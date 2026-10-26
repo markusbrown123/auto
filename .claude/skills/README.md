@@ -1,6 +1,6 @@
 # Website design skills
 
-Project skills Claude Code loads automatically in this repo. Start with `website-standards`: it is the workflow and says when to use each of the others. The same folder is kept in every website repo (automaton-, narrativa-site, premium-client-redesigns, auto); copy it whole into any new site repo.
+Project skills Claude Code loads automatically in this repo. Start with `website-standards`: it is the workflow and says when to use each of the others. To use them in another site repo, copy the folder whole into its `.claude/skills/`, or run the scripts from this checkout by full path (`node ~/auto/.claude/skills/<skill>/scripts/…`) — premium-client-redesigns ignores `.claude/`, so its A-1 site does the latter.
 
 | Skill | What it's for | Source | License |
 |---|---|---|---|
@@ -51,7 +51,7 @@ npx -y @playwright/cli@latest install --skills
 npx -y getdesign@latest list | sed 's/\x1b\[[0-9;]*m//g' | grep -E '^[a-z0-9.-]+ - ' > .claude/skills/awesome-design/catalog.txt
 ```
 
-Update the commit hashes in this table when you do, and copy the folder to the other repos so they stay in sync.
+Update the commit hashes in this table when you do, and re-copy the folder into any repo that carries its own copy.
 
 ## Using these on your own machine for every project
 

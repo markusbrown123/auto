@@ -37,6 +37,9 @@ const pretty = (p) => {
   const d = digits(p).replace(/^1(?=\d{10}$)/, '')
   return d.length === 10 ? `(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}` : p
 }
+// A town is a plain string; a wider area is written out, e.g. { "@type": "State", "name": "New Jersey" }.
+const place = (a) => (typeof a === 'string' ? { '@type': 'City', name: a } : a)
+const placeName = (a) => (typeof a === 'string' ? a : a.name)
 const service = (slug) => {
   const s = (b.services ?? []).find((x) => x.slug === slug)
   if (!s) throw new Error(`no service "${slug}" in ${file} (have: ${(b.services ?? []).map((x) => x.slug).join(', ')})`)
@@ -51,9 +54,11 @@ function check() {
   need(/^https:\/\//.test(b.url ?? ''), 'url: the live https:// address')
   need(digits(b.telephone ?? '').length >= 10, 'telephone: the main number customers call (not a tracking number unless it is the one everywhere)')
   need(b.address || b.areaServed?.length, 'address (a place customers visit) or areaServed (the towns you go to) — a service-area business needs areaServed')
+  for (const a of b.areaServed ?? []) need(typeof a === 'string' || (a?.['@type'] && a?.name), 'areaServed: a town name, or { "@type": "State", "name": "New Jersey" } for a wider area')
   if (b.address) need(['streetAddress', 'addressLocality', 'addressRegion', 'postalCode'].every((k) => b.address[k]), 'address: streetAddress, addressLocality, addressRegion and postalCode')
   if (b.hours) need(b.hours.every((h) => h.days?.every((d) => DAYS[d]) && /^\d\d:\d\d$/.test(h.opens) && /^\d\d:\d\d$/.test(h.closes)), 'hours: [{ "days": ["Mo","Tu"], "opens": "07:00", "closes": "18:00" }]')
-  else need(b.open24h, 'hours, or "open24h": true')
+  const later = []
+  if (!b.hours && !b.open24h) later.push('no hours: Google shows "hours unknown" — ask the owner')
   for (const s of b.services ?? []) need(s.name && /^[a-z0-9-]+$/.test(s.slug ?? ''), `service "${s.name ?? '?'}": a name and a lowercase-hyphen slug`)
   if (b.reviews && !b.reviews.source) P.push('reviews: say where they are from (e.g. "Google") — and only real numbers')
   if (P.length) {
@@ -61,7 +66,8 @@ function check() {
     P.forEach((p) => console.log(`  - ${p}`))
     process.exit(1)
   }
-  console.log(`${file}: ok — ${b.type} "${b.name}", ${b.services?.length ?? 0} services, ${b.address && b.showAddress !== false ? 'shows its address' : `serves ${(b.areaServed ?? []).length} areas`}`)
+  console.log(`${file}: ok — ${b.type} "${b.name}", ${b.services?.length ?? 0} services, ${b.address && b.showAddress !== false ? 'shows its address' : `serves ${(b.areaServed ?? []).map(placeName).join(', ')}`}`)
+  later.forEach((l) => console.log(`  (to ask) ${l}`))
 }
 
 function business() {
@@ -82,7 +88,7 @@ function business() {
   if (b.address && b.showAddress !== false) node.address = { '@type': 'PostalAddress', addressCountry: 'US', ...b.address }
   else if (b.address) node.address = { '@type': 'PostalAddress', addressLocality: b.address.addressLocality, addressRegion: b.address.addressRegion, postalCode: b.address.postalCode, addressCountry: b.address.addressCountry ?? 'US' }
   if (b.geo) node.geo = { '@type': 'GeoCoordinates', latitude: b.geo.latitude, longitude: b.geo.longitude }
-  if (b.areaServed?.length) node.areaServed = b.areaServed.map((n) => ({ '@type': 'City', name: n }))
+  if (b.areaServed?.length) node.areaServed = b.areaServed.map(place)
   if (b.open24h) node.openingHoursSpecification = [{ '@type': 'OpeningHoursSpecification', dayOfWeek: Object.values(DAYS), opens: '00:00', closes: '23:59' }]
   else if (b.hours) node.openingHoursSpecification = b.hours.map((h) => ({ '@type': 'OpeningHoursSpecification', dayOfWeek: h.days.map((d) => DAYS[d]), opens: h.opens, closes: h.closes }))
   if (b.sameAs?.length) node.sameAs = b.sameAs
@@ -90,16 +96,23 @@ function business() {
     node.hasOfferCatalog = {
       '@type': 'OfferCatalog',
       name: `${b.name} services`,
-      itemListElement: b.services.map((s) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: s.name, ...(s.slug ? { url: url(`/${s.slug}/`) } : {}) } })),
+      // A link per service only when the site has a page per service ("servicePages": true).
+      itemListElement: b.services.map((s) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: s.name, ...(s.description ? { description: s.description } : {}), ...(b.servicePages ? { url: url(`/${s.slug}/`) } : {}) } })),
     }
   // No aggregateRating here: Google ignores self-published review stars for local businesses, and
   // marking them up risks a manual action. Show real reviews on the page, linked to their source.
   return node
 }
 
+// --service means a page of its own; a one-page site has none to point a canonical or schema at.
+function pageCheck(slug) {
+  if (slug && !b.servicePages) throw new Error('--service is for a page per service; set "servicePages": true in business.json when the site has them')
+}
+
 function schema() {
   const graph = [business(), { '@type': 'WebSite', '@id': url('#website'), url: url(), name: b.name, publisher: { '@id': url('#business') } }]
   const slug = opt('--service')
+  pageCheck(slug)
   if (slug) {
     const s = service(slug)
     graph.push({
@@ -109,7 +122,7 @@ function schema() {
       serviceType: s.name,
       ...(s.description ? { description: s.description } : {}),
       provider: { '@id': url('#business') },
-      areaServed: (b.areaServed ?? [b.address?.addressLocality]).filter(Boolean).map((n) => ({ '@type': 'City', name: n })),
+      areaServed: (b.areaServed ?? [b.address?.addressLocality]).filter(Boolean).map(place),
       url: url(`/${s.slug}/`),
     })
   }
@@ -118,14 +131,15 @@ function schema() {
 
 function meta() {
   const slug = opt('--service')
-  const city = opt('--city') ?? b.areaServed?.[0] ?? b.address?.addressLocality ?? ''
+  pageCheck(slug)
+  const city = opt('--city') ?? (b.areaServed?.length ? placeName(b.areaServed[0]) : b.address?.addressLocality ?? '')
   const region = b.address?.addressRegion ? `, ${b.address.addressRegion}` : ''
   const s = slug ? service(slug) : null
   const path = s ? `/${s.slug}/` : '/'
   const what = s ? s.name : (b.tagline ?? PLAIN[b.type] ?? b.type.replace(/([a-z])([A-Z])/g, '$1 $2'))
   let title = `${what} in ${city}${region} | ${b.name}`
   if (title.length > 65) title = `${what} in ${city} | ${b.name}`
-  if (title.length > 65) title = `${what} | ${b.name}`
+  if (title.length > 65 || !city) title = `${what} | ${b.name}`
   const promise = s?.description ?? b.description ?? ''
   let description = `${promise} Call ${pretty(b.telephone)}.`.trim()
   if (description.length > 160) description = `${promise.slice(0, 160 - 22).replace(/\s+\S*$/, '')}… Call ${pretty(b.telephone)}.`
@@ -148,7 +162,7 @@ function nap() {
   const showAddr = a && b.showAddress !== false
   const html = `<address class="nap">
   <strong>${esc(b.name)}</strong><br>
-${showAddr ? `  ${esc(a.streetAddress)}<br>\n  ${esc(a.addressLocality)}, ${esc(a.addressRegion)} ${esc(a.postalCode)}<br>\n` : b.areaServed?.length ? `  Serving ${esc(b.areaServed.join(', '))}<br>\n` : ''}  <a href="tel:${e164(b.telephone)}">${esc(pretty(b.telephone))}</a>${b.email ? `<br>\n  <a href="mailto:${esc(b.email)}">${esc(b.email)}</a>` : ''}${b.license ? `<br>\n  ${esc(b.license)}` : ''}
+${showAddr ? `  ${esc(a.streetAddress)}<br>\n  ${esc(a.addressLocality)}, ${esc(a.addressRegion)} ${esc(a.postalCode)}<br>\n` : b.areaServed?.length ? `  Serving ${esc(b.areaServed.map(placeName).join(', '))}<br>\n` : ''}  <a href="tel:${e164(b.telephone)}">${esc(pretty(b.telephone))}</a>${b.email ? `<br>\n  <a href="mailto:${esc(b.email)}">${esc(b.email)}</a>` : ''}${b.license ? `<br>\n  ${esc(b.license)}` : ''}
 </address>`
   console.log(html)
 }

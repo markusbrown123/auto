@@ -79,9 +79,10 @@ function axeSource() {
 
 // ---------------------------------------------------------------- one page in one viewport
 const OBSERVE = `(() => {
-  const a = (window.__audit = { lcp: 0, lcpEl: null, cls: 0 });
-  try { new PerformanceObserver((l) => { for (const e of l.getEntries()) { a.lcp = e.startTime; a.lcpEl = e.element ? (e.element.tagName + (e.element.currentSrc || e.element.src ? ' ' + (e.element.currentSrc || e.element.src).split('/').pop().slice(0, 60) : '')) : null; a.lcpLazy = e.element ? e.element.loading === 'lazy' : false; } }).observe({ type: 'largest-contentful-paint', buffered: true }); } catch {}
-  try { new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) a.cls += e.value; }).observe({ type: 'layout-shift', buffered: true }); } catch {}
+  const a = (window.__audit = { lcp: 0, lcpEl: null, lcpSeen: 0, cls: 0, moved: {} });
+  try { new PerformanceObserver((l) => { for (const e of l.getEntries()) { a.lcp = e.startTime; a.lcpSeen = performance.now(); a.lcpEl = e.element ? (e.element.tagName + (e.element.currentSrc || e.element.src ? ' ' + (e.element.currentSrc || e.element.src).split('/').pop().slice(0, 60) : '')) : null; a.lcpLazy = e.element ? e.element.loading === 'lazy' : false; } }).observe({ type: 'largest-contentful-paint', buffered: true }); } catch {}
+  const label = (n) => !n || n.nodeType !== 1 ? (n?.parentElement ? label(n.parentElement) : '?') : n.tagName.toLowerCase() + (n.id ? '#' + n.id : '') + (typeof n.className === 'string' && n.className.trim() ? '.' + n.className.trim().split(/\\s+/)[0] : '');
+  try { new PerformanceObserver((l) => { for (const e of l.getEntries()) if (!e.hadRecentInput) { a.cls += e.value; for (const s of e.sources ?? []) { const k = label(s.node); a.moved[k] = (a.moved[k] ?? 0) + e.value; } } }).observe({ type: 'layout-shift', buffered: true }); } catch {}
 })();`
 
 async function visit(browser, url, { mobile }) {
@@ -89,9 +90,13 @@ async function visit(browser, url, { mobile }) {
   const net = new Map()
   const failed = []
   const S = page.sessionId
+  const inflight = new Set()
+  let lastNet = Date.now()
+  const done = (id) => (inflight.delete(id), (lastNet = Date.now()))
+  browser.on(S, 'Network.requestWillBeSent', (p) => (inflight.add(p.requestId), (lastNet = Date.now())))
   browser.on(S, 'Network.responseReceived', (p) => net.set(p.requestId, { url: p.response.url, type: p.type, status: p.response.status, bytes: 0 }))
-  browser.on(S, 'Network.loadingFinished', (p) => net.has(p.requestId) && (net.get(p.requestId).bytes = p.encodedDataLength))
-  browser.on(S, 'Network.loadingFailed', (p) => !p.canceled && failed.push(`${p.errorText} ${net.get(p.requestId)?.url ?? ''}`.trim()))
+  browser.on(S, 'Network.loadingFinished', (p) => (net.has(p.requestId) && (net.get(p.requestId).bytes = p.encodedDataLength), done(p.requestId)))
+  browser.on(S, 'Network.loadingFailed', (p) => (!p.canceled && failed.push(`${p.errorText} ${net.get(p.requestId)?.url ?? ''}`.trim()), done(p.requestId)))
   await page.send('Network.enable')
   await page.send('Network.setCacheDisabled', { cacheDisabled: true })
   if (mobile) {
@@ -101,8 +106,16 @@ async function visit(browser, url, { mobile }) {
   }
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: OBSERVE })
   const t0 = Date.now()
-  const how = await page.goto(url, { timeoutMs: 45000, settleMs: mobile ? 2500 : 1500 })
+  const how = await page.goto(url, { timeoutMs: 45000, settleMs: 500 })
   const loadMs = Date.now() - t0
+  // Lazy images on the first screen, read now: a slider may have moved on by the time the page is quiet.
+  const lazyTop = await page.eval(`[...document.images].filter((i) => { const r = i.getBoundingClientRect(); return i.loading === 'lazy' && r.top < innerHeight && r.bottom > 0 && r.width > 1 && (i.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? true) }).map((i) => (i.currentSrc || i.src).split('/').pop().slice(0, 60))`).catch(() => [])
+  // A throttled phone can paint the biggest thing long after the load event, so wait until the
+  // network has been idle for a second and LCP hasn't changed for two (at most 25 s), then read.
+  for (const until = Date.now() + 25000; Date.now() < until; await sleep(250)) {
+    const a = await page.eval('({ lcp: __audit.lcp, quiet: performance.now() - __audit.lcpSeen })').catch(() => null)
+    if (a && a.lcp > 0 && a.quiet > 2000 && inflight.size === 0 && Date.now() - lastNet > 1000) break
+  }
   const dom = await page.eval(collect, { mobile })
   for (const r of net.values()) if (r.status >= 400) failed.push(`${r.status} ${r.url}`)
   const bytes = {}
@@ -111,7 +124,7 @@ async function visit(browser, url, { mobile }) {
     bytes[k] = (bytes[k] ?? 0) + r.bytes
   }
   bytes.total = Object.values(bytes).reduce((a, b) => a + b, 0)
-  return { page, how, loadMs, dom, bytes, failed, consoleErrors: page.consoleErrors, requests: net.size }
+  return { page, how, loadMs, lazyTop, dom, bytes, failed, consoleErrors: page.consoleErrors, requests: net.size }
 }
 
 // Runs in the page.
@@ -125,7 +138,7 @@ function collect({ mobile }) {
     const r = el.getBoundingClientRect()
     const s = getComputedStyle(el)
     // Off-screen, see-through or 1-px things (skip links, trap fields for bots) aren't for tapping.
-    return r.width > 1 && r.height > 1 && r.right > 0 && r.left < innerWidth && s.visibility !== 'hidden' && s.display !== 'none' && Number(s.opacity) > 0.05
+    return r.width > 1 && r.height > 1 && r.right > 0 && r.left < innerWidth && s.visibility !== 'hidden' && s.display !== 'none' && Number(s.opacity) > 0.05 && (el.checkVisibility?.({ opacityProperty: true, visibilityProperty: true }) ?? true)
   }
   const ld = all('script[type="application/ld+json"]').map((s) => {
     try {
@@ -245,12 +258,12 @@ function judge(path, m, d, live) {
   // speed (judged on the throttled phone load; the desktop one is reported)
   if (d === 'mobile') {
     const lcp = Math.round(x.audit.lcp ?? 0)
-    if (!lcp) add('WARN', 'speed', 'LCP not measured')
+    if (!lcp) add('WARN', 'speed', 'no LCP within 25 s: nothing on the first screen counted as painted (everything fades in from opacity 0, or the page stayed blank). Lighthouse reports NO_LCP and Google can\'t score the page; show the hero text and image without a fade from 0')
     else add(lcp > 4000 ? 'FAIL' : lcp > 2500 ? 'WARN' : 'ok', 'speed', `LCP ${(lcp / 1000).toFixed(2)} s on a throttled phone (good ≤ 2.5 s)${x.audit.lcpEl ? ` — ${x.audit.lcpEl}` : ''}`)
-    const lazyTop = x.imgs.filter((i) => i.visible && i.firstScreen && i.lazy)
-    if (x.audit.lcpLazy || lazyTop.length) add('FAIL', 'speed', `first-screen image(s) set to loading="lazy" — they load last instead of first: ${lazyTop.map((i) => i.src).slice(0, 3).join(', ') || x.audit.lcpEl}`)
+    if (x.audit.lcpLazy || m.lazyTop.length) add('FAIL', 'speed', `first-screen image(s) set to loading="lazy" — they load last instead of first: ${m.lazyTop.slice(0, 3).join(', ') || x.audit.lcpEl}`)
     const cls = Number((x.audit.cls ?? 0).toFixed(3))
-    add(cls > 0.25 ? 'FAIL' : cls > 0.1 ? 'WARN' : 'ok', 'speed', `CLS ${cls} (good ≤ 0.1)`)
+    const moved = Object.entries(x.audit.moved ?? {}).sort((p, q) => q[1] - p[1]).slice(0, 3).map(([k]) => k)
+    add(cls > 0.25 ? 'FAIL' : cls > 0.1 ? 'WARN' : 'ok', 'speed', `CLS ${cls} (good ≤ 0.1)${cls > 0.1 && moved.length ? ` — moved: ${moved.join(', ')}` : ''}`)
     const b = m.bytes
     add(b.total > 3e6 ? 'FAIL' : b.total > 1.5e6 ? 'WARN' : 'ok', 'speed', `${kb(b.total)} over ${m.requests} requests (js ${kb(b.js ?? 0)}, css ${kb(b.css ?? 0)}, images ${kb(b.images ?? 0)}, fonts ${kb(b.fonts ?? 0)}, media ${kb(b.media ?? 0)})`)
     if ((b.js ?? 0) > 300 * 1024) add('WARN', 'speed', `${kb(b.js)} of JavaScript (aim under 300 KB for a brochure site)`)
@@ -317,8 +330,10 @@ try {
     for (const d of ['mobile', 'desktop']) {
       const m = await visit(browser, url, { mobile: d === 'mobile' })
       if (d === 'mobile') m.axe = await runAxe(m.page, axe).catch((e) => (console.warn('(axe failed:', e.message.split('\n')[0] + ')'), null))
-      const shot = join(OUT, `${p.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'}-${d}.jpg`)
+      const name = p.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'home'
+      const shot = join(OUT, `${name}-${d}.jpg`)
       await m.page.screenshot({ path: shot })
+      if (d === 'mobile') writeFileSync(join(OUT, `${name}.html`), '<!doctype html>\n' + (await m.page.eval('document.documentElement.outerHTML')))
       entry[d] = { loadMs: m.loadMs, bytes: m.bytes, lcp: Math.round(m.dom.audit.lcp ?? 0), cls: Number((m.dom.audit.cls ?? 0).toFixed(3)), screenshot: shot }
       // The page-level rules once (from the phone); the desktop pass adds only what differs.
       const lines = judge(p, m, d, live).filter((l) => d === 'mobile' || l.area === 'site')

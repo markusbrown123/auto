@@ -48,6 +48,7 @@
     "https://www.facebook.com/hartlineplumbing.example"
   ],
   "ogImage": "https://hartlineplumbing.example/og.jpg",
+  "servicePages": true,
   "services": [
     {
       "name": "Water Heater Repair",

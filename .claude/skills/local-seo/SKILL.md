@@ -26,11 +26,15 @@ Google will hold them to, so nothing is guessed:
   Google profile as primary and the real number as additional; the site keeps the real one.
 - `address` + `showAddress`: a shopfront customers visit shows it (`true`). A service-area business
   working from home (most trades) sets `false` — the street stays off the web; the town, state and ZIP
-  remain — and lists the towns it goes to in `areaServed`.
+  remain — and lists the towns it goes to in `areaServed` (strings), or a wider area written out:
+  `{ "@type": "State", "name": "New Jersey" }`. No address known at all is fine for a service-area
+  business: `areaServed` alone carries it.
 - `hours` or `"open24h": true` — only if someone really answers at 3 am. `emergency` says what's true
-  instead ("burst pipes answered until 10 pm").
-- `license`, `services` (name, slug, one-sentence description each), `sameAs` (Google profile,
-  Facebook, Yelp, BBB), `ogImage` (1200×630, a real job photo).
+  instead ("burst pipes answered until 10 pm"). Unknown hours are left out; `check` lists them as a
+  question for the owner rather than failing.
+- `license`, `services` (name, slug, one-sentence description each), `servicePages: true` only if
+  the site has a page per service (the schema then links each one; a one-page site leaves it out),
+  `sameAs` (Google profile, Facebook, Yelp, BBB), `ogImage` (1200×630, a real job photo).
 - Leave out anything you don't know. A missing field costs little; a wrong one costs trust.
 
 Check it: `node .claude/skills/local-seo/scripts/seo.mjs check business.json`
@@ -52,6 +56,12 @@ JSON-LD afterwards — one stray comma and Google ignores the whole block; chang
 regenerate. The script leaves out review stars (`aggregateRating`) on purpose: Google ignores
 self-published ratings for local businesses and can penalise them. Real reviews go on the page as text,
 linked to where they live.
+
+A site built with JavaScript (React, Vue, a Vite SPA) has almost nothing in its HTML files, so run
+`site-audit` first and point `verify` at the rendered pages it saves: `seo.mjs verify business.json
+.site-audit/`. The JSON-LD and meta tags themselves must still be in the HTML the server sends —
+Google reads structured data from the initial HTML most reliably — so put them in `index.html` (or
+the framework's head), not in a component.
 
 `verify` exits 1 with a list when a page shows or links a different number, a JSON-LD block doesn't
 parse, the name is missing, there are review stars in the schema, or the page says 24/7 when the

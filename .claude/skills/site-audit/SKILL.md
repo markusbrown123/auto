@@ -29,7 +29,12 @@ cloud session use the `/tmp/chromium-no-sandbox` wrapper from `website-standards
 is served over a throwaway local server; a URL is loaded as is. axe-core comes from the project's
 `node_modules` if present, otherwise `npm pack` fetches it once into `~/.cache/site-audit`.
 
-Exit code 1 when anything FAILs, so it can gate a deploy script or CI.
+Exit code 1 when anything FAILs, so it can gate a deploy script or CI. Besides the screenshots it
+saves each page as rendered (`.site-audit/<page>.html`), so `copy-check` and `local-seo verify` can
+read sites whose HTML is built by JavaScript.
+
+On the phone it waits until the network has been idle for a second and LCP has stopped changing (at
+most 25 s), so a hero that paints late is measured, not missed.
 
 ## Read the result
 

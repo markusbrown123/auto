@@ -108,6 +108,9 @@ Five questions get better copy than any amount of writing:
 node .claude/skills/local-service-copy/scripts/copy-check.mjs <build folder or page.html>
 ```
 
+For a site built with JavaScript (React, Vue, a Vite SPA) the HTML files are nearly empty: run
+`site-audit` first and check the rendered pages it saves, `copy-check.mjs .site-audit/`.
+
 FAIL (exit 1): placeholder text left in — a template slot like `[City]`, lorem ipsum, a 555 number,
 example.com, TODO. WARN: filler and AI-sounding phrases, claims that need a source, vague buttons,
 emoji in headings, a long h1, "we" outweighing "you", heavy em-dash use, long sentences, long forms.

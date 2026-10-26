@@ -10,6 +10,20 @@ Project skills Claude Code loads automatically in this repo. Start with `website
 | `awesome-design` | Real design systems (DESIGN.md) as references | Ours, wrapping [VoltAgent/awesome-design-md](https://github.com/VoltAgent/awesome-design-md) / `getdesign` CLI | MIT (catalog) |
 | `image-to-code` | Turn screenshots/mockups/URLs into matching code | Ours, adapted from taste-skill's `image-to-code` for Claude Code | MIT |
 | `playwright-cli` | Drive a real browser: snapshot, screenshot, click, console | `playwright-cli install --skills` from [`@playwright/cli`](https://github.com/microsoft/playwright-cli) 0.1.22 | Apache-2.0 |
+| `site-audit` | Launch check in a real browser: SEO, phone-speed (LCP/CLS/weight), axe accessibility, tap targets, robots/sitemap | Ours; `scripts/lib/cdp.mjs` from taste-skill | MIT (cdp.mjs) |
+| `local-seo` | One `business.json` → LocalBusiness JSON-LD, meta/OG/canonical, NAP footer, sitemap/robots; `verify` checks pages against the facts | Ours | — |
+| `local-service-copy` | Words that get a local business the call; `copy-check` flags placeholders, filler, unsourced claims, vague buttons | Ours | — |
+| `site-kit` | Add the Automaton site kit (assistant, leads, Cal.com booking) to a client site from its `business.json` | Ours; the kit lives in the jarvis repo, `bases/sites/kit` | — |
+
+## Where the local-business skills come from
+
+`local-seo`, `local-service-copy` and `site-audit` were written from research in October 2026: Anthropic's
+skill-authoring guidance; public skills such as addyosmani/web-quality-skills (Core Web Vitals budgets),
+AgriciDaniel/claude-seo (local SEO and schema checks), coreyhaines31/marketingskills (one shared context
+file per client) and anthropics/skills `webapp-testing`; practitioner discussion on Hacker News, the
+Local Search Forum and ContractorTalk; and surveys from BrightLocal (reviews) and Whitespark (local ranking
+factors). No third-party text or code was copied except `site-audit/scripts/lib/cdp.mjs`. Reddit was not
+reachable from the research environment.
 
 ## Local changes to vendored files
 

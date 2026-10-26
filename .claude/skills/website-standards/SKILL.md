@@ -1,6 +1,6 @@
 ---
 name: website-standards
-description: Required workflow for building, redesigning, generating, or fixing any public-facing website, landing page, or client site — including Automaton-generated sites and client redesigns. Use for new builds, redesigns, client fixes, hero/section/layout/visual changes, design reviews, and visual QA. Chains design-taste-frontend, awesome-design, image-to-code, playwright-cli, and web-design-guidelines into one direct → build → look → audit loop.
+description: Required workflow for building, redesigning, generating, or fixing any public-facing website, landing page, or client site — including Automaton-generated sites and client redesigns. Use for new builds, redesigns, client fixes, hero/section/layout/visual changes, design reviews, and visual QA. Chains design-taste-frontend, awesome-design, image-to-code, playwright-cli, web-design-guidelines and site-audit into one direct → build → look → audit loop, plus local-seo, local-service-copy and site-kit for local business sites.
 ---
 
 # Website Standards
@@ -17,6 +17,12 @@ Every website we build or fix goes through the same loop. Each step has its own 
 | Section or page change, client fix, visual bug | Skip the taste draw; read `design-taste-frontend/references/tells.md`, then steps 4–5 |
 | Copy/content-only or one-line CSS fix | Steps 4–5 only, on the touched page |
 
+**A local business site** (a trade, a service business, an agent — most Automaton work) adds three
+skills to whichever row applies: `local-seo` (one `business.json` → schema, meta tags, NAP, sitemap;
+`verify` before done), `local-service-copy` (the words that get the call; `copy-check` before done),
+and for premium sites `site-kit` (assistant, lead form, booking). Write `business.json` first: the
+copy, the schema and the assistant all read it, so a fact is entered once.
+
 A full taste run is expensive (30–45 min, a few hundred thousand tokens). Don't start one for a small fix.
 
 ## 1. Direction — `design-taste-frontend`
@@ -24,6 +30,7 @@ A full taste run is expensive (30–45 min, a few hundred thousand tokens). Don'
 Run its steps 1–4 (inventory → argument → draw → idea). Write the direction down in your notes or PR: audience, the one action the page must drive, chosen direction and why, type system, palette roles.
 
 - No sector fits a local trade or service business (most Automaton leads): use `--sector other`.
+- Replacing one generic look with the next safe default is still generic. Besides the indigo gradients, emoji card rows and glassmorphism the taste skill bans, the current AI-made tell is a cream background, an oversized italic serif headline and a clay or terracotta accent. Don't reach for it unless the brand already is it.
 - Its house rules (no gradients, no resting shadows, no eyebrow labels, etc.) are defaults for new work. Where they contradict an established brand, a repo design system, or something the user asked for, keep the existing choice and say so.
 - Its `assets.mjs` finds archival/open-collection pictures. For a real local business, never present those as the business's own work, crew, or location; the business's real photos come first.
 
@@ -57,16 +64,19 @@ CHROME_PATH=/tmp/chromium-no-sandbox node .claude/skills/design-taste-frontend/s
 
 Remote images (e.g. Unsplash) can fail there with `ERR_TUNNEL_CONNECTION_FAILED`, and the inspector then reports them as broken. That's the sandbox's network policy, not the site; don't "fix" those URLs.
 
-## 5. Audit — `web-design-guidelines`
+## 5. Audit — `web-design-guidelines` + `site-audit`
 
 Audit every file you changed against the Web Interface Guidelines. Fix findings in code you touched; list the rest under risks.
+
+Then run `site-audit` on the built pages (`--local` for a local business): SEO, phone-speed (LCP, CLS, weight), axe accessibility, tap targets, robots/sitemap. Fix every FAIL; defend or fix each WARN.
 
 ## Definition of done
 
 - [ ] Job sized; direction and references written down (full builds).
 - [ ] Rendered and screenshotted at phone, tablet, and desktop; no console errors, no horizontal overflow.
 - [ ] Guidelines audit run on changed files; findings fixed or listed.
+- [ ] `site-audit` has no FAIL (quote its RESULT line and the phone LCP/CLS); local business sites also pass `local-seo` `verify` and `local-service-copy` `copy-check`.
 - [ ] Copy is truthful: no invented reviews, awards, stats, team names, or certifications for a real business.
 - [ ] Report lists files changed, checks run (with viewports), open findings, and risks.
 
-Scratch output (`.playwright-cli/`, `.taste-skill/`, `.design-refs/`) is gitignored; don't commit it.
+Scratch output (`.playwright-cli/`, `.taste-skill/`, `.design-refs/`, `.site-audit/`) is gitignored; don't commit it. Add those four lines to a repo's `.gitignore` if they aren't there.

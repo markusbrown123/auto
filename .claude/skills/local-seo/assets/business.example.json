@@ -1,0 +1,80 @@
+{
+  "name": "Hartline Plumbing",
+  "type": "Plumber",
+  "url": "https://hartlineplumbing.example",
+  "telephone": "(609) 555-0114",
+  "email": "office@hartlineplumbing.example",
+  "tagline": "Plumber",
+  "description": "Licensed plumbers on the road in 30 minutes. Up-front pricing before any work starts.",
+  "address": {
+    "streetAddress": "12 Example St",
+    "addressLocality": "Trenton",
+    "addressRegion": "NJ",
+    "postalCode": "08608"
+  },
+  "showAddress": false,
+  "areaServed": [
+    "Trenton",
+    "Hamilton",
+    "Ewing",
+    "Lawrenceville"
+  ],
+  "hours": [
+    {
+      "days": [
+        "Mo",
+        "Tu",
+        "We",
+        "Th",
+        "Fr"
+      ],
+      "opens": "07:00",
+      "closes": "18:00"
+    },
+    {
+      "days": [
+        "Sa"
+      ],
+      "opens": "08:00",
+      "closes": "14:00"
+    }
+  ],
+  "open24h": false,
+  "emergency": "Burst pipes and no-water calls answered until 10 pm",
+  "license": "NJ Master Plumber Lic. #00000",
+  "priceRange": "$$",
+  "sameAs": [
+    "https://www.google.com/maps?cid=0000000000",
+    "https://www.facebook.com/hartlineplumbing.example"
+  ],
+  "ogImage": "https://hartlineplumbing.example/og.jpg",
+  "services": [
+    {
+      "name": "Water Heater Repair",
+      "slug": "water-heater-repair",
+      "description": "Same-day water heater repair and replacement, tank and tankless."
+    },
+    {
+      "name": "Drain Cleaning",
+      "slug": "drain-cleaning",
+      "description": "Clogged drains and sewer lines cleared, with a camera check so it stays cleared."
+    }
+  ],
+  "reviews": {
+    "source": "Google",
+    "url": "https://www.google.com/maps?cid=0000000000"
+  },
+  "pricing": "Free estimates. Every repair is priced before any work starts; the $79 call-out fee is waived if you go ahead.",
+  "callback": "Form messages get a call back within the hour, 7 am to 6 pm, Monday to Saturday.",
+  "faq": [
+    {
+      "q": "Do you work on tankless water heaters?",
+      "a": "Yes, tank and tankless, all the common brands."
+    },
+    {
+      "q": "Do you charge extra on Saturdays?",
+      "a": "No, Saturday rates are the same as weekdays."
+    }
+  ],
+  "bookingLabel": "Book a free estimate"
+}

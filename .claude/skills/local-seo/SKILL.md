@@ -19,6 +19,8 @@ Google will hold them to, so nothing is guessed:
 
 - `name` exactly as on the Google Business Profile. No keywords added ("Hartline Plumbing", not
   "Hartline Plumbing – Emergency Plumber Trenton"): stuffing the name gets profiles suspended.
+  If the trucks, logo or signs use a longer form ("A-1 Sealcoating Asphalt Services" for "A-1
+  Sealcoating LLC"), put it in `alternateName` so both read as one business.
 - `type`: the most specific schema.org type — `Plumber`, `Electrician`, `HVACBusiness`,
   `RoofingContractor`, `HousePainter`, `Locksmith`, `GeneralContractor`, `MovingCompany`, `AutoRepair`,
   `RealEstateAgent`, else `HomeAndConstructionBusiness`.

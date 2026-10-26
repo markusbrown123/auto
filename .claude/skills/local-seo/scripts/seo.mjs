@@ -78,6 +78,7 @@ function business() {
     url: url(),
     telephone: e164(b.telephone),
   }
+  if (b.alternateName) node.alternateName = b.alternateName
   if (b.email) node.email = b.email
   if (b.logo) node.logo = b.logo
   if (b.image) node.image = b.image

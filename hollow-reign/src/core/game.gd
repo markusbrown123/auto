@@ -35,7 +35,7 @@ func default_profile() -> Dictionary:
 			"gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": null, "relic": null},
 		"upgrades": {}, "mastery": {}, "mastered": [],
 		"flags": {}, "defeated": {}, "cleared": [], "ng": 0, "deaths": 0, "heraldry": "#3d0f0f",
-		"tutorial_done": false, "playtime": 0.0,
+		"tutorial_done": false, "playtime": 0.0, "body": "m",
 	}
 
 func has_save() -> bool:
@@ -44,9 +44,10 @@ func has_save() -> bool:
 func _p(path: String) -> String:
 	return path if save_dir_override == "" else save_dir_override + "/" + path.get_file()
 
-func new_game(heraldry: String = "#3d0f0f") -> void:
+func new_game(heraldry: String = "#3d0f0f", body: String = "m") -> void:
 	profile = default_profile()
 	profile.heraldry = heraldry
+	profile.body = body
 	run = {}
 	save()
 	profile_changed.emit()

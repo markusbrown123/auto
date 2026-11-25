@@ -5,7 +5,9 @@ Everything shipped in the game is either original to this project or under a lic
 | Asset | Source | Licence |
 |---|---|---|
 | Game code, data, design, writing | This project | Proprietary (yours) |
-| 3D characters, weapons, environments | Built in code at runtime (`src/chars/fighter_rig.gd`, `src/world/arena.gd`) | Original |
+| Character concept art (`art/concept/`) | Generated with Higgsfield (GPT Image 2.6) from prompts in `tools/concepts.py` | Generated for this project; check Higgsfield's terms for commercial use on your plan |
+| Character models (`assets/models/*.glb`) | Generated and rigged with Tripo from those concepts (`tools/tripo.py`) | Generated for this project; check Tripo's terms for commercial use on your plan |
+| Weapons, dragons, environments | Built in code at runtime (`src/chars/`, `src/world/arena.gd`) | Original |
 | Textures | Generated at runtime from noise (`src/world/look.gd`) | Original |
 | All sound effects, ambience and music | Synthesized by `tools/gen_audio.py` (no samples) | Original |
 | App icon | Drawn by script | Original |
@@ -15,4 +17,4 @@ Everything shipped in the game is either original to this project or under a lic
 
 No assets, names, characters, text, music or code were taken from Infinity Blade, Dark Souls, Elden Ring or any other game. The four reference images supplied with the brief were used as mood reference only and are not in the repository.
 
-Nothing was generated with Higgsfield: no connector or API access was available in the build environment. `docs/HIGGSFIELD_PROMPTS.md` holds the prompt library for when it is.
+Higgsfield and Tripo were connected on 2026-11-25. No reference image from any other game was given to either service; all prompts are text descriptions of original designs.

@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/ashen_sentinel_v1.png",
+ "model": {
+  "task_id": "e1961693-9dda-4e37-aba0-76f707d2d550",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "21fbe485-26b6-40f9-a8de-b58485c68610",
+  "credits": 25.0
+ }
+}

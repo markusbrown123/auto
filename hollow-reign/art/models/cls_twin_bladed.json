@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/cls_twin_bladed_v1.png",
+ "model": {
+  "task_id": "57e079b7-6d95-4b36-bb25-d18c5d94b561",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "c14661af-d9ce-4b81-84aa-eb17f36c17c4",
+  "credits": 25.0
+ }
+}

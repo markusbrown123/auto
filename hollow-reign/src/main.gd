@@ -56,8 +56,8 @@ func show_title() -> void:
 	t.continue_game.connect(func():
 		if Game.load_game():
 			_fade_then(show_sanctuary))
-	t.new_game.connect(func(h):
-		Game.new_game(h)
+	t.new_game.connect(func(h, b):
+		Game.new_game(h, b)
 		_fade_then(_opening))
 	_swap(t)
 
@@ -158,6 +158,7 @@ func _dev_boot() -> void:
 		Game.profile.defeated = {"ashen_sentinel": 1, "hollow_executioner": 1, "cathedral_beast": 1}
 		for id in ["w_knight_sword", "w_ashen_great", "w_headsman", "w_twin_fangs", "w_censer_sword", "s_garrison", "s_tower", "a_ash_chest", "a_black_helm", "a_vigil_chest", "a_garrison_legs", "r_ember", "x_bell"]:
 			Game.profile.inventory.append(id)
+	Game.profile.body = _args.get("body", "m")
 	for id in str(_args.get("gear", "")).split(",", false):
 		if not Game.owns(id):
 			Game.profile.inventory.append(id)

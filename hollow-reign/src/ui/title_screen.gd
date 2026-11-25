@@ -3,13 +3,14 @@ extends Node
 ## Main menu over a live view of the fallen courtyard.
 
 signal continue_game
-signal new_game(heraldry: String)
+signal new_game(heraldry: String, body: String)
 
 const HERALDRY := [["Oxblood", "#3d0f0f"], ["Ash", "#34322e"], ["Verdigris", "#16332c"], ["Dusk", "#1c2240"], ["Bone", "#8a8270"]]
 var backdrop: Backdrop
 var layer: CanvasLayer
 var menu: VBoxContainer
 var heraldry := "#3d0f0f"
+var body := "m"
 
 func _ready() -> void:
 	backdrop = Backdrop.new()
@@ -74,7 +75,20 @@ func _main() -> void:
 
 func _new() -> void:
 	_clear()
-	menu.add_child(UI.title("Your Colours", 30))
+	menu.add_child(UI.title("Who Wakes", 30))
+	var forms := HBoxContainer.new()
+	forms.add_theme_constant_override("separation", 8)
+	menu.add_child(forms)
+	for f in [["m", "The Knight"], ["f", "The Blade"]]:
+		var fb := UI.button(f[1], 18, 190)
+		if f[0] == body:
+			fb.add_theme_color_override("font_color", UI.GOLD)
+		fb.pressed.connect(func():
+			body = f[0]
+			_show_body()
+			_new())
+		forms.add_child(fb)
+	menu.add_child(UI.title("Your Colours", 22))
 	var note := UI.label("The cloak you were buried in. It is the only thing you remember choosing.", 20, UI.DIM)
 	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	note.custom_minimum_size.x = 460
@@ -101,11 +115,20 @@ func _new() -> void:
 	var go := UI.button("Rise", 22, 300)
 	go.pressed.connect(func():
 		Sfx.play("ui_confirm", -3.0)
-		new_game.emit(heraldry))
+		new_game.emit(heraldry, body))
 	menu.add_child(go)
 	var back := UI.button("Back", 18, 300)
 	back.pressed.connect(_main)
 	menu.add_child(back)
+
+func _show_body() -> void:
+	Game.profile = Game.default_profile() if Game.profile.is_empty() else Game.profile
+	var keep: String = Game.profile.get("body", "m")
+	Game.profile.body = body
+	backdrop.refresh_knight()
+	backdrop.rig.rotation.y = PI * 0.15
+	backdrop.rig.position = Vector3(1.4, 0, 0)
+	Game.profile.body = keep
 
 func _settings() -> void:
 	_clear()

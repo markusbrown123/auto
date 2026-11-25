@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/cls_humanoid_v1.png",
+ "model": {
+  "task_id": "5ea8b1a5-7bc5-494f-aa65-63c54a283db7",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "a3160905-7a9b-4b9f-9e12-8df9e35a4e7c",
+  "credits": 25.0
+ }
+}

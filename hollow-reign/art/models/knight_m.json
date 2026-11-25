@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/knight_m_v2.png",
+ "model": {
+  "task_id": "42772d49-9fbd-40f2-9e2e-e503b78906ab",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "016504d0-218b-41d1-b698-d19849342bd3",
+  "credits": 25.0
+ }
+}

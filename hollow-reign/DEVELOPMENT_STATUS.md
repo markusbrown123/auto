@@ -35,8 +35,21 @@ Verified means covered by `tools/test.sh` or seen in software-rendered screensho
 | Audio: 37 sound effects, 4 ambiences, 5 music loops, phase-2 music layer | In. **Nobody has listened to it** (see below) |
 | Settings: quality, frame cap, volumes, haptics, shake, prompts, forgiving timing, reduced flashes | Works |
 
+## Generated art pipeline (added 2026-11-25)
+Characters are no longer primitive shapes. The pipeline, all scripted and repeatable:
+
+1. `tools/concepts.py` writes a concept image per character with Higgsfield (about 1.25 credits each) into `art/concept/`.
+2. `tools/tripo.py` turns a concept into a low-poly (about 30k triangles), PBR-textured model with Tripo, then auto-rigs it with a Mixamo-named skeleton (135 credits, $1.35 each) into `assets/models/`.
+3. `src/chars/skin_driver.gd` drives that skeleton from the existing procedural combat rig (two-bone IK on the model's real bone lengths), so every model inherits all attacks, parries, dodges and staggers with no authored animation.
+
+In the game now: male and female player knights (chosen at New Game), nine bosses (Ashen Sentinel, Hollow Executioner, Crimson Widow, Cathedral Beast, Gravewarden, Frostbound King, Forgotten Monarch, Pale Huntsman, Devourer of Names), and one shared model per enemy class (Humanoid, Heavy, Giant, Twin-Bladed, Double-Weapon, Monstrosity, Soul-Eater), tinted per foe.
+
+Spend to date: Tripo $24.50 of $49.80; Higgsfield about 26 of 1,212 credits.
+
+Still primitive: weapons and shields, all environments, and the three dragons (they need a quadruped skeleton mapping that does not exist yet). Equipment no longer changes the knight's armour shape, only its tint, weapon and shield.
+
 ## Placeholder or unverified (must be addressed before release)
-1. **Character and environment art.** Fighters are built from cylinders, boxes and spheres with procedural IK animation. They read clearly and each boss has a distinct silhouette and palette, but this is nowhere near the realistic look in the brief. Needs real modelled, textured, rigged characters and environment kits (artist, licensed packs, or a 3D generation service).
+1. **Environment, weapon and dragon art.** Characters now use generated models (see above), but arenas, weapons, shields and dragons are still built from primitive shapes. Generated models have not been checked up close for seams, texture errors or bad skin weights.
 2. **Audio quality.** All sound was synthesized by script and checked only for levels, clipping and loop seams. Roars, choir pads, rain and fire are the likeliest to sound synthetic. Needs an ear, and probably recorded or licensed replacements.
 3. **Feel and balance on a real phone.** Swipe thresholds, parry windows (0.30 s, 0.12 s perfect), boss health and damage are tuned by bots, not hands. Expect a tuning pass after the first device playtest.
 4. **Performance.** Not profiled on any device. Measured under software rendering: about 380 to 410 draw calls and 23k to 25k triangles per frame in a duel. Triangle count is light; draw calls are high for older phones because every arena block is its own mesh.

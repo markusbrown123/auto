@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/gravewarden_v1.png",
+ "model": {
+  "task_id": "f8a3ec84-eece-4fb3-b369-a827dbc12f8f",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "d087b595-4c71-4eb8-a8ea-0b63154402d9",
+  "credits": 25.0
+ }
+}

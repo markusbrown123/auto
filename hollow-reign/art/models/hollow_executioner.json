@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/hollow_executioner_v1.png",
+ "model": {
+  "task_id": "c2760520-b108-482b-9d00-4c48c4624de8",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "6627c40e-7801-4c1d-a9a4-8a34ac5ba907",
+  "credits": 25.0
+ }
+}

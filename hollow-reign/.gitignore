@@ -4,3 +4,7 @@
 build/
 shots/
 art/models/*.glb
+assets/models/*.jpg
+assets/models/*.png
+assets/models/*.jpg.import
+assets/models/*.png.import

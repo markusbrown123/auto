@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/cls_soul_eater_v1.png",
+ "model": {
+  "task_id": "1667ff6f-8673-49ba-b92d-e5453c934930",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "418e6bac-64e8-430d-962d-7e2a6fcc8e18",
+  "credits": 25.0
+ }
+}

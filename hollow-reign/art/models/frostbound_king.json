@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/frostbound_king_v1.png",
+ "model": {
+  "task_id": "773fef6f-6efd-46af-bdf5-0d4da70fcd41",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "1481a535-ca45-4f8b-9253-d7997a8f6a86",
+  "credits": 25.0
+ }
+}

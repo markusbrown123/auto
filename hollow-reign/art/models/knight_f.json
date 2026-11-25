@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/knight_f_v2.png",
+ "model": {
+  "task_id": "6a45d316-9005-4bd0-b25a-3bea1d95ecda",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "097f3ee9-98e0-4a53-9c45-26514267f07f",
+  "credits": 25.0
+ }
+}

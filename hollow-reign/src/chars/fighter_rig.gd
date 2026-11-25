@@ -69,6 +69,8 @@ var mat_glow: StandardMaterial3D
 var mat_blade: StandardMaterial3D
 var eye_light: OmniLight3D
 var bulk := 1.0
+var skin: SkinDriver          # optional rigged model replacing the primitive body
+var _ankle := {}
 var hunch := 0.0
 var arm_scale := 1.0
 
@@ -129,7 +131,17 @@ func build(config: Dictionary, as_foe: bool) -> void:
 	if cfg.has("shield"):
 		set_shield(cfg.shield)
 	_build_trail()
-	if cfg.get("cape", false):
+	if cfg.has("skin"):
+		skin = SkinDriver.attach(body, str(cfg.skin))
+		if skin:
+			# the model replaces the primitive body; weapons, shield and trail stay
+			pelvis.visible = false
+			chest.visible = false
+			for k in seg:
+				seg[k].visible = false
+			if cfg.has("skin_tint"):
+				skin.tint(Color(str(cfg.skin_tint)))
+	if cfg.get("cape", false) and skin == null:
 		_build_cape()
 	var eye := Color(str(cfg.get("eye", "#000000")))
 	if as_foe and eye.v > 0.05:
@@ -698,6 +710,8 @@ func _solve(dt: float) -> void:
 		mat_metal.emission_enabled = _flash > 0.0
 		mat_metal.emission = Color(1, 0.9, 0.8)
 		mat_metal.emission_energy_multiplier = _flash * 0.09
+		if skin:
+			skin.flash(_flash)
 
 func _pose() -> void:
 	body.position = _root
@@ -750,6 +764,14 @@ func _pose() -> void:
 		f_l.z += 0.1
 	_leg("r", pel + Vector3(0.12 * bulk, -0.04, 0), f_r)
 	_leg("l", pel + Vector3(-0.12 * bulk, -0.04, 0), f_l)
+	if skin:
+		var hands: Dictionary = skin.drive({"pelvis": pel + Vector3(0, 0.06, 0), "pelvis_rot": Basis.from_euler(pelvis.rotation), "chest_rot": cb,
+			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l})
+		# weapons ride the model's real hands
+		weapon_r.position = hands.r
+		weapon_l.position = hands.l
+		if shield:
+			shield.position = hands.l + Vector3(-0.02, 0, -0.07)
 
 func _basis_y(y: Vector3, ref: Vector3) -> Basis:
 	y = y.normalized()
@@ -778,6 +800,7 @@ func _leg(side: String, hip: Vector3, foot: Vector3) -> void:
 	var total := THIGH + SHIN - 0.01
 	if (ankle - hip).length() > total:
 		ankle = hip + (ankle - hip).normalized() * total
+	_ankle[side] = ankle
 	var knee := _ik(hip, ankle, THIGH, SHIN, Vector3(0.15 if side == "r" else -0.15, 0.1, -1))
 	seg["thigh_" + side].transform = Transform3D(_basis_y(knee - hip, Vector3.RIGHT), hip)
 	seg["shin_" + side].transform = Transform3D(_basis_y(ankle - knee, Vector3.RIGHT), knee)

@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/cls_giant_v1.png",
+ "model": {
+  "task_id": "c5104ab9-b6ec-46b9-82d9-f5290f69b918",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "0bbdaa26-04dd-4f7a-b1d8-fe2fb166822e",
+  "credits": 25.0
+ }
+}

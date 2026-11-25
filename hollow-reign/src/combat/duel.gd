@@ -51,7 +51,15 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	player_rig.position = Vector3(0, 0, gap * 0.5)
 	foe_rig = DragonRig.new() if str(foe.rig.get("kind", "")) == "dragon" else FighterRig.new()
 	add_child(foe_rig)
-	foe_rig.build(foe.rig, true)
+	var foe_look: Dictionary = foe.rig.duplicate()
+	# a generated model for this foe, or for its class, replaces the primitive body when present
+	for candidate in ["res://assets/models/%s.glb" % foe_id, "res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_")]:
+		if ResourceLoader.exists(candidate):
+			foe_look["skin"] = candidate
+			if not foe.boss:
+				foe_look["skin_tint"] = foe.rig.get("metal", "#888888")
+			break
+	foe_rig.build(foe_look, true)
 	foe_rig.position = Vector3(0, 0, -gap * 0.5)
 	foe_rig.rotation.y = PI
 	_blade_had_emission = foe_rig.mat_blade.emission_enabled
@@ -104,6 +112,8 @@ static func player_look() -> Dictionary:
 		"cloth": Game.profile.heraldry,
 		"helm": "great",
 		"weapon": weapon.cls,
+		"skin": "res://assets/models/knight_%s.glb" % str(Game.profile.get("body", "m")),
+		"skin_tint": chest.get("look", {}).get("metal", "#aeb2b8"),
 	}
 	var set_id: String = helm.get("look", {}).get("set", "")
 	if eq.helm == null:

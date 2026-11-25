@@ -21,7 +21,7 @@ On desktop the mouse acts as a finger. Keyboard: arrow keys cut, `A`/`D` dodge, 
 ```
 tools/test.sh [path-to-godot]
 ```
-Runs two headless suites: `tests/tests.gd` (combat rules, fairness, progression, saves) and `tests/integration.gd` (every screen, and a bot-played duel against every foe through the real scene).
+Runs three suites: `tests/tests.gd` (combat rules, fairness, progression, saves), `tests/integration.gd` (every screen, and a bot-played duel against every foe through the real scene), and `tests/touch.gd` (synthetic multi-touch through a real window; uses xvfb on Linux).
 
 `tools/shoot.sh <dir> <times> [--demo=<foe> | --screen=<name>]` renders screenshots without a GPU.
 

@@ -29,7 +29,7 @@ static func label(text: String, size: int = 22, color: Color = BONE, kind: Strin
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font(kind))
-	l.add_theme_font_size_override("font_size", size)
+	l.add_theme_font_size_override("font_size", maxi(size, 16))
 	l.add_theme_color_override("font_color", color)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
@@ -56,7 +56,7 @@ static func button(text: String, size: int = 22, min_w: float = 240.0) -> Button
 	var b := Button.new()
 	b.text = text.to_upper()
 	b.add_theme_font_override("font", font("head"))
-	b.add_theme_font_size_override("font_size", size)
+	b.add_theme_font_size_override("font_size", maxi(size, 15))
 	b.add_theme_color_override("font_color", BONE)
 	b.add_theme_color_override("font_hover_color", GOLD)
 	b.add_theme_color_override("font_pressed_color", GOLD)

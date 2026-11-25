@@ -11,11 +11,11 @@ The game is playable start to finish in Godot 4.6: title, sanctuary, six regions
 - Engine choice: Godot 4.6. Unreal could not be installed here and cannot build for iOS from Linux; Godot is open source (no vendor dependency that could force the game off the store later), exports native iOS/Metal, and runs headless for tests.
 
 ## Done and verified
-Verified means covered by `tools/test.sh` (820 rule checks plus an end-to-end run) or seen in software-rendered screenshots.
+Verified means covered by `tools/test.sh` or seen in software-rendered screenshots. The script runs three suites: 820 rule checks; an end-to-end run that builds every screen and bot-plays a duel against all 14 foes through the real scene; and a touch suite that pushes synthetic multi-touch events through a real window (swipes in each direction, zig-zag chains, slow drags and jitter rejected, dodge buttons, hold-to-block with a second finger cutting).
 
 | Area | State |
 |---|---|
-| Directional swipe attacks (8 directions) | Works. Fires on distance and speed, not on release; slow drags ignored |
+| Directional swipe attacks (8 directions) | Works, tested with synthetic touches. Fires on distance and speed, not on release; one stroke is one cut; slow drags and jitter ignored |
 | Parry (swipe against the blow), perfect parry | Works, tested |
 | Dodge left/right with correct-side rule, perfect dodge and counter | Works, tested |
 | Block, stamina, guard break, unblockable attacks | Works, tested |
@@ -44,10 +44,16 @@ Verified means covered by `tools/test.sh` (820 rule checks plus an end-to-end ru
 6. **Name.** "Hollow Reign" is not cleared. A web search found no identical game but USPTO, EUIPO and the App Store were not searched. See `docs/RESEARCH.md`.
 7. **Cinematics.** Boss intros and the finisher are in-engine camera moves. There is no pre-rendered opening or trailer.
 
+## Marketing material
+- `marketing/screenshots/`: five in-engine captures at 2556x1179 (iPhone landscape size). They show the current placeholder art, so treat them as layout drafts, not store-ready images.
+- `assets/icons/icon_1024.png`: app icon (script-drawn crown and sword).
+- `docs/APP_STORE.md`: listing copy, shot list, preview storyboard. `docs/HIGGSFIELD_PROMPTS.md`: prompt library.
+- No trailer or app preview video exists.
+
 ## Known bugs and rough edges
 - Weapons pass through bodies; contact is decided by the rules, not by mesh collision. Sparks are placed at the expected meeting point.
 - The intro orbit can briefly clip the knight's sword into frame.
-- Some menu text is small for a phone (13 to 15 px at 720p reference height).
+- Smallest menu text is 15 to 16 px at the 720p reference height; there is no large-text option yet.
 - Cathedral window glows are flat quads.
 - No engine licence screen yet (required by Godot's MIT notice).
 - No localisation; English only.

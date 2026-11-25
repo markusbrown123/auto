@@ -13,7 +13,7 @@ var profile: Dictionary = {}
 var run: Dictionary = {}          # {region, stage, hp, found:[...]} — reset on death
 var settings: Dictionary = {
 	"quality": 1, "fps": 60, "music": 0.8, "sfx": 1.0, "haptics": true,
-	"shake": 1.0, "assist": false, "left_handed": false, "reduce_flash": false,
+	"shake": 1.0, "assist": false, "hints": true, "reduce_flash": false,
 }
 var rng := RandomNumberGenerator.new()
 var save_dir_override := ""   # tests point this at a temp location
@@ -34,7 +34,7 @@ func default_profile() -> Dictionary:
 		"equipped": {"weapon": "w_rusted_sword", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest",
 			"gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": null, "relic": null},
 		"upgrades": {}, "mastery": {}, "mastered": [],
-		"flags": {}, "defeated": {}, "cleared": [], "ng": 0, "deaths": 0, "heraldry": "#5a1616",
+		"flags": {}, "defeated": {}, "cleared": [], "ng": 0, "deaths": 0, "heraldry": "#3d0f0f",
 		"tutorial_done": false, "playtime": 0.0,
 	}
 
@@ -44,7 +44,7 @@ func has_save() -> bool:
 func _p(path: String) -> String:
 	return path if save_dir_override == "" else save_dir_override + "/" + path.get_file()
 
-func new_game(heraldry: String = "#5a1616") -> void:
+func new_game(heraldry: String = "#3d0f0f") -> void:
 	profile = default_profile()
 	profile.heraldry = heraldry
 	run = {}

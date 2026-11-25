@@ -108,7 +108,42 @@ class Cue extends Control:
 				draw_line(c + Vector2(-14, -14), c + Vector2(14, 14), col, 5.0, true)
 				draw_line(c + Vector2(14, -14), c + Vector2(-14, 14), col, 5.0, true)
 
+## The seam in an open foe's guard: a glowing line to cut along.
+class Rift extends Control:
+	var vec := Vector2.ZERO
+	var _pulse := 0.0
+	var _burst := 0.0
+	func show_dir(d: String) -> void:
+		vec = DuelSim.dir_vec(d) if d != "" else Vector2.ZERO
+		visible = d != ""
+		_pulse = 0.0
+		queue_redraw()
+	func burst() -> void:
+		_burst = 1.0
+	func _process(dt: float) -> void:
+		if visible:
+			_pulse += dt
+			_burst = maxf(0.0, _burst - dt * 4.0)
+			queue_redraw()
+	func _draw() -> void:
+		if vec == Vector2.ZERO:
+			return
+		var c := size * 0.5
+		var d := Vector2(vec.x, -vec.y)
+		var n := Vector2(-d.y, d.x)
+		var grow := minf(_pulse / 0.12, 1.0)
+		var len := 92.0 * grow + _burst * 30.0
+		var a := 0.75 + 0.25 * sin(_pulse * 9.0)
+		var col := Color(1.0, 0.86, 0.5, a)
+		draw_line(c - d * len, c + d * len, Color(1.0, 0.6, 0.2, a * 0.25), 16.0, true)
+		draw_line(c - d * len, c + d * len, col, 4.0, true)
+		draw_line(c - d * len, c + d * len, Color(1, 1, 1, a), 1.5, true)
+		var tip := c + d * (len + 6.0)
+		draw_polyline(PackedVector2Array([tip - d * 20.0 + n * 14.0, tip, tip - d * 20.0 - n * 14.0]), col, 4.0, true)
+		draw_circle(c - d * len, 5.0, col)
+
 var root: Control
+var rift: Rift
 var swipe_input: SwipeInput
 var boss_bar: ProgressBar
 var boss_ghost: ProgressBar
@@ -157,6 +192,11 @@ func _ready() -> void:
 	streak.width_curve = wc
 	root.add_child(streak)
 
+	rift = Rift.new()
+	rift.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rift.size = Vector2(260, 260)
+	rift.visible = false
+	root.add_child(rift)
 	var m := UI.margin(get_viewport())
 	root.add_child(m)
 	var frame := Control.new()
@@ -283,7 +323,7 @@ func _ready() -> void:
 	frame.add_child(sub_label)
 
 func set_foe(foe: Dictionary) -> void:
-	boss_name.text = str(foe.name).to_upper()
+	boss_name.text = str(foe.name).to_upper() + ("" if foe.boss else "   ·   " + str(foe.get("cls", "")).to_upper())
 	for c in _phase_pips.get_children():
 		c.queue_free()
 

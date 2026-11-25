@@ -12,7 +12,7 @@ var bot: DuelBot
 var foe: Dictionary
 var arena: Arena
 var player_rig: FighterRig
-var foe_rig: FighterRig
+var foe_rig              # FighterRig or DragonRig: same interface
 var cam: Camera3D
 var hud: DuelHud
 var stage: int = Stage.INTRO
@@ -49,7 +49,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	add_child(player_rig)
 	player_rig.build(player_look(), false)
 	player_rig.position = Vector3(0, 0, gap * 0.5)
-	foe_rig = FighterRig.new()
+	foe_rig = DragonRig.new() if str(foe.rig.get("kind", "")) == "dragon" else FighterRig.new()
 	add_child(foe_rig)
 	foe_rig.build(foe.rig, true)
 	foe_rig.position = Vector3(0, 0, -gap * 0.5)
@@ -224,6 +224,8 @@ func _process(delta: float) -> void:
 				_whoosh_at = -1.0
 				Sfx.play("swing_heavy" if _whoosh_heavy else "swing", -2.0, 0.85 if _whoosh_heavy else 0.9)
 			hud.update_bars(sim, delta)
+			if sim.rift_dir != "":
+				hud.rift.position = cam.unproject_position(foe_rig.chest_point()) - hud.rift.size * 0.5
 		Stage.FINISHER:
 			if _stage_t > 3.4:
 				_finish(true)
@@ -351,7 +353,7 @@ func _screen_to_world_dir(d: String) -> Vector3:
 	return Vector3(v.x, v.y, 0)
 
 func _set_foe_blade_warning(on: bool) -> void:
-	var m := foe_rig.mat_blade
+	var m: StandardMaterial3D = foe_rig.mat_blade
 	if on:
 		m.emission_enabled = true
 		m.emission = Color(1.0, 0.12, 0.05)
@@ -392,9 +394,14 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			Sfx.play("footstep", -4.0)
 		&"exhausted":
 			hud.flash_stamina()
+		&"rift":
+			hud.rift.show_dir(d.dir)
 		&"boss_hit":
-			var at := foe_rig.chest_point() + Vector3(randf_range(-0.2, 0.2), randf_range(-0.2, 0.3), 0.35)
-			var crit: bool = d.get("crit", false)
+			var at: Vector3 = foe_rig.chest_point() + Vector3(randf_range(-0.2, 0.2), randf_range(-0.2, 0.3), 0.35)
+			var crit: bool = d.get("crit", false) or d.get("rift", false)
+			if d.get("rift", false):
+				Sfx.play("clash", -5.0, 1.5)
+				hud.rift.burst()
 			sparks(at, _screen_to_world_dir(d.dir) + Vector3(0, 0.3, 0.8), 22 if crit else 12, Color(1.0, 0.8, 0.5) if not d.get("weak", false) else Color(0.6, 0.85, 1.0), 6.0)
 			foe_rig.flash(1.0 if crit else 0.6)
 			Sfx.play("hit_armor", -2.0 if crit else -5.0, 1.0 + 0.04 * int(d.get("combo", 1)))
@@ -444,9 +451,16 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			shake(0.7)
 			Game.haptic(120, 0.8)
 			if str(d.roar) != "":
-				hud.subtitle(d.roar)
+				hud.subtitle(d.roar, 4.2 if d.get("revive", false) else 3.2)
+			if d.get("revive", false):
+				hud.toast("IT RISES", Color("#c08aff"), 1.4)
 		&"status":
-			if d.status == "frostbite":
+			if d.status == "drain":
+				hud.toast("DRAINED", Color("#c08aff"), 0.8)
+				hud.flash_stamina()
+				Sfx.play("frost", -4.0, 0.6)
+				sparks(player_rig.chest_point(), foe_rig.chest_point() - player_rig.chest_point(), 26, Color(0.75, 0.5, 1.0), 9.0)
+			elif d.status == "frostbite":
 				hud.toast("FROSTBITTEN", UI.FROST, 1.0)
 				Sfx.play("frost", -3.0)
 			else:
@@ -511,6 +525,7 @@ func _begin_finisher(d: Dictionary) -> void:
 	_stage_t = 0.0
 	hud.set_combat_visible(false, 0.25)
 	hud.cue.clear()
+	hud.rift.show_dir("")
 	_on_block(false)
 	_slow = 1.2
 	foe_rig.stagger()

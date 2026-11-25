@@ -32,6 +32,8 @@ const STAGGER_BREAK := 3.2
 const SHIFT_TIME := 2.4
 const COMBO_STEP := 0.12
 const COMBO_MAX := 6
+const RIFT_MULT := 1.6
+const DRAIN_STAMINA := 28.0
 
 enum P { FREE, SWING, PARRY, DODGE, HURT, STUN, ADVANCE, DEAD }
 enum B { IDLE, WINDUP, RECOVER, STAGGER, SHIFT, DEAD }
@@ -77,8 +79,10 @@ var b_reckless := 0
 var b_dmg_mult := 1.0
 var b_speed := 1.0
 var b_opening_crit := false
+var rift_dir := ""       # the seam in the foe's guard: cut along it for a telling blow
+var rift_count := 0
 var habits := {"block": 0.0, "dodge_l": 0.0, "dodge_r": 0.0, "parry": 0.0}
-var stats := {"dealt": 0.0, "taken": 0.0, "parries": 0, "perfect_parries": 0, "dodges": 0, "perfect_dodges": 0, "blocks": 0, "hits_taken": 0, "max_combo": 0}
+var stats := {"dealt": 0.0, "taken": 0.0, "parries": 0, "perfect_parries": 0, "dodges": 0, "perfect_dodges": 0, "blocks": 0, "hits_taken": 0, "max_combo": 0, "rifts": 0}
 
 
 func setup(player: Dictionary, boss: Dictionary, seed_value: int = 0, opts: Dictionary = {}) -> void:
@@ -270,11 +274,17 @@ func _resolve_player_hit(dir: String) -> void:
 		if p_counter:
 			mult *= 1.5
 			p_counter = false
+		var on_rift := rift_dir != "" and dir == rift_dir
+		if on_rift:
+			mult *= RIFT_MULT
+			stats.rifts += 1
 		var elem: bool = pl.element != null and pl.element == bd.get("weak")
 		if elem:
 			mult *= 1.25
 		var dmg: float = pl.attack * mult * (1.0 - float(bd.get("armor", 0.0))) * rng.randf_range(0.95, 1.05)
-		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem})
+		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift})
+		if on_rift and boss_open():
+			_next_rift()
 	elif b_state == B.SHIFT:
 		_emit(&"deflected", {"dir": dir, "dmg": 0.0})
 	else:
@@ -299,18 +309,22 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 	if not info.get("chip", false):
 		_emit(&"boss_hit", info)
 		_add_posture(4.0)
-	if b_hp <= 0.0:
-		b_state = B.DEAD
-		over = true
-		_emit(&"boss_dead", {"dir": info.get("dir", "D")})
-	elif b_hp <= floor_hp and b_phase + 1 < bd.phases.size():
+	if b_hp <= floor_hp and b_phase + 1 < bd.phases.size():
 		b_phase += 1
+		var revive: float = float(phase().get("revive", 0.0))
+		if revive > 0.0:
+			# it falls, and gets up again
+			b_hp = b_hp_max * revive
 		b_state = B.SHIFT
 		b_t = SHIFT_TIME
 		b_posture = 0.0
 		b_far = false
 		_end_opening()
-		_emit(&"phase_change", {"phase": b_phase, "roar": phase().get("roar", "")})
+		_emit(&"phase_change", {"phase": b_phase, "roar": phase().get("roar", ""), "revive": float(phase().get("revive", 0.0)) > 0.0})
+	elif b_hp <= 0.0:
+		b_state = B.DEAD
+		over = true
+		_emit(&"boss_dead", {"dir": info.get("dir", "D")})
 
 func _add_posture(v: float) -> void:
 	if b_state == B.STAGGER or b_state == B.SHIFT or b_state == B.DEAD:
@@ -326,8 +340,22 @@ func _stagger(t: float, broke: bool) -> void:
 	b_opening_crit = true
 	b_far = false
 	_emit(&"boss_stagger", {"time": t, "break": broke})
+	_next_rift()
+
+## Each opening shows a seam; striking along it opens the next one elsewhere.
+func _next_rift() -> void:
+	var keys: Array = DIRS.keys()
+	var pick: String = rift_dir
+	while pick == rift_dir or pick == p_last_dir:
+		pick = keys[rng.randi() % keys.size()]
+	rift_dir = pick
+	rift_count += 1
+	_emit(&"rift", {"dir": rift_dir})
 
 func _end_opening() -> void:
+	if rift_dir != "":
+		rift_dir = ""
+		_emit(&"rift", {"dir": ""})
 	p_combo = 0
 	p_last_dir = ""
 	b_opening_crit = false
@@ -468,6 +496,8 @@ func _resolve_strike() -> void:
 			var broke: bool = pl.stamina - cost <= 0.0
 			_spend(cost)
 			_apply_element(a, 0.5)
+			if a.get("drain", false):
+				_drain(dmg * 0.4)
 			if broke:
 				result = "guard_break"
 				_damage_player(dmg * 0.5)
@@ -479,6 +509,8 @@ func _resolve_strike() -> void:
 			p_parry = {}
 			stats.hits_taken += 1
 			_apply_element(a, 1.0)
+			if a.get("drain", false):
+				_drain(dmg)
 			_damage_player(dmg)
 			if p_state != P.DEAD:
 				_set_p(P.HURT, HURT_TIME)
@@ -508,6 +540,15 @@ func _resolve_strike() -> void:
 	b_t = rec
 	b_opening_crit = false
 	_emit(&"boss_recover", {"time": rec, "far": b_far})
+	if not b_far:
+		_next_rift()
+
+## Soul-eaters feed: a blow that lands restores them and empties you.
+func _drain(amount: float) -> void:
+	b_hp = minf(b_hp_max, b_hp + amount * 1.5)
+	pl.stamina = maxf(0.0, pl.stamina - DRAIN_STAMINA)
+	p_regen_wait = STAMINA_DELAY * 1.5
+	_emit(&"status", {"status": "drain", "amount": amount})
 
 func _apply_element(a: Dictionary, scale: float) -> void:
 	var e = a.get("element")

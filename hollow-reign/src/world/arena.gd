@@ -4,8 +4,13 @@ extends Node3D
 ## The fight happens on the Z axis around the origin; the camera sits at +Z.
 
 const THEMES := {
-	"courtyard": {"sky": "#0b0f18", "horizon": "#27303c", "fog": "#1a212b", "fog_d": 0.035, "sun": "#8fa6c8", "sun_e": 1.1, "sun_rot": Vector3(-38, 150, 0),
-		"stone": "#55524e", "floor": "#4a4845", "fire": "#ff7a2a", "layout": "ruin", "particles": "embers", "amb": "#2a3340"},
+	# clear cold morning: the kingdom is cursed, but the sun still rises on it
+	"courtyard": {"sky": "#2f5f9e", "horizon": "#c4d6e6", "fog": "#a8bccc", "fog_d": 0.005, "sun": "#fff2dc", "sun_e": 2.3, "sun_rot": Vector3(-42, 145, 0),
+		"stone": "#9a9284", "floor": "#8c8474", "fire": "#ff8a3a", "layout": "ruin", "particles": "motes", "amb": "#8494aa", "day": true},
+	"roost": {"sky": "#2a3c72", "horizon": "#ffb478", "fog": "#d09868", "fog_d": 0.006, "sun": "#ffcf9a", "sun_e": 2.1, "sun_rot": Vector3(-18, 160, 0),
+		"stone": "#7a6858", "floor": "#6a5848", "fire": "#ff7a2a", "layout": "crag", "particles": "embers", "amb": "#8a7068", "day": true},
+	"deep": {"sky": "#020104", "horizon": "#1c0c2e", "fog": "#10081c", "fog_d": 0.05, "sun": "#9a7ad8", "sun_e": 0.55, "sun_rot": Vector3(-60, 170, 0),
+		"stone": "#342c3c", "floor": "#16121c", "fire": "#b07aff", "layout": "abyss", "particles": "motes", "amb": "#241a34", "wet": true},
 	"blackwood": {"sky": "#070a09", "horizon": "#1a241c", "fog": "#131b15", "fog_d": 0.06, "sun": "#7f9a86", "sun_e": 0.7, "sun_rot": Vector3(-55, 120, 0),
 		"stone": "#3a3a32", "floor": "#2c2e25", "fire": "#c8d86a", "layout": "forest", "particles": "motes", "amb": "#1c2a20"},
 	"cathedral": {"sky": "#120b08", "horizon": "#4a2414", "fog": "#2a1810", "fog_d": 0.04, "sun": "#ffb070", "sun_e": 0.9, "sun_rot": Vector3(-30, 200, 0),
@@ -40,7 +45,7 @@ func build(theme_id: String) -> void:
 	theme = THEMES[theme_id]
 	rng.seed = hash(theme_id)
 	mat_stone = Look.stone(Color(theme.stone))
-	mat_dark = Look.flat(Color(theme.stone).darkened(0.7), 1.0)
+	mat_dark = Look.flat(Color(theme.stone).darkened(0.3 if theme.get("day", false) else 0.7), 1.0)
 	_environment()
 	_floor()
 	call("_layout_" + theme.layout)
@@ -55,6 +60,11 @@ func _environment() -> void:
 	sky_mat.ground_horizon_color = Color(theme.horizon)
 	sky_mat.sky_curve = 0.08
 	sky_mat.sun_angle_max = 6.0
+	if theme.get("day", false):
+		sky_mat.sky_curve = 0.18
+		sky_mat.sky_cover = Look.clouds()
+		sky_mat.sky_cover_modulate = Color(theme.horizon).lerp(Color.WHITE, 0.6)
+		sky_mat.sun_angle_max = 14.0
 	var sky := Sky.new()
 	sky.sky_material = sky_mat
 	env = Environment.new()
@@ -62,14 +72,14 @@ func _environment() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(theme.amb)
-	env.ambient_light_energy = 1.5
+	env.ambient_light_energy = 1.0 if theme.get("day", false) else 1.5
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.15
+	env.tonemap_exposure = 1.0 if theme.get("day", false) else 1.15
 	env.fog_enabled = true
 	env.fog_light_color = Color(theme.fog)
 	env.fog_density = theme.fog_d
-	env.fog_sky_affect = 0.6
+	env.fog_sky_affect = 0.1 if theme.get("day", false) else 0.6
 	env.glow_enabled = true
 	env.glow_intensity = 0.7
 	env.glow_bloom = 0.08
@@ -372,6 +382,72 @@ func _layout_throne() -> void:
 		sp.rotation_degrees.z = -sx * 8.0
 	# a long, rotted carpet
 	box(Vector3(3.0, 0.02, 40.0), Vector3(0, 0.012, -8.0), Look.flat(Color("#2a0808"), 1.0))
+
+func _layout_crag() -> void:
+	# a cliff-top eyrie: rock teeth, a nest of timber and bone, the sky all round
+	var bone := Look.flat(Color("#d8cfb8"), 0.7)
+	var rock := Look.stone(Color(theme.stone).darkened(0.15), 0.25, 0.9, "rock")
+	for i in 16:
+		var a := TAU * i / 16.0 + rng.randf_range(-0.12, 0.12)
+		var d := rng.randf_range(9.0, 15.0)
+		var p := Vector3(cos(a) * d, 0, sin(a) * d - 3.0)
+		if p.z > 5.0 and absf(p.x) < 5.0:
+			continue
+		var h := rng.randf_range(3.0, 11.0)
+		var sp := cyl(0.0, rng.randf_range(1.0, 2.4), h, p + Vector3(0, h * 0.5 - 0.3, 0), rock, 6)
+		sp.rotation_degrees = Vector3(rng.randf_range(-14, 14), rng.randf() * 360.0, rng.randf_range(-14, 14))
+	# great ribs arcing over the nest
+	for i in 5:
+		for sx: float in [-1.0, 1.0]:
+			var z := -5.0 - i * 1.7
+			var lower := cyl(0.2, 0.28, 3.4, Vector3(sx * 3.8, 1.5, z), bone, 7)
+			lower.rotation_degrees.z = sx * 18.0
+			var upper := cyl(0.08, 0.2, 3.0, Vector3(sx * 2.6, 4.1, z), bone, 7)
+			upper.rotation_degrees.z = sx * 52.0
+	box(Vector3(0.5, 0.5, 9.0), Vector3(0, 0.25, -8.5), bone)
+	# nest: a ring of charred timber
+	for i in 22:
+		var a2 := TAU * i / 22.0
+		box(Vector3(0.3, 0.3, rng.randf_range(2.5, 4.5)), Vector3(cos(a2) * 6.4, rng.randf_range(0.15, 0.7), sin(a2) * 6.4 - 1.0), Look.flat(Color("#1a1410")), Vector3(rng.randf_range(-12, 12), -rad_to_deg(a2) + rng.randf_range(-25, 25), 0))
+	tower(Vector3(-13, 0, -16), 4.5, 12, false)
+	rubble(Vector3(-10, 0, -12), 10, 2.5)
+	for sx: float in [-1.0, 1.0]:
+		fire(Vector3(sx * 4.6, 0.25, -5.5), 2.0, 8.0, false)
+	# far peaks
+	for i in 7:
+		var m := cyl(0.0, rng.randf_range(14, 26), rng.randf_range(20, 44), Vector3(rng.randf_range(-90, 90), 2.0, rng.randf_range(-110, -60)), Look.flat(Color(theme.horizon).darkened(0.45)), 5)
+		m.position.y = m.mesh.height * 0.5 - 14.0
+
+func _layout_abyss() -> void:
+	# the bottom of the kingdom: leaning name-stones, and a dark with shapes in it
+	var glowm := Look.glow(Color(theme.fire).darkened(0.2), 1.4)
+	for i in 14:
+		var a := TAU * i / 14.0 + 0.2
+		var d := rng.randf_range(7.0, 11.0)
+		var p := Vector3(cos(a) * d, 0, sin(a) * d - 3.0)
+		if p.z > 4.5 and absf(p.x) < 4.5:
+			continue
+		var h := rng.randf_range(4.0, 9.0)
+		var slab := box(Vector3(rng.randf_range(1.6, 2.6), h, 0.7), p + Vector3(0, h * 0.5 - 0.2, 0), null, Vector3(rng.randf_range(-9, 9), -rad_to_deg(a) + 90.0, rng.randf_range(-9, 9)))
+		# rows of names, most worn away
+		for k in rng.randi_range(2, 6):
+			var line := box(Vector3(rng.randf_range(0.5, 1.3), 0.05, 0.02), Vector3.ZERO, glowm)
+			remove_child(line)
+			slab.add_child(line)
+			line.position = Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-h * 0.35, h * 0.4), 0.36)
+	# stones that have forgotten which way is down
+	for i in 18:
+		var s := rng.randf_range(0.4, 1.6)
+		box(Vector3(s, s * rng.randf_range(0.5, 1.4), s), Vector3(rng.randf_range(-16, 16), rng.randf_range(4.0, 14.0), rng.randf_range(-22, -4)), null,
+			Vector3(rng.randf_range(0, 90), rng.randf_range(0, 90), rng.randf_range(0, 90)))
+	# the maw: a ring of standing teeth around a low violet light
+	for i in 9:
+		var a3 := PI * (0.15 + 0.7 * i / 8.0)
+		var t := cyl(0.0, 0.7, 6.0, Vector3(cos(a3) * 6.0, 3.0, -14.0 - sin(a3) * 3.0), mat_dark, 5)
+		t.rotation_degrees.z = (cos(a3)) * 18.0
+	window_glow(Vector3(0, 3.0, -17.5), Vector2(7.0, 5.0))
+	for sx: float in [-1.0, 1.0]:
+		fire(Vector3(sx * 4.8, 1.3, -5.0), 1.8, 9.0)
 
 func _layout_chapel() -> void:
 	# a small round chapel: the one place the curse has not reached

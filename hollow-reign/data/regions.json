@@ -6,10 +6,10 @@
    "theme": "courtyard",
    "amb": "wind",
    "requires": null,
-   "blurb": "The gate you once rode out of. The banners have burned down to their poles.",
+   "blurb": "The gate you once rode out of. Morning still comes here. Nothing else does.",
    "shortcut": {
     "flag": "courtyard_gate",
-    "stage": 3,
+    "stage": 4,
     "label": "The Winch Gate"
    },
    "stages": [
@@ -22,7 +22,8 @@
        "hint": "Steel scrapes on stone ahead.",
        "foe": "hollow_soldier"
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "Beyond the rubble the path divides.",
@@ -41,9 +42,26 @@
        "type": "fight",
        "label": "The Rampart Stair",
        "hint": "A longer way, and watched.",
-       "foe": "hollow_soldier"
+       "foe": "hollow_soldier",
+       "foes": [
+        "hollow_soldier",
+        "pike_sergeant"
+       ]
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A banner still flies on the barbican. Someone is standing under it, at attention.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Barbican",
+       "hint": "Light on his feet. He salutes first.",
+       "foe": "banneret"
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A winch-house stands beside the inner gate. Its chain is rusted but whole.",
@@ -65,7 +83,34 @@
        "shards": 1,
        "needs": "courtyard_gate"
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The gate passage. It is narrow, and it is occupied.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Gate Passage",
+       "hint": "He fills it wall to wall.",
+       "foe": "rampart_brute",
+       "foes": [
+        "rampart_brute",
+        "gate_colossus"
+       ]
+      },
+      {
+       "type": "treasure",
+       "label": "The Murder Hole",
+       "hint": "A ladder up, behind a loose stone.",
+       "items": [
+        "a_garrison_helm"
+       ],
+       "gold": 80,
+       "shards": 1
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A chapel alcove survives against the keep wall. A single candle burns.",
@@ -75,7 +120,8 @@
        "label": "Kneel",
        "hint": "Rest a moment. Wounds close."
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The inner ward. He is standing exactly where he was posted.",
@@ -87,7 +133,8 @@
        "foe": "ashen_sentinel",
        "optional": false
       }
-     ]
+     ],
+     "pouches": 1
     }
    ]
   },
@@ -100,7 +147,7 @@
    "blurb": "The royal hunting forest. The trees grew in over the road, and over the hunters.",
    "shortcut": {
     "flag": "blackwood_bridge",
-    "stage": 3,
+    "stage": 4,
     "label": "The Rope Bridge"
    },
    "stages": [
@@ -113,7 +160,8 @@
        "hint": "Someone is keeping them lit.",
        "foe": "blackwood_stalker"
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A deer trail leaves the road. The road goes on.",
@@ -122,7 +170,11 @@
        "type": "fight",
        "label": "The Road",
        "hint": "Hoofprints, then bootprints.",
-       "foe": "blackwood_stalker"
+       "foe": "blackwood_stalker",
+       "foes": [
+        "blackwood_stalker",
+        "veil_dancer"
+       ]
       },
       {
        "type": "boss",
@@ -131,7 +183,34 @@
        "foe": "pale_huntsman",
        "optional": true
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "Briars have been woven across the way. Not by the wind.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Briar Gate",
+       "hint": "Two blades part the thorns from inside.",
+       "foe": "thornblade",
+       "foes": [
+        "thornblade",
+        "veil_dancer"
+       ]
+      },
+      {
+       "type": "treasure",
+       "label": "The Hollow Oak",
+       "hint": "Wide enough to hide a man. Or his things.",
+       "items": [
+        "a_black_gauntlets"
+       ],
+       "gold": 110,
+       "shards": 2
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A ravine. A bridge of rope lies coiled on your side of it.",
@@ -152,7 +231,24 @@
        "gold": 90,
        "shards": 2
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The trees here have been cut and stacked, very neatly, for a very long time.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Woodpile",
+       "hint": "The woodcutter is still at work.",
+       "foe": "woodward",
+       "foes": [
+        "woodward",
+        "maulbeast"
+       ]
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A gibbet tree, and beneath it a spring.",
@@ -167,13 +263,14 @@
        "label": "Under the Gibbet",
        "hint": "The hanged have dropped their purses.",
        "items": [
-        "a_black_gauntlets"
+        "a_black_legs"
        ],
        "gold": 140,
        "shards": 2,
        "needs": "blackwood_bridge"
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A clearing of stumps. Every one has been used as a block.",
@@ -185,7 +282,8 @@
        "foe": "hollow_executioner",
        "optional": false
       }
-     ]
+     ],
+     "pouches": 1
     }
    ]
   },
@@ -198,7 +296,7 @@
    "blurb": "The faithful burned their own cathedral to keep it holy. It is still burning.",
    "shortcut": {
     "flag": "cathedral_door",
-    "stage": 3,
+    "stage": 4,
     "label": "The Sacristy Door"
    },
    "stages": [
@@ -209,9 +307,40 @@
        "type": "fight",
        "label": "The Pilgrim Stair",
        "hint": "Robed figures turn toward you.",
-       "foe": "ash_acolyte"
+       "foe": "ash_acolyte",
+       "foes": [
+        "ash_acolyte",
+        "censer_adept"
+       ]
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A censer the size of a bell swings across the porch, and a knight swings it.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Porch",
+       "hint": "Slow. Do not mistake that for safe.",
+       "foe": "censer_knight",
+       "foes": [
+        "censer_knight",
+        "bell_ringer"
+       ]
+      },
+      {
+       "type": "treasure",
+       "label": "The Almoner's Box",
+       "hint": "Chained to the wall. The chain is ash.",
+       "items": [
+        "x_candle"
+       ],
+       "gold": 150,
+       "shards": 2
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "At the great doors, a woman in red is waiting. She has been waiting a long time.",
@@ -223,7 +352,8 @@
        "foe": "crimson_widow",
        "optional": false
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "Inside, the nave is open to the sky. A side door leads to the sacristy.",
@@ -239,13 +369,25 @@
        "label": "The Reliquary",
        "hint": "Saints' bones, and what was buried with them.",
        "items": [
-        "x_candle",
         "a_vigil_gauntlets"
        ],
        "gold": 160,
        "shards": 3
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The choir is still singing. There is nothing left of them to sing with.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Choir Loft",
+       "hint": "It reaches for you with the hymn.",
+       "foe": "choir_wraith"
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "Votive candles, hundreds, none burned down.",
@@ -254,14 +396,9 @@
        "type": "shrine",
        "label": "Light One",
        "hint": "Warmth without smoke."
-      },
-      {
-       "type": "fight",
-       "label": "The Choir Loft",
-       "hint": "Singing, of a kind.",
-       "foe": "ash_acolyte"
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The bell tower has fallen through the crossing. Something has made its den in the bronze.",
@@ -273,7 +410,8 @@
        "foe": "cathedral_beast",
        "optional": false
       }
-     ]
+     ],
+     "pouches": 1
     }
    ]
   },
@@ -286,7 +424,7 @@
    "blurb": "The kings were buried under the cathedral. Then the river was let in.",
    "shortcut": {
     "flag": "crypt_sluice",
-    "stage": 3,
+    "stage": 4,
     "label": "The Sluice Gate"
    },
    "stages": [
@@ -296,10 +434,15 @@
       {
        "type": "fight",
        "label": "The Drowned Stair",
-       "hint": "Ripples, with nothing making them.",
-       "foe": "crypt_warden"
+       "hint": "A squire, still carrying his lord's shield.",
+       "foe": "drowned_squire",
+       "foes": [
+        "drowned_squire",
+        "tomb_mummer"
+       ]
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The ossuary. Skulls are stacked to the vault.",
@@ -318,9 +461,26 @@
        "type": "fight",
        "label": "The Processional",
        "hint": "Heavy footfalls in the water.",
-       "foe": "crypt_warden"
+       "foe": "crypt_warden",
+       "foes": [
+        "crypt_warden",
+        "crypt_crawler"
+       ]
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "Something pale is pressed against a tomb lid, drinking what seeps out.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Weeping Tomb",
+       "hint": "It turns. It is not finished.",
+       "foe": "tomb_leech"
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A sluice wheel. Turning it would drain the lower halls.",
@@ -336,7 +496,8 @@
        "label": "The Dry Niche",
        "hint": "A saint's alcove above the waterline."
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "With the water gone, a lower door stands revealed.",
@@ -346,7 +507,6 @@
        "label": "The Royal Vault",
        "hint": "Sealed since before the flood.",
        "items": [
-        "w_rime_sword",
         "a_vigil_helm"
        ],
        "gold": 300,
@@ -357,9 +517,26 @@
        "type": "fight",
        "label": "The Gallery of Kings",
        "hint": "Their effigies have been defaced.",
-       "foe": "crypt_warden"
+       "foe": "crypt_warden",
+       "foes": [
+        "crypt_warden",
+        "crypt_crawler",
+        "tomb_mummer"
+       ]
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A reliquary lamp, lit, in a room with no door but the one you came by.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Sit by the Lamp",
+       "hint": "It asks nothing."
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The oldest tomb. Its keeper has not left his post.",
@@ -371,7 +548,146 @@
        "foe": "gravewarden",
        "optional": false
       }
-     ]
+     ],
+     "pouches": 1
+    }
+   ]
+  },
+  {
+   "id": "roost",
+   "name": "The Wyrm's Roost",
+   "theme": "roost",
+   "amb": "wind",
+   "requires": "crypt",
+   "blurb": "The high crag where the royal dragons were stabled. One was never sent to war. She is grown now.",
+   "shortcut": {
+    "flag": "roost_chain",
+    "stage": 4,
+    "label": "The Feeding Chain"
+   },
+   "stages": [
+    {
+     "prompt": "The cliff road. The stone is glazed, as if it ran once.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Glass Road",
+       "hint": "A knight in scale. Not his own.",
+       "foe": "scalebound"
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The falconry, roofless. The perches are man-height.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Mews",
+       "hint": "He whistles. Nothing comes. He draws instead.",
+       "foe": "ash_falconer",
+       "foes": [
+        "ash_falconer",
+        "scalebound"
+       ]
+      },
+      {
+       "type": "treasure",
+       "label": "The Tack Room",
+       "hint": "Harness for something with a long neck.",
+       "items": [
+        "a_wyrm_gauntlets"
+       ],
+       "gold": 340,
+       "shards": 4
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "Bones, heaped. Among them something small is learning to hunt.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Boneyard",
+       "hint": "Small for a dragon. Not small.",
+       "foe": "cinder_whelp"
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A chain as thick as a tree runs down the cliff to the valley, with a cage on it.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Free the Counterweight",
+       "hint": "The cage would ride up and down at your word.",
+       "flag": "roost_chain"
+      },
+      {
+       "type": "treasure",
+       "label": "The Keeper's Cell",
+       "hint": "He locked himself in. It did not help.",
+       "items": [
+        "a_wyrm_legs"
+       ],
+       "gold": 300,
+       "shards": 4
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The egg chamber. The shells are old. One is not.",
+     "options": [
+      {
+       "type": "treasure",
+       "label": "The Clutch",
+       "hint": "Warm ash, and something under it.",
+       "items": [
+        "r_brood"
+       ],
+       "gold": 420,
+       "shards": 5,
+       "needs": "roost_chain"
+      },
+      {
+       "type": "fight",
+       "label": "The Brood Guard",
+       "hint": "Two knights swore to guard the clutch. One is left.",
+       "foe": "scalebound",
+       "foes": [
+        "scalebound",
+        "brood_keeper"
+       ]
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A spring runs hot from the rock. Someone cut a basin for it.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Bathe Your Hands",
+       "hint": "Heat without harm."
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The summit. The sky is very large here, and part of it is looking at you.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Summit",
+       "hint": "A shadow crosses the sun, and comes back.",
+       "foe": "cinder_wyrm",
+       "optional": false
+      }
+     ],
+     "pouches": 1
     }
    ]
   },
@@ -380,11 +696,11 @@
    "name": "The Frozen Citadel",
    "theme": "citadel",
    "amb": "wind",
-   "requires": "crypt",
+   "requires": "roost",
    "blurb": "The mountain fortress. Its king had the gates frozen shut, and himself with them.",
    "shortcut": {
     "flag": "citadel_lift",
-    "stage": 3,
+    "stage": 4,
     "label": "The Ice Lift"
    },
    "stages": [
@@ -397,7 +713,8 @@
        "hint": "One of them is breathing.",
        "foe": "frost_thrall"
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The curtain wall, sheathed in ice.",
@@ -405,21 +722,48 @@
       {
        "type": "fight",
        "label": "The Wall Walk",
-       "hint": "Wind, and under it, footsteps.",
-       "foe": "frost_thrall"
+       "hint": "A duellist practises alone, as he has for an age.",
+       "foe": "rime_duelist",
+       "foes": [
+        "rime_duelist",
+        "rime_glaive"
+       ]
       },
       {
        "type": "treasure",
        "label": "The Armoury",
        "hint": "The racks are frozen solid.",
        "items": [
-        "a_frost_gauntlets",
-        "a_frost_legs"
+        "a_frost_gauntlets"
        ],
        "gold": 320,
        "shards": 4
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "Below the keep, a pit. A chain runs down into it, and the chain is moving.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Kennel Stair",
+       "hint": "A thrall bars the way down.",
+       "foe": "frost_thrall",
+       "foes": [
+        "frost_thrall",
+        "frost_drake"
+       ]
+      },
+      {
+       "type": "boss",
+       "label": "The Pit",
+       "hint": "Whatever is on the chain has heard you.",
+       "foe": "rimewyrm",
+       "optional": true
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A counterweight lift, iced into its shaft.",
@@ -435,7 +779,24 @@
        "label": "The Brazier",
        "hint": "Someone kept one fire alive."
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The great stair. Halfway up it, a shape that was part of the wall steps out.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Great Stair",
+       "hint": "The air itself resists you.",
+       "foe": "glacier_brute",
+       "foes": [
+        "glacier_brute",
+        "hoarbeast"
+       ]
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The queen's solar. Frost flowers cover every pane.",
@@ -453,12 +814,12 @@
        "needs": "citadel_lift"
       },
       {
-       "type": "fight",
-       "label": "The Great Stair",
-       "hint": "The air itself resists you.",
-       "foe": "frost_thrall"
+       "type": "shrine",
+       "label": "The Window Seat",
+       "hint": "The view is all white. It is restful."
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The hall of the winter throne.",
@@ -470,7 +831,142 @@
        "foe": "frostbound_king",
        "optional": false
       }
-     ]
+     ],
+     "pouches": 1
+    }
+   ]
+  },
+  {
+   "id": "deep",
+   "name": "The Hollow Deep",
+   "theme": "deep",
+   "amb": "crypt",
+   "requires": "citadel",
+   "blurb": "Under the throne there is a place where the kingdom's dead were sent. Something was fed on them.",
+   "shortcut": {
+    "flag": "deep_stair",
+    "stage": 4,
+    "label": "The Unlit Stair"
+   },
+   "stages": [
+    {
+     "prompt": "The stair goes down past where stairs should stop. People stand along it, facing the wall.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Long Stair",
+       "hint": "One turns. There is no one in it.",
+       "foe": "husk"
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A gallery of names, carved floor to roof. Most have been licked smooth.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Gallery of Names",
+       "hint": "It is eating one now. It looks up.",
+       "foe": "soul_eater"
+      },
+      {
+       "type": "treasure",
+       "label": "The Unread Wall",
+       "hint": "A few names survive. Something was hidden behind them.",
+       "items": [
+        "a_hollow_gauntlets"
+       ],
+       "gold": 520,
+       "shards": 6
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The dark here has a grain to it, like wood. Like something growing.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Grain",
+       "hint": "It comes apart from the dark as it moves.",
+       "foe": "soul_eater",
+       "foes": [
+        "soul_eater",
+        "name_thief"
+       ]
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A second stair, unlit, climbing. It smells of candle smoke \u2014 the sanctuary's.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Mark the Way",
+       "hint": "You could find this from above.",
+       "flag": "deep_stair"
+      },
+      {
+       "type": "shrine",
+       "label": "The Last Candle",
+       "hint": "Someone carried it this far."
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A hall where oaths were sworn. The banners hang empty; the words are gone out of them.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Oath Hall",
+       "hint": "It has eaten promises. It is very strong.",
+       "foe": "oath_eater",
+       "foes": [
+        "oath_eater",
+        "the_unburied"
+       ]
+      },
+      {
+       "type": "treasure",
+       "label": "The Reliquary of Vows",
+       "hint": "One vow, kept, in a lead box.",
+       "items": [
+        "a_hollow_legs",
+        "a_hollow_helm"
+       ],
+       "gold": 600,
+       "shards": 7,
+       "needs": "deep_stair"
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "Stillness. A place it has already emptied, and so does not visit.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Rest in the Emptied Place",
+       "hint": "Nothing here wants anything."
+      }
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The bottom. It is not dark. It is occupied.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Bottom",
+       "hint": "It says a name. It might be yours.",
+       "foe": "devourer",
+       "optional": false
+      }
+     ],
+     "pouches": 1
     }
    ]
   },
@@ -479,11 +975,11 @@
    "name": "The Hollow Throne",
    "theme": "throne",
    "amb": "wind",
-   "requires": "citadel",
+   "requires": "deep",
    "blurb": "The heart of the kingdom. You have been here before. You are always here before.",
    "shortcut": {
     "flag": "throne_door",
-    "stage": 3,
+    "stage": 4,
     "label": "The King's Door"
    },
    "stages": [
@@ -496,7 +992,8 @@
        "hint": "The honour guard still stands.",
        "foe": "throne_guard"
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The antechamber, hung with banners gone to thread.",
@@ -504,8 +1001,12 @@
       {
        "type": "fight",
        "label": "The Antechamber",
-       "hint": "Two guards. One steps forward.",
-       "foe": "throne_guard"
+       "hint": "The king's own blade. He bows.",
+       "foe": "kingsblade",
+       "foes": [
+        "kingsblade",
+        "herald"
+       ]
       },
       {
        "type": "treasure",
@@ -518,7 +1019,20 @@
        "gold": 600,
        "shards": 6
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "A figure sits on the steps with a crown in its lap, turning it over and over.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Steps",
+       "hint": "It was a king. It has forgotten which.",
+       "foe": "crownless"
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "A small door behind the arras, for the king's private use.",
@@ -534,15 +1048,21 @@
        "label": "The Chapel Royal",
        "hint": "The last quiet place."
       }
-     ]
+     ],
+     "pouches": 1
     },
     {
-     "prompt": "The throne room doors. They are open. They have always been open.",
+     "prompt": "The last guard. He has not been relieved. He does not expect to be.",
      "options": [
       {
-       "type": "shrine",
-       "label": "Steady Yourself",
-       "hint": "Breathe."
+       "type": "fight",
+       "label": "The Last Post",
+       "hint": "He raises his sword like a man lifting a door.",
+       "foe": "throne_guard",
+       "foes": [
+        "throne_guard",
+        "throne_colossus"
+       ]
       },
       {
        "type": "treasure",
@@ -555,7 +1075,19 @@
        "shards": 8,
        "needs": "throne_door"
       }
-     ]
+     ],
+     "pouches": 1
+    },
+    {
+     "prompt": "The throne room doors. They are open. They have always been open.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Steady Yourself",
+       "hint": "Breathe."
+      }
+     ],
+     "pouches": 1
     },
     {
      "prompt": "The Hollow Throne.",
@@ -567,7 +1099,8 @@
        "foe": "forgotten_monarch",
        "optional": false
       }
-     ]
+     ],
+     "pouches": 1
     }
    ]
   }

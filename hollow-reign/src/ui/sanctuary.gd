@@ -126,8 +126,8 @@ func _tab_journey() -> void:
 		i += 1
 		var open: bool = Game.region_unlocked(r.id)
 		var done: bool = Game.profile.cleared.has(r.id)
-		var b := UI.button(("%s  %s" % [["I", "II", "III", "IV", "V", "VI"][i - 1], r.name]) if open else "—  Unknown", 15, 290)
-		b.custom_minimum_size.y = 46
+		var b := UI.button(("%s  %s" % [["I", "II", "III", "IV", "V", "VI", "VII", "VIII"][i - 1], r.name]) if open else "—  Unknown", 15, 290)
+		b.custom_minimum_size.y = 40
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.disabled = not open
 		if done:

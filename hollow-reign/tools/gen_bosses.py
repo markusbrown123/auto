@@ -9,24 +9,175 @@ def C(id, w, attacks, recover=1.2, tags=("basic",), range="near", retreat=False,
     return dict(id=id, w=w, attacks=attacks, recover=recover, tags=list(tags), range=range, retreat=retreat, gap=gap)
 B = []
 # ---------------------------------------------------------------- lesser foes
-def lesser(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=60, gold=40):
-    return dict(id=id, name=name, title="", region=region, boss=False, hp=hp, armor=0.0, posture=60, patience=3, adapt=0.3,
-        idle=[0.9,1.6], weak=None, xp=xp, gold=gold, loot=[], rig=rig, music="combat_a",
-        punish=A("D",0.5,dmg,swing=0.25),
-        phases=[dict(at=1.0, speed=speed, combos=[
-            C("cut_l",3,[A("L",0.85,dmg,element=el)],1.3),
-            C("cut_r",3,[A("R",0.85,dmg,element=el)],1.3),
-            C("chop",2,[A("D",1.0,round(dmg*1.3),element=el)],1.5),
-            C("one_two",2,[A("L",0.8,dmg),A("R",0.6,dmg)],1.5,tags=("anti_dodge",)),
-            C("shove",1,[A("U",0.9,round(dmg*0.8),guard=dmg*3,kind="thrust")],1.2,tags=("anti_block",)),
-        ])])
+# Four archetypes, re-skinned and re-tuned per region, so the road to each
+# guardian teaches the things that guardian will test.
+def _base(id, name, region, hp, rig, combos, punish, speed, xp, gold, patience=3, adapt=0.4, posture=60, idle=(0.9,1.6), weak=None, cls="Humanoid"):
+    return dict(id=id, name=name, title="", cls=cls, region=region, boss=False, hp=hp, armor=0.0, posture=posture, patience=patience, adapt=adapt,
+        idle=list(idle), weak=weak, xp=xp, gold=gold, loot=[], rig=rig, music="combat_a", punish=punish,
+        phases=[dict(at=1.0, speed=speed, combos=combos)])
+def soldier(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=60, gold=40):
+    return _base(id, name, region, hp, rig, [
+        C("cut_l",3,[A("L",0.85,dmg,element=el)],1.3),
+        C("cut_r",3,[A("R",0.85,dmg,element=el)],1.3),
+        C("chop",2,[A("D",1.0,round(dmg*1.3),element=el)],1.5),
+        C("one_two",2,[A("L",0.8,dmg),A("R",0.6,dmg)],1.5,tags=("anti_dodge",)),
+        C("shove",1,[A("U",0.9,round(dmg*0.8),guard=dmg*3,kind="thrust")],1.2,tags=("anti_block",)),
+    ], A("D",0.5,dmg,swing=0.25), speed, xp, gold)
+def duelist(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=80, gold=55):
+    # quick, light, never stands still: teaches rapid parries and the lunge
+    d = round(dmg*0.75)
+    return _base(id, name, region, round(hp*0.85), rig, [
+        C("flick_l",2,[A("L",0.7,d,swing=0.22,element=el)],1.0),
+        C("flick_r",2,[A("R",0.7,d,swing=0.22,element=el)],1.0),
+        C("cross",3,[A("DL",0.7,d,swing=0.22),A("DR",0.5,d,swing=0.22)],1.2),
+        C("three",3,[A("L",0.7,d,swing=0.22),A("R",0.5,d,swing=0.22),A("U",0.55,d,swing=0.22)],1.3,tags=("anti_dodge",)),
+        C("skip_back",2,[A("R",0.65,d,swing=0.22)],0.45,retreat=True),
+        C("lunge",3,[A("U",0.8,round(dmg*1.1),swing=0.2,kind="lunge")],1.2,range="far"),
+    ], A("L",0.42,d,swing=0.2), speed, xp, gold, patience=2, adapt=0.6, posture=50, idle=(0.5,1.0), cls="Twin-Bladed" if rig.get("weapon") == "dual" else "Humanoid")
+def brute(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=110, gold=75):
+    # slow, heavy, breaks guards: teaches patience, dodging and delayed blows
+    h = round(dmg*1.5)
+    return _base(id, name, region, round(hp*1.5), rig, [
+        C("haul_l",3,[A("L",1.2,h,element=el)],1.6),
+        C("haul_r",3,[A("R",1.2,h,element=el)],1.6),
+        C("held",3,[A("D",1.9,round(h*1.25),swing=0.26,kind="slam",element=el)],1.8,tags=("anti_parry",)),
+        C("breaker",3,[A("D",1.25,dmg,guard=dmg*4,kind="slam")],1.5,tags=("anti_block",)),
+        C("quake",2,[A("D",1.5,round(h*1.2),unblockable=True,parry=False,dodge="any",kind="slam")],1.9,tags=("anti_block","anti_parry")),
+    ], A("U",0.55,dmg,swing=0.26,kind="thrust"), speed, xp, gold, posture=85, idle=(1.0,1.7), cls="Heavy")
+def giant(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=200, gold=130):
+    # towering: every blow is slow and enormous. Stomps cannot be blocked or parried; grabs must be sidestepped.
+    h = round(dmg*1.8)
+    return _base(id, name, region, round(hp*2.1), rig, [
+        C("fell_l",3,[A("L",1.4,h,swing=0.36,kind="sweep",element=el)],1.9),
+        C("fell_r",3,[A("R",1.4,h,swing=0.36,kind="sweep",element=el)],1.9),
+        C("hammer",3,[A("D",1.7,round(h*1.2),swing=0.36,kind="slam",element=el)],2.1),
+        C("hammer_held",2,[A("D",2.4,round(h*1.3),swing=0.28,kind="slam",element=el)],2.0,tags=("anti_parry",)),
+        C("stomp",3,[A("D",1.3,round(h*0.9),unblockable=True,parry=False,dodge="any",kind="slam")],1.8,tags=("anti_block","anti_parry")),
+        C("grab",2,[A("U",1.3,h,unblockable=True,parry=False,dodge="L",kind="thrust")],1.9,tags=("anti_block","anti_parry")),
+        C("fell_fell",2,[A("L",1.35,h,swing=0.36,kind="sweep"),A("R",1.0,h,swing=0.36,kind="sweep")],2.2,tags=("anti_dodge",)),
+    ], A("D",0.6,dmg,swing=0.28,kind="slam"), speed, xp, gold, patience=4, adapt=0.5, posture=120, idle=(1.1,1.9), cls="Giant")
+def twin(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=120, gold=80):
+    # two blades, never the same side twice: long alternating strings that demand direction changes
+    d = round(dmg*0.7)
+    f = lambda dir, w: A(dir, w, d, swing=0.2, element=el)
+    return _base(id, name, region, round(hp*0.9), rig, [
+        C("pair",3,[f("L",0.7),f("R",0.45)],1.1),
+        C("cross",3,[f("DL",0.7),f("DR",0.45)],1.1),
+        C("four",3,[f("L",0.68),f("R",0.45),f("DL",0.45),f("DR",0.45)],1.4,tags=("anti_dodge",)),
+        C("five",2,[f("R",0.68),f("L",0.45),f("UR",0.45),f("UL",0.45),A("D",0.7,round(dmg*1.1),swing=0.22)],1.6,tags=("anti_dodge",)),
+        C("stall",2,[f("L",0.65),A("R",1.3,dmg,swing=0.18)],1.2,tags=("anti_parry",)),
+        C("whirl",2,[A("L",0.9,dmg,unblockable=True,dodge="L",parry=False,kind="sweep")],1.3,tags=("anti_block","anti_parry")),
+        C("slip",2,[f("R",0.6)],0.4,retreat=True),
+        C("dart",3,[A("U",0.75,dmg,swing=0.2,kind="lunge")],1.1,range="far"),
+    ], A("R",0.4,d,swing=0.18), speed, xp, gold, patience=2, adapt=0.8, posture=50, idle=(0.45,0.9), cls="Twin-Bladed")
+def double(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=140, gold=90):
+    # a blade at each end of the haft: every cut is answered at once from the opposite side
+    a = lambda dir, w, **k: A(dir, w, dmg, element=el, **k)
+    return _base(id, name, region, round(hp*1.1), rig, [
+        C("there_back",4,[a("L",0.9),a("R",0.5)],1.3),
+        C("back_there",4,[a("R",0.9),a("L",0.5)],1.3),
+        C("rise_fall",3,[a("U",0.9),a("D",0.5,kind="slam")],1.4),
+        C("fall_rise",3,[a("D",0.95,kind="slam"),a("U",0.5)],1.4),
+        C("mill",2,[a("DL",0.85),a("UR",0.5),a("DR",0.5),a("UL",0.5)],1.7,tags=("anti_dodge",)),
+        C("butt",2,[A("U",0.9,round(dmg*0.7),guard=dmg*4,kind="thrust")],1.2,tags=("anti_block",)),
+        C("held_spin",2,[a("L",1.8,swing=0.22),a("R",0.5)],1.4,tags=("anti_parry",)),
+        C("vault_back",2,[a("U",0.7)],0.45,retreat=True),
+        C("vault",3,[A("D",0.9,round(dmg*1.2),kind="lunge")],1.3,range="far"),
+    ], A("L",0.45,dmg,swing=0.22), speed, xp, gold, patience=3, adapt=0.7, posture=70, idle=(0.7,1.3), cls="Double-Weapon")
+def beast(id, name, region, hp, dmg, rig, speed=1.0, el=None, xp=150, gold=95):
+    # not a soldier at all: it pounces, rakes and worries. Nothing it does is polite enough to block for long.
+    return _base(id, name, region, round(hp*1.3), rig, [
+        C("rake_l",3,[A("L",0.85,dmg,kind="sweep",element=el)],1.2),
+        C("rake_r",3,[A("R",0.85,dmg,kind="sweep",element=el)],1.2),
+        C("rakes",3,[A("L",0.85,dmg,kind="sweep"),A("R",0.55,dmg,kind="sweep"),A("L",0.55,dmg,kind="sweep")],1.5,tags=("anti_dodge",)),
+        C("worry",3,[A("U",1.0,round(dmg*0.8),guard=dmg*3,kind="thrust"),A("U",0.6,round(dmg*0.8),guard=dmg*3,kind="thrust")],1.4,tags=("anti_block",)),
+        C("crush",2,[A("D",1.4,round(dmg*1.6),unblockable=True,parry=False,dodge="any",kind="slam")],1.8,tags=("anti_block","anti_parry")),
+        C("spring_back",3,[A("U",0.75,dmg,kind="sweep")],0.45,retreat=True),
+        C("pounce",4,[A("D",0.95,round(dmg*1.3),kind="lunge",guard=dmg*3)],1.4,range="far"),
+        C("feint_pounce",2,[A("D",1.8,round(dmg*1.4),swing=0.22,kind="lunge")],1.4,range="far",tags=("anti_parry",)),
+    ], A("L",0.45,dmg,swing=0.22,kind="sweep"), speed, xp, gold, patience=2, adapt=0.7, posture=75, idle=(0.6,1.2), cls="Monstrosity")
+def drake(id, name, region, hp, dmg, rig, speed=1.0, el="fire", xp=300, gold=190, weak="frost"):
+    return _base(id, name, region, round(hp*1.4), rig, [
+        C("snap_l",3,[A("L",0.9,dmg,kind="bite")],1.3),
+        C("snap_r",3,[A("R",0.9,dmg,kind="bite")],1.3),
+        C("lunge_bite",3,[A("U",1.0,round(dmg*1.2),kind="lunge")],1.4),
+        C("claw",3,[A("DL",0.9,dmg,kind="sweep"),A("DR",0.7,dmg,kind="sweep")],1.5,tags=("anti_dodge",)),
+        C("spit",3,[A("D",1.4,round(dmg*1.35),unblockable=True,parry=False,dodge="any",kind="breath",element=el)],1.7,tags=("anti_block","anti_parry")),
+    ], A("U",0.5,dmg,swing=0.24,kind="bite"), speed, xp, gold, posture=80, weak=weak, cls="Monstrosity")
+def eater(id, name, region, hp, dmg, rig, speed=1.0, xp=130, gold=90):
+    # soul-eater: its grasp feeds it. Block and it still drinks; parry or dodge.
+    return _base(id, name, region, hp, rig, [
+        C("rake_l",3,[A("L",0.9,dmg,kind="sweep")],1.2),
+        C("rake_r",3,[A("R",0.9,dmg,kind="sweep")],1.2),
+        C("grasp",4,[A("U",1.15,round(dmg*0.9),drain=True,kind="thrust",guard=dmg*2)],1.4,tags=("anti_block",)),
+        C("long_grasp",2,[A("U",2.0,dmg,drain=True,swing=0.24,kind="thrust",guard=dmg*2)],1.5,tags=("anti_parry","anti_block")),
+        C("fade",2,[A("R",0.8,dmg,kind="sweep")],0.5,retreat=True),
+        C("swoop",3,[A("D",0.95,round(dmg*1.1),drain=True,kind="lunge")],1.3,range="far"),
+        C("rake_grasp",2,[A("L",0.85,dmg,kind="sweep"),A("U",0.8,dmg,drain=True,kind="thrust")],1.5,tags=("anti_dodge",)),
+    ], A("U",0.5,dmg,drain=True,swing=0.24,kind="thrust"), speed, xp, gold, patience=2, adapt=0.8, posture=55, idle=(0.7,1.3), cls="Soul-Eater")
+def R(metal, cloth, weapon, eye, helm, scale=1.0, **k):
+    d = dict(scale=scale, metal=metal, cloth=cloth, weapon=weapon, eye=eye, helm=helm); d.update(k); return d
+WR = dict(wraith=True, maw=True, cape=True)
 B += [
- lesser("hollow_soldier","Hollow Soldier","courtyard",220,12,dict(scale=1.0,metal="#5a5a5c",cloth="#3a2a22",weapon="sword",eye="#ffb060",helm="kettle")),
- lesser("blackwood_stalker","Blackwood Stalker","blackwood",300,16,dict(scale=1.02,metal="#2e3a2c",cloth="#1c2418",weapon="axe",eye="#b6ff7a",helm="hood"),speed=1.1,xp=110,gold=70),
- lesser("ash_acolyte","Ash Acolyte","cathedral",380,21,dict(scale=1.05,metal="#6a5a48",cloth="#5a1a14",weapon="sword",eye="#ff7a3a",helm="hood"),speed=1.12,el="fire",xp=170,gold=110),
- lesser("crypt_warden","Crypt Warden","crypt",480,26,dict(scale=1.1,metal="#48564e",cloth="#20282a",weapon="greatsword",eye="#7affc8",helm="great"),speed=1.1,xp=240,gold=150),
- lesser("frost_thrall","Frost Thrall","citadel",560,31,dict(scale=1.08,metal="#8aa6b4",cloth="#2a3a48",weapon="axe",eye="#8fdcff",helm="kettle"),speed=1.18,el="frost",xp=320,gold=200),
- lesser("throne_guard","Throne Guard","throne",680,37,dict(scale=1.15,metal="#8c7a52",cloth="#3a0e0e",weapon="greatsword",eye="#ffd98a",helm="great"),speed=1.22,xp=420,gold=260),
+ soldier("hollow_soldier","Hollow Soldier","courtyard",220,12,R("#7a7c80","#3a2a22","sword","#ffb060","kettle")),
+ duelist("banneret","Banneret","courtyard",230,13,R("#8a8c90","#5a1616","sword","#ffb060","kettle",bulk=0.85,cape=True),xp=75,gold=50),
+ brute("rampart_brute","Rampart Breaker","courtyard",240,13,R("#5c5a56","#2a1a14","axe","#ffb060","great",scale=1.22,bulk=1.4),xp=100,gold=70),
+
+ soldier("blackwood_stalker","Blackwood Stalker","blackwood",300,16,R("#2e3a2c","#1c2418","axe","#b6ff7a","hood"),speed=1.1,xp=110,gold=70),
+ duelist("thornblade","Thornblade","blackwood",310,17,R("#3a4434","#243018","dual","#b6ff7a","hood",bulk=0.82,cape=True),speed=1.05,xp=130,gold=85),
+ brute("woodward","The Woodward","blackwood",320,17,R("#34302a","#1c1810","cleaver","#d8ff9a","hood",scale=1.28,bulk=1.5,antlers=True),speed=1.02,xp=160,gold=105),
+
+ soldier("ash_acolyte","Ash Penitent","cathedral",380,21,R("#6a5a48","#5a1a14","sword","#ff7a3a","hood"),speed=1.12,el="fire",xp=170,gold=110),
+ brute("censer_knight","Censer Knight","cathedral",400,22,R("#8c7a52","#4a1410","axe","#ff7a3a","great",scale=1.25,bulk=1.35,ember=True),speed=1.05,el="fire",xp=230,gold=150),
+ eater("choir_wraith","Choir Wraith","cathedral",360,19,R("#3a3034","#1a1216","claws","#ffb0e0","hood",scale=1.1,bulk=0.8,**WR),xp=220,gold=140),
+
+ brute("crypt_warden","Crypt Sentry","crypt",480,26,R("#48564e","#20282a","greatsword","#7affc8","great",scale=1.2,bulk=1.3),speed=1.08,xp=280,gold=180),
+ duelist("drowned_squire","Drowned Squire","crypt",470,26,R("#5a6c66","#1c2a2c","sword","#7affc8","kettle",bulk=0.85),speed=1.1,xp=250,gold=160),
+ eater("tomb_leech","Tomb Leech","crypt",460,24,R("#2a3432","#0e1614","claws","#7affc8","hood",scale=1.15,bulk=0.85,**WR),speed=1.05,xp=290,gold=185),
+
+ soldier("scalebound","Scalebound Knight","roost",540,30,R("#7a4a34","#2a1410","axe","#ffa040","great",bulk=1.15,horns=True),speed=1.15,el="fire",xp=320,gold=200),
+ duelist("ash_falconer","Ash Falconer","roost",540,30,R("#8a7460","#3a2418","dual","#ffa040","hood",bulk=0.82,cape=True),speed=1.15,el="fire",xp=340,gold=215),
+
+ soldier("frost_thrall","Frost Thrall","citadel",600,33,R("#8aa6b4","#2a3a48","axe","#8fdcff","kettle"),speed=1.18,el="frost",xp=380,gold=235),
+ duelist("rime_duelist","Rime Duelist","citadel",600,33,R("#a8c4d0","#243848","sword","#8fdcff","crown",bulk=0.85,cape=True,weapon_glow="#7fd4ff"),speed=1.18,el="frost",xp=400,gold=250),
+ brute("glacier_brute","Glacier Hulk","citadel",620,34,R("#7a94a4","#1c2c3a","greatsword","#8fdcff","great",scale=1.3,bulk=1.45,frost=True),speed=1.1,el="frost",xp=460,gold=290),
+
+ eater("soul_eater","Soul-Eater","deep",640,34,R("#2a2430","#120e18","claws","#c08aff","hood",scale=1.2,bulk=0.85,**WR),speed=1.12,xp=480,gold=300),
+ duelist("husk","Emptied Husk","deep",660,36,R("#5a5660","#1a1620","sword","#c08aff","kettle",bulk=0.9),speed=1.2,xp=460,gold=290),
+ brute("oath_eater","Eater of Oaths","deep",680,36,R("#342a3c","#140e1c","cleaver","#d8a8ff","hood",scale=1.4,bulk=1.3,**WR),speed=1.1,xp=540,gold=340),
+
+ soldier("throne_guard","Throne Guard","throne",720,38,R("#8c7a52","#3a0e0e","greatsword","#ffd98a","great",scale=1.15),speed=1.22,xp=560,gold=350),
+ duelist("kingsblade","Kingsblade","throne",720,39,R("#b89b5e","#3a0e0e","dual","#ffd98a","crown",bulk=0.85,cape=True),speed=1.22,xp=580,gold=365),
+ eater("crownless","The Crownless","throne",740,38,R("#4a4038","#1c0808","claws","#ffe8b0","crown",scale=1.25,bulk=0.9,**WR),speed=1.18,xp=620,gold=390),
+]
+BEAST = dict(helm="beast", weapon="claws", hunch=0.45)
+def D(hide, belly, eye, glow, size): return dict(kind="dragon", scale=1.0+size, size=size, hide=hide, belly=belly, eye=eye, glow=glow)
+B += [
+ # --- courtyard
+ giant("gate_colossus","Gate Colossus","courtyard",230,13,R("#6a6860","#2a1a14","greatsword","#ffb060","great",scale=1.75,bulk=1.45),xp=160,gold=110),
+ double("pike_sergeant","Pike Sergeant","courtyard",230,12,R("#8a8c90","#3a2a22","glaive","#ffb060","kettle"),xp=90,gold=60),
+ # --- blackwood
+ beast("maulbeast","Blackwood Maulbeast","blackwood",300,16,R("#3a3428","#2a2418","claws","#d8ff9a","beast",scale=1.35,bulk=1.5,hunch=0.5,antlers=True),speed=1.05,xp=170,gold=110),
+ twin("veil_dancer","Veil Dancer","blackwood",300,17,R("#4a5040","#c8c4b4","dual","#e8ffe0","veil",bulk=0.8,cape=True,skirt=True),speed=1.05,xp=150,gold=95),
+ # --- cathedral
+ giant("bell_ringer","The Bell Ringer","cathedral",380,20,R("#6a5630","#3a1410","cleaver","#ff7a3a","hood",scale=1.85,bulk=1.5,apron=True),speed=1.03,el="fire",xp=300,gold=190),
+ double("censer_adept","Thurible Adept","cathedral",380,20,R("#8c7a52","#5a1a14","glaive","#ff7a3a","hood",cape=True,weapon_glow="#ff8a3a"),speed=1.08,el="fire",xp=240,gold=150),
+ # --- crypt
+ beast("crypt_crawler","Crypt Crawler","crypt",470,25,R("#3a4844","#141c1a","claws","#7affc8","beast",scale=1.3,bulk=1.3,hunch=0.6),speed=1.1,xp=300,gold=190),
+ twin("tomb_mummer","Tomb Mummer","crypt",470,26,R("#5a6c66","#d8d4c4","dual","#7affc8","veil",bulk=0.8,skirt=True),speed=1.1,xp=290,gold=185),
+ # --- roost
+ drake("cinder_whelp","Cinder Whelp","roost",540,30,D("#6a3a2a","#c8703a","#ffb040","#ff6a1a",0.62),speed=1.1,xp=420,gold=260),
+ giant("brood_keeper","The Brood Keeper","roost",540,28,R("#7a4a34","#2a1410","axe","#ffa040","great",scale=1.8,bulk=1.4,horns=True,ember=True),speed=1.05,el="fire",xp=440,gold=280),
+ # --- citadel
+ double("rime_glaive","Rime Glaive","citadel",600,32,R("#a8c4d0","#243848","glaive","#8fdcff","crown",cape=True,weapon_glow="#7fd4ff"),speed=1.15,el="frost",xp=420,gold=260),
+ beast("hoarbeast","Hoarbeast","citadel",600,33,R("#c8d8e0","#8aa6b4","claws","#8fdcff","beast",scale=1.45,bulk=1.5,hunch=0.5,horns=True,frost=True),speed=1.12,el="frost",xp=440,gold=275),
+ drake("frost_drake","Kennel Drake","citadel",600,32,D("#8aa8b8","#d8e8f0","#9fe4ff","#7fd4ff",0.7),speed=1.12,el="frost",xp=460,gold=290,weak="fire"),
+ # --- deep
+ twin("name_thief","Name-Thief","deep",650,35,R("#3a3040","#120e18","dual","#c08aff","veil",bulk=0.8,cape=True,weapon_glow="#c08aff"),speed=1.18,xp=500,gold=310),
+ giant("the_unburied","The Unburied","deep",660,34,R("#3c3444","#140e1c","cleaver","#d8a8ff","hood",scale=1.9,bulk=1.4,maw=True),speed=1.08,xp=600,gold=380),
+ # --- throne
+ double("herald","Herald of the Court","throne",720,37,R("#b89b5e","#3a0e0e","glaive","#ffd98a","crown",cape=True,skirt=True),speed=1.2,xp=600,gold=375),
+ giant("throne_colossus","The King's Shadow","throne",740,37,R("#2a2620","#1c0808","greatsword","#ffd98a","crown",scale=1.9,bulk=1.4,cape=True),speed=1.12,xp=700,gold=440),
 ]
 # ---------------------------------------------------------------- 1 Ashen Sentinel
 B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of the Fallen Courtyard", region="courtyard", boss=True,
@@ -233,7 +384,104 @@ B.append(dict(id="pale_huntsman", name="The Pale Huntsman", title="He Who Follow
    C("hew3",2,[A("DL",0.8,18),A("DR",0.6,18),A("DL",0.6,20)],1.5,tags=("anti_dodge",)),
  ])]))
 os.makedirs("data", exist_ok=True)
+# ---------------------------------------------------------------- Vharn, the Cinder Wyrm
+def breath(dir, windup, dmg, el="fire", **k):
+    # a sweeping gout: cannot be blocked or parried, only stepped out of
+    return A(dir, windup, dmg, unblockable=True, parry=False, kind="breath", element=el, swing=0.4, **k)
+B.append(dict(id="cinder_wyrm", name="Vharn, the Cinder Wyrm", title="Last of the Royal Brood", region="roost", boss=True,
+ hp=1900, armor=0.22, posture=170, patience=3, adapt=0.9, idle=[0.9,1.6], weak="frost", xp=2400, gold=1400,
+ loot=[["w_wyrmfang",1.0],["s_scale",0.7],["a_wyrm_chest",0.7],["a_wyrm_helm",0.6],["r_brood",0.5]], music="combat_b", arena="roost",
+ intro="The kings rode her mother to war. She has had the sky to herself since, and she has not missed them.",
+ rig=dict(kind="dragon",scale=2.3,size=1.25,hide="#5a2a20",belly="#b8602a",eye="#ffb040",glow="#ff5a14",wings=True),
+ punish=A("U",0.5,30,swing=0.24,kind="bite"),
+ phases=[
+  dict(at=1.0, speed=1.0, combos=[
+   C("snap_l",3,[A("L",1.0,30,kind="bite")],1.4),
+   C("snap_r",3,[A("R",1.0,30,kind="bite")],1.4),
+   C("maul",3,[A("D",1.4,42,kind="slam")],1.7),
+   C("claws",3,[A("DL",1.0,28,kind="sweep"),A("DR",0.75,28,kind="sweep")],1.6,tags=("anti_dodge",)),
+   C("gout_l",3,[breath("L",1.5,44)],1.8,tags=("anti_block","anti_parry")),
+   C("gout_r",3,[breath("R",1.5,44)],1.8,tags=("anti_block","anti_parry")),
+   C("tail",2,[A("R",1.2,34,guard=110,kind="sweep")],1.4,tags=("anti_block",)),
+  ]),
+  dict(at=0.6, speed=1.08, roar="She takes the air. The roost drops away beneath her and the wind turns hot.", combos=[
+   C("stoop",4,[A("D",1.3,46,kind="lunge")],1.6,range="far"),
+   C("strafe",3,[breath("L",1.6,46,dodge="L"),breath("R",1.1,46,dodge="R")],2.0,range="far",tags=("anti_block","anti_parry")),
+   C("snap_snap",3,[A("L",0.95,30,kind="bite"),A("R",0.7,30,kind="bite"),A("U",0.8,36,kind="bite")],1.7,tags=("anti_dodge",)),
+   C("maul_held",3,[A("D",2.1,50,swing=0.26,kind="slam")],1.7,tags=("anti_parry",)),
+   C("gout_l",2,[breath("L",1.4,46)],1.7,tags=("anti_block","anti_parry")),
+   C("gout_r",2,[breath("R",1.4,46)],1.7,tags=("anti_block","anti_parry")),
+   C("take_wing",3,[A("U",0.9,30,kind="sweep")],0.5,retreat=True),
+  ]),
+  dict(at=0.28, speed=1.15, roar="Her wing is torn through. She will not fly again. She does not need to.", combos=[
+   C("frenzy",3,[A("L",0.9,32,kind="bite"),A("R",0.65,32,kind="bite"),A("DL",0.65,30,kind="sweep"),A("DR",0.65,30,kind="sweep"),A("D",1.1,48,kind="slam")],2.2,tags=("anti_dodge",)),
+   C("maul_held",3,[A("D",2.3,54,swing=0.24,kind="slam")],1.7,tags=("anti_parry",)),
+   C("inferno",3,[breath("L",1.3,48,dodge="L"),breath("R",1.0,48,dodge="R"),breath("D",1.2,52,dodge="any")],2.2,tags=("anti_block","anti_parry")),
+   C("tail",2,[A("R",1.1,36,guard=130,kind="sweep")],1.3,tags=("anti_block",)),
+   C("snap_l",2,[A("L",0.9,34,kind="bite")],1.2),
+   C("snap_r",2,[A("R",0.9,34,kind="bite")],1.2),
+  ])]))
+# ---------------------------------------------------------------- optional: the Rimewyrm
+B.append(dict(id="rimewyrm", name="The Rimewyrm", title="What the King Kept Chained", region="citadel", boss=True,
+ hp=1700, armor=0.2, posture=160, patience=3, adapt=0.9, idle=[0.9,1.5], weak="fire", xp=2600, gold=1500,
+ loot=[["w_rime_sword",1.0],["a_frost_legs",0.6],["a_frost_gauntlets",0.6]], music="combat_b", arena="citadel",
+ intro="The chain froze through an age ago. It stayed anyway. It had been told to.",
+ rig=dict(kind="dragon",scale=2.2,size=1.15,hide="#8aa8b8",belly="#d8e8f0",eye="#9fe4ff",glow="#7fd4ff",wings=True),
+ punish=A("U",0.5,30,swing=0.24,kind="bite",element="frost"),
+ phases=[
+  dict(at=1.0, speed=1.0, combos=[
+   C("snap_l",3,[A("L",1.0,30,kind="bite",element="frost")],1.4),
+   C("snap_r",3,[A("R",1.0,30,kind="bite",element="frost")],1.4),
+   C("maul",3,[A("D",1.4,42,kind="slam",element="frost")],1.7),
+   C("hoar_l",3,[breath("L",1.5,40,el="frost")],1.8,tags=("anti_block","anti_parry")),
+   C("hoar_r",3,[breath("R",1.5,40,el="frost")],1.8,tags=("anti_block","anti_parry")),
+   C("claws",3,[A("DL",1.0,28,kind="sweep"),A("DR",0.75,28,kind="sweep")],1.6,tags=("anti_dodge",)),
+  ]),
+  dict(at=0.5, speed=1.12, roar="The chain snaps. It looks at the broken link for a long moment, and then at you.", combos=[
+   C("snap3",3,[A("L",0.9,30,kind="bite",element="frost"),A("R",0.65,30,kind="bite",element="frost"),A("U",0.75,36,kind="bite",element="frost")],1.7,tags=("anti_dodge",)),
+   C("maul_held",3,[A("D",2.2,50,swing=0.25,kind="slam",element="frost")],1.7,tags=("anti_parry",)),
+   C("whiteout",3,[breath("L",1.3,42,el="frost",dodge="L"),breath("R",1.0,42,el="frost",dodge="R")],2.0,tags=("anti_block","anti_parry")),
+   C("stoop",3,[A("D",1.2,44,kind="lunge",element="frost")],1.5,range="far"),
+   C("take_wing",2,[A("U",0.9,30,kind="sweep")],0.5,retreat=True),
+   C("chain_lash",2,[A("R",1.1,30,guard=130,kind="sweep")],1.3,tags=("anti_block",)),
+  ])]))
+# ---------------------------------------------------------------- The Devourer of Names
+B.append(dict(id="devourer", name="The Devourer of Names", title="First of the Soul-Eaters", region="deep", boss=True,
+ hp=1500, armor=0.1, posture=140, patience=2, adapt=1.3, idle=[0.6,1.2], weak=None, xp=3600, gold=2200,
+ loot=[["w_hunger",1.0],["x_name",1.0],["a_hollow_chest",0.6]], music="final", arena="deep",
+ intro="It ate the kingdom's dead until none were left. Then it began on the living. It knows what you were called.",
+ rig=dict(scale=1.7,bulk=1.0,metal="#2a2230",cloth="#0e0a14",weapon="claws",eye="#d8a8ff",helm="hood",wraith=True,maw=True,cape=True,horns=True),
+ punish=A("U",0.45,26,drain=True,swing=0.22,kind="thrust"),
+ phases=[
+  dict(at=1.0, speed=1.0, combos=[
+   C("rake_l",3,[A("L",0.9,30,kind="sweep")],1.2),
+   C("rake_r",3,[A("R",0.9,30,kind="sweep")],1.2),
+   C("grasp",4,[A("U",1.1,30,drain=True,kind="thrust",guard=80)],1.4,tags=("anti_block",)),
+   C("long_grasp",3,[A("U",2.1,34,drain=True,swing=0.22,kind="thrust",guard=80)],1.5,tags=("anti_parry","anti_block")),
+   C("rakes",3,[A("L",0.85,28,kind="sweep"),A("R",0.6,28,kind="sweep"),A("U",0.75,30,drain=True,kind="thrust")],1.7,tags=("anti_dodge",)),
+   C("fade",2,[A("R",0.75,26,kind="sweep")],0.45,retreat=True),
+   C("swoop",3,[A("D",0.9,34,drain=True,kind="lunge")],1.3,range="far"),
+  ]),
+  dict(at=0.5, speed=1.12, roar="It opens. Inside it is every face it has taken. Some of them know you.", combos=[
+   C("rakes4",3,[A("L",0.8,28,kind="sweep"),A("R",0.55,28,kind="sweep"),A("DL",0.55,28,kind="sweep"),A("DR",0.55,30,kind="sweep")],1.7,tags=("anti_dodge",)),
+   C("grasp2",3,[A("U",1.0,30,drain=True,kind="thrust",guard=90),A("U",0.9,30,drain=True,kind="thrust",guard=90)],1.6,tags=("anti_block",)),
+   C("long_grasp",3,[A("U",2.3,38,drain=True,swing=0.2,kind="thrust",guard=90)],1.5,tags=("anti_parry","anti_block")),
+   C("unmake",3,[A("D",1.4,46,unblockable=True,parry=False,dodge="any",drain=True,kind="slam")],1.8,tags=("anti_block","anti_parry")),
+   C("fade",2,[A("L",0.7,26,kind="sweep")],0.4,retreat=True),
+   C("swoop",3,[A("D",0.85,36,drain=True,kind="lunge")],1.2,range="far"),
+  ]),
+  # it dies. Then it remembers a name it has not used yet.
+  dict(at=0.0, revive=0.45, speed=1.25, roar="It falls, and is still. Then it says your name — the one you had before — and stands.", combos=[
+   C("rakes5",3,[A("L",0.75,30,kind="sweep"),A("R",0.5,30,kind="sweep"),A("DL",0.5,30,kind="sweep"),A("DR",0.5,30,kind="sweep"),A("U",0.7,34,drain=True,kind="thrust")],1.9,tags=("anti_dodge",)),
+   C("long_grasp",3,[A("U",2.5,42,drain=True,swing=0.2,kind="thrust",guard=100)],1.5,tags=("anti_parry","anti_block")),
+   C("stutter",3,[A("L",0.7,28,kind="sweep"),A("U",1.5,36,drain=True,swing=0.2,kind="thrust")],1.5,tags=("anti_parry",)),
+   C("unmake2",3,[A("L",1.2,44,unblockable=True,dodge="none",kind="sweep"),A("D",1.2,48,unblockable=True,parry=False,dodge="any",drain=True,kind="slam")],2.0,tags=("anti_block","anti_dodge")),
+   C("fade",2,[A("R",0.65,28,kind="sweep")],0.4,retreat=True),
+   C("swoop",3,[A("D",0.8,38,drain=True,kind="lunge")],1.2,range="far"),
+  ])]))
 for f in B:
-    f["hp"] = round(f["hp"] * (2.3 if f["boss"] else 1.5))
+    if "cls" not in f:
+        f["cls"] = "Wyrm" if f["rig"].get("kind") == "dragon" else ("Soul-Eater" if f["rig"].get("wraith") else "Guardian")
+    f["hp"] = round(f["hp"] * (3.1 if f["boss"] else 2.0))
 json.dump({"bosses": B}, open("data/bosses.json","w"), indent=1)
 print(len(B), "foes")

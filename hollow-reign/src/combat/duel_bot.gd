@@ -62,7 +62,12 @@ func tick(dt: float) -> void:
 	if sim.boss_open() and sim.p_state == DuelSim.P.FREE and sim.time >= _next_attack:
 		if sim.pl.stamina > sim.pl.swing_cost:
 			_alt = (_alt + 1) % CUTS.size()
-			sim.input_swipe(CUTS[_alt])
+			var cut: String = CUTS[_alt]
+			if sim.rift_dir != "" and style == Style.SKILLED:
+				cut = sim.rift_dir
+			elif cut == sim.p_last_dir:
+				cut = CUTS[(_alt + 1) % CUTS.size()]
+			sim.input_swipe(cut)
 			_next_attack = sim.time + 0.02
 	elif sim.b_far and sim.b_state == DuelSim.B.IDLE and sim.p_state == DuelSim.P.FREE and style != Style.TURTLE:
 		pass   # wait for the lunge rather than walk into it

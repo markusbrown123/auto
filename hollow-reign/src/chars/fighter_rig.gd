@@ -110,6 +110,17 @@ func build(config: Dictionary, as_foe: bool) -> void:
 		# gauntlet cuff
 		_cyl(seg["fore_" + side], 0.085 * bulk, 0.07 * bulk, 0.16, Vector3(0, FORE * arm_scale - 0.1, 0), mat_metal)
 		_sphere(seg["fore_" + side], 0.07 * bulk, Vector3(0, FORE * arm_scale, 0), mat_dark)
+	if cfg.get("wraith", false):
+		# soul-eaters do not walk: a ragged shroud hangs where legs would be
+		for side in ["r", "l"]:
+			for part in ["thigh_", "shin_", "foot_"]:
+				seg[part + side].visible = false
+		var shroud := _cyl(pelvis, 0.2 * bulk, 0.42 * bulk, 1.0, Vector3(0, -0.45, 0.05), mat_cloth, 9)
+		shroud.scale.z = 0.85
+		for i in 7:
+			var a := TAU * i / 7.0
+			var rag := _cyl(pelvis, 0.07, 0.0, 0.5, Vector3(cos(a) * 0.33 * bulk, -1.1, sin(a) * 0.3 * bulk + 0.05), mat_cloth, 4)
+			rag.rotation.z = cos(a) * 0.2
 	weapon_r = Node3D.new()
 	body.add_child(weapon_r)
 	weapon_l = Node3D.new()
@@ -134,8 +145,8 @@ func _materials() -> void:
 	var metal := Color(str(cfg.get("metal", "#6a6a6c")))
 	mat_metal = StandardMaterial3D.new()
 	mat_metal.albedo_color = metal
-	mat_metal.metallic = 0.6
-	mat_metal.roughness = 0.48
+	mat_metal.metallic = 0.72
+	mat_metal.roughness = 0.36
 	mat_metal.roughness_texture = Look.grime()
 	mat_metal.uv1_triplanar = true
 	mat_metal.uv1_scale = Vector3.ONE * 2.2
@@ -223,6 +234,14 @@ func _torso() -> void:
 		if cfg.get("regal", false) or cfg.get("horns", false) or bulk > 1.2:
 			var spike := _cyl(chest, 0.0, 0.04 * bulk, 0.2, Vector3(sx * (w + 0.14), 0.36, 0), mat_metal, 6)
 			spike.rotation.z = -sx * 0.7
+	if cfg.get("maw", false):
+		# the hollow where it keeps what it has eaten
+		_sphere(chest, w * 0.62, Vector3(0, 0.08, -w * 0.5), mat_glow, Vector3(1.0, 1.25, 0.5))
+		for i in 8:
+			var a := TAU * i / 8.0
+			var fang := _cyl(chest, 0.0, 0.028, 0.16, Vector3(cos(a) * w * 0.55, 0.08 + sin(a) * w * 0.7, -w * 0.72), mat_cloth, 4)
+			fang.rotation = Vector3(-PI / 2, 0, 0)
+			fang.rotation.z = a + PI / 2
 	if cfg.get("ember", false) or cfg.get("frost", false):
 		# glowing seam in the breastplate
 		var seam := _box(chest, Vector3(0.02, 0.3, 0.02), Vector3(0.03, 0.1, -w * 0.78), mat_glow)
@@ -296,7 +315,7 @@ func _clear(n: Node3D) -> void:
 func set_weapon(kind: String, look: Dictionary = {}) -> void:
 	_clear(weapon_r)
 	_clear(weapon_l)
-	two_handed = kind == "greatsword"
+	two_handed = kind == "greatsword" or kind == "glaive"
 	dual = kind == "dual" or kind == "claws"
 	mat_blade = StandardMaterial3D.new()
 	var metal := Color(str(look.get("blade", look.get("metal", "#9a9aa0"))))
@@ -327,6 +346,16 @@ func _weapon_mesh(n: Node3D, kind: String, look: Dictionary) -> void:
 			_box(n, Vector3(0.4, 0.04, 0.05), Vector3(0, 0.2, 0), mat_metal)
 			_cyl(n, 0.022, 0.022, 0.42, Vector3(0, -0.02, 0), mat_dark, 6)
 			_sphere(n, 0.045, Vector3(0, -0.25, 0), mat_metal)
+		"glaive":
+			# a blade at each end of a long haft
+			weapon_len = 1.15
+			_cyl(n, 0.022, 0.022, 1.7, Vector3(0, 0.1, 0), mat_dark, 6)
+			for e: float in [1.0, -1.0]:
+				_box(n, Vector3(0.09, 0.5, 0.018), Vector3(0, 0.1 + e * 1.05, 0), mat_blade)
+				var gt := _cyl(n, 0.0 if e > 0 else 0.062, 0.062 if e > 0 else 0.0, 0.16, Vector3(0, 0.1 + e * 1.38, 0), mat_blade, 4)
+				gt.scale.z = 0.22
+				gt.rotation.y = PI / 4
+				_box(n, Vector3(0.16, 0.03, 0.04), Vector3(0, 0.1 + e * 0.8, 0), mat_metal)
 		"cleaver":
 			weapon_len = 1.25
 			_box(n, Vector3(0.28, 0.72, 0.03), Vector3(0.08, 0.78, 0), mat_blade)
@@ -673,6 +702,8 @@ func _solve(dt: float) -> void:
 func _pose() -> void:
 	body.position = _root
 	var pel := Vector3(0, 0.96 - _crouch * 0.6, 0)
+	if cfg.get("wraith", false):
+		pel.y += 0.22 + sin(_clock * 1.9) * 0.07
 	pelvis.position = pel
 	pelvis.rotation = Vector3(-_lean * 0.3, _twist * 0.3, 0)
 	var cb := Basis.from_euler(Vector3(-_lean, _twist, 0))

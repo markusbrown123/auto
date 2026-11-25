@@ -47,6 +47,27 @@ static func stone(tint: Color, uv: float = 0.35, rough: float = 0.82, key: Strin
 	m.uv1_scale = Vector3.ONE * uv
 	return m
 
+static func clouds() -> Texture2D:
+	if _cache.has("clouds"):
+		return _cache["clouds"]
+	var n := FastNoiseLite.new()
+	n.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	n.frequency = 0.006
+	n.fractal_octaves = 5
+	n.seed = 11
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 0))
+	g.set_color(1, Color(1, 1, 1, 0.9))
+	g.add_point(0.5, Color(1, 1, 1, 0))
+	var t := NoiseTexture2D.new()
+	t.width = 1024
+	t.height = 512
+	t.seamless = true
+	t.noise = n
+	t.color_ramp = g
+	_cache["clouds"] = t
+	return t
+
 static func flat(c: Color, rough: float = 0.9, metal: float = 0.0) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = c

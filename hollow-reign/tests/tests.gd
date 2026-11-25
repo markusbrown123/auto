@@ -55,7 +55,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_bots", "t_progression", "t_save", "t_runs"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_save", "t_runs"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -64,7 +64,15 @@ func _ready() -> void:
 # ------------------------------------------------------------------ data
 func t_data() -> void:
 	ok(Db.items.size() >= 50, "item count")
-	ok(Db.regions.size() == 6, "six regions")
+	ok(Db.regions.size() == 8, "eight regions")
+	for r in Db.regions:
+		ok(r.stages.size() == 7, "%s has seven stops" % r.id)
+		var kinds := {}
+		for s in r.stages:
+			for o in s.options:
+				if o.type == "fight":
+					kinds[o.foe] = true
+		ok(kinds.size() >= 2, "%s road has varied foes" % r.id)
 	var bosses := 0
 	for id in Db.foes:
 		var f: Dictionary = Db.foes[id]
@@ -88,12 +96,30 @@ func t_data() -> void:
 					# readable: no blow lands faster than a person can react
 					ok(float(a.windup) / float(ph.speed) + (float(c.gap) if i > 0 else 0.0) >= 0.45, "%s/%s windup readable" % [id, c.id])
 			ok(near, "%s has near combos" % id)
-	ok(bosses >= 8, "at least 8 bosses")
+	ok(bosses >= 11, "at least 11 bosses")
+	var classes := {}
+	for id in Db.foes:
+		classes[Db.foes[id].cls] = int(classes.get(Db.foes[id].cls, 0)) + 1
+	for c in ["Humanoid", "Heavy", "Giant", "Twin-Bladed", "Double-Weapon", "Monstrosity", "Soul-Eater", "Wyrm", "Guardian"]:
+		ok(int(classes.get(c, 0)) >= 2, "class %s has foes (%d)" % [c, classes.get(c, 0)])
+	# every foe is reachable from some road
+	var placed := {}
+	for r in Db.regions:
+		for s in r.stages:
+			for o in s.options:
+				if o.has("foe"):
+					placed[o.foe] = true
+				for pf in o.get("foes", []):
+					placed[pf] = true
+	for id in Db.foes:
+		ok(placed.has(id), "%s appears on a road" % id)
 	for r in Db.regions:
 		for s in r.stages:
 			for o in s.options:
 				if o.has("foe"):
 					ok(Db.foes.has(o.foe), "region foe %s" % o.foe)
+				for pf in o.get("foes", []):
+					ok(Db.foes.has(pf) and Db.foes[pf].region == r.id, "pool foe %s belongs to %s" % [pf, r.id])
 				for it in o.get("items", []):
 					ok(Db.items.has(it), "region item %s" % it)
 	for slot in Db.SLOTS:
@@ -332,6 +358,61 @@ func t_elements() -> void:
 	var w := mk("ashen_sentinel", 3, geared(6))
 	ok(w.pl.element == "frost" and w.bd.weak == "frost", "weapon element matches weakness")
 
+# ------------------------------------------------------------------ seams, drain, revival
+func t_seams() -> void:
+	var s := mk("ashen_sentinel")
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 9.0
+	s._next_rift()
+	ok(s.rift_dir != "", "an opening shows a seam")
+	var hits: Array = []
+	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	var first: String = s.rift_dir
+	var off := "L" if first != "L" else "R"
+	s.input_swipe(off); run_for(s, 0.3)
+	ok(s.rift_dir == first, "an off-seam cut leaves the seam where it is")
+	s.input_swipe(first); run_for(s, 0.3)
+	ok(hits.size() == 2 and hits[1].rift and not hits[0].rift, "cutting along the seam is recognised")
+	ok(hits[1].dmg > hits[0].dmg * 1.5, "a seam cut hits much harder")
+	ok(s.rift_dir != first and s.rift_dir != "", "the seam moves after it is cut")
+	run_for(s, 9.5)
+	ok(s.rift_dir == "", "the seam closes with the opening")
+	# reading seams beats mashing: same fight, with and without following them
+	var a := mk("ashen_sentinel", 5); var ba := DuelBot.new(a, DuelBot.Style.SKILLED, 5); run_for(a, 600.0, ba)
+	var b := mk("ashen_sentinel", 5); var bb := DuelBot.new(b, DuelBot.Style.SLOPPY, 5); bb.rng.seed = 5; run_for(b, 600.0, bb)
+	ok(a.stats.rifts > 5, "the skilled bot follows seams (%d)" % a.stats.rifts)
+
+func t_drain() -> void:
+	var s := _find("soul_eater", func(a): return a.get("drain", false))
+	ok(s != null, "found a draining attack")
+	s.b_hp = s.b_hp_max * 0.5
+	var hp := s.b_hp
+	var st: float = s.pl.stamina
+	to_impact(s, 0.0); s.tick(1.0 / 60.0)
+	ok(s.b_hp > hp, "a landed grasp feeds the eater")
+	ok(s.pl.stamina < st - 20.0, "and empties your stamina")
+	s = _find("soul_eater", func(a): return a.get("drain", false))
+	s.b_hp = s.b_hp_max * 0.5
+	hp = s.b_hp
+	to_impact(s, 0.06)
+	s.input_swipe(DuelSim.parry_dir_for(s.b_attack.dir))
+	run_for(s, 0.1)
+	ok(s.b_hp == hp, "a parried grasp feeds nothing")
+
+func t_revive() -> void:
+	var s := mk("devourer")
+	var seen: Array = []
+	s.ev.connect(func(n, d): if n == &"phase_change": seen.append(d))
+	s.pl.attack = 999999.0
+	for i in 3:
+		s.b_state = DuelSim.B.RECOVER; s.b_t = 9.0
+		s.input_swipe(["L", "R", "U"][i]); run_for(s, 0.4)
+		if i == 1:
+			ok(not s.over and s.b_state == DuelSim.B.SHIFT, "at zero it does not die")
+			ok(is_equal_approx(s.b_hp, s.b_hp_max * 0.45), "it rises with health restored")
+			ok(seen.size() == 2 and seen[1].revive, "the revival is announced")
+		run_for(s, 3.0)
+	ok(s.b_state == DuelSim.B.DEAD, "the second death is final")
+
 # ------------------------------------------------------------------ whole fights
 func fight(foe: String, style: int, profile: Dictionary, seed_value: int, opts: Dictionary = {}) -> DuelSim:
 	var s := mk(foe, seed_value, profile, opts)
@@ -341,7 +422,9 @@ func fight(foe: String, style: int, profile: Dictionary, seed_value: int, opts: 
 
 func t_bots() -> void:
 	var tiers := {"hollow_soldier": 0, "ashen_sentinel": 0, "pale_huntsman": 1, "hollow_executioner": 1, "crimson_widow": 2,
-		"cathedral_beast": 3, "gravewarden": 4, "frostbound_king": 5, "forgotten_monarch": 6}
+		"cathedral_beast": 3, "gravewarden": 4, "cinder_whelp": 4, "cinder_wyrm": 5, "rimewyrm": 5, "frostbound_king": 5,
+		"soul_eater": 6, "devourer": 6, "forgotten_monarch": 6,
+		"gate_colossus": 0, "pike_sergeant": 0, "veil_dancer": 1, "maulbeast": 1, "bell_ringer": 2, "tomb_mummer": 3, "frost_drake": 5, "the_unburied": 6, "herald": 6}
 	for foe in tiers:
 		var s := fight(foe, DuelBot.Style.SKILLED, geared(tiers[foe]), 11)
 		ok(s.b_state == DuelSim.B.DEAD, "skilled play beats %s" % foe)
@@ -452,11 +535,20 @@ func t_runs() -> void:
 		steps += 1
 		if not Game.advance_stage():
 			break
-	ok(steps == 5 and levered, "walked the courtyard")
+	ok(steps == 7 and levered, "walked the courtyard")
 	ok(Game.complete_region() and Game.region_unlocked("blackwood"), "clearing unlocks the next region")
 	ok(Game.shortcut_open("courtyard"), "shortcut stays open")
+	# pooled stops: stable within a run, varied across runs
+	var seen := {}
+	for i in 40:
+		Game.start_run("courtyard")
+		Game.run.stage = 4
+		var first: String = Game.stage_options()[0].foe
+		ok(Game.stage_options()[0].foe == first, "pooled foe is stable within a run") if i == 0 else null
+		seen[first] = true
+	ok(seen.size() == 2, "pooled stops vary between runs (%s)" % str(seen.keys()))
 	Game.start_run("courtyard", true)
-	ok(Game.run.stage == 3, "shortcut skips ahead")
+	ok(Game.run.stage == 4, "shortcut skips ahead")
 	var gold: int = Game.profile.gold
 	var xp_level: int = Game.profile.level
 	Game.on_death()

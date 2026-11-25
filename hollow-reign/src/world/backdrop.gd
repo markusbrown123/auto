@@ -86,6 +86,39 @@ func add_prop(kind: String, at: Vector3) -> Node3D:
 			l.omni_range = 5.0
 			l.position = Vector3(0, 1.3, 0.4)
 			n.add_child(l)
+		"pouch":
+			var leather := Look.flat(Color("#5a3e24"), 0.8)
+			var bag := SphereMesh.new()
+			bag.radius = 0.16
+			bag.height = 0.3
+			var mi := MeshInstance3D.new()
+			mi.mesh = bag
+			mi.position = Vector3(0, 0.13, 0)
+			mi.scale = Vector3(1, 0.85, 1)
+			mi.material_override = leather
+			n.add_child(mi)
+			_box(n, Vector3(0.1, 0.08, 0.1), Vector3(0, 0.3, 0), leather)
+			_box(n, Vector3(0.05, 0.02, 0.05), Vector3(0.12, 0.02, 0.1), gold)
+			_box(n, Vector3(0.05, 0.02, 0.05), Vector3(-0.1, 0.02, 0.14), gold)
+		"marker":
+			# a ring of light on the ground: a way onward
+			var ring := TorusMesh.new()
+			ring.inner_radius = 0.42
+			ring.outer_radius = 0.5
+			ring.rings = 28
+			ring.ring_segments = 4
+			var rm := MeshInstance3D.new()
+			rm.mesh = ring
+			rm.scale.y = 0.15
+			rm.position.y = 0.03
+			rm.material_override = Look.glow(Color("#9fd0ff"), 2.2)
+			n.add_child(rm)
+			var l2 := OmniLight3D.new()
+			l2.light_color = Color("#9fd0ff")
+			l2.light_energy = 0.9
+			l2.omni_range = 2.5
+			l2.position.y = 0.5
+			n.add_child(l2)
 		"lever":
 			_box(n, Vector3(0.7, 0.3, 0.7), Vector3(0, 0.15, 0), iron)
 			var arm := Node3D.new()

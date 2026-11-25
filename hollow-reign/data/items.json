@@ -66,7 +66,7 @@
    "ng_min": 0,
    "crit": 0,
    "look": {
-    "metal": "#6d6a66"
+    "metal": "#b0b4ba"
    }
   },
   {
@@ -301,7 +301,7 @@
    "desc": "More a memory of a shield.",
    "ng_min": 0,
    "look": {
-    "color": "#4a3a2a"
+    "color": "#3a4a5c"
    },
    "strength": 0,
    "dex": 0
@@ -401,7 +401,7 @@
    "desc": "Dented, mismatched, yours.",
    "ng_min": 0,
    "look": {
-    "metal": "#5e5a55",
+    "metal": "#aeb2b8",
     "set": "worn"
    },
    "strength": 0,
@@ -422,7 +422,7 @@
    "desc": "Dented, mismatched, yours.",
    "ng_min": 0,
    "look": {
-    "metal": "#5e5a55",
+    "metal": "#aeb2b8",
     "set": "worn"
    },
    "strength": 0,
@@ -443,7 +443,7 @@
    "desc": "Dented, mismatched, yours.",
    "ng_min": 0,
    "look": {
-    "metal": "#5e5a55",
+    "metal": "#aeb2b8",
     "set": "worn"
    },
    "strength": 0,
@@ -464,7 +464,7 @@
    "desc": "Dented, mismatched, yours.",
    "ng_min": 0,
    "look": {
-    "metal": "#5e5a55",
+    "metal": "#aeb2b8",
     "set": "worn"
    },
    "strength": 0,
@@ -485,7 +485,7 @@
    "desc": "Plate of the old guard.",
    "ng_min": 0,
    "look": {
-    "metal": "#7d7d80",
+    "metal": "#c4c8ce",
     "set": "garrison"
    },
    "strength": 0,
@@ -506,7 +506,7 @@
    "desc": "Plate of the old guard.",
    "ng_min": 0,
    "look": {
-    "metal": "#7d7d80",
+    "metal": "#c4c8ce",
     "set": "garrison"
    },
    "strength": 0,
@@ -527,7 +527,7 @@
    "desc": "Plate of the old guard.",
    "ng_min": 0,
    "look": {
-    "metal": "#7d7d80",
+    "metal": "#c4c8ce",
     "set": "garrison"
    },
    "strength": 0,
@@ -548,7 +548,7 @@
    "desc": "Plate of the old guard.",
    "ng_min": 0,
    "look": {
-    "metal": "#7d7d80",
+    "metal": "#c4c8ce",
     "set": "garrison"
    },
    "strength": 0,
@@ -986,8 +986,8 @@
    "resist": 0,
    "block": 0,
    "price": 0,
-   "desc": "Only offered to those who return.",
-   "ng_min": 1,
+   "desc": "Plate with nothing inside it, even when worn.",
+   "ng_min": 0,
    "look": {
     "metal": "#1e1e24",
     "set": "hollow"
@@ -1007,8 +1007,8 @@
    "resist": 0,
    "block": 0,
    "price": 0,
-   "desc": "Only offered to those who return.",
-   "ng_min": 1,
+   "desc": "Plate with nothing inside it, even when worn.",
+   "ng_min": 0,
    "look": {
     "metal": "#1e1e24",
     "set": "hollow"
@@ -1028,8 +1028,8 @@
    "resist": 0,
    "block": 0,
    "price": 0,
-   "desc": "Only offered to those who return.",
-   "ng_min": 1,
+   "desc": "Plate with nothing inside it, even when worn.",
+   "ng_min": 0,
    "look": {
     "metal": "#1e1e24",
     "set": "hollow"
@@ -1049,8 +1049,8 @@
    "resist": 0,
    "block": 0,
    "price": 0,
-   "desc": "Only offered to those who return.",
-   "ng_min": 1,
+   "desc": "Plate with nothing inside it, even when worn.",
+   "ng_min": 0,
    "look": {
     "metal": "#1e1e24",
     "set": "hollow"
@@ -1235,6 +1235,181 @@
    "desc": "Only offered to those who return.",
    "ng_min": 1,
    "look": {},
+   "strength": 0,
+   "dex": 0
+  },
+  {
+   "id": "w_wyrmfang",
+   "name": "Wyrmfang",
+   "slot": "weapon",
+   "cls": "greatsword",
+   "rarity": "legendary",
+   "damage": 58,
+   "price": 0,
+   "desc": "A tooth as long as a man, set in a hilt. It is still warm.",
+   "element": "fire",
+   "ng_min": 0,
+   "crit": 0,
+   "look": {
+    "metal": "#d8c8a8",
+    "glow": "#ff6a1a"
+   }
+  },
+  {
+   "id": "w_hunger",
+   "name": "The Twin Hungers",
+   "slot": "weapon",
+   "cls": "dual",
+   "rarity": "legendary",
+   "damage": 34,
+   "price": 0,
+   "desc": "They do not cut so much as subtract.",
+   "element": null,
+   "ng_min": 0,
+   "crit": 20,
+   "look": {
+    "metal": "#3a2a4a",
+    "glow": "#c08aff",
+    "curved": true
+   }
+  },
+  {
+   "id": "s_scale",
+   "name": "Broodscale Aegis",
+   "slot": "shield",
+   "rarity": "epic",
+   "defense": 14,
+   "hp": 0,
+   "stamina": 0,
+   "crit": 0,
+   "resist": 22,
+   "block": 0.45,
+   "price": 0,
+   "desc": "One scale. It was a small one.",
+   "ng_min": 0,
+   "look": {
+    "color": "#6a3020"
+   },
+   "strength": 0,
+   "dex": 0
+  },
+  {
+   "id": "r_brood",
+   "name": "Broodmother's Ember",
+   "slot": "ring",
+   "rarity": "epic",
+   "defense": 0,
+   "hp": 0,
+   "stamina": 0,
+   "crit": 0,
+   "resist": 15,
+   "block": 0,
+   "price": 0,
+   "desc": "It has never cooled.",
+   "ng_min": 0,
+   "look": {},
+   "strength": 7,
+   "dex": 0
+  },
+  {
+   "id": "x_name",
+   "name": "Your Name",
+   "slot": "relic",
+   "rarity": "legendary",
+   "defense": 0,
+   "hp": 35,
+   "stamina": 25,
+   "crit": 8,
+   "resist": 0,
+   "block": 0,
+   "price": 0,
+   "desc": "You do not remember it. Holding it helps.",
+   "ng_min": 0,
+   "look": {},
+   "strength": 0,
+   "dex": 0
+  },
+  {
+   "id": "a_wyrm_helm",
+   "name": "Broodscale Helm",
+   "slot": "helm",
+   "rarity": "epic",
+   "defense": 13,
+   "hp": 0,
+   "stamina": 0,
+   "crit": 0,
+   "resist": 14,
+   "block": 0,
+   "price": 0,
+   "desc": "Shed scale, riveted over mail. Fire slides off it.",
+   "ng_min": 0,
+   "look": {
+    "metal": "#7a3a28",
+    "set": "wyrm"
+   },
+   "strength": 0,
+   "dex": 0
+  },
+  {
+   "id": "a_wyrm_chest",
+   "name": "Broodscale Hauberk",
+   "slot": "chest",
+   "rarity": "epic",
+   "defense": 26,
+   "hp": 18,
+   "stamina": 0,
+   "crit": 0,
+   "resist": 14,
+   "block": 0,
+   "price": 0,
+   "desc": "Shed scale, riveted over mail. Fire slides off it.",
+   "ng_min": 0,
+   "look": {
+    "metal": "#7a3a28",
+    "set": "wyrm"
+   },
+   "strength": 0,
+   "dex": 0
+  },
+  {
+   "id": "a_wyrm_gauntlets",
+   "name": "Broodscale Gauntlets",
+   "slot": "gauntlets",
+   "rarity": "epic",
+   "defense": 10,
+   "hp": 0,
+   "stamina": 0,
+   "crit": 0,
+   "resist": 14,
+   "block": 0,
+   "price": 0,
+   "desc": "Shed scale, riveted over mail. Fire slides off it.",
+   "ng_min": 0,
+   "look": {
+    "metal": "#7a3a28",
+    "set": "wyrm"
+   },
+   "strength": 0,
+   "dex": 0
+  },
+  {
+   "id": "a_wyrm_legs",
+   "name": "Broodscale Greaves",
+   "slot": "legs",
+   "rarity": "epic",
+   "defense": 16,
+   "hp": 0,
+   "stamina": 12,
+   "crit": 0,
+   "resist": 14,
+   "block": 0,
+   "price": 0,
+   "desc": "Shed scale, riveted over mail. Fire slides off it.",
+   "ng_min": 0,
+   "look": {
+    "metal": "#7a3a28",
+    "set": "wyrm"
+   },
    "strength": 0,
    "dex": 0
   }

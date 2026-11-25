@@ -31,6 +31,11 @@ static func label(text: String, size: int = 22, color: Color = BONE, kind: Strin
 	l.add_theme_font_override("font", font(kind))
 	l.add_theme_font_size_override("font_size", maxi(size, 16))
 	l.add_theme_color_override("font_color", color)
+	# a soft shadow keeps text readable over bright daylight scenes
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.75))
+	l.add_theme_constant_override("shadow_offset_x", 1)
+	l.add_theme_constant_override("shadow_offset_y", 2)
+	l.add_theme_constant_override("shadow_outline_size", 4)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
 

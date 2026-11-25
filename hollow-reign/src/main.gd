@@ -107,6 +107,7 @@ func start_duel(o: Dictionary) -> void:
 			"Swipe to cut — but only when your foe is open. A raised guard turns every blow.",
 			"Swipe against an incoming strike to parry it. The ring closes as the blow lands.",
 			"The arrows step aside. The shield holds, while your stamina lasts.",
+			"When a foe is open, a bright seam shows in its guard. Cut along it.",
 			["A perfect parry breaks their guard. That is your moment.", UI.GOLD]], "Begin", func(): d.set_process(true))
 
 func _duel_done(d: Duel, o: Dictionary, won: bool, sim: DuelSim) -> void:

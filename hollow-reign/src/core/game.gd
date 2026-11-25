@@ -220,7 +220,7 @@ func start_run(region_id: String, use_shortcut: bool = false) -> void:
 	var stage := 0
 	if use_shortcut and shortcut_open(region_id):
 		stage = int(Db.region_by_id[region_id].shortcut.stage)
-	run = {"region": region_id, "stage": stage, "hp": st.max_hp, "found": [], "xp": 0, "gold": 0}
+	run = {"region": region_id, "stage": stage, "hp": st.max_hp, "found": [], "xp": 0, "gold": 0, "seed": rng.randi()}
 
 func run_region() -> Dictionary:
 	return Db.region_by_id[run.region]
@@ -237,6 +237,11 @@ func stage_options() -> Array:
 			continue   # already looted; hide unless it is the only way on
 		if o.type == "lever" and profile.flags.has(o.flag):
 			continue
+		if o.has("foes"):
+			# this stop draws from a pool: fixed for the run, different on the next
+			o = o.duplicate()
+			var pool: Array = o.foes
+			o.foe = pool[absi(hash("%d|%d|%s" % [int(run.get("seed", 0)), int(run.stage), o.label])) % pool.size()]
 		out.append(o)
 	if out.is_empty():
 		out.append({"type": "pass", "label": "Press On", "hint": "Nothing more to find here."})
@@ -266,6 +271,16 @@ func open_treasure(o: Dictionary) -> Dictionary:
 	run.found.append_array(out.items)
 	save()
 	return out
+
+## Loose coin found by a sharp eye on the road. Returns the amount.
+func take_pouch() -> int:
+	var tier: int = Db.regions.find(run_region()) + 1
+	var amount: int = rng.randi_range(8, 16) * tier * (1 + int(profile.ng))
+	profile.gold += amount
+	if not run.is_empty():
+		run.gold += amount
+	save()
+	return amount
 
 func pull_lever(o: Dictionary) -> void:
 	profile.flags[o.flag] = true

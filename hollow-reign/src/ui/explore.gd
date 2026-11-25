@@ -13,6 +13,9 @@ var cards: VBoxContainer
 var prompt: Label
 var hp_bar: ProgressBar
 var angle := 0.0
+var markers: Array = []       # world positions of each option's path marker
+var pouches: Array = []       # [prop, button]
+var _leaving := false
 
 func _ready() -> void:
 	var region := Game.run_region()
@@ -69,18 +72,86 @@ func _ready() -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	bottom.add_child(row)
-	for o in Game.stage_options():
-		row.add_child(_card(o))
+	var opts := Game.stage_options()
+	for i in opts.size():
+		# each way onward is marked on the ground ahead, left to right
+		var x := (float(i) - (opts.size() - 1) * 0.5) * 3.2
+		var at := _at(angle, Vector3(x - 0.3, 0, -4.6))
+		backdrop.add_prop("marker", at)
+		markers.append(at)
+		row.add_child(_card(opts[i], i))
+	_scatter_pouches(frame, int(Game.run_stage().get("pouches", 1)))
 	layer.get_child(0).modulate.a = 0.0
 	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.5)
 
 func _at(a: float, v: Vector3) -> Vector3:
 	return v.rotated(Vector3.UP, a)
 
-func _card(o: Dictionary) -> Button:
+## Hidden coin: small, off the path, and only yours if you spot and tap it.
+func _scatter_pouches(frame: Control, n: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s%d%d" % [Game.run.region, Game.run.stage, Game.profile.deaths])
+	for i in n:
+		var side := -1.0 if rng.randf() < 0.5 else 1.0
+		var at := _at(angle, Vector3(side * rng.randf_range(2.2, 4.2) - 0.3, 0, rng.randf_range(-6.5, -2.0)))
+		var prop := backdrop.add_prop("pouch", at)
+		var b := Button.new()
+		b.flat = true
+		b.custom_minimum_size = Vector2(84, 84)
+		b.size = Vector2(84, 84)
+		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		frame.add_child(b)
+		frame.move_child(b, 0)
+		b.pressed.connect(func(): _take_pouch(prop, b))
+		pouches.append([prop, b])
+
+func _take_pouch(prop: Node3D, b: Button) -> void:
+	var amount := Game.take_pouch()
+	Sfx.play("loot", -2.0)
+	var l := UI.label("+%d gold" % amount, 22, UI.GOLD, "bold")
+	l.position = b.position + Vector2(10, 10)
+	b.get_parent().add_child(l)
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(l, "position:y", l.position.y - 60.0, 0.9)
+	tw.tween_property(l, "modulate:a", 0.0, 0.9)
+	tw.chain().tween_callback(l.queue_free)
+	for e in pouches:
+		if e[0] == prop:
+			pouches.erase(e)
+			break
+	prop.queue_free()
+	b.queue_free()
+
+func _process(_dt: float) -> void:
+	# keep each pouch's tap target over its place in the world
+	for e in pouches:
+		var p: Vector3 = e[0].global_position + Vector3(0, 0.15, 0)
+		e[1].visible = not backdrop.cam.is_position_behind(p)
+		e[1].position = backdrop.cam.unproject_position(p) - e[1].size * 0.5 - e[1].get_parent().global_position
+
+## The knight walks to the chosen marker before the scene changes.
+func _walk_then(index: int, then: Callable) -> void:
+	if _leaving:
+		return
+	_leaving = true
+	var rig := backdrop.rig
+	var to: Vector3 = markers[index] if index < markers.size() else _at(angle, Vector3(0, 0, -4.0))
+	var dir := to - rig.position
+	rig.rotation.y = atan2(-dir.x, -dir.z)
+	var tw := create_tween()
+	tw.tween_property(rig, "position", rig.position + dir * 0.8, 1.0).set_trans(Tween.TRANS_SINE)
+	for i in 3:
+		get_tree().create_timer(0.3 * i).timeout.connect(func(): Sfx.play("footstep", -5.0))
+	backdrop.move_camera(backdrop.cam_pos + dir * 0.45, to + Vector3(0, 1.2, 0))
+	tw.tween_callback(then)
+
+func _card(o: Dictionary, index: int = 0) -> Button:
 	var tag: String = {"fight": "A foe", "boss": "The guardian", "treasure": "A cache", "shrine": "Respite", "lever": "A mechanism", "pass": "Onward"}[o.type]
 	if o.get("optional", false):
-		tag = "A hunter  ·  optional"
+		tag = "A hunt  ·  optional"
+	if o.has("foe"):
+		# name the kind of fight ahead, so the right weapon can be in hand
+		tag += "  ·  " + str(Db.foes[o.foe].get("cls", ""))
 	var b := UI.button("", 18, 0)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.custom_minimum_size.y = 104
@@ -95,15 +166,15 @@ func _card(o: Dictionary) -> Button:
 	v.add_child(UI.label(tag.to_upper(), 13, UI.BLOOD.lightened(0.3) if o.type in ["fight", "boss"] else UI.GOLD_DIM, "bold"))
 	v.add_child(UI.title(o.label, 20, UI.BONE))
 	v.add_child(UI.label(o.hint, 17, UI.DIM))
-	b.pressed.connect(func(): _choose(o))
+	b.pressed.connect(func(): _choose(o, index))
 	return b
 
-func _choose(o: Dictionary) -> void:
+func _choose(o: Dictionary, index: int = 0) -> void:
 	match o.type:
 		"fight", "boss":
-			fight.emit(o)
+			_walk_then(index, func(): fight.emit(o))
 		"pass":
-			moved_on.emit()
+			_walk_then(index, func(): moved_on.emit())
 		_:
 			_interact(o)
 

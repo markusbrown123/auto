@@ -20,7 +20,7 @@ func _ready() -> void:
 func _gui_input(e: InputEvent) -> void:
 	if e is InputEventScreenTouch:
 		if e.pressed:
-			_touch[e.index] = {"pos": e.position, "t": _now()}
+			_touch[e.index] = {"pos": e.position, "t": _now(), "last": Vector2.ZERO}
 		else:
 			_touch.erase(e.index)
 	elif e is InputEventScreenDrag and _touch.has(e.index):
@@ -35,9 +35,12 @@ func _gui_input(e: InputEvent) -> void:
 			return
 		if d.length() >= side * min_dist_frac and d.length() / maxf(dt, 0.001) >= side * min_speed_frac:
 			var v := Vector2(d.x, -d.y).normalized()
-			swiped.emit(quantize(v), v)
-			trail_points = [s.pos, e.position + d * 0.8]
-			# re-anchor: a zig-zag without lifting the finger chains cuts
+			# One stroke is one cut, however long it is. Without lifting the
+			# finger, only a clear change of direction (a zig-zag) chains another.
+			if s.last == Vector2.ZERO or v.dot(s.last) < 0.3:
+				swiped.emit(quantize(v), v)
+				trail_points = [s.pos, e.position + d * 0.8]
+				s.last = v
 			s.pos = e.position
 			s.t = _now()
 

@@ -10,4 +10,11 @@ for suite in tests integration; do
 	grep -v -E "^(Godot Engine|$)|ObjectDB|object.cpp|resources still in use|resource.cpp" "/tmp/hr_$suite.log"
 	if grep -q "SCRIPT ERROR" "/tmp/hr_$suite.log"; then rc=1; fi
 done
+echo "== touch"
+if command -v xvfb-run >/dev/null 2>&1; then
+	VK_ICD_FILENAMES="${VK_ICD_FILENAMES:-/opt/lavapipe/lvp_icd.json}" xvfb-run -a -s "-screen 0 1280x720x24" "$GODOT" --path . --rendering-method mobile --resolution 1280x720 res://tests/touch.tscn > /tmp/hr_touch.log 2>&1 || rc=1
+else
+	"$GODOT" --path . --resolution 1280x720 res://tests/touch.tscn > /tmp/hr_touch.log 2>&1 || rc=1
+fi
+grep -E "^  (ok|FAIL)|^touch:|SCRIPT ERROR" /tmp/hr_touch.log
 exit $rc

@@ -25,18 +25,62 @@ C = {
  "cls_monstrosity": "A feral hunched beast standing on two legs: thick fur-and-hide body with scattered riveted iron plates, huge clawed hands hanging low, a snouted fanged head with small glowing amber eyes and short horns.",
  "cls_soul_eater": "A thin floating soul-eating wraith: long thin arms with clawed hands, a ragged dark shroud-like carapace, a smooth eyeless hooded head, a glowing pale-violet hollow maw ringed with teeth in its chest, legs wrapped in hanging tattered strips.",
 }
+# ---- weapons and shields: one object, upright, isolated, so image-to-3D gets a clean read
+WFRAME = (" A single object only, shown upright and vertical, perfectly centred, straight-on front view, isolated on a plain light grey background, "
+          "no hands, no character, no stand, no scabbard, even soft studio lighting, realistic materials, high detail. No text, no logos.")
+WSTYLE = "Original weapon design for a sci-fantasy action game, sleek futuristic-medieval style with smooth sculpted metal surfaces and clean flowing panel lines. "
+SW = "A one-handed sword, blade pointing up, hilt at the bottom: "
+GS = "A huge two-handed greatsword, blade pointing up, long grip at the bottom: "
+AX = "A one-handed battle axe, axe head at the top, haft pointing down: "
+DB = "A single short curved blade for dual wielding, blade pointing up, grip at the bottom: "
+SH = "A knight's shield seen from the front: "
+W = {
+ "w_rusted_sword": SW + "plain and worn, straight narrow brushed-steel blade with a single shallow fuller, simple straight crossguard, wrapped dark grip, small round pommel, a few nicks.",
+ "w_knight_sword": SW + "clean military issue, polished steel blade with a crisp central ridge, swept angular crossguard, dark grip with steel bands.",
+ "w_dawnline": SW + "elegant slim silver blade with a long bevel and a thin gold line down the centre, winged crossguard, white grip.",
+ "w_vigil_edge": SW + "broad leaf-shaped steel blade with layered plate-like fullers, a guard shaped like folded wings, dark blue grip, faceted pommel.",
+ "w_censer_sword": SW + "bronze-gold blade with a perforated channel glowing ember-orange from within, flared guard, soot-darkened edges.",
+ "w_rime_sword": SW + "curved sabre of pale blue translucent glass-like alloy with frost crystals along the spine, silver knuckle guard, faint icy glow.",
+ "w_starfall": SW + "long dark meteoric-alloy blade split by a glowing white-blue seam down its length, asymmetric swept guard, sleek black grip, star-shaped pommel.",
+ "w_monarch": SW + "the final king's sword: long regal blade of tarnished gold and black steel with a glowing white-gold core, ornate crown-shaped crossguard with thin spikes, black grip wound in gold wire.",
+ "w_ashen_great": GS + "massive slab of scorched blackened iron with glowing ember-orange cracks, thick blunt edges, heavy straight guard, long charred grip.",
+ "w_crypt_great": GS + "long corroded sea-green bronze zweihander with barnacle pitting, a second small parrying guard above the main crossguard, teal patina.",
+ "w_throneshard": GS + "a jagged shard of polished black stone veined with gold, shaped into a blade, set in a gold collar and a long black grip.",
+ "w_frost_great": GS + "enormous pale blue-silver blade sheathed in clear ice with icicles hanging from the guard, glowing cold blue core, crystalline pommel.",
+ "w_wyrmfang": GS + "a giant curved ivory dragon fang as the blade, mounted in dark red scaled metal with a claw-shaped guard, faint ember glow at the root.",
+ "w_woodcutter": AX + "simple bearded steel axe head with a clean curved edge, dark wooden haft with steel langets.",
+ "w_headsman": AX + "very broad heavy matte-black crescent blade with a pale bone-white edge line, thick dark haft bound in dark red cord.",
+ "w_oath_axe": AX + "double-bitted black alloy axe with swept wing-like blades and glowing deep red seams, spike on top, sleek black haft.",
+ "w_pilgrim_blades": DB + "plain slim steel knife-sword with a slight curve, simple disc guard, cord-wrapped grip.",
+ "w_twin_fangs": DB + "elegant crimson-lacquered blade curved like a fang with a mirror-bright edge, small swept guard, red silk-wrapped grip.",
+ "w_ember_fangs": DB + "dark smoked-steel blade with a glowing molten orange edge, serrated spine, black grip.",
+ "w_hunger": DB + "thin hooked blade of dark violet-black metal with a glowing violet inner edge, organic bone-like guard.",
+ "w_glaive": "A double-ended polearm, shown vertical: a long dark haft with a slim leaf-shaped steel blade at each end, steel collars, sleek and symmetrical.",
+ "s_plank": SH + "small plain heater shield of dented steel-blue painted metal with a scratched surface and a simple rim.",
+ "s_garrison": SH + "kite shield in polished steel with a dark red enamel field and a raised central ridge, clean angular rim.",
+ "s_tower": SH + "tall heavy tower shield of scorched blackened iron with glowing ember-orange seams and layered plates.",
+ "s_reliquary": SH + "ornate tarnished-gold shield shaped like a cathedral door with a pointed arch top, relief panels, a round glass reliquary at its centre.",
+ "s_rime": SH + "angular shield of pale blue-silver alloy sheathed in clear ice with frost crystals on the rim and a glowing cold blue centre line.",
+ "s_scale": SH + "rounded shield made from one huge dark red dragon scale with a ridged surface, rimmed in dark metal.",
+}
+C.update(W)
+
 def gen(cid):
     out = "art/concept/%s_v1.png" % cid
     if os.path.exists(out):
         return cid, "exists"
-    r = subprocess.run(["higgsfield", "generate", "create", "gpt_image_2_6", "--prompt", STYLE + C[cid] + FRAME,
-                        "--aspect_ratio", "3:4", "--resolution", "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True)
+    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else (STYLE + C[cid] + FRAME)
+    r = subprocess.run(["higgsfield", "generate", "create", "gpt_image_2_6", "--prompt", prompt,
+                        "--aspect_ratio", "9:16" if cid in W and not cid.startswith("s_") else "3:4",
+                        "--resolution", "1k" if cid in W else "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True)
     url = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
     if not url.startswith("http"):
         return cid, "FAILED: " + (r.stderr or r.stdout)[-200:]
     subprocess.run(["curl", "-sS", "-m", "180", "-o", out, url], check=True)
     return cid, "ok"
 ids = sys.argv[1:] or list(C)
+if ids == ["weapons"]:
+    ids = list(W)
 with cf.ThreadPoolExecutor(4) as ex:
     for cid, status in ex.map(gen, ids):
         print(cid, status, flush=True)

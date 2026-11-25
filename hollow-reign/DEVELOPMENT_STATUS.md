@@ -1,4 +1,4 @@
-# Hollow Reign: development status
+# Eternal Edge: development status
 
 Last updated 2026-11-25. Version 0.1.0.
 

@@ -69,6 +69,8 @@ var mat_glow: StandardMaterial3D
 var mat_blade: StandardMaterial3D
 var eye_light: OmniLight3D
 var bulk := 1.0
+var _warn_overlay: StandardMaterial3D
+var _base_glow = null
 var skin: SkinDriver          # optional rigged model replacing the primitive body
 var _ankle := {}
 var hunch := 0.0
@@ -337,13 +339,33 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 	mat_blade.metallic = 0.95
 	mat_blade.roughness = 0.28
 	var glow = look.get("weapon_glow", look.get("glow"))
+	_base_glow = glow
 	if glow != null:
 		mat_blade.emission_enabled = true
 		mat_blade.emission = Color(str(glow))
 		mat_blade.emission_energy_multiplier = 0.9
-	_weapon_mesh(weapon_r, kind, look)
-	if dual:
-		_weapon_mesh(weapon_l, kind, look)
+	_warn_overlay = null
+	var model: String = str(look.get("weapon_model", ""))
+	if kind == "claws" and look.has("skin"):
+		weapon_len = 0.45          # the model's own claws are the weapon
+	elif PropModel.exists(model):
+		var ls: float = float(look.get("weapon_scale", 1.0))
+		weapon_len = PropModel.weapon(weapon_r, model, kind, look.get("weapon_tint"), ls)
+		if dual:
+			PropModel.weapon(weapon_l, model, kind, look.get("weapon_tint"), ls)
+		# a red glow laid over the model marks an unblockable blow
+		_warn_overlay = StandardMaterial3D.new()
+		_warn_overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_warn_overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_warn_overlay.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_warn_overlay.albedo_color = Color(1.0, 0.1, 0.03, 0.0)
+		for n in [weapon_r, weapon_l]:
+			for mi in n.find_children("*", "MeshInstance3D", true, false):
+				mi.material_overlay = _warn_overlay
+	else:
+		_weapon_mesh(weapon_r, kind, look)
+		if dual:
+			_weapon_mesh(weapon_l, kind, look)
 	if dual or two_handed:
 		set_shield(null)
 
@@ -407,6 +429,15 @@ func _weapon_mesh(n: Node3D, kind: String, look: Dictionary) -> void:
 			_cyl(n, 0.018, 0.018, 0.2, Vector3(0, 0.02, 0), mat_dark, 6)
 			_sphere(n, 0.03, Vector3(0, -0.09, 0), mat_metal)
 
+## Marks the weapon as carrying an unblockable blow (red glow), or clears it.
+func set_blade_warning(on: bool) -> void:
+	if _warn_overlay:
+		_warn_overlay.albedo_color.a = 0.6 if on else 0.0
+		return
+	mat_blade.emission_enabled = on or _base_glow != null
+	mat_blade.emission = Color(1.0, 0.12, 0.05) if on else (Color(str(_base_glow)) if _base_glow != null else Color.BLACK)
+	mat_blade.emission_energy_multiplier = 3.0 if on else 0.9
+
 func set_shield(look) -> void:
 	if shield:
 		shield.queue_free()
@@ -416,6 +447,8 @@ func set_shield(look) -> void:
 		return
 	shield = Node3D.new()
 	body.add_child(shield)
+	if PropModel.exists(str(look.get("model", ""))) and PropModel.shield(shield, str(look.model)):
+		return
 	var m := StandardMaterial3D.new()
 	m.albedo_color = Color(str(look.get("color", "#4a3a2a")))
 	m.metallic = 0.4

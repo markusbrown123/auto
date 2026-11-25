@@ -333,7 +333,7 @@ B.append(dict(id="frostbound_king", name="The Frostbound King", title="Sovereign
    C("sceptre",2,[A("U",0.9,26,guard=120,kind="thrust")],1.2,tags=("anti_block",)),
   ])]))
 # ---------------------------------------------------------------- 6 Forgotten Monarch
-B.append(dict(id="forgotten_monarch", name="The Forgotten Monarch", title="Last Ruler of the Hollow Reign", region="throne", boss=True,
+B.append(dict(id="forgotten_monarch", name="The Forgotten Monarch", title="Last Ruler of the Fallen Realm", region="throne", boss=True,
  hp=2800, armor=0.15, posture=160, patience=2, adapt=1.4, idle=[0.6,1.2], weak=None, xp=5000, gold=3000,
  loot=[["w_monarch",1.0],["r_crown",1.0],["a_regal_chest",0.7],["a_regal_helm",0.7]], music="final", arena="throne",
  intro="You knelt to this crown once. It remembers. You do not.",

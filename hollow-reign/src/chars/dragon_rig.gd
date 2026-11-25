@@ -276,6 +276,11 @@ func telegraph(dir: Vector2, windup: float, swing: float, kind: String = "slash"
 			_go(Mode.WINDUP, windup)
 	_root_target = Vector3(0, 0, 0.3)
 
+func set_blade_warning(on: bool) -> void:
+	mat_blade.emission_enabled = on
+	mat_blade.emission = Color(1.0, 0.12, 0.05)
+	mat_blade.emission_energy_multiplier = 3.0
+
 func swing(_dir2: Vector2, _time: float) -> void:
 	pass
 

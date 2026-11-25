@@ -236,13 +236,13 @@
   },
   {
    "id": "w_monarch",
-   "name": "Hollow Reign",
+   "name": "Eternal Edge",
    "slot": "weapon",
    "cls": "sword",
    "rarity": "legendary",
    "damage": 58,
    "price": 0,
-   "desc": "The Monarch's own blade. The kingdom's name was taken from it, or given to it.",
+   "desc": "The Monarch's own blade. It has ended every reign but one.",
    "element": null,
    "ng_min": 0,
    "crit": 15,
@@ -1412,6 +1412,62 @@
    },
    "strength": 0,
    "dex": 0
+  },
+  {
+   "id": "w_dawnline",
+   "name": "Dawnline",
+   "slot": "weapon",
+   "cls": "sword",
+   "rarity": "uncommon",
+   "damage": 24,
+   "price": 420,
+   "desc": "Light catches the whole length of it at once.",
+   "element": null,
+   "ng_min": 0,
+   "crit": 0,
+   "look": {}
+  },
+  {
+   "id": "w_vigil_edge",
+   "name": "Vigil Edge",
+   "slot": "weapon",
+   "cls": "sword",
+   "rarity": "rare",
+   "damage": 30,
+   "price": 900,
+   "desc": "Issued to those who stood watch and were never relieved.",
+   "element": null,
+   "ng_min": 0,
+   "crit": 5,
+   "look": {}
+  },
+  {
+   "id": "w_starfall",
+   "name": "Starfall",
+   "slot": "weapon",
+   "cls": "sword",
+   "rarity": "epic",
+   "damage": 44,
+   "price": 2600,
+   "desc": "The alloy is not from anywhere the smiths could name.",
+   "element": null,
+   "ng_min": 0,
+   "crit": 12,
+   "look": {}
+  },
+  {
+   "id": "w_throneshard",
+   "name": "Throneshard",
+   "slot": "weapon",
+   "cls": "greatsword",
+   "rarity": "epic",
+   "damage": 56,
+   "price": 3200,
+   "desc": "A sliver of the seat itself, given an edge.",
+   "element": null,
+   "ng_min": 0,
+   "crit": 0,
+   "look": {}
   }
  ]
 }

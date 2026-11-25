@@ -59,11 +59,12 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 			if not foe.boss:
 				foe_look["skin_tint"] = foe.rig.get("metal", "#888888")
 			break
+	var carried: String = BOSS_WEAPON.get(foe_id, FOE_WEAPON.get(str(foe.rig.get("weapon", "")), ""))
+	if carried != "":
+		foe_look.merge(weapon_model(carried))
 	foe_rig.build(foe_look, true)
 	foe_rig.position = Vector3(0, 0, -gap * 0.5)
 	foe_rig.rotation.y = PI
-	_blade_had_emission = foe_rig.mat_blade.emission_enabled
-	_blade_base_emission = foe_rig.mat_blade.emission
 
 	var key := SpotLight3D.new()
 	key.light_color = Color(arena.theme.sun).lerp(Color.WHITE, 0.5)
@@ -101,6 +102,21 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	_noise.frequency = 2.0
 	_begin_intro(bool(opts.get("skip_intro", false)))
 
+## Weapons that share another weapon's model, recoloured (their own concept could not be generated).
+const MODEL_ALIAS := {"w_censer_sword": ["w_vigil_edge", "#e0b060"], "w_monarch": ["w_starfall", "#f0d080"],
+	"w_woodcutter": ["w_headsman", "#b0b4b8"], "w_oath_axe": ["w_headsman", "#c04040"]}
+## What each kind of foe carries when it has no item of its own.
+const FOE_WEAPON := {"sword": "w_knight_sword", "greatsword": "w_crypt_great", "axe": "w_headsman", "cleaver": "w_headsman", "dual": "w_pilgrim_blades"}
+const BOSS_WEAPON := {"ashen_sentinel": "w_ashen_great", "hollow_executioner": "w_headsman", "crimson_widow": "w_twin_fangs", "gravewarden": "w_crypt_great",
+	"frostbound_king": "w_frost_great", "forgotten_monarch": "w_monarch", "pale_huntsman": "w_woodcutter"}
+
+static func weapon_model(item_id: String) -> Dictionary:
+	var alias: Array = MODEL_ALIAS.get(item_id, [item_id, null])
+	var out := {"weapon_model": "res://assets/models/%s.glb" % alias[0]}
+	if alias[1] != null:
+		out["weapon_tint"] = alias[1]
+	return out
+
 static func player_look() -> Dictionary:
 	var eq: Dictionary = Game.profile.equipped
 	var chest: Dictionary = Db.item(eq.chest) if eq.chest != null else {}
@@ -125,8 +141,10 @@ static func player_look() -> Dictionary:
 	for k in ["metal", "glow", "curved"]:
 		if weapon.get("look", {}).has(k):
 			look["blade" if k == "metal" else k] = weapon.look[k]
+	look.merge(weapon_model(str(weapon.id)))
 	if eq.shield != null:
-		look["shield"] = Db.item(eq.shield).get("look", {})
+		look["shield"] = Db.item(eq.shield).get("look", {}).duplicate()
+		look["shield"]["model"] = "res://assets/models/%s.glb" % str(eq.shield)
 	if set_id in ["ash", "frost"]:
 		look["ember" if set_id == "ash" else "frost"] = true
 		look["eye"] = "#ff6a2a" if set_id == "ash" else "#7fd4ff"
@@ -363,15 +381,7 @@ func _screen_to_world_dir(d: String) -> Vector3:
 	return Vector3(v.x, v.y, 0)
 
 func _set_foe_blade_warning(on: bool) -> void:
-	var m: StandardMaterial3D = foe_rig.mat_blade
-	if on:
-		m.emission_enabled = true
-		m.emission = Color(1.0, 0.12, 0.05)
-		m.emission_energy_multiplier = 3.0
-	else:
-		m.emission_enabled = _blade_had_emission
-		m.emission = _blade_base_emission
-		m.emission_energy_multiplier = 0.9
+	foe_rig.set_blade_warning(on)
 
 
 # ================================================================ sim events

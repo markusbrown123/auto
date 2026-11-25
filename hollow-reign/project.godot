@@ -2,7 +2,7 @@
 config_version=5
 
 [application]
-config/name="Hollow Reign"
+config/name="Eternal Edge"
 config/description="A fallen knight returns to a cursed kingdom."
 config/version="0.1.0"
 run/main_scene="res://src/main.tscn"

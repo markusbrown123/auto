@@ -31,7 +31,24 @@ def wait(task_id):
             return d
         time.sleep(6)
 
+def prop(image, name, faces):
+    """Static prop (weapon, shield, scenery): standard model with a polygon cap, no skeleton. 30 credits."""
+    os.makedirs("art/models", exist_ok=True)
+    token = call("POST", "/files", form="file=@" + image)["file_token"]
+    gen = call("POST", "/generation/image-to-model", {"input": token, "model": "v3.1-20260211", "face_limit": faces, "texture": True, "pbr": True})
+    g = wait(gen["task_id"])
+    json.dump({"image": image, "model": {"task_id": gen["task_id"], "credits": g.get("credits_consumed")}}, open("art/models/%s.json" % name, "w"), indent=1)
+    url = g["output"].get("model_url") or g["output"].get("pbr_model_url") or next(v for v in g["output"].values() if isinstance(v, str) and ".glb" in v)
+    for attempt in range(4):
+        if subprocess.run(["curl", "-sS", "-L", "-m", "300", "-o", "art/models/%s.glb" % name, url]).returncode == 0:
+            break
+        time.sleep(4)
+        url = wait(gen["task_id"])["output"].get("model_url", url)   # links expire: fetch a fresh one, never regenerate
+    print("prop done:", name, g.get("credits_consumed"), flush=True)
+
 def main():
+    if sys.argv[1] == "prop":
+        return prop(sys.argv[2], sys.argv[3], int(sys.argv[4]) if len(sys.argv) > 4 else 6000)
     image, name = sys.argv[1], sys.argv[2]
     faces = int(sys.argv[3]) if len(sys.argv) > 3 else 30000
     os.makedirs("art/models", exist_ok=True)

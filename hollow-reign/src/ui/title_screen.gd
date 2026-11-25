@@ -52,10 +52,10 @@ func _clear() -> void:
 		c.queue_free()
 
 func _logo() -> void:
-	var t := UI.label("HOLLOW REIGN", 68, UI.BONE, "title")
+	var t := UI.label("ETERNAL EDGE", 68, UI.BONE, "title")
 	t.add_theme_constant_override("outline_size", 0)
 	menu.add_child(t)
-	var sub := UI.title("The crown remembers", 17, UI.GOLD)
+	var sub := UI.title("Fall. Rise. Cut deeper.", 17, UI.GOLD)
 	menu.add_child(sub)
 	menu.add_child(UI.spacer(26))
 

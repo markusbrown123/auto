@@ -1,0 +1,575 @@
+{
+ "regions": [
+  {
+   "id": "courtyard",
+   "name": "The Fallen Courtyard",
+   "theme": "courtyard",
+   "amb": "wind",
+   "requires": null,
+   "blurb": "The gate you once rode out of. The banners have burned down to their poles.",
+   "shortcut": {
+    "flag": "courtyard_gate",
+    "stage": 3,
+    "label": "The Winch Gate"
+   },
+   "stages": [
+    {
+     "prompt": "The outer wall has fallen in on itself. Something in garrison plate still walks its rounds.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Breach",
+       "hint": "Steel scrapes on stone ahead.",
+       "foe": "hollow_soldier"
+      }
+     ]
+    },
+    {
+     "prompt": "Beyond the rubble the path divides.",
+     "options": [
+      {
+       "type": "treasure",
+       "label": "The Guardhouse",
+       "hint": "A door hangs from one hinge.",
+       "items": [
+        "a_garrison_gauntlets"
+       ],
+       "gold": 60,
+       "shards": 1
+      },
+      {
+       "type": "fight",
+       "label": "The Rampart Stair",
+       "hint": "A longer way, and watched.",
+       "foe": "hollow_soldier"
+      }
+     ]
+    },
+    {
+     "prompt": "A winch-house stands beside the inner gate. Its chain is rusted but whole.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Turn the Winch",
+       "hint": "The gate would stay open behind you.",
+       "flag": "courtyard_gate"
+      },
+      {
+       "type": "treasure",
+       "label": "The Well",
+       "hint": "Something glints below the waterline.",
+       "items": [
+        "r_iron"
+       ],
+       "gold": 40,
+       "shards": 1,
+       "needs": "courtyard_gate"
+      }
+     ]
+    },
+    {
+     "prompt": "A chapel alcove survives against the keep wall. A single candle burns.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Kneel",
+       "hint": "Rest a moment. Wounds close."
+      }
+     ]
+    },
+    {
+     "prompt": "The inner ward. He is standing exactly where he was posted.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Inner Ward",
+       "hint": "Embers drift from the gatehouse.",
+       "foe": "ashen_sentinel",
+       "optional": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "blackwood",
+   "name": "The Blackwood",
+   "theme": "blackwood",
+   "amb": "wind",
+   "requires": "courtyard",
+   "blurb": "The royal hunting forest. The trees grew in over the road, and over the hunters.",
+   "shortcut": {
+    "flag": "blackwood_bridge",
+    "stage": 3,
+    "label": "The Rope Bridge"
+   },
+   "stages": [
+    {
+     "prompt": "The road gives out under roots. Lanterns hang in the branches, still lit.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Lantern Road",
+       "hint": "Someone is keeping them lit.",
+       "foe": "blackwood_stalker"
+      }
+     ]
+    },
+    {
+     "prompt": "A deer trail leaves the road. The road goes on.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Road",
+       "hint": "Hoofprints, then bootprints.",
+       "foe": "blackwood_stalker"
+      },
+      {
+       "type": "boss",
+       "label": "The Deer Trail",
+       "hint": "White antlers move between the trunks.",
+       "foe": "pale_huntsman",
+       "optional": true
+      }
+     ]
+    },
+    {
+     "prompt": "A ravine. A bridge of rope lies coiled on your side of it.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Cast the Bridge",
+       "hint": "It will hold. It will also remain.",
+       "flag": "blackwood_bridge"
+      },
+      {
+       "type": "treasure",
+       "label": "The Charcoal Burner's Hut",
+       "hint": "The door is barred from outside.",
+       "items": [
+        "w_woodcutter"
+       ],
+       "gold": 90,
+       "shards": 2
+      }
+     ]
+    },
+    {
+     "prompt": "A gibbet tree, and beneath it a spring.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Drink",
+       "hint": "The water is cold and clean."
+      },
+      {
+       "type": "treasure",
+       "label": "Under the Gibbet",
+       "hint": "The hanged have dropped their purses.",
+       "items": [
+        "a_black_gauntlets"
+       ],
+       "gold": 140,
+       "shards": 2,
+       "needs": "blackwood_bridge"
+      }
+     ]
+    },
+    {
+     "prompt": "A clearing of stumps. Every one has been used as a block.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Clearing",
+       "hint": "A cleaver drags somewhere in the dark.",
+       "foe": "hollow_executioner",
+       "optional": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "cathedral",
+   "name": "The Cathedral of Ash",
+   "theme": "cathedral",
+   "amb": "fire",
+   "requires": "blackwood",
+   "blurb": "The faithful burned their own cathedral to keep it holy. It is still burning.",
+   "shortcut": {
+    "flag": "cathedral_door",
+    "stage": 3,
+    "label": "The Sacristy Door"
+   },
+   "stages": [
+    {
+     "prompt": "Pilgrims' steps, worn into bowls. Ash falls like first snow.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Pilgrim Stair",
+       "hint": "Robed figures turn toward you.",
+       "foe": "ash_acolyte"
+      }
+     ]
+    },
+    {
+     "prompt": "At the great doors, a woman in red is waiting. She has been waiting a long time.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Cathedral Steps",
+       "hint": "Two blades. No hesitation.",
+       "foe": "crimson_widow",
+       "optional": false
+      }
+     ]
+    },
+    {
+     "prompt": "Inside, the nave is open to the sky. A side door leads to the sacristy.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Unbar the Sacristy",
+       "hint": "A way in that avoids the steps.",
+       "flag": "cathedral_door"
+      },
+      {
+       "type": "treasure",
+       "label": "The Reliquary",
+       "hint": "Saints' bones, and what was buried with them.",
+       "items": [
+        "x_candle",
+        "a_vigil_gauntlets"
+       ],
+       "gold": 160,
+       "shards": 3
+      }
+     ]
+    },
+    {
+     "prompt": "Votive candles, hundreds, none burned down.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Light One",
+       "hint": "Warmth without smoke."
+      },
+      {
+       "type": "fight",
+       "label": "The Choir Loft",
+       "hint": "Singing, of a kind.",
+       "foe": "ash_acolyte"
+      }
+     ]
+    },
+    {
+     "prompt": "The bell tower has fallen through the crossing. Something has made its den in the bronze.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Crossing",
+       "hint": "The bell tolls by itself.",
+       "foe": "cathedral_beast",
+       "optional": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "crypt",
+   "name": "The Sunken Crypt",
+   "theme": "crypt",
+   "amb": "crypt",
+   "requires": "cathedral",
+   "blurb": "The kings were buried under the cathedral. Then the river was let in.",
+   "shortcut": {
+    "flag": "crypt_sluice",
+    "stage": 3,
+    "label": "The Sluice Gate"
+   },
+   "stages": [
+    {
+     "prompt": "Stairs descend into black water. Lamps burn beneath its surface.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Drowned Stair",
+       "hint": "Ripples, with nothing making them.",
+       "foe": "crypt_warden"
+      }
+     ]
+    },
+    {
+     "prompt": "The ossuary. Skulls are stacked to the vault.",
+     "options": [
+      {
+       "type": "treasure",
+       "label": "The Ossuary",
+       "hint": "One niche is sealed with newer mortar.",
+       "items": [
+        "a_vigil_legs"
+       ],
+       "gold": 200,
+       "shards": 3
+      },
+      {
+       "type": "fight",
+       "label": "The Processional",
+       "hint": "Heavy footfalls in the water.",
+       "foe": "crypt_warden"
+      }
+     ]
+    },
+    {
+     "prompt": "A sluice wheel. Turning it would drain the lower halls.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Open the Sluice",
+       "hint": "The water would not come back.",
+       "flag": "crypt_sluice"
+      },
+      {
+       "type": "shrine",
+       "label": "The Dry Niche",
+       "hint": "A saint's alcove above the waterline."
+      }
+     ]
+    },
+    {
+     "prompt": "With the water gone, a lower door stands revealed.",
+     "options": [
+      {
+       "type": "treasure",
+       "label": "The Royal Vault",
+       "hint": "Sealed since before the flood.",
+       "items": [
+        "w_rime_sword",
+        "a_vigil_helm"
+       ],
+       "gold": 300,
+       "shards": 4,
+       "needs": "crypt_sluice"
+      },
+      {
+       "type": "fight",
+       "label": "The Gallery of Kings",
+       "hint": "Their effigies have been defaced.",
+       "foe": "crypt_warden"
+      }
+     ]
+    },
+    {
+     "prompt": "The oldest tomb. Its keeper has not left his post.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The First Tomb",
+       "hint": "A lantern, held very still.",
+       "foe": "gravewarden",
+       "optional": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "citadel",
+   "name": "The Frozen Citadel",
+   "theme": "citadel",
+   "amb": "wind",
+   "requires": "crypt",
+   "blurb": "The mountain fortress. Its king had the gates frozen shut, and himself with them.",
+   "shortcut": {
+    "flag": "citadel_lift",
+    "stage": 3,
+    "label": "The Ice Lift"
+   },
+   "stages": [
+    {
+     "prompt": "The pass. Soldiers stand in ranks along it, upright, rimed white.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Frozen Rank",
+       "hint": "One of them is breathing.",
+       "foe": "frost_thrall"
+      }
+     ]
+    },
+    {
+     "prompt": "The curtain wall, sheathed in ice.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Wall Walk",
+       "hint": "Wind, and under it, footsteps.",
+       "foe": "frost_thrall"
+      },
+      {
+       "type": "treasure",
+       "label": "The Armoury",
+       "hint": "The racks are frozen solid.",
+       "items": [
+        "a_frost_gauntlets",
+        "a_frost_legs"
+       ],
+       "gold": 320,
+       "shards": 4
+      }
+     ]
+    },
+    {
+     "prompt": "A counterweight lift, iced into its shaft.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Break the Ice",
+       "hint": "It would run from the pass to the keep.",
+       "flag": "citadel_lift"
+      },
+      {
+       "type": "shrine",
+       "label": "The Brazier",
+       "hint": "Someone kept one fire alive."
+      }
+     ]
+    },
+    {
+     "prompt": "The queen's solar. Frost flowers cover every pane.",
+     "options": [
+      {
+       "type": "treasure",
+       "label": "The Solar",
+       "hint": "A jewel case, frozen shut.",
+       "items": [
+        "r_frost",
+        "a_frost_helm"
+       ],
+       "gold": 400,
+       "shards": 5,
+       "needs": "citadel_lift"
+      },
+      {
+       "type": "fight",
+       "label": "The Great Stair",
+       "hint": "The air itself resists you.",
+       "foe": "frost_thrall"
+      }
+     ]
+    },
+    {
+     "prompt": "The hall of the winter throne.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Winter Throne",
+       "hint": "He has not moved in an age. He moves now.",
+       "foe": "frostbound_king",
+       "optional": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "throne",
+   "name": "The Hollow Throne",
+   "theme": "throne",
+   "amb": "wind",
+   "requires": "citadel",
+   "blurb": "The heart of the kingdom. You have been here before. You are always here before.",
+   "shortcut": {
+    "flag": "throne_door",
+    "stage": 3,
+    "label": "The King's Door"
+   },
+   "stages": [
+    {
+     "prompt": "The royal mile. Statues of every monarch, each with the face struck off.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Royal Mile",
+       "hint": "The honour guard still stands.",
+       "foe": "throne_guard"
+      }
+     ]
+    },
+    {
+     "prompt": "The antechamber, hung with banners gone to thread.",
+     "options": [
+      {
+       "type": "fight",
+       "label": "The Antechamber",
+       "hint": "Two guards. One steps forward.",
+       "foe": "throne_guard"
+      },
+      {
+       "type": "treasure",
+       "label": "The Treasury",
+       "hint": "Open. Unguarded. Nearly empty.",
+       "items": [
+        "a_regal_gauntlets",
+        "a_regal_legs"
+       ],
+       "gold": 600,
+       "shards": 6
+      }
+     ]
+    },
+    {
+     "prompt": "A small door behind the arras, for the king's private use.",
+     "options": [
+      {
+       "type": "lever",
+       "label": "Unlock the King's Door",
+       "hint": "Kings do not use the front.",
+       "flag": "throne_door"
+      },
+      {
+       "type": "shrine",
+       "label": "The Chapel Royal",
+       "hint": "The last quiet place."
+      }
+     ]
+    },
+    {
+     "prompt": "The throne room doors. They are open. They have always been open.",
+     "options": [
+      {
+       "type": "shrine",
+       "label": "Steady Yourself",
+       "hint": "Breathe."
+      },
+      {
+       "type": "treasure",
+       "label": "Behind the Throne",
+       "hint": "Where a king hides what matters.",
+       "items": [
+        "x_heart"
+       ],
+       "gold": 800,
+       "shards": 8,
+       "needs": "throne_door"
+      }
+     ]
+    },
+    {
+     "prompt": "The Hollow Throne.",
+     "options": [
+      {
+       "type": "boss",
+       "label": "The Hollow Throne",
+       "hint": "The crown turns toward you.",
+       "foe": "forgotten_monarch",
+       "optional": false
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

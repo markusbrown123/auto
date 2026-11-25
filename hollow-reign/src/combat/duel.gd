@@ -250,9 +250,10 @@ func _camera(delta: float) -> void:
 	match stage:
 		Stage.INTRO:
 			# low orbit around the foe: let the silhouette land
-			var a := -0.9 + _stage_t * 0.22
-			var r := 3.2 + float(foe.rig.scale) * 1.4
-			pos = Vector3(sin(a) * r, 0.55 + _stage_t * 0.12, -pz + cos(a) * r)
+			# sweeps from the foe's flank round to the knight's shoulder
+			var a := 1.3 - _stage_t * 0.19
+			var r := 2.4 + float(foe.rig.scale) * 1.6
+			pos = Vector3(sin(a) * r, 0.5 + _stage_t * 0.2, -pz + cos(a) * r)
 			look = Vector3(0, foe_h * 0.85, -pz)
 			fov = 42.0
 			rate = 30.0

@@ -45,3 +45,10 @@ Status as of 2026-11-25. The Godot 4.6 docs page could not be fetched (docs.godo
 - Thermal: check `ProcessInfo.thermalState` (or Instruments Thermal State) during a 20-minute boss-rush session; target no sustained "serious" state; add a quality-reduction fallback (lower shadow/particle caps, 30 fps cap) on elevated thermal states.
 - Memory: stay well under per-app limits on the oldest device (target below 1.5 GB resident; target is a project choice, not an Apple number).
 - Checks per build: cold start under 5 s, no frame hitches above 50 ms in boss transitions, battery drain per 30 minutes.
+
+## What is already in this repository
+- `export_presets.cfg` contains an **iOS** preset: bundle id `com.hollowreign.game` (placeholder), arm64, min iOS 15.0, iPhone + iPad, icon `assets/icons/icon_1024.png`, tracking disabled, launch background near-black. `application/app_store_team_id` is empty and must be filled in.
+- The preset was written by hand on Linux using the option names found in the Godot 4.6 binary; it has **not** been opened in the Godot editor on a Mac or exported. On first open, check the Export dialog for warnings and re-save.
+- The `privacy/*_access_reasons` values are left at 0 (none selected). Godot itself touches file timestamps, disk space, system boot time and user defaults, so tick the matching reasons in the Export dialog (it shows them as checkboxes) before uploading, or App Store Connect will flag the missing privacy manifest entries.
+- `project.godot` sets landscape orientation, the Mobile renderer and ETC2/ASTC texture compression.
+- No iOS build has been produced. That needs a Mac with Xcode and an Apple Developer account.

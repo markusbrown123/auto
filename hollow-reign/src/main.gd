@@ -202,5 +202,9 @@ func _process(delta: float) -> void:
 		var t: float = _shots.pop_front()
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png("%s/%s_%04.1f.png" % [_shot_dir, _args.get("name", "shot"), t])
+		print("render t=%.1f draw_calls=%d primitives=%d objects=%d video_mem=%.1fMB nodes=%d" % [t,
+			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
+			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME), Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+			Performance.get_monitor(Performance.OBJECT_NODE_COUNT)])
 		if _shots.is_empty():
 			get_tree().quit()

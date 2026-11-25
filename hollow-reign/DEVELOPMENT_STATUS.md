@@ -1,0 +1,66 @@
+# Hollow Reign: development status
+
+Last updated 2026-11-25. Version 0.1.0.
+
+## Summary
+The game is playable start to finish in Godot 4.6: title, sanctuary, six regions with branching roads, 8 guardians and 6 lesser foes, loot, upgrades, levelling, death and return, New Game Plus. Combat rules are covered by automated tests. **Art is programmer-built placeholder geometry, no iOS build exists yet, and nothing has been played on a phone or by a human.** Those three things are the gap between this and a shippable game.
+
+## Environment this was built in
+- Linux container, no GPU, no Mac, no Xcode, no Unreal or Unity, no Blender.
+- Higgsfield: no connector and the API host was unreachable. Nothing was generated.
+- Engine choice: Godot 4.6. Unreal could not be installed here and cannot build for iOS from Linux; Godot is open source (no vendor dependency that could force the game off the store later), exports native iOS/Metal, and runs headless for tests.
+
+## Done and verified
+Verified means covered by `tools/test.sh` (820 rule checks plus an end-to-end run) or seen in software-rendered screenshots.
+
+| Area | State |
+|---|---|
+| Directional swipe attacks (8 directions) | Works. Fires on distance and speed, not on release; slow drags ignored |
+| Parry (swipe against the blow), perfect parry | Works, tested |
+| Dodge left/right with correct-side rule, perfect dodge and counter | Works, tested |
+| Block, stamina, guard break, unblockable attacks | Works, tested |
+| Chains (alternate directions), repeat-cut penalty, input buffering | Works, tested |
+| Spam punishment (deflect, stamina recoil, boss counter) | Works. A swipe-spam bot loses to every foe |
+| Boss AI: weighted combos, delayed attacks, phases, posture/stagger, retreat and lunge, adapts to block/dodge/parry habits | Works, tested |
+| Fairness checks | Every attack has at least one valid defence and a windup of 0.45 s or more; a skilled bot beats every foe |
+| 8 guardians (the 6 in the brief plus The Gravewarden and The Pale Huntsman), 6 lesser foes | In, each with its own attack table, look, arena, intro card |
+| Elements: frost build-up and frostbite, burn, resistance, weapon vs weakness | Works, tested |
+| Progression: XP, levels, 7 attributes, 61 items in 8 slots, 4 weapon classes with different speed and cost, upgrades, mastery, shop | Works, tested |
+| Equipment changes the knight's look (armour colour, helm, weapon model, shield, cloak) | Works |
+| Six regions, 5 stages each: fights, caches, shrines, levers that open permanent shortcuts, hidden caches, one optional boss | Works, tested |
+| Death keeps XP, gold and loot; route resets; New Game Plus scaling and exclusive gear | Works, tested |
+| Saves: atomic write, backup recovery from a corrupt file, migration of old saves, save on app pause | Works, tested |
+| UI: title, colour choice, sanctuary (journey, armory with comparison, blacksmith, character, settings), road, HUD, pause, victory, death, ending | Works |
+| Feedback: hit-stop, camera shake, sparks, blade trails, haptics calls, slow motion on perfect dodge, finisher and death sequences | In. Haptics untested (needs a device) |
+| Audio: 37 sound effects, 4 ambiences, 5 music loops, phase-2 music layer | In. **Nobody has listened to it** (see below) |
+| Settings: quality, frame cap, volumes, haptics, shake, prompts, forgiving timing, reduced flashes | Works |
+
+## Placeholder or unverified (must be addressed before release)
+1. **Character and environment art.** Fighters are built from cylinders, boxes and spheres with procedural IK animation. They read clearly and each boss has a distinct silhouette and palette, but this is nowhere near the realistic look in the brief. Needs real modelled, textured, rigged characters and environment kits (artist, licensed packs, or a 3D generation service).
+2. **Audio quality.** All sound was synthesized by script and checked only for levels, clipping and loop seams. Roars, choir pads, rain and fire are the likeliest to sound synthetic. Needs an ear, and probably recorded or licensed replacements.
+3. **Feel and balance on a real phone.** Swipe thresholds, parry windows (0.30 s, 0.12 s perfect), boss health and damage are tuned by bots, not hands. Expect a tuning pass after the first device playtest.
+4. **Performance.** Not profiled on any device. Measured under software rendering: about 380 to 410 draw calls and 23k to 25k triangles per frame in a duel. Triangle count is light; draw calls are high for older phones because every arena block is its own mesh.
+5. **iOS build.** `export_presets.cfg` is hand-written and has never been opened in the editor or exported. See `docs/IOS_BUILD.md`.
+6. **Name.** "Hollow Reign" is not cleared. A web search found no identical game but USPTO, EUIPO and the App Store were not searched. See `docs/RESEARCH.md`.
+7. **Cinematics.** Boss intros and the finisher are in-engine camera moves. There is no pre-rendered opening or trailer.
+
+## Known bugs and rough edges
+- Weapons pass through bodies; contact is decided by the rules, not by mesh collision. Sparks are placed at the expected meeting point.
+- The intro orbit can briefly clip the knight's sword into frame.
+- Some menu text is small for a phone (13 to 15 px at 720p reference height).
+- Cathedral window glows are flat quads.
+- No engine licence screen yet (required by Godot's MIT notice).
+- No localisation; English only.
+
+## Blocked on you
+- A Mac with Xcode 26 or later, and an Apple Developer account, to build, sign and test.
+- A decision on art: commission, licensed packs, or a generation service (and Higgsfield access if you want concept art and trailers from it).
+- A proper trademark search on the name.
+
+## Next tasks, in order
+1. Open on a Mac, fix any export warnings, run on an iPhone. Tune swipe and parry feel by hand.
+2. Profile. Merge static arena meshes to cut draw calls; confirm 60 fps and thermal behaviour.
+3. Replace the knight and the Ashen Sentinel with real models to set the art bar, then roll through the roster.
+4. Listen to the audio; replace the weakest sounds.
+5. Larger text option, licence screen, VoiceOver labels on menus.
+6. More roads per region and more enemy variants for New Game Plus.

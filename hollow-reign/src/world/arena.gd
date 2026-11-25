@@ -16,6 +16,8 @@ const THEMES := {
 		"stone": "#3c4440", "floor": "#1a2422", "fire": "#5fe0b8", "layout": "vault", "particles": "motes", "amb": "#10201c", "wet": true},
 	"citadel": {"sky": "#0c1220", "horizon": "#5a7088", "fog": "#3a4a5c", "fog_d": 0.045, "sun": "#bcd4f0", "sun_e": 1.3, "sun_rot": Vector3(-35, 140, 0),
 		"stone": "#6a7480", "floor": "#8a96a2", "fire": "#7fd4ff", "layout": "hall", "particles": "snow", "amb": "#3c4c60"},
+	"sanctuary": {"sky": "#07070a", "horizon": "#1c1a1c", "fog": "#15120f", "fog_d": 0.045, "sun": "#c8b8a0", "sun_e": 0.5, "sun_rot": Vector3(-50, 160, 0),
+		"stone": "#5c564e", "floor": "#48423a", "fire": "#ffb45a", "layout": "chapel", "particles": "motes", "amb": "#3a3028"},
 	"throne": {"sky": "#060404", "horizon": "#2a1a10", "fog": "#16100c", "fog_d": 0.03, "sun": "#ffd9a0", "sun_e": 0.9, "sun_rot": Vector3(-48, 180, 0),
 		"stone": "#4a443c", "floor": "#2e2a26", "fire": "#ffc860", "layout": "throne", "particles": "motes", "amb": "#2a2018", "wet": true},
 }
@@ -370,6 +372,28 @@ func _layout_throne() -> void:
 		sp.rotation_degrees.z = -sx * 8.0
 	# a long, rotted carpet
 	box(Vector3(3.0, 0.02, 40.0), Vector3(0, 0.012, -8.0), Look.flat(Color("#2a0808"), 1.0))
+
+func _layout_chapel() -> void:
+	# a small round chapel: the one place the curse has not reached
+	for i in 10:
+		var a := TAU * i / 10.0 + 0.3
+		var p := Vector3(cos(a) * 7.5, 0, sin(a) * 7.5 - 1.0)
+		if p.z > 4.0:
+			continue
+		column(p, 5.5, 0.42, i == 3)
+		box(Vector3(4.6, 7.0, 0.8), Vector3(cos(a + 0.31) * 9.2, 3.5, sin(a + 0.31) * 9.2 - 1.0), null, Vector3(0, -rad_to_deg(a + 0.31) + 90.0, 0))
+	box(Vector3(2.4, 1.0, 1.1), Vector3(0, 0.5, -5.0))
+	box(Vector3(2.8, 0.14, 1.4), Vector3(0, 1.07, -5.0))
+	window_glow(Vector3(0, 4.6, -8.6), Vector2(0.9, 3.2))
+	fire(Vector3(0, 1.32, -5.0), 2.6, 11.0, false)
+	for i in 9:
+		var c := Vector3(rng.randf_range(-1.1, 1.1), 1.14, -5.0 + rng.randf_range(-0.5, 0.5))
+		var h := rng.randf_range(0.1, 0.32)
+		cyl(0.025, 0.03, h, c + Vector3(0, h * 0.5, 0), Look.flat(Color("#d8cfb8")), 6)
+		box(Vector3(0.02, 0.04, 0.02), c + Vector3(0, h + 0.03, 0), Look.glow(Color(theme.fire), 3.0))
+	for sx: float in [-1.0, 1.0]:
+		fire(Vector3(sx * 3.4, 1.3, -2.5), 1.8, 8.0)
+	rubble(Vector3(5, 0, -5), 5, 1.2)
 
 # ---------------------------------------------------------------- particles
 func _quad(s: float) -> QuadMesh:

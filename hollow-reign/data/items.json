@@ -61,7 +61,7 @@
    "rarity": "common",
    "damage": 14,
    "price": 0,
-   "desc": "The sword you were buried with. It has not forgotten its work.",
+   "desc": "The sword you woke holding. Somebody put it in your hand, and it has not forgotten its work.",
    "element": null,
    "ng_min": 0,
    "crit": 0,
@@ -1313,7 +1313,7 @@
   },
   {
    "id": "x_name",
-   "name": "Your Name",
+   "name": "A Name of Your Own",
    "slot": "relic",
    "rarity": "legendary",
    "defense": 0,

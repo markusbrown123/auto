@@ -81,7 +81,8 @@ func _greet() -> void:
 		return
 	if Game.just_died:
 		Game.just_died = false
-		Story.play("rebirth_%d" % (randi() % 6))
+		# the returns are written as a progression: play them in order, then stay on the last
+		Story.play("rebirth_%d" % clampi(int(Game.profile.deaths) - 1, 0, 5))
 	elif Game.profile.cleared.has("courtyard"):
 		Story.play("sanctuary_return")
 

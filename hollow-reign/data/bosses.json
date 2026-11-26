@@ -10107,7 +10107,7 @@
    ],
    "music": "combat_a",
    "arena": "courtyard",
-   "intro": "He kept the gate when there was a kingdom behind it. He keeps it still.",
+   "intro": "A gate sergeant. They told him the post was for one winter.",
    "rig": {
     "scale": 1.45,
     "bulk": 1.25,
@@ -11306,7 +11306,7 @@
   {
    "id": "crimson_widow",
    "name": "The Crimson Widow",
-   "title": "Mourner of the Cathedral Steps",
+   "title": "Commander of the Last Rising",
    "region": "cathedral",
    "boss": true,
    "hp": 3430,
@@ -11337,7 +11337,7 @@
    ],
    "music": "combat_a",
    "arena": "cathedral_steps",
-   "intro": "She was promised a wedding in the Cathedral. She has been waiting at the doors ever since.",
+   "intro": "She led the rising against the Everbound. Something of theirs has kept her alive to regret it.",
    "rig": {
     "scale": 1.12,
     "bulk": 0.78,
@@ -11848,7 +11848,7 @@
   {
    "id": "cathedral_beast",
    "name": "The Cathedral Beast",
-   "title": "What the Congregation Became",
+   "title": "Keeper of the Lower Works",
    "region": "cathedral",
    "boss": true,
    "hp": 5250,
@@ -11883,7 +11883,7 @@
    ],
    "music": "combat_b",
    "arena": "cathedral",
-   "intro": "They prayed to be made strong enough to endure. They were answered.",
+   "intro": "It was made to keep what lies under the cathedral. Nobody remembers telling it to stop.",
    "rig": {
     "scale": 1.75,
     "bulk": 1.7,
@@ -12370,7 +12370,7 @@
    ],
    "music": "combat_b",
    "arena": "crypt",
-   "intro": "He buried every king of this line. He does not intend to bury another.",
+   "intro": "He knows what is kept down here, and he has been gentle with it for a very long time.",
    "rig": {
     "scale": 1.5,
     "bulk": 1.3,
@@ -12786,7 +12786,7 @@
    ],
    "music": "combat_b",
    "arena": "citadel",
-   "intro": "He ordered the gates frozen shut so that nothing could come in. Nothing has gone out either.",
+   "intro": "One of the first to live forever. He tried to stop. This was as close as he could get.",
    "rig": {
     "scale": 1.6,
     "bulk": 1.3,
@@ -13369,7 +13369,7 @@
   {
    "id": "forgotten_monarch",
    "name": "The Forgotten Monarch",
-   "title": "Last Ruler of the Fallen Realm",
+   "title": "Steward of the Crown",
    "region": "throne",
    "boss": true,
    "hp": 9800,
@@ -13404,7 +13404,7 @@
    ],
    "music": "final",
    "arena": "throne",
-   "intro": "You knelt to this crown once. It remembers. You do not.",
+   "intro": "He was never a king. He was the one left to keep the machines running.",
    "rig": {
     "scale": 1.5,
     "bulk": 1.1,
@@ -14437,7 +14437,7 @@
   {
    "id": "cinder_wyrm",
    "name": "Veyrath, the Cinder Wyrm",
-   "title": "Last of the Royal Brood",
+   "title": "The Siege That Outlived Its War",
    "region": "roost",
    "boss": true,
    "hp": 6650,
@@ -14476,7 +14476,7 @@
    ],
    "music": "combat_b",
    "arena": "roost",
-   "intro": "The kings rode her mother to war. She has had the sky to herself since, and she has not missed them.",
+   "intro": "Built to break sieges, and woken under the mountain when there was nothing left to besiege.",
    "rig": {
     "kind": "dragon",
     "scale": 2.3,
@@ -15585,7 +15585,7 @@
   {
    "id": "devourer",
    "name": "The Devourer of Names",
-   "title": "First of the Soul-Eaters",
+   "title": "What the Crown Discarded",
    "region": "deep",
    "boss": true,
    "hp": 5250,
@@ -15616,7 +15616,7 @@
    ],
    "music": "final",
    "arena": "deep",
-   "intro": "It ate the kingdom's dead until none were left. Then it began on the living. It knows what you were called.",
+   "intro": "Every mind the Crown threw away, in one body. It would like, very much, to be someone.",
    "rig": {
     "scale": 1.7,
     "bulk": 1.0,

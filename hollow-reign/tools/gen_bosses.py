@@ -183,7 +183,7 @@ B += [
 B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of the Fallen Courtyard", region="courtyard", boss=True,
  hp=620, armor=0.1, posture=100, patience=3, adapt=0.5, idle=[1.0,1.7], weak="frost", xp=400, gold=300,
  loot=[["w_ashen_great",1.0],["s_tower",0.6],["a_ash_chest",0.5],["r_ember",0.5]], music="combat_a", arena="courtyard",
- intro="He kept the gate when there was a kingdom behind it. He keeps it still.",
+ intro="A gate sergeant. They told him the post was for one winter.",
  rig=dict(scale=1.45,bulk=1.25,metal="#3e3a37",cloth="#2a1410",weapon="greatsword",eye="#ff6a2a",helm="great",crest="plume",ember=True,cape=True),
  punish=A("D",0.55,22,swing=0.28),
  phases=[
@@ -243,10 +243,10 @@ B.append(dict(id="hollow_executioner", name="The Hollow Executioner", title="Las
    C("reap",2,[A("R",1.4,38,unblockable=True,dodge="none",kind="sweep")],1.8,tags=("anti_block","anti_dodge")),
   ])]))
 # ---------------------------------------------------------------- 3 Crimson Widow
-B.append(dict(id="crimson_widow", name="The Crimson Widow", title="Mourner of the Cathedral Steps", region="cathedral", boss=True,
+B.append(dict(id="crimson_widow", name="The Crimson Widow", title="Commander of the Last Rising", region="cathedral", boss=True,
  hp=980, armor=0.05, posture=85, patience=2, adapt=1.0, idle=[0.5,1.0], weak=None, xp=1000, gold=650,
  loot=[["w_twin_fangs",1.0],["r_widow",0.7],["a_vigil_gauntlets",0.5]], music="combat_a", arena="cathedral_steps",
- intro="She was promised a wedding in the Cathedral. She has been waiting at the doors ever since.",
+ intro="She led the rising against the Everbound. Something of theirs has kept her alive to regret it.",
  rig=dict(scale=1.12,bulk=0.78,metal="#5a1616",cloth="#7a1010",weapon="dual",eye="#ff4a4a",helm="veil",cape=True,skirt=True),
  punish=A("L",0.4,18,swing=0.2),
  phases=[
@@ -269,10 +269,10 @@ B.append(dict(id="crimson_widow", name="The Crimson Widow", title="Mourner of th
    C("red_dance",2,[A("L",0.9,26,unblockable=True,dodge="L",parry=False,kind="sweep"),A("R",0.7,26,unblockable=True,dodge="R",parry=False,kind="sweep")],1.7,tags=("anti_block","anti_parry")),
   ])]))
 # ---------------------------------------------------------------- 4 Cathedral Beast
-B.append(dict(id="cathedral_beast", name="The Cathedral Beast", title="What the Congregation Became", region="cathedral", boss=True,
+B.append(dict(id="cathedral_beast", name="The Cathedral Beast", title="Keeper of the Lower Works", region="cathedral", boss=True,
  hp=1500, armor=0.08, posture=130, patience=3, adapt=0.9, idle=[0.8,1.5], weak="fire", xp=1500, gold=900,
  loot=[["w_censer_sword",1.0],["x_bell",0.7],["s_reliquary",0.6],["a_vigil_chest",0.5]], music="combat_b", arena="cathedral",
- intro="They prayed to be made strong enough to endure. They were answered.",
+ intro="It was made to keep what lies under the cathedral. Nobody remembers telling it to stop.",
  rig=dict(scale=1.75,bulk=1.7,metal="#8c7a52",cloth="#4a4038",weapon="claws",eye="#ffe08a",helm="beast",hunch=0.5,horns=True),
  punish=A("L",0.5,26,swing=0.25,kind="sweep"),
  phases=[
@@ -298,7 +298,7 @@ B.append(dict(id="cathedral_beast", name="The Cathedral Beast", title="What the 
 B.append(dict(id="gravewarden", name="The Gravewarden", title="Keeper of the Sunken Crypt", region="crypt", boss=True,
  hp=2000, armor=0.18, posture=140, patience=3, adapt=0.9, idle=[0.9,1.5], weak="fire", xp=1900, gold=1100,
  loot=[["w_crypt_great",1.0],["a_vigil_legs",0.5],["a_vigil_helm",0.5],["r_iron",0.3]], music="combat_b", arena="crypt",
- intro="He buried every king of this line. He does not intend to bury another.",
+ intro="He knows what is kept down here, and he has been gentle with it for a very long time.",
  rig=dict(scale=1.5,bulk=1.3,metal="#48564e",cloth="#1c2624",weapon="greatsword",eye="#7affc8",helm="great",crest="none",cape=True,lantern=True),
  punish=A("U",0.5,28,swing=0.25,kind="thrust"),
  phases=[
@@ -321,7 +321,7 @@ B.append(dict(id="gravewarden", name="The Gravewarden", title="Keeper of the Sun
 B.append(dict(id="frostbound_king", name="The Frostbound King", title="Sovereign of the Frozen Citadel", region="citadel", boss=True,
  hp=2100, armor=0.2, posture=150, patience=3, adapt=1.0, idle=[0.9,1.5], weak="fire", xp=2600, gold=1500,
  loot=[["w_frost_great",1.0],["s_rime",0.6],["x_tear",0.7],["a_frost_chest",0.6],["r_frost",0.5]], music="combat_b", arena="citadel",
- intro="He ordered the gates frozen shut so that nothing could come in. Nothing has gone out either.",
+ intro="One of the first to live forever. He tried to stop. This was as close as he could get.",
  rig=dict(scale=1.6,bulk=1.3,metal="#8fb0c0",cloth="#243848",weapon="greatsword",weapon_glow="#7fd4ff",eye="#9fe4ff",helm="crown",cape=True,frost=True),
  punish=A("U",0.5,30,swing=0.25,kind="thrust",element="frost"),
  phases=[
@@ -349,10 +349,10 @@ B.append(dict(id="frostbound_king", name="The Frostbound King", title="Sovereign
    C("sceptre",2,[A("U",0.9,26,guard=120,kind="thrust")],1.2,tags=("anti_block",)),
   ])]))
 # ---------------------------------------------------------------- 6 Forgotten Monarch
-B.append(dict(id="forgotten_monarch", name="The Forgotten Monarch", title="Last Ruler of the Fallen Realm", region="throne", boss=True,
+B.append(dict(id="forgotten_monarch", name="The Forgotten Monarch", title="Steward of the Crown", region="throne", boss=True,
  hp=2800, armor=0.15, posture=160, patience=2, adapt=1.4, idle=[0.6,1.2], weak=None, xp=5000, gold=3000,
  loot=[["w_monarch",1.0],["r_crown",1.0],["a_regal_chest",0.7],["a_regal_helm",0.7]], music="final", arena="throne",
- intro="You knelt to this crown once. It remembers. You do not.",
+ intro="He was never a king. He was the one left to keep the machines running.",
  rig=dict(scale=1.5,bulk=1.1,metal="#b89b5e",cloth="#3a0e0e",weapon="sword",weapon_glow="#ffd98a",eye="#ffffff",helm="crown",cape=True,skirt=True,regal=True),
  punish=A("R",0.42,30,swing=0.22),
  phases=[
@@ -404,10 +404,10 @@ os.makedirs("data", exist_ok=True)
 def breath(dir, windup, dmg, el="fire", **k):
     # a sweeping gout: cannot be blocked or parried, only stepped out of
     return A(dir, windup, dmg, unblockable=True, parry=False, kind="breath", element=el, swing=0.4, **k)
-B.append(dict(id="cinder_wyrm", name="Veyrath, the Cinder Wyrm", title="Last of the Royal Brood", region="roost", boss=True,
+B.append(dict(id="cinder_wyrm", name="Veyrath, the Cinder Wyrm", title="The Siege That Outlived Its War", region="roost", boss=True,
  hp=1900, armor=0.22, posture=170, patience=3, adapt=0.9, idle=[0.9,1.6], weak="frost", xp=2400, gold=1400,
  loot=[["w_wyrmfang",1.0],["s_scale",0.7],["a_wyrm_chest",0.7],["a_wyrm_helm",0.6],["r_brood",0.5]], music="combat_b", arena="roost",
- intro="The kings rode her mother to war. She has had the sky to herself since, and she has not missed them.",
+ intro="Built to break sieges, and woken under the mountain when there was nothing left to besiege.",
  rig=dict(kind="dragon",scale=2.3,size=1.25,hide="#5a2a20",belly="#b8602a",eye="#ffb040",glow="#ff5a14",wings=True),
  punish=A("U",0.5,30,swing=0.24,kind="bite"),
  phases=[
@@ -462,10 +462,10 @@ B.append(dict(id="rimewyrm", name="Skeldra, the White Ruin", title="What the Kin
    C("chain_lash",2,[A("R",1.1,30,guard=130,kind="sweep")],1.3,tags=("anti_block",)),
   ])]))
 # ---------------------------------------------------------------- The Devourer of Names
-B.append(dict(id="devourer", name="The Devourer of Names", title="First of the Soul-Eaters", region="deep", boss=True,
+B.append(dict(id="devourer", name="The Devourer of Names", title="What the Crown Discarded", region="deep", boss=True,
  hp=1500, armor=0.1, posture=140, patience=2, adapt=1.3, idle=[0.6,1.2], weak=None, xp=3600, gold=2200,
  loot=[["w_hunger",1.0],["x_name",1.0],["a_hollow_chest",0.6]], music="final", arena="deep",
- intro="It ate the kingdom's dead until none were left. Then it began on the living. It knows what you were called.",
+ intro="Every mind the Crown threw away, in one body. It would like, very much, to be someone.",
  rig=dict(scale=1.7,bulk=1.0,metal="#2a2230",cloth="#0e0a14",weapon="claws",eye="#d8a8ff",helm="hood",wraith=True,maw=True,cape=True,horns=True),
  punish=A("U",0.45,26,drain=True,swing=0.22,kind="thrust"),
  phases=[

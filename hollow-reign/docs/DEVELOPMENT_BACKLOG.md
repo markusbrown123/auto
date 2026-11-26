@@ -38,7 +38,7 @@ Update this file in the same commit as the work.
 | B2 | Casting profiles (`docs/VOICE_BIBLE.md`) and audition reel with several candidates per role | DOING — profiles written; measured catalogue building; reel next, then BLOCKED on owner's ears |
 | B3 | Combat effects synchronised to contact frames; footsteps, armour, effort sounds | TODO |
 | B4 | Adaptive music layers | TODO |
-| B5 | `SOUND_DESIGN_BIBLE.md`, `SOUNDTRACK_PLAN.md`, `AUDIO_ASSET_MANIFEST.md` | TODO |
+| B5 | `SOUND_DESIGN_BIBLE.md`, `SOUNDTRACK_PLAN.md`, `AUDIO_ASSET_MANIFEST.md` | DONE — written; all audio labelled unheard |
 
 ## C. Cinematics
 | # | Task | Status |
@@ -46,14 +46,14 @@ Update this file in the same commit as the work.
 | C1 | Hybrid: live knight over filmed backgrounds, so equipment and body show | TODO |
 | C2 | Re-film crowded Courtyard stops 3 and 5 | TODO |
 | C3 | Memories, conversations, finishers | TODO |
-| C4 | `CAMPAIGN_SCRIPT.md`, `CINEMATIC_SCRIPT.md` | TODO |
+| C4 | `CAMPAIGN_SCRIPT.md`, `CINEMATIC_SCRIPT.md` | DONE — written; new lines marked proposed |
 
 ## D. Campaign roll-out (after A is accepted)
 | # | Task | Status |
 |---|---|---|
-| D1 | Unique mechanics and movement per boss (8 remaining + Devourer) | TODO |
-| D2 | Dragons on the stance system | TODO |
-| D3 | Environment kits for the six regions still on primitive geometry | TODO — costs about $3–4 each on Tripo |
+| D1 | Unique mechanics and movement per boss (8 remaining + Devourer) | DOING — one rule trait each (`TRAITS` in `tools/gen_bosses.py`), tested; pattern sets not yet widened like the Sentinel's |
+| D2 | Dragons on the stance system | DOING — dragons now ride the turning line; needs a capture |
+| D3 | Environment kits for the six regions still on primitive geometry | DOING — 42 concepts made, models generating (`tools/kit_props.py`), layouts written in `arena.gd`; needs captures per region |
 | D4 | Optional quests, lore collectibles, memories | TODO |
 | D5 | Three endings, New Game Plus check | TODO |
 | D6 | Modular armour customisation | TODO |
@@ -65,6 +65,16 @@ Update this file in the same commit as the work.
 | E2 | iOS export preparation | BLOCKED — needs a Mac with Xcode and an iPhone (owner) |
 | E3 | Device performance | BLOCKED — same |
 | E4 | Audio sign-off | BLOCKED — needs the owner to listen |
+
+## F. Story and data consistency (found while writing the campaign and audio documents)
+| # | Task | Status |
+|---|---|---|
+| F1 | Boss intro cards, region blurbs and some item text still tell the older story (a returning servant of the crown); the story bible says the Unbound is a newly made person | DONE — intro cards, titles, region blurbs and two items rewritten to the story bible |
+| F2 | Master brief asks for nine guardians and three dragons; data has eight guardians, the Devourer and two dragons (no Azhurion) | TODO — add Azhurion as the third dragon; ninth guardian needs a design |
+| F3 | Story bible wants the Roost and the Deep optional; data chains all eight regions, so the third ending's condition cannot fail | TODO |
+| F4 | Missing scenes: Huntsman, Veyrath and Devourer deaths; all of Skeldra; the Unbound's origin; stage remarks outside the Courtyard | TODO — proposed text in `CAMPAIGN_SCRIPT.md`; recording waits on casting |
+| F5 | Memory clip is 5 s under about 20 s of speech; `sentinel_travel` clip missing; all footage shows the male knight | TODO (see C1) |
+| F6 | Phase music layer is hard-coded to one cue and may not fit generated boss tracks; one roar set for every boss; `menu` cue still used as exploration music in seven regions | TODO — see `SOUNDTRACK_PLAN.md` |
 
 ## Decisions waiting on the owner (do not block other work)
 - Paid animation library, if the free ones leave gaps (see A13).

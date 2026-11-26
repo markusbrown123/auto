@@ -95,7 +95,12 @@ func _duck(on: bool) -> void:
 		var idx := AudioServer.get_bus_index(bus_name)
 		if idx >= 0:
 			var base: float = linear_to_db(maxf(float(Game.settings[Sfx.BUS_SETTING[bus_name]]), 0.0001)) + float(Sfx.BUS_TRIM[bus_name])
-			AudioServer.set_bus_volume_db(idx, base - (9.0 if on else 0.0))
+			# ramp rather than jump: down quickly as the line starts, back up slowly after it
+			var from: float = AudioServer.get_bus_volume_db(idx)
+			var to: float = base - (9.0 if on else 0.0)
+			var tw := create_tween()
+			tw.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(idx, v), from, to, 0.18 if on else 0.6)
 
 ## Plays a scene line by line. Await it to block, or call without await to let it run alongside play.
 func play(id: String, force: bool = false) -> void:

@@ -11,7 +11,7 @@ def lever(label, hint, flag): return dict(type="lever", label=label, hint=hint, 
 def st(prompt, *opts, pouches=1): return dict(prompt=prompt, options=list(opts), pouches=pouches)
 R = [
  dict(id="courtyard", name="The Fallen Courtyard", theme="courtyard", amb="wind", requires=None,
-  blurb="The gate you once rode out of. Morning still comes here. Nothing else does.",
+  blurb="The gate of a fortress nobody has garrisoned in centuries. Morning still comes here. Nothing else does.",
   shortcut=dict(flag="courtyard_gate", stage=4, label="The Winch Gate"),
   stages=[
    st("The outer wall has fallen in on itself. Something in garrison plate still walks its rounds.",
@@ -56,7 +56,7 @@ R = [
       boss("The Clearing", "A cleaver drags somewhere in the dark.", "hollow_executioner")),
   ]),
  dict(id="cathedral", name="The Cathedral of Ash", theme="cathedral", amb="fire", requires="blackwood",
-  blurb="The faithful burned their own cathedral to keep it holy. It is still burning.",
+  blurb="A cathedral raised over a research works. Someone burned it to keep what was underneath. It is still burning.",
   shortcut=dict(flag="cathedral_door", stage=4, label="The Sacristy Door"),
   stages=[
    st("Pilgrims' steps, worn into bowls. Ash falls like first snow.",
@@ -77,7 +77,7 @@ R = [
       boss("The Crossing", "The bell tolls by itself.", "cathedral_beast")),
   ]),
  dict(id="crypt", name="The Sunken Crypt", theme="crypt", amb="crypt", requires="cathedral",
-  blurb="The kings were buried under the cathedral. Then the river was let in.",
+  blurb="Not a burial place. The minds the Crown stored were kept here, and then the river was let in.",
   shortcut=dict(flag="crypt_sluice", stage=4, label="The Sluice Gate"),
   stages=[
    st("Stairs descend into black water. Lamps burn beneath its surface.",
@@ -99,7 +99,7 @@ R = [
       boss("The First Tomb", "A lantern, held very still.", "gravewarden")),
   ]),
  dict(id="roost", name="The Wyrm's Roost", theme="roost", amb="wind", requires="crypt",
-  blurb="The high crag where the royal dragons were stabled. One was never sent to war. She is grown now.",
+  blurb="A volcanic fortress. Under it they kept a thing built to break sieges, and never told it the wars were over.",
   shortcut=dict(flag="roost_chain", stage=4, label="The Feeding Chain"),
   stages=[
    st("The cliff road. The stone is glazed, as if it ran once.",
@@ -144,7 +144,7 @@ R = [
       boss("The Winter Throne", "He has not moved in an age. He moves now.", "frostbound_king")),
   ]),
  dict(id="deep", name="The Hollow Deep", theme="deep", amb="crypt", requires="citadel",
-  blurb="Under the throne there is a place where the kingdom's dead were sent. Something was fed on them.",
+  blurb="Under the throne is where the Crown sent what it had no use for. All of it is still down there, together.",
   shortcut=dict(flag="deep_stair", stage=4, label="The Unlit Stair"),
   stages=[
    st("The stair goes down past where stairs should stop. People stand along it, facing the wall.",
@@ -166,7 +166,7 @@ R = [
       boss("The Bottom", "It says a name. It might be yours.", "devourer")),
   ]),
  dict(id="throne", name="The Hollow Throne", theme="throne", amb="wind", requires="deep",
-  blurb="The heart of the kingdom. You have been here before. You are always here before.",
+  blurb="The last hall, and the machine at the end of it. Somebody stayed to keep it running.",
   shortcut=dict(flag="throne_door", stage=4, label="The King's Door"),
   stages=[
    st("The royal mile. Statues of every monarch, each with the face struck off.",

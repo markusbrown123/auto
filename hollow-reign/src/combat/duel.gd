@@ -113,13 +113,15 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	foe_rig.position = Vector3(0, 0, -gap * 0.5)
 	foe_rig.rotation.y = PI
 	foot = foe.get("footwork", foot)
-	_can_step = foe_rig is FighterRig
-	if _can_step:
-		for r in [player_rig, foe_rig]:
-			r.walking = true
-			r.combat_steps = true
-		f_back = float(foot.keep)
-		f_back_t = f_back
+	# dragons ride the same turning line as everyone else: they circle, close and give ground too
+	_can_step = true
+	player_rig.walking = true
+	player_rig.combat_steps = true
+	if foe_rig is FighterRig:
+		foe_rig.walking = true
+		foe_rig.combat_steps = true
+	f_back = float(foot.keep)
+	f_back_t = f_back
 
 	var key := SpotLight3D.new()
 	key.light_color = Color(arena.theme.sun).lerp(Color.WHITE, 0.5)

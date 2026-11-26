@@ -1,6 +1,6 @@
 extends Node
-## Sound effects, ambience and crossfading music. All audio is original,
-## synthesized by tools/gen_audio.py.
+## Sound effects, ambience and crossfading music, mixed on six buses. All audio is original:
+## effects are synthesised by tools/gen_audio.py; four music cues and all speech are generated.
 
 const VARIANTS := {"swing": 3, "clash": 3, "hit_armor": 2, "hit_flesh": 2, "block": 2, "roar": 3, "footstep": 2}
 ## Mix buses and the setting that scales each, with a fixed trim so the layers sit in order:
@@ -8,8 +8,9 @@ const VARIANTS := {"swing": 3, "clash": 3, "hit_armor": 2, "hit_flesh": 2, "bloc
 const BUSES := ["Music", "Dialogue", "Combat", "Ambience", "Interface", "Cinematics"]
 const BUS_SETTING := {"Music": "music", "Dialogue": "voice", "Combat": "sfx", "Ambience": "sfx", "Interface": "sfx", "Cinematics": "sfx"}
 const BUS_TRIM := {"Music": -3.0, "Dialogue": 0.0, "Combat": -1.0, "Ambience": -7.0, "Interface": -5.0, "Cinematics": -2.0}
-const INTERFACE_SOUNDS := ["loot", "levelup", "ui_tap", "ui_back", "bell"]
-const AMBIENT_SOUNDS := ["footstep"]
+const INTERFACE_SOUNDS := ["loot", "levelup", "ui_tap", "ui_back", "ui_confirm"]
+const AMBIENT_SOUNDS := ["bell"]
+const CINEMATIC_SOUNDS := ["victory", "death", "finisher"]      # stingers that belong to the staged moments
 var _cache := {}
 var _pool: Array = []
 var _next := 0
@@ -72,7 +73,7 @@ func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float 
 	var p: AudioStreamPlayer = _pool[_next]
 	_next = (_next + 1) % _pool.size()
 	p.stream = s
-	p.bus = "Interface" if INTERFACE_SOUNDS.has(sound) else ("Ambience" if AMBIENT_SOUNDS.has(sound) else "Combat")
+	p.bus = "Interface" if INTERFACE_SOUNDS.has(sound) else ("Ambience" if AMBIENT_SOUNDS.has(sound) else ("Cinematics" if CINEMATIC_SOUNDS.has(sound) else "Combat"))
 	p.volume_db = vol_db
 	p.pitch_scale = pitch * randf_range(1.0 - jitter, 1.0 + jitter)
 	p.play()

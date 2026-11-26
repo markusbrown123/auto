@@ -105,3 +105,16 @@ Following the recommendation above, the Courtyard's seven stops were filmed as a
 - Device testing (no hardware attached).
 - Audio audition: reels are in `marketing/audition/`; nobody has listened yet.
 - Props for choices already taken still appear in the filmed views.
+
+## Hybrid presentation: findings (2026-11-26)
+
+Question from the brief: can filmed environments be combined with live, equipment-visible characters?
+
+- **The footage in this project is rendered from the game's own scenes.** It is not higher quality than the live scene, only cheaper to play back. So "film the background, composite a live knight" would need a per-frame camera track exported with every clip and a second 3D pass matched to it, to gain nothing the live scene does not already give.
+- **What the footage costs:** it bakes in one knight and one loadout. That was the visible fault (the female knight and any other armour never appeared).
+- **Chosen approach:**
+  1. Exploration walks are filmed once per body (`courtyard_road_N` and `courtyard_f_road_N`), now with the authored walk cycle. The road screen picks the film that matches the player's knight. Equipment is still the starting set in these films.
+  2. Combat stays real-time. It is the only place the player's actual weapon, shield and armour tint matter to play, and the only place input latency matters.
+  3. Footage made by a video model (the Sentinel's memory) is kept for scenes with no player character in them, where continuity of equipment cannot break.
+- **If equipment-accurate walks are wanted later:** render the road live instead of filming it. The Courtyard road scene (`src/cine/clip_stage.gd`) already runs in real time when filmed; exposing it as a playable screen is a smaller job than a compositing pipeline. Cost: the walk then draws about 400k triangles per frame instead of decoding a video.
+- **Not done:** live rendering of the road; per-loadout films; memory clip re-cut to cover its 20 s of speech.

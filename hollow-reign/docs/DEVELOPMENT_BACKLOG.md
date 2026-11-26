@@ -31,7 +31,7 @@ Update this file in the same commit as the work.
 | A16 | Each of the 16 combos visually distinct | DOING — finishing cut uses a body clip per combo kind (overhead, lunge, shield dash, long swing); needs captures per combo |
 | A17 | Authored clips verified on female knight and each boss (`--screen=animtest --model=…`) | DOING — clean on knight_f, Sentinel, Executioner, Widow, Gravewarden; Beast, Frost King, Huntsman, Monarch, Devourer unchecked |
 | A18 | Sentinel: richer attack set, own movement style | DONE — 20 patterns, three phases, drill/thrust/give-ground identity; balance tests pass |
-| A19 | Subtle temporary sword trails; replace drawn parry arrow with blade glint | DOING — trails exist; seam and parry prompts shrunk and dimmed; blade glint not done |
+| A19 | Subtle temporary sword trails; replace drawn parry arrow with blade glint | DONE — trails exist; prompts shrunk and dimmed; blade glints as each blow commits; needs a capture |
 | A20 | Camera redesign for the duel | DOING — camera now tracks the knight's real position and sits wider |
 | A21 | Courtyard art pass | TODO |
 | A22 | Visual regression test (golden captures, tolerance) | DOING — `tools/visual_test.sh` written; golden images not yet captured |
@@ -50,7 +50,7 @@ Update this file in the same commit as the work.
 ## C. Cinematics
 | # | Task | Status |
 |---|---|---|
-| C1 | Hybrid: live knight over filmed backgrounds, so equipment and body show | TODO |
+| C1 | Hybrid: live knight over filmed backgrounds, so equipment and body show | DOING — investigated (`CINEMATIC_COMBAT.md`): compositing rejected; road is being re-filmed per body with the authored walk; live-rendered road is the route to equipment-accurate walks |
 | C2 | Re-film crowded Courtyard stops 3 and 5 | TODO |
 | C3 | Memories, conversations, finishers | TODO |
 | C4 | `CAMPAIGN_SCRIPT.md`, `CINEMATIC_SCRIPT.md` | DONE — written; new lines marked proposed |

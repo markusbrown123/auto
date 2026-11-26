@@ -612,7 +612,7 @@ var _rolling := false
 func roll(side: float) -> void:
 	_dodge_side = side
 	_rolling = true
-	_go(Mode.DODGE, 0.75)
+	_go(Mode.DODGE, 0.84)      # ends as the rules free the knight, not before
 
 func roar() -> void:
 	_go(Mode.ROAR, 2.0)

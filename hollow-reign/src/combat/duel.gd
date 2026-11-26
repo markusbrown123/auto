@@ -47,6 +47,7 @@ var p_back_t := 0.0
 var p_side := 0.0             # sideways distance the knight is off the line, mid-sidestep
 var p_side_owed := 0.0        # sidestep still to be taken
 var training := false
+var _glinted := false
 ## Onboarding: learn by doing. Each step waits for the thing itself to be done once.
 var _lesson := -1
 var _lesson_count := 0
@@ -335,6 +336,22 @@ func _process(delta: float) -> void:
 		ts = 0.35
 	player_rig.time_scale = ts
 	foe_rig.time_scale = ts
+	# the tell is on the blade itself: a glint as the blow commits, so timing can be read without any prompt
+	if stage == Stage.FIGHT and sim.b_state == DuelSim.B.WINDUP and foe_rig is FighterRig:
+		if sim.b_t <= 0.32 and not _glinted:
+			_glinted = true
+			var g := OmniLight3D.new()
+			g.light_color = Color(1.0, 0.95, 0.8) if not sim.b_attack.get("unblockable", false) else Color(1.0, 0.3, 0.2)
+			g.light_energy = 5.0
+			g.omni_range = 1.6
+			add_child(g)
+			g.global_position = foe_rig.blade_mid()
+			sparks(foe_rig.blade_tip(), Vector3.UP, 3, g.light_color, 1.2)
+			var tw := create_tween()
+			tw.tween_property(g, "light_energy", 0.0, 0.28)
+			tw.tween_callback(g.queue_free)
+	else:
+		_glinted = false
 	if stage == Stage.FIGHT:
 		Sfx.set_intensity("danger" if sim.pl.hp < sim.pl.max_hp * 0.3 else "combat")
 	elif stage == Stage.DONE:
@@ -392,7 +409,8 @@ func _footwork(dt: float) -> void:
 	p_side += step
 	var turn := p_side * (1.0 - exp(-dt * 3.2))
 	p_side -= turn
-	ring += turn / (gap * 0.5 + 1.0)
+	ring += turn / maxf(gap * 0.5 + p_back, 0.6)      # exact for where the knight stands, so nothing slides back
+	p_side_owed = clampf(p_side_owed, -2.8, 2.8)
 	ring_cam = lerp_angle(ring_cam, ring, 1.0 - exp(-dt * 2.2))
 	var axis := Vector3(sin(ring), 0, cos(ring))
 	var perp := Vector3(cos(ring), 0, -sin(ring))

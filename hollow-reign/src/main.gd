@@ -302,6 +302,11 @@ func _dev_boot() -> void:
 				current.show_tab(_args.tab)
 		"training":
 			start_training()
+		"lesson":
+			Game.profile.tutorial_done = false
+			Game.start_run("courtyard")
+			_args.erase("bot")
+			start_duel({"foe": "ashen_sentinel", "type": "boss"})
 		"explore":
 			Game.start_run(_args.get("region", "courtyard"))
 			Game.run.stage = int(_args.get("stage", "1"))

@@ -60,6 +60,28 @@ func _ready() -> void:
 			await get_tree().process_frame
 			e.queue_free()
 		ok(true, "road: %s" % r.name)
+	# --- the Witness is found at the Courtyard's second stop: staged at the fallen monument, then worn
+	Game.new_game()
+	Game.profile.tutorial_done = true
+	Game.start_run("courtyard")
+	Game.run.stage = 1
+	var ew := Explore.new()
+	add_child(ew)
+	await get_tree().create_timer(3.0).timeout
+	ok(ew._staging and ew.relic != null, "witness: the discovery is staged at the monument")
+	var had_relic: bool = ew.relic != null
+	for i in 2000:
+		if not ew._staging:
+			break
+		Story._skip = true
+		await get_tree().process_frame
+	ok(had_relic and ew.relic == null and Companion.witness_found() and bool(ew.backdrop.rig.cfg.get("witness", false)),
+		"witness: after the scene the mask is off the stones and on the knight")
+	await get_tree().create_timer(2.0).timeout
+	ok(ew.layer.get_child(0).modulate.a > 0.5, "witness: the choices return")
+	ew.queue_free()
+	Story.stop()
+	await get_tree().process_frame
 	# --- the filmed Courtyard road: every stop offers exactly the choices the region data offers
 	if CineRoad.available("courtyard"):
 		Game.new_game()

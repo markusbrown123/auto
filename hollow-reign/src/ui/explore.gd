@@ -19,6 +19,7 @@ var _leaving := false
 var adopted: Backdrop         # a place already built and on screen (the Approach hands its own over): no rebuild, no cut
 var foes: Array = []          # the figure standing at each fight's marker, or null
 var _staging := false         # a staged moment has the camera; the choices wait
+var relic: Node3D             # the Witness's mask on the stones, while it is being found
 
 const CAM_POS := Vector3(1.3, 1.7, 4.2)
 const CAM_LOOK := Vector3(-0.3, 1.25, -4.0)
@@ -180,7 +181,7 @@ func _find_witness(region_id: String, stage: int) -> void:
 	var from := (backdrop.rig.position - m).normalized()
 	var side := from.rotated(Vector3.UP, -0.9)
 	var rest := m + side * 1.25 + Vector3(0, 0.12, 0)
-	var relic := PropModel.scenery(backdrop.props, "res://assets/models/witness_relic.glb", 0.36, rest, rad_to_deg(atan2(side.x, side.z)))
+	relic = PropModel.scenery(backdrop.props, "res://assets/models/witness_relic.glb", 0.36, rest, rad_to_deg(atan2(side.x, side.z)))
 	var lamp := OmniLight3D.new()
 	lamp.light_color = Color("#ffb347")
 	lamp.light_energy = 0.0
@@ -202,6 +203,7 @@ func _find_witness(region_id: String, stage: int) -> void:
 	# lifted down: gone from the stones, and worn from here on
 	if relic:
 		relic.queue_free()
+		relic = null
 	Sfx.play("loot", -4.0)
 	var out := create_tween()
 	out.tween_property(lamp, "light_energy", 0.0, 0.6)

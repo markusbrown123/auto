@@ -766,7 +766,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		&"exhausted":
 			hud.flash_stamina()
 		&"rift":
-			hud.rift.show_dir(d.dir)
+			hud.rift.show_dir(d.dir if _lesson < 0 else "")      # the lesson draws its own strokes; a seam beside them would only confuse
 		&"surge_ready":
 			Sfx.play("loot", -4.0, 0.8)
 			Game.haptic(20, 0.5)

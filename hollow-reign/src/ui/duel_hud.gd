@@ -120,10 +120,10 @@ class Pad extends Control:
 				draw_arc(c, r + 12.0, 0, TAU, 64, Color(0, 0, 0, 0.55), 9.0, true)
 				draw_arc(c, r + 12.0, -PI / 2, -PI / 2 + TAU * clampf(_hold_t / HOLD_FULL, 0.0, 1.0), 64, Color("#8fe39a") if _hold_t >= HOLD_FULL else hot, 7.0, true)
 			"double":
-				word = "×2"
-				# two quick pulses, a rest, and again
-				var t := fmod(_teach_t, 1.3)
-				for start: float in [0.0, 0.26]:
+				word = "TAP ×2"
+				# two quick pulses, a short rest, and again
+				var t := fmod(_teach_t, 1.0)
+				for start: float in [0.0, 0.28]:
 					var u2 := (t - start) / 0.24
 					if u2 >= 0.0 and u2 <= 1.0:
 						draw_arc(c, r + 4.0 + 22.0 * u2, 0, TAU, 64, Color(hot.r, hot.g, hot.b, 1.0 - u2), 6.0, true)

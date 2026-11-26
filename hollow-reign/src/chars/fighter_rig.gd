@@ -956,13 +956,20 @@ func _pose() -> void:
 		hl = Vector3(-0.32, 0.86, -0.05)
 	if _walk_amount > 0.01 and not two_handed and not blocking:
 		hl = hl.lerp(Vector3(-0.34, 0.95, -0.08 + 0.12 * sin(_walk_phase)), _walk_amount)
+	# a cut wound up across the body: the shield swings open to the side, out of the sword arm's way
+	var across := 0.0
+	if has_shield and not blocking and _brace_t <= 0.0 and mode in [Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW, Mode.GUARD]:
+		across = clampf((0.12 - _hand.x) / 0.45, 0.0, 1.0)
+		# low when the sword passes high, high and forward when it passes low: the blade never has to go through the shield arm
+		hl = hl.lerp(Vector3(-0.56, 0.92, 0.04) if _hand.y > 1.15 else Vector3(-0.5, 1.46, -0.14), across)
+	_shield_open = lerpf(_shield_open, across, 0.4)
 	_hand_l = _hand_l.lerp(hl, 0.4) if not two_handed else hl
 	_blade_l = _blade_l.lerp(bl, 0.4).normalized()
 	var hl2 := sh_l + (_hand_l - sh_l).limit_length(reach)
 	_arm("l", sh_l, hl2, Vector3(-0.7, -0.8, 0.35))
 	weapon_l.transform = Transform3D(_basis_y(_blade_l, Vector3(0, 0, -1) if absf(_blade_l.z) < 0.9 else Vector3.RIGHT), hl2)
 	if shield:
-		shield.transform = Transform3D(Basis.from_euler(Vector3(0.1, 0.35 if not blocking else 0.05, 0)), hl2 + Vector3(-0.02, 0, -0.07))
+		shield.transform = Transform3D(Basis.from_euler(Vector3(0.1, lerpf(0.35, 1.25, _shield_open) if not blocking else 0.05, 0)), hl2 + Vector3(-0.02, 0, -0.07))
 	# --- legs (feet stay planted in world space while the body shifts)
 	var stance := 0.22 + 0.12 * bulk
 	var f_r := Vector3(stance, 0, 0.16) - Vector3(_root.x * 0.35, 0, _root.z * 0.3)
@@ -998,44 +1005,13 @@ func _pose() -> void:
 ## With a generated body: the weapons and shield are fitted to the real hands after the skeleton is posed.
 ## The blade is kept out of the wielder's own head, trunk and thighs and off the floor; the hand closes round the
 ## handle; the off hand of a two-handed grip is brought onto it; the shield never goes under the floor.
+var _shield_open := 0.0
 var _shield_local := Transform3D.IDENTITY      # the shield against the forearm, as last held in guard
 var _whole_w := 0.0
 func _fit_props(hands: Dictionary) -> void:
 	var whole := skin.clip_full and skin.clip_w > 0.0
 	_whole_w = lerpf(_whole_w, 1.0 if whole else 0.0, 0.35)
-	# --- right hand
-	var dir: Vector3 = weapon_r.transform.basis.y
-	var carried := skin.hand_axis("Right")
-	if _whole_w > 0.01 and carried != Vector3.ZERO and _pin_t <= 0.0:
-		# a whole-body clip (a fall, a hit, a roll) throws the arm: the weapon goes with the hand, not with the old aim
-		dir = dir.slerp(carried, _whole_w) if dir.dot(carried) > -0.99 else carried
 	var caps := _body_caps()
-	if _pin_t <= 0.0:
-		dir = _clear_blade(hands.r, dir, weapon_len, caps + ([] if two_handed else [_arm_cap("Left")]))
-	dir = _off_floor(hands.r, dir, weapon_len, _pommel)
-	var pr: Vector3 = skin.grip("Right", dir)
-	var dir2 := _off_floor(pr, dir, weapon_len, _pommel)
-	if not dir2.is_equal_approx(dir):
-		dir = dir2
-		pr = skin.grip("Right", dir)
-	weapon_r.transform = Transform3D(_basis_y(dir, Vector3(0, 0, -1) if absf(dir.z) < 0.9 else Vector3.RIGHT), pr)
-	# --- left hand
-	if two_handed:
-		weapon_l.position = pr
-		if mode != Mode.DEAD:
-			skin.reach_hand("Left", pr - dir * _off_grip)
-			skin.grip("Left", dir)
-	elif dual:
-		var dl: Vector3 = weapon_l.transform.basis.y
-		var carried_l := skin.hand_axis("Left")
-		if _whole_w > 0.01 and carried_l != Vector3.ZERO:
-			dl = dl.slerp(carried_l, _whole_w) if dl.dot(carried_l) > -0.99 else carried_l
-		dl = _clear_blade(hands.l, dl, weapon_len, caps + [_arm_cap("Right")])
-		dl = _off_floor(hands.l, dl, weapon_len, _pommel)
-		var pl: Vector3 = skin.grip("Left", dl)
-		weapon_l.transform = Transform3D(_basis_y(dl, Vector3(0, 0, -1) if absf(dl.z) < 0.9 else Vector3.RIGHT), pl)
-	else:
-		weapon_l.position = hands.l
 	if shield:
 		var fore := skin.frame("LeftForeArm")
 		var held := Transform3D(shield.transform.basis, hands.l + Vector3(-0.02, 0, -0.07))
@@ -1057,15 +1033,17 @@ func _fit_props(hands: Dictionary) -> void:
 					up = up.normalized() if up.length() > 0.2 else axis
 					strapped = Transform3D(Basis(up.cross(-out).normalized(), up, -out), mid + out * 0.07)
 			held = held.interpolate_with(strapped, _whole_w)
-		# the board is kept off the head and trunk: pushed out along its own facing, to the side they are not on
-		var nrm := held.basis.z.normalized()
-		for c2: Array in [caps[0], caps[1]]:
+		# the board is kept off the head and trunk: moved away from them by however far its nearest point is inside
+		for c2: Array in _arm_caps("Right") + [caps[2], caps[4], caps[0], caps[1]]:
 			var q2: Vector3 = Geometry3D.get_closest_point_to_segment(held.origin, c2[0], c2[1])
 			var l2 := held.affine_inverse() * q2
-			var r2: float = float(c2[2]) + 0.03
-			var d2 := (q2 - held.origin).dot(nrm)
-			if absf(d2) < r2 and l2.x * l2.x / ((0.28 + r2) * (0.28 + r2)) + l2.y * l2.y / ((0.42 + r2) * (0.42 + r2)) < 1.0:
-				held.origin -= nrm * (r2 - absf(d2)) * (1.0 if d2 >= 0.0 else -1.0)
+			var e2 := l2.x * l2.x / 0.078 + l2.y * l2.y / 0.176
+			var on_board := held * (Vector3(l2.x, l2.y, 0) / maxf(1.0, sqrt(e2)))
+			var r2: float = float(c2[2]) + 0.02
+			var v2 := on_board - q2
+			if v2.length() < r2:
+				var away := v2.normalized() if v2.length() > 0.005 else -held.basis.z.normalized()
+				held.origin += away * (r2 - v2.length())
 		# no part of the rim under the floor
 		var low := 1e9
 		for c: Vector3 in SHIELD_RIM:
@@ -1073,6 +1051,44 @@ func _fit_props(hands: Dictionary) -> void:
 		if low < 0.015:
 			held.origin.y += 0.015 - low
 		shield.transform = held
+	# --- right hand
+	var dir: Vector3 = weapon_r.transform.basis.y
+	var carried := skin.hand_axis("Right")
+	if _whole_w > 0.01 and carried != Vector3.ZERO and _pin_t <= 0.0:
+		# a whole-body clip (a fall, a hit, a roll) throws the arm: the weapon goes with the hand, not with the old aim
+		dir = dir.slerp(carried, _whole_w) if dir.dot(carried) > -0.99 else carried
+	if _pin_t <= 0.0:
+		dir = _clear_blade(hands.r, dir, weapon_len, caps + ([] if two_handed else _arm_caps("Left")))
+	if shield and _pin_t <= 0.0:
+		dir = _clear_shield(hands.r, dir, weapon_len)
+	dir = _off_floor(hands.r, dir, weapon_len, _pommel)
+	var pr: Vector3 = skin.grip("Right", dir)
+	var dir2 := _off_floor(pr, dir, weapon_len, _pommel)
+	if not dir2.is_equal_approx(dir):
+		dir = dir2
+		pr = skin.grip("Right", dir)
+	weapon_r.transform = Transform3D(_basis_y(dir, Vector3(0, 0, -1) if absf(dir.z) < 0.9 else Vector3.RIGHT), pr)
+	# --- left hand
+	if two_handed:
+		weapon_l.position = pr
+		if mode != Mode.DEAD:
+			skin.reach_hand("Left", pr - dir * _off_grip)
+			skin.grip("Left", dir)
+	elif dual:
+		var dl: Vector3 = weapon_l.transform.basis.y
+		var carried_l := skin.hand_axis("Left")
+		if _whole_w > 0.01 and carried_l != Vector3.ZERO:
+			dl = dl.slerp(carried_l, _whole_w) if dl.dot(carried_l) > -0.99 else carried_l
+		dl = _clear_blade(hands.l, dl, weapon_len, caps + _arm_caps("Right"))
+		dl = _off_floor(hands.l, dl, weapon_len, _pommel)
+		var pl: Vector3 = skin.grip("Left", dl)
+		var dl2 := _off_floor(pl, dl, weapon_len, _pommel)
+		if not dl2.is_equal_approx(dl):
+			dl = dl2
+			pl = skin.grip("Left", dl)
+		weapon_l.transform = Transform3D(_basis_y(dl, Vector3(0, 0, -1) if absf(dl.z) < 0.9 else Vector3.RIGHT), pl)
+	else:
+		weapon_l.position = hands.l
 
 const SHIELD_RIM := [Vector3(0.27, 0.41, 0), Vector3(-0.27, 0.41, 0), Vector3(0.27, -0.41, 0), Vector3(-0.27, -0.41, 0), Vector3(0, -0.41, 0), Vector3(0, 0.41, 0)]
 
@@ -1084,12 +1100,15 @@ func _body_caps() -> Array:
 	var trunk_r: float = minf(float(skin.ball("Hips")[1]), 0.24) * 0.9
 	var out: Array = [[head_b[0], head_b[0], float(head_b[1]) * 1.05], [hips, neck, trunk_r]]
 	for side: String in ["Left", "Right"]:
-		out.append([skin.point(side + "UpLeg"), skin.point(side + "Leg"), trunk_r * 0.5])
+		var knee: Vector3 = skin.point(side + "Leg")
+		out.append([skin.point(side + "UpLeg"), knee, trunk_r * 0.5])
+		out.append([knee, skin.point(side + "Foot"), trunk_r * 0.5])
 	return out
 
-## The upper arm on one side, for the blade held in the other hand.
-func _arm_cap(side: String) -> Array:
-	return [skin.point(side + "Arm"), skin.point(side + "ForeArm"), 0.07 * bulk]
+## The arm on one side, for the blade held in the other hand.
+func _arm_caps(side: String) -> Array:
+	var el: Vector3 = skin.point(side + "ForeArm")
+	return [[skin.point(side + "Arm"), el, 0.08], [el, skin.point(side + "Hand"), 0.075]]
 
 ## Turn a blade about the hand that holds it until it is clear of the body.
 func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Vector3:
@@ -1109,6 +1128,13 @@ func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Ve
 				var cp := Geometry3D.get_closest_points_between_segments(from, tip, a, b)
 				p = cp[0]
 				q = cp[1]
+			var qh: Vector3 = Geometry3D.get_closest_point_to_segment(hand, a, b)
+			if hand.distance_to(qh) < r and hand.distance_to(qh) > 0.001:
+				# the hand itself rests on this part of the body: the blade at least does not point into it
+				var nh := (hand - qh).normalized()
+				if dir.dot(nh) < 0.05:
+					dir = (dir + nh * (0.05 - dir.dot(nh))).normalized()
+				continue
 			var d := p.distance_to(q)
 			if d < r:
 				var n := (p - q) / d if d > 0.001 else Vector3(0, 0, -1)
@@ -1116,6 +1142,20 @@ func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Ve
 				if (moved - hand).length() > 0.05:
 					dir = (moved - hand).normalized()
 	return dir
+
+## A blade does not pass through the wielder's own shield: its point stays on the side of the board the hand is on.
+func _clear_shield(hand: Vector3, dir: Vector3, length: float) -> Vector3:
+	var st := shield.transform
+	var n := st.basis.z.normalized()
+	var tip := hand + dir * length
+	var dh := (hand - st.origin).dot(n)
+	var dt := (tip - st.origin).dot(n)
+	if absf(dh) < 0.02 or dh * dt > 0.0:
+		return dir
+	var cross := st.affine_inverse() * hand.lerp(tip, dh / (dh - dt))
+	if cross.x * cross.x / 0.09 + cross.y * cross.y / 0.2 > 1.0:
+		return dir
+	return (tip + n * (signf(dh) * 0.03 - dt) - hand).normalized()
 
 ## Tilt a blade just enough that neither its point nor its pommel is under the floor.
 func _off_floor(hand: Vector3, dir: Vector3, length: float, pommel: float) -> Vector3:

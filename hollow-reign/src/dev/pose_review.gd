@@ -208,6 +208,10 @@ func _run() -> void:
 		(pose[1] as Callable).call()
 		var t := 0.0
 		var todo: Array = (pose[3] as Array).duplicate()
+		if _args.has("t"):
+			todo.clear()
+			for ts: String in str(_args.t).split(",", false):
+				todo.append(float(ts))
 		var tiles: Array = []
 		var stat := {}
 		while t < float(pose[2]):
@@ -390,6 +394,14 @@ func _audit(stat: Dictionary, t: float) -> void:
 				n2 += 1
 				hits2[nm2] = int(hits2.get(nm2, 0)) + 1
 		_worse(stat, "shield", float(n2), t, str(hits2), false)
+		# the blade through the shield board: how much of its length lies inside the board
+		var wt2 := fr.weapon_r.global_transform
+		var inside := 0
+		for i in 21:
+			var bp2 := inv * (wt2 * Vector3(0, fr.weapon_len * (0.15 + 0.85 * i / 20.0), 0))
+			if absf(bp2.z) < 0.025 and bp2.x * bp2.x / 0.068 + bp2.y * bp2.y / 0.15 < 1.0:
+				inside += 1
+		_worse(stat, "bshield", float(inside), t, "", false)
 		var rim := 1e9
 		for c: Vector3 in [Vector3(0.28, 0.41, 0), Vector3(-0.28, 0.41, 0), Vector3(0.28, -0.41, 0), Vector3(-0.28, -0.41, 0)]:
 			rim = minf(rim, (st * c).y)
@@ -423,7 +435,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 func _report(pose: String, stat: Dictionary) -> void:
 	var out := "%-16s" % pose
 	var flags := ""
-	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand"]:
+	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand"]:
 		if not stat.has(k):
 			continue
 		var e: Array = stat[k]
@@ -436,6 +448,7 @@ func _report(pose: String, stat: Dictionary) -> void:
 			"rim": bad = v < -0.01
 			"blade", "blade_l": bad = v >= 3.0
 			"shield": bad = v >= 3.0
+			"bshield": bad = v >= 1.0
 			"knee_min": bad = v < 35.0
 			"knee_back": bad = v < -0.03
 			"elbow_min": bad = v < 25.0

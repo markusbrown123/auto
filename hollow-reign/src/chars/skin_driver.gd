@@ -8,6 +8,8 @@ extends RefCounted
 ## exactly on their targets.
 
 const HEIGHT := 1.95          # metres, to match the procedural rig's proportions
+const ELBOW_MIN := 0.7        # radians: an elbow is never folded tighter than this
+const SOLE := 0.012           # metres kept between the measured sole and the floor (the measured points are a sample)
 
 var root: Node3D              # the instanced model
 var skel: Skeleton3D
@@ -108,11 +110,16 @@ func _ik(a: Vector3, b: Vector3, la: float, lb: float, pole: Vector3) -> Vector3
 	var perp := (pole - n * pole.dot(n)).normalized()
 	return a + n * x + perp * h
 
-func _limb(up: String, mid: String, end: String, target: Vector3, pole: Vector3, max_stretch: float = 1.0) -> Vector3:
+func _limb(up: String, mid: String, end: String, target: Vector3, pole: Vector3, max_stretch: float = 1.0, min_bend: float = 0.0) -> Vector3:
 	var a := _fk_origin(up)
 	var la: float = (rest[mid].origin - rest[up].origin).length()
 	var lb: float = (rest[end].origin - rest[mid].origin).length()
 	var reach := (target - a).limit_length((la + lb) * max_stretch - 0.001)
+	if min_bend > 0.0:
+		# a joint is never folded tighter than this angle: the target is eased away from the limb's root
+		var least := sqrt(la * la + lb * lb - 2.0 * la * lb * cos(min_bend))
+		if reach.length() < least:
+			reach = (reach.normalized() if reach.length() > 0.001 else pole.normalized()) * least
 	var t := a + reach
 	var m := _ik(a, t, la, lb, pole)
 	_aim(up, mid, a, m - a)
@@ -173,8 +180,8 @@ func drive(j: Dictionary) -> Dictionary:
 	# pose had it, the hand targets ride with the shoulders, so an arm is neither folded into the chest nor pulled straight.
 	var tr: Vector3 = to_skel * j.hand_r + (_fk_origin("RightArm") - sh_r0) * float(j.get("follow_r", 1.0))
 	var tl: Vector3 = to_skel * j.hand_l + (_fk_origin("LeftArm") - sh_l0) * float(j.get("follow_l", 1.0))
-	var hr := _limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985)
-	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985)
+	var hr := _limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
+	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
 	if whole:
 		# whole-body clips (falling, dying) carry the arms too; the weapons follow the real hands
 		_overlay(true)
@@ -197,7 +204,7 @@ func reach_hand(side: String, target: Vector3) -> Vector3:
 	var wrist: Vector3 = skel.get_bone_global_pose(bone[side + "Hand"]).origin
 	var off := _palm(side, wrist) - wrist
 	var pole := to_skel.basis.orthonormalized() * Vector3(0.7 if side == "Right" else -0.7, -0.8, 0.35)
-	var w := _limb(side + "Arm", side + "ForeArm", side + "Hand", to_skel * target - off, pole, 0.985)
+	var w := _limb(side + "Arm", side + "ForeArm", side + "Hand", to_skel * target - off, pole, 0.985, ELBOW_MIN)
 	return _back * _palm(side, w)
 
 # ---------------------------------------------------------------- hands
@@ -280,7 +287,7 @@ func ball(name: String) -> Array:
 ## The floor is y = 0 of the rig body space. Nothing the model is made of may go under it.
 ## For each bone that can touch the floor, a handful of the outermost points of the mesh it carries are kept in that
 ## bone's own space (measured once per model from the real skinned vertices), and tested after the pose is solved.
-const CONTACT_BONES := ["Hips", "Spine2", "Head", "LeftArm", "LeftForeArm", "LeftHand", "RightArm", "RightForeArm", "RightHand",
+const CONTACT_BONES := ["Hips", "Spine2", "Head", "LeftShoulder", "RightShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightArm", "RightForeArm", "RightHand",
 	"LeftUpLeg", "LeftLeg", "LeftFoot", "RightUpLeg", "RightLeg", "RightFoot"]
 static var _contact_cache := {}
 var _contact := {}            # short bone name -> PackedVector3Array, bone-local
@@ -399,10 +406,10 @@ func _plant(back: Transform3D, q: Basis, whole: bool) -> void:
 		tw = tw.normalized() if tw.length_squared() > 0.0001 else Quaternion.IDENTITY
 		var flat := Basis(tw) * rb
 		var ank_y: float = (back * f.origin).y
-		var h_flat := -_low_with(pts, back.basis * flat)
+		var h_flat := SOLE - _low_with(pts, back.basis * flat)
 		var wf := 0.0 if whole else 1.0 - smoothstep(0.02, 0.12, ank_y - h_flat)
 		var nb := Basis(cur.get_rotation_quaternion().slerp(flat.get_rotation_quaternion(), wf)) if wf > 0.0 else cur
-		var low := ank_y + _low_with(pts, back.basis * nb)
+		var low := ank_y + _low_with(pts, back.basis * nb) - SOLE
 		var origin := f.origin
 		if low < 0.0 and not whole:
 			var hip: Vector3 = skel.get_bone_global_pose(bone[side + "UpLeg"]).origin
@@ -423,6 +430,7 @@ func _ground(back: Transform3D, q: Basis, whole: bool, settle: bool) -> void:
 			low = minf(low, _low(nm, back))
 	if low > 1e8:
 		return
+	low -= SOLE
 	if low < 0.0 or (settle and whole and low > 0.0):
 		var hi: int = bone["Hips"]
 		var cur := skel.get_bone_global_pose(hi)

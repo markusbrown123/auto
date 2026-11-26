@@ -18,12 +18,48 @@ FX = {
 HELMED = ["sentinel", "executioner", "gravewarden", "frostking", "monarch", "huntsman", "widow"]
 os.makedirs("assets/audio/vo", exist_ok=True)
 
+import hashlib
+TAKES_PATH = "assets/audio/vo/takes.json"
+TAKES = json.load(open(TAKES_PATH)) if os.path.exists(TAKES_PATH) else {}
+RECAST = [a[9:].split(",") for a in sys.argv if a.startswith("--recast=")]
+RECAST = RECAST[0] if RECAST else []
+# owner's direction: a little stone-room echo, a little weight, the voice itself untouched
+ROOM = "bass=g=2.5:f=150,aecho=0.9:0.35:55|110:0.16|0.08"
+ROLE_FX = {"witness": ROOM + ",aecho=0.9:0.25:11:0.12", "narrator": "bass=g=2:f=150,aecho=0.9:0.4:80|170:0.18|0.1"}
+
+def text_hash(line):
+    return hashlib.sha1(line["text"].encode()).hexdigest()[:12]
+
+def make_inworld(lid, line, voice, out):
+    """The owner-approved cast: a named voice on the Inworld model (2 credits a take)."""
+    try:
+        r = subprocess.run(["higgsfield", "generate", "create", "inworld_text_to_speech", "--prompt", line["text"], "--voice", voice, "--wait", "--wait-timeout", "120s"],
+                           capture_output=True, text=True, timeout=180, stdin=subprocess.DEVNULL)
+    except subprocess.TimeoutExpired:
+        return out, "FAILED timeout"
+    url = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
+    if not url.startswith("http"):
+        return out, "FAILED " + (r.stderr or r.stdout)[-160:]
+    raw = out + ".src"
+    subprocess.run(["curl", "-sS", "-m", "120", "-o", raw, url], check=True)
+    fx = ROLE_FX.get(line["speaker"], ROOM)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-af", fx + ",loudnorm=I=-18:TP=-2", "-ac", "1", "-ar", "44100", "-c:a", "libvorbis", "-q:a", "5", out], check=True)
+    os.remove(raw)
+    TAKES[os.path.basename(out)] = text_hash(line)
+    json.dump(TAKES, open(TAKES_PATH, "w"), indent=1, sort_keys=True)
+    return out, "ok"
+
 def make(lid, speaker_key, suffix):
     out = "assets/audio/vo/%s%s.ogg" % (lid, suffix)
-    if os.path.exists(out):
+    base_speaker = D["lines"][lid]["speaker"]
+    redo = (speaker_key in RECAST or base_speaker in RECAST) and TAKES.get(os.path.basename(out)) != text_hash(D["lines"][lid])
+    if os.path.exists(out) and not redo:
         return out, "exists"
     line = D["lines"][lid]
-    v = VOICE_IDS[D["voices"][speaker_key]]
+    cast = D["voices"][speaker_key]
+    if cast.startswith("inworld:"):
+        return make_inworld(lid, line, cast[8:], out)
+    v = VOICE_IDS[cast]
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
         json.dump([{"text": line["text"], "voice_id": v["id"], "voice_type": v["voice_type"]}], f)
     try:
@@ -53,6 +89,9 @@ for sid in ([a for a in sys.argv[1:] if not a.startswith("--")] or list(D["scene
             jobs += [(lid, "player_m", "_m"), (lid, "player_f", "_f")]
         else:
             jobs.append((lid, sp, ""))
+ONLY = [a[7:].split(",") for a in sys.argv if a.startswith("--only=")]
+if ONLY:
+    jobs = [j for j in jobs if j[1] in ONLY[0]]
 with cf.ThreadPoolExecutor(1) as ex:   # the service stalls when speech jobs run in parallel
     for out, status in ex.map(lambda j: make(*j), jobs):
         if status != "exists":

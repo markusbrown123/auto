@@ -46,7 +46,7 @@ Pool: 4 spark emitters.
 | Stagger dust | `boss_stagger` | ground under the foe | 7 | 0.75 s |
 | Slam chips | `_on_strike` when `attack.kind == "slam"`, whatever the result | ground under the foe's blade tip | 10 chips + 7 dust | 0.65 s |
 
-Dust is soft billboards (34 cm growing to 44 cm), alpha-blended, peak alpha 0.13, coloured from the arena floor.
+Dust is soft billboards (growing to at most 44 cm), alpha-blended, peak alpha 0.13, coloured from the arena floor (converted to linear, since particle vertex colours are read as linear).
 Chips are small lit boxes in the floor colour, thrown up 1.8-4.4 m/s under 12 m/s2 gravity.
 Pools: 3 dust emitters, 2 chip emitters.
 
@@ -58,7 +58,7 @@ Triggered in `_on_strike` when the foe's attack data has `element` (any result e
 | Element | Effect | Max count | Data that triggers it today |
 |---|---|---|---|
 | `fire` | rising embers (additive dots, 0.65 s) + orange light, 0.3 s | 12 | boss attacks with `"element": "fire"`, fire weapons |
-| `frost` | ice chips (pale streaks, 0.45 s) + a cold mist puff + pale blue light | 10 + 4 | boss attacks with `"element": "frost"`, frost weapons |
+| `frost` | ice chips (pale streaks, 0.45 s) + a cold mist puff + pale blue light | 10 + 3 | boss attacks with `"element": "frost"`, frost weapons |
 | `rift` / `ancient` / `arc` | 3 thin jagged arcs, redrawn each frame for 0.14 s, + cyan light | 3 arcs (4 max), 36 triangles | a rift cut (`boss_hit` with `rift`) |
 | `drain` / `corruption` / `void` | dark violet motes drawn inward, alpha-blended (not additive), 0.8 s | 12 | the Devourer's `drain` status |
 

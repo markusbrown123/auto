@@ -366,10 +366,25 @@ for foe, cat in SPEECH.items():
     assert not (cat == "A" and n), foe + " is a creature and must not speak"
     assert not (cat == "B" and n > 4), foe + " has too many lines for category B"
 COMPANION = {"discovery": {"scene": "witness_discovery", "region": "courtyard", "stage": 1}, "stage": STAGE, "boss": BOSS, "topics": TOPICS}
-VOICES = {  # cast by name only: nobody has auditioned these by ear yet
- "narrator": "Helena", "lyra": "Vesper", "player_m": "Callum", "player_f": "Imogen", "orren": "Gideon", "archivist": "Onyx",
- "sentinel": "Sterling", "executioner": "Vlad", "huntsman": "Brooks", "widow": "Sloane", "gravewarden": "Bram", "frostking": "Alistair",
- "monarch": "Caspian", "devourer": "Luna"}   # the Witness is not cast yet: no entry, so tools/voices.py cannot record it by accident
+# Cast. "inworld:<voice>" entries were CHOSEN BY THE OWNER from audition reel 4 (2026-11-26): the Witness, the male knight,
+# the narrator, and the plain human challenge before a fight (Sentinel, Executioner). Everything else is still the
+# provisional cast picked by name, which nobody has approved.
+VOICES = {
+ "witness": "inworld:Hamish (en)", "player_m": "inworld:Malcolm (en)", "narrator": "inworld:Graham (en)",
+ "sentinel": "inworld:Mortimer (en)", "executioner": "inworld:Mortimer (en)",
+ "lyra": "Vesper", "player_f": "Imogen", "orren": "Gideon", "archivist": "Onyx",
+ "huntsman": "Brooks", "widow": "Sloane", "gravewarden": "Bram", "frostking": "Alistair",
+ "monarch": "Caspian", "devourer": "Luna"}
+# A line written after its speaker was last recorded is text-only until tools/voices.py records it: that tool keeps
+# assets/audio/vo/takes.json (file -> hash of the text it was recorded from). A new line counts as recorded when a
+# take of exactly its current text exists (for the knight's lines, the male take).
+import hashlib, os
+_takes = json.load(open("assets/audio/vo/takes.json")) if os.path.exists("assets/audio/vo/takes.json") else {}
+for _lid, _l in L.items():
+    if _l.get("recorded") is False:
+        _f = _lid + ("_m" if _l["speaker"] == "player" else "") + ".ogg"
+        if _takes.get(_f) == hashlib.sha1(_l["text"].encode()).hexdigest()[:12]:
+            del _l["recorded"]
 NAMES = {"narrator": "", "lyra": "Lyra", "player": "", "orren": "Orren", "archivist": "The Archivist", "sentinel": "Ashen Sentinel", "executioner": "Hollow Executioner",
  "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness"}
 OUT = {"lines": L, "scenes": S, "voices": VOICES, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}

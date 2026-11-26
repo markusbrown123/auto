@@ -267,7 +267,8 @@ func sparks(at: Vector3, dir: Vector3, amount: int = 16, color: Color = Color(1.
 
 ## A low puff at the feet: rolls, sidesteps, being driven back.
 func dust(at: Vector3, amount: int = 6, tint = null, strength: float = 1.0) -> void:
-	var c: Color = tint if tint != null else ground.lerp(Color(0.7, 0.68, 0.64), 0.2)
+	# particle vertex colours are read as linear, so convert: otherwise dark floors raise pale grey dust
+	var c: Color = (tint if tint != null else ground.lerp(Color(0.7, 0.68, 0.64), 0.35)).srgb_to_linear()
 	c.a = clampf(strength, 0.2, 1.5)
 	_fire("dust", Vector3(at.x, maxf(at.y, 0.0) + 0.08, at.z), Vector3.UP, count(amount, BUDGET.dust), c)
 
@@ -286,7 +287,7 @@ func element(kind: String, at: Vector3, dir: Vector3 = Vector3.UP) -> bool:
 			_flash(at, Color(1.0, 0.5, 0.18), 2.0, 3.5, 0.3)
 		"frost":
 			_fire("ice", at, dir + Vector3(0, 0.6, 0), count(10, BUDGET.element), Color(1, 1, 1), 3.4)
-			dust(at, 4, Color(0.78, 0.9, 1.0), 0.9)
+			dust(at, 3, Color(0.78, 0.9, 1.0), 0.9)
 			_flash(at, Color(0.55, 0.8, 1.0), 1.2, 3.0, 0.22)
 		"ancient", "arc", "rift":
 			arcs(at, 3)

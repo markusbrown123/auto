@@ -1578,7 +1578,7 @@ const AU_CUTS := {
 		"thrust": ["ss_thrust2", 0]},
 	"th": {
 		"R": ["th_cut_r2", 0], "L": ["th_cut_l", 0], "D": ["th_cut_d", 0], "DL": ["th_cut_l", 0], "DR": ["th_cut_dr", 0],
-		"U": ["th_cut_u", 0], "UL": ["th_cut_u", 0], "UR": ["th_cut_r2", 0], "thrust": ["th_combo_thrust", 2]},
+		"U": ["th_cut_u", 0], "UL": ["th_cut_u", 0], "UR": [["th_cut_u", 0], ["th_cut_r2", 0]], "thrust": ["th_combo_thrust", 2]},
 	"dw": {
 		"R": ["dw_cut_r", 0], "L": ["dw_double", 0], "D": ["dw_cut_dr", 0], "DL": ["dw_cut_dl", 0], "DR": ["dw_cross", 2],
 		"U": ["th_cut_u", 0], "UL": ["th_cut_u", 0], "UR": ["dw_cut_r", 0], "thrust": ["dw_flurry", 0]},
@@ -1624,8 +1624,25 @@ func _au_begin(label: String, strike_from: float, hit_at: float, finish: String)
 	_au_stop()
 	if not authored or skin == null or not skin.ok or test_clip != "" or not use_clips:
 		return
-	var spec := _au_pick(label, finish)
-	if spec.is_empty() or not SkinDriver.has_clip(str(spec[0])):
+	var pick := _au_pick(label, finish)
+	if pick.is_empty():
+		return
+	# (several clips may be offered for one swipe: the one whose blade ends nearest the swiped line is played)
+	var best := {}
+	for cand: Array in (pick if pick[0] is Array else [pick]):
+		_au_build(cand, label, strike_from, hit_at)
+		if not _au.is_empty() and (best.is_empty() or float(_au.err) < float(best.err) - 0.12):
+			best = _au
+	_au = best
+	if _au.is_empty():
+		return
+	_au_t = 0.0
+	_au_state = "cut"
+	_xfade(minf(AU_IN, float(_au.hit) * 0.45) if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
+
+func _au_build(spec: Array, label: String, strike_from: float, hit_at: float) -> void:
+	_au = {}
+	if not SkinDriver.has_clip(str(spec[0])):
 		return
 	var m := clip_meta(str(spec[0]))
 	var hits: Array = m.get("hits", [])
@@ -1685,25 +1702,25 @@ func _au_begin(label: String, strike_from: float, hit_at: float, finish: String)
 		ts = clampf(apex - 0.1, minf(ts, apex), apex)
 	_au = {"clip": n, "ts": ts, "tc": tc, "te": te, "t_out": t_out, "pre": pre,
 		"from": strike_from, "hit": maxf(hit_at, strike_from + 0.02), "roll": 0.0, "freeze": -1.0, "arm_l": float(opt.get("arm_l", 1.0)),
-		"reach": 1.0, "travel": 1.0 if float(m.get("hip_travel", 0.0)) < 0.8 else 0.0, "label": label, "linger": float(opt.get("linger", 0.0))}
+		"reach": 1.0, "travel": 1.0 if float(m.get("hip_travel", 0.0)) < 0.8 else 0.0, "label": label, "linger": float(opt.get("linger", 0.0)), "err": 0.0}
 	if label != "thrust" and opt.get("roll", true):
 		# the line the blade tip travels across the hit, as it will be seen: over the last frames before the hit instant
 		# (the trunk's own turn carries the blade too, so the roll is found in a few steps, not in one)
 		var roll := 0.0
-		for i in 4:
+		for i in 5:
 			var a0: Dictionary = skin.clip_hand(n, _au_time(float(_au.hit) - 0.07), "Right", roll)
 			var a1: Dictionary = skin.clip_hand(n, _au_time(float(_au.hit) + 0.035), "Right", roll)
 			var v: Vector3 = (a1.p + a1.axis * weapon_len) - (a0.p + a0.axis * weapon_len)
 			var v2 := Vector2(v.x, v.y)
 			if v2.length() < 0.04:
 				break
+			_au.err = absf(v2.angle_to(Vector2(_arc_dir.x, _arc_dir.y)))
+			if i == 4:
+				break
 			roll = clampf(roll + v2.angle_to(Vector2(_arc_dir.x, _arc_dir.y)) * 0.85, -AU_ROLL_MAX, AU_ROLL_MAX)
 		_au.roll = roll if absf(roll) >= 0.07 else 0.0
 	var hc: Dictionary = skin.clip_hand(n, tc, "Right", float(_au.roll))
 	_au.reach = -(hc.p.z + hc.axis.z * weapon_len * 0.8)
-	_au_t = 0.0
-	_au_state = "cut"
-	_xfade(minf(AU_IN, float(_au.hit) * 0.45) if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
 
 ## Clip time for a moment of the attack. The warning window eases into the wound-up pose and holds there; the blow
 ## runs from there to the clip's contact frame, arriving at the hit instant; what follows plays at the clip's own pace.

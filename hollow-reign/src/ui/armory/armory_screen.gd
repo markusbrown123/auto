@@ -559,6 +559,7 @@ func _stat_row(k: String, v: String, col: Color = UI.BONE, better: int = 0, delt
 	var kl := UI.label(k, 20, UI.DIM)
 	kl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	kl.clip_text = true
+	kl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	row.add_child(kl)
 	row.add_child(UI.label(v, 20, col, "bold"))
 	if better != 0:

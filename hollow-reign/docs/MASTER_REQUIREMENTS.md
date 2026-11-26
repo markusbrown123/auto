@@ -129,3 +129,5 @@ Three briefs received together. All earlier requirements stay in force.
 **Budget:** Tripo allocation for essential 3D gear only; refine existing assets and model hard surfaces by hand first; Tripo funds cannot be moved to other services.
 
 **Owner follow-up (2026-11-26, with a photo of four ornate display swords): "Futuristic style".** The first benchmark swords were too plain and historical. Swords need individual sculpted guards with cut-outs, waisted blades with engraved line-work, slender twisted or corded grips, distinctive pommels, small gold accents. The photographed swords are an existing game's signature weapons: take the general language only, never their shapes.
+
+**Owner follow-ups (2026-11-26):** three or four basic swords in the futuristic style that differ in damage or speed (Wayfarer balanced, Silver Vow light, Ashbrand heavy, Veilcutter precision), one chosen at the start of a journey; shields differ by number of blocks and movement speed (light, balanced, heavy); weapons are modded at the forge by blade, handle, ore and sharpen, and the model shows the mods; new swords come from bosses.

@@ -75,6 +75,7 @@ var _preview_due := -1.0          # seconds until the knight is dressed in the m
 var _preview_want := ""
 var _preview_paths: Array = []
 var _preview_animate := false
+var _applied_id := "?"
 var _preview_waiting := false
 var _last_settle := -10.0
 var _rapid := false
@@ -682,7 +683,9 @@ func apply_preview(preview_slot: String, id: String) -> String:
 	else:
 		previewing = ""
 	var changed := backdrop.dress_knight(trial)
-	last_change = changed
+	if id != _applied_id or changed != "":
+		last_change = changed      # (dressing in the same piece twice changes nothing the second time)
+	_applied_id = id
 	if changed == "body":
 		_rig_ready()
 	else:

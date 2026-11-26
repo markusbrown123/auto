@@ -1,0 +1,80 @@
+{
+ "version": 1,
+ "level": 9,
+ "xp": 1500,
+ "attr_points": 3,
+ "attrs": {
+  "health": 9,
+  "strength": 11,
+  "dex": 6,
+  "endurance": 8,
+  "defense": 4,
+  "crit": 1,
+  "resist": 0
+ },
+ "gold": 4321,
+ "shards": 19,
+ "inventory": [
+  "w_rusted_sword",
+  "s_plank",
+  "a_worn_helm",
+  "a_worn_chest",
+  "a_worn_gauntlets",
+  "a_worn_legs",
+  "w_ashen_great",
+  "s_tower",
+  "a_black_chest",
+  "a_black_helm",
+  "r_ember"
+ ],
+ "equipped": {
+  "weapon": "w_ashen_great",
+  "shield": null,
+  "helm": "a_black_helm",
+  "chest": "a_black_chest",
+  "gauntlets": "a_worn_gauntlets",
+  "legs": "a_worn_legs",
+  "ring": "r_ember",
+  "relic": null
+ },
+ "upgrades": {
+  "w_ashen_great": 3,
+  "a_black_chest": 1
+ },
+ "mastery": {
+  "w_ashen_great": 4,
+  "a_black_chest": 2,
+  "w_rusted_sword": 3
+ },
+ "mastered": [
+  "w_rusted_sword"
+ ],
+ "flags": {
+  "courtyard_gate": true,
+  "beat_ashen_sentinel": true,
+  "chest_courtyard_1_The Guardhouse": true
+ },
+ "defeated": {
+  "hollow_soldier": 9,
+  "ashen_sentinel": 2,
+  "hollow_executioner": 1
+ },
+ "cleared": [
+  "courtyard",
+  "blackwood"
+ ],
+ "endings": [],
+ "ng": 0,
+ "deaths": 6,
+ "heraldry": "#3d0f0f",
+ "tutorial_done": true,
+ "playtime": 5400.5,
+ "body": "f",
+ "combos": [
+  "double_slash",
+  "riposte"
+ ],
+ "combo_uses": {
+  "double_slash": 14
+ }
+}

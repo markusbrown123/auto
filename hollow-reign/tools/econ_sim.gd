@@ -11,6 +11,7 @@ const ORDER := ["courtyard", "blackwood", "cathedral", "crypt", "roost", "citade
 const DRY_LIMIT := 3
 
 var style := DuelBot.Style.SLOPPY
+var struggling := false          # two wins in three: every third fight or so is fought by the bot that always loses
 var seed_base := 1
 var fights := 0
 var dry := 0                      # wins in a row with nothing meaningful affordable
@@ -22,6 +23,8 @@ func _ready() -> void:
 	for a: String in OS.get_cmdline_user_args():
 		if a == "--style=skilled":
 			style = DuelBot.Style.SKILLED
+		if a == "--style=struggling":
+			struggling = true
 		if a.begins_with("--seed="):
 			seed_base = int(a.trim_prefix("--seed="))
 	Game.save_dir_override = OS.get_cache_dir() + "/hollow_reign_econ"
@@ -32,7 +35,7 @@ func _ready() -> void:
 	Game.new_game()
 	Game.profile.rewards.seed = seed_base
 	Game.rng.seed = seed_base
-	print("ECONOMY SIMULATION  (bot: %s, seed %d)" % ["skilled" if style == DuelBot.Style.SKILLED else "sloppy", seed_base])
+	print("ECONOMY SIMULATION  (player: %s, seed %d)" % ["struggling: sloppy bot, loses about one fight in three" if struggling else ("skilled bot" if style == DuelBot.Style.SKILLED else "sloppy bot, which wins every fight"), seed_base])
 	print("%-10s %5s %5s %5s %7s %6s %-34s %7s %5s %9s %9s %4s %3s  %s" % ["region", "fight", "wins", "died", "gold", "shard", "materials", "spent", "level", "full-cost", "remaining", "dry", "", "worn"])
 	for r: String in ORDER:
 		play_region(r)
@@ -107,10 +110,10 @@ func play_region(region: String) -> void:
 		row.spent, Game.profile.level, cost.total, cost.remaining, row.dry, "!" if int(row.dry) > DRY_LIMIT else "", worn()])
 	if int(row.dry) > DRY_LIMIT:
 		flags.append("%s: %d wins in a row with nothing meaningful affordable" % [region, row.dry])
-	if cost.remaining > 0 and Game.profile.gold >= cost.remaining_gold and Game.shop_stock().is_empty():
-		flags.append("%s: everything is affordable at once (%d gold held, %d needed)" % [region, Game.profile.gold, cost.remaining_gold])
-	if cost.remaining_gold > 0 and int(row.gold) > 0 and float(cost.remaining_gold) / float(row.gold) > 6.0:
-		flags.append("%s: a full upgrade of what is worn costs %.1f times what the region pays" % [region, float(cost.remaining_gold) / float(row.gold)])
+	if cost.remaining > 0 and Game.profile.gold >= cost.remaining_gold:
+		flags.append("%s: everything left is affordable at once (%d gold held, %d needed)" % [region, Game.profile.gold, cost.remaining_gold])
+	if Game.profile.gold > 2 * maxi(1, int(row.gold)):
+		flags.append("%s: gold is piling up unspent (%d held, the region paid %d)" % [region, Game.profile.gold, row.gold])
 
 ## Something still to do on a cleared road: an unopened chest or an optional guardian not yet ended.
 func unfinished(region: String) -> bool:
@@ -147,7 +150,10 @@ func duel(foe: String, attempt: int) -> bool:
 	var sd: int = hash("%d|%s|%d" % [seed_base, foe, fights])
 	s.setup(Game.stats(), Db.foes[foe], sd, {"combos": known, "start_hp": Game.run.hp, "ng": Game.profile.ng})
 	# a road that has beaten the player six times is finally walked with care
-	var bot := DuelBot.new(s, DuelBot.Style.SKILLED if attempt > 6 else style, sd)
+	var how: int = style
+	if struggling and absi(hash("lose|%d" % sd)) % 100 < 35:
+		how = DuelBot.Style.TURTLE
+	var bot := DuelBot.new(s, DuelBot.Style.SKILLED if attempt > 6 else how, sd)
 	for i: int in 300 * 60:
 		bot.tick(1.0 / 60.0)
 		s.tick(1.0 / 60.0)
@@ -169,15 +175,35 @@ func duel(foe: String, attempt: int) -> bool:
 func affordable() -> bool:
 	for slot: String in Game.profile.equipped:
 		var id = Game.profile.equipped[slot]
-		if id != null and Game.can_upgrade(str(id)):
+		if id != null and upgradable(str(id), false):
 			return true
 	for it: Dictionary in Game.shop_stock():
 		if Game.profile.gold >= int(it.price) and better(it):
 			return true
 	for it: Dictionary in Game.craft_stock():
-		if Game.can_craft(str(it.id)):
+		if cover(it.craft, false):
 			return true
 	return false
+
+## Buys whatever shards and materials the cost still lacks, if the whole thing can be paid for. True when it now can be.
+func cover(cost: Dictionary, really: bool) -> bool:
+	var extra := Game.shortfall_price(cost)
+	if extra < 0 or Game.profile.gold < int(cost.get("gold", 0)) + extra:
+		return false
+	if really:
+		var need: Dictionary = cost.get("materials", {}).duplicate()
+		need["shards"] = int(cost.get("shards", 0))
+		for m: String in need:
+			var lack: int = int(need[m]) - Game.material_count(m)
+			if lack > 0:
+				Game.buy_material(m, lack)
+	return true
+
+func upgradable(id: String, really: bool) -> bool:
+	var it: Dictionary = Db.item(id)
+	if not it.has("upgrade") or Game.upgrade_level(id) >= int(it.upgrade.max):
+		return false
+	return cover(Stats.upgrade_cost(it, Game.upgrade_level(id)), really)
 
 func better(it: Dictionary) -> bool:
 	var cur = Game.profile.equipped.get(it.slot)
@@ -199,10 +225,8 @@ func sanctuary() -> int:
 	var gold0: int = Game.profile.gold
 	var earned := 0
 	var i := 0
-	var w: Dictionary = Db.item(str(Game.profile.equipped.weapon))
-	var main: String = "strength" if float(Db.classes[w.cls].scale.strength) >= 0.5 else "dex"
 	while Game.profile.attr_points > 0:
-		Game.spend_attr(["health", main, "endurance", main][i % 4])
+		Game.spend_attr(["health", "strength", "dex", "endurance"][i % 4])
 		i += 1
 	for q: Dictionary in Db.quests:
 		var g: int = Game.profile.gold
@@ -222,7 +246,7 @@ func sanctuary() -> int:
 			bought = Game.buy(str(pick.id))
 			wear_best()
 	for it: Dictionary in Game.craft_stock():
-		if Game.can_craft(str(it.id)):
+		if better(it) and cover(it.craft, true) and Game.can_craft(str(it.id)):
 			note_cost(it.craft)
 			Game.craft(str(it.id))
 			wear_best()
@@ -233,7 +257,7 @@ func sanctuary() -> int:
 		var best_gold := 1 << 30
 		for slot: String in ["weapon", "chest", "shield", "helm", "legs", "shoulders", "gauntlets", "boots"]:
 			var id = Game.profile.equipped.get(slot)
-			if id == null or not Game.can_upgrade(str(id)):
+			if id == null or not upgradable(str(id), false):
 				continue
 			var c := Stats.upgrade_cost(Db.item(str(id)), Game.upgrade_level(str(id)))
 			if slot == "weapon" or int(c.gold) < best_gold:
@@ -241,7 +265,7 @@ func sanctuary() -> int:
 				best_gold = int(c.gold)
 				if slot == "weapon":
 					break
-		if best != "":
+		if best != "" and upgradable(best, true):
 			note_cost(Stats.upgrade_cost(Db.item(best), Game.upgrade_level(best)))
 			worked = Game.upgrade(best)
 	dry = 0 if gold0 > Game.profile.gold - earned else dry

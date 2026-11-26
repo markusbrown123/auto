@@ -56,6 +56,7 @@ func _ready() -> void:
 	var locked := 0
 	var visible_change := {}
 	for slot: String in ArmoryScreen.RAIL:
+		a.apply_preview(a.slot, "")      # back to what is equipped, so a change is counted against the slot that made it
 		a._enter_slot(slot)
 		await settle(a)
 		for i in a.entries.size():
@@ -72,7 +73,7 @@ func _ready() -> void:
 				ok(false, "the equipped %s is not called a preview" % id)
 			if s.backdrop.look_now != s.backdrop.knight_look(Game.trial_profile(id) if not Game.is_equipped(id) else {}):
 				ok(false, "the knight wears the preview of %s" % id)
-			if a.last_change != "":
+			if a.previewing == id and a.last_change != "":
 				visible_change[slot] = true
 			if e.locked:
 				locked += 1
@@ -81,9 +82,13 @@ func _ready() -> void:
 				a._do_equip()
 				if Game.is_equipped(id) or Game.owns(id):
 					ok(false, "a locked item cannot be equipped (%s)" % id)
-	ok(seen >= Db.item_list.size() - 4, "every item was brought to the middle and previewed (%d)" % seen)
+	var expect := 0
+	for it in Db.item_list:
+		if ArmoryScreen.RAIL.has(str(it.slot)) and int(it.get("ng_min", 0)) <= 0:
+			expect += 1
+	ok(seen == expect, "every item of this journey was brought to the middle and previewed (%d of %d)" % [seen, expect])
 	ok(locked > 10, "items not yet held are shown locked (%d)" % locked)
-	ok(visible_change.has("weapon") and visible_change.has("shield") and visible_change.has("chest"), "weapon, shield and chest previews change the knight")
+	ok(visible_change.has("weapon") and visible_change.has("shield") and visible_change.has("chest"), "weapon, shield and chest previews change the knight (%s)" % str(visible_change.keys()))
 	ok(not visible_change.has("helm") and not visible_change.has("gauntlets") and not visible_change.has("legs") and not visible_change.has("ring") and not visible_change.has("relic"),
 		"helm, gauntlets, greaves, ring and relic previews change nothing that is seen (and the screen says so)")
 	# --- a finger: drag follows 1:1, the flick carries on, the row rests on an item

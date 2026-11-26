@@ -1,0 +1,137 @@
+{
+ "version": 1,
+ "level": 23,
+ "xp": 900,
+ "attr_points": 1,
+ "attrs": {
+  "health": 14,
+  "strength": 16,
+  "dex": 12,
+  "endurance": 12,
+  "defense": 6,
+  "crit": 4,
+  "resist": 2
+ },
+ "gold": 9876,
+ "shards": 41,
+ "inventory": [
+  "w_rusted_sword",
+  "s_plank",
+  "a_worn_helm",
+  "a_worn_chest",
+  "a_worn_gauntlets",
+  "a_worn_legs",
+  "w_ashen_great",
+  "w_headsman",
+  "w_twin_fangs",
+  "w_monarch",
+  "w_oath_axe",
+  "s_tower",
+  "s_rime",
+  "a_regal_helm",
+  "a_regal_chest",
+  "a_frost_gauntlets",
+  "a_frost_legs",
+  "r_crown",
+  "x_name",
+  "w_starfall",
+  "w_future_blade",
+  "a_vigil_helm"
+ ],
+ "equipped": {
+  "weapon": "w_oath_axe",
+  "shield": "s_rime",
+  "helm": "a_regal_helm",
+  "chest": "a_regal_chest",
+  "gauntlets": "a_frost_gauntlets",
+  "legs": "a_frost_legs",
+  "ring": "r_crown",
+  "relic": "x_name"
+ },
+ "upgrades": {
+  "w_oath_axe": 5,
+  "w_monarch": 4,
+  "s_rime": 2,
+  "a_regal_chest": 3,
+  "w_future_blade": 2,
+  "r_crown": 1
+ },
+ "mastery": {
+  "w_oath_axe": 6,
+  "w_monarch": 11,
+  "a_regal_chest": 5,
+  "w_future_blade": 3,
+  "s_rime": 4
+ },
+ "mastered": [
+  "w_rusted_sword",
+  "w_monarch",
+  "w_twin_fangs"
+ ],
+ "flags": {
+  "courtyard_gate": true,
+  "witness_found": true,
+  "last_ending": "cities",
+  "beat_forgotten_monarch": true
+ },
+ "defeated": {
+  "hollow_soldier": 31,
+  "ashen_sentinel": 4,
+  "hollow_executioner": 2,
+  "crimson_widow": 2,
+  "cathedral_beast": 1,
+  "gravewarden": 1,
+  "frostbound_king": 1,
+  "forgotten_monarch": 1,
+  "future_foe": 2
+ },
+ "cleared": [
+  "courtyard",
+  "blackwood"
+ ],
+ "endings": [
+  "cities"
+ ],
+ "ng": 1,
+ "deaths": 40,
+ "heraldry": "#123456",
+ "tutorial_done": true,
+ "playtime": 86400.25,
+ "body": "m",
+ "combos": [
+  "double_slash",
+  "riposte",
+  "rising_fang",
+  "colossus"
+ ],
+ "combo_uses": {
+  "double_slash": 200,
+  "colossus": 9
+ },
+ "lore": [
+  "l_one",
+  "l_two"
+ ],
+ "quests_done": [
+  "relief_of_the_gate"
+ ],
+ "heard": [
+  "a",
+  "b"
+ ],
+ "favourites": [
+  "w_monarch",
+  "w_future_blade",
+  "s_rime"
+ ],
+ "inv_sort": "rarity",
+ "mastery_taught": {
+  "w_rusted_sword": "riposte",
+  "w_monarch": "rising_fang"
+ },
+ "name": "Aldous",
+ "last_played": 1790000000.0,
+ "some_future_field": {
+  "kept": true
+ }
+}

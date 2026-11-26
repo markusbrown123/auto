@@ -1,0 +1,37 @@
+{
+ "attrs": {
+  "health": 9,
+  "strength": 7
+ },
+ "equipped": {
+  "weapon": "w_knight_sword",
+  "shield": "s_plank",
+  "helm": "a_worn_helm",
+  "chest": "a_garrison_chest"
+ },
+ "level": 4,
+ "xp": 310,
+ "gold": 1234,
+ "shards": 7,
+ "inventory": [
+  "w_rusted_sword",
+  "w_knight_sword",
+  "s_plank",
+  "a_worn_helm",
+  "a_garrison_chest"
+ ],
+ "upgrades": {
+  "w_knight_sword": 2
+ },
+ "flags": {
+  "courtyard_gate": true
+ },
+ "defeated": {
+  "hollow_soldier": 5,
+  "ashen_sentinel": 1
+ },
+ "cleared": [
+  "courtyard"
+ ],
+ "heraldry": "#224466"
+}

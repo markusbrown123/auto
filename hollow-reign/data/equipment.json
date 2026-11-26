@@ -343,6 +343,7 @@
  },
  "materials": {
   "m_iron": {
+   "price": 40,
    "name": "Old Iron",
    "regions": [
     "courtyard",
@@ -351,6 +352,7 @@
    "desc": "Garrison stock, sound under the rust."
   },
   "m_silver": {
+   "price": 90,
    "name": "Grave Silver",
    "regions": [
     "cathedral",
@@ -359,6 +361,7 @@
    "desc": "Poured for the dead. It takes an edge the living never asked of it."
   },
   "m_scale": {
+   "price": 150,
    "name": "Wyrm Scale",
    "regions": [
     "roost"
@@ -366,6 +369,7 @@
    "desc": "Shed, not cut. Still warm."
   },
   "m_rime": {
+   "price": 150,
    "name": "Rimesteel",
    "regions": [
     "citadel"
@@ -373,6 +377,7 @@
    "desc": "Steel that wintered in the Citadel and did not come back the same."
   },
   "m_glass": {
+   "price": 240,
    "name": "Hollow Glass",
    "regions": [
     "deep",
@@ -381,6 +386,7 @@
    "desc": "Not glass. Orren will not say what it was part of."
   },
   "m_core": {
+   "price": 0,
    "name": "Guardian Core",
    "regions": [],
    "desc": "What a guardian was built around. One to a guardian."
@@ -400,10 +406,10 @@
   "max": 5,
   "gold_base": [
    50,
-   80,
-   130,
-   210,
-   320
+   85,
+   150,
+   260,
+   400
   ],
   "gold_step": [
    1.0,
@@ -415,9 +421,9 @@
   "shard": [
    1,
    1,
+   1,
    2,
-   2,
-   3
+   2
   ],
   "slot_mult": {
    "weapon": 1.0,
@@ -447,6 +453,7 @@
  },
  "sell_rate": 0.35,
  "buyback_rate": 3.0,
+ "shard_price": 60,
  "shop_stage": {
   "common": 0,
   "uncommon": 0,
@@ -470,10 +477,15 @@
   "mat_fight": 1,
   "mat_elite": 2,
   "mat_boss": 4,
+  "shards_fight": 1,
+  "shards_boss": 3,
+  "shards_boss_per_region": 1,
   "mat_chance": 0.65,
   "dup_gold": 0.25,
   "dup_mats": 2,
-  "ng_item_chance": 0.5
+  "ng_item_chance": 0.5,
+  "ng_gold": 1.0,
+  "ng_xp": 0.5
  },
  "aliases": {
   "w_wayfarer": "w_rusted_sword",
@@ -524,6 +536,16 @@
    "id": "w_monarch"
   }
  },
+ "region_order": [
+  "courtyard",
+  "blackwood",
+  "cathedral",
+  "crypt",
+  "roost",
+  "citadel",
+  "deep",
+  "throne"
+ ],
  "boss_rewards": {
   "ashen_sentinel": {
    "first": [
@@ -1022,27 +1044,27 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 85,
       "shards": 1,
       "materials": {}
      },
      {
-      "gold": 130,
+      "gold": 135,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 190,
+      "gold": 205,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 290,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 370,
+      "gold": 390,
       "shards": 5,
       "materials": {}
      }
@@ -1104,32 +1126,32 @@
     },
     "costs": [
      {
-      "gold": 130,
+      "gold": 150,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 240,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 210,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 310,
-      "shards": 6,
+      "gold": 360,
+      "shards": 3,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 440,
-      "shards": 8,
+      "gold": 510,
+      "shards": 4,
       "materials": {
        "m_iron": 4
       }
      },
      {
-      "gold": 600,
-      "shards": 10,
+      "gold": 690,
+      "shards": 5,
       "materials": {
        "m_iron": 6
       }
@@ -1199,27 +1221,27 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 85,
       "shards": 1,
       "materials": {}
      },
      {
-      "gold": 130,
+      "gold": 135,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 190,
+      "gold": 205,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 290,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 370,
+      "gold": 390,
       "shards": 5,
       "materials": {}
      }
@@ -1281,32 +1303,32 @@
     },
     "costs": [
      {
-      "gold": 130,
+      "gold": 150,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 240,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 210,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 310,
-      "shards": 6,
+      "gold": 360,
+      "shards": 3,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 440,
-      "shards": 8,
+      "gold": 510,
+      "shards": 4,
       "materials": {
        "m_iron": 4
       }
      },
      {
-      "gold": 600,
-      "shards": 10,
+      "gold": 690,
+      "shards": 5,
       "materials": {
        "m_iron": 6
       }
@@ -1369,31 +1391,31 @@
     },
     "costs": [
      {
-      "gold": 210,
+      "gold": 260,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 335,
+      "gold": 415,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 505,
+      "gold": 625,
       "shards": 6,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 715,
+      "gold": 885,
       "shards": 8,
       "materials": {
        "m_iron": 4
       }
      },
      {
-      "gold": 965,
+      "gold": 1195,
       "shards": 10,
       "materials": {
        "m_iron": 6,
@@ -1463,27 +1485,27 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 85,
       "shards": 1,
       "materials": {}
      },
      {
-      "gold": 130,
+      "gold": 135,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 190,
+      "gold": 205,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 290,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 370,
+      "gold": 390,
       "shards": 5,
       "materials": {}
      }
@@ -1546,31 +1568,31 @@
     },
     "costs": [
      {
-      "gold": 210,
+      "gold": 260,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 335,
+      "gold": 415,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 505,
+      "gold": 625,
       "shards": 6,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 715,
+      "gold": 885,
       "shards": 8,
       "materials": {
        "m_iron": 4
       }
      },
      {
-      "gold": 965,
+      "gold": 1195,
       "shards": 10,
       "materials": {
        "m_iron": 6,
@@ -1635,31 +1657,31 @@
     },
     "costs": [
      {
-      "gold": 210,
+      "gold": 260,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 335,
+      "gold": 415,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 505,
+      "gold": 625,
       "shards": 6,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 715,
+      "gold": 885,
       "shards": 8,
       "materials": {
        "m_silver": 4
       }
      },
      {
-      "gold": 965,
+      "gold": 1195,
       "shards": 10,
       "materials": {
        "m_silver": 6,
@@ -1724,32 +1746,32 @@
     },
     "costs": [
      {
-      "gold": 320,
-      "shards": 3,
+      "gold": 400,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 510,
+      "gold": 640,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 960,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 770,
-      "shards": 9,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 1090,
-      "shards": 12,
+      "gold": 1360,
+      "shards": 8,
       "materials": {
        "m_rime": 4
       }
      },
      {
-      "gold": 1470,
-      "shards": 15,
+      "gold": 1840,
+      "shards": 10,
       "materials": {
        "m_rime": 6,
        "m_core": 1
@@ -1819,31 +1841,31 @@
     },
     "costs": [
      {
-      "gold": 210,
+      "gold": 260,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 335,
+      "gold": 415,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 505,
+      "gold": 625,
       "shards": 6,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 715,
+      "gold": 885,
       "shards": 8,
       "materials": {
        "m_rime": 4
       }
      },
      {
-      "gold": 965,
+      "gold": 1195,
       "shards": 10,
       "materials": {
        "m_rime": 6,
@@ -1910,32 +1932,32 @@
     },
     "costs": [
      {
-      "gold": 320,
-      "shards": 3,
+      "gold": 400,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 510,
+      "gold": 640,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 960,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 770,
-      "shards": 9,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 1090,
-      "shards": 12,
+      "gold": 1360,
+      "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 1470,
-      "shards": 15,
+      "gold": 1840,
+      "shards": 10,
       "materials": {
        "m_glass": 6,
        "m_core": 1
@@ -1996,32 +2018,32 @@
     },
     "costs": [
      {
-      "gold": 320,
-      "shards": 3,
+      "gold": 400,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 510,
+      "gold": 640,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 960,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 770,
-      "shards": 9,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 1090,
-      "shards": 12,
+      "gold": 1360,
+      "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 1470,
-      "shards": 15,
+      "gold": 1840,
+      "shards": 10,
       "materials": {
        "m_glass": 6,
        "m_core": 1
@@ -2081,32 +2103,32 @@
     },
     "costs": [
      {
-      "gold": 320,
-      "shards": 3,
+      "gold": 400,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 510,
+      "gold": 640,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 960,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 770,
-      "shards": 9,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 1090,
-      "shards": 12,
+      "gold": 1360,
+      "shards": 8,
       "materials": {
        "m_iron": 4
       }
      },
      {
-      "gold": 1470,
-      "shards": 15,
+      "gold": 1840,
+      "shards": 10,
       "materials": {
        "m_iron": 6,
        "m_core": 1
@@ -2237,27 +2259,27 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 70,
       "shards": 1,
       "materials": {}
      },
      {
-      "gold": 100,
+      "gold": 110,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 155,
+      "gold": 165,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 220,
+      "gold": 230,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 295,
+      "gold": 315,
       "shards": 5,
       "materials": {}
      }
@@ -2315,32 +2337,32 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 120,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 190,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 165,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 250,
-      "shards": 6,
+      "gold": 290,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 355,
-      "shards": 8,
+      "gold": 410,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 480,
-      "shards": 10,
+      "gold": 550,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -2399,31 +2421,31 @@
     },
     "costs": [
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 335,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 405,
+      "gold": 500,
       "shards": 6,
       "materials": {
        "m_silver": 1
       }
      },
      {
-      "gold": 570,
+      "gold": 705,
       "shards": 8,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 775,
+      "gold": 955,
       "shards": 10,
       "materials": {
        "m_silver": 3,
@@ -2481,32 +2503,32 @@
     },
     "costs": [
      {
-      "gold": 255,
-      "shards": 3,
+      "gold": 320,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 410,
+      "gold": 510,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 770,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 615,
-      "shards": 9,
       "materials": {
        "m_rime": 1
       }
      },
      {
-      "gold": 870,
-      "shards": 12,
+      "gold": 1090,
+      "shards": 8,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 1180,
-      "shards": 15,
+      "gold": 1470,
+      "shards": 10,
       "materials": {
        "m_rime": 3,
        "m_core": 1
@@ -2880,22 +2902,22 @@
       "materials": {}
      },
      {
-      "gold": 75,
+      "gold": 80,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 115,
+      "gold": 120,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 165,
+      "gold": 175,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 220,
+      "gold": 235,
       "shards": 5,
       "materials": {}
      }
@@ -2954,27 +2976,27 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 70,
       "shards": 1,
       "materials": {}
      },
      {
-      "gold": 100,
+      "gold": 110,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 155,
+      "gold": 165,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 220,
+      "gold": 230,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 295,
+      "gold": 315,
       "shards": 5,
       "materials": {}
      }
@@ -3047,22 +3069,22 @@
       "materials": {}
      },
      {
-      "gold": 65,
+      "gold": 70,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 95,
+      "gold": 100,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 135,
+      "gold": 145,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 185,
+      "gold": 195,
       "shards": 5,
       "materials": {}
      }
@@ -3125,22 +3147,22 @@
       "materials": {}
      },
      {
-      "gold": 75,
+      "gold": 80,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 115,
+      "gold": 120,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 165,
+      "gold": 175,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 220,
+      "gold": 235,
       "shards": 5,
       "materials": {}
      }
@@ -3206,32 +3228,32 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 90,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 145,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 125,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 185,
-      "shards": 6,
+      "gold": 215,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 265,
-      "shards": 8,
+      "gold": 305,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 360,
-      "shards": 10,
+      "gold": 415,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -3299,32 +3321,32 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 120,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 190,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 165,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 250,
-      "shards": 6,
+      "gold": 290,
+      "shards": 3,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 355,
-      "shards": 8,
+      "gold": 410,
+      "shards": 4,
       "materials": {
        "m_iron": 4
       }
      },
      {
-      "gold": 480,
-      "shards": 10,
+      "gold": 550,
+      "shards": 5,
       "materials": {
        "m_iron": 6
       }
@@ -3398,32 +3420,32 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 75,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 120,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 105,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 155,
-      "shards": 6,
+      "gold": 180,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 220,
-      "shards": 8,
+      "gold": 255,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 300,
-      "shards": 10,
+      "gold": 345,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -3497,32 +3519,32 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 90,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 145,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 125,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 185,
-      "shards": 6,
+      "gold": 215,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 265,
-      "shards": 8,
+      "gold": 305,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 360,
-      "shards": 10,
+      "gold": 415,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -3587,32 +3609,32 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 90,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 145,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 125,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 185,
-      "shards": 6,
+      "gold": 215,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 265,
-      "shards": 8,
+      "gold": 305,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 360,
-      "shards": 10,
+      "gold": 415,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -3678,32 +3700,32 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 120,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 190,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 165,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 250,
-      "shards": 6,
+      "gold": 290,
+      "shards": 3,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 355,
-      "shards": 8,
+      "gold": 410,
+      "shards": 4,
       "materials": {
        "m_iron": 4
       }
      },
      {
-      "gold": 480,
-      "shards": 10,
+      "gold": 550,
+      "shards": 5,
       "materials": {
        "m_iron": 6
       }
@@ -3768,32 +3790,32 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 75,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 120,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 105,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 155,
-      "shards": 6,
+      "gold": 180,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 220,
-      "shards": 8,
+      "gold": 255,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 300,
-      "shards": 10,
+      "gold": 345,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -3858,32 +3880,32 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 90,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 145,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 125,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 185,
-      "shards": 6,
+      "gold": 215,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 265,
-      "shards": 8,
+      "gold": 305,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 360,
-      "shards": 10,
+      "gold": 415,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -3957,31 +3979,31 @@
     },
     "costs": [
      {
-      "gold": 125,
+      "gold": 155,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 200,
+      "gold": 250,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 300,
+      "gold": 375,
       "shards": 6,
       "materials": {
        "m_silver": 1
       }
      },
      {
-      "gold": 430,
+      "gold": 530,
       "shards": 8,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 580,
+      "gold": 720,
       "shards": 10,
       "materials": {
        "m_silver": 3,
@@ -4051,31 +4073,31 @@
     },
     "costs": [
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 335,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 405,
+      "gold": 500,
       "shards": 6,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 570,
+      "gold": 705,
       "shards": 8,
       "materials": {
        "m_silver": 4
       }
      },
      {
-      "gold": 775,
+      "gold": 955,
       "shards": 10,
       "materials": {
        "m_silver": 6,
@@ -4151,31 +4173,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_silver": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_silver": 3,
@@ -4251,31 +4273,31 @@
     },
     "costs": [
      {
-      "gold": 125,
+      "gold": 155,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 200,
+      "gold": 250,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 300,
+      "gold": 375,
       "shards": 6,
       "materials": {
        "m_silver": 1
       }
      },
      {
-      "gold": 430,
+      "gold": 530,
       "shards": 8,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 580,
+      "gold": 720,
       "shards": 10,
       "materials": {
        "m_silver": 3,
@@ -4344,31 +4366,31 @@
     },
     "costs": [
      {
-      "gold": 125,
+      "gold": 155,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 200,
+      "gold": 250,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 300,
+      "gold": 375,
       "shards": 6,
       "materials": {
        "m_rime": 1
       }
      },
      {
-      "gold": 430,
+      "gold": 530,
       "shards": 8,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 580,
+      "gold": 720,
       "shards": 10,
       "materials": {
        "m_rime": 3,
@@ -4436,31 +4458,31 @@
     },
     "costs": [
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 335,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 405,
+      "gold": 500,
       "shards": 6,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 570,
+      "gold": 705,
       "shards": 8,
       "materials": {
        "m_rime": 4
       }
      },
      {
-      "gold": 775,
+      "gold": 955,
       "shards": 10,
       "materials": {
        "m_rime": 6,
@@ -4534,31 +4556,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_rime": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_rime": 3,
@@ -4625,31 +4647,31 @@
     },
     "costs": [
      {
-      "gold": 125,
+      "gold": 155,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 200,
+      "gold": 250,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 300,
+      "gold": 375,
       "shards": 6,
       "materials": {
        "m_rime": 1
       }
      },
      {
-      "gold": 430,
+      "gold": 530,
       "shards": 8,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 580,
+      "gold": 720,
       "shards": 10,
       "materials": {
        "m_rime": 3,
@@ -4713,32 +4735,32 @@
     },
     "costs": [
      {
-      "gold": 190,
-      "shards": 3,
+      "gold": 240,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 305,
+      "gold": 385,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 575,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 460,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 655,
-      "shards": 12,
+      "gold": 815,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 885,
-      "shards": 15,
+      "gold": 1105,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -4802,32 +4824,32 @@
     },
     "costs": [
      {
-      "gold": 255,
-      "shards": 3,
+      "gold": 320,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 410,
+      "gold": 510,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 770,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 615,
-      "shards": 9,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 870,
-      "shards": 12,
+      "gold": 1090,
+      "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 1180,
-      "shards": 15,
+      "gold": 1470,
+      "shards": 10,
       "materials": {
        "m_glass": 6,
        "m_core": 1
@@ -4892,32 +4914,32 @@
     },
     "costs": [
      {
-      "gold": 160,
-      "shards": 3,
+      "gold": 200,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 255,
+      "gold": 320,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 480,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 385,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 545,
-      "shards": 12,
+      "gold": 680,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 735,
-      "shards": 15,
+      "gold": 920,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -4982,32 +5004,32 @@
     },
     "costs": [
      {
-      "gold": 190,
-      "shards": 3,
+      "gold": 240,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 305,
+      "gold": 385,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 575,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 460,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 655,
-      "shards": 12,
+      "gold": 815,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 885,
-      "shards": 15,
+      "gold": 1105,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -5072,32 +5094,32 @@
     },
     "costs": [
      {
-      "gold": 190,
-      "shards": 3,
+      "gold": 240,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 305,
+      "gold": 385,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 575,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 460,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 655,
-      "shards": 12,
+      "gold": 815,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 885,
-      "shards": 15,
+      "gold": 1105,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -5161,32 +5183,32 @@
     },
     "costs": [
      {
-      "gold": 255,
-      "shards": 3,
+      "gold": 320,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 410,
+      "gold": 510,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 770,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 615,
-      "shards": 9,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 870,
-      "shards": 12,
+      "gold": 1090,
+      "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 1180,
-      "shards": 15,
+      "gold": 1470,
+      "shards": 10,
       "materials": {
        "m_glass": 6,
        "m_core": 1
@@ -5251,32 +5273,32 @@
     },
     "costs": [
      {
-      "gold": 160,
-      "shards": 3,
+      "gold": 200,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 255,
+      "gold": 320,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 480,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 385,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 545,
-      "shards": 12,
+      "gold": 680,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 735,
-      "shards": 15,
+      "gold": 920,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -5341,32 +5363,32 @@
     },
     "costs": [
      {
-      "gold": 190,
-      "shards": 3,
+      "gold": 240,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 305,
+      "gold": 385,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 575,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 460,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 655,
-      "shards": 12,
+      "gold": 815,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 885,
-      "shards": 15,
+      "gold": 1105,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -5799,32 +5821,32 @@
     },
     "costs": [
      {
-      "gold": 320,
-      "shards": 3,
+      "gold": 400,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 510,
+      "gold": 640,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 960,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 770,
-      "shards": 9,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 1090,
-      "shards": 12,
+      "gold": 1360,
+      "shards": 8,
       "materials": {
        "m_scale": 4
       }
      },
      {
-      "gold": 1470,
-      "shards": 15,
+      "gold": 1840,
+      "shards": 10,
       "materials": {
        "m_scale": 6,
        "m_core": 1
@@ -5888,32 +5910,32 @@
     },
     "costs": [
      {
-      "gold": 320,
-      "shards": 3,
+      "gold": 400,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 510,
+      "gold": 640,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 960,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 770,
-      "shards": 9,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 1090,
-      "shards": 12,
+      "gold": 1360,
+      "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 1470,
-      "shards": 15,
+      "gold": 1840,
+      "shards": 10,
       "materials": {
        "m_glass": 6,
        "m_core": 1
@@ -5980,31 +6002,31 @@
     },
     "costs": [
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 335,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 405,
+      "gold": 500,
       "shards": 6,
       "materials": {
        "m_scale": 1
       }
      },
      {
-      "gold": 570,
+      "gold": 705,
       "shards": 8,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 775,
+      "gold": 955,
       "shards": 10,
       "materials": {
        "m_scale": 3,
@@ -6140,31 +6162,31 @@
     },
     "costs": [
      {
-      "gold": 125,
+      "gold": 155,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 200,
+      "gold": 250,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 300,
+      "gold": 375,
       "shards": 6,
       "materials": {
        "m_scale": 1
       }
      },
      {
-      "gold": 430,
+      "gold": 530,
       "shards": 8,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 580,
+      "gold": 720,
       "shards": 10,
       "materials": {
        "m_scale": 3,
@@ -6232,31 +6254,31 @@
     },
     "costs": [
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 335,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 405,
+      "gold": 500,
       "shards": 6,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 570,
+      "gold": 705,
       "shards": 8,
       "materials": {
        "m_scale": 4
       }
      },
      {
-      "gold": 775,
+      "gold": 955,
       "shards": 10,
       "materials": {
        "m_scale": 6,
@@ -6325,31 +6347,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_scale": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_scale": 3,
@@ -6418,31 +6440,31 @@
     },
     "costs": [
      {
-      "gold": 125,
+      "gold": 155,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 200,
+      "gold": 250,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 300,
+      "gold": 375,
       "shards": 6,
       "materials": {
        "m_scale": 1
       }
      },
      {
-      "gold": 430,
+      "gold": 530,
       "shards": 8,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 580,
+      "gold": 720,
       "shards": 10,
       "materials": {
        "m_scale": 3,
@@ -6506,27 +6528,27 @@
     },
     "costs": [
      {
-      "gold": 80,
+      "gold": 85,
       "shards": 1,
       "materials": {}
      },
      {
-      "gold": 130,
+      "gold": 135,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 190,
+      "gold": 205,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 270,
+      "gold": 290,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 370,
+      "gold": 390,
       "shards": 5,
       "materials": {}
      }
@@ -6589,32 +6611,32 @@
     },
     "costs": [
      {
-      "gold": 130,
+      "gold": 150,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 240,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 210,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 310,
-      "shards": 6,
+      "gold": 360,
+      "shards": 3,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 440,
-      "shards": 8,
+      "gold": 510,
+      "shards": 4,
       "materials": {
        "m_silver": 4
       }
      },
      {
-      "gold": 600,
-      "shards": 10,
+      "gold": 690,
+      "shards": 5,
       "materials": {
        "m_silver": 6
       }
@@ -6684,31 +6706,31 @@
     },
     "costs": [
      {
-      "gold": 210,
+      "gold": 260,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 335,
+      "gold": 415,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 505,
+      "gold": 625,
       "shards": 6,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 715,
+      "gold": 885,
       "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 965,
+      "gold": 1195,
       "shards": 10,
       "materials": {
        "m_glass": 6,
@@ -6777,31 +6799,31 @@
     },
     "costs": [
      {
-      "gold": 210,
+      "gold": 260,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 335,
+      "gold": 415,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 505,
+      "gold": 625,
       "shards": 6,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 715,
+      "gold": 885,
       "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 965,
+      "gold": 1195,
       "shards": 10,
       "materials": {
        "m_glass": 6,
@@ -7056,22 +7078,22 @@
       "materials": {}
      },
      {
-      "gold": 65,
+      "gold": 70,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 95,
+      "gold": 100,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 135,
+      "gold": 145,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 185,
+      "gold": 195,
       "shards": 5,
       "materials": {}
      }
@@ -7149,22 +7171,22 @@
       "materials": {}
      },
      {
-      "gold": 65,
+      "gold": 70,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 95,
+      "gold": 100,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 135,
+      "gold": 145,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 185,
+      "gold": 195,
       "shards": 5,
       "materials": {}
      }
@@ -7237,32 +7259,32 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 75,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 120,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 105,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 155,
-      "shards": 6,
+      "gold": 180,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 220,
-      "shards": 8,
+      "gold": 255,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 300,
-      "shards": 10,
+      "gold": 345,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -7337,32 +7359,32 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 75,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 120,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 105,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 155,
-      "shards": 6,
+      "gold": 180,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 220,
-      "shards": 8,
+      "gold": 255,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 300,
-      "shards": 10,
+      "gold": 345,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -7440,32 +7462,32 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 75,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 120,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 105,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 155,
-      "shards": 6,
+      "gold": 180,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 220,
-      "shards": 8,
+      "gold": 255,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 300,
-      "shards": 10,
+      "gold": 345,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -7546,32 +7568,32 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 75,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 120,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 105,
-      "shards": 4,
-      "materials": {}
-     },
-     {
-      "gold": 155,
-      "shards": 6,
+      "gold": 180,
+      "shards": 3,
       "materials": {
        "m_iron": 1
       }
      },
      {
-      "gold": 220,
-      "shards": 8,
+      "gold": 255,
+      "shards": 4,
       "materials": {
        "m_iron": 2
       }
      },
      {
-      "gold": 300,
-      "shards": 10,
+      "gold": 345,
+      "shards": 5,
       "materials": {
        "m_iron": 3
       }
@@ -7647,31 +7669,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_silver": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_silver": 3,
@@ -7747,31 +7769,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_silver": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_silver": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_silver": 3,
@@ -7851,31 +7873,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_rime": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_rime": 3,
@@ -7956,31 +7978,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_rime": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_rime": 3,
@@ -8065,32 +8087,32 @@
     },
     "costs": [
      {
-      "gold": 160,
-      "shards": 3,
+      "gold": 200,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 255,
+      "gold": 320,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 480,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 385,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 545,
-      "shards": 12,
+      "gold": 680,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 735,
-      "shards": 15,
+      "gold": 920,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -8166,32 +8188,32 @@
     },
     "costs": [
      {
-      "gold": 160,
-      "shards": 3,
+      "gold": 200,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 255,
+      "gold": 320,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 480,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 385,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 545,
-      "shards": 12,
+      "gold": 680,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 735,
-      "shards": 15,
+      "gold": 920,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -8275,32 +8297,32 @@
     },
     "costs": [
      {
-      "gold": 160,
-      "shards": 3,
+      "gold": 200,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 255,
+      "gold": 320,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 480,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 385,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 545,
-      "shards": 12,
+      "gold": 680,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 735,
-      "shards": 15,
+      "gold": 920,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -8376,32 +8398,32 @@
     },
     "costs": [
      {
-      "gold": 160,
-      "shards": 3,
+      "gold": 200,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 255,
+      "gold": 320,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 480,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 385,
-      "shards": 9,
       "materials": {
        "m_glass": 1
       }
      },
      {
-      "gold": 545,
-      "shards": 12,
+      "gold": 680,
+      "shards": 8,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 735,
-      "shards": 15,
+      "gold": 920,
+      "shards": 10,
       "materials": {
        "m_glass": 3,
        "m_core": 1
@@ -8488,31 +8510,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_scale": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_scale": 3,
@@ -8593,31 +8615,31 @@
     },
     "costs": [
      {
-      "gold": 105,
+      "gold": 130,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 170,
+      "gold": 210,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 250,
+      "gold": 310,
       "shards": 6,
       "materials": {
        "m_scale": 1
       }
      },
      {
-      "gold": 355,
+      "gold": 440,
       "shards": 8,
       "materials": {
        "m_scale": 2
       }
      },
      {
-      "gold": 485,
+      "gold": 600,
       "shards": 10,
       "materials": {
        "m_scale": 3,
@@ -8702,31 +8724,31 @@
     },
     "costs": [
      {
-      "gold": 210,
+      "gold": 260,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 335,
+      "gold": 415,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 505,
+      "gold": 625,
       "shards": 6,
       "materials": {
        "m_rime": 2
       }
      },
      {
-      "gold": 715,
+      "gold": 885,
       "shards": 8,
       "materials": {
        "m_rime": 4
       }
      },
      {
-      "gold": 965,
+      "gold": 1195,
       "shards": 10,
       "materials": {
        "m_rime": 6,
@@ -8811,32 +8833,32 @@
     },
     "costs": [
      {
-      "gold": 320,
-      "shards": 3,
+      "gold": 400,
+      "shards": 2,
       "materials": {}
      },
      {
-      "gold": 510,
+      "gold": 640,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 960,
       "shards": 6,
-      "materials": {}
-     },
-     {
-      "gold": 770,
-      "shards": 9,
       "materials": {
        "m_glass": 2
       }
      },
      {
-      "gold": 1090,
-      "shards": 12,
+      "gold": 1360,
+      "shards": 8,
       "materials": {
        "m_glass": 4
       }
      },
      {
-      "gold": 1470,
-      "shards": 15,
+      "gold": 1840,
+      "shards": 10,
       "materials": {
        "m_glass": 6,
        "m_core": 1
@@ -8916,27 +8938,27 @@
     },
     "costs": [
      {
-      "gold": 65,
+      "gold": 70,
       "shards": 1,
       "materials": {}
      },
      {
-      "gold": 100,
+      "gold": 110,
       "shards": 2,
       "materials": {}
      },
      {
-      "gold": 155,
+      "gold": 165,
       "shards": 3,
       "materials": {}
      },
      {
-      "gold": 220,
+      "gold": 230,
       "shards": 4,
       "materials": {}
      },
      {
-      "gold": 295,
+      "gold": 315,
       "shards": 5,
       "materials": {}
      }

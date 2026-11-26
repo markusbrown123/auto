@@ -1,0 +1,30 @@
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+render t=2.6 draw_calls=243 primitives=177228 objects=1184 video_mem=185.0MB nodes=290
+render t=4.0 draw_calls=280 primitives=188876 objects=1475 video_mem=209.2MB nodes=334
+render t=5.6 draw_calls=296 primitives=206945 objects=1523 video_mem=230.6MB nodes=339
+render t=7.0 draw_calls=354 primitives=207251 objects=1676 video_mem=231.1MB nodes=337
+render t=8.6 draw_calls=450 primitives=215145 objects=2261 video_mem=231.4MB nodes=385
+render t=10.2 draw_calls=391 primitives=180951 objects=1763 video_mem=296.2MB nodes=310
+render t=11.8 draw_calls=412 primitives=187599 objects=2083 video_mem=317.2MB nodes=346
+ERROR: Parameter "material" is null.
+   at: material_casts_shadows (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2404)
+ERROR: Parameter "material" is null.
+   at: material_is_animated (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2391)
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2435)
+ERROR: Parameter "material" is null.
+   at: material_update_dependency (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2447)
+ERROR: Parameter "material" is null.
+   at: material_casts_shadows (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2404)
+ERROR: Parameter "material" is null.
+   at: material_is_animated (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2391)
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2435)
+ERROR: Parameter "material" is null.
+   at: material_update_dependency (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2447)
+render t=13.4 draw_calls=260 primitives=199212 objects=1173 video_mem=298.4MB nodes=282
+render t=15.0 draw_calls=378 primitives=203041 objects=1564 video_mem=314.8MB nodes=299
+render t=16.6 draw_calls=273 primitives=167356 objects=1159 video_mem=314.7MB nodes=271
+render t=18.0 draw_calls=278 primitives=167524 objects=1099 video_mem=314.7MB nodes=268
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

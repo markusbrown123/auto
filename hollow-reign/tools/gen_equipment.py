@@ -40,12 +40,12 @@ WEIGHTS = {
 }
 
 MATERIALS = {
-    "m_iron":  {"name": "Old Iron",      "regions": ["courtyard", "blackwood"], "desc": "Garrison stock, sound under the rust."},
-    "m_silver": {"name": "Grave Silver", "regions": ["cathedral", "crypt"],     "desc": "Poured for the dead. It takes an edge the living never asked of it."},
-    "m_scale": {"name": "Wyrm Scale",    "regions": ["roost"],                  "desc": "Shed, not cut. Still warm."},
-    "m_rime":  {"name": "Rimesteel",     "regions": ["citadel"],                "desc": "Steel that wintered in the Citadel and did not come back the same."},
-    "m_glass": {"name": "Hollow Glass",  "regions": ["deep", "throne"],         "desc": "Not glass. Orren will not say what it was part of."},
-    "m_core":  {"name": "Guardian Core", "regions": [],                         "desc": "What a guardian was built around. One to a guardian."},
+    "m_iron":  {"price": 40, "name": "Old Iron",      "regions": ["courtyard", "blackwood"], "desc": "Garrison stock, sound under the rust."},
+    "m_silver": {"price": 90, "name": "Grave Silver", "regions": ["cathedral", "crypt"],     "desc": "Poured for the dead. It takes an edge the living never asked of it."},
+    "m_scale": {"price": 150, "name": "Wyrm Scale",    "regions": ["roost"],                  "desc": "Shed, not cut. Still warm."},
+    "m_rime":  {"price": 150, "name": "Rimesteel",     "regions": ["citadel"],                "desc": "Steel that wintered in the Citadel and did not come back the same."},
+    "m_glass": {"price": 240, "name": "Hollow Glass",  "regions": ["deep", "throne"],         "desc": "Not glass. Orren will not say what it was part of."},
+    "m_core":  {"price": 0, "name": "Guardian Core", "regions": [],                         "desc": "What a guardian was built around. One to a guardian."},
 }
 REGION_MAT = {r: m for m, d in MATERIALS.items() for r in d["regions"]}
 
@@ -92,9 +92,9 @@ UPGRADE_MAX = 5
 # gold for level n+1 = base[rank] * step[n]; shards = shard[rank] * (n+1); materials from level 3 for rare and above.
 UPGRADE = {
     "max": UPGRADE_MAX,
-    "gold_base": [50, 80, 130, 210, 320],
+    "gold_base": [50, 85, 150, 260, 400],
     "gold_step": [1.0, 1.6, 2.4, 3.4, 4.6],
-    "shard": [1, 1, 2, 2, 3],
+    "shard": [1, 1, 1, 2, 2],
     "slot_mult": {"weapon": 1.0, "shield": 0.8, "chest": 0.8, "helm": 0.6, "legs": 0.6, "shoulders": 0.5, "gauntlets": 0.5, "boots": 0.5},
     "mat_from_level": 2,           # the third level and up asks for the item's material...
     "mat_min_rank": 2,             # ...for rare and above
@@ -102,6 +102,7 @@ UPGRADE = {
     "growth": {"weapon": {"damage_pct": 10}, "armour": {"defense_pct": 10}, "shield": {"defense_pct": 10, "block": 0.03}},
 }
 SELL_RATE = 0.35
+SHARD_PRICE = 60                  # Orren sells shards, and the material of any region already cleared; he buys neither back
 BUYBACK_RATE = 3.0                 # a sold one-of-a-kind item can be bought back for this many times what it sold for
 SHOP_STAGE = {"common": 0, "uncommon": 0, "rare": 1, "epic": 3, "legendary": 5}     # regions cleared before Orren stocks it
 REWARDS = {
@@ -112,10 +113,12 @@ REWARDS = {
     "discover_chance": 0.30,       # a rumour: an undiscovered item of this region becomes a known silhouette with its hint
     "pity": 3,                     # after this many wins in a row with nothing new to look at, something new is forced
     "mat_fight": 1, "mat_elite": 2, "mat_boss": 4,
+    "shards_fight": 1, "shards_boss": 3, "shards_boss_per_region": 1,      # a guardian gives 3 shards, plus one for each region before its own
     "mat_chance": 0.65,
     "dup_gold": 0.25,              # a guaranteed reward already held pays this share of the foe's gold instead...
     "dup_mats": 2,                 # ...and this many of the region's material
     "ng_item_chance": 0.5,
+    "ng_gold": 1.0, "ng_xp": 0.5,  # each cycle of New Game Plus adds this share to what a foe pays
 }
 REQUIRE = {"attack_pct": -15.0, "swing_cost_pct": 20.0, "regen_pct": -3.0}      # what an unmet requirement costs
 
@@ -479,9 +482,9 @@ doc = {
         "set": [{"pieces": n, "bonus": b, "text": bonus_text(b)} for n, b in v["set"]]} for k, v in FAMILIES.items()},
     "suit_family": SUIT_FAMILY,
     "materials": MATERIALS, "region_material": REGION_MAT,
-    "upgrade": UPGRADE, "sell_rate": SELL_RATE, "buyback_rate": BUYBACK_RATE, "shop_stage": SHOP_STAGE,
+    "upgrade": UPGRADE, "sell_rate": SELL_RATE, "buyback_rate": BUYBACK_RATE, "shard_price": SHARD_PRICE, "shop_stage": SHOP_STAGE,
     "rewards": REWARDS,
-    "aliases": ALIASES, "named": NAMED,
+    "aliases": ALIASES, "named": NAMED, "region_order": [r["id"] for r in REGIONS],
     "boss_rewards": BOSS, "encounters": ENCOUNTERS, "drops": DROPS, "elites": ELITES,
     "challenges": CHALLENGES,
     "finishes": FINISHES, "accents": ACCENTS,

@@ -1169,6 +1169,43 @@ func materials_list() -> Array:
 		out.append({"id": id, "name": str(Db.materials[id].name), "desc": str(Db.materials[id].desc), "count": material_count(id)})
 	return out
 
+## What one unit costs at the forge, 0 when Orren does not have it: shards always, a region's material once one of its
+## regions has been cleared, guardian cores never. Materials cannot be sold back, so nothing is gained by trading.
+func material_price(id: String) -> int:
+	if id == "shards":
+		return int(Db.equipment.shard_price)
+	var m: Dictionary = Db.materials.get(id, {})
+	if int(m.get("price", 0)) <= 0:
+		return 0
+	for r: String in m.get("regions", []):
+		if profile.cleared.has(r) or int(profile.ng) > 0:
+			return int(m.price)
+	return 0
+
+func buy_material(id: String, n: int = 1) -> bool:
+	var cost := material_price(id) * n
+	if n <= 0 or cost <= 0 or profile.gold < cost:
+		return false
+	profile.gold -= cost
+	add_material(id, n)
+	save()
+	profile_changed.emit()
+	return true
+
+## Gold needed to buy what an upgrade or a pattern still lacks in shards and materials, or -1 when some of it
+## cannot be bought. `cost` is {gold, shards, materials}; the gold of the cost itself is not included.
+func shortfall_price(cost: Dictionary) -> int:
+	var total := 0
+	var need: Dictionary = cost.get("materials", {}).duplicate()
+	need["shards"] = int(cost.get("shards", 0))
+	for m: String in need:
+		var lack: int = int(need[m]) - material_count(m)
+		if lack > 0:
+			if material_price(m) <= 0:
+				return -1
+			total += lack * material_price(m)
+	return total
+
 # ---------------------------------------------------------------- requirements
 func meets_requirements(id: String) -> bool:
 	return Stats.unmet(profile.attrs, Db.item(id)).is_empty()

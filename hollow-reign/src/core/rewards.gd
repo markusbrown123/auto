@@ -62,11 +62,12 @@ static func roll(profile: Dictionary, foe_id: String) -> Dictionary:
 	rng.seed = roll_seed(profile, foe_id)
 	var items: Array = []
 	var mats := {}
-	var out := {"xp": int(foe.xp * (1.0 + 0.5 * ng) * rep), "gold": int(foe.gold * (1.0 + 0.5 * ng) * rep), "shards": 3 if foe.boss else 1,
+	var out := {"xp": int(foe.xp * (1.0 + float(r.ng_xp) * ng) * rep), "gold": int(foe.gold * (1.0 + float(r.ng_gold) * ng) * rep), "shards": int(r.shards_fight),
 		"items": items, "items_new": items, "materials": mats, "discoveries": [], "mastery_ups": [], "unlocks": [],
 		"levels": 0, "mastered": [], "first": first, "repeat": rep, "compensation": {}, "pity": false, "core": false}
 	var has := func(id: String) -> bool: return profile.get("inventory", []).has(id) or items.has(id)
 	if foe.boss:
+		out.shards = int(r.shards_boss) + int(r.shards_boss_per_region) * maxi(0, eq.region_order.find(region))
 		var b: Dictionary = eq.boss_rewards.get(foe_id, {"first": [], "pool": [], "materials": {}})
 		# one guardian core for each guardian, once in each cycle of the world
 		out.core = int(st.get("cores", {}).get(foe_id, 0)) <= ng

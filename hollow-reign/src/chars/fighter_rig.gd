@@ -1564,7 +1564,7 @@ static var _au_meta := {}
 
 const AU_STEP := 0.2          # metres the player's step into a cut has carried the body forward by the hit
 const AU_STEP_FOE := 0.05
-const AU_ROLL_MAX := 0.85     # radians the sword arm may be rolled to put a clip's cut on the swiped line
+const AU_ROLL_MAX := 1.0     # radians the sword arm may be rolled to put a clip's cut on the swiped line
 const AU_IN := 0.09           # seconds a player's cut takes to come in from the pose before it
 const AU_IN_FOE := 0.2
 const AU_OUT := 0.22
@@ -1577,10 +1577,10 @@ const AU_CUTS := {
 		"U": ["th_cut_u", 0, {"arm_l": 0.0}], "UL": ["th_cut_u", 0, {"arm_l": 0.0}], "UR": ["ss_cut_r_high", 0],
 		"thrust": ["ss_thrust2", 0]},
 	"th": {
-		"R": ["th_cut_r2", 0], "L": ["th_cut_l", 0], "D": ["th_cut_d", 0], "DL": ["th_cut_dl2", 0], "DR": ["th_cut_dr", 0],
+		"R": ["th_cut_r2", 0], "L": ["th_cut_l", 0], "D": ["th_cut_d", 0], "DL": ["th_cut_l", 0], "DR": ["th_cut_dr", 0],
 		"U": ["th_cut_u", 0], "UL": ["th_cut_u", 0], "UR": ["th_cut_r2", 0], "thrust": ["th_combo_thrust", 2]},
 	"dw": {
-		"R": ["dw_cut_r", 0], "L": ["dw_cross", 0], "D": ["dw_cut_dr", 0], "DL": ["dw_cut_dl", 0], "DR": ["dw_cross", 2],
+		"R": ["dw_cut_r", 0], "L": ["dw_double", 0], "D": ["dw_cut_dr", 0], "DL": ["dw_cut_dl", 0], "DR": ["dw_cross", 2],
 		"U": ["th_cut_u", 0], "UL": ["th_cut_u", 0], "UR": ["dw_cut_r", 0], "thrust": ["dw_flurry", 0]},
 }
 
@@ -1660,11 +1660,29 @@ func _au_begin(label: String, strike_from: float, hit_at: float, finish: String)
 			t_out = maxf(tc + 0.03, tq - 0.033)
 			break
 	te = minf(te, t_out)
-	var pre := ts
+	# the wound-up pose: the moment before the cut at which the blade is furthest back along the line it will travel
+	# (high for a falling cut, out to the left for a cut to the right). A foe holds it for the whole warning; the
+	# player's cut starts just before it.
+	var want := Vector3(0, 0, -1) if label == "thrust" else Vector3(_arc_dir.x, _arc_dir.y, 0)
+	var apex := ts
+	var least := 1e9
+	tq = tc - 0.06
+	while tq >= maxf(0.0, minf(ts, tc - 0.3) - 0.2):
+		var hd: Dictionary = skin.clip_hand(n, tq)
+		var c: Vector3 = hd.get("chest", Vector3(0, 0, -1))
+		var sc: float = (hd.p + hd.axis * weapon_len * 0.8 - Vector3(0, 1.4, 0)).dot(want)
+		if absf(atan2(c.x, -c.z)) < 1.75 and sc < least - 0.03:
+			least = sc
+			apex = tq
+		tq -= 1.0 / 30.0
+	var pre := apex
 	if strike_from > 0.05:
-		while pre > maxf(0.0, ts - 0.3) and absf(_au_yaw(n, pre - 0.033)) < AU_YAW_MAX:
+		ts = apex
+		while pre > maxf(0.0, apex - 0.3) and absf(_au_yaw(n, pre - 0.033)) < AU_YAW_MAX:
 			pre -= 0.033
 		pre = maxf(pre, 0.0)
+	else:
+		ts = clampf(apex - 0.1, minf(ts, apex), apex)
 	_au = {"clip": n, "ts": ts, "tc": tc, "te": te, "t_out": t_out, "pre": pre,
 		"from": strike_from, "hit": maxf(hit_at, strike_from + 0.02), "roll": 0.0, "freeze": -1.0, "arm_l": float(opt.get("arm_l", 1.0)),
 		"reach": 1.0, "travel": 1.0 if float(m.get("hip_travel", 0.0)) < 0.8 else 0.0, "label": label, "linger": float(opt.get("linger", 0.0))}

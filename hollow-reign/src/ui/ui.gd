@@ -232,7 +232,8 @@ static func theme() -> Theme:
 	t.set_color("font_placeholder_color", "LineEdit", Color(DIM, 0.7))
 	t.set_color("caret_color", "LineEdit", GOLD)
 	t.set_color("selection_color", "LineEdit", Color(GOLD_DIM, 0.6))
-	t.set_font_size("font_size", "LineEdit", 20)
+	t.set_font("font", "LineEdit", font("body"))
+	t.set_font_size("font_size", "LineEdit", 21)
 	# --- bars and rules
 	var bar_bg := StyleBoxFlat.new()
 	bar_bg.bg_color = Color(0, 0, 0, 0.65)
@@ -249,8 +250,15 @@ static func theme() -> Theme:
 	_theme = t
 	return t
 
-## Puts the theme on the root window. Safe to call from every screen.
+static var _applied := false
+
+## Makes the theme the game's default, once. Controls under a CanvasLayer do not inherit a theme from the root
+## window, so as well as being set there it is merged into the engine's default theme, which every Control falls
+## back to wherever it sits in the tree. Safe to call from every screen.
 static func apply(node: Node) -> void:
+	if not _applied:
+		_applied = true
+		ThemeDB.get_default_theme().merge_with(theme())
 	if node.is_inside_tree() and node.get_tree().root.theme != theme():
 		node.get_tree().root.theme = theme()
 
@@ -321,8 +329,10 @@ static func corners(target: Control, color: Color = GOLD, arm: float = 14.0) -> 
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	target.add_child(c)
 	c.draw.connect(func():
-		var s := c.size
-		for p: Array in [[Vector2.ZERO, 1, 1], [Vector2(s.x, 0), -1, 1], [Vector2(0, s.y), 1, -1], [s, -1, -1]]:
+		# the marks sit on the panel's edge, outside its padding
+		var g := Vector2(9, 9)
+		var s := c.size + g
+		for p: Array in [[-g, 1, 1], [Vector2(s.x, -g.y), -1, 1], [Vector2(-g.x, s.y), 1, -1], [s, -1, -1]]:
 			var o: Vector2 = p[0]
 			c.draw_line(o, o + Vector2(arm * p[1], 0), color, 2.0)
 			c.draw_line(o, o + Vector2(0, arm * p[2]), color, 2.0))

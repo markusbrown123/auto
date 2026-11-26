@@ -2,9 +2,8 @@
  "_note": "Copied from docs/CREDITS.md and docs/licenses (docs/ is not in the build). Keep the two in step. The engine's own licence text is read from the engine at run time.",
  "sections": [
   {
-   "heading": "Hollow Reign",
+   "heading": "An original work",
    "lines": [
-    "An original work.",
     "Game code, data, design and writing: this project."
    ]
   },

@@ -21,7 +21,7 @@ func _ready() -> void:
 	_fader.color = Color(0.01, 0.01, 0.012, 1.0)
 	_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fl.add_child(_fader)
-	get_tree().root.theme = UI.theme()
+	UI.apply(self)
 	if _args.has("shots"):
 		# capture harness: --shots=dir --at=1.0,2.5 [--demo=foe | --screen=name]
 		_shot_dir = _args.shots
@@ -286,7 +286,7 @@ func _ending() -> void:
 
 # ================================================================ dev / capture
 func _dev_boot() -> void:
-	Game.save_dir_override = OS.get_cache_dir() + "/hollow_reign_dev"
+	Game.save_dir_override = OS.get_cache_dir() + "/hollow_reign_dev" + str(_args.get("savedir", ""))   # parallel captures keep apart
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	Game.profile = Game.default_profile()
 	if _args.has("rich"):
@@ -467,7 +467,7 @@ func _dev_boot() -> void:
 			_swap(d3)
 			d3.setup("ashen_sentinel", {"skip_intro": true})
 			d3.sim._damage_player(99999.0, true)
-			Overlays.death(d3, Db.foes.ashen_sentinel, {"xp": 120, "gold": 80, "found": ["r_iron"]}, func(): pass)
+			Overlays.death(d3, Db.foes.ashen_sentinel, {"xp": 120, "gold": 80, "found": ["r_iron"]}, func(): pass, {"retry": func(): pass, "equipment": func(): pass})
 
 ## The front-end screens, in a known state, for captures:
 ##   --screen=menu|slots|charselect|loading|map|chronicle|credits|launch  [--rich] [--fresh] [--mode=new] [--region=id] [--tab=Name] [--licences]

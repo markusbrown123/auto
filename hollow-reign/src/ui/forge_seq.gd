@@ -6,8 +6,8 @@ extends Control
 
 signal finished
 
-const HIT_AT := [0.7, 1.3, 1.9]
-const REVEAL_AT := 2.7
+const HIT_AT := [1.0, 1.6, 2.2]
+const REVEAL_AT := 3.0
 const SPOT := Vector3(-1.5, 0.0, 1.0)
 
 var backdrop: Backdrop
@@ -46,7 +46,7 @@ func _ready() -> void:
 			_piece.add_child(holder)
 			# along the anvil's face, flat side down
 			holder.basis = Basis(Vector3.RIGHT, -PI * 0.5) * Basis(Vector3.BACK, -PI * 0.5)
-			var k := 0.62
+			var k := 0.8
 			var len: float = float(PropModel.LENGTH.get(cls, 1.1)) * k
 			holder.position = Vector3(-len * (0.5 - float(PropModel.GRIP.get(cls, 0.11))), 0.02, 0)
 			placed = PropModel.weapon(holder, m.weapon_model, cls, m.get("weapon_tint"), k) > 0.0
@@ -77,7 +77,7 @@ func _ready() -> void:
 	_sparks.initial_velocity_max = 4.2
 	_sparks.gravity = Vector3(0, -9.0, 0)
 	var q := QuadMesh.new()
-	q.size = Vector2(0.03, 0.03)
+	q.size = Vector2(0.036, 0.036)
 	_sparks.mesh = q
 	_sparks.material_override = Look.particle(Color("#ffb648"))
 	_sparks.position = Vector3(0.05, 0.06, 0)
@@ -89,7 +89,7 @@ func _ready() -> void:
 	_flash.position = Vector3(0.05, 0.35, 0.15)
 	top.add_child(_flash)
 	_cam = [backdrop.cam_pos, backdrop.cam_look]
-	backdrop.move_camera(SPOT + Vector3(0.75, 1.5, 1.55), SPOT + Vector3(0.0, 0.85, 0.0), bool(Game.settings.reduce_motion))
+	backdrop.move_camera(SPOT + Vector3(0.5, 1.4, 1.3), SPOT + Vector3(0.25, 0.8, 0.0), bool(Game.settings.reduce_motion))
 	var m2 := UI.margin(get_viewport(), 10)
 	add_child(m2)
 	_hint = UI.label("Tap to skip", 17, UI.DIM)
@@ -124,13 +124,14 @@ func _reveal() -> void:
 	_revealed = true
 	_hint.visible = false
 	Sfx.play("ui_confirm", -4.0)
-	var centre := CenterContainer.new()
-	UI.full(centre)
-	centre.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(centre)
+	# to the right of the anvil, so the piece stays in view
+	var side := UI.margin(get_viewport(), 40)
+	add_child(side)
 	var p := UI.panel()
 	p.custom_minimum_size.x = 430
-	centre.add_child(p)
+	p.size_flags_horizontal = Control.SIZE_SHRINK_END
+	p.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	side.add_child(p)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 6)
 	p.add_child(v)

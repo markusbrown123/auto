@@ -58,6 +58,15 @@ func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
 			look["skin_tint"] = tint
 	rig.build(look, false)
 	rig.rotation.y = knight_yaw
+	if rig.skin and look.has("skin_tint"):
+		# The rig's own tint keeps only the hue of the plate, so dark iron and bright steel look alike.
+		# Here the metal's lightness is kept too, so a change of armour can be seen.
+		var plate := Color.WHITE.lerp(Color(str(look.skin_tint)), 0.6)
+		for mi in rig.skin.root.find_children("*", "MeshInstance3D", true, false):
+			for surf in mi.mesh.get_surface_count():
+				var mat = mi.get_surface_override_material(surf)
+				if mat is BaseMaterial3D:
+					mat.albedo_color = plate
 
 func turn_knight(by: float) -> void:
 	knight_yaw = wrapf(knight_yaw + by, -PI, PI)

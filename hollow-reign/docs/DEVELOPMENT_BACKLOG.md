@@ -87,7 +87,7 @@ Next actions, in order:
 | G2 | Enemy speech categories: creatures silent, guardians sparse, Devourer whispers | DONE — categories in data and enforced by the generator and the duel; creature sound libraries play instead |
 | G3 | Witness relic model on the knight's belt; discovery scene | TODO |
 | G4 | UI theme; launch; animated main menu; save slots; character selection; loading screens with lore; world map | DOING (agent) |
-| G5 | Equipment screen with live rotatable knight, comparison, weapon collection with 3D preview, rarity, sorting, favourites; forge; settings (graphics presets, five audio sliders, accessibility); victory/defeat screens | DOING (agent) |
+| G5 | Equipment screen with live rotatable knight, comparison, weapon collection with 3D preview, rarity, sorting, favourites; forge; settings (graphics presets, five audio sliders, accessibility); victory/defeat screens | DONE (first pass) — Armory with live turning knight, preview-before-equip, deltas, 3D weapon preview, rarity, sorting, favourites; forge sequence, sell, wares; full settings with working presets and five audio sliders; mastery tiers. Not done: side-by-side compare, real armour geometry (tint only), victory/defeat screens (menu agent), touch-exercised captures. Notes in `UI_INVENTORY_NOTES.md` |
 | G6 | Graphics: materials audit, lighting per region, post-processing, thin sword trails, contact sparks, dust, elemental and environmental effects, budgets; GRAPHICS_BIBLE, SHADER_LIBRARY, VFX_BIBLE, PERFORMANCE_REPORT | DOING (agent) |
 | G7 | Sixteen combos individually animated | TODO — limited by owned clips; see ANIMATION_SOURCES |
 | G8 | Dragons: jaw, walk, wing fold/flap, death | TODO |

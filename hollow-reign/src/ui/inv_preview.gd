@@ -49,12 +49,14 @@ func _init(item_id: String, height: float = 180.0) -> void:
 		var n: int = 2 if cls == "dual" else 1
 		for i in n:
 			var holder := Node3D.new()
-			pivot.add_child(holder)
-			# centre the piece on the turning axis; a pair lies side by side, the second reversed
-			holder.position = Vector3((i - (n - 1) * 0.5) * 0.3, -len * (0.5 - grip) * (1.0 if i == 0 else -1.0), 0)
-			holder.rotation.z = 0.0 if i == 0 else PI
+			# centre the piece on the turning axis; a pair is laid crossed, the second reversed
+			var arm := Node3D.new()
+			pivot.add_child(arm)
+			arm.rotation.z = 0.0 if n == 1 else (0.16 if i == 0 else PI - 0.16)
+			arm.add_child(holder)
+			holder.position = Vector3(0, -len * (0.5 - grip), 0.03 * i)
 			PropModel.weapon(holder, path, cls, m.get("weapon_tint"))
-		tilt.rotation.z = -PI * 0.42      # lying along the frame, point to the right and a little up
+		tilt.rotation.z = -PI * (0.42 if n == 1 else 0.5)      # lying along the frame, point to the right and a little up
 		extent = len
 		cam.keep_aspect = Camera3D.KEEP_WIDTH
 		ok = true

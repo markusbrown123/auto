@@ -12,11 +12,11 @@ const PLACE := {
 	"courtyard": Vector2(0.25, 0.63),
 	"blackwood": Vector2(0.44, 0.76),
 	"cathedral": Vector2(0.57, 0.53),
-	"crypt": Vector2(0.39, 0.37),
-	"roost": Vector2(0.16, 0.24),
+	"crypt": Vector2(0.40, 0.33),
+	"roost": Vector2(0.17, 0.37),
 	"citadel": Vector2(0.63, 0.19),
 	"throne": Vector2(0.85, 0.36),
-	"deep": Vector2(0.80, 0.62),
+	"deep": Vector2(0.80, 0.60),
 }
 ## The road to a region is drawn from the region that unlocks it, except where the ground says otherwise.
 const ROAD_FROM := {"courtyard": "sanctuary", "deep": "throne"}
@@ -176,10 +176,10 @@ const TECH := Color(0.16, 0.42, 0.44, 0.26)
 
 ## The coast, clockwise, 0..1. Roughened when drawn.
 const COAST := [
-	Vector2(0.05, 0.86), Vector2(0.03, 0.70), Vector2(0.07, 0.55), Vector2(0.05, 0.40), Vector2(0.07, 0.25), Vector2(0.10, 0.12),
-	Vector2(0.20, 0.07), Vector2(0.33, 0.10), Vector2(0.44, 0.05), Vector2(0.58, 0.04), Vector2(0.72, 0.07), Vector2(0.84, 0.13),
-	Vector2(0.94, 0.22), Vector2(0.97, 0.38), Vector2(0.94, 0.52), Vector2(0.96, 0.66), Vector2(0.90, 0.80), Vector2(0.78, 0.88),
-	Vector2(0.66, 0.86), Vector2(0.56, 0.93), Vector2(0.42, 0.95), Vector2(0.30, 0.90), Vector2(0.20, 0.94), Vector2(0.10, 0.93),
+	Vector2(0.05, 0.82), Vector2(0.03, 0.70), Vector2(0.07, 0.56), Vector2(0.05, 0.42), Vector2(0.08, 0.30), Vector2(0.17, 0.24),
+	Vector2(0.27, 0.16), Vector2(0.34, 0.09), Vector2(0.44, 0.05), Vector2(0.58, 0.04), Vector2(0.72, 0.07), Vector2(0.84, 0.13),
+	Vector2(0.94, 0.22), Vector2(0.97, 0.38), Vector2(0.94, 0.52), Vector2(0.96, 0.64), Vector2(0.92, 0.76), Vector2(0.84, 0.82),
+	Vector2(0.70, 0.84), Vector2(0.58, 0.89), Vector2(0.43, 0.90), Vector2(0.31, 0.87), Vector2(0.20, 0.89), Vector2(0.10, 0.87),
 ]
 
 func _rough(pts: Array, amount: float, seed_value: int) -> PackedVector2Array:
@@ -229,7 +229,7 @@ func _draw_sheet() -> void:
 	var river := PackedVector2Array()
 	for i in 22:
 		var t := i / 21.0
-		var base := Vector2(lerpf(0.55, 0.36, t) + sin(t * 9.0) * 0.022, lerpf(0.14, 0.94, t))
+		var base := Vector2(lerpf(0.55, 0.37, t) + sin(t * 9.0) * 0.022, lerpf(0.12, 0.895, t))
 		river.append(base * s)
 	sheet.draw_polyline(river, Color(0.30, 0.40, 0.44, 0.75), 3.0, true)
 	sheet.draw_polyline(river, Color(0.62, 0.70, 0.70, 0.5), 1.0, true)
@@ -252,7 +252,7 @@ func _draw_sheet() -> void:
 	var sp := _at("sanctuary")
 	sheet.draw_colored_polygon(PackedVector2Array([sp + Vector2(-9, 4), sp + Vector2(-9, -5), sp + Vector2(0, -14), sp + Vector2(9, -5), sp + Vector2(9, 4)]), ink)
 	sheet.draw_rect(Rect2(sp + Vector2(-2.5, -3), Vector2(5, 7)), LAND)
-	_name(sp + Vector2(0, 22), "The Sanctuary", 15, Color(ink, 0.85))
+	_name(sp + Vector2(0, 26), "The Sanctuary", 15, Color(ink, 0.85))
 	# the regions that are open
 	for r in Db.regions:
 		if Game.region_unlocked(r.id):
@@ -278,7 +278,10 @@ func _name(at: Vector2, text: String, size: int, color: Color) -> void:
 	var f := UI.font("head")
 	var w := f.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, size).x
 	var p := Vector2(clampf(at.x - w * 0.5, 16.0, sheet.size.x - w - 16.0), at.y)
-	sheet.draw_string_outline(f, p, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 4, Color(LAND, 0.85))
+	# a slip of parchment under the name, so it reads over trees, roads and water
+	var plate := Rect2(p + Vector2(-6, -size), Vector2(w + 12, size + 7))
+	sheet.draw_rect(plate, Color(LAND.lightened(0.12), 0.9))
+	sheet.draw_rect(plate, Color(LAND_EDGE, 0.45), false, 1.0)
 	sheet.draw_string(f, p, text, HORIZONTAL_ALIGNMENT_LEFT, -1, size, color)
 
 func _road(a: Vector2, b: Vector2, optional: bool) -> void:
@@ -321,7 +324,7 @@ func _marker(r: Dictionary) -> void:
 		sheet.draw_line(p + Vector2(6, -6), p + Vector2(-6, 6), UI.GOLD.lightened(0.2), 2.0, true)
 	else:
 		sheet.draw_circle(p, 3.5, rim.darkened(0.2))
-	_name(p + Vector2(0, 34), str(r.name), 16, ink)
+	_name(p + Vector2(0, 38), str(r.name), 16, ink)
 
 ## Small drawings that say what kind of country it is. Only where the knight has been.
 func _terrain(ink: Color) -> void:

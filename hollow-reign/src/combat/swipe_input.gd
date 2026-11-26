@@ -33,7 +33,8 @@ func _gui_input(e: InputEvent) -> void:
 			s.pos = e.position
 			s.t = _now()
 			return
-		if d.length() >= side * min_dist_frac and d.length() / maxf(dt, 0.001) >= side * min_speed_frac:
+		var sens: float = clampf(float(Game.settings.get("swipe_sens", 1.0)), 0.5, 1.5)      # higher = shorter, slower strokes count
+		if d.length() >= side * min_dist_frac / sens and d.length() / maxf(dt, 0.001) >= side * min_speed_frac / sens:
 			var v := Vector2(d.x, -d.y).normalized()
 			# One stroke is one cut, however long it is. Without lifting the
 			# finger, only a clear change of direction (a zig-zag) chains another.

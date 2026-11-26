@@ -11,7 +11,7 @@ const BODIES := [
 	["m", "The Knight", "Broad in the shoulder and slow to anger. Whoever he was, he was buried standing."],
 	["f", "The Blade", "Lean, exact, and very still. Whoever she was, somebody made sure she kept her sword."],
 ]
-const SPOT := {"m": Vector3(-1.2, 0, 0.6), "f": Vector3(1.2, 0, 0.6)}
+const SPOT := {"m": Vector3(-1.7, 0, 0.6), "f": Vector3(1.7, 0, 0.6)}
 const FACING := PI * 0.94
 
 var body := "m"
@@ -55,7 +55,7 @@ func _frame(snap: bool = false) -> void:
 func _ready() -> void:
 	UI.apply(self)
 	UI.full(self)
-	add_child(UI.shade(0.86, 0.6))
+	add_child(UI.shade(0.94, 0.58))
 	# everything not covered by a control turns the knight
 	var drag: Control = UI.full(Control.new())
 	drag.gui_input.connect(_on_drag)
@@ -107,7 +107,7 @@ func _fill() -> void:
 				_fill())
 		forms.add_child(fb)
 	_v.add_child(UI.wrapped(desc, 20, UI.BONE, 440))
-	_v.add_child(UI.wrapped("Both wake with the same strength, the same reach and the same chances. Only the body differs.", 17, UI.DIM, 440))
+	_v.add_child(UI.wrapped("Both wake with the same strength, the same reach and the same chances. Only the body differs.", 18, UI.SILVER, 440))
 	_v.add_child(UI.spacer(2))
 	_v.add_child(UI.label("BURIED WITH", 15, UI.GOLD_DIM.lightened(0.3), "head"))
 	var eq: Dictionary = Game.default_profile().equipped

@@ -95,6 +95,7 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 			row.add_child(b)
 		else:
 			_slider(row, key, 0.0, 1.0)
+		row.add_child(UI.spacer(0, 8))      # clear of the scroll bar
 		v.add_child(row)
 	_header(v, "Other")
 	var other := HBoxContainer.new()

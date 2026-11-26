@@ -32,8 +32,8 @@ var stage: Control              # the open space beside the panel, where the kni
 var _previewing := ""           # item the backdrop knight is dressed in that is not actually worn
 var _forging := false
 var _sell_confirm := ""
-var _armory_yaw := -PI * 0.5 + 0.3   # facing the camera, a little turned; dragging changes it
-var _dev := {}                  # capture harness: --item=<id> --smith=<mode> --forge=<id>
+var _armory_yaw := -PI + 0.2   # facing the camera, a little turned; dragging changes it
+var _dev := {}                  # capture harness: --item=<id> --mastery=<n> --smith=<mode> --forge=<id>
 
 func _ready() -> void:
 	backdrop = Backdrop.new()
@@ -43,8 +43,11 @@ func _ready() -> void:
 	Game.sync_mastery()
 	for a in OS.get_cmdline_user_args():
 		var kv: PackedStringArray = a.trim_prefix("--").split("=")
-		if kv[0] in ["item", "smith", "forge"] and kv.size() > 1:
+		if kv[0] in ["item", "smith", "forge", "mastery"] and kv.size() > 1:
 			_dev[kv[0]] = kv[1]
+	if _dev.has("mastery") and _dev.has("item"):
+		Game.profile.mastery[str(_dev.item)] = int(_dev.mastery)
+		Game.sync_mastery()
 	smith_mode = str(_dev.get("smith", smith_mode))
 	if _dev.has("forge"):
 		get_tree().create_timer(1.2).timeout.connect(func(): _forge(str(_dev.forge)))
@@ -322,8 +325,7 @@ func _stage_armory() -> void:
 	var notes := VBoxContainer.new()
 	notes.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	notes.add_theme_constant_override("separation", -2)
-	notes.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	notes.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	notes.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	notes.offset_left = 186
 	stage.add_child(notes)
 	if _previewing != "":
@@ -337,7 +339,10 @@ func _stage_armory() -> void:
 			notes.add_child(n2)
 	var hint := UI.label("Drag to turn", 16, UI.DIM)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	notes.add_child(hint)
+	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	hint.offset_left = 186
+	stage.add_child(hint)
 
 ## Frames the knight in the middle of the open space left of the panel, whatever the screen's shape.
 func _frame_knight() -> void:
@@ -509,7 +514,8 @@ func _item_detail(det: VBoxContainer, it: Dictionary, compare: bool) -> void:
 				var c: Color = GOOD if int(r.better) > 0 else (BAD if int(r.better) < 0 else UI.BONE)
 				var row := _kv(det, r.label, "%s  →  %s" % [r.now_text, r.then_text], 17, c)
 				if int(r.better) != 0:
-					row.add_child(InvGlyph.new("up" if float(r.delta) > 0.0 else "down", c, 0, 12.0))
+					# the arrow says better or worse; the signed number says which way the figure moved
+					row.add_child(InvGlyph.new("up" if int(r.better) > 0 else "down", c, 0, 12.0))
 					var d := UI.label(("+" if float(r.delta) > 0.0 else "−") + _delta_text(r), 17, c, "bold")
 					d.custom_minimum_size.x = 52
 					row.add_child(d)
@@ -767,6 +773,28 @@ func _bosses_slain() -> int:
 func _tab_journal() -> void:
 	var p: Dictionary = Game.profile
 	var cls := str(Game.stats().get("weapon_cls", "sword"))
+	# conversations with the companions: unheard first; each can be heard again from here
+	if has_node("/root/Companion") and Companion.witness_found():
+		var topics: Array = Companion.sanctuary_topics()
+		if not topics.is_empty():
+			var th := _row()
+			content.add_child(th)
+			th.add_child(UI.title("Talk", 22))
+			var flow := HFlowContainer.new()
+			flow.add_theme_constant_override("h_separation", 8)
+			flow.add_theme_constant_override("v_separation", 6)
+			content.add_child(flow)
+			for tp in topics:
+				var b := UI.button(str(tp.title), 14, 0)
+				b.custom_minimum_size.y = 38
+				if not bool(tp.heard):
+					b.add_theme_color_override("font_color", UI.GOLD)
+				b.pressed.connect(func():
+					if not Story.busy:
+						await Companion.play_topic(str(tp.id))
+						if is_inside_tree() and tab == "Journal":
+							show_tab("Journal"))
+				flow.add_child(b)
 	var head := _row()
 	content.add_child(head)
 	var t := UI.title("Combat Journal", 24)

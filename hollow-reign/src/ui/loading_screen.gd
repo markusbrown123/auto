@@ -24,7 +24,9 @@ static func show(what: String, work: Callable, warm: Array = []) -> void:
 	var ls := LoadingScreen.new()
 	ls._what = what
 	ls.process_mode = Node.PROCESS_MODE_ALWAYS
-	tree.root.add_child(ls)
+	# deferred, so it can be asked for from inside another node's _ready
+	tree.root.add_child.call_deferred(ls)
+	await ls.ready
 	await ls._run(work, warm)
 
 ## One line the player is allowed to read: any combat tip, or a note about somewhere already reached.
@@ -74,7 +76,7 @@ func _build() -> void:
 	_still = UI.full(TextureRect.new())
 	_still.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_still.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	_still.modulate = Color(0.62, 0.62, 0.66, 0.0)
+	_still.modulate = Color(0.8, 0.8, 0.84, 0.0)
 	_still.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_root.add_child(_still)
 	# dust in the light

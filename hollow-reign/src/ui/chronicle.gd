@@ -52,10 +52,13 @@ func _ready() -> void:
 	_scroll = ScrollContainer.new()
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	p.add_child(_scroll)
+	var pad := MarginContainer.new()      # keeps the text clear of the scroll hairline
+	pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pad.add_theme_constant_override("margin_right", 16)
+	_scroll.add_child(pad)
 	_body = VBoxContainer.new()
-	_body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_body.add_theme_constant_override("separation", 6)
-	_scroll.add_child(_body)
+	pad.add_child(_body)
 	if not tabs().has(tab):
 		tab = "Records"
 	show_tab(tab)
@@ -94,7 +97,7 @@ func _head(text: String, note: String = "") -> void:
 func _entry(heading: String, text: String, heading_color: Color = UI.BONE) -> void:
 	_body.add_child(UI.label(heading, 20, heading_color, "bold"))
 	if text != "":
-		_body.add_child(UI.wrapped(text, 19, UI.DIM.lightened(0.25), 840))
+		_body.add_child(UI.wrapped(text, 19, UI.DIM.lightened(0.25), 820))
 	_body.add_child(UI.spacer(4))
 
 func _tab_records() -> void:
@@ -176,12 +179,17 @@ func _tab_stories() -> void:
 func _story(s, fallback: String) -> void:
 	if s is Dictionary:
 		var heading := str(s.get("title", s.get("name", s.get("id", fallback))))
-		var text = s.get("text", s.get("lines", s.get("summary", "")))
+		var text = s.get("lines", s.get("text", s.get("summary", "")))
 		if text is Array:
+			# each line as it was spoken, with who spoke it
 			var parts: Array = []
 			for line in text:
-				parts.append(str(line.get("text", line)) if line is Dictionary else str(line))
-			text = " ".join(parts)
-		_entry(heading, str(text))
+				if line is Dictionary:
+					var who := str(line.get("name", ""))
+					parts.append(("%s:  " % who if who != "" else "") + str(line.get("text", "")))
+				else:
+					parts.append(str(line))
+			text = "\n".join(parts)
+		_entry(heading, str(text), UI.BONE)
 	else:
 		_entry(str(s) if fallback == "" else fallback, "" if fallback == "" else str(s))

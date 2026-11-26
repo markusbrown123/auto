@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bklck28ts6j1y"
-path="res://.godot/imported/courtyard_outer.jpg-1c17547fdc5f43256c6be61114b53557.ctex"
+uid="uid://heo4sds467w"
+path="res://.godot/imported/courtyard_stop_3.jpg-a1c76ea705d0ff3f9ee0db235331cdef.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/video/stills/courtyard_outer.jpg"
-dest_files=["res://.godot/imported/courtyard_outer.jpg-1c17547fdc5f43256c6be61114b53557.ctex"]
+source_file="res://assets/video/stills/courtyard_stop_3.jpg"
+dest_files=["res://.godot/imported/courtyard_stop_3.jpg-a1c76ea705d0ff3f9ee0db235331cdef.ctex"]
 
 [params]
 

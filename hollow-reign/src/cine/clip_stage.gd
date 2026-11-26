@@ -27,7 +27,23 @@ var gap := 3.0
 var cam_base := Vector3.ZERO
 var cam_look := Vector3.ZERO
 var cam_kick := 0.0
+## The Courtyard road: where the knight stands at each of the seven stops, and what they are looking toward.
+const ROAD := [
+	[Vector3(0.0, 0, 12.5), Vector3(0.0, 1.2, 2.0)],
+	[Vector3(-5.0, 0, 9.0), Vector3(-12.0, 1.4, -2.0)],
+	[Vector3(-8.0, 0, 5.0), Vector3(-6.0, 1.6, -10.0)],
+	[Vector3(7.0, 0, 6.5), Vector3(12.0, 1.4, -3.0)],
+	[Vector3(2.0, 0, -5.0), Vector3(0.0, 2.5, -15.0)],
+	[Vector3(-7.5, 0, -2.0), Vector3(-9.0, 2.5, -9.0)],
+]
+var road_i := -1
+var road_anchors: Array = []
 var cam_mode := ""
+var _walk_from := Vector3.ZERO
+var _walk_to := Vector3.ZERO
+var _road_from: Array = []
+var _road_to: Array = []
+var _exported := false
 var _noise := FastNoiseLite.new()
 
 func _ready() -> void:
@@ -74,6 +90,10 @@ func _ready() -> void:
 	var foe_h := 1.4 * float(f.rig.scale)
 	cam_base = Vector3(1.15, 1.62, pz + 1.55)
 	cam_look = Vector3(0.38, foe_h * 0.82, -pz)
+	if take.begins_with("road_"):
+		road_i = int(take.trim_prefix("road_"))
+		foe.visible = road_i == 6        # he waits in the inner ward; the road only reaches him at the end
+		_dress_road()
 	if take == "travel":
 		# a chest by the fallen column: seen on the walk in, out of frame once the duel begins
 		arena.prop("chest", 0.75, Vector3(-2.9, 0, 8.6), 160.0)
@@ -83,6 +103,56 @@ func _ready() -> void:
 
 func at(time: float, c: Callable) -> void:
 	events.append([PRE + time, c])
+
+func _road_pose(i: int) -> Array:
+	# [knight position, facing, camera position, camera look] for stop i
+	if i >= ROAD.size():
+		return [Vector3(0, 0, gap * 0.5), Vector3(0, 0, -1), cam_base, cam_look]
+	if i < 0:
+		# before the first stop: outside the breach, looking in
+		var first: Array = _road_pose(0)
+		return [first[0] + Vector3(1.5, 0, 9.0), Vector3(0, 0, -1), first[2] + Vector3(3.0, 2.2, 10.0), first[3] + Vector3(0, 1.5, 0)]
+	var spot: Vector3 = ROAD[i][0]
+	var target: Vector3 = ROAD[i][1]
+	var dir := Vector3(target.x - spot.x, 0, target.z - spot.z).normalized()
+	var right := dir.cross(Vector3.UP)
+	return [spot, dir, spot - dir * 2.5 + right * 0.95 + Vector3(0, 1.72, 0), spot + dir * 6.0 + Vector3(0, 1.35, 0)]
+
+## Puts each choice at this stop into the picture: a chest, a lever, a shrine light, or a path marker.
+func _dress_road() -> void:
+	var stage: Dictionary = Db.region_by_id["courtyard"].stages[road_i]
+	var pose: Array = _road_pose(road_i)
+	var right: Vector3 = pose[1].cross(Vector3.UP)
+	var n: int = stage.options.size()
+	for k in n:
+		var o: Dictionary = stage.options[k]
+		var at: Vector3 = pose[0] + pose[1] * (5.2 if road_i < 6 else 0.0) + right * (float(k) - (n - 1) * 0.5) * 4.2
+		if road_i == 6:
+			at = Vector3(0, 0, -gap * 0.5)
+		at.y = 0.0
+		road_anchors.append(at + Vector3(0, 0.9 if road_i < 6 else 2.0, 0))
+		match str(o.type):
+			"treasure":
+				arena.prop("chest", 0.75, at, rad_to_deg(atan2(pose[1].x, pose[1].z)) + 180.0)
+			"shrine":
+				arena.prop("brazier", 1.5, at, 0.0)
+				arena.fire(at + Vector3(0, 1.4, 0), 1.8, 7.0, false)
+			"lever":
+				var back := Backdrop.new()
+				add_child(back)
+				back.arena = arena
+				back.props = Node3D.new()
+				back.add_child(back.props)
+				back.add_prop("lever", at).rotation.y = atan2(pose[1].x, pose[1].z)
+				back.set_process(false)
+			"fight":
+				var back2 := Backdrop.new()
+				add_child(back2)
+				back2.arena = arena
+				back2.props = Node3D.new()
+				back2.add_child(back2.props)
+				back2.add_prop("marker", at)
+				back2.set_process(false)
 
 func _open_preroll() -> void:
 	# the shared OPEN pose: the Sentinel reeling, the knight ready
@@ -154,6 +224,25 @@ func _script_take() -> void:
 			length = 4.5
 			cam_mode = "defeat"
 			at(0.15, func(): knight.die(1.0))
+		"road_0", "road_1", "road_2", "road_3", "road_4", "road_5", "road_6":
+			length = 6.0
+			cam_mode = "road"
+			var from: Array = _road_pose(road_i - 1)
+			var to: Array = _road_pose(road_i)
+			knight.position = from[0]
+			knight.rotation.y = atan2(-from[1].x, -from[1].z)
+			knight.walking = true
+			_walk_from = from[0]
+			_walk_to = to[0]
+			_road_from = from
+			_road_to = to
+		"walktest":
+			length = 5.0
+			cam_mode = "walktest"
+			knight.position = Vector3(0, 0, gap * 0.5 + 6.0)
+			knight.walking = true
+			_walk_from = knight.position
+			_walk_to = Vector3(0, 0, gap * 0.5)
 		"travel":
 			# the walk across the ward, as one unbroken camera move ending on the combat camera
 			length = 6.0
@@ -195,6 +284,16 @@ func _sparks(pos: Vector3, color: Color, amount: int) -> void:
 
 func _camera(dt: float) -> void:
 	var u := clampf((t - PRE) / length, 0.0, 1.0)
+	if _walk_to != Vector3.ZERO:
+		var wu := clampf((t - PRE - 0.3) / (length * 0.8), 0.0, 1.0)
+		knight.position = _walk_from.lerp(_walk_to, smoothstep(0.0, 1.0, wu))
+		if cam_mode == "road":
+			# turn to the way being walked, then to what this stop looks at
+			var heading := (_walk_to - _walk_from).normalized()
+			var face: Vector3 = heading.lerp(_road_to[1], smoothstep(0.75, 1.0, wu)) if wu > 0.02 else _road_from[1].lerp(heading, smoothstep(0.0, 0.02, wu) )
+			knight.rotation.y = lerp_angle(knight.rotation.y, atan2(-face.x, -face.z), 0.12)
+		if wu >= 1.0:
+			knight.walking = false
 	var pos := cam_base
 	var look := cam_look
 	var pz := gap * 0.5
@@ -211,6 +310,13 @@ func _camera(dt: float) -> void:
 			var k2 := ease(clampf(u / 0.9, 0.0, 1.0), -2.2)
 			pos = (cam_base + Vector3(2.6, 1.3, 11.0)).lerp(cam_base, k2)
 			look = (cam_look + Vector3(-1.2, 0.6, 0.0)).lerp(cam_look, k2)
+		"road":
+			var ck := smoothstep(0.0, 1.0, clampf(u / 0.92, 0.0, 1.0))
+			pos = (_road_from[2] as Vector3).lerp(_road_to[2], ck)
+			look = (_road_from[3] as Vector3).lerp(_road_to[3], ck)
+		"walktest":
+			pos = knight.position + Vector3(3.6, 1.3, 0.6)
+			look = knight.position + Vector3(0, 1.0, -0.4)
 		"victory":
 			pos = cam_base + Vector3(-0.9, 0.15, -0.9) * ease(u, 0.5)
 			look = cam_look + Vector3(0, -0.7, 0) * ease(u, 0.5)
@@ -229,5 +335,16 @@ func _process(delta: float) -> void:
 		var e: Array = events.pop_front()
 		e[1].call()
 	_camera(delta)
+	if road_i >= 0 and not _exported and t >= PRE + length - 0.05:
+		# record where each choice sits in the final frame, so the game can put its hotspots there
+		_exported = true
+		var size := get_viewport().get_visible_rect().size
+		var spots: Array = []
+		for a in road_anchors:
+			var sp := cam.unproject_position(a)
+			spots.append([snappedf(sp.x / size.x, 0.001), snappedf(sp.y / size.y, 0.001)])
+		var f := FileAccess.open("res://art/takes/road_%d.json" % road_i, FileAccess.WRITE)
+		f.store_string(JSON.stringify({"stage": road_i, "spots": spots}))
+		f.close()
 	if t >= PRE + length + 0.1:
 		get_tree().quit()

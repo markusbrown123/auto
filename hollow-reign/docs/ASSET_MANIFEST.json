@@ -1,13 +1,13 @@
 {
  "generated": "see tools/asset_manifest.py",
- "count": 276,
+ "count": 287,
  "bytes_by_kind": {
   "character model": 97737192,
   "scenery model": 66227716,
   "weapon or shield model": 90728464,
   "concept image": 138001224,
-  "combat/travel footage": 44799997,
-  "view still": 210321,
+  "combat/travel footage": 72157454,
+  "view still": 692525,
   "voice line": 3783033,
   "music": 9105900,
   "sound effect": 2734950,
@@ -1086,6 +1086,76 @@
    "status": "reference only, not shipped"
   },
   {
+   "path": "assets/video/courtyard_road_0.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 4567462,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_1.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 4508819,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_2.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 3862742,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_3.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 5510416,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_4.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 5315383,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_5.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 4279660,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_6.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 5614290,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
    "path": "assets/video/sentinel_a_block.ogv",
    "kind": "combat/travel footage",
    "bytes": 1538349,
@@ -1256,16 +1326,6 @@
    "status": "in game (cinematic test)"
   },
   {
-   "path": "assets/video/sentinel_travel.ogv",
-   "kind": "combat/travel footage",
-   "bytes": 6301315,
-   "source": "This project",
-   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
-   "rights": "Original (derived from the generated models above)",
-   "cost_usd": 0.0,
-   "status": "in game (cinematic test)"
-  },
-  {
    "path": "assets/video/sentinel_victory.ogv",
    "kind": "combat/travel footage",
    "bytes": 7082731,
@@ -1276,9 +1336,9 @@
    "status": "in game (cinematic test)"
   },
   {
-   "path": "assets/video/stills/courtyard_outer.jpg",
+   "path": "assets/video/stills/courtyard_stop_0.jpg",
    "kind": "view still",
-   "bytes": 97048,
+   "bytes": 102140,
    "source": "This project",
    "method": "frame taken from the rendered takes",
    "rights": "Original",
@@ -1286,9 +1346,59 @@
    "status": "in game (cinematic test)"
   },
   {
-   "path": "assets/video/stills/courtyard_ward.jpg",
+   "path": "assets/video/stills/courtyard_stop_1.jpg",
    "kind": "view still",
-   "bytes": 113273,
+   "bytes": 97353,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_2.jpg",
+   "kind": "view still",
+   "bytes": 89990,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_3.jpg",
+   "kind": "view still",
+   "bytes": 100677,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_4.jpg",
+   "kind": "view still",
+   "bytes": 99987,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_5.jpg",
+   "kind": "view still",
+   "bytes": 89018,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_6.jpg",
+   "kind": "view still",
+   "bytes": 113360,
    "source": "This project",
    "method": "frame taken from the rendered takes",
    "rights": "Original",

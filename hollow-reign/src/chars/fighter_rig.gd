@@ -572,6 +572,13 @@ func chest_point() -> Vector3:
 	return chest.global_position
 
 
+## Walking: whoever moves the rig just changes its position; the stride follows the distance covered.
+var walking := false
+var _walk_phase := 0.0
+var _walk_amount := 0.0       # 0 standing .. 1 full stride, eased so starts and stops are not abrupt
+var _last_world := Vector3.ZERO
+const STRIDE := 0.78          # metres per step
+
 ## When filming clips every idle oscillation is snapped to a harmonic of
 ## `loop_period`, so the pose at the end of a loop equals the pose at its start.
 var loop_period := 0.0
@@ -586,6 +593,12 @@ func _process(delta: float) -> void:
 	var dt := delta * time_scale
 	_clock += dt
 	_t += dt
+	# stride phase advances with ground actually covered, so feet never slide
+	var moved := global_position.distance_to(_last_world) / maxf(scale.x, 0.01)
+	_last_world = global_position
+	if walking and moved < 1.0:
+		_walk_phase += moved / STRIDE * PI
+	_walk_amount = lerpf(_walk_amount, 1.0 if (walking and moved > 0.0005) else 0.0, 1.0 - exp(-dt * 7.0))
 	_solve(dt)
 
 func _arc_point(theta: float, lag: float) -> Array:
@@ -728,6 +741,15 @@ func _solve(dt: float) -> void:
 			twist_t = 0.3 * _death_dir
 			crouch_t = lerpf(0.2, 0.72, fall)
 			_root_target = Vector3(0, 0, 0.3)
+	if _walk_amount > 0.01 and mode == Mode.GUARD:
+		# sword carried low at the side, shoulders counter-swinging against the legs
+		var w := _walk_amount
+		var sw := sin(_walk_phase)
+		hand_t = hand_t.lerp(Vector3(0.34, 0.92, -0.06 - 0.10 * sw), w)
+		blade_t = blade_t.lerp(Vector3(0.12, -0.42, -0.9).normalized(), w).normalized()
+		twist_t = lerpf(twist_t, 0.14 * sw, w)
+		lean_t = lerpf(lean_t, 0.10, w)
+		crouch_t = lerpf(crouch_t, 0.03 + 0.035 * absf(cos(_walk_phase)), w)
 	if blocking and (mode == Mode.GUARD or mode == Mode.HURT):
 		lean_t = 0.14
 		crouch_t = 0.12
@@ -790,6 +812,8 @@ func _pose() -> void:
 		hl = Vector3(-0.05, 1.3, -0.42) if blocking else Vector3(-0.3, 1.08, -0.24)
 	else:
 		hl = Vector3(-0.32, 0.86, -0.05)
+	if _walk_amount > 0.01 and not two_handed and not blocking:
+		hl = hl.lerp(Vector3(-0.34, 0.95, -0.08 + 0.12 * sin(_walk_phase)), _walk_amount)
 	_hand_l = _hand_l.lerp(hl, 0.4) if not two_handed else hl
 	_blade_l = _blade_l.lerp(bl, 0.4).normalized()
 	var hl2 := sh_l + (_hand_l - sh_l).limit_length(reach)
@@ -804,6 +828,15 @@ func _pose() -> void:
 	if mode == Mode.DEAD:
 		f_r.z += 0.25
 		f_l.z += 0.1
+	if _walk_amount > 0.01:
+		# each foot: planted and sliding back under the body for half the cycle, lifted and swung forward for the other half
+		var w2 := _walk_amount
+		var half := STRIDE * 0.5
+		var narrow := 0.13 * bulk
+		var wr := Vector3(narrow, maxf(0.0, -sin(_walk_phase)) * 0.14, -half * cos(_walk_phase))
+		var wl := Vector3(-narrow, maxf(0.0, sin(_walk_phase)) * 0.14, half * cos(_walk_phase))
+		f_r = f_r.lerp(wr, w2)
+		f_l = f_l.lerp(wl, w2)
 	_leg("r", pel + Vector3(0.12 * bulk, -0.04, 0), f_r)
 	_leg("l", pel + Vector3(-0.12 * bulk, -0.04, 0), f_l)
 	if skin:
@@ -846,7 +879,7 @@ func _leg(side: String, hip: Vector3, foot: Vector3) -> void:
 	var knee := _ik(hip, ankle, THIGH, SHIN, Vector3(0.15 if side == "r" else -0.15, 0.1, -1))
 	seg["thigh_" + side].transform = Transform3D(_basis_y(knee - hip, Vector3.RIGHT), hip)
 	seg["shin_" + side].transform = Transform3D(_basis_y(ankle - knee, Vector3.RIGHT), knee)
-	seg["foot_" + side].position = Vector3(ankle.x, 0, ankle.z)
+	seg["foot_" + side].position = Vector3(ankle.x, foot.y, ankle.z)
 	seg["foot_" + side].rotation.y = 0.25 if side == "r" else -0.25
 
 func _update_trail() -> void:

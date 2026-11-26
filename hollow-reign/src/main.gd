@@ -94,18 +94,19 @@ func show_sanctuary() -> void:
 	s.quit_to_title.connect(func(): _fade_then(show_title))
 	_swap(s)
 
-func show_cine_courtyard() -> void:
-	var c := CineCourtyard.new()
-	_swap(c)
-	c.encounter.connect(func(): start_cine_duel({"type": "boss", "foe": "ashen_sentinel", "label": "The Inner Ward"}))
+func show_cine_road() -> void:
+	var c := CineRoad.new()
+	c.fight.connect(func(o): _fade_then(func(): start_duel(o)))
+	c.moved_on.connect(_next_stage)
 	c.turned_back.connect(func():
 		Game.run = {}
 		_fade_then(show_sanctuary))
+	_swap(c)
 
 func show_stage() -> void:
-	# with the cinematic test switched on, the last stop of the Courtyard is the prerendered walk and duel
-	if Game.settings.cine and str(Game.run.region) == "courtyard" and int(Game.run.stage) == Game.run_region().stages.size() - 1 and CineCourtyard.available():
-		show_cine_courtyard()
+	# cinematic exploration, where a region has been filmed for it
+	if Game.settings.cine_road and CineRoad.available(str(Game.run.region)):
+		show_cine_road()
 		return
 	var e := Explore.new()
 	e.fight.connect(func(o): _fade_then(func(): start_duel(o)))
@@ -127,7 +128,11 @@ func start_duel(o: Dictionary) -> void:
 		return
 	var d := Duel.new()
 	_swap(d)
-	d.setup(o.foe, {"start_hp": Game.run.hp, "ng": Game.profile.ng})
+	var duel_opts := {"start_hp": Game.run.hp, "ng": Game.profile.ng}
+	if _args.has("bot"):
+		duel_opts["autoplay"] = true
+		duel_opts["bot_style"] = DuelBot.Style.SKILLED
+	d.setup(o.foe, duel_opts)
 	d.hud.pause_pressed.connect(func():
 		if d.stage == Duel.Stage.FIGHT:
 			Overlays.pause(d, func(): pass, func(): d.sim._damage_player(999999.0, true)))
@@ -266,18 +271,16 @@ func _dev_boot() -> void:
 				holder.add_child(mark)
 		"cinewalk":
 			Game.profile.tutorial_done = true
+			Game.settings.cine_road = true
 			Game.start_run("courtyard")
-			Game.run.stage = 6
+			Game.run.stage = int(_args.get("stage", "0"))
 			for id in ["w_knight_sword", "s_garrison"]:
 				if not Game.owns(id):
 					Game.profile.inventory.append(id)
 				Game.equip(id)
-			Game.settings.cine = true
-			if _args.has("arrived"):
-				Game.profile.flags["cine_courtyard_arrived"] = true
-			show_cine_courtyard()
+			show_stage()
 			if _args.has("bot"):
-				_journey_bot(str(_args.bot))
+				_journey_bot()
 		"cine":
 			Game.profile.tutorial_done = true
 			Game.start_run("courtyard")
@@ -306,35 +309,23 @@ func _dev_boot() -> void:
 			d3.sim._damage_player(99999.0, true)
 			Overlays.death(d3, Db.foes.ashen_sentinel, {"xp": 120, "gold": 80, "found": ["r_iron"]}, func(): pass)
 
-## Plays the cinematic Courtyard journey through touches, for recordings.
-func _journey_bot(script_name: String) -> void:
-	var tap := func(pos: Vector2):
-		for pressed in [true, false]:
-			var e := InputEventScreenTouch.new()
-			e.index = 0
-			e.position = pos
-			e.pressed = pressed
-			get_viewport().push_input(e)
-			var m := InputEventMouseButton.new()
-			m.button_index = MOUSE_BUTTON_LEFT
-			m.position = pos
-			m.global_position = pos
-			m.pressed = pressed
-			get_viewport().push_input(m)
-	var c: CineCourtyard = current
-	await get_tree().create_timer(2.5).timeout
-	tap.call(c._to_screen(Vector2(0.19, 0.76)))
-	await get_tree().create_timer(2.5).timeout
-	for b in c.find_children("*", "Button", true, false):
-		if b.text == "TAKE":
-			b.pressed.emit()
-	await get_tree().create_timer(1.5).timeout
-	tap.call(c._to_screen(Vector2(0.51, 0.60)))
-	await get_tree().create_timer(12.0).timeout
-	tap.call(c._to_screen(Vector2(0.47, 0.48)))
-	while not (current is CineDuel):
-		await get_tree().process_frame
-	add_child(load("res://src/cine/cine_bot.gd").new(current, script_name))
+## Walks the cinematic road by itself, for recordings: takes the first choice at each stop and lets a bot fight.
+func _journey_bot() -> void:
+	while true:
+		await get_tree().create_timer(0.5).timeout
+		for b in find_children("*", "Button", true, false):
+			if b.is_visible_in_tree() and b.text in ["ONWARD", "TAKE", "CONTINUE", "BEGIN"]:
+				await get_tree().create_timer(1.2).timeout
+				if is_instance_valid(b):
+					b.pressed.emit()
+				break
+		if current is CineRoad and not current._busy and not current._travelling and not Story.busy:
+			for b in current.ui.find_children("*", "Button", true, false):
+				if b.flat and b.is_visible_in_tree():
+					await get_tree().create_timer(1.6).timeout
+					if is_instance_valid(b):
+						b.pressed.emit()
+					break
 
 func _process(delta: float) -> void:
 	if _shot_dir == "":

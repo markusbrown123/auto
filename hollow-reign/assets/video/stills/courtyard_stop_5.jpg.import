@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bw5mj7vfsqdrk"
-path="res://.godot/imported/courtyard_ward.jpg-b9fde0c1762fced97fd645cbfcd91f97.ctex"
+uid="uid://c50s4uyapj6j5"
+path="res://.godot/imported/courtyard_stop_5.jpg-c0bf5c5d533e833cd767386fdd62ced2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/video/stills/courtyard_ward.jpg"
-dest_files=["res://.godot/imported/courtyard_ward.jpg-b9fde0c1762fced97fd645cbfcd91f97.ctex"]
+source_file="res://assets/video/stills/courtyard_stop_5.jpg"
+dest_files=["res://.godot/imported/courtyard_stop_5.jpg-c0bf5c5d533e833cd767386fdd62ced2.ctex"]
 
 [params]
 

@@ -19,6 +19,20 @@ for a, branch in ATT.items():
     for o in ["parry", "dodge", "block", "hit"]:
         if os.path.exists("art/takes/%s_%s.avi" % (a, o)):
             cut("%s_%s" % (a, o), branch, 6.0 - branch, "%s_%s" % (a, o)); done["%s_%s" % (a, o)] = round(6.0 - branch, 3)
+# the Courtyard road: one travel clip and one still per stop, plus the hotspot positions filmed with them
+road = {"region": "courtyard", "clip_len": 6.0, "stops": []}
+os.makedirs("assets/video/stills", exist_ok=True)
+for i in range(7):
+    if not os.path.exists("art/takes/road_%d.avi" % i):
+        continue
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", "art/takes/road_%d.avi" % i, "-vf", "trim=start_frame=%d:end_frame=%d,setpts=PTS-STARTPTS" % (round(PRE * FPS), round((PRE + 6.0) * FPS)),
+                    "-an", "-r", str(FPS), "-c:v", "libtheora", "-q:v", "6", "-g", "15", "assets/video/courtyard_road_%d.ogv" % i], check=True)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", "art/takes/road_%d.avi" % i, "-vf", "select=eq(n\\,%d)" % (round((PRE + 6.0) * FPS) - 1), "-vframes", "1", "-q:v", "3", "assets/video/stills/courtyard_stop_%d.jpg" % i], check=True)
+    spots = json.load(open("art/takes/road_%d.json" % i))["spots"] if os.path.exists("art/takes/road_%d.json" % i) else []
+    road["stops"].append({"stage": i, "clip": "road_%d" % i, "still": "courtyard_stop_%d.jpg" % i, "spots": spots})
+if road["stops"]:
+    json.dump(road, open("data/cine_courtyard.json", "w"), indent=1)
+    print(len(road["stops"]), "road stops")
 total = sum(os.path.getsize("assets/video/sentinel_%s.ogv" % k) for k in done)
 print(len(done), "clips,", round(total / 1048576, 2), "MB")
 json.dump({"clips": done, "bytes": total}, open("art/takes/clips.json", "w"), indent=1)

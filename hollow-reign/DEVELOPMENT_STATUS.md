@@ -38,6 +38,8 @@ Verified means covered by `tools/test.sh` or seen in software-rendered screensho
 ## Experiment 2026-11-26: cinematic presentation
 A complete, playable test of prerecorded footage with live rules (the Ashen Sentinel in the Fallen Courtyard), plus a short hotspot-and-travel exploration example. Off by default; switch on in Settings. The real-time duel is unchanged. Full write-up, measurements and recommendation: `docs/CINEMATIC_COMBAT.md`. Short version: it works and is verified on desktop; it suits travel, intros, finishers and story scenes; the real-time duel remains the better choice for the fighting itself. Asset manifest: `docs/ASSET_MANIFEST.json` (`tools/asset_manifest.py`). Audition reels for the unheard voices and music: `marketing/audition/`.
 
+Since then: the whole Fallen Courtyard can be played as cinematic exploration (filmed walks and views with hotspots, real-time duels), also off by default; the knight has a procedural walk cycle; and the real-time duel gained a surge meter (stuns the foe when full), a healing relic, and four named three-cut combos.
+
 Also fixed: weapon models could be fitted upside down (the Sentinel's greatsword was). The fitter now finds the handle by cross-section shape, and `-- --screen=weapons` shows every weapon as fitted.
 
 ## Milestone 2026-11-26: the first region, voiced

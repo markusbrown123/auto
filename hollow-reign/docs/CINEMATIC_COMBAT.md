@@ -3,8 +3,8 @@
 One complete test of "prerecorded footage, live rules": the Fallen Courtyard, the Ashen Sentinel, the male knight with the Courtyard Longsword and Garrison Kite. The real-time duel is untouched and remains the default.
 
 ## How to try it
-- In the game: Settings → **Cinematic duel (test)** → On. The last stop of the Fallen Courtyard then becomes the prerendered walk and duel. Off restores the normal road and real-time duel.
-- Directly: `godot --path . -- --screen=cinewalk` (journey) or `-- --screen=cine` (duel only).
+- In the game: Settings → **Cinematic duel (test)** → On makes the Ashen Sentinel fight use footage. Off restores the real-time duel.
+- Directly: `godot --path . -- --screen=cine`.
 - Recordings of actual play, made by pushing touch events into the running game: `marketing/recordings/cinematic_courtyard_gameplay.mp4` (walk, chest, travel, challenge, duel with two deliberate failures, victory), `cinematic_duel_gameplay.mp4`, and `realtime_duel_gameplay.mp4` for comparison.
 
 ## What is footage and what is live
@@ -92,8 +92,16 @@ The prototype shows one character and one loadout. The shipped game has two knig
 - A middle path worth trying next: real-time fighters over a prerendered or simplified background, with prerendered intro and finisher clips. That keeps the swipe combat and customization and still buys most of the visual gain.
 - Before any of this ships: play it on an iPhone. Nothing here has been.
 
+## Extension: the whole Fallen Courtyard as cinematic exploration (hybrid)
+Following the recommendation above, the Courtyard's seven stops were filmed as a road: at each stop the knight **walks** in (a new procedural walk cycle, stride tied to ground covered), the clip ends on a still view, and hotspots appear where each choice was filmed. Fights use the real-time duel.
+
+- Settings → **Cinematic exploration (test)**, or `-- --screen=cinewalk`. Recording: `marketing/recordings/cinematic_road_gameplay.mp4`.
+- `src/cine/cine_road.gd` is data-driven (`data/cine_courtyard.json`, written by the filming step, holds each stop's clip, still and hotspot positions). The choices, rewards, flags and what happens next come from the same region data and `Game` code as the normal road. Tested: every stop shows exactly the region's choices; a cache pays once.
+- Each walk plays in full once per save; on a retry or a return the player arrives at the still immediately. Any walk can be skipped with a tap.
+- 7 clips, 42 s, about 30 MB at quality 6.
+- Known rough edges: at two stops a wall or pillar crowds one side of the frame; props for choices already taken (an opened chest, a pulled lever) still appear in the picture; the knight shown is always the male knight with sword and shield, whatever is equipped. That last one is the customization problem again, and is the main argument for drawing the knight live over a filmed background if this style is kept.
+
 ## Not done
 - Device testing (no hardware attached).
 - Audio audition: reels are in `marketing/audition/`; nobody has listened yet.
-- The chest stays closed in the footage after it is opened (the view is a still).
-- A walking animation: the travel clip is a camera move with the knight standing ready, because the rig has no walk cycle.
+- Props for choices already taken still appear in the filmed views.

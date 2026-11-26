@@ -60,6 +60,42 @@ func _ready() -> void:
 			await get_tree().process_frame
 			e.queue_free()
 		ok(true, "road: %s" % r.name)
+	# --- the filmed Courtyard road: every stop offers exactly the choices the region data offers
+	if CineRoad.available("courtyard"):
+		Game.new_game()
+		Game.profile.tutorial_done = true
+		Game.start_run("courtyard")
+		var road_ok := true
+		for i in Db.region_by_id["courtyard"].stages.size():
+			Game.run.stage = i
+			Game.profile.flags["cine_road_courtyard_%d" % i] = true      # arrive directly: video does not decode headless
+			Game.profile.flags["scene_courtyard_%d" % i] = true
+			var cr := CineRoad.new()
+			add_child(cr)
+			await get_tree().process_frame
+			await get_tree().process_frame
+			var spots := cr.ui.find_children("*", "Button", true, false).filter(func(b): return b.flat)
+			if spots.size() != Game.stage_options().size():
+				road_ok = false
+				print("    stop %d: %d hotspots for %d options" % [i, spots.size(), Game.stage_options().size()])
+			cr.queue_free()
+			await get_tree().process_frame
+		ok(road_ok, "cinematic road: hotspots match the region's choices at all seven stops")
+		# a cache pays once, however it is reached
+		Game.run.stage = 1
+		var cr2 := CineRoad.new()
+		add_child(cr2)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var gold: int = Game.profile.gold
+		var cache: Dictionary = Game.stage_options()[0]
+		cr2._choose(cache)
+		var after: int = Game.profile.gold
+		cr2._busy = false
+		cr2._choose(cache)
+		ok(cache.type == "treasure" and after > gold and Game.profile.gold - after < after - gold and Game.owns("a_garrison_gauntlets"), "cinematic road: a cache gives its contents once")
+		cr2.queue_free()
+		await get_tree().process_frame
 	# --- whole duels through the real scene, every foe
 	Game.new_game()
 	for id in ["w_monarch", "a_regal_helm", "a_regal_chest", "a_regal_gauntlets", "a_regal_legs", "s_rime"]:

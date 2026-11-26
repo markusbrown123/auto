@@ -18,11 +18,11 @@ const PRIORITY := {"exchange": 1, "phase": 3, "clash": 4, "struggle": 5, "reveal
 ## look_x: sideways aim (negative puts the foe further right of the knight); wide: how much the
 ## cinematic shots open up for it.
 const CLASS := {
-	"humanoid": {"side": 2.2, "back": 1.0, "y": 0.95, "fov": 54.0, "look_h": 1.05, "look_x": 0.0, "wide": 1.0},
-	"giant": {"side": 1.85, "back": 0.8, "y": 0.85, "fov": 60.0, "look_h": 1.0, "look_x": 0.0, "wide": 1.0},
+	"humanoid": {"side": 1.9, "back": 0.7, "y": 1.0, "fov": 54.0, "look_h": 1.05, "look_x": 0.0, "wide": 1.0},
+	"giant": {"side": 1.85, "back": 0.9, "y": 0.85, "fov": 60.0, "look_h": 1.0, "look_x": 0.0, "wide": 1.0},
 	"dragon": {"side": 2.6, "back": 1.2, "y": 0.6, "fov": 54.0, "look_h": 0.55, "look_x": 0.0, "wide": 1.5},
 }
-const ARENA_R := 8.4          # the arena is about 9 m across its radius: stay inside the props
+const ARENA_R := 6.4          # some arenas stand scenery from about 7 m out: stay inside it
 const MIN_Y := 0.25
 
 var duel: Duel
@@ -60,6 +60,7 @@ func _init(d: Duel, c: Camera3D) -> void:
 	duel = d
 	cam = c
 	_noise.frequency = 2.0
+	dev_seen()
 
 
 ## Ask for a shot. `clash` {at: world point, perfect: bool}, `struggle` {on: bool}, `phase` {},
@@ -159,6 +160,9 @@ func update(delta: float, trauma: float, clock: float) -> void:
 ## "kill@3" / "die@3" leaves the foe / the knight on a sliver of health 3 s into the fight, so the ending can be filmed.
 var _dev := OS.get_environment("HR_CAM_DEV")
 var _dev_t := 0.0
+func dev_seen() -> void:
+	if _dev == "seen" or OS.has_environment("HR_CAM_SEEN"):
+		Game.profile.flags["scene_" + Companion.voice_key(str(duel.foe.id)) + "_intro"] = true
 func _dev_hook(name: String, delta: float) -> String:
 	if duel.stage != Duel.Stage.FIGHT:
 		return name
@@ -265,14 +269,14 @@ func _intro_shot() -> String:
 ## Wide and high from behind the knight's sword side: both figures and the ground between them. Slow drift in.
 func _shot_establish() -> Dictionary:
 	var d := shot_t * (0.0 if _calm else 0.22)
-	return {"pos": Vector3(3.4 + 1.1 * _big - d * 0.5, 2.3 + 0.7 * _big, _K.z + 3.4 + 0.9 * _big - d),
-		"look": _mid(0.5 * _H), "fov": 50.0, "rate": 30.0}
+	return {"pos": Vector3(3.0 + 0.9 * _big - d * 0.5, 1.7 + 0.6 * _big, _K.z + 2.2 + 0.7 * _big - d),
+		"look": _mid(0.55 * _H), "fov": 56.0, "rate": 30.0}
 
 ## Near the ground in front of the foe, looking up its body. Rises a little.
 func _shot_reveal() -> Dictionary:
 	var d := shot_t * (0.0 if _calm else 0.12)
 	return {"pos": _F + Vector3(1.15 * _big, 0.3 + d, 1.4 * _big + 0.35 - d * 0.5),
-		"look": _F + Vector3(0, _H * 0.92, 0), "fov": 54.0, "roll": 0.04, "rate": 30.0}
+		"look": _F + Vector3(0, _H * 0.9, 0), "fov": 48.0, "roll": 0.04, "rate": 30.0}
 
 ## The foe's helm (or a dragon's head). Slow push.
 func _shot_close_up() -> Dictionary:
@@ -297,9 +301,26 @@ func _combat(back: float, round: float, lift: float, dfov: float) -> Dictionary:
 		c = {"side": v[0], "back": v[1], "y": v[2], "fov": v[3], "look_h": v[4], "look_x": v[5]}
 	var far := 0.1 if duel.sim.b_far else 0.0
 	back += far - 0.18 * _tight + 0.7 * _wide
-	return {"pos": Vector3(float(c.side) + _side + duel.p_side * 0.6 + round + 0.25 * _wide, float(c.y) + lift + 0.1 * _wide, _K.z + float(c.back) + back),
-		"look": Vector3(float(c.look_x) + _side * 0.4, _H * float(c.look_h), _F.z + duel.f_back * 0.4),
-		"fov": float(c.fov) + dfov - 2.5 * _tight + 3.0 * _wide, "rate": 6.0}
+	var pos := Vector3(float(c.side) + _side + duel.p_side * 0.6 + round + 0.25 * _wide, float(c.y) + lift + 0.1 * _wide, _K.z + float(c.back) + back)
+	var look := Vector3(float(c.look_x) + _side * 0.4, _H * float(c.look_h), _F.z + duel.f_back * 0.4)
+	var fov := float(c.fov) + dfov - 2.5 * _tight + 3.0 * _wide
+	return {"pos": pos, "look": _keep_knight(pos, look, fov), "fov": fov, "rate": 6.0}
+
+## Turns the aim toward the knight just enough that a sidestep or a shove never carries them out of the frame.
+func _keep_knight(pos: Vector3, look: Vector3, fov: float) -> Vector3:
+	var vp := cam.get_viewport()
+	var aspect := 16.0 / 9.0
+	if vp != null:
+		var sz := vp.get_visible_rect().size
+		aspect = sz.x / maxf(sz.y, 1.0)
+	var half := atan(tan(deg_to_rad(fov) * 0.5) * aspect)
+	var to_l := Vector2(look.x - pos.x, look.z - pos.z)
+	var to_k := Vector2(_K.x - pos.x, _K.z - pos.z)
+	var over := absf(to_l.angle_to(to_k)) - half * 0.92
+	if over <= 0.0:
+		return look
+	var r := to_l.rotated(signf(to_l.angle_to(to_k)) * over)
+	return Vector3(pos.x + r.x, look.y, pos.z + r.y)
 
 func _shot_combat() -> Dictionary:
 	return _combat(0.0, 0.0, 0.0, 0.0)
@@ -335,13 +356,13 @@ func _shot_struggle() -> Dictionary:
 
 ## Phase change: a low hero angle on the foe.
 func _shot_phase() -> Dictionary:
-	return {"pos": _F + Vector3(1.0 + 0.5 * _big, 0.32, 1.5 + 1.1 * _big), "look": _F + Vector3(0, _H * 1.0, 0),
-		"fov": 56.0, "roll": 0.05, "rate": 4.5}
+	return {"pos": _F + Vector3(0.8 + 0.4 * _big, 0.3, 1.2 + 0.9 * _big), "look": _F + Vector3(0, _H * 0.95, 0),
+		"fov": 54.0, "roll": 0.05, "rate": 4.5}
 
 ## The killing blow: side-on and wide, both figures whole.
 func _shot_finish_blow() -> Dictionary:
 	var d := shot_t * (0.0 if _calm else 0.25)
-	return {"pos": _mid(0.95) + Vector3(3.3 + 1.3 * _big - d, 0, 0.5), "look": _mid(0.95 + 0.2 * (_big - 1.0)), "fov": 48.0, "rate": 30.0}
+	return {"pos": _mid(0.9) + Vector3(2.3 + 0.9 * _big - d, 0, 0.5), "look": _mid(0.95 + 0.25 * (_big - 1.0)), "fov": 46.0, "rate": 30.0}
 
 ## The fall: low, close to the foe.
 func _shot_finish_fall() -> Dictionary:
@@ -354,9 +375,9 @@ func _shot_victory() -> Dictionary:
 
 ## The knight goes down: low and side-on, close.
 func _shot_death_fall() -> Dictionary:
-	return {"pos": _K + Vector3(2.3, 0.4, 0.9), "look": _K + Vector3(0, 0.7, 0), "fov": 50.0, "roll": -0.05, "rate": 30.0}
+	return {"pos": _K + Vector3(2.5, 0.4, 1.3), "look": _K.lerp(_F, 0.3) + Vector3(0, 0.8, 0), "fov": 52.0, "roll": -0.05, "rate": 30.0}
 
 ## Defeat: from the ground beside the fallen knight, the foe looming over.
 func _shot_defeat() -> Dictionary:
 	var d := minf(shot_t, 6.0) * (0.0 if _calm else 0.06)
-	return {"pos": _K + Vector3(1.1, 0.3, 1.5 - d), "look": _F + Vector3(0, _H * 0.95, 0), "fov": 58.0, "roll": 0.03, "rate": 30.0}
+	return {"pos": _K + Vector3(0.9, 0.3, 1.9 - d), "look": _F + Vector3(-0.2, _H * 0.8, 0), "fov": 40.0, "roll": 0.03, "rate": 30.0}

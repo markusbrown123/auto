@@ -176,6 +176,16 @@ func drive(j: Dictionary) -> Dictionary:
 				var o := _limb(side + "UpLeg", side + "Leg", side + "Foot", Vector3(f.origin.x, want_y, f.origin.z), pole)
 				skel.set_bone_global_pose(fi, Transform3D(f.basis, o))
 	_plant(back, q, whole)
+	if clip_w > 0.0 and not whole:
+		# eyes on the opponent: a body clip turns the trunk, the head keeps the procedural aim as far as the neck allows
+		var chest_now: Basis = skel.get_bone_global_pose(bone["Spine2"]).basis.orthonormalized() * (rest["Spine2"] as Transform3D).basis.orthonormalized().inverse()
+		var rel := (chest_now.inverse() * head_rot).get_rotation_quaternion()
+		var ang := rel.get_angle()
+		if ang > PI:
+			ang = TAU - ang
+		var look: Basis = head_rot if ang <= NECK_TURN else chest_now * Basis(Quaternion.IDENTITY.slerp(rel, NECK_TURN / ang))
+		_pose_bone("Neck", Basis(chest_now.get_rotation_quaternion().slerp(look.get_rotation_quaternion(), 0.5)) * rest["Neck"].basis, _fk_origin("Neck"))
+		_pose_bone("Head", look * rest["Head"].basis, _fk_origin("Head"))
 	# arms: elbows fall outward and down. When an authored clip has carried the torso away from where the procedural
 	# pose had it, the hand targets ride with the shoulders, so an arm is neither folded into the chest nor pulled straight.
 	var tr: Vector3 = to_skel * j.hand_r + (_fk_origin("RightArm") - sh_r0) * float(j.get("follow_r", 1.0))
@@ -189,6 +199,9 @@ func drive(j: Dictionary) -> Dictionary:
 	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
 	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
 	_back = back
+	if OS.has_environment("DBG"):
+		var fw := func(n: String) -> Vector3: return back.basis.orthonormalized() * (skel.get_bone_global_pose(bone[n]).basis.orthonormalized() * (rest[n] as Transform3D).basis.orthonormalized().inverse() * (q * Vector3(0, 0, -1)))
+		print("fwd clip=", clip, " w=", snappedf(clip_w, 0.01), " whole=", whole, " hips=", fw.call("Hips"), " chest=", fw.call("Spine2"), " head=", fw.call("Head"))
 	return {"r": back * _palm("Right", hr), "l": back * _palm("Left", hl)}
 
 var _back := Transform3D.IDENTITY      # skeleton space -> rig body space, as of the last drive()
@@ -451,6 +464,9 @@ static var _tracks: Dictionary = {}      # clip -> {bone: track index}, plus "_p
 const CLIP_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head",
 	"LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand",
 	"LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
+const TRUNK := ["Hips", "Spine", "Spine1", "Spine2"]
+const TRUNK_YAW := 0.6        # radians a body clip may turn the trunk away from the procedural pose while the arms are on IK
+const NECK_TURN := 1.05       # radians the head may be turned from the chest
 const LIMB_CHILD := {"LeftShoulder": "LeftArm", "LeftArm": "LeftForeArm", "LeftForeArm": "LeftHand", "RightShoulder": "RightArm", "RightArm": "RightForeArm", "RightForeArm": "RightHand",
 	"LeftUpLeg": "LeftLeg", "LeftLeg": "LeftFoot", "RightUpLeg": "RightLeg", "RightLeg": "RightFoot"}
 var _canon := Basis.IDENTITY      # this skeleton's space -> canonical (facing -Z)
@@ -498,6 +514,10 @@ func _overlay(arms: bool) -> void:
 	var t := fposmod(clip_t, a.length) if a.loop_mode != Animation.LOOP_NONE else clampf(clip_t, 0.0, a.length)
 	var back := _canon.inverse()
 	var full_b := {}      # the clip's own turn of the hips and legs, at full weight
+	var pre := {}         # the trunk as the procedural pose had it, before any bone of it is turned by the clip
+	if not arms and not clip_full:
+		for tb: String in TRUNK:
+			pre[tb] = skel.get_bone_global_pose(bone[tb]).basis.orthonormalized()
 	if not arms and map.has("_pos"):
 		# hip height as a fraction of standing height; travel only for whole-body clips
 		var hp: Vector3 = a.position_track_interpolate(map["_pos"], t)
@@ -520,7 +540,18 @@ func _overlay(arms: bool) -> void:
 		var i: int = bone[b]
 		var cur_b: Basis = skel.get_bone_global_pose(i).basis.orthonormalized()
 		var origin: Vector3 = skel.get_bone_global_pose(i).origin if b == "Hips" else _fk_origin(b)
-		skel.set_bone_global_pose(i, Transform3D(Basis(cur_b.get_rotation_quaternion().slerp(target.get_rotation_quaternion(), clip_w)), origin))
+		if pre.has(b):
+			cur_b = pre[b]      # (a bone already carried round by its parent would otherwise be turned twice over)
+		var mixed := Basis(cur_b.get_rotation_quaternion().slerp(target.get_rotation_quaternion(), clip_w))
+		if pre.has(b):
+			# The arms stay on IK toward targets set for a body that faces its opponent. A clip may coil the trunk for a
+			# cut, but only so far: past this the sword arm would have to reach behind the back and through the shield.
+			var dq := (mixed * cur_b.inverse()).get_rotation_quaternion()
+			var yaw := 2.0 * atan2(dq.y, dq.w)
+			yaw = wrapf(yaw, -PI, PI)
+			if absf(yaw) > TRUNK_YAW:
+				mixed = Basis(Vector3.UP, -(yaw - signf(yaw) * TRUNK_YAW)) * mixed
+		skel.set_bone_global_pose(i, Transform3D(mixed, origin))
 	if not arms and map.has("_pos") and full_b.has("Hips"):
 		var hip_y: float = a.position_track_interpolate(map["_pos"], t).y * rest["Hips"].origin.y
 		for side: String in ["Left", "Right"]:

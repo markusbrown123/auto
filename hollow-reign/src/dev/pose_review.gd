@@ -24,6 +24,7 @@ var _out := ""
 var _tag := ""
 var _vel := Vector3.ZERO
 var _zoom := 1.0
+var _mid := Vector3.ZERO      # centre of the figure on the floor, for the cameras
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -189,7 +190,19 @@ func _run() -> void:
 		var tiles: Array = []
 		var stat := {}
 		while t < float(pose[2]):
-			await get_tree().process_frame
+			await get_tree().process_frame      # the rig solved the previous frame; measure that, then move on
+			if t > 0.0:
+				_audit(stat, t)
+			if shots and not todo.is_empty() and t >= float(todo[0]) - 0.001:
+				todo.pop_front()
+				rig.time_scale = 0.0
+				for v: Array in VIEWS:
+					_aim_cam(v[1])
+					await RenderingServer.frame_post_draw
+					await RenderingServer.frame_post_draw
+					tiles.append(get_viewport().get_texture().get_image())
+				rig.time_scale = 1.0
+				await get_tree().process_frame
 			var dt := 1.0 / 30.0
 			t += dt
 			rig.position += _vel * dt * rig.scale.x
@@ -197,20 +210,6 @@ func _run() -> void:
 				if t >= float(tm[0]):
 					_timers.erase(tm)
 					(tm[1] as Callable).call()
-			await get_tree().process_frame      # the rig has now solved with this frame's position
-			_audit(stat, t)
-			if shots and not todo.is_empty() and t >= float(todo[0]) - 0.001:
-				todo.pop_front()
-				rig.time_scale = 0.0
-				var keep := _vel
-				_vel = Vector3.ZERO
-				for v: Array in VIEWS:
-					_aim_cam(v[1])
-					await RenderingServer.frame_post_draw
-					await RenderingServer.frame_post_draw
-					tiles.append(get_viewport().get_texture().get_image())
-				_vel = keep
-				rig.time_scale = 1.0
 		_report(str(pose[0]), stat)
 		if shots and not tiles.is_empty():
 			var w: int = tiles[0].get_width()
@@ -225,10 +224,10 @@ func _run() -> void:
 
 func _aim_cam(dir: Vector3) -> void:
 	var s: float = rig.scale.x
-	var centre: Vector3 = rig.global_position + Vector3(0, (1.6 if _is_dragon else 0.95) * s, (1.2 * s) if _is_dragon else 0.0)
+	var centre: Vector3 = Vector3(_mid.x, 0, _mid.z) + Vector3(0, (1.6 if _is_dragon else 0.95) * s, 0)
 	if _args.has("aim"):
 		var a: PackedStringArray = str(_args.aim).split(",")
-		centre = rig.global_position + Vector3(float(a[0]), float(a[1]), float(a[2])) * s
+		centre = Vector3(_mid.x, 0, _mid.z) + Vector3(float(a[0]), float(a[1]), float(a[2])) * s
 	cam.size = (9.5 if _is_dragon else 2.75) * s / _zoom
 	cam.position = centre + (dir + Vector3(0, 0.12, 0)).normalized() * 30.0
 	cam.look_at(centre)
@@ -319,10 +318,15 @@ func _audit(stat: Dictionary, t: float) -> void:
 	var names: Array = sk[1]
 	var lo := 1e9
 	var lo_n := ""
+	var b_lo := Vector3.ONE * 1e9
+	var b_hi := Vector3.ONE * -1e9
 	for i in pts.size():
+		b_lo = b_lo.min(pts[i])
+		b_hi = b_hi.max(pts[i])
 		if pts[i].y < lo:
 			lo = pts[i].y
 			lo_n = names[i]
+	_mid = (b_lo + b_hi) * 0.5 if not pts.is_empty() else rig.global_position
 	if not pts.is_empty():
 		_worse(stat, "low", lo / s, t, lo_n)
 		_worse(stat, "float", lo / s, t, lo_n, false)
@@ -357,7 +361,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 		var hits2 := {}
 		for i in pts.size():
 			var nm2: String = names[i]
-			if nm2.begins_with("Left"):
+			if nm2.begins_with("Left") or nm2.begins_with("RightHand") or nm2 == "RightForeArm":
 				continue
 			var l := inv * pts[i]
 			if l.z < -0.03 and l.x * l.x / 0.07 + l.y * l.y / 0.14 < 1.0:

@@ -1685,7 +1685,7 @@ func _au_begin(label: String, strike_from: float, hit_at: float, finish: String)
 	_au.reach = -(hc.p.z + hc.axis.z * weapon_len * 0.8)
 	_au_t = 0.0
 	_au_state = "cut"
-	_xfade(AU_IN if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
+	_xfade(minf(AU_IN, float(_au.hit) * 0.45) if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
 
 ## Clip time for a moment of the attack. The warning window eases into the wound-up pose and holds there; the blow
 ## runs from there to the clip's contact frame, arriving at the hit instant; what follows plays at the clip's own pace.

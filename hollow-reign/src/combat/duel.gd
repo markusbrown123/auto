@@ -52,22 +52,34 @@ var _glinted := false
 ## Onboarding: learn by doing. Each step waits for the thing itself to be done once.
 var _lesson := -1
 var _lesson_count := 0
+## Each lesson: what to do in a few big words, why in one plain line, and the stroke to draw (if any).
 const LESSONS := [
-	"Swipe across your foe to cut. Any direction. Land three.",
-	"Now left, then right, without a pause. Some patterns end in a harder blow.",
-	"It will cut at you. Swipe INTO the blow as it lands to parry it.",
-	"Tap an arrow to step aside. Tap it twice to roll.",
-	"Hold the shield to block. Raise it at the last instant and it costs nothing.",
+	["SWIPE TO STRIKE", "Drag a finger across your foe, any direction. Land three cuts.", ["R"]],
+	["LEFT, THEN RIGHT", "Two cuts in a pattern end in a harder blow. There are more patterns to find.", ["L", "R"]],
+	["PARRY", "It is about to cut at you. Swipe INTO the blow as its blade glints.", []],
+	["DODGE", "Tap an arrow as the blow comes. Tap it twice to roll clear.", []],
+	["BLOCK", "Hold the shield and let the blow land on it.", []],
 ]
+## What the defence just bought, said the moment it works, so cause and effect are unmistakable.
+const LESSON_PAYOFF := {2: ["PARRIED", "A parry throws its guard wide open."], 3: ["IT MISSED", "A dodge leaves it off balance."], 4: ["BLOCKED", "Blocking gives you a chance to attack."]}
+var _lesson_strike := false      # the defence worked; now the lesson waits for the answering cut
+func _lesson_defended(step: int) -> void:
+	if _lesson != step or _lesson_strike:
+		return
+	_lesson_strike = true
+	Sfx.play("loot", -8.0, 1.4)
+	hud.lesson_text(str(LESSON_PAYOFF[step][0]) + "  ·  SWIPE TO STRIKE", str(LESSON_PAYOFF[step][1]), ["R"], true)
+
 func _lesson_done(step: int) -> void:
 	if _lesson != step:
 		return
 	_lesson += 1
 	_lesson_count = 0
+	_lesson_strike = false
 	Sfx.play("loot", -6.0, 1.2)
 	if _lesson >= LESSONS.size():
 		_lesson = -1
-		hud.lesson_text("")
+		hud.lesson_text("", "", [])
 		hud.toast("THE OLD LESSONS HOLD", UI.GOLD, 1.4)
 		await get_tree().create_timer(1.8).timeout
 		_result_sent = true
@@ -77,7 +89,7 @@ func _lesson_done(step: int) -> void:
 	if _lesson == 2:
 		sim.lesson_fights = true
 		sim.b_t = 0.8
-	hud.lesson_text(LESSONS[_lesson])
+	hud.lesson_text(str(LESSONS[_lesson][0]), str(LESSONS[_lesson][1]), LESSONS[_lesson][2])
 var foot := {"circle": 0.08, "keep": 0.7}
 var _can_step := true
 var _voice_key := ""
@@ -181,7 +193,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 		foe_rig.footsteps = true
 	if _lesson >= 0:
 		hud.show_training()
-		hud.lesson_text(LESSONS[0])
+		hud.lesson_text(str(LESSONS[0][0]), str(LESSONS[0][1]), LESSONS[0][2])
 		foe_rig.recover()
 	elif training:
 		hud.show_training()
@@ -494,8 +506,10 @@ func _camera(delta: float) -> void:
 				zoom_t -= 0.3
 			_cam_zoom = lerpf(_cam_zoom, zoom_t, 1.0 - exp(-delta * 2.5))
 			# stays behind and to the side of wherever the knight actually stands, so the knight never hides the foe
-			pos = Vector3(1.55 + _cam_side + p_side * 0.6, 1.72, pz + p_back + 2.0 - _cam_zoom * 0.5)
-			look = Vector3(0.15 + _cam_side * 0.4, foe_h * 0.74, -pz - f_back * 0.6)
+			# low at the knight's flank and looking up: the knight sits in the lower corner, the foe towers over the frame
+			var tall := clampf(foe_h / 1.6, 1.0, 2.2)
+			pos = Vector3(1.45 + _cam_side + p_side * 0.6, 0.42 + 0.06 * tall, pz + p_back + 1.3 - _cam_zoom * 0.35)
+			look = Vector3(-0.25 + _cam_side * 0.4, foe_h * (0.98 + 0.04 * tall), -pz - f_back * 0.6)
 			fov = 64.0 - _cam_zoom * 5.0
 	var k := 1.0 - exp(-delta * rate)
 	if _cam_pos == Vector3.ZERO:
@@ -651,6 +665,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			shake(0.22 if crit else 0.12)
 			Game.haptic(18 if crit else 10, 0.5)
 			hud.combo(int(d.get("combo", 1)))
+			if _lesson >= 2 and _lesson_strike:
+				_lesson_done(_lesson)      # the answering cut landed: lesson learned
 			if _lesson == 0:
 				_lesson_count += 1
 				if _lesson_count >= 3:
@@ -778,7 +794,7 @@ func _on_strike(d: Dictionary) -> void:
 		var a1: Vector3 = foe_rig.blade_tip()
 		meet = a0.lerp(a1, 0.72)
 	if _lesson >= 2:
-		_lesson_done({"parried": 2, "dodged": 3, "blocked": 4}.get(str(d.result), -9))
+		_lesson_defended({"parried": 2, "dodged": 3, "blocked": 4}.get(str(d.result), -9))
 	# effects that belong to the blow itself, whatever came of it
 	if str(a.get("kind", "")) == "slam":
 		# where the blow comes down: beside the knight if it was dodged, otherwise just in front of the feet

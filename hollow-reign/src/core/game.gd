@@ -578,9 +578,9 @@ func save_settings() -> void:
 ## What each graphics preset really sets. shadow_atlas 0 turns spot and omni shadows off;
 ## shadow_dist caps how far sun shadows are drawn; lod is the mesh LOD pixel threshold (higher = coarser sooner).
 const GRAPHICS := [
-	{"name": "Performance", "scale": 0.6, "msaa": Viewport.MSAA_DISABLED, "shadow_atlas": 0, "sun_atlas": 1024, "shadow_dist": 16.0, "particles": 0.5, "lod": 4.0},
-	{"name": "Balanced", "scale": 0.8, "msaa": Viewport.MSAA_2X, "shadow_atlas": 2048, "sun_atlas": 2048, "shadow_dist": 45.0, "particles": 0.8, "lod": 1.0},
-	{"name": "High", "scale": 1.0, "msaa": Viewport.MSAA_4X, "shadow_atlas": 4096, "sun_atlas": 4096, "shadow_dist": 400.0, "particles": 1.0, "lod": 0.5},
+	{"name": "Performance", "scale": 0.75, "msaa": Viewport.MSAA_DISABLED, "shadow_atlas": 0, "sun_atlas": 1024, "shadow_dist": 16.0, "particles": 0.5, "lod": 4.0},
+	{"name": "Balanced", "scale": 1.0, "msaa": Viewport.MSAA_2X, "shadow_atlas": 2048, "sun_atlas": 2048, "shadow_dist": 45.0, "particles": 0.8, "lod": 1.0},
+	{"name": "High", "scale": 1.15, "msaa": Viewport.MSAA_4X, "shadow_atlas": 4096, "sun_atlas": 4096, "shadow_dist": 400.0, "particles": 1.0, "lod": 0.5},
 ]
 const SUB_SIZES := [20, 25, 32]
 var _lights_hooked := false

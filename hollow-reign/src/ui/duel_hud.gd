@@ -438,11 +438,66 @@ func show_training() -> void:
 	_train_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(_train_name)
 
-func lesson_text(t: String) -> void:
-	if _train_head:
-		_train_head.text = t
-		_train_head.add_theme_font_size_override("font_size", 22)
-		_train_head.add_theme_color_override("font_color", UI.BONE)
+## Teaching: a few big words for what to do, one plain line for why, and (for cuts) the stroke itself drawn on screen.
+## Only the lesson draws a stroke; ordinary fights never do.
+class LessonStroke extends Control:
+	var dirs: Array = []
+	var _t := 0.0
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	func _process(dt: float) -> void:
+		_t += dt
+		if not dirs.is_empty():
+			queue_redraw()
+	func _draw() -> void:
+		if dirs.is_empty():
+			return
+		var n := dirs.size()
+		var cycle := fmod(_t, 1.25 * n + 0.6)
+		var i := mini(int(cycle / 1.25), n - 1)
+		var u := clampf((cycle - i * 1.25) / 0.7, 0.0, 1.0)
+		var v: Vector2 = DuelSim.dir_vec(str(dirs[i]))
+		v = Vector2(v.x, -v.y).normalized()
+		var c := size * Vector2(0.5, 0.56)
+		var half := minf(size.x, size.y) * 0.22
+		var a := c - v * half
+		var b := a.lerp(c + v * half, ease(u, 0.5))
+		var fade := 1.0 - clampf((cycle - i * 1.25 - 0.7) / 0.4, 0.0, 1.0)
+		var col := Color(1.0, 0.9, 0.6, 0.85 * fade)
+		var side := Vector2(-v.y, v.x)
+		draw_line(a, b, Color(1.0, 0.8, 0.4, 0.18 * fade), 34.0, true)
+		draw_line(a, b, col, 9.0, true)
+		draw_colored_polygon(PackedVector2Array([b + v * 34.0, b + side * 26.0, b - side * 26.0]), col)
+		draw_circle(a, 9.0, Color(1, 1, 1, 0.7 * fade))
+
+var _train_sub: Label
+var _stroke: LessonStroke
+func lesson_text(t: String, sub: String = "", stroke: Array = [], good: bool = false) -> void:
+	if _train_head == null:
+		return
+	_train_head.text = t
+	_train_head.add_theme_font_size_override("font_size", 40)
+	_train_head.add_theme_color_override("font_color", Color("#8fe39a") if good else UI.GOLD)
+	_train_head.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	_train_head.add_theme_constant_override("outline_size", 8)
+	if _train_sub == null:
+		_train_sub = UI.label("", 23, UI.BONE, "bold")
+		_train_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_train_sub.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+		_train_sub.add_theme_constant_override("outline_size", 6)
+		_train_head.get_parent().add_child(_train_sub)
+		_train_head.get_parent().move_child(_train_sub, _train_head.get_index() + 1)
+		_stroke = LessonStroke.new()
+		UI.full(_stroke)
+		root.add_child(_stroke)
+	_train_sub.text = sub
+	_stroke.dirs = stroke
+	_stroke._t = 0.0
+	_stroke.queue_redraw()
+	# a small pulse so a change of instruction is noticed
+	_train_head.pivot_offset = _train_head.size * 0.5
+	_train_head.scale = Vector2(1.15, 1.15)
+	create_tween().tween_property(_train_head, "scale", Vector2.ONE, 0.18)
 
 func training_cuts(cuts: Array, named: String) -> void:
 	if _train_seq:

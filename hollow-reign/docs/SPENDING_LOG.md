@@ -87,3 +87,8 @@ The further $100 the owner reports adding for graphics was not visible on either
 | Fourth audition reel (regional and continental voices, Inworld model): 34 takes + 1 test, 2 credits each; one timed-out take recovered by job id, not regenerated | Higgsfield speech | 70 | about $2.87 |
 
 Running total: Tripo ≈ $56.15, Higgsfield ≈ $17.22, combined ≈ **$73.37 of the original $100 cap**.
+
+## Budget correction (2026-11-26, from the owner's Tripo billing screenshot)
+The Tripo account has received $150 in total: $50 on 25 Nov and $100 on 26 Nov 00:16. The $100 is the "added graphics allocation" in the final brief; it was already in the wallet when that brief arrived, which is why no new top-up appeared. The owner has now authorised it as a dedicated graphics allocation on top of the original cap.
+- Original cap: $100 across both services. Spent so far ≈ $73.37, plus the voice recording now running (about $12 when complete) and 9 ground textures (about $0.40).
+- Graphics allocation: up to $100, on Tripo only (3D models, rigs). Tripo wallet shows $93.85. It cannot pay for Higgsfield images, video or speech.

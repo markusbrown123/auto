@@ -63,7 +63,9 @@ static func theme_for(region_theme: String, arena: String = "") -> String:
 		return arena
 	return region_theme if THEMES.has(region_theme) else "courtyard"
 
+var _theme_id := ""
 func build(theme_id: String) -> void:
+	_theme_id = theme_id
 	theme = THEMES[theme_id]
 	rng.seed = hash(theme_id)
 	mat_stone = Look.stone(Color(theme.stone))
@@ -150,6 +152,23 @@ func _floor() -> void:
 	m.metallic = 0.0
 	m.metallic_specular = 0.5 if theme.get("wet", false) else 0.35
 	m.normal_scale = 0.6 if theme.get("wet", false) else 0.9
+	# a real ground texture where one has been made for this region: sharp paving instead of soft noise
+	var tex_id := {"cathedral_steps": "cathedral"}.get(_theme_id, _theme_id) as String
+	var tex_path := "res://assets/textures/floor_%s.jpg" % tex_id
+	if ResourceLoader.exists(tex_path):
+		var fm := StandardMaterial3D.new()
+		fm.albedo_texture = load(tex_path)
+		fm.albedo_color = Color(0.92, 0.92, 0.92)
+		if ResourceLoader.exists("res://assets/textures/floor_%s_n.png" % tex_id):
+			fm.normal_enabled = true
+			fm.normal_texture = load("res://assets/textures/floor_%s_n.png" % tex_id)
+			fm.normal_scale = 1.1
+		fm.uv1_scale = Vector3(20, 20, 1)          # one tile every 4.5 m
+		fm.roughness = 0.62 if theme.get("wet", false) else 0.85
+		fm.metallic = 0.0
+		fm.metallic_specular = 0.45 if theme.get("wet", false) else 0.3
+		fm.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+		m = fm
 	var p := PlaneMesh.new()
 	p.size = Vector2(90, 90)
 	var mi := MeshInstance3D.new()

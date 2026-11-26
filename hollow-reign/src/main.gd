@@ -139,7 +139,8 @@ func start_duel(o: Dictionary) -> void:
 			"Swipe to cut — but only when your foe is open. A raised guard turns every blow.",
 			"Swipe against an incoming strike to parry it. The ring closes as the blow lands.",
 			"The arrows step aside. The shield holds, while your stamina lasts.",
-			"When a foe is open, a bright seam shows in its guard. Cut along it.",
+			"When a foe is open, a bright seam shows in its guard. Cut along it. Three cuts in a pattern land a named blow.",
+			"The burst fills as you fight: tap it to break your foe open. The flame mends you when it is full.",
 			["A perfect parry breaks their guard. That is your moment.", UI.GOLD]], "Begin", func(): d.set_process(true))
 
 ## The experimental footage-driven duel. Rewards, saves and progression go through the same path as the real-time one.

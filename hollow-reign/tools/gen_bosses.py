@@ -280,7 +280,7 @@ B.append(dict(id="cathedral_beast", name="The Cathedral Beast", title="What the 
   ])]))
 # ---------------------------------------------------------------- optional: Gravewarden
 B.append(dict(id="gravewarden", name="The Gravewarden", title="Keeper of the Sunken Crypt", region="crypt", boss=True,
- hp=1700, armor=0.18, posture=140, patience=3, adapt=0.9, idle=[0.9,1.5], weak="fire", xp=1900, gold=1100,
+ hp=2000, armor=0.18, posture=140, patience=3, adapt=0.9, idle=[0.9,1.5], weak="fire", xp=1900, gold=1100,
  loot=[["w_crypt_great",1.0],["a_vigil_legs",0.5],["a_vigil_helm",0.5],["r_iron",0.3]], music="combat_b", arena="crypt",
  intro="He buried every king of this line. He does not intend to bury another.",
  rig=dict(scale=1.5,bulk=1.3,metal="#48564e",cloth="#1c2624",weapon="greatsword",eye="#7affc8",helm="great",crest="none",cape=True,lantern=True),
@@ -482,6 +482,6 @@ B.append(dict(id="devourer", name="The Devourer of Names", title="First of the S
 for f in B:
     if "cls" not in f:
         f["cls"] = "Wyrm" if f["rig"].get("kind") == "dragon" else ("Soul-Eater" if f["rig"].get("wraith") else "Guardian")
-    f["hp"] = round(f["hp"] * (3.1 if f["boss"] else 2.0))
+    f["hp"] = round(f["hp"] * (3.5 if f["boss"] else 2.0))
 json.dump({"bosses": B}, open("data/bosses.json","w"), indent=1)
 print(len(B), "foes")

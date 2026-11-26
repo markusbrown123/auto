@@ -79,10 +79,27 @@ var b_reckless := 0
 var b_dmg_mult := 1.0
 var b_speed := 1.0
 var b_opening_crit := false
+## Surge: a meter earned by fighting well; spend it to stun the foe outright.
+var surge := 0.0
+## Relic: charges slowly over the fight; spend it to mend wounds.
+var relic := 0.0
+const SURGE_MAX := 100.0
+const RELIC_MAX := 100.0
+const RELIC_RATE := 3.4          # per second: full in about half a minute
+const RELIC_HEAL := 0.35
+const SURGE_STUN := 2.6
+## Three-cut patterns that end in a named, heavier blow.
+const COMBOS := {
+	"Cross Cut": [["L", "R", "L"], ["R", "L", "R"], 1.5],
+	"Hammerfall": [["U", "D", "U"], ["D", "U", "D"], 1.6],
+	"Sundering": [["L", "R", "D"], ["R", "L", "D"], 1.75],
+	"Skyward": [["DL", "DR", "U"], ["DR", "DL", "U"], 1.75],
+}
+var p_hist: Array = []
 var rift_dir := ""       # the seam in the foe's guard: cut along it for a telling blow
 var rift_count := 0
 var habits := {"block": 0.0, "dodge_l": 0.0, "dodge_r": 0.0, "parry": 0.0}
-var stats := {"dealt": 0.0, "taken": 0.0, "parries": 0, "perfect_parries": 0, "dodges": 0, "perfect_dodges": 0, "blocks": 0, "hits_taken": 0, "max_combo": 0, "rifts": 0}
+var stats := {"dealt": 0.0, "taken": 0.0, "parries": 0, "perfect_parries": 0, "dodges": 0, "perfect_dodges": 0, "blocks": 0, "hits_taken": 0, "max_combo": 0, "rifts": 0, "surges": 0, "relics": 0, "named": 0}
 
 
 func setup(player: Dictionary, boss: Dictionary, seed_value: int = 0, opts: Dictionary = {}) -> void:
@@ -170,6 +187,34 @@ func input_swipe(dir: String) -> void:
 	_set_p(P.SWING, pl.swing_time)
 	_emit(&"player_swing", {"dir": dir, "time": pl.swing_time})
 
+func _gain_surge(v: float) -> void:
+	var was := surge
+	surge = minf(SURGE_MAX, surge + v)
+	if was < SURGE_MAX and surge >= SURGE_MAX:
+		_emit(&"surge_ready")
+
+## Unleash the surge: whatever the foe was doing, it is broken open.
+func input_surge() -> bool:
+	if over or surge < SURGE_MAX or b_state == B.SHIFT or b_state == B.DEAD or p_state == P.DEAD or p_state == P.STUN:
+		return false
+	surge = 0.0
+	stats.surges += 1
+	_emit(&"surge")
+	_stagger(SURGE_STUN, false)
+	return true
+
+## Spend the relic's charge to close wounds.
+func input_relic() -> bool:
+	if over or relic < RELIC_MAX or p_state == P.DEAD or pl.hp >= pl.max_hp:
+		return false
+	relic = 0.0
+	stats.relics += 1
+	var heal: float = float(pl.max_hp) * RELIC_HEAL
+	pl.hp = minf(pl.max_hp, pl.hp + heal)
+	p_burn = 0.0
+	_emit(&"relic", {"heal": heal})
+	return true
+
 func input_dodge(side: int) -> void:
 	if over:
 		return
@@ -190,6 +235,10 @@ func tick(dt: float) -> void:
 	if over:
 		return
 	time += dt
+	if relic < RELIC_MAX:
+		relic = minf(RELIC_MAX, relic + RELIC_RATE * dt)
+		if relic >= RELIC_MAX:
+			_emit(&"relic_ready")
 	_tick_player(dt)
 	_tick_boss(dt)
 
@@ -274,6 +323,18 @@ func _resolve_player_hit(dir: String) -> void:
 		if p_counter:
 			mult *= 1.5
 			p_counter = false
+		# named combos: the third cut of a known pattern lands much harder
+		p_hist.append(dir)
+		var named := ""
+		if p_hist.size() >= 3:
+			var last: Array = p_hist.slice(p_hist.size() - 3)
+			for cname in COMBOS:
+				if last == COMBOS[cname][0] or last == COMBOS[cname][1]:
+					named = cname
+					mult *= float(COMBOS[cname][2])
+					stats.named += 1
+					p_hist.clear()
+					break
 		var on_rift := rift_dir != "" and dir == rift_dir
 		if on_rift:
 			mult *= RIFT_MULT
@@ -282,7 +343,8 @@ func _resolve_player_hit(dir: String) -> void:
 		if elem:
 			mult *= 1.25
 		var dmg: float = pl.attack * mult * (1.0 - float(bd.get("armor", 0.0))) * rng.randf_range(0.95, 1.05)
-		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift})
+		_gain_surge(7.0 + (6.0 if named != "" else 0.0))
+		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "named": named})
 		if on_rift and boss_open():
 			_next_rift()
 	elif b_state == B.SHIFT:
@@ -356,6 +418,7 @@ func _end_opening() -> void:
 	if rift_dir != "":
 		rift_dir = ""
 		_emit(&"rift", {"dir": ""})
+	p_hist.clear()
 	p_combo = 0
 	p_last_dir = ""
 	b_opening_crit = false
@@ -475,6 +538,7 @@ func _resolve_strike() -> void:
 		result = "blocked"
 	match result:
 		"dodged":
+			_gain_surge(10.0 if perfect else 5.0)
 			habits["dodge_l" if p_dodge_side < 0 else "dodge_r"] += 1.0
 			stats.dodges += 1
 			if perfect:
@@ -482,6 +546,7 @@ func _resolve_strike() -> void:
 				p_counter = true
 				pl.stamina = minf(pl.max_stamina, pl.stamina + DODGE_COST)
 		"parried":
+			_gain_surge(18.0 if perfect else 9.0)
 			p_parry = {}
 			habits.parry += 1.0
 			stats.parries += 1
@@ -490,6 +555,7 @@ func _resolve_strike() -> void:
 			if perfect:
 				stats.perfect_parries += 1
 		"blocked":
+			_gain_surge(4.0)
 			habits.block += 1.0
 			stats.blocks += 1
 			var cost: float = float(a.guard) * (1.0 - float(pl.block_eff))
@@ -506,6 +572,7 @@ func _resolve_strike() -> void:
 			else:
 				_damage_player(dmg * 0.08 * (1.0 - float(pl.block_eff)), true)
 		"hit":
+			_gain_surge(9.0)
 			p_parry = {}
 			stats.hits_taken += 1
 			_apply_element(a, 1.0)

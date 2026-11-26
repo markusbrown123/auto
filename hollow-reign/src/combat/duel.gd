@@ -93,6 +93,8 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	hud.swipe.connect(func(d, _v): if stage == Stage.FIGHT: sim.input_swipe(d))
 	hud.dodge.connect(func(s): if stage == Stage.FIGHT: sim.input_dodge(s))
 	hud.block.connect(_on_block)
+	hud.surge_pressed.connect(func(): if stage == Stage.FIGHT: sim.input_surge())
+	hud.relic_pressed.connect(func(): if stage == Stage.FIGHT: sim.input_relic())
 	hud.root.modulate.a = 0.0
 
 	var o := opts.duplicate()
@@ -247,6 +249,8 @@ func _unhandled_key_input(e: InputEvent) -> void:
 		KEY_RIGHT: sim.input_swipe("R")
 		KEY_UP: sim.input_swipe("U")
 		KEY_DOWN: sim.input_swipe("D")
+		KEY_Q: sim.input_surge()
+		KEY_E: sim.input_relic()
 		KEY_A: sim.input_dodge(-1)
 		KEY_D: sim.input_dodge(1)
 
@@ -447,6 +451,26 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			hud.flash_stamina()
 		&"rift":
 			hud.rift.show_dir(d.dir)
+		&"surge_ready":
+			Sfx.play("loot", -4.0, 0.8)
+			Game.haptic(20, 0.5)
+		&"relic_ready":
+			Sfx.play("loot", -8.0, 1.3)
+		&"surge":
+			hud.toast("SURGE", Color("#ffb347"), 0.9)
+			Sfx.play("ember_burst", -1.0)
+			Sfx.play("parry_perfect", -4.0, 0.8)
+			sparks(foe_rig.chest_point(), Vector3(0, 0.6, 1), 50, Color(1.0, 0.7, 0.3), 8.0)
+			hud.cue.clear()
+			_set_foe_blade_warning(false)
+			shake(0.6)
+			_slow = 0.4
+			Game.haptic(80, 1.0)
+		&"relic":
+			hud.toast("MENDED", Color("#7fd4ff"), 0.8)
+			Sfx.play("levelup", -6.0, 1.2)
+			sparks(player_rig.chest_point(), Vector3.UP, 30, Color(0.5, 0.85, 1.0), 3.0)
+			player_rig.flash(0.6)
 		&"boss_hit":
 			var at: Vector3 = foe_rig.chest_point() + Vector3(randf_range(-0.2, 0.2), randf_range(-0.2, 0.3), 0.35)
 			var crit: bool = d.get("crit", false) or d.get("rift", false)
@@ -462,6 +486,11 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			shake(0.22 if crit else 0.12)
 			Game.haptic(18 if crit else 10, 0.5)
 			hud.combo(int(d.get("combo", 1)))
+			if str(d.get("named", "")) != "":
+				hud.toast(str(d.named).to_upper(), UI.BONE, 0.7)
+				Sfx.play("clash", -3.0, 0.8)
+				shake(0.25)
+				hitstop(0.09)
 		&"deflected":
 			sparks(foe_rig.blade_mid(), Vector3(0, 0.6, 1), 8, Color(1, 0.9, 0.7), 4.0)
 			Sfx.play("clash", -8.0, 1.25)

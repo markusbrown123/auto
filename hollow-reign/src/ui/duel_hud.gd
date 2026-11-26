@@ -6,6 +6,8 @@ signal dodge(side: int)
 signal block(down: bool)
 signal swipe(dir: String, vec: Vector2)
 signal pause_pressed
+signal surge_pressed
+signal relic_pressed
 
 ## A multi-touch aware round button (hold or tap).
 class Pad extends Control:
@@ -13,6 +15,8 @@ class Pad extends Control:
 	signal up
 	var icon := "left"
 	var held := false
+	var charge := -1.0        # 0..1 draws a filling ring (surge and relic); -1 = plain button
+	var tint := UI.GOLD
 	var _idx := -1
 	func _init(kind: String, diameter: float) -> void:
 		icon = kind
@@ -42,6 +46,12 @@ class Pad extends Control:
 		draw_circle(c, r, Color(0.04, 0.04, 0.05, 0.62 if not held else 0.85))
 		draw_arc(c, r, 0, TAU, 48, UI.GOLD if held else UI.GOLD_DIM, 2.0, true)
 		var col := UI.GOLD if held else UI.BONE
+		if charge >= 0.0:
+			var full := charge >= 1.0
+			col = tint if full else Color(0.45, 0.44, 0.42)
+			draw_arc(c, r - 5.0, -PI / 2, -PI / 2 + TAU * clampf(charge, 0.0, 1.0), 48, tint, 5.0 if full else 3.5, true)
+			if full:
+				draw_circle(c, r - 12.0, Color(tint.r, tint.g, tint.b, 0.16 + 0.1 * sin(Time.get_ticks_msec() / 160.0)))
 		var s := r * 0.42
 		match icon:
 			"left", "right":
@@ -49,6 +59,17 @@ class Pad extends Control:
 				for off: float in [-0.22, 0.22]:
 					var o := c + Vector2(off * r * k + k * s * 0.15, 0)
 					draw_polyline(PackedVector2Array([o + Vector2(-k * s * 0.5, -s), o + Vector2(k * s * 0.5, 0), o + Vector2(-k * s * 0.5, s)]), col, 3.0, true)
+			"surge":
+				# a burst: eight short rays
+				for i in 8:
+					var a := TAU * i / 8.0
+					var d := Vector2(cos(a), sin(a))
+					draw_line(c + d * s * 0.35, c + d * s * (1.1 if i % 2 == 0 else 0.8), col, 3.0, true)
+			"relic":
+				# a flame-shaped drop
+				draw_polyline(PackedVector2Array([c + Vector2(0, -s * 1.2), c + Vector2(s * 0.7, s * 0.2), c + Vector2(0, s * 1.0), c + Vector2(-s * 0.7, s * 0.2), c + Vector2(0, -s * 1.2)]), col, 3.0, true)
+				draw_line(c + Vector2(0, -s * 0.2), c + Vector2(0, s * 0.5), col, 2.0, true)
+				draw_line(c + Vector2(-s * 0.3, s * 0.15), c + Vector2(s * 0.3, s * 0.15), col, 2.0, true)
 			"shield":
 				var pts := PackedVector2Array([c + Vector2(-s, -s), c + Vector2(s, -s), c + Vector2(s, s * 0.2), c + Vector2(0, s * 1.25), c + Vector2(-s, s * 0.2), c + Vector2(-s, -s)])
 				draw_polyline(pts, col, 3.0, true)
@@ -161,6 +182,8 @@ var streak: Line2D
 var pad_l: Pad
 var pad_r: Pad
 var pad_block: Pad
+var pad_surge: Pad
+var pad_relic: Pad
 var controls: Control
 var _toast_tw: Tween
 var _sub_tw: Tween
@@ -276,6 +299,25 @@ func _ready() -> void:
 	pad_block.offset_left = -52
 	pad_block.offset_right = 52
 	controls.add_child(pad_block)
+	pad_surge = Pad.new("surge", 78)
+	pad_surge.charge = 0.0
+	pad_surge.tint = Color("#ffb347")
+	pad_surge.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	pad_surge.offset_top = 52
+	pad_surge.offset_bottom = 130
+	pad_surge.offset_right = 78
+	controls.add_child(pad_surge)
+	pad_relic = Pad.new("relic", 78)
+	pad_relic.charge = 0.0
+	pad_relic.tint = Color("#7fd4ff")
+	pad_relic.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	pad_relic.offset_top = 52
+	pad_relic.offset_bottom = 130
+	pad_relic.offset_left = 90
+	pad_relic.offset_right = 168
+	controls.add_child(pad_relic)
+	pad_surge.down.connect(func(): surge_pressed.emit())
+	pad_relic.down.connect(func(): relic_pressed.emit())
 	pad_l.down.connect(func(): dodge.emit(-1))
 	pad_r.down.connect(func(): dodge.emit(1))
 	pad_block.down.connect(func(): block.emit(true))
@@ -340,6 +382,10 @@ func update_bars(sim: DuelSim, dt: float) -> void:
 	boss_ghost.value = maxf(sim.b_hp, lerpf(boss_ghost.value, sim.b_hp, 1.0 - exp(-dt * 2.5)))
 	posture_bar.max_value = float(sim.bd.posture)
 	posture_bar.value = sim.b_posture if sim.b_state != DuelSim.B.STAGGER else posture_bar.max_value
+	pad_surge.charge = sim.surge / DuelSim.SURGE_MAX
+	pad_relic.charge = sim.relic / DuelSim.RELIC_MAX
+	pad_surge.queue_redraw()
+	pad_relic.queue_redraw()
 	hp_bar.max_value = sim.pl.max_hp
 	hp_bar.value = sim.pl.hp
 	st_bar.max_value = sim.pl.max_stamina

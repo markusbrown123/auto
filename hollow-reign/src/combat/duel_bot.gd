@@ -46,6 +46,12 @@ func tick(dt: float) -> void:
 			_spam_t = 0.14
 			sim.input_swipe("L")
 		return
+	if style != Style.TURTLE:
+		# spend the meters the way a player would
+		if sim.surge >= DuelSim.SURGE_MAX and sim.b_state == DuelSim.B.IDLE and sim.p_state == DuelSim.P.FREE:
+			sim.input_surge()
+		if sim.relic >= DuelSim.RELIC_MAX and sim.pl.hp < sim.pl.max_hp * 0.55:
+			sim.input_relic()
 	var want_block := style == Style.TURTLE and not sim.boss_open()
 	if not _plan.is_empty():
 		if _plan.kind == "block":

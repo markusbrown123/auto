@@ -55,7 +55,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_save", "t_runs"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_save", "t_runs"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -357,6 +357,45 @@ func t_elements() -> void:
 	ok(r.pl.resist > 80.0, "resist stat applies")
 	var w := mk("ashen_sentinel", 3, geared(6))
 	ok(w.pl.element == "frost" and w.bd.weak == "frost", "weapon element matches weakness")
+
+# ------------------------------------------------------------------ surge, relic, named combos
+func t_meters_combos() -> void:
+	var s := mk("ashen_sentinel")
+	ok(not s.input_surge(), "no surge without a full meter")
+	until_windup(s)
+	to_impact(s, 0.06)
+	s.input_swipe(DuelSim.parry_dir_for(s.b_attack.dir))
+	run_for(s, 0.1)
+	ok(s.surge >= 18.0, "a perfect parry feeds the surge meter")
+	s.surge = DuelSim.SURGE_MAX
+	run_for(s, 3.5)
+	until_windup(s)
+	ok(s.input_surge() and s.b_state == DuelSim.B.STAGGER and s.surge == 0.0, "surge breaks a foe mid-attack and empties the meter")
+	var hp: float = s.pl.hp
+	run_for(s, 1.0)
+	ok(s.pl.hp == hp, "the interrupted attack never lands")
+	# relic
+	s = mk("ashen_sentinel")
+	ok(not s.input_relic(), "relic is not ready at the start")
+	s.b_t = 99.0
+	run_for(s, 31.0)
+	ok(s.relic >= DuelSim.RELIC_MAX, "relic charges in about half a minute")
+	ok(not s.input_relic(), "relic is not wasted at full health")
+	s.pl.hp = 20.0
+	ok(s.input_relic() and is_equal_approx(s.pl.hp, 20.0 + s.pl.max_hp * 0.35) and s.relic == 0.0, "relic heals 35% and empties")
+	# named combos
+	s = mk("ashen_sentinel")
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 9.0
+	var hits: Array = []
+	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	for d in ["L", "R", "L"]:
+		s.input_swipe(d); run_for(s, 0.3)
+	ok(hits.size() == 3 and hits[2].named == "Cross Cut" and hits[0].named == "", "left-right-left is a Cross Cut")
+	ok(hits[2].dmg > hits[1].dmg * 1.4, "the named blow lands much harder")
+	for d in ["U", "D", "U"]:
+		s.input_swipe(d); run_for(s, 0.3)
+	ok(hits.size() == 6 and hits[5].named == "Hammerfall", "up-down-up is a Hammerfall")
+	ok(s.stats.named == 2, "named combos are counted")
 
 # ------------------------------------------------------------------ seams, drain, revival
 func t_seams() -> void:

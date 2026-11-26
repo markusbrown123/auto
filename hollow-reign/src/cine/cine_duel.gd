@@ -47,6 +47,8 @@ func setup(opts: Dictionary = {}) -> void:
 	hud = DuelHud.new()
 	add_child(hud)
 	hud.set_foe(foe)
+	hud.pad_surge.visible = false     # the footage test has no clips for these
+	hud.pad_relic.visible = false
 	hud.swipe.connect(func(d, _v): _act("swipe", func(): fight.input_swipe(d)))
 	hud.dodge.connect(func(s): _act("dodge", func(): fight.input_dodge(s)))
 	hud.block.connect(func(down): fight.input_block(down))

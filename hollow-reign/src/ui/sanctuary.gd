@@ -5,8 +5,9 @@ extends Node
 
 signal set_out(region_id: String, use_shortcut: bool)
 signal quit_to_title
+signal train
 
-const TABS := ["Journey", "Armory", "Blacksmith", "Character", "Settings"]
+const TABS := ["Journey", "Armory", "Blacksmith", "Character", "Journal", "Settings"]
 
 var backdrop: Backdrop
 var layer: CanvasLayer
@@ -436,6 +437,62 @@ func _bosses_slain() -> int:
 		if Db.foes[id].boss:
 			n += 1
 	return n
+
+# ================================================================ Journal
+## Every combo the knight has found, and the shape of the ones still unfound.
+func _tab_journal() -> void:
+	var p: Dictionary = Game.profile
+	var cls := str(Game.stats().get("weapon_cls", "sword"))
+	var head := _row()
+	content.add_child(head)
+	var t := UI.title("Combat Journal", 24)
+	t.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(t)
+	var found := 0
+	for c in Db.combos:
+		if p.combos.has(c.id):
+			found += 1
+	head.add_child(UI.label("%d of %d found" % [found, Db.combos.size()], 18, UI.DIM))
+	var tr := UI.button("Train with Orren", 16, 220)
+	tr.pressed.connect(func(): train.emit())
+	head.add_child(tr)
+	content.add_child(_wrap("Sequences are found by cutting. End an opening with the right pattern and the last blow lands as something more.", 16))
+	var v := _scroll()
+	for c in Db.combos:
+		var known: bool = p.combos.has(c.id)
+		var usable: bool = c.cls.is_empty() or c.cls.has(cls)
+		var row := _row()
+		v.add_child(row)
+		var names := VBoxContainer.new()
+		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		names.add_theme_constant_override("separation", -3)
+		row.add_child(names)
+		if known:
+			var title_row := _row()
+			title_row.add_child(UI.label(str(c.name), 20, UI.GOLD if usable else UI.DIM, "bold"))
+			title_row.add_child(UI.label(str(c.kind).to_upper(), 13, UI.DIM))
+			names.add_child(title_row)
+			names.add_child(_wrap(str(c.use), 15))
+			var bits: Array = ["×%.2f damage" % float(c.mult)]
+			if float(c.get("posture", 0)) > 0:
+				bits.append("+%d posture" % int(c.posture))
+			if float(c.get("stamina_cost", 0)) > 0:
+				bits.append("−%d stamina" % int(c.stamina_cost))
+			if float(c.get("stamina_back", 0)) > 0:
+				bits.append("+%d stamina" % int(c.stamina_back))
+			if c.get("pierce", false):
+				bits.append("ignores armour")
+			bits.append("used %d×" % int(p.combo_uses.get(c.id, 0)))
+			if not usable:
+				bits.append("needs: " + ", ".join(c.cls))
+			names.add_child(UI.label("  ·  ".join(bits), 14, UI.BONE))
+			row.add_child(SeqView.new(c.seq, 30.0, UI.BONE if usable else UI.DIM))
+		else:
+			names.add_child(UI.label("Unfound", 20, UI.DIM, "bold"))
+			var hint := "%d cuts  ·  %s" % [c.seq.size(), str(c.kind).to_lower()]
+			if not c.cls.is_empty():
+				hint += "  ·  " + ", ".join(c.cls) + " only"
+			names.add_child(UI.label(hint, 14, UI.DIM))
 
 # ================================================================ Settings
 func _tab_settings() -> void:

@@ -13,7 +13,7 @@ var profile: Dictionary = {}
 var run: Dictionary = {}          # {region, stage, hp, found:[...]} — reset on death
 var settings: Dictionary = {
 	"quality": 1, "fps": 60, "music": 0.8, "sfx": 1.0, "voice": 1.0, "haptics": true,
-	"shake": 1.0, "assist": false, "hints": true, "reduce_flash": false, "cine": false, "cine_road": false,
+	"shake": 1.0, "assist": false, "hints": true, "reduce_flash": false, "cine": false, "cine_road": false, "pad_opacity": 0.2,
 }
 var rng := RandomNumberGenerator.new()
 var just_died := false         # set on death, consumed by the sanctuary
@@ -36,7 +36,7 @@ func default_profile() -> Dictionary:
 			"gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": null, "relic": null},
 		"upgrades": {}, "mastery": {}, "mastered": [],
 		"flags": {}, "defeated": {}, "cleared": [], "ng": 0, "deaths": 0, "heraldry": "#3d0f0f",
-		"tutorial_done": false, "playtime": 0.0, "body": "m",
+		"tutorial_done": false, "playtime": 0.0, "body": "m", "combos": ["double_slash"], "combo_uses": {},
 	}
 
 func has_save() -> bool:
@@ -103,7 +103,7 @@ func _migrate(v: Dictionary) -> Dictionary:
 		v[k] = int(v[k])
 	for k in v.attrs:
 		v.attrs[k] = int(v.attrs[k])
-	for d in ["upgrades", "mastery", "defeated"]:
+	for d in ["upgrades", "mastery", "defeated", "combo_uses"]:
 		for k in v[d]:
 			v[d][k] = int(v[d][k])
 	v.version = SAVE_VERSION
@@ -130,6 +130,17 @@ func spend_attr(attr: String) -> bool:
 	profile.attrs[attr] += 1
 	save()
 	profile_changed.emit()
+	return true
+
+## Records that a combo was performed. Returns true the first time, when it is newly discovered.
+func use_combo(id: String) -> bool:
+	if not Db.combo_by_id.has(id):
+		return false
+	profile.combo_uses[id] = int(profile.combo_uses.get(id, 0)) + 1
+	if profile.combos.has(id):
+		return false
+	profile.combos.append(id)
+	save()
 	return true
 
 func owns(id: String) -> bool:

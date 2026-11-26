@@ -7,6 +7,8 @@ var classes: Dictionary = {}
 var rarity_order: Array = []
 var foes: Dictionary = {}
 var regions: Array = []
+var combos: Array = []
+var combo_by_id: Dictionary = {}
 var region_by_id: Dictionary = {}
 
 const RARITY_COLOR := {
@@ -32,6 +34,9 @@ func _ready() -> void:
 		items[it.id] = it
 	for f in _load("res://data/bosses.json").bosses:
 		foes[f.id] = f
+	combos = _load("res://data/combos.json").combos
+	for c in combos:
+		combo_by_id[c.id] = c
 	regions = _load("res://data/regions.json").regions
 	for r in regions:
 		region_by_id[r.id] = r

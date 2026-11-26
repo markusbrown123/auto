@@ -88,13 +88,13 @@ const RELIC_MAX := 100.0
 const RELIC_RATE := 3.4          # per second: full in about half a minute
 const RELIC_HEAL := 0.35
 const SURGE_STUN := 2.6
-## Three-cut patterns that end in a named, heavier blow.
-const COMBOS := {
-	"Cross Cut": [["L", "R", "L"], ["R", "L", "R"], 1.5],
-	"Hammerfall": [["U", "D", "U"], ["D", "U", "D"], 1.6],
-	"Sundering": [["L", "R", "D"], ["R", "L", "D"], 1.75],
-	"Skyward": [["DL", "DR", "U"], ["DR", "DL", "U"], 1.75],
-}
+## The combo library (data/combos.json), filtered to the weapon in hand. Set by setup().
+var combos: Array = []
+var training := false
+var _last_cut_t := 0.0
+var opening_from := ""        # what earned the current opening: "parry", "perfect", "dodge", "break", "surge", ""
+var p_block_since := -9.0     # when the shield went up, for timed blocks
+const PERFECT_BLOCK := 0.22
 var p_hist: Array = []
 var rift_dir := ""       # the seam in the foe's guard: cut along it for a telling blow
 var rift_count := 0
@@ -117,6 +117,17 @@ func setup(player: Dictionary, boss: Dictionary, seed_value: int = 0, opts: Dict
 	b_state = B.IDLE
 	b_t = 1.6
 	b_phase = 0
+	combos = []
+	for c in opts.get("combos", []):
+		if c.cls.is_empty() or c.cls.has(str(pl.get("weapon_cls", "sword"))):
+			combos.append(c)
+	if opts.get("training", false):
+		# practice: the foe stands open and cannot be killed
+		b_state = B.RECOVER
+		b_t = 1.0e9
+		b_hp_max = 1.0e9
+		b_hp = b_hp_max
+		training = true
 
 
 # ============================================================ helpers / queries
@@ -158,7 +169,30 @@ static func parry_dir_for(attack_dir: String) -> String:
 
 # ============================================================ input
 func input_block(down: bool) -> void:
+	if down and not p_block:
+		p_block_since = time
 	p_block = down
+
+## Would adding `dir` to the cuts so far still be the start of a known combo?
+func _continues_combo(dir: String) -> bool:
+	var want: Array = p_hist + [dir]
+	for c in combos:
+		var seq: Array = c.seq
+		for start in range(maxi(0, want.size() - seq.size()), want.size() - 1):
+			var tail: Array = want.slice(start)
+			if tail.size() <= seq.size() and seq.slice(0, tail.size()) == tail:
+				return true
+	return false
+
+## The longest combo whose whole sequence is the tail of the cuts so far.
+func _completed_combo() -> Dictionary:
+	var best := {}
+	for c in combos:
+		var seq: Array = c.seq
+		if p_hist.size() >= seq.size() and p_hist.slice(p_hist.size() - seq.size()) == seq:
+			if best.is_empty() or seq.size() > best.seq.size():
+				best = c
+	return best
 
 func input_swipe(dir: String) -> void:
 	if over:
@@ -198,6 +232,7 @@ func input_surge() -> bool:
 	if over or surge < SURGE_MAX or b_state == B.SHIFT or b_state == B.DEAD or p_state == P.DEAD or p_state == P.STUN:
 		return false
 	surge = 0.0
+	opening_from = "surge"
 	stats.surges += 1
 	_emit(&"surge")
 	_stagger(SURGE_STUN, false)
@@ -310,8 +345,8 @@ func _resolve_player_hit(dir: String) -> void:
 		return
 	if boss_open():
 		var mult := 1.0
-		if p_last_dir != "" and dir == p_last_dir:
-			mult = 0.45   # predictable: the same cut twice glances off
+		if p_last_dir != "" and dir == p_last_dir and not _continues_combo(dir):
+			mult = 0.45   # predictable: the same cut twice glances off, unless a combo calls for it
 		else:
 			p_combo = mini(p_combo + 1, COMBO_MAX)
 			mult = 1.0 + COMBO_STEP * (p_combo - 1)
@@ -323,18 +358,28 @@ func _resolve_player_hit(dir: String) -> void:
 		if p_counter:
 			mult *= 1.5
 			p_counter = false
-		# named combos: the third cut of a known pattern lands much harder
+		# combos: the last cut of a known sequence lands as that combo's finishing blow
 		p_hist.append(dir)
+		_last_cut_t = time
 		var named := ""
-		if p_hist.size() >= 3:
-			var last: Array = p_hist.slice(p_hist.size() - 3)
-			for cname in COMBOS:
-				if last == COMBOS[cname][0] or last == COMBOS[cname][1]:
-					named = cname
-					mult *= float(COMBOS[cname][2])
-					stats.named += 1
-					p_hist.clear()
-					break
+		var combo_id := ""
+		var pierce := false
+		var extra_posture := 0.0
+		var done := _completed_combo()
+		if not done.is_empty():
+			named = done.name
+			combo_id = done.id
+			mult *= float(done.mult)
+			if opening_from == "dodge":
+				mult *= float(done.get("after_dodge", 1.0))
+			if opening_from in ["parry", "perfect"]:
+				mult *= float(done.get("after_parry", 1.0))
+			if b_state == B.STAGGER:
+				mult *= float(done.get("on_stagger", 1.0)) * float(done.get("crit_bonus", 1.0))
+			pierce = bool(done.get("pierce", false))
+			extra_posture = float(done.get("posture", 0))
+			pl.stamina = clampf(pl.stamina + float(done.get("stamina_back", 0)) - float(done.get("stamina_cost", 0)), 0.0, pl.max_stamina)
+			stats.named += 1
 		var on_rift := rift_dir != "" and dir == rift_dir
 		if on_rift:
 			mult *= RIFT_MULT
@@ -342,9 +387,11 @@ func _resolve_player_hit(dir: String) -> void:
 		var elem: bool = pl.element != null and pl.element == bd.get("weak")
 		if elem:
 			mult *= 1.25
-		var dmg: float = pl.attack * mult * (1.0 - float(bd.get("armor", 0.0))) * rng.randf_range(0.95, 1.05)
+		var dmg: float = pl.attack * mult * (1.0 - (0.0 if pierce else float(bd.get("armor", 0.0)))) * rng.randf_range(0.95, 1.05)
 		_gain_surge(7.0 + (6.0 if named != "" else 0.0))
-		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "named": named})
+		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "named": named, "combo_id": combo_id})
+		if extra_posture > 0.0 and b_state == B.RECOVER:
+			_add_posture(extra_posture)
 		if on_rift and boss_open():
 			_next_rift()
 	elif b_state == B.SHIFT:
@@ -397,6 +444,8 @@ func _add_posture(v: float) -> void:
 		_stagger(STAGGER_BREAK, true)
 
 func _stagger(t: float, broke: bool) -> void:
+	if opening_from == "":
+		opening_from = "break" if broke else "perfect"
 	b_state = B.STAGGER
 	b_t = t
 	b_opening_crit = true
@@ -419,6 +468,7 @@ func _end_opening() -> void:
 		rift_dir = ""
 		_emit(&"rift", {"dir": ""})
 	p_hist.clear()
+	opening_from = ""
 	p_combo = 0
 	p_last_dir = ""
 	b_opening_crit = false
@@ -438,6 +488,13 @@ func _tick_boss(dt: float) -> void:
 			if b_t <= 0.0:
 				_resolve_strike()
 		B.RECOVER, B.STAGGER:
+			if training:
+				b_t = 1.0e9
+				if not p_hist.is_empty() and time - _last_cut_t > 1.5:
+					p_hist.clear()      # a pause starts the sequence over
+					_emit(&"combo_reset")
+				if b_state == B.STAGGER:
+					b_state = B.RECOVER
 			if b_t <= 0.0:
 				_end_opening()
 				_go_idle()
@@ -558,7 +615,13 @@ func _resolve_strike() -> void:
 			_gain_surge(4.0)
 			habits.block += 1.0
 			stats.blocks += 1
-			var cost: float = float(a.guard) * (1.0 - float(pl.block_eff))
+			# a block raised at the last instant turns the blow for free and rattles the attacker
+			var timed: bool = time - p_block_since <= PERFECT_BLOCK * assist
+			var cost: float = 0.0 if timed else float(a.guard) * (1.0 - float(pl.block_eff))
+			if timed:
+				perfect = true
+				stats["perfect_blocks"] = int(stats.get("perfect_blocks", 0)) + 1
+				_gain_surge(8.0)
 			var broke: bool = pl.stamina - cost <= 0.0
 			_spend(cost)
 			_apply_element(a, 0.5)
@@ -570,7 +633,8 @@ func _resolve_strike() -> void:
 				if p_state != P.DEAD:
 					_set_p(P.STUN, STUN_TIME)
 			else:
-				_damage_player(dmg * 0.08 * (1.0 - float(pl.block_eff)), true)
+				if not timed:
+					_damage_player(dmg * 0.08 * (1.0 - float(pl.block_eff)), true)
 		"hit":
 			_gain_surge(9.0)
 			p_parry = {}
@@ -600,6 +664,9 @@ func _resolve_strike() -> void:
 	var rec: float = float(b_combo.recover) / speed()
 	if result == "dodged" and perfect:
 		rec += 0.6
+	if result == "blocked" and perfect:
+		_add_posture(12.0)
+	opening_from = "dodge" if result == "dodged" else ("parry" if result == "parried" else "")
 	if b_combo.get("retreat", false):
 		b_far = true
 		_emit(&"boss_retreat")

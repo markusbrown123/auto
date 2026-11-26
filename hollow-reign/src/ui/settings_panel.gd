@@ -10,6 +10,7 @@ const ROWS := [
 	["voice", "Voices", "slider", ""],
 	["haptics", "Haptics", "toggle", "Vibration on impacts"],
 	["shake", "Camera shake", "slider", ""],
+	["pad_opacity", "Control visibility", "slider", "How visible the dodge and shield buttons are at rest. Zero hides them; they still work."],
 	["hints", "Combat prompts", "toggle", "Show the parry direction and timing ring"],
 	["assist", "Forgiving timing", "toggle", "Widens parry and dodge windows by 30%"],
 	["reduce_flash", "Reduce flashes", "toggle", "Softens full-screen hit flashes"],

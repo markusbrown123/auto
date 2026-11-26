@@ -139,6 +139,7 @@ func drive(j: Dictionary) -> Dictionary:
 	var head_rot: Basis = chest_rot * conv.call(j.head_rot)
 	_pose_bone("Neck", Basis(cq.slerp(head_rot.get_rotation_quaternion(), 0.5)) * rest["Neck"].basis, _fk_origin("Neck"))
 	_pose_bone("Head", head_rot * rest["Head"].basis, _fk_origin("Head"))
+	_overlay(false)
 	# arms: elbows fall outward and down
 	var hr := _limb("RightArm", "RightForeArm", "RightHand", to_skel * j.hand_r, q * Vector3(0.7, -0.8, 0.35))
 	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", to_skel * j.hand_l, q * Vector3(-0.7, -0.8, 0.35))
@@ -147,7 +148,74 @@ func drive(j: Dictionary) -> Dictionary:
 		var ankle := _limb(side[0] + "UpLeg", side[0] + "Leg", side[0] + "Foot", to_skel * j["ankle_" + side[1]], q * Vector3(side[2], 0.1, -1))
 		_pose_bone(side[0] + "Foot", rest[side[0] + "Foot"].basis, ankle)
 	var back := to_skel.affine_inverse()
+	if clip_full and clip_w > 0.0:
+		# whole-body clips (falling, dying) carry the arms too; the weapons follow the real hands
+		_overlay(true)
+		hr = skel.get_bone_global_pose(bone["RightHand"]).origin
+		hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
 	return {"r": back * _palm("Right", hr), "l": back * _palm("Left", hl)}
+
+# ---------------------------------------------------------------- authored clips
+## Authored skeletal motion (assets/anim/humanoid.res) layered over the procedural pose.
+## The rig sets these each frame; weight 0 leaves the procedural pose untouched.
+var clip := ""
+var clip_t := 0.0
+var clip_w := 0.0
+var clip_full := false        # false: body and legs only, sword and shield arms stay on IK
+static var _lib: AnimationLibrary
+static var _lib_rest: Dictionary
+static var _tracks: Dictionary = {}      # clip -> {bone: track index}, plus "_pos" for the hip position
+const ARM_BONES := ["Shoulder", "Arm", "ForeArm", "Hand"]
+
+static func has_clip(n: String) -> bool:
+	if _lib == null and ResourceLoader.exists("res://assets/anim/humanoid.res"):
+		_lib = load("res://assets/anim/humanoid.res")
+		_lib_rest = _lib.get_meta("rest", {})
+	return _lib != null and _lib.has_animation(n)
+
+static func clip_length(n: String) -> float:
+	return _lib.get_animation(n).length if has_clip(n) else 0.0
+
+func _is_arm(b: String) -> bool:
+	return b.begins_with("Left") or b.begins_with("Right") if (b.contains("Hand") or b.contains("Arm") or b.contains("Shoulder")) else false
+
+func _overlay(arms: bool) -> void:
+	if clip_w <= 0.0 or not has_clip(clip):
+		return
+	var a: Animation = _lib.get_animation(clip)
+	if not _tracks.has(clip):
+		var m := {}
+		for t in a.get_track_count():
+			var b := str(a.track_get_path(t)).get_slice(":", 1)
+			if a.track_get_type(t) == Animation.TYPE_POSITION_3D:
+				m["_pos"] = t
+			else:
+				m[b] = t
+		_tracks[clip] = m
+	var map: Dictionary = _tracks[clip]
+	var t := fposmod(clip_t, a.length) if a.loop_mode != Animation.LOOP_NONE else clampf(clip_t, 0.0, a.length)
+	for b in map:
+		if b == "_pos" or not bone.has(b) or _is_arm(b) != arms:
+			continue
+		var i: int = bone[b]
+		var q: Quaternion = a.rotation_track_interpolate(map[b], t)
+		# carry the motion across skeletons with different rest poses as a change from rest
+		if _lib_rest.has(b):
+			q = skel.get_bone_rest(i).basis.get_rotation_quaternion() * (_lib_rest[b] as Transform3D).basis.get_rotation_quaternion().inverse() * q
+		skel.set_bone_pose_rotation(i, skel.get_bone_pose_rotation(i).slerp(q, clip_w))
+	if not arms and map.has("_pos") and _lib_rest.has("Hips"):
+		# hip height (and, for whole-body clips, travel) scaled to this skeleton's leg length
+		var src: Vector3 = (_lib_rest["Hips"] as Transform3D).origin
+		var k: float = rest["Hips"].origin.y / maxf(src.y, 0.001)
+		var d: Vector3 = (a.position_track_interpolate(map["_pos"], t) - (src if not clip_full else a.position_track_interpolate(map["_pos"], 0.0))) * k
+		if not clip_full:
+			d.x = 0.0
+			d.z = 0.0
+		var i2: int = bone["Hips"]
+		var base: Vector3 = skel.get_bone_pose_position(i2)
+		if clip_full:
+			base = base.lerp(Vector3(base.x, rest["Hips"].origin.y + (a.position_track_interpolate(map["_pos"], 0.0).y - src.y) * k, base.z), clip_w)
+		skel.set_bone_pose_position(i2, base + d * clip_w)
 
 ## The grip sits in the palm, not at the wrist.
 func _palm(side: String, wrist: Vector3) -> Vector3:

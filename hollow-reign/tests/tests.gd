@@ -13,7 +13,10 @@ func ok(cond: bool, what: String) -> void:
 func mk(foe: String, seed_value: int = 7, profile: Dictionary = {}, opts: Dictionary = {}) -> DuelSim:
 	var p: Dictionary = profile if not profile.is_empty() else Game.default_profile()
 	var s := DuelSim.new()
-	s.setup(Stats.compute(p, Db.items, Db.classes), Db.foes[foe], seed_value, opts)
+	var o := opts.duplicate()
+	if not o.has("combos"):
+		o["combos"] = Db.combos
+	s.setup(Stats.compute(p, Db.items, Db.classes), Db.foes[foe], seed_value, o)
 	return s
 
 func run_for(s: DuelSim, t: float, bot: DuelBot = null) -> void:
@@ -383,19 +386,68 @@ func t_meters_combos() -> void:
 	ok(not s.input_relic(), "relic is not wasted at full health")
 	s.pl.hp = 20.0
 	ok(s.input_relic() and is_equal_approx(s.pl.hp, 20.0 + s.pl.max_hp * 0.35) and s.relic == 0.0, "relic heals 35% and empties")
-	# named combos
+	# the combo library
 	s = mk("ashen_sentinel")
-	s.b_state = DuelSim.B.RECOVER; s.b_t = 9.0
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 30.0
 	var hits: Array = []
 	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
-	for d in ["L", "R", "L"]:
-		s.input_swipe(d); run_for(s, 0.3)
-	ok(hits.size() == 3 and hits[2].named == "Cross Cut" and hits[0].named == "", "left-right-left is a Cross Cut")
-	ok(hits[2].dmg > hits[1].dmg * 1.4, "the named blow lands much harder")
-	for d in ["U", "D", "U"]:
-		s.input_swipe(d); run_for(s, 0.3)
-	ok(hits.size() == 6 and hits[5].named == "Hammerfall", "up-down-up is a Hammerfall")
-	ok(s.stats.named == 2, "named combos are counted")
+	for d in ["L", "R"]:
+		s.input_swipe(d); run_for(s, 0.4)
+	ok(hits.size() == 2 and hits[1].named == "Double Slash" and hits[1].combo_id == "double_slash" and hits[0].named == "", "left-right is a Double Slash")
+	ok(hits[1].dmg > hits[0].dmg * 1.15, "the finishing cut lands harder")
+	s = mk("ashen_sentinel"); hits.clear()
+	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 30.0
+	var post: float = s.b_posture
+	for d in ["R", "L", "D"]:
+		s.input_swipe(d); run_for(s, 0.4)
+	ok(hits.size() == 3 and hits[2].named == "Armor Splitter", "right-left-down is an Armor Splitter")
+	ok(s.b_posture - post >= 30.0 or s.b_state == DuelSim.B.STAGGER, "Armor Splitter cracks posture")
+	s = mk("ashen_sentinel"); hits.clear()
+	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 30.0
+	for d in ["U", "D", "D"]:
+		s.input_swipe(d); run_for(s, 0.4)
+	ok(hits.size() == 3 and hits[2].named == "Falling Crown" and hits[2].dmg > hits[1].dmg * 1.5, "a combo may repeat a cut without the glancing penalty")
+	s = mk("ashen_sentinel"); hits.clear()
+	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 30.0
+	for d in ["D", "D"]:
+		s.input_swipe(d); run_for(s, 0.4)
+	ok(hits.size() == 2 and hits[1].named == "" and hits[1].dmg < hits[0].dmg * 0.6, "the same cut twice still glances when no combo calls for it")
+	ok(s.stats.named == 0, "unnamed cuts are not counted as combos")
+	var ids: Array = s.combos.map(func(c): return c.id)
+	ok(ids.has("riposte") and not ids.has("twin_fang") and not ids.has("colossus"), "a sword knows sword combos only")
+	for c in Db.combos:
+		ok(c.seq.size() >= 2 and c.seq.all(func(x): return DuelSim.DIRS.has(x)), "%s is a valid sequence" % c.id)
+		for other in Db.combos:
+			ok(other.id == c.id or other.seq != c.seq, "%s and %s differ" % [c.id, other.id])
+	ok(Db.combos.size() >= 12 and Db.combos.size() <= 20, "twelve to twenty combos")
+	# discovery
+	Game.new_game("#123456")
+	var before: int = Game.profile.combos.size()
+	ok(Game.profile.combos.has("double_slash"), "Double Slash is known from the start")
+	ok(Game.use_combo("armor_splitter") and not Game.use_combo("armor_splitter"), "a combo is discovered once")
+	ok(Game.profile.combos.size() == before + 1 and int(Game.profile.combo_uses.armor_splitter) == 2, "uses are counted")
+	# timed block
+	s = _find("ashen_sentinel", func(a): return not a.unblockable)
+	to_impact(s, 0.1)
+	var stam: float = s.pl.stamina
+	var hp2: float = s.pl.hp
+	s.input_block(true)
+	run_for(s, 0.2)
+	ok(int(s.stats.get("perfect_blocks", 0)) == 1 and s.pl.stamina >= stam and s.pl.hp == hp2, "a block raised at the last instant costs nothing")
+	# training ground
+	s = mk("ashen_sentinel", 7, {}, {"training": true})
+	hits.clear()
+	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	run_for(s, 20.0)
+	ok(s.b_state == DuelSim.B.RECOVER and s.pl.hp == s.pl.max_hp and not s.over, "the training foe only stands open")
+	for d in ["L", "R"]:
+		s.input_swipe(d); run_for(s, 0.4)
+	ok(hits.size() == 2 and hits[1].named == "Double Slash" and not s.over, "combos land in training and nothing dies")
+	run_for(s, 2.0)
+	ok(s.p_hist.is_empty(), "a pause in training starts the sequence over")
 
 # ------------------------------------------------------------------ seams, drain, revival
 func t_seams() -> void:

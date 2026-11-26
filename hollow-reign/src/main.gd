@@ -92,7 +92,16 @@ func show_sanctuary() -> void:
 		Game.start_run(region, shortcut)
 		_fade_then(show_stage))
 	s.quit_to_title.connect(func(): _fade_then(show_title))
+	s.train.connect(func(): _fade_then(start_training))
 	_swap(s)
+
+## Orren's yard: a foe that only stands open, for finding and practising combos. Nothing is won or lost.
+func start_training() -> void:
+	var d := Duel.new()
+	_swap(d)
+	d.setup("ashen_sentinel", {"training": true})
+	d.hud.pause_pressed.connect(func():
+		Overlays.pause(d, func(): pass, func(): _fade_then(show_sanctuary)))
 
 func show_cine_road() -> void:
 	var c := CineRoad.new()
@@ -232,6 +241,8 @@ func _dev_boot() -> void:
 			if _args.has("tab"):
 				current.sel_slot = _args.get("slot", "weapon")
 				current.show_tab(_args.tab)
+		"training":
+			start_training()
 		"explore":
 			Game.start_run(_args.get("region", "courtyard"))
 			Game.run.stage = int(_args.get("stage", "1"))
@@ -269,6 +280,38 @@ func _dev_boot() -> void:
 				mark.mesh = sm
 				mark.material_override = Look.glow(Color(0.2, 1.0, 0.3), 3.0)
 				holder.add_child(mark)
+		"animtest":
+			# dev: a figure walks across the yard and then falls, to judge the authored clips on any skeleton
+			var st2 := Node3D.new()
+			_swap(st2)
+			var ar := Arena.new()
+			st2.add_child(ar)
+			ar.build("sanctuary")
+			var c2 := Camera3D.new()
+			st2.add_child(c2)
+			c2.position = Vector3(3.2, 1.3, 3.6)
+			c2.fov = 42.0
+			c2.make_current()
+			var k2 := OmniLight3D.new()
+			k2.light_energy = 6.0
+			k2.omni_range = 20.0
+			k2.position = Vector3(2, 4, 5)
+			st2.add_child(k2)
+			var rig := FighterRig.new()
+			st2.add_child(rig)
+			var look: Dictionary = Duel.player_look()
+			if _args.has("model"):
+				look["skin"] = "res://assets/models/%s.glb" % _args.model
+			rig.build(look, false)
+			rig.use_clips = not _args.has("noclips")
+			rig.rotation.y = -PI / 2
+			rig.position = Vector3(-3.0, 0, 0)
+			rig.walking = true
+			c2.look_at(Vector3(0, 1.0, 0))
+			var tw := st2.create_tween()
+			tw.tween_property(rig, "position:x", 1.2, 3.5)
+			tw.tween_interval(0.8)
+			tw.tween_callback(func(): rig.die())
 		"cinewalk":
 			Game.profile.tutorial_done = true
 			Game.settings.cine_road = true

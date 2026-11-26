@@ -479,6 +479,14 @@ B.append(dict(id="devourer", name="The Devourer of Names", title="First of the S
    C("fade",2,[A("R",0.65,28,kind="sweep")],0.4,retreat=True),
    C("swoop",3,[A("D",0.8,38,drain=True,kind="lunge")],1.2,range="far"),
   ])]))
+# How each foe moves between blows: how fast it circles (radians/second) and how far off it likes to stand (metres).
+FOOT_BY_CLS = {"Humanoid": (0.10, 0.7), "Heavy": (0.05, 0.9), "Giant": (0.035, 1.1), "Twin-Bladed": (0.34, 0.55), "Double-Weapon": (0.18, 1.0),
+               "Monstrosity": (0.26, 0.9), "Soul-Eater": (0.22, 1.0)}
+FOOT_BY_ID = {"ashen_sentinel": (0.07, 0.9), "hollow_executioner": (0.05, 0.8), "crimson_widow": (0.46, 0.5), "cathedral_beast": (0.24, 1.0),
+              "gravewarden": (0.04, 1.3), "frostbound_king": (0.08, 1.0), "pale_huntsman": (0.36, 1.3), "forgotten_monarch": (0.20, 0.8), "devourer": (0.30, 1.1)}
+for f in B:
+    c, k = FOOT_BY_ID.get(f["id"], FOOT_BY_CLS.get(f.get("cls", ""), (0.08, 0.7)))
+    f["footwork"] = {"circle": c, "keep": k}
 for f in B:
     if "cls" not in f:
         f["cls"] = "Wyrm" if f["rig"].get("kind") == "dragon" else ("Soul-Eater" if f["rig"].get("wraith") else "Guardian")

@@ -577,7 +577,12 @@ var walking := false
 var _walk_phase := 0.0
 var _walk_amount := 0.0       # 0 standing .. 1 full stride, eased so starts and stops are not abrupt
 var _last_world := Vector3.ZERO
+var _prev_world := Vector3.ZERO
+var _step_dir := Vector3(0, 0, -1)   # which way the feet are travelling, in the rig's own space
+var combat_steps := false            # in a duel: short steps in any direction, guard kept up
 const STRIDE := 0.78          # metres per step
+const WALK_CYCLES := 1.0      # full left-right cycles in the authored walk clip
+var use_clips := true         # authored skeletal clips over the procedural pose, where the skeleton suits them
 
 ## When filming clips every idle oscillation is snapped to a harmonic of
 ## `loop_period`, so the pose at the end of a loop equals the pose at its start.
@@ -597,7 +602,13 @@ func _process(delta: float) -> void:
 	var moved := global_position.distance_to(_last_world) / maxf(scale.x, 0.01)
 	_last_world = global_position
 	if walking and moved < 1.0:
-		_walk_phase += moved / STRIDE * PI
+		_walk_phase += moved / (STRIDE * (0.62 if combat_steps else 1.0)) * PI
+		if moved > 0.0004:
+			var local := global_transform.basis.inverse() * (global_position - _prev_world)
+			local.y = 0.0
+			if local.length() > 0.00001:
+				_step_dir = _step_dir.lerp(local.normalized(), 0.25).normalized()
+	_prev_world = global_position
 	_walk_amount = lerpf(_walk_amount, 1.0 if (walking and moved > 0.0005) else 0.0, 1.0 - exp(-dt * 7.0))
 	_solve(dt)
 
@@ -741,7 +752,11 @@ func _solve(dt: float) -> void:
 			twist_t = 0.3 * _death_dir
 			crouch_t = lerpf(0.2, 0.72, fall)
 			_root_target = Vector3(0, 0, 0.3)
-	if _walk_amount > 0.01 and mode == Mode.GUARD:
+	if _walk_amount > 0.01 and combat_steps:
+		# fighting footwork: the guard stays up, the body sinks and sways a little into each step
+		crouch_t += 0.03 * _walk_amount * absf(cos(_walk_phase))
+		twist_t += 0.05 * _walk_amount * sin(_walk_phase)
+	elif _walk_amount > 0.01 and mode == Mode.GUARD:
 		# sword carried low at the side, shoulders counter-swinging against the legs
 		var w := _walk_amount
 		var sw := sin(_walk_phase)
@@ -831,15 +846,31 @@ func _pose() -> void:
 	if _walk_amount > 0.01:
 		# each foot: planted and sliding back under the body for half the cycle, lifted and swung forward for the other half
 		var w2 := _walk_amount
-		var half := STRIDE * 0.5
-		var narrow := 0.13 * bulk
-		var wr := Vector3(narrow, maxf(0.0, -sin(_walk_phase)) * 0.14, -half * cos(_walk_phase))
-		var wl := Vector3(-narrow, maxf(0.0, sin(_walk_phase)) * 0.14, half * cos(_walk_phase))
+		var half := STRIDE * (0.31 if combat_steps else 0.5)
+		var narrow := (stance if combat_steps else 0.13 * bulk)
+		var lift := 0.09 if combat_steps else 0.14
+		# stride along whichever way the body is travelling: forward, back or sideways
+		var along := _step_dir * half
+		var wr := Vector3(narrow, maxf(0.0, -sin(_walk_phase)) * lift, 0.16 if combat_steps else 0.0) + along * cos(_walk_phase)
+		var wl := Vector3(-narrow, maxf(0.0, sin(_walk_phase)) * lift, -0.2 if combat_steps else 0.0) - along * cos(_walk_phase)
 		f_r = f_r.lerp(wr, w2)
 		f_l = f_l.lerp(wl, w2)
 	_leg("r", pel + Vector3(0.12 * bulk, -0.04, 0), f_r)
 	_leg("l", pel + Vector3(-0.12 * bulk, -0.04, 0), f_l)
 	if skin:
+		# authored motion where it exists: the walk cycle out of combat, and the fall when killed
+		if mode == Mode.DEAD and use_clips and SkinDriver.has_clip("fall"):
+			skin.clip = "fall"
+			skin.clip_full = true
+			skin.clip_t = _t * 1.15
+			skin.clip_w = clampf(_t / 0.18, 0.0, 1.0)
+		elif _walk_amount > 0.01 and not combat_steps and use_clips and SkinDriver.has_clip("walk"):
+			skin.clip = "walk"
+			skin.clip_full = false
+			skin.clip_t = _walk_phase / TAU * SkinDriver.clip_length("walk") / WALK_CYCLES
+			skin.clip_w = _walk_amount
+		else:
+			skin.clip_w = 0.0
 		var hands: Dictionary = skin.drive({"pelvis": pel + Vector3(0, 0.06, 0), "pelvis_rot": Basis.from_euler(pelvis.rotation), "chest_rot": cb,
 			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l})
 		# weapons ride the model's real hands
@@ -847,6 +878,11 @@ func _pose() -> void:
 		weapon_l.position = hands.l
 		if shield:
 			shield.position = hands.l + Vector3(-0.02, 0, -0.07)
+			if mode == Mode.DEAD and skin.clip_w > 0.0:
+				# the shield goes down with the arm and ends flat on the stones
+				var u := clampf(_t / 1.6, 0.0, 1.0)
+				shield.rotation = Vector3(lerpf(0.1, -1.45, u), 0.35, 0.0)
+				shield.position.y = maxf(shield.position.y, 0.06)
 
 func _basis_y(y: Vector3, ref: Vector3) -> Basis:
 	y = y.normalized()

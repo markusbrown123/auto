@@ -18,6 +18,17 @@ class Pad extends Control:
 	var charge := -1.0        # 0..1 draws a filling ring (surge and relic); -1 = plain button
 	var tint := UI.GOLD
 	var _idx := -1
+	var glow := 0.0           # 1 while pressed, fades after release
+	func _process(dt: float) -> void:
+		# near-invisible at rest, fully lit under the thumb, fading back afterwards
+		glow = 1.0 if held else maxf(0.0, glow - dt * 2.2)
+		var rest: float = float(Game.settings.get("pad_opacity", 0.2))
+		if charge >= 1.0:
+			rest = maxf(rest, 0.8)      # a full burst or flame announces itself
+		var a := lerpf(rest, 1.0, glow * glow * (3.0 - 2.0 * glow))
+		if not is_equal_approx(a, modulate.a) or glow > 0.0:
+			modulate.a = a
+			queue_redraw()
 	func _init(kind: String, diameter: float) -> void:
 		icon = kind
 		custom_minimum_size = Vector2(diameter, diameter)
@@ -45,6 +56,9 @@ class Pad extends Control:
 		var r := size.x * 0.5 - 2.0
 		draw_circle(c, r, Color(0.04, 0.04, 0.05, 0.62 if not held else 0.85))
 		draw_arc(c, r, 0, TAU, 48, UI.GOLD if held else UI.GOLD_DIM, 2.0, true)
+		if glow > 0.0:
+			draw_arc(c, r - 3.0, 0, TAU, 48, Color(UI.GOLD.r, UI.GOLD.g, UI.GOLD.b, 0.45 * glow), 6.0, true)
+			draw_circle(c, r - 6.0, Color(UI.GOLD.r, UI.GOLD.g, UI.GOLD.b, 0.12 * glow))
 		var col := UI.GOLD if held else UI.BONE
 		if charge >= 0.0:
 			var full := charge >= 1.0
@@ -399,6 +413,33 @@ func update_bars(sim: DuelSim, dt: float) -> void:
 		st = "BURNING"
 	status_label.text = st
 	status_label.add_theme_color_override("font_color", UI.FROST if sim.p_burn <= 0.0 or sim.p_frostbite > 0.0 else Color("#ff8a3a"))
+
+## Training ground: the cuts made so far, and the name of whatever they completed.
+var _train_seq: SeqView
+var _train_name: Label
+func show_training() -> void:
+	var v := VBoxContainer.new()
+	v.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	v.anchor_left = 0.0
+	v.anchor_right = 1.0
+	v.offset_top = 150
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(v)
+	var head := UI.label("TRAINING GROUND  ·  cut freely, pause to leave", 15, UI.DIM)
+	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(head)
+	_train_seq = SeqView.new([], 34.0, UI.BONE)
+	_train_seq.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	v.add_child(_train_seq)
+	_train_name = UI.label("", 18, UI.GOLD, "bold")
+	_train_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(_train_name)
+
+func training_cuts(cuts: Array, named: String) -> void:
+	if _train_seq:
+		_train_seq.show_seq(cuts)
+		_train_name.text = named
 
 func toast(text: String, color: Color = UI.GOLD, hold: float = 0.7) -> void:
 	toast_label.text = text

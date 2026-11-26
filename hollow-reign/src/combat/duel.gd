@@ -35,6 +35,20 @@ var _intro_card: Control
 var _noise := FastNoiseLite.new()
 var _sparks: Array = []
 var _result_sent := false
+## Footwork. The fighters stand on a line through the arena's centre; the line turns as they circle,
+## and each has an offset along it for advancing, giving ground and being driven back.
+var ring := 0.0
+var ring_cam := 0.0
+var ring_dir := 1.0
+var f_back := 0.6
+var f_back_t := 0.6
+var p_back := 0.0
+var p_back_t := 0.0
+var p_side := 0.0             # sideways distance the knight is off the line, mid-sidestep
+var p_side_owed := 0.0        # sidestep still to be taken
+var training := false
+var foot := {"circle": 0.08, "keep": 0.7}
+var _can_step := true
 var _voice_key := ""
 const VOICE_KEYS := {"ashen_sentinel": "sentinel", "hollow_executioner": "executioner", "pale_huntsman": "huntsman", "crimson_widow": "widow",
 	"cathedral_beast": "beast", "gravewarden": "gravewarden", "frostbound_king": "frostking", "cinder_wyrm": "wyrm", "devourer": "devourer", "forgotten_monarch": "monarch"}
@@ -69,6 +83,14 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	foe_rig.build(foe_look, true)
 	foe_rig.position = Vector3(0, 0, -gap * 0.5)
 	foe_rig.rotation.y = PI
+	foot = foe.get("footwork", foot)
+	_can_step = foe_rig is FighterRig
+	if _can_step:
+		for r in [player_rig, foe_rig]:
+			r.walking = true
+			r.combat_steps = true
+		f_back = float(foot.keep)
+		f_back_t = f_back
 
 	var key := SpotLight3D.new()
 	key.light_color = Color(arena.theme.sun).lerp(Color.WHITE, 0.5)
@@ -99,6 +121,8 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 
 	var o := opts.duplicate()
 	o["assist"] = 1.3 if Game.settings.assist else 1.0
+	o["combos"] = Db.combos
+	training = bool(opts.get("training", false))
 	sim.setup(Game.stats(), foe, int(opts.get("seed", 0)), o)
 	sim.ev.connect(_on_ev)
 	if opts.get("autoplay", false):
@@ -106,7 +130,9 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	Sfx.ambience(str(region.amb))
 	Sfx.music_for("boss_" + foe_id, str(foe.music))
 	_noise.frequency = 2.0
-	_begin_intro(bool(opts.get("skip_intro", false)))
+	_begin_intro(bool(opts.get("skip_intro", false)) or training)
+	if training:
+		hud.show_training()
 
 ## Weapons that share another weapon's model, recoloured (their own concept could not be generated).
 const MODEL_ALIAS := {"w_censer_sword": ["w_vigil_edge", "#e0b060"], "w_monarch": ["w_starfall", "#f0d080"],
@@ -289,8 +315,48 @@ func _process(delta: float) -> void:
 		Stage.DEATH:
 			if _stage_t > 3.0:
 				_finish(false)
+	_footwork(delta * ts)
 	_camera(delta)
 	_trauma = maxf(0.0, _trauma - delta * 1.8)
+
+## Moves the pair: circling while the foe looks for an opening, stepping in to strike, giving ground when hurt.
+func _footwork(dt: float) -> void:
+	if not _can_step:
+		return
+	if stage == Stage.FIGHT:
+		var late := 1.5 if sim.b_phase >= 1 else 1.0
+		match sim.b_state:
+			DuelSim.B.IDLE:
+				# prowling: turn about the player, holding its preferred distance
+				ring += ring_dir * float(foot.circle) * late * dt
+				f_back_t = (1.7 if sim.b_far else float(foot.keep) / late)
+			DuelSim.B.WINDUP:
+				f_back_t = -0.15 if str(sim.b_attack.get("kind", "")) in ["lunge", "thrust"] else 0.05
+			DuelSim.B.RECOVER:
+				f_back_t = 1.7 if sim.b_far else 0.1
+			DuelSim.B.SHIFT:
+				f_back_t = 1.2
+		p_back_t = lerpf(p_back_t, 0.0, 1.0 - exp(-dt * 1.6))
+		f_back_t = minf(f_back_t, 2.2)
+	f_back = lerpf(f_back, f_back_t, 1.0 - exp(-dt * (5.0 if f_back_t < f_back else 3.0)))
+	p_back = lerpf(p_back, p_back_t, 1.0 - exp(-dt * 6.0))
+	# sidestep: the knight leaves the line quickly, then the line swings round to where they now stand,
+	# so the foe has to turn to find them and the camera follows the new angle
+	var step := p_side_owed * (1.0 - exp(-dt * 14.0))
+	p_side_owed -= step
+	p_side += step
+	var turn := p_side * (1.0 - exp(-dt * 3.2))
+	p_side -= turn
+	ring += turn / (gap * 0.5 + 1.0)
+	ring_cam = lerp_angle(ring_cam, ring, 1.0 - exp(-dt * 2.2))
+	var axis := Vector3(sin(ring), 0, cos(ring))
+	var perp := Vector3(cos(ring), 0, -sin(ring))
+	player_rig.position = axis * (gap * 0.5 + p_back) + perp * p_side
+	foe_rig.position = -axis * (gap * 0.5 + f_back)
+	var to_foe: Vector3 = foe_rig.position - player_rig.position
+	player_rig.rotation.y = atan2(-to_foe.x, -to_foe.z)
+	# the foe turns to face at its own pace: heavy things are slow to come about
+	foe_rig.rotation.y = lerp_angle(foe_rig.rotation.y, atan2(to_foe.x, to_foe.z), 1.0 - exp(-dt * 7.0))
 
 func _finish(won: bool) -> void:
 	if _result_sent:
@@ -351,9 +417,11 @@ func _camera(delta: float) -> void:
 	var k := 1.0 - exp(-delta * rate)
 	if _cam_pos == Vector3.ZERO:
 		k = 1.0
-	_cam_pos = _cam_pos.lerp(pos, k)
-	_cam_look = _cam_look.lerp(look, k)
 	cam.fov = lerpf(cam.fov, fov, k)
+	# the camera rides the fight's turning axis, a little behind it
+	var turn := Basis(Vector3.UP, ring_cam)
+	_cam_pos = _cam_pos.lerp(turn * pos, k)
+	_cam_look = _cam_look.lerp(turn * look, k)
 	var shake := _trauma * _trauma * float(Game.settings.shake)
 	var off := Vector3(_noise.get_noise_2d(_clock * 60.0, 0.0), _noise.get_noise_2d(0.0, _clock * 60.0), 0) * 0.16 * shake
 	cam.position = _cam_pos + off
@@ -436,15 +504,22 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				Sfx.play("roar", -9.0, 1.1)
 		&"boss_strike":
 			_on_strike(d)
+		&"boss_combo":
+			if randf() < 0.5:
+				ring_dir = -ring_dir       # comes at you from the other side
 		&"player_swing":
+			p_back_t = -0.3                # step into the cut
 			player_rig.swing(DuelSim.dir_vec(d.dir), d.time)
 			Sfx.play("swing", -4.0, 1.25 - float(d.time) * 0.8)
 		&"player_parry_swing":
 			player_rig.parry(DuelSim.dir_vec(d.dir))
 			Sfx.play("swing", -9.0, 1.3)
 		&"player_dodge":
+			p_side_owed += float(d.side) * 1.25     # a real step across the ground, not a lean
 			player_rig.dodge(float(d.side))
 			Sfx.play("dodge", -3.0)
+		&"combo_reset":
+			hud.training_cuts([], "")
 		&"player_advance":
 			Sfx.play("footstep", -4.0)
 		&"exhausted":
@@ -472,6 +547,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			sparks(player_rig.chest_point(), Vector3.UP, 30, Color(0.5, 0.85, 1.0), 3.0)
 			player_rig.flash(0.6)
 		&"boss_hit":
+			f_back_t = minf(f_back_t + 0.16, 1.5)      # each blow drives it back a pace
+			f_back += 0.05
 			var at: Vector3 = foe_rig.chest_point() + Vector3(randf_range(-0.2, 0.2), randf_range(-0.2, 0.3), 0.35)
 			var crit: bool = d.get("crit", false) or d.get("rift", false)
 			if d.get("rift", false):
@@ -486,8 +563,14 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			shake(0.22 if crit else 0.12)
 			Game.haptic(18 if crit else 10, 0.5)
 			hud.combo(int(d.get("combo", 1)))
+			if training:
+				hud.training_cuts(sim.p_hist.slice(maxi(0, sim.p_hist.size() - 5)), str(d.get("named", "")))
 			if str(d.get("named", "")) != "":
-				hud.toast(str(d.named).to_upper(), UI.BONE, 0.7)
+				if Game.use_combo(str(d.get("combo_id", ""))):
+					hud.toast("DISCOVERED  ·  " + str(d.named).to_upper(), UI.GOLD, 1.6)
+					Sfx.play("parry_perfect", -4.0, 0.8)
+				else:
+					hud.toast(str(d.named).to_upper(), UI.BONE, 0.7)
 				Sfx.play("clash", -3.0, 0.8)
 				shake(0.25)
 				hitstop(0.09)
@@ -497,6 +580,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			foe_rig.flash(0.25)
 			shake(0.08)
 		&"boss_stagger":
+			f_back_t = 1.0                 # reels away; the player follows in
+			p_back_t = -0.55
 			foe_rig.stagger()
 			hud.cue.clear()
 			_set_foe_blade_warning(false)
@@ -507,16 +592,20 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				_slow = 0.35
 		&"boss_recover":
 			foe_rig.recover()
-			foe_rig.set_far(d.far)
+			if not _can_step:
+				foe_rig.set_far(d.far)
 			_set_foe_blade_warning(false)
 		&"boss_idle":
 			foe_rig.guard()
-			foe_rig.set_far(d.far)
+			if not _can_step:
+				foe_rig.set_far(d.far)
 		&"boss_retreat":
-			foe_rig.set_far(true)
+			if not _can_step:
+				foe_rig.set_far(true)
 			Sfx.play("dodge", -6.0, 0.8)
 		&"boss_close":
-			foe_rig.set_far(false)
+			if not _can_step:
+				foe_rig.set_far(false)
 		&"phase_change":
 			foe_rig.roar()
 			hud.cue.clear()
@@ -574,12 +663,14 @@ func _on_strike(d: Dictionary) -> void:
 				Game.haptic(15, 0.4)
 		"blocked":
 			sparks(meet, Vector3(0, 0.5, 1), 8, Color(1, 0.8, 0.6), 3.5)
+			p_back_t = 0.75 if heavy else 0.4          # the blow shoves the player back across the stones
 			Sfx.play("block", 0.0)
 			shake(0.3 if heavy else 0.18)
 			hitstop(0.04)
 			Game.haptic(22, 0.6)
 		"guard_break":
 			sparks(meet, Vector3(0, 0.5, 1), 20, Color(1, 0.7, 0.4), 5.0)
+			p_back_t = 1.1
 			Sfx.play("guard_break", 0.0)
 			player_rig.hurt()
 			player_rig.blocking = false
@@ -590,6 +681,7 @@ func _on_strike(d: Dictionary) -> void:
 			Game.haptic(70, 1.0)
 		"hit":
 			sparks(player_rig.chest_point(), Vector3(0, 0.6, 1), 14, Color(0.8, 0.12, 0.08), 4.0)
+			p_back_t = 0.95 if heavy else 0.55
 			Sfx.play("hit_armor", 0.0, 0.9)
 			Sfx.play("hit_flesh", -2.0)
 			player_rig.hurt()

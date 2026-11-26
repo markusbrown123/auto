@@ -38,6 +38,15 @@ What that changes:
 - **Second reel:** `marketing/audition/casting_v2/` (`tools/voice_reel.py`). The script itself (`data/dialogue.json`) is to be rewritten in this cadence once a cast is chosen, then recorded.
 - **Limit:** voices are chosen by measured pitch and pace, not by ear, and the catalogue gives no gender. A candidate may be the wrong sex for a role; that is for the listener to reject.
 
+## Owner's direction, refined (later on 2026-11-26)
+"Echo, not too much. Deep. Maybe Swedish, Irish, Australian accents, but realistic for an old European world. Not super-AI voices."
+- **Accent:** regional and northern-European colour rather than neutral narrator English: Scottish, Irish, northern English, Scandinavian or other continental accents in English. An accent has to sound like a person from somewhere, not a put-on.
+- **Depth:** from the voice itself. No pitch shifting.
+- **Room:** a short stone-room reflection on every speaking character, kept low (two early echoes, quiet). Guardians' helm effect stays minimal.
+- **Naturalness first:** if a take sounds synthetic it is rejected however deep it is.
+- **Tooling:** the anonymous preset voices carry no accent information, so the fourth reel uses the Inworld speech model, whose voices are named individuals (several regional by name) and include Dutch, German and Russian voices that are tried reading English. Swedish and Australian voices are not offered by name on either model; the nearest available are used and labelled. `tools/voice_reel_inworld.py`, output `marketing/audition/casting_v4/`.
+- **Still true:** nobody in the build environment can hear any of this. Accent labels on the reel are guesses from voice names.
+
 ## Direction notes for generation
 - Lower `stability` (0.30–0.40) for Lyra, Orren, Widow, Monarch, Devourer: they need movement in the line. Higher (0.60–0.75) for Sentinel, Executioner, Archivist, Gravewarden: flatness is the character.
 - Punctuate for breath, not grammar: short sentences, em dashes for held pauses, ellipses only where a thought fails.

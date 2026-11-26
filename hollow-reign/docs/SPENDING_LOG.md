@@ -83,3 +83,7 @@ Running total: Tripo ≈ $55.85, Higgsfield ≈ $13.65, combined ≈ **$69.50 of
 
 Running total: Tripo ≈ $56.15, Higgsfield ≈ $14.35, combined ≈ **$70.50 of the original $100 cap**.
 The further $100 the owner reports adding for graphics was not visible on either account when checked (Tripo 9,415 credits, Higgsfield 880 credits, both unchanged), so nothing has been spent against it.
+
+| Fourth audition reel (regional and continental voices, Inworld model): 34 takes + 1 test, 2 credits each; one timed-out take recovered by job id, not regenerated | Higgsfield speech | 70 | about $2.87 |
+
+Running total: Tripo ≈ $56.15, Higgsfield ≈ $17.22, combined ≈ **$73.37 of the original $100 cap**.

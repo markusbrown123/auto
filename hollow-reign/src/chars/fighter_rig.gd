@@ -402,8 +402,15 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 		_weapon_mesh(weapon_r, kind, look)
 		if dual:
 			_weapon_mesh(weapon_l, kind, look)
+	# how far the handle runs below the grip point, and where on it the off hand of a two-handed grip closes
+	var g := float(PropModel.GRIP.get(kind, 0.11))
+	_pommel = weapon_len * g / (1.0 - g) if PropModel.exists(model) and kind != "claws" else 0.14
+	_off_grip = clampf(_pommel * 0.62, 0.1, 0.22)
 	if dual or two_handed:
 		set_shield(null)
+
+var _pommel := 0.14
+var _off_grip := 0.2
 
 func _weapon_mesh(n: Node3D, kind: String, look: Dictionary) -> void:
 	match kind:
@@ -930,7 +937,7 @@ func _pose() -> void:
 	var hl: Vector3
 	var bl := Vector3(_blade.x * -1.0, _blade.y, _blade.z)
 	if two_handed:
-		hl = hr - _blade * 0.2
+		hl = hr - _blade * _off_grip
 	elif dual:
 		hl = Vector3(-_hand.x, _hand.y - 0.04, _hand.z + 0.05)
 		if mode == Mode.STRIKE:
@@ -982,18 +989,129 @@ func _pose() -> void:
 		_pick_clip()
 		if _relic:
 			_relic.position = pel + Vector3(0.19, -0.03, 0.11)      # behind the sword-side hip, where the duel camera sees it; moves with the hips
+		var pinned := _pin_t > 0.0 or _brace_t > 0.0
 		var hands: Dictionary = skin.drive({"pelvis": pel + Vector3(0, 0.06, 0), "pelvis_rot": Basis.from_euler(pelvis.rotation), "chest_rot": cb,
-			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l})
-		# weapons ride the model's real hands
-		weapon_r.position = hands.r
+			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l,
+			"follow_r": 0.0 if _pin_t > 0.0 else 1.0, "follow_l": 0.0 if pinned else 1.0, "settle": true})
+		_fit_props(hands)
+
+## With a generated body: the weapons and shield are fitted to the real hands after the skeleton is posed.
+## The blade is kept out of the wielder's own head, trunk and thighs and off the floor; the hand closes round the
+## handle; the off hand of a two-handed grip is brought onto it; the shield never goes under the floor.
+var _shield_local := Transform3D.IDENTITY      # the shield against the forearm, as last held in guard
+var _whole_w := 0.0
+func _fit_props(hands: Dictionary) -> void:
+	var whole := skin.clip_full and skin.clip_w > 0.0
+	_whole_w = lerpf(_whole_w, 1.0 if whole else 0.0, 0.35)
+	# --- right hand
+	var dir: Vector3 = weapon_r.transform.basis.y
+	var carried := skin.hand_axis("Right")
+	if _whole_w > 0.01 and carried != Vector3.ZERO and _pin_t <= 0.0:
+		# a whole-body clip (a fall, a hit, a roll) throws the arm: the weapon goes with the hand, not with the old aim
+		dir = dir.slerp(carried, _whole_w) if dir.dot(carried) > -0.99 else carried
+	var caps := _body_caps()
+	if _pin_t <= 0.0:
+		dir = _clear_blade(hands.r, dir, weapon_len, caps)
+	dir = _off_floor(hands.r, dir, weapon_len, _pommel)
+	var pr: Vector3 = skin.grip("Right", dir)
+	var dir2 := _off_floor(pr, dir, weapon_len, _pommel)
+	if not dir2.is_equal_approx(dir):
+		dir = dir2
+		pr = skin.grip("Right", dir)
+	weapon_r.transform = Transform3D(_basis_y(dir, Vector3(0, 0, -1) if absf(dir.z) < 0.9 else Vector3.RIGHT), pr)
+	# --- left hand
+	if two_handed:
+		weapon_l.position = pr
+		if mode != Mode.DEAD:
+			skin.reach_hand("Left", pr - dir * _off_grip)
+			skin.grip("Left", dir)
+	elif dual:
+		var dl: Vector3 = weapon_l.transform.basis.y
+		var carried_l := skin.hand_axis("Left")
+		if _whole_w > 0.01 and carried_l != Vector3.ZERO:
+			dl = dl.slerp(carried_l, _whole_w) if dl.dot(carried_l) > -0.99 else carried_l
+		dl = _clear_blade(hands.l, dl, weapon_len, caps)
+		dl = _off_floor(hands.l, dl, weapon_len, _pommel)
+		var pl: Vector3 = skin.grip("Left", dl)
+		weapon_l.transform = Transform3D(_basis_y(dl, Vector3(0, 0, -1) if absf(dl.z) < 0.9 else Vector3.RIGHT), pl)
+	else:
 		weapon_l.position = hands.l
-		if shield:
-			shield.position = hands.l + Vector3(-0.02, 0, -0.07)
-			if mode == Mode.DEAD and skin.clip_w > 0.0:
-				# the shield goes down with the arm and ends flat on the stones
-				var u := clampf(_t / 1.6, 0.0, 1.0)
-				shield.rotation = Vector3(lerpf(0.1, -1.45, u), 0.35, 0.0)
-				shield.position.y = maxf(shield.position.y, 0.06)
+	if shield:
+		var fore := skin.frame("LeftForeArm")
+		var held := Transform3D(shield.transform.basis, hands.l + Vector3(-0.02, 0, -0.07))
+		if _whole_w < 0.01:
+			_shield_local = fore.affine_inverse() * held
+		else:
+			# strapped to the forearm: where a whole-body clip takes the arm, the shield goes
+			held = held.interpolate_with(fore * _shield_local, _whole_w)
+		# the board is kept off the head and trunk: pushed out along its own facing, to the side they are not on
+		var nrm := held.basis.z.normalized()
+		for c2: Array in [caps[0], caps[1]]:
+			var q2: Vector3 = Geometry3D.get_closest_point_to_segment(held.origin, c2[0], c2[1])
+			var l2 := held.affine_inverse() * q2
+			var r2: float = float(c2[2]) + 0.03
+			var d2 := (q2 - held.origin).dot(nrm)
+			if absf(d2) < r2 and l2.x * l2.x / 0.09 + l2.y * l2.y / 0.2 < 1.0:
+				held.origin -= nrm * (r2 - absf(d2)) * (1.0 if d2 >= 0.0 else -1.0)
+		# no part of the rim under the floor
+		var low := 1e9
+		for c: Vector3 in SHIELD_RIM:
+			low = minf(low, (held * c).y)
+		if low < 0.015:
+			held.origin.y += 0.015 - low
+		shield.transform = held
+
+const SHIELD_RIM := [Vector3(0.27, 0.41, 0), Vector3(-0.27, 0.41, 0), Vector3(0.27, -0.41, 0), Vector3(-0.27, -0.41, 0), Vector3(0, -0.41, 0), Vector3(0, 0.41, 0)]
+
+## The wielder's own body as a few capsules [a, b, radius] in rig body space: head, trunk, thighs.
+func _body_caps() -> Array:
+	var head_b: Array = skin.ball("Head")
+	var hips: Vector3 = skin.point("Hips")
+	var neck: Vector3 = skin.point("Neck")
+	var trunk_r: float = minf(float(skin.ball("Hips")[1]), 0.24) * 0.9
+	var out: Array = [[head_b[0], head_b[0], float(head_b[1]) * 1.05], [hips, neck, trunk_r]]
+	for side: String in ["Left", "Right"]:
+		out.append([skin.point(side + "UpLeg"), skin.point(side + "Leg"), trunk_r * 0.5])
+	return out
+
+## Turn a blade about the hand that holds it until it is clear of the body.
+func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Vector3:
+	for pass_i in 2:
+		for c: Array in caps:
+			var from := hand + dir * length * 0.2      # the first part of the blade is at the hand, which may rest on the body
+			var tip := hand + dir * length
+			var a: Vector3 = c[0]
+			var b: Vector3 = c[1]
+			var r: float = c[2]
+			var p: Vector3
+			var q: Vector3
+			if a.is_equal_approx(b):
+				q = a
+				p = Geometry3D.get_closest_point_to_segment(a, from, tip)
+			else:
+				var cp := Geometry3D.get_closest_points_between_segments(from, tip, a, b)
+				p = cp[0]
+				q = cp[1]
+			var d := p.distance_to(q)
+			if d < r:
+				var n := (p - q) / d if d > 0.001 else Vector3(0, 0, -1)
+				var moved := q + n * (r + 0.01)
+				if (moved - hand).length() > 0.05:
+					dir = (moved - hand).normalized()
+	return dir
+
+## Tilt a blade just enough that neither its point nor its pommel is under the floor.
+func _off_floor(hand: Vector3, dir: Vector3, length: float, pommel: float) -> Vector3:
+	var floor_y := 0.02
+	var lo := clampf((floor_y - hand.y) / maxf(length, 0.01), -1.0, 1.0)
+	var hi := clampf((hand.y - floor_y) / maxf(pommel, 0.01), -1.0, 1.0)
+	if dir.y >= lo and dir.y <= hi:
+		return dir
+	var y := clampf(dir.y, lo, maxf(lo, hi))
+	var flat := Vector3(dir.x, 0, dir.z)
+	if flat.length() < 0.001:
+		flat = Vector3(0, 0, -1)
+	return flat.normalized() * sqrt(maxf(1.0 - y * y, 0.0)) + Vector3.UP * y
 
 ## Chooses the authored clip for the body in the current state. The sword and shield arms stay on IK
 ## unless the clip is a whole-body one (falls, hit reactions), so cuts keep the direction that was swiped.

@@ -40,6 +40,7 @@ static func attach(parent: Node3D, path: String) -> SkinDriver:
 			d.root.queue_free()
 			return null
 	d._fit()
+	d._measure(path)
 	d.ok = true
 	return d
 
@@ -107,11 +108,11 @@ func _ik(a: Vector3, b: Vector3, la: float, lb: float, pole: Vector3) -> Vector3
 	var perp := (pole - n * pole.dot(n)).normalized()
 	return a + n * x + perp * h
 
-func _limb(up: String, mid: String, end: String, target: Vector3, pole: Vector3) -> Vector3:
+func _limb(up: String, mid: String, end: String, target: Vector3, pole: Vector3, max_stretch: float = 1.0) -> Vector3:
 	var a := _fk_origin(up)
 	var la: float = (rest[mid].origin - rest[up].origin).length()
 	var lb: float = (rest[end].origin - rest[mid].origin).length()
-	var reach := (target - a).limit_length(la + lb - 0.001)
+	var reach := (target - a).limit_length((la + lb) * max_stretch - 0.001)
 	var t := a + reach
 	var m := _ik(a, t, la, lb, pole)
 	_aim(up, mid, a, m - a)
@@ -120,6 +121,8 @@ func _limb(up: String, mid: String, end: String, target: Vector3, pole: Vector3)
 
 ## `j` holds control points in the parent (rig body) space:
 ## pelvis, pelvis_rot, chest_rot, head_rot (Basis), hand_r, hand_l, ankle_r, ankle_l (Vector3).
+## Optional: follow_r / follow_l (0..1: how far each hand target rides with its shoulder when an authored clip moves the torso),
+## settle (bool: a body that has fallen is lowered onto the floor as well as lifted out of it).
 ## Returns the hands' final positions in that same space: {r, l}.
 func drive(j: Dictionary) -> Dictionary:
 	var to_skel: Transform3D = (root.transform * (root.global_transform.affine_inverse() * skel.global_transform)).affine_inverse()
@@ -138,21 +141,293 @@ func drive(j: Dictionary) -> Dictionary:
 	var head_rot: Basis = chest_rot * conv.call(j.head_rot)
 	_pose_bone("Neck", Basis(cq.slerp(head_rot.get_rotation_quaternion(), 0.5)) * rest["Neck"].basis, _fk_origin("Neck"))
 	_pose_bone("Head", head_rot * rest["Head"].basis, _fk_origin("Head"))
+	var sh_r0 := _fk_origin("RightArm")
+	var sh_l0 := _fk_origin("LeftArm")
 	# legs: knees forward, feet flat
 	for side in [["Right", "r", 0.15], ["Left", "l", -0.15]]:
 		var ankle := _limb(side[0] + "UpLeg", side[0] + "Leg", side[0] + "Foot", to_skel * j["ankle_" + side[1]], q * Vector3(side[2], 0.1, -1))
 		_pose_bone(side[0] + "Foot", rest[side[0] + "Foot"].basis, ankle)
+	var ank0 := {"Right": (to_skel * j.ankle_r).y, "Left": (to_skel * j.ankle_l).y}
+	_clip_ankle.clear()
 	_overlay(false)
-	# arms: elbows fall outward and down
-	var hr := _limb("RightArm", "RightForeArm", "RightHand", to_skel * j.hand_r, q * Vector3(0.7, -0.8, 0.35))
-	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", to_skel * j.hand_l, q * Vector3(-0.7, -0.8, 0.35))
 	var back := to_skel.affine_inverse()
-	if clip_full and clip_w > 0.0:
+	var whole := clip_full and clip_w > 0.0
+	if clip_w > 0.0 and clip_w < 0.98:
+		# A clip mixed in by turning each bone part of the way does not put the feet part of the way: a foot the clip
+		# plants and the procedural pose plants ends up in the air or under the floor. Put each ankle at the height
+		# that lies between the two poses' own heights, and solve the leg again to it.
+		for side: String in _clip_ankle:
+			var fi: int = bone[side + "Foot"]
+			var f := skel.get_bone_global_pose(fi)
+			var want_y := lerpf(float(ank0[side]), float(_clip_ankle[side]), clip_w)
+			if absf(want_y - f.origin.y) > 0.0005:
+				var hip: Vector3 = skel.get_bone_global_pose(bone[side + "UpLeg"]).origin
+				var knee: Vector3 = skel.get_bone_global_pose(bone[side + "Leg"]).origin
+				var pole := knee - hip.lerp(f.origin, 0.5)
+				if pole.length() < 0.02 * (knee - hip).length():
+					pole = q * Vector3(0.15 if side == "Right" else -0.15, 0.1, -1)
+				var o := _limb(side + "UpLeg", side + "Leg", side + "Foot", Vector3(f.origin.x, want_y, f.origin.z), pole)
+				skel.set_bone_global_pose(fi, Transform3D(f.basis, o))
+	_plant(back, q, whole)
+	# arms: elbows fall outward and down. When an authored clip has carried the torso away from where the procedural
+	# pose had it, the hand targets ride with the shoulders, so an arm is neither folded into the chest nor pulled straight.
+	var tr: Vector3 = to_skel * j.hand_r + (_fk_origin("RightArm") - sh_r0) * float(j.get("follow_r", 1.0))
+	var tl: Vector3 = to_skel * j.hand_l + (_fk_origin("LeftArm") - sh_l0) * float(j.get("follow_l", 1.0))
+	var hr := _limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985)
+	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985)
+	if whole:
 		# whole-body clips (falling, dying) carry the arms too; the weapons follow the real hands
 		_overlay(true)
-		hr = skel.get_bone_global_pose(bone["RightHand"]).origin
-		hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
+	_ground(back, q, whole, bool(j.get("settle", false)))
+	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
+	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
+	_back = back
 	return {"r": back * _palm("Right", hr), "l": back * _palm("Left", hl)}
+
+var _back := Transform3D.IDENTITY      # skeleton space -> rig body space, as of the last drive()
+var _clip_ankle := {}                  # "Left"/"Right" -> the ankle's height in the clip's own pose (skeleton space)
+
+## Where a bone is, in rig body space (after drive()).
+func point(name: String) -> Vector3:
+	return _back * skel.get_bone_global_pose(bone[name]).origin
+
+## Move one hand's palm to `target` (rig body space) after the pose is solved: an off hand onto a two-handed grip.
+func reach_hand(side: String, target: Vector3) -> Vector3:
+	var to_skel := _back.affine_inverse()
+	var wrist: Vector3 = skel.get_bone_global_pose(bone[side + "Hand"]).origin
+	var off := _palm(side, wrist) - wrist
+	var pole := to_skel.basis.orthonormalized() * Vector3(0.7 if side == "Right" else -0.7, -0.8, 0.35)
+	var w := _limb(side + "Arm", side + "ForeArm", side + "Hand", to_skel * target - off, pole, 0.985)
+	return _back * _palm(side, w)
+
+# ---------------------------------------------------------------- hands
+var _grip_axis := {}      # side -> [across the palm toward the index finger, along the knuckles, out of the palm] at rest
+
+func _grip_rest(side: String) -> Array:
+	if _grip_axis.has(side):
+		return _grip_axis[side]
+	var out: Array = []
+	if bone.has(side + "HandIndex1") and bone.has(side + "HandPinky1") and bone.has(side + "HandMiddle1"):
+		var t0: Vector3 = (rest[side + "HandIndex1"].origin - rest[side + "HandPinky1"].origin).normalized()
+		var f0: Vector3 = rest[side + "HandMiddle1"].origin - rest[side + "Hand"].origin
+		var hand_len := f0.length()
+		f0 = (f0 - t0 * f0.dot(t0)).normalized()
+		var n0 := t0.cross(f0)
+		if n0.y > 0.0:
+			n0 = -n0          # the palm faces the floor in a T- or A-pose
+		out = [t0, f0, n0, hand_len]
+	_grip_axis[side] = out
+	return out
+
+## Close the hand's frame round a handle that runs along `dir` (rig body space): the handle lies across the palm and
+## leaves it on the thumb side, the knuckles stay as nearly in line with the forearm as that allows.
+## Returns where the handle's grip point is (rig body space).
+func grip(side: String, dir: Vector3) -> Vector3:
+	var hi: int = bone[side + "Hand"]
+	var h := skel.get_bone_global_pose(hi)
+	var ax := _grip_rest(side)
+	if ax.is_empty():
+		return _back * _palm(side, h.origin)
+	var rb: Basis = (rest[side + "Hand"] as Transform3D).basis.orthonormalized()
+	var t1 := (_back.basis.inverse() * dir).normalized()
+	var fore: Vector3 = (h.origin - skel.get_bone_global_pose(bone[side + "ForeArm"]).origin).normalized()
+	var f1 := fore - t1 * fore.dot(t1)
+	if f1.length() < 0.3:
+		# the blade runs nearly along the forearm (a thrust): lean on the hand's present knuckle line as well
+		var cur_f: Vector3 = h.basis.orthonormalized() * (rb.inverse() * (ax[1] as Vector3))
+		f1 += (cur_f - t1 * cur_f.dot(t1)) * (0.3 - f1.length())
+	if f1.length() < 0.001:
+		return _back * _palm(side, h.origin)
+	f1 = f1.normalized()
+	var t0: Vector3 = ax[0]
+	var f0: Vector3 = ax[1]
+	var rot := Basis(t1, f1, t1.cross(f1)) * Basis(t0, f0, t0.cross(f0)).inverse()
+	skel.set_bone_global_pose(hi, Transform3D(rot * rb, h.origin))
+	return _back * (_palm(side, h.origin) + rot * (ax[2] as Vector3) * (float(ax[3]) * 0.3))
+
+## The way a handle held in this hand points (rig body space), from the hand's present pose: for whole-body clips,
+## where the hand is carried by the clip and the weapon must go with it.
+func hand_axis(side: String) -> Vector3:
+	var ax := _grip_rest(side)
+	if ax.is_empty():
+		return Vector3.ZERO
+	var h := skel.get_bone_global_pose(bone[side + "Hand"])
+	return (_back.basis * (h.basis.orthonormalized() * ((rest[side + "Hand"] as Transform3D).basis.orthonormalized().inverse() * (ax[0] as Vector3)))).normalized()
+
+## A bone's frame in rig body space (no scale).
+func frame(name: String) -> Transform3D:
+	var g := skel.get_bone_global_pose(bone[name])
+	return Transform3D((_back.basis.orthonormalized() * g.basis.orthonormalized()), _back * g.origin)
+
+## A rough ball round what the named bone carries: [centre, radius] in rig body space.
+var _ball := {}
+func ball(name: String) -> Array:
+	if not _ball.has(name):
+		var pts: PackedVector3Array = _contact.get(name, PackedVector3Array())
+		var c := Vector3.ZERO
+		for p in pts:
+			c += p / maxf(pts.size(), 1)
+		var mean := 0.0
+		var far := 0.0
+		for p in pts:
+			mean += c.distance_to(p) / maxf(pts.size(), 1)
+			far = maxf(far, c.distance_to(p))
+		_ball[name] = [c, lerpf(mean, far, 0.5)]
+	var e: Array = _ball[name]
+	return [_back * (skel.get_bone_global_pose(bone[name]) * (e[0] as Vector3)), float(e[1]) * _back.basis.get_scale().y]
+
+# ---------------------------------------------------------------- grounding
+## The floor is y = 0 of the rig body space. Nothing the model is made of may go under it.
+## For each bone that can touch the floor, a handful of the outermost points of the mesh it carries are kept in that
+## bone's own space (measured once per model from the real skinned vertices), and tested after the pose is solved.
+const CONTACT_BONES := ["Hips", "Spine2", "Head", "LeftArm", "LeftForeArm", "LeftHand", "RightArm", "RightForeArm", "RightHand",
+	"LeftUpLeg", "LeftLeg", "LeftFoot", "RightUpLeg", "RightLeg", "RightFoot"]
+static var _contact_cache := {}
+var _contact := {}            # short bone name -> PackedVector3Array, bone-local
+
+func _measure(path: String) -> void:
+	if _contact_cache.has(path):
+		_contact = _contact_cache[path]
+		return
+	var group := {}
+	for i in skel.get_bone_count():
+		var b := i
+		var nm := ""
+		while b >= 0:
+			var n := skel.get_bone_name(b)
+			nm = n.get_slice(":", n.get_slice_count(":") - 1).trim_prefix("mixamorig_").trim_prefix("mixamorig")
+			if CONTACT_BONES.has(nm):
+				break
+			nm = ""
+			b = skel.get_bone_parent(b)
+		group[i] = nm
+	var dirs: Array = []
+	for x: float in [-1.0, 0.0, 1.0]:
+		for y: float in [-1.0, 0.0, 1.0]:
+			for z: float in [-1.0, 0.0, 1.0]:
+				var d := Vector3(x, y, z)
+				if d.length() > 0.5 and (d.length() < 1.1 or d.length() > 1.6 or y < 0.0):
+					dirs.append(d.normalized())
+	var best := {}
+	for nm2: String in CONTACT_BONES:
+		var a: Array = []
+		for d2 in dirs:
+			a.append([-1e9, Vector3.ZERO])
+		best[nm2] = a
+	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		if mi.skin == null or mi.mesh == null:
+			continue
+		var binds: Array = []
+		for b2 in mi.skin.get_bind_count():
+			var bi := mi.skin.get_bind_bone(b2)
+			if bi < 0:
+				bi = skel.find_bone(mi.skin.get_bind_name(b2))
+			binds.append([bi, (skel.get_bone_global_rest(bi) * mi.skin.get_bind_pose(b2)) if bi >= 0 else Transform3D.IDENTITY])
+		for s in mi.mesh.get_surface_count():
+			var arr := mi.mesh.surface_get_arrays(s)
+			var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bones = arr[Mesh.ARRAY_BONES]
+			var weights = arr[Mesh.ARRAY_WEIGHTS]
+			if bones == null or weights == null or pos.is_empty():
+				continue
+			var nb: int = bones.size() / pos.size()
+			var step: int = maxi(1, pos.size() / 16000)
+			for i in range(0, pos.size(), step):
+				var top := 0
+				for k in range(1, nb):
+					if weights[i * nb + k] > weights[i * nb + top]:
+						top = k
+				var bind: Array = binds[bones[i * nb + top]]
+				var nm3: String = group.get(int(bind[0]), "")
+				if nm3 == "":
+					continue
+				var p: Vector3 = (bind[1] as Transform3D) * pos[i]      # skeleton space, rest pose
+				var slots: Array = best[nm3]
+				for di in dirs.size():
+					var sc: float = p.dot(dirs[di])
+					if sc > float(slots[di][0]):
+						slots[di] = [sc, p]
+	var out := {}
+	for nm4: String in CONTACT_BONES:
+		var inv: Transform3D = (rest[nm4] as Transform3D).affine_inverse() if rest.has(nm4) else Transform3D.IDENTITY
+		var pts := PackedVector3Array()
+		for e: Array in best[nm4]:
+			if float(e[0]) > -1e8:
+				var lp: Vector3 = inv * (e[1] as Vector3)
+				if not pts.has(lp):
+					pts.append(lp)
+		out[nm4] = pts
+	_contact_cache[path] = out
+	_contact = out
+
+## Lowest point, in rig body space, of what the named bone carries in its present pose.
+func _low(name: String, back: Transform3D) -> float:
+	var pts: PackedVector3Array = _contact.get(name, PackedVector3Array())
+	if pts.is_empty():
+		return 1e9
+	var t: Transform3D = back * skel.get_bone_global_pose(bone[name])
+	var row := Vector3(t.basis.x.y, t.basis.y.y, t.basis.z.y)
+	var m := 1e9
+	for p in pts:
+		m = minf(m, row.dot(p))
+	return m + t.origin.y
+
+func _low_with(pts: PackedVector3Array, basis: Basis) -> float:
+	var row := Vector3(basis.x.y, basis.y.y, basis.z.y)
+	var m := 1e9
+	for p in pts:
+		m = minf(m, row.dot(p))
+	return m
+
+## Feet: a foot near the floor lies flat on it, and no part of its sole goes under.
+## The leg is solved again to the lifted ankle, keeping the knee on the side it was on.
+func _plant(back: Transform3D, q: Basis, whole: bool) -> void:
+	var up := (q * Vector3.UP).normalized()
+	var s: float = back.basis.get_scale().y
+	for side: String in ["Left", "Right"]:
+		var pts: PackedVector3Array = _contact.get(side + "Foot", PackedVector3Array())
+		if pts.is_empty():
+			continue
+		var fi: int = bone[side + "Foot"]
+		var f := skel.get_bone_global_pose(fi)
+		var cur := f.basis.orthonormalized()
+		var rb: Basis = (rest[side + "Foot"] as Transform3D).basis.orthonormalized()
+		# the turn about the vertical that the foot has taken, without its pitch and roll
+		var dq := (cur * rb.inverse()).get_rotation_quaternion()
+		var along := up * Vector3(dq.x, dq.y, dq.z).dot(up)
+		var tw := Quaternion(along.x, along.y, along.z, dq.w)
+		tw = tw.normalized() if tw.length_squared() > 0.0001 else Quaternion.IDENTITY
+		var flat := Basis(tw) * rb
+		var ank_y: float = (back * f.origin).y
+		var h_flat := -_low_with(pts, back.basis * flat)
+		var wf := 0.0 if whole else 1.0 - smoothstep(0.02, 0.12, ank_y - h_flat)
+		var nb := Basis(cur.get_rotation_quaternion().slerp(flat.get_rotation_quaternion(), wf)) if wf > 0.0 else cur
+		var low := ank_y + _low_with(pts, back.basis * nb)
+		var origin := f.origin
+		if low < 0.0 and not whole:
+			var hip: Vector3 = skel.get_bone_global_pose(bone[side + "UpLeg"]).origin
+			var knee: Vector3 = skel.get_bone_global_pose(bone[side + "Leg"]).origin
+			var pole := knee - hip.lerp(f.origin, 0.5)
+			if pole.length() < 0.02 * (knee - hip).length():
+				pole = q * Vector3(0.15 if side == "Right" else -0.15, 0.1, -1)
+			origin = _limb(side + "UpLeg", side + "Leg", side + "Foot", f.origin + up * (-low / s), pole)
+		if wf > 0.0 or origin != f.origin:
+			skel.set_bone_global_pose(fi, Transform3D(nb, origin))
+
+## Whole body: lift the hips until nothing is under the floor. Standing figures are tested at the feet and shins
+## (a knee in a deep lunge); figures in a whole-body clip (falls, rolls, deaths) at every part.
+func _ground(back: Transform3D, q: Basis, whole: bool, settle: bool) -> void:
+	var low := 1e9
+	for nm: String in _contact:
+		if whole or nm.ends_with("Leg") or nm.ends_with("Foot"):
+			low = minf(low, _low(nm, back))
+	if low > 1e8:
+		return
+	if low < 0.0 or (settle and whole and low > 0.0):
+		var hi: int = bone["Hips"]
+		var cur := skel.get_bone_global_pose(hi)
+		var lift := -low * (clip_w if low > 0.0 else 1.0)
+		skel.set_bone_global_pose(hi, Transform3D(cur.basis, cur.origin + (q * Vector3.UP).normalized() * (lift / back.basis.get_scale().y)))
 
 # ---------------------------------------------------------------- authored clips
 ## Authored skeletal motion (assets/anim/humanoid.res) layered over the procedural pose.
@@ -214,6 +489,7 @@ func _overlay(arms: bool) -> void:
 	var src_dir: Dictionary = a.get_meta("rest_dir", {})
 	var t := fposmod(clip_t, a.length) if a.loop_mode != Animation.LOOP_NONE else clampf(clip_t, 0.0, a.length)
 	var back := _canon.inverse()
+	var full_b := {}      # the clip's own turn of the hips and legs, at full weight
 	if not arms and map.has("_pos"):
 		# hip height as a fraction of standing height; travel only for whole-body clips
 		var hp: Vector3 = a.position_track_interpolate(map["_pos"], t)
@@ -231,10 +507,19 @@ func _overlay(arms: bool) -> void:
 			# line this skeleton's limb up with the source's rest limb first (A-pose against T-pose)
 			d = d * Basis(Quaternion(_my_dir[b], src_dir[b]))
 		var target: Basis = back * d * _canon * rest[b].basis.orthonormalized()
+		if not arms and (b == "Hips" or b.ends_with("UpLeg") or b.ends_with("Leg")):
+			full_b[b] = target * (rest[b] as Transform3D).basis.orthonormalized().inverse()
 		var i: int = bone[b]
 		var cur_b: Basis = skel.get_bone_global_pose(i).basis.orthonormalized()
 		var origin: Vector3 = skel.get_bone_global_pose(i).origin if b == "Hips" else _fk_origin(b)
 		skel.set_bone_global_pose(i, Transform3D(Basis(cur_b.get_rotation_quaternion().slerp(target.get_rotation_quaternion(), clip_w)), origin))
+	if not arms and map.has("_pos") and full_b.has("Hips"):
+		var hip_y: float = a.position_track_interpolate(map["_pos"], t).y * rest["Hips"].origin.y
+		for side: String in ["Left", "Right"]:
+			if full_b.has(side + "UpLeg") and full_b.has(side + "Leg"):
+				_clip_ankle[side] = hip_y + ((full_b["Hips"] as Basis) * (rest[side + "UpLeg"].origin - rest["Hips"].origin)).y \
+					+ ((full_b[side + "UpLeg"] as Basis) * (rest[side + "Leg"].origin - rest[side + "UpLeg"].origin)).y \
+					+ ((full_b[side + "Leg"] as Basis) * (rest[side + "Foot"].origin - rest[side + "Leg"].origin)).y
 
 ## The grip sits in the palm, not at the wrist.
 func _palm(side: String, wrist: Vector3) -> Vector3:

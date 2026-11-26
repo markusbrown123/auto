@@ -140,6 +140,7 @@ func _opening() -> void:
 ## The fall of the kingdoms. It opens from black and ends on black, so nothing is faded here.
 func show_opening(then: Callable = Callable()) -> void:
 	var o := Opening.new()
+	o.only_shot = int(_args.get("shot", "0"))
 	o.finished.connect(func():
 		if then.is_valid():
 			then.call()
@@ -151,6 +152,7 @@ func show_opening(then: Callable = Callable()) -> void:
 func show_awakening() -> void:
 	var a := Awakening.new()
 	a.auto = _args.has("auto")
+	a.start_at = str(_args.get("from", ""))
 	a.finished.connect(show_approach)
 	_swap(a, 0.0)
 

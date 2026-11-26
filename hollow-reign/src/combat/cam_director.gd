@@ -18,9 +18,9 @@ const PRIORITY := {"exchange": 1, "phase": 3, "clash": 4, "struggle": 5, "reveal
 ## look_x: sideways aim (negative puts the foe further right of the knight); wide: how much the
 ## cinematic shots open up for it.
 const CLASS := {
-	"humanoid": {"side": 1.35, "back": 1.0, "y": 1.2, "fov": 54.0, "look_h": 1.12, "look_x": -0.25, "wide": 1.0},
-	"giant": {"side": 1.45, "back": 1.05, "y": 0.95, "fov": 58.0, "look_h": 1.05, "look_x": -0.25, "wide": 1.0},
-	"dragon": {"side": 2.2, "back": 2.4, "y": 0.8, "fov": 68.0, "look_h": 0.8, "look_x": -0.3, "wide": 1.5},
+	"humanoid": {"side": 2.2, "back": 1.0, "y": 0.95, "fov": 54.0, "look_h": 1.05, "look_x": 0.0, "wide": 1.0},
+	"giant": {"side": 1.85, "back": 0.8, "y": 0.85, "fov": 60.0, "look_h": 1.0, "look_x": 0.0, "wide": 1.0},
+	"dragon": {"side": 2.6, "back": 1.2, "y": 0.6, "fov": 54.0, "look_h": 0.55, "look_x": 0.0, "wide": 1.5},
 }
 const ARENA_R := 8.4          # the arena is about 9 m across its radius: stay inside the props
 const MIN_Y := 0.25
@@ -109,6 +109,8 @@ func update(delta: float, trauma: float, clock: float) -> void:
 	_side = lerpf(_side, duel.player_rig._root.x * 0.6, 1.0 - exp(-delta * 5.0))
 
 	var name := _choose()
+	if _dev != "":
+		name = _dev_hook(name, delta)
 	var cut := false
 	if name != shot:
 		# hard cuts only inside the cinematic stages; into and during the fight, always ease
@@ -152,6 +154,24 @@ func update(delta: float, trauma: float, clock: float) -> void:
 	cam.look_at(turn * _look + off * 0.5)
 	cam.rotation.z += _roll + _noise.get_noise_2d(clock * 50.0, 9.0) * 0.035 * shake
 
+
+## Dev only (capture harness): HR_CAM_DEV="shot=struggle" holds a shot during the fight;
+## "kill@3" / "die@3" leaves the foe / the knight on a sliver of health 3 s into the fight, so the ending can be filmed.
+var _dev := OS.get_environment("HR_CAM_DEV")
+var _dev_t := 0.0
+func _dev_hook(name: String, delta: float) -> String:
+	if duel.stage != Duel.Stage.FIGHT:
+		return name
+	_dev_t += delta
+	if _dev.begins_with("shot="):
+		return _dev.trim_prefix("shot=")
+	var at := float(_dev.get_slice("@", 1))
+	if _dev_t >= at:
+		if _dev.begins_with("kill"):
+			duel.sim.b_hp = minf(duel.sim.b_hp, 1.0)
+		elif _dev.begins_with("die"):
+			duel.sim.pl.hp = minf(float(duel.sim.pl.hp), 1.0)
+	return name
 
 func _context() -> void:
 	var foe: Dictionary = duel.foe

@@ -24,6 +24,7 @@ var _out := ""
 var _tag := ""
 var _vel := Vector3.ZERO
 var _zoom := 1.0
+var _floor: MeshInstance3D
 var _mid := Vector3.ZERO      # centre of the figure on the floor, for the cameras
 
 func _ready() -> void:
@@ -51,21 +52,32 @@ func _room() -> void:
 	sun.rotation_degrees = Vector3(-50, 35, 0)
 	sun.light_energy = 1.3
 	add_child(sun)
-	# floor: a see-through sheet with a half-metre grid, so anything below y = 0 shows dimmed under it
-	var sh := Shader.new()
-	sh.code = "shader_type spatial; render_mode unshaded, cull_disabled, depth_draw_never;
-varying vec3 wp;
-void vertex(){ wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
-void fragment(){ vec2 g = abs(fract(wp.xz) - 0.5); float l = step(0.485, max(g.x, g.y));
-ALBEDO = mix(vec3(0.16, 0.2, 0.26), vec3(0.95, 0.85, 0.3), l); ALPHA = mix(0.5, 0.8, l); }"
-	var sm := ShaderMaterial.new()
-	sm.shader = sh
-	var pm := PlaneMesh.new()
-	pm.size = Vector2(60, 60)
+	# floor: a translucent slab below y = 0, seen edge-on, so anything under the floor shows dimmed below a crisp line
+	var fm := StandardMaterial3D.new()
+	fm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	fm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	fm.albedo_color = Color(0.1, 0.12, 0.16, 0.62)
+	var bm := BoxMesh.new()
+	bm.size = Vector3(44, 6, 44)
 	var floor_mi := MeshInstance3D.new()
-	floor_mi.mesh = pm
-	floor_mi.material_override = sm
+	floor_mi.mesh = bm
+	floor_mi.material_override = fm
+	floor_mi.position.y = -3.0
 	add_child(floor_mi)
+	_floor = floor_mi
+	# metre marks on the floor
+	for i in range(-6, 7):
+		for axis in 2:
+			var lm := BoxMesh.new()
+			lm.size = Vector3(0.012, 0.004, 44.0) if axis == 0 else Vector3(44.0, 0.004, 0.012)
+			var l := MeshInstance3D.new()
+			l.mesh = lm
+			var m2 := StandardMaterial3D.new()
+			m2.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			m2.albedo_color = Color(0.95, 0.85, 0.3)
+			l.material_override = m2
+			l.position = Vector3(i, 0.0, 0) if axis == 0 else Vector3(0, 0.0, i)
+			add_child(l)
 	cam = Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
 	cam.near = 0.1
@@ -238,8 +250,9 @@ func _aim_cam(dir: Vector3) -> void:
 		var a: PackedStringArray = str(_args.aim).split(",")
 		centre = Vector3(_mid.x, 0, _mid.z) + Vector3(float(a[0]), float(a[1]), float(a[2])) * s
 	cam.size = (9.5 if _is_dragon else 2.75) * s / _zoom
-	cam.position = centre + (dir + Vector3(0, 0.07, 0)).normalized() * 30.0
+	cam.position = centre + dir * 30.0
 	cam.look_at(centre)
+	_floor.position = Vector3(centre.x, -3.0, centre.z)
 
 # ---------------------------------------------------------------- measurement
 func _collect() -> void:
@@ -373,7 +386,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 			if nm2.begins_with("Left") or nm2.begins_with("RightHand") or nm2 == "RightForeArm":
 				continue
 			var l := inv * pts[i]
-			if l.z < -0.03 and l.x * l.x / 0.07 + l.y * l.y / 0.14 < 1.0:
+			if absf(l.z) < 0.03 and l.x * l.x / 0.06 + l.y * l.y / 0.13 < 1.0:
 				n2 += 1
 				hits2[nm2] = int(hits2.get(nm2, 0)) + 1
 		_worse(stat, "shield", float(n2), t, str(hits2), false)

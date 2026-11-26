@@ -96,6 +96,67 @@ func _ready() -> void:
 		ok(cache.type == "treasure" and after > gold and Game.profile.gold - after < after - gold and Game.owns("a_garrison_gauntlets"), "cinematic road: a cache gives its contents once")
 		cr2.queue_free()
 		await get_tree().process_frame
+	# --- the story chain through the real router: New Journey → opening → chamber → walk → first stop
+	if FileAccess.file_exists(Game._p(Opening.SEEN_FILE)):
+		DirAccess.remove_absolute(Game._p(Opening.SEEN_FILE))
+	var m: Node = load("res://src/main.tscn").instantiate()
+	add_child(m)
+	await get_tree().process_frame
+	m._new_journey("#16332c", "f")
+	await get_tree().create_timer(1.2).timeout
+	ok(m.current is Opening and Game.profile.body == "f", "new journey: opens on the opening")
+	m.current.skip()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	ok(m.current is Awakening, "new journey: the opening, skipped, leads to the chamber")
+	if m.current is Awakening:
+		var kn: CineActor = m.current.knight
+		ok(str(kn.cfg.skin).contains("knight_f") and str(kn.cfg.get("weapon_model", "")).contains(str(Game.profile.equipped.weapon)) and not kn.weapon_r.visible,
+			"chamber: the chosen knight, with her own sword still in the block")
+		m.current.skip()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	ok(m.current is Approach and str(Game.run.get("region", "")) == "courtyard" and int(Game.run.stage) == 0, "new journey: the chamber leads out into the Courtyard")
+	var place: Node = m.current.backdrop if m.current is Approach else null
+	if m.current is Approach:
+		m.current.skip()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	ok(m.current is Explore and m.current.backdrop == place and is_instance_valid(place), "new journey: the walk ends on the first stop, in the same place (nothing rebuilt)")
+	ok(Opening.seen_before(), "the opening is remembered as seen")
+	var loading := func() -> bool:
+		for c in get_tree().root.get_children():
+			if c is LoadingScreen:
+				return true
+		return false
+	ok(not loading.call(), "new journey: no loading screen on the way to the first stop")
+	# the first duel: the road has read the foe ahead, so it is a fade and nothing else
+	if m.current is Explore:
+		for i in 600:
+			if m.current.foes.size() > 0 and m.current.foes[0] != null:
+				break
+			await get_tree().process_frame
+		ok(m.current.foes.size() > 0 and m.current.foes[0] != null, "first stop: the foe stands on the road")
+		m._enter_duel(Game.stage_options()[0])
+		await get_tree().process_frame
+		var seen_loading: bool = loading.call()
+		await get_tree().create_timer(1.5).timeout
+		ok(not seen_loading and not loading.call() and m.current is Duel, "first duel: reached by a fade, with no loading screen")
+	# a later new journey passes over the opening; Continue never replays either scene
+	m._new_journey("#3d0f0f", "m")
+	await get_tree().create_timer(1.2).timeout
+	ok(m.current is Awakening, "a later new journey passes over the opening")
+	Game.save()
+	m.show_title()
+	await get_tree().process_frame
+	if m.current is TitleScreen:
+		m.current.continue_game.emit()
+	await get_tree().create_timer(1.2).timeout
+	ok(m.current is Sanctuary, "continue: goes to the save, and replays neither opening nor chamber")
+	Story.stop()
+	m.queue_free()
+	await get_tree().process_frame
+	await get_tree().process_frame
 	# --- whole duels through the real scene, every foe
 	Game.new_game()
 	for id in ["w_monarch", "a_regal_helm", "a_regal_chest", "a_regal_gauntlets", "a_regal_legs", "s_rime"]:

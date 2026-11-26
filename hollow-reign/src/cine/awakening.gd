@@ -14,6 +14,7 @@ const GRILLE := Vector3(-2.6, 2.4, -4.2)
 const WALK := 1.35               # metres a second
 
 var auto := false                # dev captures: the prompt answers itself
+var start_at := ""               # dev captures: "sword" opens on the standing knight and the prompt
 var arena: Arena
 var cam: CineCam
 var knight: CineActor
@@ -89,11 +90,21 @@ func _stand_sword() -> void:
 
 # ================================================================ the scene
 func _run() -> void:
+	if start_at == "sword":
+		knight.position = STAND
+		knight.hold("idle", 0.0)
+		_key.light_energy = 3.2
+		_rack_light.light_energy = 2.2
+		_veil.color.a = 0.0
+		cam.cut(Vector3(1.2, 2.3, 6.0), Vector3(0.9, 1.0, -1.0), 50.0)
+		_turn_to(_rack.position, 0.9)
+		_offer_sword()
+		return
 	# low and close on a figure that is not moving
 	cam.cut(Vector3(0.75, 0.42, 3.45), Vector3(0.0, 0.72, 1.7), 40.0)
 	cam.move(Vector3(0.95, 0.5, 3.75), Vector3(0.0, 0.78, 1.7), 7.0)
 	create_tween().tween_property(_veil, "color:a", 0.0, 2.2)
-	create_tween().tween_property(_key, "light_energy", 5.0, 3.0)
+	create_tween().tween_property(_key, "light_energy", 6.5, 3.0)
 	await _wait(2.0)
 	if _over:
 		return
@@ -127,8 +138,8 @@ func _run() -> void:
 	if _over:
 		return
 	# "Then it worked": the whole room, the sword in its block, the door at the back
-	cam.cut(Vector3(-2.9, 2.3, 4.7), Vector3(0.9, 1.0, -0.6), 50.0)
-	cam.move(Vector3(-2.5, 2.1, 4.9), Vector3(1.2, 1.0, -0.8), 6.0)
+	cam.cut(Vector3(0.7, 2.5, 6.0), Vector3(0.8, 1.0, -1.0), 50.0)
+	cam.move(Vector3(1.2, 2.3, 6.0), Vector3(0.9, 1.0, -1.0), 6.0)
 	Sfx.music_for("hub", "sanctuary", 2.5)
 	create_tween().tween_property(_rack_light, "light_energy", 2.2, 1.6)
 	await _story_end()

@@ -19,6 +19,7 @@ var figures: Array = []
 var _veil: ColorRect
 var _hint: Label
 var _over := false
+var only_shot := 0               # dev captures: hold on one shot (1-7), without the narrator
 var _clock := 0.0
 var _mob: OmniLight3D            # the light of the crowd at the doors
 var _wake: Array = []            # [light, mesh material, delay]: the machines that come back on
@@ -147,76 +148,93 @@ func _grade(life: float, time: float) -> void:
 	tw.tween_property(arena.sun, "light_energy", sun_e, time)
 
 # ================================================================ the shots
+## Sets one shot going: its framing, its camera move and whatever changes in the hall with it.
+func _shot(i: int) -> void:
+	match i:
+		1:  # the hall at its height, seen from the doors
+			cam.cut(Vector3(0.0, 7.5, 17.0), Vector3(0, 5.2, -16.0), 52.0)
+			cam.move(Vector3(0.0, 5.6, 11.5), Vector3(0, 5.0, -16.0), 9.0)
+			create_tween().tween_property(_throne_glow, "light_energy", 3.5, 2.0)
+		2:  # "Then men became gods": from the floor, up at the seat they made
+			cam.cut(Vector3(2.2, 0.5, -5.0), Vector3(0.0, 6.0, -17.5), 46.0)
+			cam.move(Vector3(1.4, 0.7, -6.6), Vector3(0.0, 7.4, -17.5), 5.0)
+		3:  # bodies that could not grow old: along the line of them, each a shape against the fire
+			cam.cut(Vector3(-0.9, 1.5, 7.4), Vector3(4.2, 1.75, 3.6), 38.0)
+			cam.move(Vector3(-0.9, 1.6, -3.2), Vector3(4.2, 1.85, -6.4), 10.5, -1.0, Tween.TRANS_LINEAR)
+		4:  # the people they ruled: a red light from the doors behind us, growing
+			cam.drift = 0.07
+			cam.cut(Vector3(0.4, 1.3, 13.5), Vector3(0, 2.6, -8.0), 44.0)
+			cam.move(Vector3(0.0, 1.5, 9.6), Vector3(0, 2.4, -8.0), 6.0)
+			var tw := create_tween().set_parallel(true)
+			tw.tween_property(_mob, "light_energy", 9.0, 4.6).set_ease(Tween.EASE_IN)
+			tw.tween_property(arena.env, "fog_light_color", Color("#6a1c0c"), 4.6)
+			tw.tween_property(_throne_glow, "light_energy", 0.8, 4.0)
+		5:  # the same hall, three hundred years on
+			_ruin()
+			cam.cut(Vector3(0.0, 5.4, 11.0), Vector3(0, 4.6, -16.0), 52.0)
+			cam.move(Vector3(0.0, 6.6, 15.5), Vector3(0, 4.4, -16.0), 6.5)
+		6:  # …and one of them, where it fell
+			_ruin()
+			var fallen: FighterRig = figures[1] if figures.size() > 1 else null
+			if fallen:
+				var p := fallen.global_position
+				cam.cut(p + Vector3(-2.6, 0.45, 2.2), p + Vector3(0.2, 0.3, 0.2), 36.0)
+				cam.move(p + Vector3(-2.2, 0.6, 2.9), p + Vector3(0.2, 0.3, 0.2), 6.0)
+		7:  # "We were wrong": in the dark, down the length of the floor, something is switching itself back on
+			_ruin()
+			cam.cut(Vector3(0.0, 0.42, 9.0), Vector3(0, 2.6, -16.0), 44.0)
+			cam.move(Vector3(0.0, 0.6, 7.0), Vector3(0, 3.4, -16.0), 5.0)
+			_wake_t = 0.0
+			Sfx.play("levelup", -10.0, 0.5)
+			_throne_glow.light_color = Color("#5fe0c8")
+			create_tween().tween_property(_throne_glow, "light_energy", 5.0, 2.4).set_delay(2.0)
+
+var _ruined := false
+func _ruin() -> void:
+	if _ruined:
+		return
+	_ruined = true
+	cam.drift = 0.02
+	_mob.light_energy = 0.0
+	_throne_glow.light_energy = 0.0
+	_grade(0.0, 0.0)
+	for f: FighterRig in figures:
+		f.time_scale = 30.0          # they are long fallen by the time we look again
+		f.die(1.0 if f.position.x > 0.0 else -1.0)
+	create_tween().tween_callback(func():
+		for f: FighterRig in figures:
+			f.time_scale = 1.0).set_delay(0.4)
+
 func _run() -> void:
-	# 1. the hall at its height, seen from the doors
-	cam.cut(Vector3(0.0, 7.5, 17.0), Vector3(0, 5.2, -16.0), 52.0)
-	cam.move(Vector3(0.0, 5.6, 11.5), Vector3(0, 5.0, -16.0), 9.0)
-	create_tween().tween_property(_throne_glow, "light_energy", 3.5, 2.0)
+	if only_shot > 0:
+		_veil.color.a = 0.0
+		_shot(only_shot)
+		return
+	_shot(1)
 	create_tween().tween_property(_veil, "color:a", 0.0, 1.6)
 	await _wait(1.3)
 	if _over:
 		return
 	Story.play("opening", true)
-	await _line(1)
-	if _over:
-		return
-	# 2. "Then men became gods": from the floor, up at the seat they made
-	cam.cut(Vector3(2.2, 0.5, -5.0), Vector3(0.0, 6.0, -17.5), 46.0)
-	cam.move(Vector3(1.4, 0.7, -6.6), Vector3(0.0, 7.4, -17.5), 5.0)
-	await _line(2)
-	if _over:
-		return
-	# 3. bodies that could not grow old: along the line of them, each a shape against the fire
-	cam.cut(Vector3(-0.9, 1.5, 7.4), Vector3(4.2, 1.75, 3.6), 38.0)
-	cam.move(Vector3(-0.9, 1.6, -3.2), Vector3(4.2, 1.85, -6.4), 10.5, -1.0, Tween.TRANS_LINEAR)
-	await _line(3)
-	if _over:
-		return
-	# 4. the people they ruled: a red light from the doors behind us, growing
-	cam.drift = 0.07
-	cam.cut(Vector3(0.4, 1.3, 13.5), Vector3(0, 2.6, -8.0), 44.0)
-	cam.move(Vector3(0.0, 1.5, 9.6), Vector3(0, 2.4, -8.0), 6.0)
-	var tw := create_tween().set_parallel(true)
-	tw.tween_property(_mob, "light_energy", 9.0, 4.6).set_ease(Tween.EASE_IN)
-	tw.tween_property(arena.env, "fog_light_color", Color("#6a1c0c"), 4.6)
-	tw.tween_property(_throne_glow, "light_energy", 0.8, 4.0)
+	for i: int in [2, 3, 4]:
+		await _line(i - 1)
+		if _over:
+			return
+		_shot(i)
 	await _line(4)
 	if _over:
 		return
-	# 5. the same hall, three hundred years on
-	await _dip(func():
-		cam.drift = 0.02
-		_mob.light_energy = 0.0
-		_throne_glow.light_energy = 0.0
-		_grade(0.0, 0.0)
-		for f: FighterRig in figures:
-			f.time_scale = 30.0          # they are long fallen by the time we look again
-			f.die(1.0 if f.position.x > 0.0 else -1.0)
-		cam.cut(Vector3(0.0, 5.4, 11.0), Vector3(0, 4.6, -16.0), 52.0)
-		cam.move(Vector3(0.0, 6.6, 15.5), Vector3(0, 4.4, -16.0), 6.5))
+	await _dip(func(): _shot(5))
 	if _over:
 		return
-	for f: FighterRig in figures:
-		f.time_scale = 1.0
-	await _wait_line(4.6, 5)
+	await _wait_line(4.4, 5)
 	if _over:
 		return
-	#    …and one of them, where it fell
-	var fallen: FighterRig = figures[1] if figures.size() > 1 else null
-	if fallen:
-		var p := fallen.global_position
-		cam.cut(p + Vector3(-2.6, 0.45, 2.2), p + Vector3(0.2, 0.3, 0.2), 36.0)
-		cam.move(p + Vector3(-2.2, 0.6, 2.9), p + Vector3(0.2, 0.3, 0.2), 6.0)
+	_shot(6)
 	await _line(5)
 	if _over:
 		return
-	# 6. "We were wrong": in the dark, down the length of the floor, something is switching itself back on
-	cam.cut(Vector3(0.0, 0.42, 9.0), Vector3(0, 2.6, -16.0), 44.0)
-	cam.move(Vector3(0.0, 0.6, 7.0), Vector3(0, 3.4, -16.0), 5.0)
-	_wake_t = 0.0
-	Sfx.play("levelup", -10.0, 0.5)
-	create_tween().tween_property(_throne_glow, "light_color", Color("#5fe0c8"), 0.1)
-	create_tween().tween_property(_throne_glow, "light_energy", 5.0, 2.4).set_delay(2.0)
+	_shot(7)
 	await _story_end()
 	await _wait(2.6)
 	if _over:

@@ -438,8 +438,7 @@
   "witness_discovery_01": {
    "speaker": "lyra",
    "text": "Wait. Under the fallen plinth. There is a door there that is on no plan I hold.",
-   "dir": "puzzled, wary",
-   "recorded": false
+   "dir": "puzzled, wary"
   },
   "witness_discovery_02": {
    "speaker": "witness",
@@ -474,8 +473,7 @@
   "witness_discovery_08": {
    "speaker": "lyra",
    "text": "I do not know what that is. I do not like not knowing.",
-   "dir": "low, to the player",
-   "recorded": false
+   "dir": "low, to the player"
   },
   "witness_discovery_09": {
    "speaker": "witness",
@@ -786,8 +784,7 @@
   "w_deep_stair_02": {
    "speaker": "lyra",
    "text": "I did not know.",
-   "dir": "stung",
-   "recorded": false
+   "dir": "stung"
   },
   "w_deep_stair_03": {
    "speaker": "witness",
@@ -917,8 +914,7 @@
   "w_talk_lyra_02": {
    "speaker": "lyra",
    "text": "I counted.",
-   "dir": "cool",
-   "recorded": false
+   "dir": "cool"
   },
   "w_talk_lyra_03": {
    "speaker": "witness",
@@ -928,8 +924,7 @@
   "w_talk_lyra_04": {
    "speaker": "lyra",
    "text": "Then we counted differently. I had something to wait for.",
-   "dir": "quiet, firm",
-   "recorded": false
+   "dir": "quiet, firm"
   },
   "w_talk_return_01": {
    "speaker": "player",
@@ -984,8 +979,7 @@
   "w_talk_people_01": {
    "speaker": "lyra",
    "text": "They were people. Every one you have cut down.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_talk_people_02": {
    "speaker": "witness",
@@ -995,8 +989,7 @@
   "w_talk_people_03": {
    "speaker": "lyra",
    "text": "They were lied to.",
-   "dir": "sharp",
-   "recorded": false
+   "dir": "sharp"
   },
   "w_talk_people_04": {
    "speaker": "witness",
@@ -1006,8 +999,7 @@
   "w_talk_silence_01": {
    "speaker": "lyra",
    "text": "The Silence came without warning. One night the far towns simply stopped answering.",
-   "dir": "remembering",
-   "recorded": false
+   "dir": "remembering"
   },
   "w_talk_silence_02": {
    "speaker": "witness",
@@ -1017,8 +1009,7 @@
   "w_talk_silence_03": {
    "speaker": "lyra",
    "text": "There is no record of a warning.",
-   "dir": "firm",
-   "recorded": false
+   "dir": "firm"
   },
   "w_talk_silence_04": {
    "speaker": "witness",
@@ -1038,8 +1029,7 @@
   "w_talk_stored_01": {
    "speaker": "lyra",
    "text": "The stored can be saved. All of them. I have to believe that.",
-   "dir": "raw",
-   "recorded": false
+   "dir": "raw"
   },
   "w_talk_stored_02": {
    "speaker": "witness",
@@ -1049,8 +1039,7 @@
   "w_talk_stored_03": {
    "speaker": "lyra",
    "text": "Broken is not gone.",
-   "dir": "fierce",
-   "recorded": false
+   "dir": "fierce"
   },
   "w_talk_stored_04": {
    "speaker": "witness",
@@ -2000,7 +1989,7 @@
   "sentinel": "inworld:Mortimer (en)",
   "executioner": "inworld:Mortimer (en)",
   "lyra": "inworld:Claire (en)",
-  "player_f": "inworld:Elizabeth (en)",
+  "player_f": "inworld:Victoria (en)",
   "orren": "inworld:Callum (en)",
   "monarch": "inworld:Hades (en)",
   "archivist": "Onyx",

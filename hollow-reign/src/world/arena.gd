@@ -1051,12 +1051,12 @@ func _layout_chamber() -> void:
 		var at := Vector3(sin(a2), 0, cos(a2)) * (CHAMBER_R - 1.0)
 		if absf(wrapf(a2 - PI, -PI, PI)) < 0.5:
 			continue
-		if _kit("de", "conduit") and i % 2 == 0:
-			prop("de_conduit", 3.4, at, rad_to_deg(a2) + 180.0)
-		else:
-			box(Vector3(0.7, 3.0, 0.7), at + Vector3(0, 1.5, 0), metal, Vector3(0, rad_to_deg(a2), 0))
-			box(Vector3(0.74, 0.08, 0.74), at + Vector3(0, 2.2, 0), amber, Vector3(0, rad_to_deg(a2), 0))
-			box(Vector3(0.74, 0.05, 0.74), at + Vector3(0, 1.1, 0), amber, Vector3(0, rad_to_deg(a2), 0))
+		box(Vector3(0.7, 3.0, 0.7), at + Vector3(0, 1.5, 0), metal, Vector3(0, rad_to_deg(a2), 0))
+		box(Vector3(0.9, 0.3, 0.9), at + Vector3(0, 0.15, 0), null, Vector3(0, rad_to_deg(a2), 0))
+		var lit: Material = amber if i % 2 == 1 else teal
+		box(Vector3(0.74, 0.08, 0.74), at + Vector3(0, 2.2, 0), lit, Vector3(0, rad_to_deg(a2), 0))
+		box(Vector3(0.74, 0.05, 0.74), at + Vector3(0, 1.1, 0), lit, Vector3(0, rad_to_deg(a2), 0))
+		cyl(0.06, 0.06, 2.6, at * 1.02 + Vector3(0, 4.2, 0), metal, 6)
 		_glow(at * 0.86 + Vector3(0, 1.8, 0), Color(theme.fire) if i % 2 == 1 else Color("#5fe0c8"), 0.55, 4.5)
 	# the voice in the walls: a grille over the cradle's head with a light behind it
 	var ly := OmniLight3D.new()

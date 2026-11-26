@@ -35,8 +35,7 @@ func _ready() -> void:
 	arena.build("chamber")
 	_lyra = arena.get_node("Lyra")
 	_rack = arena.get_node("Rack")
-	knight = CineActor.knight()
-	add_child(knight)
+	knight = CineActor.knight(self)
 	knight.set_armed(false)
 	knight.footsteps = true
 	knight.position = SEAT

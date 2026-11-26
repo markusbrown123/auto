@@ -16,8 +16,9 @@ var _w_to := 0.0
 var _w_rate := 2.0
 
 ## Builds the player's knight exactly as the duel does, with whatever is equipped.
-static func knight() -> CineActor:
+static func knight(parent: Node) -> CineActor:
 	var a := CineActor.new()
+	parent.add_child(a)
 	a.build(Duel.player_look(), false)
 	return a
 

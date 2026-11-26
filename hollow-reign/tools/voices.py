@@ -25,12 +25,14 @@ RECAST = [a[9:].split(",") for a in sys.argv if a.startswith("--recast=")]
 RECAST = RECAST[0] if RECAST else []
 # owner's direction: a little stone-room echo, a little weight, the voice itself untouched
 ROOM = "bass=g=2.5:f=150,aecho=0.9:0.35:55|110:0.16|0.08"
-ROLE_FX = {"witness": ROOM + ",aecho=0.9:0.25:11:0.12", "narrator": "bass=g=2:f=150,aecho=0.9:0.4:80|170:0.18|0.1"}
+# the female knight (owner's choice): the accent of this voice, treated for clarity — presence up, low-mids down, lighter room
+CLEAR = "highpass=f=90,equalizer=f=3500:t=q:w=1.2:g=4.5,equalizer=f=250:t=q:w=1.0:g=-2,treble=g=1.5:f=7000,aecho=0.9:0.22:45|95:0.10|0.05"
+ROLE_FX = {"player_f": CLEAR, "witness": ROOM + ",aecho=0.9:0.25:11:0.12", "narrator": "bass=g=2:f=150,aecho=0.9:0.4:80|170:0.18|0.1"}
 
 def text_hash(line):
     return hashlib.sha1(line["text"].encode()).hexdigest()[:12]
 
-def make_inworld(lid, line, voice, out):
+def make_inworld(lid, line, voice, out, key=""):
     """The owner-approved cast: a named voice on the Inworld model (2 credits a take)."""
     try:
         r = subprocess.run(["higgsfield", "generate", "create", "inworld_text_to_speech", "--prompt", line["text"], "--voice", voice, "--wait", "--wait-timeout", "120s"],
@@ -42,9 +44,11 @@ def make_inworld(lid, line, voice, out):
         return out, "FAILED " + (r.stderr or r.stdout)[-160:]
     raw = out + ".src"
     subprocess.run(["curl", "-sS", "-m", "120", "-o", raw, url], check=True)
-    fx = ROLE_FX.get(line["speaker"], ROOM)
+    fx = ROLE_FX.get(key, ROLE_FX.get(line["speaker"], ROOM))
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-af", fx + ",loudnorm=I=-18:TP=-2", "-ac", "1", "-ar", "44100", "-c:a", "libvorbis", "-q:a", "5", out], check=True)
     os.remove(raw)
+    if os.path.exists(TAKES_PATH):
+        TAKES.update(json.load(open(TAKES_PATH)))
     TAKES[os.path.basename(out)] = text_hash(line)
     json.dump(TAKES, open(TAKES_PATH, "w"), indent=1, sort_keys=True)
     return out, "ok"
@@ -58,7 +62,7 @@ def make(lid, speaker_key, suffix):
     line = D["lines"][lid]
     cast = D["voices"][speaker_key]
     if cast.startswith("inworld:"):
-        return make_inworld(lid, line, cast[8:], out)
+        return make_inworld(lid, line, cast[8:], out, speaker_key)
     v = VOICE_IDS[cast]
     with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
         json.dump([{"text": line["text"], "voice_id": v["id"], "voice_type": v["voice_type"]}], f)

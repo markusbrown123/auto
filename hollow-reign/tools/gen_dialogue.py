@@ -372,8 +372,8 @@ COMPANION = {"discovery": {"scene": "witness_discovery", "region": "courtyard", 
 VOICES = {
  "witness": "inworld:Hamish (en)", "player_m": "inworld:Malcolm (en)", "narrator": "inworld:Graham (en)",
  "sentinel": "inworld:Mortimer (en)", "executioner": "inworld:Mortimer (en)",
- # cast by the developer from reel 4's measurements at the owner's instruction to finish these roles; NOT yet heard or approved:
- "lyra": "inworld:Claire (en)", "player_f": "inworld:Elizabeth (en)", "orren": "inworld:Callum (en)", "monarch": "inworld:Hades (en)",
+ # player_f = Victoria with the clarity treatment: CHOSEN BY THE OWNER (2026-11-26). Lyra, Orren and the Monarch below are the developer's picks from reel 4's measurements, not yet heard or approved:
+ "lyra": "inworld:Claire (en)", "player_f": "inworld:Victoria (en)", "orren": "inworld:Callum (en)", "monarch": "inworld:Hades (en)",
  "archivist": "Onyx",
  "huntsman": "Brooks", "widow": "Sloane", "gravewarden": "Bram", "frostking": "Alistair",
  "devourer": "Luna"}

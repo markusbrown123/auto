@@ -1098,7 +1098,7 @@ func _body_caps() -> Array:
 	var hips: Vector3 = skin.point("Hips")
 	var neck: Vector3 = skin.point("Neck")
 	var trunk_r: float = minf(float(skin.ball("Hips")[1]), 0.24) * 0.9
-	var out: Array = [[head_b[0], head_b[0], float(head_b[1]) * 1.05], [hips, neck, trunk_r]]
+	var out: Array = [[head_b[0], head_b[0], float(head_b[1]) * 1.2], [hips, neck, trunk_r]]
 	for side: String in ["Left", "Right"]:
 		var knee: Vector3 = skin.point(side + "Leg")
 		out.append([skin.point(side + "UpLeg"), knee, trunk_r * 0.5])

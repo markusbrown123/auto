@@ -90,3 +90,21 @@ Everything above still applies. New or changed requirements:
 
 ## Extra documents to maintain
 GRAPHICS_BIBLE.md, SHADER_LIBRARY.md, VFX_BIBLE.md, ANIMATION_LIBRARY.md, PERFORMANCE_REPORT.md, AUDIO_ASSET_MANIFEST.json.
+
+---
+# Addendum 2: frame-based cinematic and combat reference (2026-11-26)
+The owner supplied five timestamped contact sheets from a reference playthrough of a classic swipe sword-duelling game (the video file itself did not reach the build environment; only the sheets did, and no audio). They are a reference for *feel* — camera, rhythm, continuity, teaching — not for content. Nothing from it is reused; all assets stay original.
+
+What the sheets show, and what Hollow Reign must do in its own way:
+- **Camera director.** Distinct shots chosen by events: wide establishing, low-angle reveal, close-up, over-the-shoulder and reverse for dialogue, walking track, standard combat framing, defensive reaction, blade-struggle close-up, stagger, phase transition, finishing strike, victory, defeat, discovery. Combat framing keeps attacks readable; cinematics move more. Consistent screen direction.
+- **Continuity.** Menu → selection → opening → awakening → walk → enemy reveal → combat → finisher → rewards → onward, with matched poses and cameras; fades only for a change of place. No loading screen between short interactions.
+- **Opening.** The fall of the immortal civilization without giving the mystery away; the knight wakes in the resurrection chamber; Lyra; find the weapon; walk to the first enemy; combat taught by the encounter; the Witness found early.
+- **Teaching.** In the first encounter: swipes, shield, left/right dodge, rolls, parries, counters, two- and three-hit combinations, stamina. Temporary indicators, the enemy throws the matching attack, the instruction goes when done. Experienced players are not interrupted.
+- **Rhythm.** A full defensive-and-offensive exchange inside a few seconds. Consecutive enemy attacks; not every defence opens the foe; repeated successful defences destabilise it; a parry break gives the long opening. No long lockouts.
+- **Blade struggle.** Occasionally a parry locks blades: close camera, both push, a short interactive action (rapid taps), success destabilises, failure hands control back. Used sparingly.
+- **Combos.** All sixteen keep their own choreography, timing, cost, recovery and purpose; the player chooses.
+- **Mid-battle story beats** for intelligent bosses at a phase threshold, skippable after the first time, state preserved, possibly a choice.
+- **Finishers** unique to major bosses; creatures do not make speeches.
+- **Environmental storytelling:** machines, hidden chambers, inscriptions; a major revelation beneath the Cathedral of Ash.
+- **Measured testing:** input acknowledgement delay, transition delay, contact accuracy, branch delay, frame pacing, memory; dynamic recordings of every action.
+- **Priority:** one complete Sentinel encounter with all twelve elements (approach, companion dialogue, introduction, movement, contextual teaching, defensive exchanges, chosen combos, contact, blade struggle, finisher, rewards, onward), compared against the reference principles; then the rest of the campaign.

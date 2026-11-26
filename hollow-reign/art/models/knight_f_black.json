@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_black_f_v1.png",
+ "model": {
+  "task_id": "33df1f22-95a1-4870-8760-7a4780d2aca1",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "dd102186-509f-42dc-8654-49f3069a5b18",
+  "credits": 25.0
+ }
+}

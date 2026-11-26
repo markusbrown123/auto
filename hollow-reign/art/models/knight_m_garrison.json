@@ -10,5 +10,9 @@
    "riggable": true,
    "rig_type": "biped"
   }
+ },
+ "rig": {
+  "task_id": "3699fb54-02c9-43d4-a626-65bdf3c1e7db",
+  "credits": 25.0
  }
 }

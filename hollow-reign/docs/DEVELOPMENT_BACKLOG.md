@@ -99,6 +99,18 @@ Next actions, in order:
 | G14 | Ninth guardian design | TODO |
 | G15 | End-to-end flow test; demonstration package; iOS export preparation | TODO |
 
+## H. Frame-based reference brief (2026-11-26)
+| # | Task | Status |
+|---|---|---|
+| H1 | Camera director with named shots driven by events (duel, intro, finisher, dialogue) | DOING (agent) |
+| H2 | Combat rhythm: consecutive attacks, posture-based openings, parry break; blade struggle; mid-battle story beat | DOING (agent) |
+| H3 | Opening, awakening, weapon, walk to the first enemy, continuous flow without loading between short steps; staged Witness discovery | DOING (agent) |
+| H4 | First-encounter teaching extended: rolls, counters, three-hit combination, stamina | TODO |
+| H5 | Unique finishers per major boss | TODO |
+| H6 | Cathedral technology revelation as a staged scene | TODO |
+| H7 | Measured responsiveness report (input-to-acknowledgement, transition, contact accuracy) | TODO |
+| H8 | The complete Sentinel encounter recorded end to end and compared with the reference principles | TODO |
+
 ## Decisions waiting on the owner (do not block other work)
 - Paid animation library, if the free ones leave gaps (see A13).
 - Title: "Hollow Reign" in use; trademark search not done.

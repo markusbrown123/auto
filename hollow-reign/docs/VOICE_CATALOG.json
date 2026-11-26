@@ -19,6 +19,26 @@
   "voice_type": "preset",
   "words_per_second": 3.2
  },
+ "Alistair": {
+  "f0_median": 101.9,
+  "f0_p10": 74.1,
+  "f0_p90": 145.5,
+  "id": "d9d5c263-f84e-4752-97b5-3750fcc6fd2f",
+  "seconds": 6.53,
+  "speech_seconds": 5.19,
+  "voice_type": "preset",
+  "words_per_second": 3.08
+ },
+ "Andre": {
+  "f0_median": 130.1,
+  "f0_p10": 87.4,
+  "f0_p90": 190.5,
+  "id": "f1e8226e-2248-4d5f-b43c-0a79e9949dbf",
+  "seconds": 6.61,
+  "speech_seconds": 5.13,
+  "voice_type": "preset",
+  "words_per_second": 3.12
+ },
  "Annie": {
   "f0_median": 216.2,
   "f0_p10": 183.9,
@@ -128,6 +148,16 @@
   "speech_seconds": 4.76,
   "voice_type": "preset",
   "words_per_second": 3.36
+ },
+ "Caspian": {
+  "f0_median": 99.4,
+  "f0_p10": 80.4,
+  "f0_p90": 124.0,
+  "id": "ef70cc83-3015-4bad-9359-0ea968c43ec0",
+  "seconds": 6.84,
+  "speech_seconds": 4.9,
+  "voice_type": "preset",
+  "words_per_second": 3.27
  },
  "Celine": {
   "f0_median": 153.8,
@@ -269,6 +299,16 @@
   "voice_type": "preset",
   "words_per_second": 3.46
  },
+ "Gia": {
+  "f0_median": 181.8,
+  "f0_p10": 150.2,
+  "f0_p90": 240.6,
+  "id": "530df032-c311-483b-a750-cb3c9e1bcdfd",
+  "seconds": 6.61,
+  "speech_seconds": 5.01,
+  "voice_type": "preset",
+  "words_per_second": 3.19
+ },
  "Gideon": {
   "f0_median": 83.3,
   "f0_p10": 67.6,
@@ -339,6 +379,16 @@
   "voice_type": "preset",
   "words_per_second": 3.1
  },
+ "Harrison": {
+  "f0_median": 124.0,
+  "f0_p10": 90.4,
+  "f0_p90": 183.9,
+  "id": "573e5163-59b3-4926-aab1-951ef2985f81",
+  "seconds": 6.69,
+  "speech_seconds": 5.16,
+  "voice_type": "preset",
+  "words_per_second": 3.1
+ },
  "Helena": {
   "f0_median": 188.2,
   "f0_p10": 146.8,
@@ -368,6 +418,16 @@
   "speech_seconds": 4.78,
   "voice_type": "preset",
   "words_per_second": 3.35
+ },
+ "Imogen": {
+  "f0_median": 197.5,
+  "f0_p10": 144.3,
+  "f0_p90": 242.4,
+  "id": "3811e986-0891-47cf-a1f5-78a1d62a547a",
+  "seconds": 6.53,
+  "speech_seconds": 4.87,
+  "voice_type": "preset",
+  "words_per_second": 3.29
  },
  "Ines": {
   "f0_median": 172.0,
@@ -409,6 +469,16 @@
   "voice_type": "preset",
   "words_per_second": 3.65
  },
+ "Julian": {
+  "f0_median": 120.3,
+  "f0_p10": 93.6,
+  "f0_p90": 164.9,
+  "id": "95429266-c0ac-4137-a209-63b8812b0f23",
+  "seconds": 6.19,
+  "speech_seconds": 4.83,
+  "voice_type": "preset",
+  "words_per_second": 3.31
+ },
  "Juno": {
   "f0_median": 183.9,
   "f0_p10": 145.5,
@@ -438,6 +508,16 @@
   "speech_seconds": 5.4,
   "voice_type": "preset",
   "words_per_second": 2.96
+ },
+ "Kevin": {
+  "f0_median": 133.3,
+  "f0_p10": 99.9,
+  "f0_p90": 195.1,
+  "id": "f1373f24-3b96-433f-9a68-e595810ef608",
+  "seconds": 5.96,
+  "speech_seconds": 4.72,
+  "voice_type": "preset",
+  "words_per_second": 3.39
  },
  "Knox": {
   "f0_median": 129.0,
@@ -469,6 +549,26 @@
   "voice_type": "preset",
   "words_per_second": 3.16
  },
+ "Luna": {
+  "f0_median": 266.7,
+  "f0_p10": 225.4,
+  "f0_p90": 344.9,
+  "id": "375a3398-e3b4-4f91-845d-42181e352899",
+  "seconds": 6.84,
+  "speech_seconds": 4.81,
+  "voice_type": "preset",
+  "words_per_second": 3.33
+ },
+ "Mabel": {
+  "f0_median": 200.0,
+  "f0_p10": 145.5,
+  "f0_p90": 271.2,
+  "id": "fa64fba4-ad02-405e-99d0-1f085d87c706",
+  "seconds": 6.77,
+  "speech_seconds": 5.1,
+  "voice_type": "preset",
+  "words_per_second": 3.14
+ },
  "Maeve": {
   "f0_median": 188.2,
   "f0_p10": 130.9,
@@ -498,6 +598,26 @@
   "speech_seconds": 3.72,
   "voice_type": "preset",
   "words_per_second": 4.3
+ },
+ "Mark": {
+  "f0_median": 123.1,
+  "f0_p10": 103.2,
+  "f0_p90": 169.7,
+  "id": "27c04473-84a9-4b60-a41f-c8e8458bd4f1",
+  "seconds": 6.19,
+  "speech_seconds": 4.76,
+  "voice_type": "preset",
+  "words_per_second": 3.36
+ },
+ "Maya": {
+  "f0_median": 207.8,
+  "f0_p10": 170.2,
+  "f0_p90": 275.9,
+  "id": "b0f766b7-8703-4bd1-b973-f857c36837b6",
+  "seconds": 6.27,
+  "speech_seconds": 4.86,
+  "voice_type": "preset",
+  "words_per_second": 3.29
  },
  "Miles": {
   "f0_median": 170.2,
@@ -549,6 +669,16 @@
   "voice_type": "preset",
   "words_per_second": 3.15
  },
+ "Orion": {
+  "f0_median": 117.6,
+  "f0_p10": 89.0,
+  "f0_p90": 159.0,
+  "id": "ed69c516-92d2-4b30-a967-617737a342e5",
+  "seconds": 5.88,
+  "speech_seconds": 4.45,
+  "voice_type": "preset",
+  "words_per_second": 3.6
+ },
  "Petra": {
   "f0_median": 179.8,
   "f0_p10": 146.8,
@@ -568,6 +698,16 @@
   "speech_seconds": 5.13,
   "voice_type": "preset",
   "words_per_second": 3.12
+ },
+ "Quinn": {
+  "f0_median": 202.5,
+  "f0_p10": 161.6,
+  "f0_p90": 258.9,
+  "id": "80914268-dfae-4f76-8306-36f2d55f58f8",
+  "seconds": 6.69,
+  "speech_seconds": 5.05,
+  "voice_type": "preset",
+  "words_per_second": 3.17
  },
  "Raina": {
   "f0_median": 200.0,
@@ -619,6 +759,26 @@
   "voice_type": "preset",
   "words_per_second": 3.19
  },
+ "Skye": {
+  "f0_median": 211.9,
+  "f0_p10": 175.8,
+  "f0_p90": 271.2,
+  "id": "1fb253b8-928b-4d29-a349-f242a71eaddf",
+  "seconds": 6.35,
+  "speech_seconds": 4.71,
+  "voice_type": "preset",
+  "words_per_second": 3.4
+ },
+ "Sloane": {
+  "f0_median": 176.8,
+  "f0_p10": 131.1,
+  "f0_p90": 245.8,
+  "id": "b57b22a0-f287-405b-bc82-6f08f5e6bb1f",
+  "seconds": 7.16,
+  "speech_seconds": 5.52,
+  "voice_type": "preset",
+  "words_per_second": 2.9
+ },
  "Soraya": {
   "f0_median": 161.6,
   "f0_p10": 120.3,
@@ -628,6 +788,16 @@
   "speech_seconds": 5.38,
   "voice_type": "preset",
   "words_per_second": 2.97
+ },
+ "Sterling": {
+  "f0_median": 106.7,
+  "f0_p10": 83.3,
+  "f0_p90": 150.4,
+  "id": "dc382508-c8bd-443c-8cb2-46e57b8d2e6f",
+  "seconds": 6.53,
+  "speech_seconds": 4.83,
+  "voice_type": "preset",
+  "words_per_second": 3.31
  },
  "Talia": {
   "f0_median": 219.2,
@@ -679,6 +849,16 @@
   "voice_type": "preset",
   "words_per_second": 3.21
  },
+ "Vesper": {
+  "f0_median": 175.8,
+  "f0_p10": 130.1,
+  "f0_p90": 238.8,
+  "id": "c3204739-4084-41a3-9dc5-c805b307ec18",
+  "seconds": 6.84,
+  "speech_seconds": 5.4,
+  "voice_type": "preset",
+  "words_per_second": 2.96
+ },
  "Willow": {
   "f0_median": 181.8,
   "f0_p10": 147.6,
@@ -718,5 +898,15 @@
   "speech_seconds": 4.82,
   "voice_type": "preset",
   "words_per_second": 3.32
+ },
+ "Zoe": {
+  "f0_median": 228.6,
+  "f0_p10": 197.5,
+  "f0_p90": 301.9,
+  "id": "d0374db1-44b9-4f05-939e-0a9ae9dbbe6a",
+  "seconds": 5.96,
+  "speech_seconds": 4.28,
+  "voice_type": "preset",
+  "words_per_second": 3.74
  }
 }

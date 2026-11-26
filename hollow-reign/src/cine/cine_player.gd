@@ -57,6 +57,7 @@ func _make(clip: String) -> VideoStreamPlayer:
 	var s := VideoStreamTheora.new()
 	s.file = path(clip)
 	p.stream = s
+	p.bus = "Cinematics"
 	p.expand = true
 	p.volume_db = -80.0
 	p.mouse_filter = Control.MOUSE_FILTER_IGNORE

@@ -3,6 +3,13 @@ extends Node
 ## synthesized by tools/gen_audio.py.
 
 const VARIANTS := {"swing": 3, "clash": 3, "hit_armor": 2, "hit_flesh": 2, "block": 2, "roar": 3, "footstep": 2}
+## Mix buses and the setting that scales each, with a fixed trim so the layers sit in order:
+## dialogue on top, then combat, interface, music, ambience underneath.
+const BUSES := ["Music", "Dialogue", "Combat", "Ambience", "Interface", "Cinematics"]
+const BUS_SETTING := {"Music": "music", "Dialogue": "voice", "Combat": "sfx", "Ambience": "sfx", "Interface": "sfx", "Cinematics": "sfx"}
+const BUS_TRIM := {"Music": -3.0, "Dialogue": 0.0, "Combat": -1.0, "Ambience": -7.0, "Interface": -5.0, "Cinematics": -2.0}
+const INTERFACE_SOUNDS := ["loot", "levelup", "ui_tap", "ui_back", "bell"]
+const AMBIENT_SOUNDS := ["footstep"]
 var _cache := {}
 var _pool: Array = []
 var _next := 0
@@ -16,13 +23,19 @@ var _layer_tween: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for b in ["Music", "Sfx", "Voice"]:
+	# six mix buses; a limiter on the master keeps stacked impacts from clipping
+	for b in BUSES:
 		if AudioServer.get_bus_index(b) < 0:
 			AudioServer.add_bus()
 			AudioServer.set_bus_name(AudioServer.bus_count - 1, b)
+	if AudioServer.get_bus_effect_count(0) == 0:
+		var lim := AudioEffectLimiter.new()
+		lim.ceiling_db = -1.0
+		lim.threshold_db = -6.0
+		AudioServer.add_bus_effect(0, lim)
 	for i in 12:
 		var p := AudioStreamPlayer.new()
-		p.bus = "Sfx"
+		p.bus = "Combat"
 		add_child(p)
 		_pool.append(p)
 	for i in 2:
@@ -36,9 +49,10 @@ func _ready() -> void:
 	_layer.volume_db = -60.0
 	add_child(_layer)
 	_amb = AudioStreamPlayer.new()
-	_amb.bus = "Sfx"
+	_amb.bus = "Ambience"
 	_amb.volume_db = -8.0
 	add_child(_amb)
+	Game.apply_settings()
 
 func _stream(path: String, loop: bool = false) -> AudioStream:
 	if not _cache.has(path):
@@ -58,6 +72,7 @@ func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float 
 	var p: AudioStreamPlayer = _pool[_next]
 	_next = (_next + 1) % _pool.size()
 	p.stream = s
+	p.bus = "Interface" if INTERFACE_SOUNDS.has(sound) else ("Ambience" if AMBIENT_SOUNDS.has(sound) else "Combat")
 	p.volume_db = vol_db
 	p.pitch_scale = pitch * randf_range(1.0 - jitter, 1.0 + jitter)
 	p.play()

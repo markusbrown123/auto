@@ -12,18 +12,18 @@ Update this file in the same commit as the work.
 | A4 | Timed block | DONE |
 | A5 | Pads fade to 20%, glow, visibility setting | DONE |
 | A6 | Authored walk and death on male knight | DONE — `marketing/overhaul_walk_fall.jpg` |
-| A7 | Rerun all suites; make cinematic playback suite finish | DOING |
+| A7 | Rerun all suites; make cinematic playback suite finish | DONE — all five suites pass; the earlier non-finish was the 120 s command limit, the suite takes about 3 min |
 | A8 | Sentinel greatsword through its own head while open | DONE — two-handed guard holds the point forward |
 | A9 | Parry: blades visibly meet | DONE — stopped blade + pinned knight blade; `--snap=parried` captures |
 | A10 | Block: incoming weapon lands on the shield; shield recoil | DOING — shield braces to the contact point; not yet captured (bot rarely blocks) |
 | A11 | Dodge: blow visibly passes through empty space | TODO |
 | A12 | Hits visibly connect (blade reaches the body at the contact frame) | DONE — fighters step to striking range; `--snap=boss_hit,hit` |
 | A13 | Animation library research (`docs/ANIMATION_SOURCES.md`) | DONE — free CC0 Quaternius UAL downloaded to `art/anim_src/`; paid top-ups listed for the owner |
-| A14 | Import chosen library: bone map, bake, directional cuts, parries, blocks, rolls, reactions, stances | TODO (after A13) |
-| A15 | Left/right dodge rolls (deeper than sidestep) | TODO (uses A14 or owned "dive" clip) |
+| A14 | Import chosen library: bone map, bake, directional cuts, parries, blocks, rolls, reactions, stances | DOING — 41 clips baked skeleton-independently; body motion live for cuts, steps, rolls, hits, stagger, stance, walk, death. Sword arm still IK. Missing from free sets: 8 labelled directions, directional parries, high/low blocks, greatsword and dual sets |
+| A15 | Left/right dodge rolls (deeper than sidestep) | DONE — second tap on the same pad; tests; needs a capture |
 | A16 | Each of the 16 combos visually distinct | TODO |
 | A17 | Authored clips verified on female knight and each boss (`--screen=animtest --model=…`) | TODO |
-| A18 | Sentinel: richer attack set, own movement style | TODO |
+| A18 | Sentinel: richer attack set, own movement style | DONE — 20 patterns, three phases, drill/thrust/give-ground identity; balance tests pass |
 | A19 | Subtle temporary sword trails; replace drawn parry arrow with blade glint | TODO |
 | A20 | Camera redesign for the duel | DOING — camera now tracks the knight's real position and sits wider |
 | A21 | Courtyard art pass | TODO |
@@ -34,8 +34,8 @@ Update this file in the same commit as the work.
 ## B. Audio
 | # | Task | Status |
 |---|---|---|
-| B1 | Six buses: Music, Dialogue, Combat, Ambience, Interface, Cinematics | TODO |
-| B2 | Casting profiles (`docs/VOICE_BIBLE.md`) and audition reel with several candidates per role | TODO — reel then BLOCKED on owner's ears |
+| B1 | Six buses: Music, Dialogue, Combat, Ambience, Interface, Cinematics | DONE — routed with trims, master limiter, dialogue ducks music and ambience. Unheard |
+| B2 | Casting profiles (`docs/VOICE_BIBLE.md`) and audition reel with several candidates per role | DOING — profiles written; measured catalogue building; reel next, then BLOCKED on owner's ears |
 | B3 | Combat effects synchronised to contact frames; footsteps, armour, effort sounds | TODO |
 | B4 | Adaptive music layers | TODO |
 | B5 | `SOUND_DESIGN_BIBLE.md`, `SOUNDTRACK_PLAN.md`, `AUDIO_ASSET_MANIFEST.md` | TODO |

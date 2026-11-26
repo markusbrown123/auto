@@ -20,7 +20,7 @@ func _ready() -> void:
 	if j.parse(FileAccess.get_file_as_string("res://data/dialogue.json")) == OK:
 		data = j.data
 	_player = AudioStreamPlayer.new()
-	_player.bus = "Voice"
+	_player.bus = "Dialogue"
 	add_child(_player)
 	_layer = CanvasLayer.new()
 	_layer.layer = 60
@@ -90,10 +90,12 @@ func stop() -> void:
 	_duck(false)
 
 func _duck(on: bool) -> void:
-	var idx := AudioServer.get_bus_index("Music")
-	if idx >= 0:
-		var base: float = linear_to_db(maxf(float(Game.settings.music), 0.0001))
-		AudioServer.set_bus_volume_db(idx, base - (9.0 if on else 0.0))
+	# speech pushes music and ambience down so the words stay on top
+	for bus_name: String in ["Music", "Ambience"]:
+		var idx := AudioServer.get_bus_index(bus_name)
+		if idx >= 0:
+			var base: float = linear_to_db(maxf(float(Game.settings[Sfx.BUS_SETTING[bus_name]]), 0.0001)) + float(Sfx.BUS_TRIM[bus_name])
+			AudioServer.set_bus_volume_db(idx, base - (9.0 if on else 0.0))
 
 ## Plays a scene line by line. Await it to block, or call without await to let it run alongside play.
 func play(id: String, force: bool = false) -> void:

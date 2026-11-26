@@ -591,7 +591,15 @@ func brace(world_point: Vector3, hold: float = 0.3) -> void:
 
 func dodge(side: float) -> void:
 	_dodge_side = side
+	_rolling = false
 	_go(Mode.DODGE, 0.5)
+
+## Turn the sidestep in progress into a roll.
+var _rolling := false
+func roll(side: float) -> void:
+	_dodge_side = side
+	_rolling = true
+	_go(Mode.DODGE, 0.75)
 
 func roar() -> void:
 	_go(Mode.ROAR, 2.0)
@@ -624,6 +632,8 @@ var _walk_amount := 0.0       # 0 standing .. 1 full stride, eased so starts and
 var _last_world := Vector3.ZERO
 var _prev_world := Vector3.ZERO
 var _step_dir := Vector3(0, 0, -1)   # which way the feet are travelling, in the rig's own space
+var footsteps := false                # play a footfall as each foot lands
+var _step_i := 0
 var combat_steps := false            # in a duel: short steps in any direction, guard kept up
 const STRIDE := 0.78          # metres per step
 const WALK_CYCLES := 1.0      # full left-right cycles in the authored walk clip
@@ -655,6 +665,12 @@ func _process(delta: float) -> void:
 			if local.length() > 0.00001:
 				_step_dir = _step_dir.lerp(local.normalized(), 0.25).normalized()
 	_prev_world = global_position
+	# a footfall each time a foot comes down, heard on the frame it lands
+	var step_i := int(floor(_walk_phase / PI))
+	if step_i != _step_i:
+		_step_i = step_i
+		if footsteps and _walk_amount > 0.35:
+			Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
 	_walk_amount = lerpf(_walk_amount, 1.0 if (walking and moved > 0.0005) else 0.0, 1.0 - exp(-dt * 7.0))
 	_solve(dt)
 
@@ -952,8 +968,13 @@ func _pick_clip() -> void:
 			Mode.STAGGER:
 				n = "stunned"; t = _clock; w = 0.7
 			Mode.DODGE:
-				n = "step_r" if _dodge_side * mirror > 0.0 else "step_l"
-				t = clampf(_t / maxf(_dur, 0.01), 0.0, 1.0) * SkinDriver.clip_length(n); w = 0.9
+				if _rolling:
+					n = "roll_r" if _dodge_side * mirror > 0.0 else "roll_l"
+					full = true
+				else:
+					n = "step_r" if _dodge_side * mirror > 0.0 else "step_l"
+				t = clampf(_t / maxf(_dur, 0.01), 0.0, 1.0) * SkinDriver.clip_length(n); w = 0.95 if _rolling else 0.9
+				skin.clip_travel = 0.0      # the duel moves the body; the clip only shapes it
 			Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW:
 				n = "sword_attack" if _arc_dir.y < -0.7 else ("cut_a" if _arc_dir.x < 0.0 else "cut_b")
 				var u := clampf(_t / maxf(_dur, 0.01), 0.0, 1.0)

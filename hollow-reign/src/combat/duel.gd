@@ -131,6 +131,9 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	Sfx.music_for("boss_" + foe_id, str(foe.music))
 	_noise.frequency = 2.0
 	_begin_intro(bool(opts.get("skip_intro", false)) or training)
+	player_rig.footsteps = true
+	if foe_rig is FighterRig:
+		foe_rig.footsteps = true
 	if training:
 		hud.show_training()
 		foe_rig.recover()
@@ -522,6 +525,10 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			p_side_owed += float(d.side) * 1.25     # a real step across the ground, not a lean
 			player_rig.dodge(float(d.side))
 			Sfx.play("dodge", -3.0)
+		&"player_roll":
+			p_side_owed += float(d.side) * 1.3      # the roll carries on past where the sidestep would have stopped
+			player_rig.roll(float(d.side))
+			Sfx.play("dodge", -1.0, 0.8)
 		&"combo_reset":
 			hud.training_cuts([], "")
 		&"player_advance":

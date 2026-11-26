@@ -22,6 +22,10 @@ const DODGE_IFRAME_START := 0.03
 const DODGE_IFRAME_END := 0.42
 const DODGE_PERFECT := 0.20
 const DODGE_COST := 14.0
+## A second tap on the same side during a sidestep turns it into a roll: further, safe for longer, dearer.
+const ROLL_WINDOW := 0.3
+const ROLL_EXTRA_TIME := 0.35
+const ROLL_EXTRA_COST := 8.0
 const HURT_TIME := 0.42
 const STUN_TIME := 1.3
 const BUFFER_TIME := 0.18
@@ -50,6 +54,7 @@ var p_t := 0.0           # time left in state
 var p_elapsed := 0.0     # time spent in state
 var p_block := false
 var p_dodge_side := 0
+var p_roll := false
 var p_swing := {}        # pending attack swing {dir, contact, landed}
 var p_parry := {}        # {t, dir}
 var p_buffer := {}       # {kind, arg, t}
@@ -253,6 +258,13 @@ func input_relic() -> bool:
 func input_dodge(side: int) -> void:
 	if over:
 		return
+	if p_state == P.DODGE and side == p_dodge_side and not p_roll and p_elapsed <= ROLL_WINDOW and pl.stamina >= 1.0:
+		p_roll = true
+		p_t += ROLL_EXTRA_TIME
+		_spend(ROLL_EXTRA_COST)
+		stats["rolls"] = int(stats.get("rolls", 0)) + 1
+		_emit(&"player_roll", {"side": side})
+		return
 	if p_state != P.FREE:
 		p_buffer = {"kind": "dodge", "arg": side, "t": time}
 		return
@@ -260,6 +272,7 @@ func input_dodge(side: int) -> void:
 		_emit(&"exhausted")
 		return
 	_spend(DODGE_COST)
+	p_roll = false
 	p_dodge_side = side
 	_set_p(P.DODGE, DODGE_TIME)
 	_emit(&"player_dodge", {"side": side})
@@ -577,7 +590,7 @@ func _resolve_strike() -> void:
 	var result := "hit"
 	var perfect := false
 	# --- dodge
-	if p_state == P.DODGE and p_elapsed >= DODGE_IFRAME_START and p_elapsed <= DODGE_IFRAME_END * assist:
+	if p_state == P.DODGE and p_elapsed >= DODGE_IFRAME_START and p_elapsed <= (DODGE_IFRAME_END + (ROLL_EXTRA_TIME if p_roll else 0.0)) * assist:
 		var need: String = a.dodge
 		var side := "L" if p_dodge_side < 0 else "R"
 		if need == "any" or need == side:

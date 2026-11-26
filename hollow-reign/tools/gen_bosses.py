@@ -193,8 +193,15 @@ B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of t
    C("overhead",3,[A("D",1.45,28,swing=0.34,kind="slam")],1.8),
    C("rise",2,[A("U",1.2,18)],1.4),
    C("two_sweep",2,[A("L",1.2,18),A("R",0.9,20)],1.7,tags=("anti_dodge",)),
+   # the gatekeeper's drill: formal, crossing cuts; a thrust to hold the line; a step back that sweeps
+   C("drill_cross",2,[A("DL",1.15,20),A("DR",0.85,20)],1.6,tags=("anti_dodge",)),
+   C("gate_thrust",2,[A("U",1.0,22,swing=0.22,kind="lunge")],1.4,range="far"),
+   C("give_ground",2,[A("R",1.0,18,kind="sweep")],0.6,retreat=True),
   ]),
   dict(at=0.5, speed=1.08, roar="The Sentinel's armour splits. Embers pour from the seams.", combos=[
+   C("ember_charge",3,[A("D",1.1,30,kind="lunge",element="fire")],1.6,range="far"),
+   C("rising_cross",2,[A("UL",1.0,22),A("DR",0.8,24),A("U",0.8,20)],1.9,tags=("anti_dodge",)),
+   C("give_ground",2,[A("L",0.95,20,kind="sweep",element="fire")],0.6,retreat=True),
    C("sweep_l",2,[A("L",1.15,22,element="fire")],1.4),
    C("sweep_r",2,[A("R",1.15,22,element="fire")],1.4),
    C("overhead",3,[A("D",1.4,32,swing=0.34,kind="slam",element="fire")],1.8),
@@ -202,6 +209,15 @@ B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of t
    C("delayed",2,[A("D",2.1,34,swing=0.26,kind="slam")],1.9,tags=("anti_parry",)),
    C("pommel",2,[A("U",0.95,16,guard=75,kind="thrust")],1.3,tags=("anti_block",)),
    C("cinder_wave",1,[A("L",1.5,30,unblockable=True,dodge="none",kind="sweep",element="fire")],1.8,tags=("anti_block","anti_dodge")),
+  ]),
+  # the last order: he stops giving ground, and every pattern is the drill at full speed
+  dict(at=0.22, speed=1.16, roar="He plants the blade and speaks the oath of the gate one last time.", combos=[
+   C("final_watch",3,[A("L",1.05,22),A("R",0.8,22),A("DL",0.8,24),A("D",0.95,34,kind="slam",element="fire")],2.3,tags=("anti_dodge",)),
+   C("drill_cross",3,[A("DL",1.0,24),A("DR",0.75,24)],1.5,tags=("anti_dodge",)),
+   C("ember_charge",3,[A("D",1.0,32,kind="lunge",element="fire")],1.5,range="far"),
+   C("delayed",2,[A("D",2.0,38,swing=0.26,kind="slam")],1.9,tags=("anti_parry",)),
+   C("pommel",2,[A("U",0.9,18,guard=80,kind="thrust")],1.3,tags=("anti_block",)),
+   C("oath",1,[A("D",1.7,40,unblockable=True,kind="slam",element="fire")],2.2,tags=("anti_block",)),
   ])]))
 # ---------------------------------------------------------------- 2 Hollow Executioner
 B.append(dict(id="hollow_executioner", name="The Hollow Executioner", title="Last Justice of the Blackwood", region="blackwood", boss=True,

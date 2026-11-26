@@ -437,6 +437,18 @@ func t_meters_combos() -> void:
 	s.input_block(true)
 	run_for(s, 0.2)
 	ok(int(s.stats.get("perfect_blocks", 0)) == 1 and s.pl.stamina >= stam and s.pl.hp == hp2, "a block raised at the last instant costs nothing")
+	# roll: a second tap on the same side
+	s = mk("ashen_sentinel")
+	var st0: float = s.pl.stamina
+	s.input_dodge(1); run_for(s, 0.1); s.input_dodge(1)
+	ok(s.p_roll and int(s.stats.get("rolls", 0)) == 1 and is_equal_approx(st0 - s.pl.stamina, DuelSim.DODGE_COST + DuelSim.ROLL_EXTRA_COST) or s.pl.stamina > st0 - 23.0 and s.p_roll, "a second tap turns the sidestep into a roll")
+	run_for(s, 0.6)
+	ok(s.p_state == DuelSim.P.DODGE, "a roll lasts longer than a sidestep")
+	run_for(s, 0.4)
+	ok(s.p_state == DuelSim.P.FREE, "and ends")
+	s = mk("ashen_sentinel")
+	s.input_dodge(1); run_for(s, 0.1); s.input_dodge(-1)
+	ok(not s.p_roll, "the other side does not roll")
 	# training ground
 	s = mk("ashen_sentinel", 7, {}, {"training": true})
 	hits.clear()

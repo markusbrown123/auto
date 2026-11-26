@@ -399,11 +399,11 @@ func apply_settings() -> void:
 	if vp:
 		vp.scaling_3d_scale = [0.6, 0.8, 1.0][q]
 		vp.msaa_3d = Viewport.MSAA_DISABLED if q == 0 else Viewport.MSAA_2X
-	for bus_name in ["Music", "Sfx", "Voice"]:
+	for bus_name: String in Sfx.BUSES:
 		var idx := AudioServer.get_bus_index(bus_name)
 		if idx >= 0:
-			var vol: float = float(settings[bus_name.to_lower()])
-			AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(vol, 0.0001)))
+			var vol: float = float(settings[Sfx.BUS_SETTING[bus_name]])
+			AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(vol, 0.0001)) + float(Sfx.BUS_TRIM[bus_name]))
 			AudioServer.set_bus_mute(idx, vol <= 0.001)
 
 func haptic(ms: int, strength: float = 0.6) -> void:

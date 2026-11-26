@@ -72,3 +72,14 @@ All three dragons rigged and seen in game. Running total: Tripo ≈ $55.85, Higg
 | Second audition reel (deeper, older direction): 30 takes | Higgsfield speech | 15.9 | about $0.65 |
 
 Running total: Tripo ≈ $55.85, Higgsfield ≈ $13.65, combined ≈ **$69.50 of the $100 cap**.
+
+## Final production brief pass (2026-11-26)
+
+| Item | Service | Credits | Cost |
+|---|---|---|---|
+| Third audition reel: 34 takes, cast by character, unprocessed | Higgsfield speech | about 16 | about $0.65 |
+| Witness relic concept | Higgsfield image | about 1 | about $0.04 |
+| Witness relic model | Tripo static prop | 30 | $0.30 |
+
+Running total: Tripo ≈ $56.15, Higgsfield ≈ $14.35, combined ≈ **$70.50 of the original $100 cap**.
+The further $100 the owner reports adding for graphics was not visible on either account when checked (Tripo 9,415 credits, Higgsfield 880 credits, both unchanged), so nothing has been spent against it.

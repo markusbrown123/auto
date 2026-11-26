@@ -5,36 +5,37 @@ casting_reel.mp3 (all, in order) and casting_reel.md (what you are hearing). ~0.
 Usage: tools/voice_reel.py [role ...]"""
 import json, os, subprocess, sys, tempfile
 CAT = json.load(open("docs/VOICE_CATALOG.json"))
-# Second reel, after the owner's note: older, deeper, graver — the weight of dark fantasy epics.
-# Cast from the lowest and slowest voices in the measured catalogue, written in a plainer, older cadence,
-# then set a little deeper and placed in stone (pitch down about a semitone, low shelf, short hall).
-# role: (pitch lo, pitch hi, wants wide range, stability, line)
+# Third reel, to the final voice direction: mature, weathered, grounded; cast by character, not by depth alone.
+# No pitch shifting, no echo, no helm effect: the takes are the voices as generated, only levelled.
+# Each role draws from a different band so the cast does not collapse onto the same few deep voices.
+# role: (pitch lo, pitch hi, wants wide range, stability, line, how many candidates)
 ROLES = {
- "narrator": (140, 175, False, 0.6, "In the elder days, men begged the gods to spare them from death. The gods kept their silence. And so men built a thing that would answer."),
- "lyra": (150, 185, True, 0.45, "Can you hear me? Good. Lie still a while. You have been a long time dead, and I would not have you do it twice."),
- "player_m": (80, 108, False, 0.6, "Who speaks? ... And why does my hand know the weight of this blade?"),
- "player_f": (140, 175, False, 0.6, "Who speaks? ... And why does my hand know the weight of this blade?"),
- "orren": (75, 102, True, 0.45, "So. You are what she woke. Hm. The shoulders are wrong. The feet are worse. We begin with the feet."),
- "sentinel": (70, 98, False, 0.75, "Halt. Name your allegiance. The gate is shut. The gate has ever been shut."),
- "widow": (140, 175, True, 0.45, "That stance. I knew the soldier who taught it. He died badly. Come, then. Show me whether he taught you why."),
- "monarch": (75, 105, True, 0.5, "Look upon what remains of us. I did not unmake it. I am only the last of it that would not leave."),
- "gravewarden": (60, 92, False, 0.75, "These are not tombs, child. Nothing here was ever suffered to finish dying."),
- "devourer": (95, 150, True, 0.4, "I had a daughter once. I think ... I think she had my hands."),
+ "witness": (95, 128, True, 0.4, "Ah. At last. I had begun to suspect the dead were better company. ... That gate once bore the banners of thirteen kings. Now look at it. Eternity has a peculiar sense of humour.", 6),
+ "lyra": (185, 215, True, 0.45, "Can you hear me? Good. Don't try to stand just yet. You've been gone a long while, and I'd rather not lose you twice.", 4),
+ "narrator": (160, 185, False, 0.6, "The Everbound feared neither age nor sickness. What they feared was being forgotten. And so they built a crown that would remember them for ever.", 3),
+ "player_m": (100, 125, False, 0.55, "What was it built for? ... Can it be killed?", 3),
+ "player_f": (175, 205, False, 0.55, "What was it built for? ... Can it be killed?", 3),
+ "orren": (88, 112, True, 0.4, "So you're what she woke. Hm. Shoulders are wrong. Feet are worse. Well. We'll start with the feet.", 3),
+ "monarch": (85, 110, False, 0.55, "I was never a king. I was the one who stayed. Somebody had to keep the lights burning, and you will find it is harder than it looks.", 3),
+ "widow": (165, 195, False, 0.5, "That stance. I knew the soldier who taught it. He died badly. Let's see whether he taught you why.", 3),
+ "frostking": (95, 120, False, 0.65, "I watched men become gods. Then I watched gods become machines. Forgive an old man for wanting to sleep through the rest.", 3),
+ "archivist": (125, 160, False, 0.75, "Record incomplete. Witness deceased. Memory ... retained. I am sorry. I was asked to forget this, and I did not.", 3),
 }
-# deeper, and in a hall of stone
-FX = "asetrate=44100*0.94,aresample=44100,atempo=1.03,bass=g=5:f=140,treble=g=-2:f=5000,aecho=0.85:0.5:60|140:0.22|0.12"
-OUT = "marketing/audition/casting_v2"
+FX = "loudnorm=I=-18:TP=-2"
+OUT = "marketing/audition/casting_v3"
 os.makedirs(OUT, exist_ok=True)
-notes, parts = ["# Casting reel\n", "Second reel: deeper, older, graver. Three candidates per role, in this order. Each take is set about a semitone lower and placed in a stone hall. Nobody has listened to these; the choice is yours.\n"], []
+used = set()
+notes, parts = ["# Casting reel\n", "Third reel: cast by character. Unprocessed takes (levelled only), each voice auditions for one role only. Candidates in this order. Nobody has listened to these; the choice is yours.\n"], []
 for role in (sys.argv[1:] or ROLES):
-    lo, hi, wide, stab, line = ROLES[role]
+    lo, hi, wide, stab, line, count = ROLES[role]
     mid = (lo + hi) / 2.0
     def score(n):
         v = CAT[n]; rng = v["f0_p90"] - v["f0_p10"]
         # lean low and slow: below the middle of the band is better than above it, and unhurried is better than quick
         off = (v["f0_median"] - mid) / (hi - lo)
-        return (abs(off) if off < 0 else off * 2.0) - (0.004 * rng if wide else -0.004 * rng) + 0.25 * (v["words_per_second"] - 3.0)
-    picks = sorted(CAT, key=score)[:3]
+        return abs(off) - (0.004 * rng if wide else -0.004 * rng) + 0.2 * (v["words_per_second"] - 3.0)
+    picks = [n for n in sorted(CAT, key=score) if n not in used][:count]
+    used.update(picks)          # nobody auditions for two roles
     notes.append("\n## %s\nLine: \"%s\"\n" % (role, line))
     for k, name in enumerate(picks, 1):
         v = CAT[name]; path = "%s/%s_%d_%s.mp3" % (OUT, role, k, name)

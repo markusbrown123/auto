@@ -29,6 +29,7 @@ var spin := 0.6                   # the middle piece's turn, radians
 var res_scale := 1.0              # viewport pixels per screen pixel (lowered on the Performance preset)
 var moving := false
 var zoom := 1.0                   # size of the middle piece (the armoury shows it large)
+var drop := 0.0                   # pieces sit this far below the middle (world units; the viewport is WORLD_H tall), clear of a heading laid over the top
 
 var _target := 0.0
 var _touch := -1
@@ -294,7 +295,7 @@ func _layout() -> void:
 			_world.add_child(node)
 		seen[k] = true
 		var s := _scale_at(o)
-		node.position = Vector3(o * spacing() / ppu, -0.02, -0.6 * minf(absf(o), 2.0))
+		node.position = Vector3(o * spacing() / ppu, -0.02 - drop, -0.6 * minf(absf(o), 2.0))
 		# the push back in depth is undone in size, so the 2D marks and the 3D pieces agree on where things are
 		var depth: float = (WORLD_H / (2.0 * tan(deg_to_rad(FOV * 0.5))) + 0.6 * minf(absf(o), 2.0)) / (WORLD_H / (2.0 * tan(deg_to_rad(FOV * 0.5))))
 		node.position.x *= depth
@@ -335,7 +336,7 @@ func _exit_tree() -> void:
 func _draw() -> void:
 	if entries.is_empty():
 		return
-	var cy := size.y * 0.5
+	var cy := size.y * 0.5 + drop * size.y / WORLD_H
 	var lo := int(floorf(pos)) - 2
 	for i in range(maxi(lo, 0), mini(lo + 6, entries.size())):
 		var e: Dictionary = entries[i]
@@ -380,6 +381,8 @@ func _draw_over() -> void:
 		var a := _alpha_at(o)
 		var c := Vector2(size.x * 0.5 + o * spacing(), size.y * 0.5)
 		var near := clampf(1.0 - absf(o), 0.0, 1.0)
+		if e.get("locked", false):
+			c.y += drop * size.y / WORLD_H
 		if e.get("locked", false):
 			var h := 30.0 * s
 			_over.draw_circle(c + Vector2(0, -size.y * 0.02), h * 0.95, Color(0.03, 0.03, 0.04, 0.72 * a))

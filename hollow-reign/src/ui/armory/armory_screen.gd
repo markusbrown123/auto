@@ -405,7 +405,8 @@ func _enter_slot(s: String, want_item: String = "") -> void:
 	entries = _build_entries()
 	# a whole suit is a five-megabyte skinned model with its own textures: keep only the three that can be on show
 	carousel.keep = 3 if slot == "chest" else 7
-	carousel.zoom = 1.1 if slot == "chest" else 1.25       # the middle piece is shown large
+	carousel.zoom = 1.0 if slot == "chest" else (1.2 if slot == "weapon" else 1.08)       # the middle piece is shown large
+	carousel.drop = 0.03 if slot == "chest" else 0.08                                     # (and clear of the heading over the top of the case)
 	ItemModel.keep = 4 if slot == "chest" else 10
 	var at := 0
 	var equipped = Game.profile.equipped.get(slot)

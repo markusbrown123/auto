@@ -74,7 +74,7 @@ A headland of grass and heather above the sea; a worn road that climbs it in swi
 | T6 | `gen1_records` 2 | low angle | pans | the Monarch comes down | EXISTS (live) |
 | D2 | — | the duel's own camera | `CamDirector` | **the clash**; taken on a landed cut | EXISTS (live) |
 | F1 | — | MS by the block in the Engine's room | ease in | the door comes down; the forebear reaches the block; the sword goes in; light | EXISTS (live) |
-| F2 | `gen1_seal` 1, 2 | LS across the cradle to the door | slow drift | the Monarch in the doorway; the forebear goes down at the foot of the cradle | EXISTS (live) |
+| F2 | `gen1_seal` 1, 2 | LS across the cradle to the door | slow drift | the Monarch is only a voice beyond the shut door; the forebear goes down at the foot of the cradle | EXISTS (live) |
 | F3 | `gen1_seal` 3 | MCU, low: **the frame the Awakening opens on** | slow drift back | the one light goes out | EXISTS (live) |
 | F4 | `gen1_close_*` | black; the mark | — | — | EXISTS (live) |
 

@@ -71,7 +71,7 @@ Consequences that carry: the Winch Gate, the Rope Bridge, the Sacristy Door, the
 | The guardian | "Show the warden to the gate." A Throne Guard leaves the wall and turns. **A real duel**, winnable; two prompts say what the shield and a cut are for. Lost: it is taken again. | **played** | `gen1_guard` (1, new) |
 | The records | The forebear goes for the seal instead of the door. The Monarch comes down himself. | watched | `gen1_records` (2, new) |
 | The clash | **A real duel** with the Monarch at full strength. After nine seconds, the cut that makes four landed is the one the story answers: the hall is sealed mid-exchange. (A player who lands nothing is released at 32 seconds; nobody dies to an ordinary blow here.) | **played** | none: no words in a fight |
-| The fall | Behind the seal, the Engine's room. The door comes down. The sword goes into the block; light goes out through it. The forebear reaches the foot of the cradle. The Monarch, in the doorway. | watched | `gen1_seal` (3, new) |
+| The fall | Behind the seal, the Engine's room. The door comes down. The sword goes into the block; light goes out through it. The forebear reaches the foot of the cradle. The Monarch is heard through the door he has shut. | watched | `gen1_seal` (3, new) |
 | The mark | Black. The family's mark. | watched | `gen1_close_m` / `_f` (2 each, new) |
 
 Lines as written (all new, text only):

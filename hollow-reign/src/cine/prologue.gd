@@ -507,12 +507,7 @@ func _beat_fall(me: int) -> void:
 	hall.add_child(hero)
 	hero.build(forebear_look(), false)
 	hero.footsteps = true
-	monarch = FighterRig.new()
-	hall.add_child(monarch)
-	monarch.build(CineActor.foe_look("forgotten_monarch"), true)
-	monarch.position = Vector3(0, 0, -7.4)
-	monarch.rotation.y = PI
-	monarch.time_scale = 0.7
+	# (the Monarch is not in the room: the door has come down between them, and he speaks through it)
 	var key := SpotLight3D.new()
 	key.light_color = Color("#ffd9a0")
 	key.light_energy = 4.0
@@ -574,8 +569,8 @@ func _beat_fall(me: int) -> void:
 		return
 	hero.create_tween().tween_property(hero, "rotation:y", PI, 1.2)
 	hero.hold("wounded", 2.4)
-	cam.cut(Vector3(-2.6, 1.1, 5.2), Vector3(0.4, 1.0, -2.0), 42.0)
-	cam.move(Vector3(-2.0, 0.9, 5.0), Vector3(0.6, 0.9, -2.0), 9.0)
+	cam.cut(Vector3(-1.3, 1.2, 5.3), Vector3(0.3, 1.0, -2.0), 42.0)
+	cam.move(Vector3(-0.9, 1.0, 5.1), Vector3(0.4, 0.9, -2.0), 9.0)
 	if not await _until("gen1_seal", 2, me):
 		return
 	# the last word is the forebear's: low and close, where the heir will be found

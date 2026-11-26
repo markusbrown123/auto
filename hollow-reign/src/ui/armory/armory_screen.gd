@@ -21,7 +21,7 @@ const FOCUS := {
 	"helm": ["Head", 0.0, 2.0, 0.45, 0.25, "rest"],
 	"chest": ["Spine2", -0.05, 2.9, 0.46, 0.2, "rest"],
 	"gauntlets": ["Spine", 0.0, 2.9, 0.46, 0.3, "rest"],
-	"legs": ["Hips", -0.5, 3.0, 0.47, 0.25, "rest"],
+	"legs": ["Hips", -0.5, 2.9, 0.5, 0.25, "rest"],
 	"weapon": ["Spine2", 0.0, 3.3, 0.47, 0.55, "arms"],
 	"shield": ["Spine2", -0.1, 3.0, 0.47, -0.8, "arms"],
 	"ring": ["", 0.0, 4.25, 0.485, 0.2, "rest"],
@@ -122,6 +122,7 @@ func leave() -> void:
 	if inspect and is_instance_valid(inspect):
 		inspect.queue_free()
 	previewing = ""
+	ItemModel.clear()
 	backdrop.rig_script = null
 	backdrop.studio(false)
 	backdrop.cam_speed = 1.6
@@ -377,6 +378,9 @@ func _enter_slot(s: String, want_item: String = "") -> void:
 	slot = s
 	_show_grid(false)
 	entries = _build_entries()
+	# a whole suit is a five-megabyte skinned model with its own textures: keep only the three that can be on show
+	carousel.keep = 3 if slot == "chest" else 7
+	ItemModel.keep = 4 if slot == "chest" else 10
 	var at := 0
 	var equipped = Game.profile.equipped.get(slot)
 	for i in entries.size():

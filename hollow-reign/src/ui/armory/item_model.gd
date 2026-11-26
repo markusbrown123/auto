@@ -6,7 +6,7 @@ extends RefCounted
 ## for them and the screens draw a medallion instead.
 ## Loading never blocks: `want` starts a background load, `ready` says when `build` can run without a hitch.
 
-const KEEP := 10                 # loaded scenes held for reuse; older ones are let go
+static var keep := 10            # loaded scenes held for reuse; older ones are let go (the screen lowers it for whole suits)
 static var _held := {}           # path -> PackedScene
 static var _order: Array = []    # least recently used first
 static var _pending := {}        # path -> true
@@ -62,7 +62,7 @@ static func ready(list: Array) -> bool:
 				_pending.erase(p)      # failed: treat as nothing to wait for
 				continue
 		all = false
-	while _order.size() > KEEP:
+	while _order.size() > keep:
 		_held.erase(_order.pop_front())
 	return all
 
@@ -72,6 +72,11 @@ static func known(list: Array) -> bool:
 		if not _held.has(p) and not _pending.has(p):
 			return false
 	return true
+
+## Lets go of every scene held here (the armoury calls it on the way out); what is on screen keeps its own.
+static func clear() -> void:
+	_held.clear()
+	_order.clear()
 
 static func loading() -> int:
 	return _pending.size()

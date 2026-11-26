@@ -745,6 +745,7 @@ func brace(world_point: Vector3, hold: float = 0.3) -> void:
 	_brace_at.z = minf(_brace_at.z, -0.25)
 	_brace_t = hold
 	_hand_l = _brace_at
+	_au_brace = 0.0
 	_solve(0.0)
 
 func dodge(side: float) -> void:
@@ -815,6 +816,7 @@ func _process(delta: float) -> void:
 	_clock += dt
 	_t += dt
 	_parry_t = maxf(0.0, _parry_t - dt)
+	_au_tick(dt)
 	# stride phase advances with ground actually covered, so feet never slide
 	var moved := global_position.distance_to(_last_world) / maxf(scale.x, 0.01)
 	_last_world = global_position
@@ -1054,6 +1056,8 @@ func _solve(dt: float) -> void:
 		twist_t = lerpf(twist_t, 0.14 * sw, w)
 		lean_t = lerpf(lean_t, 0.10, w)
 		crouch_t = lerpf(crouch_t, 0.03 + 0.035 * absf(cos(_walk_phase)), w)
+	if _sheath_w > 0.5 and mode == Mode.GUARD:
+		hand_t = Vector3(0.33, 0.9, -0.04)
 	if blocking and (mode == Mode.GUARD or mode == Mode.HURT):
 		lean_t = 0.14
 		crouch_t = 0.12
@@ -1258,7 +1262,7 @@ func _fit_props(hands: Dictionary) -> void:
 	# --- left hand
 	if two_handed:
 		weapon_l.position = pr
-		if mode != Mode.DEAD:
+		if mode != Mode.DEAD and _sheath_w <= 0.0:
 			skin.reach_hand("Left", pr - dir * _off_grip)
 			skin.grip("Left", dir)
 	elif dual:
@@ -1281,6 +1285,7 @@ func _fit_props(hands: Dictionary) -> void:
 		weapon_l.transform = Transform3D(_basis_y(dl, Vector3(0, 0, -1) if absf(dl.z) < 0.9 else Vector3.RIGHT), pl)
 	else:
 		weapon_l.position = hands.l
+	_fit_sheath()
 
 const SHIELD_RIM := [Vector3(0.27, 0.41, 0), Vector3(-0.27, 0.41, 0), Vector3(0.27, -0.41, 0), Vector3(-0.27, -0.41, 0), Vector3(0, -0.41, 0), Vector3(0, 0.41, 0)]
 
@@ -1711,6 +1716,7 @@ func _au_apply() -> void:
 	skin.clip_look = false
 	skin.clip_roll = 0.0
 	if _au.is_empty():
+		_au_other()
 		return
 	skin.clip = str(_au.clip)
 	skin.clip_t = float(_au.freeze) if float(_au.freeze) >= 0.0 else _au_time(_au_t)
@@ -1721,3 +1727,172 @@ func _au_apply() -> void:
 	skin.clip_roll = float(_au.roll)
 	skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
 	skin.arm_l = 0.0 if _brace_t > 0.0 else float(_au.arm_l)
+
+
+# ---------------------------------------------------------------- authored parry, block, draw and sheath
+## Parry and block take the body (and the shield arm) from the packs' clips; the arm that makes the contact stays on
+## its pin, so the blade still meets the foe's blade at the world point the duel gives (`clash`) and the shield still
+## goes to the blow (`brace`). Dual blades have no such clips and stay procedural.
+const AU_PARRY := {"ss": "ss_parry", "th": "th_parry"}
+const AU_BLOCK := {"ss": "ss_block_idle", "th": "th_guard"}
+const AU_BLOCK_HIT := {"ss": "ss_block_hit", "th": "th_block_hit_f"}
+const AU_DRAW_TIME := 0.8     # seconds a draw or a sheathing takes
+var _au_brace := 9.0          # seconds since the shield last took a blow
+var _au_clock := 0.0          # time in the present authored state
+
+func _au_tick(dt: float) -> void:
+	_au_brace += dt
+	_au_clock += dt
+	if _draw_dir != 0:
+		_draw_t += dt
+		if _draw_t >= AU_DRAW_TIME:
+			_sheath_w = 1.0 if _draw_dir < 0 else 0.0
+			_draw_dir = 0
+	if _preview_block > 0.0:
+		_preview_block -= dt
+		if _preview_block <= 0.0:
+			blocking = false
+
+func _au_other() -> void:
+	var st := ""
+	var n := ""
+	var t := 0.0
+	var k := au_set()
+	if authored and use_clips and test_clip == "" and skin.ok and mode != Mode.DEAD:
+		if _draw_dir != 0 and mode == Mode.GUARD:
+			st = "draw"
+			n = "ss_unsheath" if _draw_dir > 0 else "ss_sheath"
+			t = _draw_t / AU_DRAW_TIME * SkinDriver.clip_length(n)
+		elif _parry_t > 0.0 and mode in [Mode.STRIKE, Mode.GUARD] and AU_PARRY.has(k):
+			st = "parry"
+			n = AU_PARRY[k]
+			t = (0.5 - _parry_t) * (1.6 if k == "ss" else 0.66)
+		elif blocking and mode == Mode.GUARD and AU_BLOCK.has(k) and (has_shield or two_handed):
+			if _au_brace < 0.5:
+				st = "bhit"
+				n = AU_BLOCK_HIT[k]
+				t = _au_brace
+			else:
+				st = "block"
+				n = AU_BLOCK[k]
+				t = _clock
+	if st != "" and not SkinDriver.has_clip(n):
+		st = ""
+	if st != _au_state:
+		# a pinned arm is not eased: the contact pose is taken on the frame the duel asks for it
+		_xfade(0.1 if st != "" else AU_OUT)
+		_au_state = st
+		_au_clock = 0.0
+		_clip_w = 0.0
+	if st == "":
+		return
+	skin.clip = n
+	skin.clip_t = t
+	skin.clip_full = true
+	skin.clip_w = 1.0
+	skin.clip_travel = 0.0
+	skin.clip_look = true
+	match st:
+		"parry":
+			skin.arm_r = 0.0
+		"bhit":
+			skin.arm_l = 0.0 if _brace_t > 0.0 else 1.0
+			skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
+		"block":
+			skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
+
+# --- draw / sheath
+var _sheath_w := 0.0          # 1: the weapon hangs in its place on the body; 0: in the hand
+var _draw_dir := 0            # +1 drawing, -1 sheathing, 0 neither
+var _draw_t := 0.0
+var _preview_block := 0.0
+const DRAW_GRAB := 0.42       # share of the time at which the hand closes on the grip (draw) or lets it go (sheath)
+const DRAW_FREE := 0.72       # share at which the blade has come round to the hand's own aim
+
+func is_sheathed() -> bool:
+	return _sheath_w >= 1.0 and _draw_dir == 0
+
+## Put the weapon away: at the left hip for one-handed swords, across the back for long blades. The hand carries it
+## there and only then lets go. Returns the seconds it takes. `instant` for setting a scene.
+func sheath(instant: bool = false) -> float:
+	if skin == null or not skin.ok or instant or not authored:
+		_sheath_w = 1.0
+		_draw_dir = 0
+		return 0.0
+	if _sheath_w >= 1.0 or _draw_dir < 0:
+		return 0.0
+	_draw_dir = -1
+	_draw_t = 0.0
+	return AU_DRAW_TIME
+
+## Take the weapon in hand: the hand goes to the grip first; the weapon does not move until the hand is on it.
+func draw(instant: bool = false) -> float:
+	if skin == null or not skin.ok or instant or not authored:
+		_sheath_w = 0.0
+		_draw_dir = 0
+		return 0.0
+	if _sheath_w <= 0.0 or _draw_dir > 0:
+		return 0.0
+	_draw_dir = 1
+	_draw_t = 0.0
+	return AU_DRAW_TIME
+
+## One cut for a screen that shows the fighter off (the Armory): `dir` a swipe name. Returns the seconds until the
+## fighter is back in guard.
+func preview_attack(dir: String = "R", time: float = 0.5) -> float:
+	var lead := 0.0
+	if _sheath_w > 0.0:
+		draw(true)
+	var v: Vector2 = {"R": Vector2(1, 0), "L": Vector2(-1, 0), "U": Vector2(0, 1), "D": Vector2(0, -1), "UR": Vector2(0.7, 0.7),
+		"UL": Vector2(-0.7, 0.7), "DR": Vector2(0.7, -0.7), "DL": Vector2(-0.7, -0.7)}.get(dir, Vector2(1, 0))
+	swing(v, time)
+	return lead + time * 0.85 + 0.3 + AU_OUT
+
+## Raise the guard for `hold` seconds, then lower it. Returns the seconds until the fighter is back in guard.
+func preview_block(hold: float = 1.0) -> float:
+	if _sheath_w > 0.0:
+		draw(true)
+	guard()
+	blocking = true
+	_preview_block = hold
+	return hold + AU_OUT
+
+## Where the weapon in the given hand hangs when it is put away, in rig body space: [grip point, the way the blade points].
+func _holster(side: String) -> Array:
+	if two_handed:
+		var ct: Basis = skin.turn("Spine2")
+		return [skin.point("Spine2") + ct * Vector3(0.2, 0.3, 0.17 + skin.extent("Spine2", Vector3(0, 0, 1)) * 0.5), (ct * Vector3(-0.42, -0.9, 0.08)).normalized()]
+	var ht: Basis = skin.turn("Hips")
+	var sx := -1.0 if side == "Right" else 1.0      # the right hand's sword hangs at the left hip
+	var bone_n := "LeftUpLeg" if side == "Right" else "RightUpLeg"
+	var out: float = maxf(skin.extent("Hips", Vector3(sx, 0, 0)), skin.extent(bone_n, Vector3(sx, 0, 0)) + absf((skin.point(bone_n) - skin.point("Hips")).dot(ht.x))) + 0.04
+	return [skin.point("Hips") + ht * Vector3(sx * out, 0.04, -0.06), (ht * Vector3(sx * 0.1, -0.86, 0.5)).normalized()]
+
+func _fit_sheath() -> void:
+	if _sheath_w <= 0.0 and _draw_dir == 0:
+		return
+	var u := clampf(_draw_t / AU_DRAW_TIME, 0.0, 1.0) if _draw_dir != 0 else 1.0
+	if _draw_dir < 0:
+		u = 1.0 - u      # sheathing is the draw run backward
+	# u: 0 the weapon hangs and the hand is away; DRAW_GRAB the hand is on the grip; DRAW_FREE the weapon is carried freely
+	var on_grip := smoothstep(0.0, DRAW_GRAB, u) * (1.0 - smoothstep(DRAW_GRAB, DRAW_FREE, u)) if _draw_dir != 0 else 0.0
+	if _draw_dir != 0 and u >= DRAW_GRAB:
+		on_grip = 1.0 - smoothstep(DRAW_GRAB, DRAW_FREE, u)
+	var freed := smoothstep(DRAW_GRAB, DRAW_FREE, u) if _draw_dir != 0 else 0.0
+	for side: String in (["Right", "Left"] if dual else ["Right"]):
+		var w: Node3D = weapon_r if side == "Right" else weapon_l
+		var hs := _holster(side)
+		var hpos: Vector3 = hs[0]
+		var hdir := _off_floor(hpos, hs[1], weapon_len, _pommel)
+		var in_hand := w.transform
+		if on_grip > 0.0:
+			# the hand goes to where the weapon is (or carries it back there); the weapon is not fetched to the hand
+			var palm: Vector3 = skin.reach_hand(side, in_hand.origin.lerp(hpos, on_grip))
+			in_hand.origin = palm
+		var d := hdir.slerp(in_hand.basis.y.normalized(), freed) if hdir.dot(in_hand.basis.y) > -0.99 else hdir
+		var pos := hpos if u < DRAW_GRAB else in_hand.origin
+		if u >= DRAW_GRAB and u < 1.0:
+			skin.grip(side, d)
+		w.transform = Transform3D(_basis_y(d, Vector3(0, 0, -1) if absf(d.z) < 0.9 else Vector3.RIGHT), pos)
+		if two_handed:
+			weapon_l.position = pos

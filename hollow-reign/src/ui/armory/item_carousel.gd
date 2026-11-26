@@ -17,7 +17,7 @@ signal tapped(index: int)         # the middle item was tapped
 
 const WORLD_H := 1.3              # world units from top to bottom of the viewport at the item plane
 const FOV := 30.0
-const NODES := 7                  # built pieces kept alive
+var keep := 7                     # built pieces kept alive (the owner lowers it for heavy pieces such as whole suits)
 const FADE_SHADER := "shader_type canvas_item;\nuniform float edge = 0.5;\nvoid fragment() {\n\tvec4 c = texture(TEXTURE, UV);\n\tfloat d = abs(UV.x - 0.5) * 2.0;\n\tc.a *= 1.0 - smoothstep(edge, 1.0, d) * 0.9;\n\tCOLOR = c;\n}\n"
 
 var entries: Array = []
@@ -311,7 +311,7 @@ func _layout() -> void:
 		if not seen.has(k):
 			_unplace(k)
 	_placed = seen
-	while _recent.size() > NODES:
+	while _recent.size() > keep:
 		var old: String = _recent.pop_front()
 		if _nodes.has(old) and not seen.has(old):
 			(_nodes[old] as Node3D).queue_free()

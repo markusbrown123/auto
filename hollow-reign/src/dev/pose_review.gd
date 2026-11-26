@@ -48,7 +48,50 @@ func _ready() -> void:
 	if _args.has("versus"):
 		_versus()
 		return
+	if _args.has("clipscan"):
+		_clipscan()
+		return
 	_run()
+
+## Every cut of every attack clip of one pack ("ss", "th", "dw"), measured on THIS skeleton with the weapon in hand:
+## the line the blade tip travels across the contact frame as seen from behind (degrees, 0 = to the fighter's right,
+## 90 = up) and the swipe that is nearest, how much of that travel is across the view rather than along it, how far
+## the chest is turned from the opponent at the start of the cut and at contact, and how far ahead the blade reaches.
+func _clipscan() -> void:
+	_fresh()
+	for i in 4:
+		await get_tree().process_frame
+	var fr: FighterRig = rig
+	var names: Array = []
+	FighterRig.clip_meta("")
+	for n: String in FighterRig._au_meta:
+		if n.begins_with(str(_args.clipscan) + "_") and (FighterRig._au_meta[n].get("hits", []) as Array).size() > 0:
+			names.append(n)
+	names.sort()
+	print("== clip scan %s on %s, weapon %.2f m" % [str(_args.clipscan), _tag, fr.weapon_len])
+	for n: String in names:
+		var hits: Array = FighterRig._au_meta[n].hits
+		for hi in hits.size():
+			var h: Dictionary = hits[hi]
+			var tc := float(h.contact)
+			var ts := minf(float(h.start), tc - 0.1)
+			var a0: Dictionary = fr.skin.clip_hand(n, maxf(tc - 0.07, ts))
+			var a1: Dictionary = fr.skin.clip_hand(n, minf(tc + 0.04, float(h.end)))
+			var c: Dictionary = fr.skin.clip_hand(n, tc)
+			var s0: Dictionary = fr.skin.clip_hand(n, maxf(ts, 0.0))
+			var v: Vector3 = (a1.p + a1.axis * fr.weapon_len) - (a0.p + a0.axis * fr.weapon_len)
+			var ang := rad_to_deg(atan2(v.y, v.x))
+			var lab: String = ["R", "UR", "U", "UL", "L", "DL", "D", "DR"][posmod(int(round(ang / 45.0)), 8)]
+			var yaw := func(d: Dictionary) -> float: return rad_to_deg(atan2((d.chest as Vector3).x, -(d.chest as Vector3).z))
+			var worst := 0.0
+			var t := maxf(ts, 0.0)
+			while t <= float(h.end) + 0.3:
+				worst = maxf(worst, absf(float(yaw.call(fr.skin.clip_hand(n, t)))))
+				t += 0.033
+			print("%-16s hit%d meta=%-6s rig=%-2s %4.0f deg  across=%.2f  speed=%.1f  yaw start %4.0f contact %4.0f worst %4.0f  reach %.2f  hand y %.2f  t %.2f>%.2f>%.2f/%.2f" % [n, hi, str(h.swipe), lab, ang,
+				Vector2(v.x, v.y).length() / maxf(v.length(), 0.001), v.length() / 0.11, float(yaw.call(s0)), float(yaw.call(c)), worst,
+				-(c.p.z + c.axis.z * fr.weapon_len * 0.8), float(c.p.y), ts, tc, float(h.end), float(FighterRig._au_meta[n].length)])
+	get_tree().quit()
 
 ## Two fighters at duelling distance: the knight cuts the foe, then the foe cuts the knight; frames around contact.
 ##   --versus=<foe id> [--gap=2.6] [--nobite] [--dirs=R,D]

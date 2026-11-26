@@ -627,6 +627,7 @@ var _step_dir := Vector3(0, 0, -1)   # which way the feet are travelling, in the
 var combat_steps := false            # in a duel: short steps in any direction, guard kept up
 const STRIDE := 0.78          # metres per step
 const WALK_CYCLES := 1.0      # full left-right cycles in the authored walk clip
+var test_clip := ""           # dev: play one clip on the whole body
 var use_clips := true         # authored skeletal clips over the procedural pose, where the skeleton suits them
 
 ## When filming clips every idle oscillation is snapped to a harmonic of
@@ -915,18 +916,7 @@ func _pose() -> void:
 	_leg("l", pel + Vector3(-0.12 * bulk, -0.04, 0), f_l)
 	if skin:
 		# authored motion where it exists: the walk cycle out of combat, and the fall when killed
-		if mode == Mode.DEAD and use_clips and SkinDriver.has_clip("fall"):
-			skin.clip = "fall"
-			skin.clip_full = true
-			skin.clip_t = _t * 1.15
-			skin.clip_w = clampf(_t / 0.18, 0.0, 1.0)
-		elif _walk_amount > 0.01 and not combat_steps and use_clips and SkinDriver.has_clip("walk"):
-			skin.clip = "walk"
-			skin.clip_full = false
-			skin.clip_t = _walk_phase / TAU * SkinDriver.clip_length("walk") / WALK_CYCLES
-			skin.clip_w = _walk_amount
-		else:
-			skin.clip_w = 0.0
+		_pick_clip()
 		var hands: Dictionary = skin.drive({"pelvis": pel + Vector3(0, 0.06, 0), "pelvis_rot": Basis.from_euler(pelvis.rotation), "chest_rot": cb,
 			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l})
 		# weapons ride the model's real hands
@@ -939,6 +929,52 @@ func _pose() -> void:
 				var u := clampf(_t / 1.6, 0.0, 1.0)
 				shield.rotation = Vector3(lerpf(0.1, -1.45, u), 0.35, 0.0)
 				shield.position.y = maxf(shield.position.y, 0.06)
+
+## Chooses the authored clip for the body in the current state. The sword and shield arms stay on IK
+## unless the clip is a whole-body one (falls, hit reactions), so cuts keep the direction that was swiped.
+var _clip_w := 0.0
+func _pick_clip() -> void:
+	var n := ""
+	var t := 0.0
+	var w := 0.0
+	var full := false
+	var dtt := get_process_delta_time() * time_scale
+	if test_clip != "":
+		n = test_clip; t = _clock; w = 1.0; full = true
+	elif not use_clips:
+		pass
+	else:
+		match mode:
+			Mode.DEAD:
+				n = "death"; t = _t; w = 1.0; full = true
+			Mode.HURT:
+				n = "hit_chest"; t = _t; w = 0.85; full = true
+			Mode.STAGGER:
+				n = "stunned"; t = _clock; w = 0.7
+			Mode.DODGE:
+				n = "step_r" if _dodge_side * mirror > 0.0 else "step_l"
+				t = clampf(_t / maxf(_dur, 0.01), 0.0, 1.0) * SkinDriver.clip_length(n); w = 0.9
+			Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW:
+				n = "sword_attack" if _arc_dir.y < -0.7 else ("cut_a" if _arc_dir.x < 0.0 else "cut_b")
+				var u := clampf(_t / maxf(_dur, 0.01), 0.0, 1.0)
+				var p := u * 0.4 if mode == Mode.WINDUP else (0.4 + u * 0.25 if mode == Mode.STRIKE else 0.65 + u * 0.35)
+				t = p * SkinDriver.clip_length(n); w = 0.8
+			Mode.GUARD:
+				if _walk_amount > 0.01 and not combat_steps:
+					n = "walk"; t = _walk_phase / TAU * SkinDriver.clip_length("walk") / WALK_CYCLES; w = _walk_amount
+				elif combat_steps:
+					n = "shield_idle" if has_shield else "sword_idle"
+					t = _clock; w = 0.55 * (1.0 - _walk_amount)
+	if n == "" or not SkinDriver.has_clip(n):
+		w = 0.0
+	elif n != skin.clip:
+		_clip_w = 0.0 if skin.clip_w > 0.3 and not full else _clip_w * 0.5      # change of clip: fade the new one in
+	if w > 0.0:
+		skin.clip = n
+		skin.clip_t = t
+		skin.clip_full = full
+	_clip_w = lerpf(_clip_w, w, 1.0 - exp(-dtt * (22.0 if full else 12.0))) if dtt > 0.0 else _clip_w
+	skin.clip_w = _clip_w if test_clip == "" else 1.0
 
 func _basis_y(y: Vector3, ref: Vector3) -> Basis:
 	y = y.normalized()

@@ -162,60 +162,80 @@ var clip := ""
 var clip_t := 0.0
 var clip_w := 0.0
 var clip_full := false        # false: body and legs only, sword and shield arms stay on IK
+var clip_travel := 1.0        # how much of a whole-body clip's own travel to apply
 static var _lib: AnimationLibrary
-static var _lib_rest: Dictionary
-static var _tracks: Dictionary = {}      # clip -> {bone: track index}, plus "_pos" for the hip position
-const ARM_BONES := ["Shoulder", "Arm", "ForeArm", "Hand"]
+static var _tracks: Dictionary = {}      # clip -> {bone: track index}, plus "_pos" for the hips
+## Parent-first order; the clips store each bone's model-space turn away from rest, facing -Z.
+const CLIP_BONES := ["Hips", "Spine", "Spine1", "Spine2", "Neck", "Head",
+	"LeftShoulder", "LeftArm", "LeftForeArm", "LeftHand", "RightShoulder", "RightArm", "RightForeArm", "RightHand",
+	"LeftUpLeg", "LeftLeg", "LeftFoot", "LeftToeBase", "RightUpLeg", "RightLeg", "RightFoot", "RightToeBase"]
+const LIMB_CHILD := {"LeftShoulder": "LeftArm", "LeftArm": "LeftForeArm", "LeftForeArm": "LeftHand", "RightShoulder": "RightArm", "RightArm": "RightForeArm", "RightForeArm": "RightHand",
+	"LeftUpLeg": "LeftLeg", "LeftLeg": "LeftFoot", "RightUpLeg": "RightLeg", "RightLeg": "RightFoot"}
+var _canon := Basis.IDENTITY      # this skeleton's space -> canonical (facing -Z)
+var _canon_ready := false
+var _my_dir := {}                 # limb rest directions of this skeleton, canonical
 
 static func has_clip(n: String) -> bool:
 	if _lib == null and ResourceLoader.exists("res://assets/anim/humanoid.res"):
 		_lib = load("res://assets/anim/humanoid.res")
-		_lib_rest = _lib.get_meta("rest", {})
 	return _lib != null and _lib.has_animation(n)
 
 static func clip_length(n: String) -> float:
 	return _lib.get_animation(n).length if has_clip(n) else 0.0
 
 func _is_arm(b: String) -> bool:
-	return b.begins_with("Left") or b.begins_with("Right") if (b.contains("Hand") or b.contains("Arm") or b.contains("Shoulder")) else false
+	return b.contains("Hand") or b.contains("Arm") or b.contains("Shoulder")
+
+func _prepare_canon() -> void:
+	_canon_ready = true
+	var toe: Vector3 = (rest["LeftToeBase"].origin - rest["LeftFoot"].origin) if bone.has("LeftToeBase") else Vector3(0, 0, 1)
+	var ang := -atan2(toe.x, toe.z) + PI
+	_canon = Basis(Vector3.UP, ang)
+	if (_canon * Vector3(toe.x, 0, toe.z).normalized()).z > -0.9:
+		_canon = Basis(Vector3.UP, -ang)
+	for b: String in LIMB_CHILD:
+		if bone.has(b) and bone.has(LIMB_CHILD[b]):
+			_my_dir[b] = (_canon * (rest[LIMB_CHILD[b]].origin - rest[b].origin)).normalized()
 
 func _overlay(arms: bool) -> void:
 	if clip_w <= 0.0 or not has_clip(clip):
 		return
+	if not _canon_ready:
+		_prepare_canon()
 	var a: Animation = _lib.get_animation(clip)
 	if not _tracks.has(clip):
 		var m := {}
 		for t in a.get_track_count():
-			var b := str(a.track_get_path(t)).get_slice(":", 1)
 			if a.track_get_type(t) == Animation.TYPE_POSITION_3D:
 				m["_pos"] = t
 			else:
-				m[b] = t
+				m[str(a.track_get_path(t)).get_slice(":", 1)] = t
 		_tracks[clip] = m
 	var map: Dictionary = _tracks[clip]
+	var src_dir: Dictionary = a.get_meta("rest_dir", {})
 	var t := fposmod(clip_t, a.length) if a.loop_mode != Animation.LOOP_NONE else clampf(clip_t, 0.0, a.length)
-	for b in map:
-		if b == "_pos" or not bone.has(b) or _is_arm(b) != arms:
-			continue
-		var i: int = bone[b]
-		var q: Quaternion = a.rotation_track_interpolate(map[b], t)
-		# carry the motion across skeletons with different rest poses as a change from rest
-		if _lib_rest.has(b):
-			q = skel.get_bone_rest(i).basis.get_rotation_quaternion() * (_lib_rest[b] as Transform3D).basis.get_rotation_quaternion().inverse() * q
-		skel.set_bone_pose_rotation(i, skel.get_bone_pose_rotation(i).slerp(q, clip_w))
-	if not arms and map.has("_pos") and _lib_rest.has("Hips"):
-		# hip height (and, for whole-body clips, travel) scaled to this skeleton's leg length
-		var src: Vector3 = (_lib_rest["Hips"] as Transform3D).origin
-		var k: float = rest["Hips"].origin.y / maxf(src.y, 0.001)
-		var d: Vector3 = (a.position_track_interpolate(map["_pos"], t) - (src if not clip_full else a.position_track_interpolate(map["_pos"], 0.0))) * k
-		if not clip_full:
-			d.x = 0.0
-			d.z = 0.0
-		var i2: int = bone["Hips"]
-		var base: Vector3 = skel.get_bone_pose_position(i2)
+	var back := _canon.inverse()
+	if not arms and map.has("_pos"):
+		# hip height as a fraction of standing height; travel only for whole-body clips
+		var hp: Vector3 = a.position_track_interpolate(map["_pos"], t)
+		var h: float = rest["Hips"].origin.y
+		var cur: Transform3D = skel.get_bone_global_pose(bone["Hips"])
+		var want := Vector3(cur.origin.x, hp.y * h, cur.origin.z)
 		if clip_full:
-			base = base.lerp(Vector3(base.x, rest["Hips"].origin.y + (a.position_track_interpolate(map["_pos"], 0.0).y - src.y) * k, base.z), clip_w)
-		skel.set_bone_pose_position(i2, base + d * clip_w)
+			want += back * Vector3(hp.x, 0, hp.z) * h * clip_travel
+		skel.set_bone_global_pose(bone["Hips"], Transform3D(cur.basis, cur.origin.lerp(want, clip_w)))
+	for b: String in CLIP_BONES:
+		if not map.has(b) or not bone.has(b) or _is_arm(b) != arms:
+			continue
+		var d := Basis(a.rotation_track_interpolate(map[b], t))
+		if _my_dir.has(b) and src_dir.has(b):
+			# line this skeleton's limb up with the source's rest limb first (A-pose against T-pose)
+			d = d * Basis(Quaternion(_my_dir[b], src_dir[b]))
+		var target: Basis = back * d * _canon * rest[b].basis.orthonormalized()
+		var i: int = bone[b]
+		var cur_b: Basis = skel.get_bone_global_pose(i).basis.orthonormalized()
+		var origin: Vector3 = skel.get_bone_global_pose(i).origin if b == "Hips" else _fk_origin(b)
+		skel.set_bone_global_pose(i, Transform3D(Basis(cur_b.get_rotation_quaternion().slerp(target.get_rotation_quaternion(), clip_w)), origin))
 
 ## The grip sits in the palm, not at the wrist.
 func _palm(side: String, wrist: Vector3) -> Vector3:

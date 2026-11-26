@@ -324,6 +324,13 @@ func _dev_boot() -> void:
 			rig.position = Vector3(-3.0, 0, 0)
 			rig.walking = true
 			c2.look_at(Vector3(0, 1.0, 0))
+			if _args.has("clip"):
+				# one clip, whole body, standing still, three-quarter view
+				rig.position = Vector3.ZERO
+				rig.rotation.y = -0.6
+				rig.walking = false
+				rig.test_clip = _args.clip
+				return
 			var tw := st2.create_tween()
 			tw.tween_property(rig, "position:x", 1.2, 3.5)
 			tw.tween_interval(0.8)

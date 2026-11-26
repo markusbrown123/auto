@@ -175,7 +175,7 @@ func _build(season: int) -> void:
 	arena = Arena.new()
 	stage.add_child(arena)
 	arena.build("highland")
-	Highland.season(arena, season)
+	Highland.generation(arena, season + 1)
 	cam = CineCam.new()
 	stage.add_child(cam)
 	cam.far = 6000.0

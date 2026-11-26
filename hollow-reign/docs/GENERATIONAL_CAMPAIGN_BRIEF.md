@@ -77,3 +77,6 @@ Consequences persist: a gate the son opened stays open; a tower the father broug
 
 ## Testing required
 Father's opening → first fight → first canonical death → time jump → inherited gear → changed enemies → Witness → forge and upgrades → second Monarch fight (including a player who wins it) → second death → time jump → everything preserved → heir's journey → final Monarch → facility → optional encounters → all three endings → legacy journey. Both protagonists. Saves immediately before and after each transition. No duplicate rewards, lost gear, wrong character, broken triggers or wrong respawns. All suites rerun. Recordings of the whole progression.
+
+## Owner clarification (2026-11-26, later)
+"Don't have to copy the father dying exactly, I just like that kind of twist. We can keep the original or a different story and plot, but make it amazing and crazy, like in 2011 it wowed me that you died twice." The plot is free to change; the requirement is a genuine shock of our own. Options are to be put to the owner before recording or filming.

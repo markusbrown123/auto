@@ -38,20 +38,22 @@ const ROAD := [[-20, 500], [-18, 470], [-8, 432], [8, 398], [6, 360], [-12, 322]
 const PROFILE := [[580, -62], [470, -54], [400, -50], [330, -46], [300, -47], [240, -41], [228, -38], [120, -10.5],
 	[105, -7], [70, -8.5], [40, -5], [22, -1.2], [14, 0], [-22, 0], [-44, 4], [-140, 42]]
 
-## What the seasons change. 0: a summer dawn. 1: a late-autumn dusk with weather coming in. 2: deep winter, still.
+## The same place in each generation of the family (index = generation - 1).
+## I: a summer dawn, the gate whole and kept. II: an autumn dusk, the arc fallen, the road half grown over.
+## III: deep winter, still, and the seam in the ring alight: what is under the stone has woken.
 const SEASONS := [
 	{"sky": "#34578f", "horizon": "#f0c692", "fog": "#c4a888", "fog_d": 0.0008, "sun": "#ffd6a2", "sun_e": 3.6, "sun_rot": Vector3(-12, 166, 0),
 		"amb": "#8693a8", "amb_e": 0.8, "exp": 0.95, "sat": 1.02,
 		"grass_a": "#56692c", "grass_b": "#8f8a3c", "heather": "#6a4466", "heather_amt": 1.0, "dry": 0.1, "snow": 0.0,
-		"cloud": 0.48, "cloud_lit": "#fff0d8", "cloud_dark": "#8a8494", "wind": 1.0, "seam": 0.5, "weather": ""},
+		"cloud": 0.48, "cloud_lit": "#fff0d8", "cloud_dark": "#8a8494", "wind": 1.0, "seam": 0.25, "weather": "", "wear": 1.0, "whole": true},
 	{"sky": "#272c3a", "horizon": "#9a6a4c", "fog": "#6a5a56", "fog_d": 0.0042, "sun": "#ff9a5a", "sun_e": 2.1, "sun_rot": Vector3(-6, 192, 0),
 		"amb": "#5e6474", "amb_e": 1.0, "exp": 1.12, "sat": 0.9,
 		"grass_a": "#6a5628", "grass_b": "#9a7436", "heather": "#5a3a34", "heather_amt": 0.5, "dry": 1.0, "snow": 0.0,
-		"cloud": 0.36, "cloud_lit": "#c08a66", "cloud_dark": "#3a3640", "wind": 2.3, "seam": 1.2, "weather": "rain"},
+		"cloud": 0.36, "cloud_lit": "#c08a66", "cloud_dark": "#3a3640", "wind": 2.0, "seam": 0.0, "weather": "", "wear": 0.45, "whole": false},
 	{"sky": "#5f7088", "horizon": "#cfd6dc", "fog": "#bcc6ce", "fog_d": 0.0034, "sun": "#eaf0fa", "sun_e": 2.0, "sun_rot": Vector3(-14, 160, 0),
 		"amb": "#8d99ab", "amb_e": 1.15, "exp": 1.1, "sat": 0.8,
 		"grass_a": "#6e7260", "grass_b": "#8e8c74", "heather": "#6a5a60", "heather_amt": 0.4, "dry": 0.7, "snow": 0.85,
-		"cloud": 0.42, "cloud_lit": "#f4f6fa", "cloud_dark": "#8e98a6", "wind": 0.6, "seam": 3.2, "weather": "snow"},
+		"cloud": 0.42, "cloud_lit": "#f4f6fa", "cloud_dark": "#8e98a6", "wind": 0.6, "seam": 4.5, "weather": "snow", "wear": 0.6, "whole": false},
 ]
 
 static var _h := PackedFloat32Array()       # the height field, row by row along z
@@ -346,10 +348,11 @@ static func build(a: Arena) -> void:
 	st["grass"] = _grass(a)
 	st["seam"] = _ring(a)
 	_citadel(a)
-	_gate_court(a)
-	_wayside(a)
+	st["kept"] = []
+	_gate_court(a, st)
+	_wayside(a, st)
 	a.set_meta("highland", st)
-	season(a, 0)
+	generation(a, 1)
 
 ## Tufts along the road, thick beside it and thinning with distance, in a few batches so the far ones are not drawn.
 static func _grass(a: Arena) -> ShaderMaterial:
@@ -425,24 +428,24 @@ static func _grass_batch(a: Arena, mm: MultiMesh, mat: ShaderMaterial) -> void:
 static func _blades() -> Texture2D:
 	if Look._cache.has("highland_blades"):
 		return Look._cache["highland_blades"]
-	var img := Image.create(128, 64, false, Image.FORMAT_RGBA8)
+	var img := Image.create(256, 128, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0.6, 0.6, 0.6, 0))
 	var r := RandomNumberGenerator.new()
 	r.seed = 23
 	for b in 26:
-		var base_x := r.randf_range(6.0, 122.0)
-		var lean := r.randf_range(-16.0, 16.0)
-		var h := r.randf_range(26.0, 63.0)
-		var w := r.randf_range(1.6, 3.0)
+		var base_x := r.randf_range(12.0, 244.0)
+		var lean := r.randf_range(-32.0, 32.0)
+		var h := r.randf_range(52.0, 126.0)
+		var w := r.randf_range(3.2, 6.0)
 		var shade := r.randf_range(0.7, 1.0)
 		for y in int(h):
 			var u := float(y) / h
 			var cx := base_x + lean * u * u
 			var half := w * (1.0 - u * 0.85) + 0.35
 			for x in range(int(cx - half), int(cx + half) + 1):
-				if x >= 0 and x < 128:
+				if x >= 0 and x < 256:
 					var v := (0.45 + 0.55 * u) * shade
-					img.set_pixel(x, 63 - y, Color(v, v, v, 1.0))
+					img.set_pixel(x, 127 - y, Color(v, v, v, 1.0))
 	img.generate_mipmaps()
 	var t := ImageTexture.create_from_image(img)
 	Look._cache["highland_blades"] = t
@@ -458,49 +461,50 @@ static func _ring(a: Arena) -> StandardMaterial3D:
 	rng.seed = 97
 	var xf: Array = []
 	var lamps: Array = []
+	var arc: Array = []           # the stones that stand in the first generation and are down by the second
+	var arc_lamps: Array = []
+	var fallen: Array = []
 	for i in RING_BLOCKS:
 		var ang := TAU * (float(i) + 0.5) / RING_BLOCKS
-		if ang > BREAK_FROM and ang < BREAK_TO:
-			continue
-		var near_break := minf(absf(ang - BREAK_FROM), absf(ang - BREAK_TO)) < 0.2
-		var r := RING_R + (rng.randf_range(-0.5, 0.5) if not near_break else rng.randf_range(-2.2, 0.4))
+		var gone := ang > BREAK_FROM and ang < BREAK_TO
+		var r := RING_R + rng.randf_range(-0.5, 0.5)
 		var basis := Basis(Vector3(0, 0, 1), ang)
 		var at := RING_C + Vector3(sin(ang) * r, -cos(ang) * r, rng.randf_range(-0.35, 0.35))
-		var sc := Vector3(1.0, rng.randf_range(0.94, 1.05) * (0.7 if near_break else 1.0), rng.randf_range(0.92, 1.06))
-		xf.append(Transform3D(basis.scaled(sc), at))
-		if not near_break and rng.randf() < 0.8:
+		var sc := Vector3(1.0, rng.randf_range(0.94, 1.05), rng.randf_range(0.92, 1.06))
+		(arc if gone else xf).append(Transform3D(basis.scaled(sc), at))
+		if rng.randf() < 0.8:
+			(arc_lamps if gone else lamps).append(Transform3D(basis, RING_C + Vector3(sin(ang), -cos(ang), 0) * (RING_R - RING_THICK * 0.5 - 0.05) + Vector3(0, 0, RING_DEEP * 0.5 - 0.6)))
+		if false:
 			lamps.append(Transform3D(basis, RING_C + Vector3(sin(ang), -cos(ang), 0) * (RING_R - RING_THICK * 0.5 - 0.05) + Vector3(0, 0, RING_DEEP * 0.5 - 0.6)))
 	# what came down lies east of the court, where the ground breaks toward the cliff
 	for f: Array in [[38.0, -14.0, 0.5, 0.3], [47.0, -2.0, 1.1, -0.4], [33.0, 4.0, 2.0, 0.7], [52.0, -22.0, 0.2, 1.3]]:
 		var p := on_ground(float(f[0]), float(f[1]), 2.2)
-		xf.append(Transform3D(Basis.from_euler(Vector3(float(f[3]) * 0.5, float(f[2]), float(f[3]))).scaled(Vector3.ONE * 0.9), p))
-	var mm := MultiMesh.new()
-	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.mesh = block
-	mm.instance_count = xf.size()
-	for i in xf.size():
-		mm.set_instance_transform(i, xf[i])
-	var mi := MultiMeshInstance3D.new()
-	mi.name = "HLRing"
-	mi.multimesh = mm
-	mi.material_override = stone
-	a.add_child(mi)
+		fallen.append(Transform3D(Basis.from_euler(Vector3(float(f[3]) * 0.5, float(f[2]), float(f[3]))).scaled(Vector3.ONE * 0.9), p))
 	var seam := Look.glow(Color("#5fe0c8"), 0.5)
 	seam.albedo_color = Color(0.08, 0.1, 0.1)
 	var strip := BoxMesh.new()
 	strip.size = Vector3(block.size.x * 0.62, 0.5, 0.5)
-	var lm := MultiMesh.new()
-	lm.transform_format = MultiMesh.TRANSFORM_3D
-	lm.mesh = strip
-	lm.instance_count = lamps.size()
-	for i in lamps.size():
-		lm.set_instance_transform(i, lamps[i])
-	var li := MultiMeshInstance3D.new()
-	li.multimesh = lm
-	li.material_override = seam
-	li.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	a.add_child(li)
+	_batch(a, "HLRing", block, xf, stone, true)
+	_batch(a, "HLRingArc", block, arc, stone, true)
+	_batch(a, "HLRingFallen", block, fallen, stone, true)
+	_batch(a, "HLSeam", strip, lamps, seam, false)
+	_batch(a, "HLSeamArc", strip, arc_lamps, seam, false)
 	return seam
+
+static func _batch(a: Arena, node_name: String, mesh: Mesh, xf: Array, mat: Material, shadows: bool) -> void:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = mesh
+	mm.instance_count = xf.size()
+	for i in xf.size():
+		mm.set_instance_transform(i, xf[i])
+	var mi := MultiMeshInstance3D.new()
+	mi.name = node_name
+	mi.multimesh = mm
+	mi.material_override = mat
+	if not shadows:
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	a.add_child(mi)
 
 ## The citadel, far behind the gate and seen through it: two stepped spires and the span between them.
 static func _citadel(a: Arena) -> void:
@@ -538,14 +542,14 @@ static func _far_box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material)
 	parent.add_child(mi)
 
 ## The court between the ring's feet: the gatehouse that is shut, the curtain wall, fires that are still fed.
-static func _gate_court(a: Arena) -> void:
+static func _gate_court(a: Arena, st: Dictionary) -> void:
 	a.prop("gate", 13.0, Vector3(0, 0, -21.0), 0.0)
 	for sx: float in [-1.0, 1.0]:
 		a.prop("wall", 8.5, Vector3(sx * 15.5, 0, -22.0), 0.0 if sx < 0 else 180.0)
 		a.prop("wall", 7.5, on_ground(sx * 30.0, -23.0, -0.6), 8.0 * sx + (0.0 if sx < 0 else 180.0))
 		a.prop("brazier", 1.9, Vector3(sx * 4.2, 0, -9.5), 0.0)
 		a.fire(Vector3(sx * 4.2, 1.75, -9.5), 2.0, 9.0, false)
-		a.prop("banner", 6.5, Vector3(sx * 8.6, 0, -12.5), sx * -18.0)
+		st.kept.append(a.prop("banner", 6.5, Vector3(sx * 8.6, 0, -12.5), sx * -18.0))
 		a.prop("pillar", 4.4, Vector3(sx * 11.0, 0, 2.0), sx * 40.0)
 	a.prop("statue", 9.0, on_ground(-17.5, -3.0, -0.3), 28.0)
 	a.prop("rubble", 2.4, on_ground(12.5, 4.5, -0.2), 70.0)
@@ -553,7 +557,7 @@ static func _gate_court(a: Arena) -> void:
 
 ## What stands beside the road: waystones in pairs, a ruined arch where the climb ends, the dead tree, a king's
 ## fallen head, old banners, and the rock the turf never covered.
-static func _wayside(a: Arena) -> void:
+static func _wayside(a: Arena, st: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1909
 	# waystones: one each side, every sixty metres or so, some of them broken off short
@@ -575,14 +579,16 @@ static func _wayside(a: Arena) -> void:
 	var lintel := a.box(Vector3(5.6, 0.9, 1.2), road(sa, -1.6) + Vector3(0, 6.5, 0), Look.stone(Color("#8d877b"), 0.2), Vector3(0, rad_to_deg(along), -7.0))
 	lintel.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	# the dead tree in the saddle below the gate
-	var st := tree_s()
-	_shadowed(a.prop("tree", 10.5, road(st, -5.5) - Vector3(0, 0.3, 0), 75.0))
+	var s_tree := tree_s()
+	_shadowed(a.prop("tree", 10.5, road(s_tree, -5.5) - Vector3(0, 0.3, 0), 75.0))
 	# a king's head, off its statue, where the road tops the rise
 	var sh := road_at_z(103.0)
 	_shadowed(a.prop("statue_head", 4.6, road(sh, 9.0) - Vector3(0, 1.1, 0), -150.0))
 	# banners, long past their colours, on the last stretch
 	for b: Array in [[44.0, 3.4, 20.0], [31.0, -3.6, -30.0], [58.0, 3.8, 0.0]]:
-		_shadowed(a.prop("banner", 5.6, road(road_at_z(float(b[0])), float(b[1])) - Vector3(0, 0.2, 0), rad_to_deg(road_yaw(road_at_z(float(b[0])))) + float(b[2])))
+		var flag := a.prop("banner", 5.6, road(road_at_z(float(b[0])), float(b[1])) - Vector3(0, 0.2, 0), rad_to_deg(road_yaw(road_at_z(float(b[0])))) + float(b[2]))
+		_shadowed(flag)
+		st.kept.append(flag)
 	# rock the turf never covered: one batch of rough lumps
 	var lump := SphereMesh.new()
 	lump.radius = 1.0
@@ -623,12 +629,29 @@ static func _shadowed(n: Node3D) -> void:
 		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 
 # ================================================================ seasons
-## Sets the time of year and of day: light, air, colour of the turf, weather, and how awake the gate is.
-static func season(a: Arena, i: int) -> void:
+## Sets which generation's road this is (1, 2 or 3): the light and the air, the colour of the turf, the weather,
+## whether the ring is whole, how worn the road still is, whether the fires and banners are kept, and how awake
+## the gate is. The composition never changes; what is in it does.
+static func generation(a: Arena, g: int) -> void:
 	var st: Dictionary = a.get_meta("highland", {})
 	if st.is_empty():
 		return
-	var s: Dictionary = SEASONS[clampi(i, 0, SEASONS.size() - 1)]
+	var s: Dictionary = SEASONS[clampi(g, 1, SEASONS.size()) - 1]
+	a.set_meta("generation", clampi(g, 1, SEASONS.size()))
+	var whole: bool = s.whole
+	for nm: String in ["HLRingArc", "HLSeamArc"]:
+		(a.get_node(nm) as Node3D).visible = whole
+	(a.get_node("HLRingFallen") as Node3D).visible = not whole
+	# kept in the first generation; after it nobody feeds the fires, and the banners are down
+	for f: Array in a.fires:
+		f[1] = 2.0 if whole else 0.0
+		(f[0] as Light3D).visible = whole
+	for p in a.find_children("*", "CPUParticles3D", true, false):
+		if (p as CPUParticles3D).lifetime < 1.0:
+			(p as CPUParticles3D).emitting = whole
+	for n in st.get("kept", []):
+		if n != null:
+			(n as Node3D).visible = whole
 	var env := a.env
 	var sky := env.sky.sky_material as ProceduralSkyMaterial
 	sky.sky_top_color = Color(str(s.sky))
@@ -659,6 +682,7 @@ static func season(a: Arena, i: int) -> void:
 		m.set_shader_parameter("snow", float(s.snow))
 		m.set_shader_parameter("wind", wind)
 	grass.set_shader_parameter("dry", float(s.dry))
+	ground.set_shader_parameter("wear", float(s.wear))
 	var cloud: ShaderMaterial = st.cloud
 	cloud.set_shader_parameter("cover", float(s.cloud))
 	cloud.set_shader_parameter("lit", Color(str(s.cloud_lit)))

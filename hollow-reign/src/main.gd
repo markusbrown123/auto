@@ -635,6 +635,9 @@ func _dev_front(which: String) -> void:
 			Game.profile.inventory.append(id)
 		Game.profile.equipped.weapon = "w_knight_sword"
 		Game.profile.equipped.shield = "s_garrison"
+		Secrets.backfill(Game.profile)       # the roads this journey has cleared count as walked
+		for sid in ["cy_loose_stone", "cy_charcoal_sketch", "bw_dark_lantern", "cy_second_candle"]:
+			Secrets.find(sid)
 	if not _args.has("fresh"):
 		Game.slot = 1
 		Game.save()

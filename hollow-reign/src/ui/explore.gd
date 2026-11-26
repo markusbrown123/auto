@@ -729,6 +729,8 @@ func _challenge(s: Dictionary, at: Vector3) -> void:
 ## Dev captures: find the named secret of this stop after `after` seconds, as a touch would.
 func dev_tap(id: String, after: float) -> void:
 	await get_tree().create_timer(after).timeout
+	while is_inside_tree() and not _quiet():
+		await get_tree().process_frame
 	if not is_inside_tree():
 		return
 	for e: Dictionary in spots:

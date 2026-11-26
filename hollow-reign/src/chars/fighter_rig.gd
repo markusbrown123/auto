@@ -1573,14 +1573,15 @@ const AU_OUT := 0.22
 ## leaves the clip's own line. Swipe names are in the fighter's own frame (a foe facing the camera swaps left and right).
 const AU_CUTS := {
 	"ss": {
-		"L": ["ss_cut_l", 0], "R": ["ss_cut_r_high", 0], "D": ["ss_cut_d", 0], "DL": ["ss_cut_dl", 0], "DR": ["ss_cut_dr2", 0],
-		"U": ["th_cut_u", 0, {"arm_l": 0.0}], "UR": ["th_cut_ur", 0, {"arm_l": 0.0}], "UL": ["th_cut_u", 0, {"arm_l": 0.0}],
+		"R": ["ss_cut_r_high", 0], "L": ["ss_cut_l", 0], "D": ["ss_cut_d", 0], "DL": ["ss_cut_dl", 0], "DR": ["ss_cut_dr2", 0],
+		"U": ["th_cut_u", 0, {"arm_l": 0.0}], "UL": ["th_cut_u", 0, {"arm_l": 0.0}], "UR": ["ss_cut_r_high", 0],
 		"thrust": ["ss_thrust2", 0]},
 	"th": {
-		"L": ["th_cut_l", 0], "R": ["th_cut_r", 0], "D": ["th_cut_d", 0], "DL": ["th_cut_dl2", 0], "DR": ["th_cut_dr", 0],
-		"U": ["th_cut_u", 0], "UR": ["th_cut_ur", 0], "UL": ["th_cut_u", 0], "thrust": ["th_combo_thrust", 2]},
+		"R": ["th_cut_r2", 0], "L": ["th_cut_l", 0], "D": ["th_cut_d", 0], "DL": ["th_cut_dl2", 0], "DR": ["th_cut_dr", 0],
+		"U": ["th_cut_u", 0], "UL": ["th_cut_u", 0], "UR": ["th_cut_r2", 0], "thrust": ["th_combo_thrust", 2]},
 	"dw": {
-		"L": ["dw_double", 0], "R": ["dw_cut_r", 0], "DL": ["dw_cut_dl", 0], "DR": ["dw_cut_dr", 0], "thrust": ["dw_thrust", 0]},
+		"R": ["dw_cut_r", 0], "L": ["dw_cross", 0], "D": ["dw_cut_dr", 0], "DL": ["dw_cut_dl", 0], "DR": ["dw_cross", 2],
+		"U": ["th_cut_u", 0], "UL": ["th_cut_u", 0], "UR": ["dw_cut_r", 0], "thrust": ["dw_flurry", 0]},
 }
 
 static func clip_meta(n: String) -> Dictionary:
@@ -1638,26 +1639,50 @@ func _au_begin(label: String, strike_from: float, hit_at: float, finish: String)
 		ts = float(opt.start)
 	ts = maxf(ts, 0.0)
 	var te := maxf(float(h.end), tc + 0.05)
+	if not opt.has("contact"):
+		tc = au_contact(str(spec[0]), ts, te)
+	else:
+		tc = float(opt.contact)
+	ts = minf(ts, tc - 0.08)
 	# what follows the cut: its own recovery, but never the next cut of a chain
 	var t_out := float(m.get("length", te))
 	if int(spec[1]) + 1 < hits.size():
 		t_out = minf(t_out, float(hits[int(spec[1]) + 1].start) - 0.05)
 	t_out = clampf(te + 0.5, te, maxf(t_out, te))
 	var n := str(spec[0])
-	var roll := 0.0
+	# the packs are showy: what follows a cut is played only until the fighter would turn side-on to the opponent,
+	# and a foe's warning pose reaches back into the clip's own wind-up only as far as the chest still faces forward
+	var tq := tc
+	while tq < t_out:
+		tq += 0.033
+		# (nor on to where the hand comes back beside the wielder's own neck with the blade over the shoulder)
+		if absf(_au_yaw(n, tq)) > AU_YAW_MAX or (tq > tc + 0.1 and (skin.clip_hand(n, tq).p as Vector3).distance_to(Vector3(0, 1.58, 0.0)) < 0.36):
+			t_out = maxf(tc + 0.03, tq - 0.033)
+			break
+	te = minf(te, t_out)
+	var pre := ts
+	if strike_from > 0.05:
+		while pre > maxf(0.0, ts - 0.3) and absf(_au_yaw(n, pre - 0.033)) < AU_YAW_MAX:
+			pre -= 0.033
+		pre = maxf(pre, 0.0)
+	_au = {"clip": n, "ts": ts, "tc": tc, "te": te, "t_out": t_out, "pre": pre,
+		"from": strike_from, "hit": maxf(hit_at, strike_from + 0.02), "roll": 0.0, "freeze": -1.0, "arm_l": float(opt.get("arm_l", 1.0)),
+		"reach": 1.0, "travel": 1.0 if float(m.get("hip_travel", 0.0)) < 0.8 else 0.0, "label": label, "linger": float(opt.get("linger", 0.0))}
 	if label != "thrust" and opt.get("roll", true):
-		var a0: Dictionary = skin.clip_hand(n, maxf(tc - 0.07, ts))
-		var a1: Dictionary = skin.clip_hand(n, minf(tc + 0.04, te))
-		var v: Vector3 = (a1.p + a1.axis * weapon_len) - (a0.p + a0.axis * weapon_len)
-		var v2 := Vector2(v.x, v.y)
-		if v2.length() > 0.04:
-			roll = clampf(v2.angle_to(Vector2(_arc_dir.x, _arc_dir.y)), -AU_ROLL_MAX, AU_ROLL_MAX)
-			if absf(roll) < 0.07:
-				roll = 0.0
-	var hc: Dictionary = skin.clip_hand(n, tc, "Right", roll)
-	_au = {"clip": n, "ts": ts, "tc": tc, "te": te, "t_out": t_out, "pre": maxf(0.0, ts - (0.3 if strike_from > 0.05 else 0.0)),
-		"from": strike_from, "hit": maxf(hit_at, strike_from + 0.02), "roll": roll, "freeze": -1.0, "arm_l": float(opt.get("arm_l", 1.0)),
-		"reach": -(hc.p.z + hc.axis.z * weapon_len * 0.8), "travel": 1.0 if float(m.get("hip_travel", 0.0)) < 0.8 else 0.0, "label": label}
+		# the line the blade tip travels across the hit, as it will be seen: over the last frames before the hit instant
+		# (the trunk's own turn carries the blade too, so the roll is found in a few steps, not in one)
+		var roll := 0.0
+		for i in 4:
+			var a0: Dictionary = skin.clip_hand(n, _au_time(float(_au.hit) - 0.07), "Right", roll)
+			var a1: Dictionary = skin.clip_hand(n, _au_time(float(_au.hit) + 0.035), "Right", roll)
+			var v: Vector3 = (a1.p + a1.axis * weapon_len) - (a0.p + a0.axis * weapon_len)
+			var v2 := Vector2(v.x, v.y)
+			if v2.length() < 0.04:
+				break
+			roll = clampf(roll + v2.angle_to(Vector2(_arc_dir.x, _arc_dir.y)) * 0.85, -AU_ROLL_MAX, AU_ROLL_MAX)
+		_au.roll = roll if absf(roll) >= 0.07 else 0.0
+	var hc: Dictionary = skin.clip_hand(n, tc, "Right", float(_au.roll))
+	_au.reach = -(hc.p.z + hc.axis.z * weapon_len * 0.8)
 	_au_t = 0.0
 	_au_state = "cut"
 	_xfade(AU_IN if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
@@ -1674,6 +1699,33 @@ func _au_time(tau: float) -> float:
 		var u2 := (tau - from) / (hit - from)
 		return lerpf(float(_au.ts), float(_au.tc), pow(u2, 1.5))
 	return minf(float(_au.tc) + (tau - hit) * 1.2, float(_au.t_out))
+
+## The moment of a cut at which the blade is where the opponent stands: when the far part of the blade reaches
+## furthest ahead of the fighter. (The bake's own `contact` is when the tip is fastest, which for a level cut on
+## this rig is after the blade has already swept past the centre.)
+static var _au_tc := {}
+func au_contact(n: String, ts: float, te: float) -> float:
+	var key := "%s|%.2f|%.2f|%.1f|%s" % [n, ts, te, weapon_len, str(cfg.get("skin", ""))]
+	if _au_tc.has(key):
+		return _au_tc[key]
+	var best := ts
+	var far := -1e9
+	var t := ts
+	while t <= te + 0.001:
+		var hd: Dictionary = skin.clip_hand(n, t)
+		var r: float = -(hd.p.z + hd.axis.z * weapon_len * 0.8)
+		if r > far:
+			far = r
+			best = t
+		t += 1.0 / 60.0
+	_au_tc[key] = best
+	return best
+
+const AU_YAW_MAX := 1.3       # radians the chest may be turned from the opponent in what is played of a clip
+
+func _au_yaw(n: String, t: float) -> float:
+	var c: Vector3 = skin.clip_hand(n, t).get("chest", Vector3(0, 0, -1))
+	return atan2(c.x, -c.z)
 
 func _au_stop() -> void:
 	if _au.is_empty():
@@ -1896,3 +1948,8 @@ func _fit_sheath() -> void:
 		w.transform = Transform3D(_basis_y(d, Vector3(0, 0, -1) if absf(d.z) < 0.9 else Vector3.RIGHT), pos)
 		if two_handed:
 			weapon_l.position = pos
+
+# ---------------------------------------------------------------- combos
+var combo_book: Array = []    # the combos this fighter knows (`DuelSim.combos`: {id, seq, kind}); set by the duel
+var _au_hist: Array = []      # swipes of the cuts thrown lately, oldest first
+var _au_hist_t := -9.0

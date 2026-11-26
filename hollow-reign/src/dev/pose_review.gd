@@ -75,6 +75,8 @@ func _clipscan() -> void:
 			var h: Dictionary = hits[hi]
 			var tc := float(h.contact)
 			var ts := minf(float(h.start), tc - 0.1)
+			tc = fr.au_contact(n, maxf(ts, 0.0), maxf(float(h.end), tc + 0.05))
+			ts = minf(ts, tc - 0.08)
 			var a0: Dictionary = fr.skin.clip_hand(n, maxf(tc - 0.07, ts))
 			var a1: Dictionary = fr.skin.clip_hand(n, minf(tc + 0.04, float(h.end)))
 			var c: Dictionary = fr.skin.clip_hand(n, tc)
@@ -407,7 +409,7 @@ func _run() -> void:
 			await get_tree().process_frame      # the rig solved the previous frame; measure that, then move on
 			if t > 0.0:
 				_audit(stat, t)
-			if shots and not todo.is_empty() and t >= float(todo[0]) - 0.001:
+			if shots and not todo.is_empty() and t + 1.0 / float(_args.get("fps", "30")) >= float(todo[0]) - 0.001:
 				todo.pop_front()
 				rig.time_scale = 0.0
 				for v: Array in VIEWS:
@@ -573,7 +575,10 @@ func _audit(stat: Dictionary, t: float) -> void:
 	var s: float = rig.scale.x
 	if not _is_dragon and (rig as FighterRig).skin:
 		var f: Vector3 = (rig as FighterRig).skin.turn("Spine2") * Vector3(0, 0, -1)
-		_track.append([t, _tip_local(), atan2(f.x, -f.z)])
+		# (the rig has already taken the step that ends at t + one frame)
+		_track.append([t + 1.0 / float(_args.get("fps", "30")), _tip_local(), atan2(f.x, -f.z)])
+	if _args.has("motiononly"):
+		return      # only the blade's path (fast enough to run at 120 frames a second)
 	var sk: Array = _skinned()
 	var pts: PackedVector3Array = sk[0]
 	var names: Array = sk[1]
@@ -689,9 +694,9 @@ func _report(pose: String, stat: Dictionary) -> void:
 			"elbow_min": bad = v < 25.0
 			"ankle_low": bad = v < -0.03
 			"offhand": bad = v > 0.06
-"delay": bad = v > 0.085
-"dir_err": bad = absf(v) > 25.0
-"yaw": bad = v > 75.0
+			"delay": bad = v > 0.085
+			"dir_err": bad = absf(v) > 25.0
+			"yaw": bad = v > 75.0
 		out += " %s%s=%.2f@%.2f%s" % ["!!" if bad else "", k, v, float(e[1]), ("(" + str(e[2]) + ")") if str(e[2]) != "" and (bad or k == "low") else ""]
 		if bad:
 			flags += k + " "

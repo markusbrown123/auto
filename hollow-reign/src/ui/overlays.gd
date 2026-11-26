@@ -73,6 +73,13 @@ static func victory(parent: Node, foe: Dictionary, r: Dictionary, sim: DuelSim, 
 	for id in r.items:
 		var it: Dictionary = Db.item(id)
 		v.add_child(_centered("Found:  " + str(it.name), 21, Db.rarity_color(it), "bold"))
+	var mats: Array = []
+	for m: String in r.get("materials", {}):
+		mats.append("%d %s" % [int(r.materials[m]), Db.material_name(m)])
+	if not mats.is_empty():
+		v.add_child(_centered("Salvaged:  " + ",  ".join(mats), 18, UI.BONE))
+	for id in r.get("discoveries", []):
+		v.add_child(_centered("Word of something:  %s" % Game.item_hint(id), 17, UI.SILVER))
 	for id in r.mastered:
 		v.add_child(_centered("Mastered:  %s.  One more point to spend." % Db.item(id).name, 19, UI.GOLD))
 	for id in r.get("new_combos", []):

@@ -106,3 +106,6 @@ Most of what the owner listed (clipping, floor penetration, weapons passing thro
 
 ## Animation packs (owner purchase, 2026-11-26)
 The owner bought the Game Dev Hero bundle ($59.97, paid directly by the owner, outside the generation caps): Sword & Shield V3, Two-Handed Sword V3, Dual Sword V1 (Mixamo skeleton, 1,181 FBX). Source files live only in the git-ignored `art/anim_src/gamedevhero/` and the private repo `hollow-reign-anims`; the licence forbids redistributing them, so they must never be committed here. No licence text was inside the zips.
+
+## Benchmark knights v3 (2026-11-26)
+Two sleek starter-knight concepts (`art/concept/knight_{m,f}_v3.png`, about 2.5 Higgsfield credits) and two rigged models (`assets/models/knight_{m,f}_v3.glb`, 135 Tripo credits each = **$2.70**) from the Tripo graphics allocation. Graphics allocation spent so far: $21.60 + $2.70 = **$24.30**.

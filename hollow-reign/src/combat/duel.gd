@@ -328,6 +328,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	training = bool(opts.get("training", false)) or bool(opts.get("lesson", false))
 	_lesson = 0 if opts.get("lesson", false) else -1
 	sim.setup(Game.stats(), foe, int(opts.get("seed", 0)), o)
+	player_rig.combo_book = sim.combos      # the rig gives each known combo its own choreography
 	sim.ev.connect(_on_ev)
 	if opts.get("autoplay", false):
 		bot = DuelBot.new(sim, int(opts.get("bot_style", DuelBot.Style.SLOPPY)), 5)
@@ -687,8 +688,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				ring_dir = -ring_dir       # comes at you from the other side
 		&"player_swing":
 			# step in until the blade will reach the body
-			p_back_t = clampf(player_rig.reach() + 0.18 * float(foe.rig.scale) - gap - f_back, -1.1, 0.3)
 			player_rig.swing(DuelSim.dir_vec(d.dir), d.time, str(d.get("finish", "")))
+			p_back_t = clampf(player_rig.reach() + 0.18 * float(foe.rig.scale) - gap - f_back, -1.1, 0.3)      # (after the swing: the reach is that of the cut chosen)
 			Sfx.play("swing", -4.0, 1.25 - float(d.time) * 0.8)
 		&"player_parry_swing":
 			player_rig.parry(DuelSim.dir_vec(d.dir))

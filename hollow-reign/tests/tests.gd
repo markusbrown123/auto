@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -645,7 +645,10 @@ func t_endings() -> void:
 	ok(Game.game_complete() and not Game.can_divide_crown(), "the main road alone finishes the game but cannot divide the Crown")
 	Game.profile.cleared.append("roost")
 	Game.profile.defeated["devourer"] = 1
-	ok(Game.can_divide_crown(), "the side roads earn the third ending")
+	ok(not Game.can_divide_crown(), "the side roads alone are not enough without the records")
+	for i in Game.LORE_FOR_DIVIDE:
+		Game.profile.lore.append(Db.lore[i].id)
+	ok(Game.can_divide_crown(), "the side roads and thirty records earn the third ending")
 	Game.choose_ending("cities"); Game.choose_ending("cities")
 	ok(Game.profile.endings == ["cities"] and Game.profile.flags.last_ending == "cities", "the ending is recorded once")
 
@@ -724,3 +727,75 @@ func t_runs() -> void:
 	var inv: int = Game.profile.inventory.size()
 	Game.start_ng_plus()
 	ok(Game.profile.ng == 1 and Game.profile.cleared.is_empty() and Game.profile.inventory.size() == inv, "NG+ keeps gear, resets the world")
+
+# ------------------------------------------------------------------ records and tasks
+func t_lore_quests() -> void:
+	Game.new_game("#123456")
+	var ids := {}
+	var places := true
+	for l in Db.lore:
+		ids[l.id] = true
+		var st: int = int(l.stage)
+		places = places and Db.region_by_id.has(l.region) and st >= 0 and st < Db.region_by_id.get(l.region, {"stages": []}).stages.size()
+		places = places and str(l.title) != "" and str(l.text) != ""
+	ok(Db.lore.size() == 50 and ids.size() == 50 and Db.lore_by_id.size() == 50, "fifty records with unique ids")
+	ok(places, "every record sits at a real stage of a real region")
+	var first: Dictionary = Db.lore[0]
+	var got := Game.find_lore(first.region, int(first.stage))
+	ok(got.size() >= 1 and got.has(first) and Game.profile.lore.has(first.id), "arriving at a stage finds its record")
+	var held: int = Game.profile.lore.size()
+	ok(Game.find_lore(first.region, int(first.stage)).is_empty() and Game.profile.lore.size() == held, "a record is found only once")
+	Game.profile = {}
+	ok(Game.load_game() and Game.profile.lore.has(first.id), "found records are saved")
+	var old := Game.default_profile()
+	old.erase("lore"); old.erase("quests_done")
+	old = Game._migrate(old)
+	ok(old.lore == [] and old.quests_done == [], "older saves gain the record and task lists")
+	# tasks
+	ok(Db.quests.size() == 8 and Db.quest_by_id.size() == 8, "eight tasks with unique ids")
+	var refs := true
+	for q in Db.quests:
+		for k in q.need:
+			refs = refs and k in ["defeated", "cleared", "lore", "combos"]
+		for f in q.need.get("defeated", []):
+			refs = refs and Db.foes.has(f)
+		for r in q.need.get("cleared", []):
+			refs = refs and Db.region_by_id.has(r)
+		refs = refs and int(q.need.get("lore", 0)) <= Db.lore.size() and int(q.need.get("combos", 0)) <= Db.combos.size()
+		refs = refs and not q.need.is_empty() and not q.reward.is_empty()
+		for k in q.reward:
+			refs = refs and k in ["gold", "shards", "item"]
+		if q.reward.has("item"):
+			refs = refs and Db.items.has(q.reward.item)
+	ok(refs, "task needs and rewards point at real foes, regions and items")
+	for q in Db.quests:
+		Game.new_game("#123456")
+		ok(not Game.quest_ready(q.id) and not Game.claim_quest(q.id), "%s is not ready on a new profile" % q.id)
+		ok(Game.quest_progress(q.id).begins_with("0 / "), "%s reports progress (%s)" % [q.id, Game.quest_progress(q.id)])
+		for f in q.need.get("defeated", []):
+			Game.profile.defeated[f] = 1
+		for r in q.need.get("cleared", []):
+			Game.profile.cleared.append(r)
+		for i in int(q.need.get("lore", 0)):
+			Game.profile.lore.append(Db.lore[i].id)
+		for c in Db.combos:
+			if Game.profile.combos.size() < int(q.need.get("combos", 0)) and not Game.profile.combos.has(c.id):
+				Game.profile.combos.append(c.id)
+		ok(Game.quest_ready(q.id), "%s becomes ready when its need is met" % q.id)
+		var gold: int = Game.profile.gold
+		var shards: int = Game.profile.shards
+		ok(Game.claim_quest(q.id), "%s can be claimed" % q.id)
+		var paid: bool = Game.profile.gold == gold + int(q.reward.get("gold", 0)) and Game.profile.shards == shards + int(q.reward.get("shards", 0))
+		if q.reward.has("item"):
+			paid = paid and Game.owns(q.reward.item)
+		ok(paid and Game.profile.quests_done == [q.id] and Game.quest_progress(q.id) == "Done", "%s pays its reward" % q.id)
+		ok(not Game.claim_quest(q.id) and Game.profile.gold == gold + int(q.reward.get("gold", 0)) and Game.profile.quests_done.size() == 1, "%s pays only once" % q.id)
+	# the third ending needs the record
+	Game.new_game("#123456")
+	Game.profile.cleared.append("roost")
+	Game.profile.defeated["devourer"] = 1
+	for i in 29:
+		Game.profile.lore.append(Db.lore[i].id)
+	ok(not Game.can_divide_crown(), "twenty-nine records cannot divide the Crown")
+	Game.profile.lore.append(Db.lore[29].id)
+	ok(Game.can_divide_crown(), "thirty records can")

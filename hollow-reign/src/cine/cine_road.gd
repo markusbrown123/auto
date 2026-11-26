@@ -153,6 +153,8 @@ func _build_ui() -> void:
 	hp.max_value = Game.stats().max_hp
 	hp.value = Game.run.hp
 	head.add_child(hp)
+	for l in Game.find_lore(region.id, stage):
+		head.add_child(UI.label("Record found  ·  " + str(l.title), 15, UI.GOLD))
 	var back := UI.button("Turn Back", 14, 150)
 	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	back.offset_left = -150

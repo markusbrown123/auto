@@ -494,6 +494,52 @@ func _tab_journal() -> void:
 			if not c.cls.is_empty():
 				hint += "  ·  " + ", ".join(c.cls) + " only"
 			names.add_child(UI.label(hint, 14, UI.DIM))
+	# ---- tasks
+	v.add_child(UI.spacer(8))
+	v.add_child(UI.rule())
+	var qhead := _row()
+	v.add_child(qhead)
+	var qt := UI.title("Tasks", 22)
+	qt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	qhead.add_child(qt)
+	qhead.add_child(UI.label("%d of %d done" % [p.quests_done.size(), Db.quests.size()], 18, UI.DIM))
+	for q in Db.quests:
+		var done: bool = p.quests_done.has(q.id)
+		var qrow := _row()
+		v.add_child(qrow)
+		var qv := VBoxContainer.new()
+		qv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		qv.add_theme_constant_override("separation", -3)
+		qrow.add_child(qv)
+		var qtitle := _row()
+		qtitle.add_child(UI.label(str(q.name), 20, UI.DIM if done else UI.GOLD, "bold"))
+		qtitle.add_child(UI.label(str(q.giver).to_upper(), 13, UI.DIM))
+		qv.add_child(qtitle)
+		qv.add_child(_wrap(str(q.done_text if done else q.text), 15))
+		qv.add_child(UI.label(Game.quest_progress(q.id), 14, UI.BONE))
+		if not done and Game.quest_ready(q.id):
+			var claim := UI.button("Claim", 16, 120)
+			claim.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			claim.pressed.connect(func(): Game.claim_quest(q.id))
+			qrow.add_child(claim)
+	# ---- records
+	v.add_child(UI.spacer(8))
+	v.add_child(UI.rule())
+	var rhead := _row()
+	v.add_child(rhead)
+	var rt := UI.title("Records", 22)
+	rt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	rhead.add_child(rt)
+	rhead.add_child(UI.label("%d of %d found" % [p.lore.size(), Db.lore.size()], 18, UI.DIM))
+	for l in Db.lore:
+		if p.lore.has(l.id):
+			var lv := VBoxContainer.new()
+			lv.add_theme_constant_override("separation", -3)
+			v.add_child(lv)
+			lv.add_child(UI.label(str(l.title), 19, UI.GOLD, "bold"))
+			lv.add_child(_wrap(str(l.text), 15))
+		else:
+			v.add_child(UI.label("Unfound — " + str(Db.region_by_id[l.region].name), 15, UI.DIM))
 
 # ================================================================ Settings
 func _tab_settings() -> void:

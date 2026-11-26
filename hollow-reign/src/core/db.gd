@@ -10,6 +10,10 @@ var regions: Array = []
 var combos: Array = []
 var combo_by_id: Dictionary = {}
 var region_by_id: Dictionary = {}
+var lore: Array = []
+var lore_by_id: Dictionary = {}
+var quests: Array = []
+var quest_by_id: Dictionary = {}
 
 const RARITY_COLOR := {
 	"common": Color("#9a958c"), "uncommon": Color("#7d9a6a"), "rare": Color("#5f86b0"),
@@ -40,6 +44,12 @@ func _ready() -> void:
 	regions = _load("res://data/regions.json").regions
 	for r in regions:
 		region_by_id[r.id] = r
+	lore = _load("res://data/lore.json").lore
+	for l in lore:
+		lore_by_id[l.id] = l
+	quests = _load("res://data/quests.json").quests
+	for q in quests:
+		quest_by_id[q.id] = q
 
 func _load(path: String) -> Dictionary:
 	var txt := FileAccess.get_file_as_string(path)

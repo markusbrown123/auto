@@ -54,7 +54,7 @@ Update this file in the same commit as the work.
 | D1 | Unique mechanics and movement per boss (8 remaining + Devourer) | DOING — one rule trait each (`TRAITS` in `tools/gen_bosses.py`), tested; pattern sets not yet widened like the Sentinel's |
 | D2 | Dragons on the stance system | DOING — dragons now ride the turning line; needs a capture |
 | D3 | Environment kits for the six regions still on primitive geometry | DOING — Cathedral kit in and captured (237k triangles); other five kits: 42 concepts made, models generating (`tools/kit_props.py`), layouts written in `arena.gd`; needs captures per region |
-| D4 | Optional quests, lore collectibles, memories | TODO |
+| D4 | Optional quests, lore collectibles, memories | DOING — 50 records found on the road, 8 tasks claimable from the Journal, third ending needs 30 records; quests are profile conditions (the scripted steps are not built); needs captures |
 | D5 | Three endings, New Game Plus check | DOING — choice after the Monarch, three written epilogues, post-credits text, third ending gated on the side roads; text only, no footage or voice; needs a capture (`--screen=ending`) |
 | D6 | Modular armour customisation | TODO |
 

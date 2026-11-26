@@ -1,0 +1,144 @@
+{
+ "quests": [
+  {
+   "id": "relief_of_the_gate",
+   "name": "The Relief of the Gate",
+   "giver": "Lyra",
+   "text": "The Sentinel asked why no one came back for him. Lay him to rest, and gather what the Courtyard still records of his posting, so that someone can finally say he is relieved.",
+   "need": {
+    "defeated": [
+     "ashen_sentinel"
+    ],
+    "lore": 4
+   },
+   "reward": {
+    "gold": 150,
+    "shards": 2,
+    "item": "w_vigil_edge"
+   },
+   "done_text": "\"Sergeant. You are relieved.\" Nobody answers. Lyra is quiet for a while afterward."
+  },
+  {
+   "id": "older_than_my_bloodline",
+   "name": "Older Than My Bloodline",
+   "giver": "Orren",
+   "text": "Orren wants proof that you are more than a thing the old kings left lying about. Walk the Courtyard, the Blackwood and the Citadel to their ends, and show him five sequences of the blade you found for yourself.",
+   "need": {
+    "cleared": [
+     "courtyard",
+     "blackwood",
+     "citadel"
+    ],
+    "combos": 5
+   },
+   "reward": {
+    "gold": 300,
+    "shards": 12,
+    "item": "w_dawnline"
+   },
+   "done_text": "Orren unrolls a bundle of his family's scraps on the anvil. \"My grandmother called it prayer. It was a wiring diagram.\""
+  },
+  {
+   "id": "what_the_kings_bred",
+   "name": "What the Kings Bred",
+   "giver": "The Pale Huntsman",
+   "text": "The Huntsman has spent his life ending what the old kings bred. Put down the whelp in the Roost's boneyard and the drake on the Citadel's kennel stair, and he may believe you are not one of them.",
+   "need": {
+    "defeated": [
+     "cinder_whelp",
+     "frost_drake"
+    ]
+   },
+   "reward": {
+    "gold": 350,
+    "shards": 5
+   },
+   "done_text": "Two fresh marks are scored through on a strip of hide left where you would find it. Beside them, a purse, and no message."
+  },
+  {
+   "id": "six_people_i_buried",
+   "name": "Six People I Buried",
+   "giver": "The Crimson Widow",
+   "text": "She said you fight like six people she buried. Face her on the Cathedral steps, then walk the Sunken Crypt to its end, where the ones who made you left their names.",
+   "need": {
+    "defeated": [
+     "crimson_widow"
+    ],
+    "cleared": [
+     "crypt"
+    ]
+   },
+   "reward": {
+    "gold": 400,
+    "shards": 6
+   },
+   "done_text": "Six names, said aloud in order. You knew each one before it was spoken."
+  },
+  {
+   "id": "surviving_version",
+   "name": "The Surviving Version",
+   "giver": "The Archivist",
+   "text": "History has been rewritten seventeen times. Recover thirty records from the road and the Archivist will have enough to state the one that was not.",
+   "need": {
+    "lore": 30
+   },
+   "reward": {
+    "gold": 600,
+    "shards": 10
+   },
+   "done_text": "\"Version zero. Not surviving. True. I had forgotten there was a difference.\""
+  },
+  {
+   "id": "names_for_the_waiting",
+   "name": "Names for the Waiting",
+   "giver": "The Gravewarden's lantern",
+   "text": "The keeper of the First Tomb learned every name he guarded. With him gone, go down to the Gallery of Names and take them back from the thing that is eating them.",
+   "need": {
+    "defeated": [
+     "gravewarden",
+     "soul_eater"
+    ]
+   },
+   "reward": {
+    "gold": 450,
+    "shards": 8
+   },
+   "done_text": "The lantern at the First Tomb burns a little higher. The names you carried up are said there now, by you."
+  },
+  {
+   "id": "chain_that_stayed",
+   "name": "The Chain That Stayed",
+   "giver": "Lyra",
+   "text": "Whatever is chained in the pit under the Citadel was told to stay, three hundred years ago, and has. Go down and end its waiting.",
+   "need": {
+    "defeated": [
+     "rimewyrm"
+    ]
+   },
+   "reward": {
+    "gold": 500,
+    "shards": 8
+   },
+   "done_text": "\"It waited all that time for someone to tell it otherwise,\" Lyra says. \"I am glad it was not alone at the end.\""
+  },
+  {
+   "id": "the_rain",
+   "name": "The Rain",
+   "giver": "Lyra",
+   "text": "Lyra thinks she remembers rain, and does not know where she would have felt it. Follow the trail through the Cathedral, the Crypt and the Throne to learn where her mind is kept.",
+   "need": {
+    "cleared": [
+     "cathedral",
+     "crypt",
+     "throne"
+    ]
+   },
+   "reward": {
+    "gold": 800,
+    "shards": 12,
+    "item": "w_throneshard"
+   },
+   "done_text": "Now you know where she is. \"Tell me about it again,\" she says. \"The rain. Slowly, this time.\""
+  }
+ ]
+}

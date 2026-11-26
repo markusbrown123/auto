@@ -8,6 +8,7 @@ const SAVE_TMP := "user://save.tmp"
 const SAVE_BAK := "user://save.bak"
 const SETTINGS_PATH := "user://settings.json"
 const SAVE_VERSION := 1
+const LORE_FOR_DIVIDE := 30   # records needed before the Crown can be divided
 
 var profile: Dictionary = {}
 var run: Dictionary = {}          # {region, stage, hp, found:[...]} — reset on death
@@ -37,6 +38,7 @@ func default_profile() -> Dictionary:
 		"upgrades": {}, "mastery": {}, "mastered": [],
 		"flags": {}, "defeated": {}, "cleared": [], "endings": [], "ng": 0, "deaths": 0, "heraldry": "#3d0f0f",
 		"tutorial_done": false, "playtime": 0.0, "body": "m", "combos": ["double_slash"], "combo_uses": {},
+		"lore": [], "quests_done": [],
 	}
 
 func has_save() -> bool:
@@ -370,9 +372,76 @@ func on_death() -> Dictionary:
 func game_complete() -> bool:
 	return profile.cleared.has(Db.regions[-1].id)      # the throne; the Roost and the Deep are optional
 
-## The third ending needs the side roads walked: the Devourer ended and the wyrm of the Roost faced.
+## The third ending needs the side roads walked: the Devourer ended and the wyrm of the Roost faced,
+## and enough of the record recovered to know what is being divided.
 func can_divide_crown() -> bool:
-	return profile.defeated.has("devourer") and profile.cleared.has("roost")
+	return profile.defeated.has("devourer") and profile.cleared.has("roost") and profile.lore.size() >= LORE_FOR_DIVIDE
+
+# ================================================================ records and tasks
+## Grants every record kept at this stop that is not yet held. Returns the newly found entries.
+func find_lore(region_id: String, stage: int) -> Array:
+	var out: Array = []
+	for l in Db.lore:
+		if l.region == region_id and int(l.stage) == stage and not profile.lore.has(l.id):
+			profile.lore.append(l.id)
+			out.append(l)
+	if not out.is_empty():
+		save()
+	return out
+
+## Each condition of a task as [have, need, noun].
+func _quest_parts(id: String) -> Array:
+	var need: Dictionary = Db.quest_by_id[id].need
+	var parts: Array = []
+	if need.has("defeated"):
+		var n := 0
+		var bosses := true
+		for f in need.defeated:
+			n += 1 if profile.defeated.has(f) else 0
+			bosses = bosses and Db.foes[f].boss
+		parts.append([n, need.defeated.size(), "guardians" if bosses else "foes"])
+	if need.has("cleared"):
+		var n := 0
+		for r in need.cleared:
+			n += 1 if profile.cleared.has(r) else 0
+		parts.append([n, need.cleared.size(), "regions"])
+	if need.has("lore"):
+		parts.append([mini(profile.lore.size(), int(need.lore)), int(need.lore), "records"])
+	if need.has("combos"):
+		parts.append([mini(profile.combos.size(), int(need.combos)), int(need.combos), "sequences"])
+	return parts
+
+func quest_ready(id: String) -> bool:
+	if not Db.quest_by_id.has(id):
+		return false
+	for part in _quest_parts(id):
+		if part[0] < part[1]:
+			return false
+	return true
+
+func quest_progress(id: String) -> String:
+	if not Db.quest_by_id.has(id):
+		return ""
+	if profile.quests_done.has(id):
+		return "Done"
+	var bits: Array = []
+	for part in _quest_parts(id):
+		bits.append("%d / %d %s" % part)
+	return "  ·  ".join(bits)
+
+## Pays out a finished task, once.
+func claim_quest(id: String) -> bool:
+	if profile.quests_done.has(id) or not quest_ready(id):
+		return false
+	var reward: Dictionary = Db.quest_by_id[id].reward
+	profile.gold += int(reward.get("gold", 0))
+	profile.shards += int(reward.get("shards", 0))
+	if reward.has("item"):
+		grant_item(str(reward.item))
+	profile.quests_done.append(id)
+	save()
+	profile_changed.emit()
+	return true
 
 func choose_ending(id: String) -> void:
 	if not profile.endings.has(id):

@@ -53,6 +53,8 @@ func _ready() -> void:
 	hp_bar.max_value = Game.stats().max_hp
 	hp_bar.value = Game.run.hp
 	head.add_child(hp_bar)
+	for l in Game.find_lore(region.id, stage):
+		head.add_child(UI.label("Record found  ·  " + str(l.title), 15, UI.GOLD))
 	var back := UI.button("Turn Back", 14, 150)
 	back.custom_minimum_size.y = 40
 	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)

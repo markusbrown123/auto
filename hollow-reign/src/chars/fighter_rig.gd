@@ -572,6 +572,15 @@ func chest_point() -> Vector3:
 	return chest.global_position
 
 
+## When filming clips every idle oscillation is snapped to a harmonic of
+## `loop_period`, so the pose at the end of a loop equals the pose at its start.
+var loop_period := 0.0
+
+func _osc(f: float, cosine: bool = false) -> float:
+	if loop_period > 0.0:
+		f = TAU / loop_period * maxf(1.0, roundf(f * loop_period / TAU))
+	return cos(_clock * f) if cosine else sin(_clock * f)
+
 # ================================================================ per-frame
 func _process(delta: float) -> void:
 	var dt := delta * time_scale
@@ -601,7 +610,7 @@ func _solve(dt: float) -> void:
 	var twist_t := -0.25
 	var crouch_t := 0.04 + hunch * 0.1
 	var direct := false
-	var breathe := sin(_clock * 1.7) * 0.012
+	var breathe := _osc(1.7) * 0.012
 	match mode:
 		Mode.GUARD:
 			hand_t.y += breathe
@@ -620,7 +629,7 @@ func _solve(dt: float) -> void:
 				blade_t = ap[1]
 				# the held blade trembles slightly: the tell before a delayed blow
 				if _t > rise:
-					hand_t += Vector3(sin(_clock * 31.0), cos(_clock * 27.0), 0) * 0.006
+					hand_t += Vector3(_osc(31.0), _osc(27.0, true), 0) * 0.006
 				lean_t = -0.1 + hunch
 				twist_t = _arc_dir.x * 0.55
 				crouch_t = 0.07
@@ -633,7 +642,7 @@ func _solve(dt: float) -> void:
 			hand_t = Vector3(0.3, 1.22 - hunch * 0.2, 0.1)
 			blade_t = Vector3(-0.1, 0.05, -1).normalized()
 			if _t > minf(_dur * 0.5, 0.5):
-				hand_t += Vector3(sin(_clock * 31.0), cos(_clock * 27.0), 0) * 0.006
+				hand_t += Vector3(_osc(31.0), _osc(27.0, true), 0) * 0.006
 			lean_t = -0.12 + hunch
 			twist_t = 0.6
 			crouch_t = 0.12
@@ -677,14 +686,14 @@ func _solve(dt: float) -> void:
 			# spent: weapon low and wide, chest heaving — this is the opening
 			hand_t = Vector3(0.42, 0.62, -0.25)
 			blade_t = Vector3(0.35, -0.75, -0.55).normalized()
-			lean_t = 0.42 + hunch + sin(_clock * 5.0) * 0.03
+			lean_t = 0.42 + hunch + _osc(5.0) * 0.03
 			twist_t = 0.1
 			crouch_t = 0.16
 		Mode.STAGGER:
-			hand_t = Vector3(0.5, 0.75 + sin(_clock * 3.0) * 0.04, 0.05)
+			hand_t = Vector3(0.5, 0.75 + _osc(3.0) * 0.04, 0.05)
 			blade_t = Vector3(0.7, -0.6, 0.2).normalized()
-			lean_t = -0.22 + sin(_clock * 2.3) * 0.08
-			twist_t = 0.35 + sin(_clock * 1.7) * 0.15
+			lean_t = -0.22 + _osc(2.3) * 0.08
+			twist_t = 0.35 + _osc(1.7) * 0.15
 			crouch_t = 0.22
 		Mode.HURT:
 			lean_t = -0.25
@@ -706,7 +715,7 @@ func _solve(dt: float) -> void:
 			hand_t = Vector3(0.55, 1.5, 0.0)
 			blade_t = Vector3(0.5, 0.85, 0.1).normalized()
 			lean_t = -0.35 * sin(u5 * PI) + hunch * 0.5
-			twist_t = sin(_clock * 20.0) * 0.03
+			twist_t = _osc(20.0) * 0.03
 			crouch_t = 0.0
 			if u5 >= 1.0:
 				guard()

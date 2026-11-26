@@ -1,0 +1,23 @@
+{
+ "clips": {
+  "idle": 3.0,
+  "open": 3.0,
+  "counter": 3.0,
+  "recover": 3.0,
+  "victory": 6.0,
+  "defeat": 4.5,
+  "intro": 6.0,
+  "travel": 6.0,
+  "a_tele": 1.65,
+  "a_parry": 4.35,
+  "a_dodge": 4.35,
+  "a_block": 4.35,
+  "a_hit": 4.35,
+  "b_tele": 1.45,
+  "b_parry": 4.55,
+  "b_dodge": 4.55,
+  "b_block": 4.55,
+  "b_hit": 4.55
+ },
+ "bytes": 41840081
+}

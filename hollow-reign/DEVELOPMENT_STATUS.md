@@ -35,6 +35,11 @@ Verified means covered by `tools/test.sh` or seen in software-rendered screensho
 | Audio: 37 sound effects, 4 ambiences, 5 music loops, phase-2 music layer | In. **Nobody has listened to it** (see below) |
 | Settings: quality, frame cap, volumes, haptics, shake, prompts, forgiving timing, reduced flashes | Works |
 
+## Experiment 2026-11-26: cinematic presentation
+A complete, playable test of prerecorded footage with live rules (the Ashen Sentinel in the Fallen Courtyard), plus a short hotspot-and-travel exploration example. Off by default; switch on in Settings. The real-time duel is unchanged. Full write-up, measurements and recommendation: `docs/CINEMATIC_COMBAT.md`. Short version: it works and is verified on desktop; it suits travel, intros, finishers and story scenes; the real-time duel remains the better choice for the fighting itself. Asset manifest: `docs/ASSET_MANIFEST.json` (`tools/asset_manifest.py`). Audition reels for the unheard voices and music: `marketing/audition/`.
+
+Also fixed: weapon models could be fitted upside down (the Sentinel's greatsword was). The fitter now finds the handle by cross-section shape, and `-- --screen=weapons` shows every weapon as fitted.
+
 ## Milestone 2026-11-26: the first region, voiced
 - **Weapons and shields:** 21 generated models (8 swords incl. two recoloured variants, 5 greatswords, axes, 4 dual-blade sets, 6 shields), fitted automatically to the hand (`src/chars/prop_model.gd`). Bosses carry their signature weapons. Four concepts were refused by the image service's content filter and are covered by recoloured variants; the glaive is still a primitive shape.
 - **The Fallen Courtyard:** rebuilt from 13 generated set pieces (gatehouse, walls, towers, statues, pillars, braziers, banners, tree, rubble, a half-buried machine obelisk, mountain peaks), enclosed on all sides, with grass, fire light and shadows. The other seven regions are still primitive geometry.

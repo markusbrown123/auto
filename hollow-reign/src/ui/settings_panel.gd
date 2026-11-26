@@ -13,6 +13,7 @@ const ROWS := [
 	["hints", "Combat prompts", "toggle", "Show the parry direction and timing ring"],
 	["assist", "Forgiving timing", "toggle", "Widens parry and dodge windows by 30%"],
 	["reduce_flash", "Reduce flashes", "toggle", "Softens full-screen hit flashes"],
+	["cine", "Cinematic duel (test)", "toggle", "Ashen Sentinel only: prerecorded footage, live rules"],
 ]
 
 static func fill(v: VBoxContainer, refresh: Callable) -> void:

@@ -71,20 +71,32 @@ static func _frame(path: String, root: Node3D, flip_wide_to: String) -> Dictiona
 		lo2 = lo2.min(q)
 		hi2 = hi2.max(q)
 	if flip_wide_to != "":
-		# which end is wider? swords carry their width (the guard) low; axes carry it high
+		# Which end is the handle? A grip or haft is round in cross-section; a blade or axe head is flat.
+		# Slice the model along its length and compare how round each end is: the rounder end is held.
 		var len := hi2.y - lo2.y
-		var low_w := 0.0
-		var high_w := 0.0
-		var mid_x := (lo2.x + hi2.x) * 0.5
+		var bins := 16
+		var xlo: Array = []
+		var xhi: Array = []
+		var zlo: Array = []
+		var zhi: Array = []
+		for b in bins:
+			xlo.append(1e9); xhi.append(-1e9); zlo.append(1e9); zhi.append(-1e9)
 		for q in pts:
-			var u := (q.y - lo2.y) / maxf(len, 0.001)
-			if u < 0.3:
-				low_w = maxf(low_w, absf(q.x - mid_x))
-			elif u > 0.7:
-				high_w = maxf(high_w, absf(q.x - mid_x))
-		var wide_is_high := high_w > low_w * 1.15
-		var wide_is_low := low_w > high_w * 1.15
-		if (flip_wide_to == "low" and wide_is_high) or (flip_wide_to == "high" and wide_is_low):
+			var b2 := clampi(int((q.y - lo2.y) / maxf(len, 0.001) * bins), 0, bins - 1)
+			xlo[b2] = minf(xlo[b2], q.x); xhi[b2] = maxf(xhi[b2], q.x)
+			zlo[b2] = minf(zlo[b2], q.z); zhi[b2] = maxf(zhi[b2], q.z)
+		var round_of := func(from: int, to: int) -> float:
+			var vals: Array = []
+			for b3 in range(from, to):
+				if xhi[b3] > xlo[b3]:
+					var ex: float = xhi[b3] - xlo[b3]
+					var ez: float = zhi[b3] - zlo[b3]
+					vals.append(minf(ex, ez) / maxf(maxf(ex, ez), 0.0001))
+			vals.sort()
+			return vals[vals.size() / 2] if not vals.is_empty() else 0.0
+		var low_round: float = round_of.call(0, 5)
+		var high_round: float = round_of.call(bins - 5, bins)
+		if high_round > low_round * 1.2:
 			basis = Basis(Vector3.BACK, PI) * basis
 			var a := Basis(Vector3.BACK, PI) * lo2
 			var b := Basis(Vector3.BACK, PI) * hi2
@@ -108,7 +120,7 @@ static func weapon(parent: Node3D, path: String, cls: String, tint = null, lengt
 	var root := _instance(path)
 	if root == null:
 		return 0.0
-	var f := _frame(path, root, "high" if cls in HEAD_HEAVY else ("" if cls == "glaive" else "low"))
+	var f := _frame(path, root, "" if cls == "glaive" else "grip_low")
 	var len: float = f.hi.y - f.lo.y
 	var want: float = float(LENGTH.get(cls, 1.1)) * length_scale
 	var k := want / maxf(len, 0.001)

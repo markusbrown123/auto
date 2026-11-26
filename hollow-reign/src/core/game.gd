@@ -13,7 +13,7 @@ var profile: Dictionary = {}
 var run: Dictionary = {}          # {region, stage, hp, found:[...]} — reset on death
 var settings: Dictionary = {
 	"quality": 1, "fps": 60, "music": 0.8, "sfx": 1.0, "voice": 1.0, "haptics": true,
-	"shake": 1.0, "assist": false, "hints": true, "reduce_flash": false,
+	"shake": 1.0, "assist": false, "hints": true, "reduce_flash": false, "cine": false,
 }
 var rng := RandomNumberGenerator.new()
 var just_died := false         # set on death, consumed by the sanctuary

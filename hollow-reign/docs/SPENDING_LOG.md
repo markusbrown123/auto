@@ -14,8 +14,10 @@ Cap: $100 total across Higgsfield and Tripo, including everything below. Tripo c
 | 2026-11-26 | Higgsfield | 13 environment concepts (1k) | about 10 cr | $0.40 |
 | 2026-11-26 | Higgsfield | 97 voice lines (ElevenLabs v4, about 0.46 cr each; a few early test lines repeated) | about 50 cr | $2.05 |
 | 2026-11-26 | Higgsfield | 4 music cues, 75 to 95 seconds each (ElevenLabs Music v2.5) | about 50 cr | $2.05 |
+| 2026-11-26 | Higgsfield | 1 video clip (Seedance 2.5, 5 s, 720p): the Courtyard memory scene | 35 cr | $1.45 |
+| 2026-11-26 | (none) | Cinematic duel footage: 18 clips rendered from the game's own scene | 0 | $0.00 |
 
-**Totals to date:** Tripo $34.70 spent. Higgsfield about 170 credits (about $7) spent, 1,042 credits left. Combined about $42 of the $100 cap.
+**Totals to date (reconciled 2026-11-26 against both accounts):** Tripo $34.70 spent. Higgsfield 205 credits (about $8.45) spent, 1,007 credits left. Combined about $43 of the $100 cap.
 
 **Balances:** the owner topped up Tripo on 2026-11-26; the API wallet now shows $115.30. The $100 cap has not been changed, so spending still stops at $100 combined unless told otherwise. There are also 6,200 Tripo Studio credits that can only be spent by hand in the Studio web app.
 

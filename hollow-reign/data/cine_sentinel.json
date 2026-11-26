@@ -1,0 +1,40 @@
+{
+ "foe": "ashen_sentinel",
+ "video_dir": "res://assets/video/",
+ "prefix": "sentinel_",
+ "loop_step": 1.5,
+ "clips": {
+  "intro": 6.0, "idle": 3.0, "open": 3.0, "counter": 3.0, "recover": 3.0, "victory": 6.0, "defeat": 4.5,
+  "a_tele": 1.65, "a_parry": 4.35, "a_dodge": 4.35, "a_block": 4.35, "a_hit": 4.35,
+  "b_tele": 1.45, "b_parry": 4.55, "b_dodge": 4.55, "b_block": 4.55, "b_hit": 4.55
+ },
+ "poses": {"ready": ["idle", "a_tele", "b_tele", "defeat"], "open": ["open", "counter", "recover", "victory"]},
+ "ready_waits": [1.5, 3.0],
+ "boss_hits_to_kill": 5.5,
+ "phase2_at": 0.5,
+ "exchanges": [
+  {"id": "overhead", "weight": 1.0, "tele": "a_tele", "name": "Overhead",
+   "window": [0.90, 1.65], "perfect_from": 1.35, "damage": 28, "guard": 36,
+   "inputs": {"swipe:U": "parry", "swipe:UL": "parry", "swipe:UR": "parry", "dodge:L": "dodge", "dodge:R": "dodge", "block": "block"},
+   "cue": {"parry": "U", "dodge": "any"},
+   "outcomes": {
+    "parry": {"clip": "a_parry", "exit": "open", "impact": 0.35, "sfx": "clash"},
+    "dodge": {"clip": "a_dodge", "exit": "open", "impact": 0.35, "sfx": "dodge"},
+    "block": {"clip": "a_block", "exit": "ready", "impact": 0.35, "sfx": "block"},
+    "hit": {"clip": "a_hit", "exit": "ready", "impact": 0.35, "sfx": "hit_armor"}}},
+  {"id": "sweep", "weight": 1.0, "tele": "b_tele", "name": "Sweep",
+   "window": [0.70, 1.45], "perfect_from": 1.15, "damage": 20, "guard": 26,
+   "inputs": {"swipe:R": "parry", "swipe:UR": "parry", "swipe:DR": "parry", "dodge:L": "dodge", "block": "block"},
+   "cue": {"parry": "R", "dodge": "L"},
+   "outcomes": {
+    "parry": {"clip": "b_parry", "exit": "open", "impact": 0.35, "sfx": "clash"},
+    "dodge": {"clip": "b_dodge", "exit": "open", "impact": 0.35, "sfx": "dodge"},
+    "block": {"clip": "b_block", "exit": "ready", "impact": 0.35, "sfx": "block"},
+    "hit": {"clip": "b_hit", "exit": "ready", "impact": 0.35, "sfx": "hit_armor"}}}
+ ],
+ "stamina": {"parry": 6, "dodge": 14, "counter": 11, "early": 3, "max_regen_per_s": 22},
+ "open": {"clip": "open", "max_time": 3.0, "counter": {"clip": "counter", "impact": 0.45, "exit": "ready"},
+          "recover": {"clip": "recover", "exit": "ready"}, "victory": {"clip": "victory", "impact": 0.68}},
+ "defeat": {"clip": "defeat"},
+ "intro": {"clip": "intro"}
+}

@@ -94,7 +94,19 @@ func show_sanctuary() -> void:
 	s.quit_to_title.connect(func(): _fade_then(show_title))
 	_swap(s)
 
+func show_cine_courtyard() -> void:
+	var c := CineCourtyard.new()
+	_swap(c)
+	c.encounter.connect(func(): start_cine_duel({"type": "boss", "foe": "ashen_sentinel", "label": "The Inner Ward"}))
+	c.turned_back.connect(func():
+		Game.run = {}
+		_fade_then(show_sanctuary))
+
 func show_stage() -> void:
+	# with the cinematic test switched on, the last stop of the Courtyard is the prerendered walk and duel
+	if Game.settings.cine and str(Game.run.region) == "courtyard" and int(Game.run.stage) == Game.run_region().stages.size() - 1 and CineCourtyard.available():
+		show_cine_courtyard()
+		return
 	var e := Explore.new()
 	e.fight.connect(func(o): _fade_then(func(): start_duel(o)))
 	e.moved_on.connect(_next_stage)
@@ -110,6 +122,9 @@ func _next_stage() -> void:
 		_region_done()
 
 func start_duel(o: Dictionary) -> void:
+	if Game.settings.cine and str(o.foe) == "ashen_sentinel" and CineDuel.available():
+		start_cine_duel(o)
+		return
 	var d := Duel.new()
 	_swap(d)
 	d.setup(o.foe, {"start_hp": Game.run.hp, "ng": Game.profile.ng})
@@ -127,7 +142,24 @@ func start_duel(o: Dictionary) -> void:
 			"When a foe is open, a bright seam shows in its guard. Cut along it.",
 			["A perfect parry breaks their guard. That is your moment.", UI.GOLD]], "Begin", func(): d.set_process(true))
 
-func _duel_done(d: Duel, o: Dictionary, won: bool, sim: DuelSim) -> void:
+## The experimental footage-driven duel. Rewards, saves and progression go through the same path as the real-time one.
+func start_cine_duel(o: Dictionary) -> void:
+	var c := CineDuel.new()
+	_swap(c)
+	c.unavailable.connect(func():
+		# footage missing or unreadable: never strand the player, fall back to the real-time duel
+		Game.settings.cine = false
+		start_duel(o))
+	c.setup({"start_hp": Game.run.hp})
+	c.hud.pause_pressed.connect(func():
+		c.player.hold(true)
+		Overlays.pause(c, func(): c.player.hold(false), func():
+			c.player.hold(false)
+			c.fight.hp = 0.0
+			c.fight._show(CineFight.S.DEFEAT, "defeat", false)))
+	c.finished.connect(func(won, sim): _duel_done(c, o, won, sim))
+
+func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 	var foe: Dictionary = Db.foes[o.foe]
 	if won:
 		var rewards := Game.on_victory(o.foe, sim.pl.hp)
@@ -198,6 +230,66 @@ func _dev_boot() -> void:
 			Game.start_run(_args.get("region", "courtyard"))
 			Game.run.stage = int(_args.get("stage", "1"))
 			show_stage()
+		"weapons":
+			# line-up of every weapon model as the game fits it: grip at the bottom, blade up
+			var stage := Node3D.new()
+			_swap(stage)
+			var arena := Arena.new()
+			stage.add_child(arena)
+			arena.build("sanctuary")
+			var cam := Camera3D.new()
+			stage.add_child(cam)
+			cam.position = Vector3(0, 1.5, 7.5)
+			cam.fov = 50.0
+			cam.make_current()
+			var key := OmniLight3D.new()
+			key.light_energy = 6.0
+			key.omni_range = 20.0
+			key.position = Vector3(0, 4, 6)
+			stage.add_child(key)
+			var ids: Array = []
+			for it in Db.item_list:
+				if it.slot == "weapon" and ResourceLoader.exists("res://assets/models/%s.glb" % it.id):
+					ids.append(it)
+			for i in ids.size():
+				var holder := Node3D.new()
+				stage.add_child(holder)
+				holder.position = Vector3((i % 10 - 4.5) * 0.85, 0.4 + (1 - i / 10) * 2.1, 0)
+				PropModel.weapon(holder, "res://assets/models/%s.glb" % ids[i].id, ids[i].cls)
+				var mark := MeshInstance3D.new()
+				var sm := SphereMesh.new()
+				sm.radius = 0.035
+				sm.height = 0.07
+				mark.mesh = sm
+				mark.material_override = Look.glow(Color(0.2, 1.0, 0.3), 3.0)
+				holder.add_child(mark)
+		"cinewalk":
+			Game.profile.tutorial_done = true
+			Game.start_run("courtyard")
+			Game.run.stage = 6
+			for id in ["w_knight_sword", "s_garrison"]:
+				if not Game.owns(id):
+					Game.profile.inventory.append(id)
+				Game.equip(id)
+			Game.settings.cine = true
+			if _args.has("arrived"):
+				Game.profile.flags["cine_courtyard_arrived"] = true
+			show_cine_courtyard()
+			if _args.has("bot"):
+				_journey_bot(str(_args.bot))
+		"cine":
+			Game.profile.tutorial_done = true
+			Game.start_run("courtyard")
+			Game.run.stage = 6
+			for id in ["w_knight_sword", "s_garrison"]:
+				if not Game.owns(id):
+					Game.profile.inventory.append(id)
+				Game.equip(id)
+			if _args.has("seen"):
+				Game.profile.flags["scene_sentinel_intro"] = true
+			start_cine_duel({"type": "boss", "foe": "ashen_sentinel", "label": "The Inner Ward"})
+			if _args.has("bot"):
+				add_child(load("res://src/cine/cine_bot.gd").new(current, str(_args.bot)))
 		"victory":
 			Game.start_run("courtyard")
 			var d2 := Duel.new()
@@ -212,6 +304,36 @@ func _dev_boot() -> void:
 			d3.setup("ashen_sentinel", {"skip_intro": true})
 			d3.sim._damage_player(99999.0, true)
 			Overlays.death(d3, Db.foes.ashen_sentinel, {"xp": 120, "gold": 80, "found": ["r_iron"]}, func(): pass)
+
+## Plays the cinematic Courtyard journey through touches, for recordings.
+func _journey_bot(script_name: String) -> void:
+	var tap := func(pos: Vector2):
+		for pressed in [true, false]:
+			var e := InputEventScreenTouch.new()
+			e.index = 0
+			e.position = pos
+			e.pressed = pressed
+			get_viewport().push_input(e)
+			var m := InputEventMouseButton.new()
+			m.button_index = MOUSE_BUTTON_LEFT
+			m.position = pos
+			m.global_position = pos
+			m.pressed = pressed
+			get_viewport().push_input(m)
+	var c: CineCourtyard = current
+	await get_tree().create_timer(2.5).timeout
+	tap.call(c._to_screen(Vector2(0.19, 0.76)))
+	await get_tree().create_timer(2.5).timeout
+	for b in c.find_children("*", "Button", true, false):
+		if b.text == "TAKE":
+			b.pressed.emit()
+	await get_tree().create_timer(1.5).timeout
+	tap.call(c._to_screen(Vector2(0.51, 0.60)))
+	await get_tree().create_timer(12.0).timeout
+	tap.call(c._to_screen(Vector2(0.47, 0.48)))
+	while not (current is CineDuel):
+		await get_tree().process_frame
+	add_child(load("res://src/cine/cine_bot.gd").new(current, script_name))
 
 func _process(delta: float) -> void:
 	if _shot_dir == "":

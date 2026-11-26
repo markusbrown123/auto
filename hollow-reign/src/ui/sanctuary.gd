@@ -32,6 +32,8 @@ var stage: Control              # the open space beside the panel, where the kni
 var _previewing := ""           # item the backdrop knight is dressed in that is not actually worn
 var _forging := false
 var _sell_confirm := ""
+var _armory_yaw := -PI * 0.5 + 0.3   # facing the camera, a little turned; dragging changes it
+var _dev := {}                  # capture harness: --item=<id> --smith=<mode> --forge=<id>
 
 func _ready() -> void:
 	backdrop = Backdrop.new()
@@ -39,6 +41,13 @@ func _ready() -> void:
 	backdrop.build("sanctuary")
 	backdrop.move_camera(CAM_POS, CAM_LOOK, true)
 	Game.sync_mastery()
+	for a in OS.get_cmdline_user_args():
+		var kv: PackedStringArray = a.trim_prefix("--").split("=")
+		if kv[0] in ["item", "smith", "forge"] and kv.size() > 1:
+			_dev[kv[0]] = kv[1]
+	smith_mode = str(_dev.get("smith", smith_mode))
+	if _dev.has("forge"):
+		get_tree().create_timer(1.2).timeout.connect(func(): _forge(str(_dev.forge)))
 	Sfx.music_for("hub", "sanctuary")
 	Sfx.ambience("fire")
 	layer = CanvasLayer.new()
@@ -117,6 +126,8 @@ func show_tab(t: String) -> void:
 		for c in holder.get_children():
 			holder.remove_child(c)
 			c.queue_free()
+	backdrop.knight_yaw = _armory_yaw if t == "Armory" else PI * 0.92
+	backdrop.turn_knight(0.0)
 	if t != "Armory":
 		_preview("")
 		backdrop.move_camera(CAM_POS, CAM_LOOK, bool(Game.settings.reduce_motion))
@@ -305,7 +316,8 @@ func _stage_armory() -> void:
 	drag.mouse_filter = Control.MOUSE_FILTER_STOP
 	drag.gui_input.connect(func(e: InputEvent):
 		if e is InputEventScreenDrag:
-			backdrop.turn_knight(e.relative.x * 0.012))
+			backdrop.turn_knight(e.relative.x * 0.012)
+			_armory_yaw = backdrop.knight_yaw)
 	stage.add_child(drag)
 	var notes := VBoxContainer.new()
 	notes.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -351,6 +363,9 @@ func _preview(id: String) -> void:
 func _tab_armory() -> void:
 	var owned: Array = Game.sorted_items([sel_slot])
 	var equipped = Game.profile.equipped[sel_slot]
+	if _dev.has("item"):
+		sel_item = str(_dev.item)
+		_dev.erase("item")
 	if sel_item == "" or Db.item(sel_item).get("slot", "") != sel_slot or not Game.owns(sel_item):
 		sel_item = str(equipped) if equipped != null else (str(owned[0]) if not owned.is_empty() else "")
 	_preview(sel_item)
@@ -394,10 +409,13 @@ func _tab_armory() -> void:
 	dsc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	dsc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	side.add_child(dsc)
+	var pad := MarginContainer.new()
+	pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pad.add_theme_constant_override("margin_right", 12)
+	dsc.add_child(pad)
 	var det := VBoxContainer.new()
-	det.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	det.add_theme_constant_override("separation", 4)
-	dsc.add_child(det)
+	pad.add_child(det)
 	_item_detail(det, Db.item(sel_item), true)
 	var foot := _row()
 	side.add_child(foot)

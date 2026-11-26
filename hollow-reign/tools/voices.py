@@ -42,9 +42,13 @@ def make(lid, speaker_key, suffix):
     return out, "ok"
 
 jobs = []
-for sid in (sys.argv[1:] or list(D["scenes"])):
+for sid in ([a for a in sys.argv[1:] if not a.startswith("--")] or list(D["scenes"])):
     for lid in D["scenes"][sid]["lines"]:
+        if D["lines"][lid].get("recorded") is False and "--new" not in sys.argv:
+            continue      # written but uncast: recording these waits for the owner's casting choice (pass --new to record them)
         sp = D["lines"][lid]["speaker"]
+        if sp != "player" and sp not in D["voices"]:
+            continue
         if sp == "player":
             jobs += [(lid, "player_m", "_m"), (lid, "player_f", "_f")]
         else:

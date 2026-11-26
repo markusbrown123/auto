@@ -12,7 +12,9 @@ func _init(size_px: float = 96.0, tint: Color = UI.GOLD, spin: bool = false) -> 
 	color = tint
 	turning = spin
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_process(spin)
+
+func _ready() -> void:
+	set_process(turning)
 
 func _process(delta: float) -> void:
 	_a += delta * 1.7

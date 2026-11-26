@@ -68,21 +68,30 @@ func _motes() -> void:
 		p.lifetime = 9.0 if kind == 0 else 5.0
 		p.preprocess = 9.0
 		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
-		p.emission_box_extents = Vector3(4.0, 1.4, 2.5)
-		p.position = Vector3(0.6, 1.5, 1.0)
+		p.emission_box_extents = Vector3(4.5, 1.5, 2.0)
+		p.position = Vector3(0.8, 1.6, -0.6)       # kept well in front of the camera, so no mote fills the screen
 		p.direction = Vector3(0.4, 1.0 if kind == 1 else 0.15, 0.1)
 		p.spread = 50.0
 		p.gravity = Vector3.ZERO
 		p.initial_velocity_min = 0.03 if kind == 0 else 0.2
 		p.initial_velocity_max = 0.12 if kind == 0 else 0.45
 		var q := QuadMesh.new()
-		q.size = Vector2.ONE * (0.022 if kind == 0 else 0.03)
+		q.size = Vector2.ONE * (0.03 if kind == 0 else 0.04)
 		var mat := StandardMaterial3D.new()
 		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 		mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		mat.vertex_color_use_as_albedo = true
 		mat.albedo_color = Color(1.0, 0.95, 0.82) if kind == 0 else Color(1.0, 0.55, 0.2)
+		var dot := GradientTexture2D.new()
+		dot.gradient = Gradient.new()
+		dot.gradient.colors = PackedColorArray([Color(1, 1, 1, 1), Color(1, 1, 1, 0)])
+		dot.fill = GradientTexture2D.FILL_RADIAL
+		dot.fill_from = Vector2(0.5, 0.5)
+		dot.fill_to = Vector2(1.0, 0.5)
+		dot.width = 16
+		dot.height = 16
+		mat.albedo_texture = dot
 		q.material = mat
 		p.mesh = q
 		var g := Gradient.new()

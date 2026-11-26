@@ -75,8 +75,7 @@ func _init(item_id: String, height: float = 180.0) -> void:
 	key.spot_angle = 38.0
 	key.shadow_enabled = false
 	vp.add_child(key)
-	key.position = Vector3(-extent * 0.9, extent * 1.1, extent * 1.6)
-	key.look_at(Vector3.ZERO)
+	key.look_at_from_position(Vector3(-extent * 0.9, extent * 1.1, extent * 1.6), Vector3.ZERO)
 	var rim := DirectionalLight3D.new()
 	var glow = it.get("look", {}).get("glow")
 	rim.light_color = Color(str(glow)).lerp(Color.WHITE, 0.25) if glow != null else Color("#7f9cc8")

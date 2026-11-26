@@ -83,8 +83,8 @@ Next actions, in order:
 ## G. Final production brief (2026-11-26)
 | # | Task | Status |
 |---|---|---|
-| G1 | The Witness: bible entries, dialogue (travel, landmarks, boss approaches, victories, sanctuary talks), cooldowns, no repeats after death, archive | DOING (agent) |
-| G2 | Enemy speech categories: creatures silent, guardians sparse, Devourer whispers | DOING (agent, with G1) |
+| G1 | The Witness: bible entries, dialogue (travel, landmarks, boss approaches, victories, sanctuary talks), cooldowns, no repeats after death, archive | DONE (text) — 95 Witness lines in 69 scenes, `Companion` autoload, once-per-save, cooldown, silent in combat, test `t_companion`; unrecorded (subtitles only); sanctuary-topics and archive UI still to build |
+| G2 | Enemy speech categories: creatures silent, guardians sparse, Devourer whispers | DONE — categories in data and enforced by the generator and the duel; creature sound libraries play instead |
 | G3 | Witness relic model on the knight's belt; discovery scene | TODO |
 | G4 | UI theme; launch; animated main menu; save slots; character selection; loading screens with lore; world map | DOING (agent) |
 | G5 | Equipment screen with live rotatable knight, comparison, weapon collection with 3D preview, rarity, sorting, favourites; forge; settings (graphics presets, five audio sliders, accessibility); victory/defeat screens | DOING (agent) |

@@ -16,22 +16,43 @@ var angle := 0.0
 var markers: Array = []       # world positions of each option's path marker
 var pouches: Array = []       # [prop, button]
 var _leaving := false
+var adopted: Backdrop         # a place already built and on screen (the Approach hands its own over): no rebuild, no cut
+var foes: Array = []          # the figure standing at each fight's marker, or null
+var _staging := false         # a staged moment has the camera; the choices wait
+
+const CAM_POS := Vector3(1.3, 1.7, 4.2)
+const CAM_LOOK := Vector3(-0.3, 1.25, -4.0)
+
+## Each stage looks across the arena from its own bearing.
+static func bearing(stage: int) -> float:
+	return stage * 0.85 - 0.4
 
 func _ready() -> void:
 	var region := Game.run_region()
 	var stage: int = Game.run.stage
-	backdrop = Backdrop.new()
-	add_child(backdrop)
-	backdrop.build(region.theme)
-	# each stage looks across the arena from a new bearing; arriving pans from the last one
-	angle = stage * 0.85 - 0.4
-	var prev := angle - 0.85
-	backdrop.rig.rotation.y = angle
-	backdrop.move_camera(_at(prev, Vector3(1.3, 1.9, 5.2)), _at(prev, Vector3(0, 1.3, -4.0)), true)
-	backdrop.move_camera(_at(angle, Vector3(1.3, 1.7, 4.2)), _at(angle, Vector3(-0.3, 1.25, -4.0)))
+	angle = bearing(stage)
+	if adopted:
+		# the knight has just walked in, in this very place: keep it, and let the camera settle from where it is
+		backdrop = adopted
+		if backdrop.get_parent():
+			backdrop.get_parent().remove_child(backdrop)
+		add_child(backdrop)
+		backdrop.cam.make_current()
+		backdrop.rig.rotation.y = angle
+		backdrop.rig.walking = false
+		backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK))
+	else:
+		backdrop = Backdrop.new()
+		add_child(backdrop)
+		backdrop.build(region.theme)
+		# arriving pans from the last stage's bearing
+		var prev := angle - 0.85
+		backdrop.rig.rotation.y = angle
+		backdrop.move_camera(_at(prev, Vector3(1.3, 1.9, 5.2)), _at(prev, Vector3(0, 1.3, -4.0)), true)
+		backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK))
+		Sfx.play("footstep", -6.0)
 	Sfx.ambience(str(region.amb))
 	Sfx.music_for("explore_" + str(region.id), "menu")
-	Sfx.play("footstep", -6.0)
 	layer = CanvasLayer.new()
 	add_child(layer)
 	var m := UI.margin(get_viewport(), 8)
@@ -81,19 +102,117 @@ func _ready() -> void:
 		var at := _at(angle, Vector3(x - 0.3, 0, -4.6))
 		backdrop.add_prop("marker", at)
 		markers.append(at)
+		_stand_foe(opts[i], at)
 		row.add_child(_card(opts[i], i))
 	_scatter_pouches(frame, int(Game.run_stage().get("pouches", 1)))
 	layer.get_child(0).modulate.a = 0.0
-	if not Companion.pick_stage(str(region.id), stage).is_empty():
+	var said: Array = Companion.pick_stage(str(region.id), stage)
+	if not said.is_empty():
 		# let the place and the voice land first; the choices appear once the line is done
 		await get_tree().create_timer(1.4).timeout
-		await Companion.on_stage(str(region.id), stage)
+		if not is_inside_tree():
+			return
+		if said.has(Companion.discovery_id()) and _monument() != Vector3.INF:
+			await _find_witness(str(region.id), stage)
+		else:
+			await Companion.on_stage(str(region.id), stage)
 		if not is_inside_tree():
 			return
 	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.3)
 
 func _at(a: float, v: Vector3) -> Vector3:
 	return v.rotated(Vector3.UP, a)
+
+# ---------------------------------------------------------------- what waits on the road
+## The foe of a fight stands at its marker, so the way onward shows what is on it. Guardians keep their entrance
+## for the duel. Its files are read on a thread first, so neither this nor the duel after it has to stop the picture.
+static var _kept: Array = []          # models read ahead, held so the duel finds them loaded
+
+func _stand_foe(o: Dictionary, at: Vector3) -> void:
+	var index := foes.size()
+	foes.append(null)
+	if not o.has("foe") or not Db.foes.has(str(o.foe)):
+		return
+	var foe: Dictionary = Db.foes[str(o.foe)]
+	var files: Array = CineActor.foe_files(str(o.foe))
+	if o.type != "fight" or str(foe.rig.get("kind", "")) == "dragon":
+		_read_ahead(files, Callable())
+		return
+	_read_ahead(files, func():
+		var f := FighterRig.new()
+		backdrop.props.add_child(f)
+		f.build(CineActor.foe_look(str(o.foe)), true)
+		f.position = at + _at(angle, Vector3(0, 0, -1.6))
+		f.rotation.y = angle + PI
+		f.time_scale = 0.6
+		foes[index] = f)
+
+func _read_ahead(files: Array, then: Callable) -> void:
+	var pending: Array = []
+	for p: String in files:
+		if ResourceLoader.exists(p) and not ResourceLoader.has_cached(p) and ResourceLoader.load_threaded_request(p) == OK:
+			pending.append(p)
+	while not pending.is_empty():
+		await get_tree().process_frame
+		if not is_inside_tree():
+			return
+		for p: String in pending.duplicate():
+			if ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				_kept.append(ResourceLoader.load_threaded_get(p))
+				pending.erase(p)
+	while _kept.size() > 8:
+		_kept.pop_front()
+	if then.is_valid():
+		then.call()
+
+# ---------------------------------------------------------------- the Witness is found
+## Where the fallen monument lies in this place (INF where the place has none).
+func _monument() -> Vector3:
+	if backdrop.arena._theme_id == "courtyard" and PropModel.exists("res://assets/models/env_statue_head.glb"):
+		return Vector3(6.4, 0, -2.4)
+	return Vector3.INF
+
+## The camera goes to the fallen monument, a light kindles under it, they talk, and the mask is lifted down:
+## after this it is on the knight's belt, not on the stones.
+func _find_witness(region_id: String, stage: int) -> void:
+	_staging = true
+	var m := _monument()
+	var from := (backdrop.rig.position - m).normalized()
+	var side := from.rotated(Vector3.UP, -0.9)
+	var rest := m + side * 1.25 + Vector3(0, 0.12, 0)
+	var relic := PropModel.scenery(backdrop.props, "res://assets/models/witness_relic.glb", 0.36, rest, rad_to_deg(atan2(side.x, side.z)))
+	var lamp := OmniLight3D.new()
+	lamp.light_color = Color("#ffb347")
+	lamp.light_energy = 0.0
+	lamp.omni_range = 3.4
+	lamp.position = rest + side * 0.35 + Vector3(0, 0.45, 0)
+	backdrop.props.add_child(lamp)
+	var keep_pos := backdrop.cam_pos
+	var keep_look := backdrop.cam_look
+	backdrop.move_camera(rest + side * 2.3 + from * 0.9 + Vector3(0, 0.75, 0), rest + Vector3(0, 0.3, 0))
+	var d := m - backdrop.rig.position
+	create_tween().tween_property(backdrop.rig, "rotation:y", atan2(-d.x, -d.z), 0.8).set_trans(Tween.TRANS_SINE)
+	var tw := create_tween()
+	tw.tween_interval(1.1)
+	tw.tween_callback(func(): Sfx.play("levelup", -12.0, 0.7))
+	tw.tween_property(lamp, "light_energy", 2.6, 1.4)
+	await Companion.on_stage(region_id, stage)
+	if not is_inside_tree():
+		return
+	# lifted down: gone from the stones, and worn from here on
+	if relic:
+		relic.queue_free()
+	Sfx.play("loot", -4.0)
+	var out := create_tween()
+	out.tween_property(lamp, "light_energy", 0.0, 0.6)
+	out.tween_callback(lamp.queue_free)
+	if Companion.witness_found():
+		var pos := backdrop.rig.position
+		backdrop.refresh_knight()
+		backdrop.rig.position = pos
+		backdrop.rig.rotation.y = angle
+	backdrop.move_camera(keep_pos, keep_look)
+	_staging = false
 
 ## Hidden coin: small, off the path, and only yours if you spot and tap it.
 func _scatter_pouches(frame: Control, n: int) -> void:
@@ -153,6 +272,29 @@ func _walk_then(index: int, then: Callable) -> void:
 	backdrop.move_camera(backdrop.cam_pos + dir * 0.45, to + Vector3(0, 1.2, 0))
 	tw.tween_callback(then)
 
+## The foe on the road is shown before steel is drawn: the knight starts toward it, and the camera goes low
+## and looks up at what is waiting. The duel opens on the same two figures facing each other.
+func _reveal_then(index: int, then: Callable) -> void:
+	if _leaving:
+		return
+	_leaving = true
+	create_tween().tween_property(layer.get_child(0), "modulate:a", 0.0, 0.3)
+	var rig := backdrop.rig
+	var foe: FighterRig = foes[index]
+	var dir := foe.position - rig.position
+	var step := dir.normalized()
+	var side := step.rotated(Vector3.UP, PI * 0.5)
+	rig.rotation.y = atan2(-dir.x, -dir.z)
+	rig.walking = true
+	rig.footsteps = true
+	foe.rotation.y = atan2(dir.x, dir.z)
+	foe.time_scale = 1.0
+	var tw := create_tween()
+	tw.tween_property(rig, "position", rig.position + dir * 0.45, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	backdrop.move_camera(foe.position - step * 2.7 + side * 1.1 + Vector3(0, 0.55, 0), foe.position + Vector3(0, 1.35 * foe.scale.y, 0))
+	Sfx.play("armor", -6.0, 0.8)
+	tw.tween_callback(then)
+
 func _card(o: Dictionary, index: int = 0) -> Button:
 	var tag: String = {"fight": "A foe", "boss": "The guardian", "treasure": "A cache", "shrine": "Respite", "lever": "A mechanism", "pass": "Onward"}[o.type]
 	if o.get("optional", false):
@@ -180,7 +322,10 @@ func _card(o: Dictionary, index: int = 0) -> Button:
 func _choose(o: Dictionary, index: int = 0) -> void:
 	match o.type:
 		"fight", "boss":
-			_walk_then(index, func(): fight.emit(o))
+			if index < foes.size() and foes[index] != null:
+				_reveal_then(index, func(): fight.emit(o))
+			else:
+				_walk_then(index, func(): fight.emit(o))
 		"pass":
 			_walk_then(index, func(): moved_on.emit())
 		_:

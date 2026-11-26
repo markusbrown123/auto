@@ -168,11 +168,24 @@ func _context() -> void:
 func _ring(world: Vector3) -> Vector3:
 	return Basis(Vector3.UP, -duel.ring_cam) * world
 
+## A rig's head in the ring frame: the skinned model's head bone when it has one, else the procedural head.
+func _head_of(rig: Node3D, fallback: Vector3) -> Vector3:
+	var sk = rig.get("skin")
+	if sk != null and sk.ok and sk.skel != null:
+		var i := -1
+		if sk is SkinDriver and sk.bone.has("Head"):
+			i = int(sk.bone["Head"])
+		elif sk is DragonSkin and not sk._neck.is_empty():
+			i = int(sk._neck[sk._neck.size() - 1])
+		if i >= 0:
+			var w: Vector3 = sk.skel.global_transform * sk.skel.get_bone_global_pose(i).origin
+			if w.y > 0.3:
+				return _ring(w)
+	var h: Vector3 = _ring(rig.head.global_position) if rig.get("head") != null else fallback
+	return h if h.y > 0.3 else fallback
+
 func _foe_head() -> Vector3:
-	var h: Vector3 = _ring(duel.foe_rig.head.global_position) if duel.foe_rig.get("head") != null else _F + Vector3(0, _H * 1.15, 0)
-	if h.y < 0.3:      # not posed yet
-		h = _F + Vector3(0, _H * 1.15, 0)
-	return h
+	return _head_of(duel.foe_rig, _F + Vector3(0, _H * 1.15, 0))
 
 func _mid(y: float) -> Vector3:
 	var m := _K.lerp(_F, 0.5)
@@ -238,7 +251,7 @@ func _shot_establish() -> Dictionary:
 ## Near the ground in front of the foe, looking up its body. Rises a little.
 func _shot_reveal() -> Dictionary:
 	var d := shot_t * (0.0 if _calm else 0.12)
-	return {"pos": _F + Vector3(0.75 * _big, 0.3 + d, 1.55 * _big + 0.35 - d * 0.5),
+	return {"pos": _F + Vector3(1.15 * _big, 0.3 + d, 1.4 * _big + 0.35 - d * 0.5),
 		"look": _F + Vector3(0, _H * 0.92, 0), "fov": 54.0, "roll": 0.04, "rate": 30.0}
 
 ## The foe's helm (or a dragon's head). Slow push.

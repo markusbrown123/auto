@@ -38,9 +38,30 @@ const COMBO_STEP := 0.12
 const COMBO_MAX := 6
 const RIFT_MULT := 1.6
 const DRAIN_STAMINA := 28.0
+## Poise: what a foe's composure is worth (bosses.json "poise"). Successful defences wear it down;
+## only when it is gone does the foe break open. A defence that does not break it buys a short recovery.
+const POISE_PARRY_PERFECT := 45.0
+const POISE_PARRY := 28.0
+const POISE_DODGE_PERFECT := 22.0
+const POISE_DODGE := 12.0
+const POISE_BLOCK_TIMED := 18.0
+const POISE_BLOCK := 6.0
+const POISE_CUT := 3.0           # each cut landed in an opening
+const POISE_REGEN := 2.0         # per second, only while it stands unpressed (IDLE)
+const SHORT_RECOVER := 0.42      # share of a combo's own `recover` the foe stands open after an unbroken string
+const SHORT_RECOVER_MIN := 0.5   # never less than one cut's worth
+const RIPOSTE_TIME := 1.0        # a perfect parry cuts the string short: room for a cut or two, not a full opening
+const PRESS_IDLE_MIN := 0.25     # "pressure": the pause before it chains straight into another string
+const PRESS_IDLE_MAX := 0.45
+## Blade struggle: now and then a parried heavy blow locks blades; rapid taps decide it.
+const STRUGGLE_CHANCE := 0.3
+const STRUGGLE_TIME := 2.2
+const STRUGGLE_COOLDOWN := 20.0
+const STRUGGLE_STUN := 0.7
+const STRUGGLE_DMG := 0.5        # share of the locked blow's damage taken on losing
 
-enum P { FREE, SWING, PARRY, DODGE, HURT, STUN, ADVANCE, DEAD }
-enum B { IDLE, WINDUP, RECOVER, STAGGER, SHIFT, DEAD }
+enum P { FREE, SWING, PARRY, DODGE, HURT, STUN, ADVANCE, DEAD, STRUGGLE }
+enum B { IDLE, WINDUP, RECOVER, STAGGER, SHIFT, DEAD, STRUGGLE }
 
 var rng := RandomNumberGenerator.new()
 var time := 0.0
@@ -70,7 +91,14 @@ var p_burn := 0.0
 var bd := {}
 var b_hp := 0.0
 var b_hp_max := 0.0
-var b_posture := 0.0
+var b_poise := 0.0             # what is left of its composure; 0 = broken
+var b_poise_max := 1.0
+var s_need := 0                # blade struggle: taps needed, taps made
+var s_taps := 0
+var force_struggle := false    # dev/tests: every eligible parry locks blades
+var paused := false            # a story beat holds the whole fight exactly where it is
+var _struggle_last := -99.0
+var _beat_sent := false
 var b_state: int = B.IDLE
 var b_t := 0.0
 var b_phase := 0
@@ -127,6 +155,8 @@ func setup(player: Dictionary, boss: Dictionary, seed_value: int = 0, opts: Dict
 	b_state = B.IDLE
 	b_t = 1.6
 	b_phase = 0
+	b_poise_max = maxf(1.0, float(boss.get("poise", boss.get("posture", 100.0))))
+	b_poise = b_poise_max
 	combos = []
 	for c in opts.get("combos", []):
 		if c.cls.is_empty() or c.cls.has(str(pl.get("weapon_cls", "sword"))):
@@ -149,6 +179,45 @@ func phase() -> Dictionary:
 
 func boss_open() -> bool:
 	return b_state == B.RECOVER or b_state == B.STAGGER
+
+func poise_frac() -> float:
+	return clampf(b_poise / b_poise_max, 0.0, 1.0)
+
+## Blades can only lock with something that holds a blade: not dragons, not things with claws.
+func struggle_capable() -> bool:
+	return str(bd.rig.get("kind", "")) != "dragon" and str(bd.rig.get("weapon", "")) != "claws"
+
+## A committed, weighty blow: a slam, or a long-wound cut or sweep.
+static func heavy_attack(a: Dictionary) -> bool:
+	var kind := str(a.get("kind", ""))
+	return kind == "slam" or (kind in ["slash", "sweep"] and float(a.windup) >= 1.2)
+
+## Taps needed to win a struggle: more against bosses, big foes and later journeys; fewer with assist on.
+func struggle_need() -> int:
+	var n := 6.0 + (2.0 if bd.get("boss", false) else 0.0) + floorf(maxf(0.0, float(bd.rig.get("scale", 1.0)) - 1.0) / 0.25) + (b_dmg_mult - 1.0) / 0.35
+	return clampi(roundi(n / assist), 5, 11)
+
+## The single plain cut the lesson foe throws.
+func lesson_attack() -> Dictionary:
+	for c in phase().combos:
+		if c.attacks.size() == 1 and not c.attacks[0].unblockable and c.get("range", "near") != "far":
+			return c.attacks[0]
+	return {}
+
+## Lesson only: stand the foe open for cutting practice, or set it attacking again.
+func lesson_hold(open: bool) -> void:
+	if not lesson or b_state == B.STRUGGLE:
+		return
+	lesson_fights = not open
+	b_far = false
+	if open:
+		b_state = B.RECOVER
+		b_t = 1.0e9
+		b_opening_crit = false
+		_emit(&"boss_recover", {"time": b_t, "far": false})
+	else:
+		_end_opening()
+		_go_idle(0.8)
 
 func time_to_impact() -> float:
 	return b_t if b_state == B.WINDUP else -1.0
@@ -229,8 +298,17 @@ func _completed_combo() -> Dictionary:
 				best = c
 	return best
 
+## One tap in a blade struggle. Enough of them before the time runs out wins it.
+func input_struggle_tap() -> void:
+	if over or paused or b_state != B.STRUGGLE:
+		return
+	s_taps += 1
+	_emit(&"struggle_tap", {"n": s_taps, "need": s_need})
+	if s_taps >= s_need:
+		_end_struggle(true)
+
 func input_swipe(dir: String) -> void:
-	if over:
+	if over or p_state == P.STRUGGLE:
 		return
 	if p_state != P.FREE:
 		p_buffer = {"kind": "swipe", "arg": dir, "t": time}
@@ -270,7 +348,7 @@ func _gain_surge(v: float) -> void:
 
 ## Unleash the surge: whatever the foe was doing, it is broken open.
 func input_surge() -> bool:
-	if over or surge < SURGE_MAX or b_state == B.SHIFT or b_state == B.DEAD or p_state == P.DEAD or p_state == P.STUN:
+	if over or surge < SURGE_MAX or b_state == B.SHIFT or b_state == B.DEAD or b_state == B.STRUGGLE or p_state == P.DEAD or p_state == P.STUN:
 		return false
 	surge = 0.0
 	opening_from = "surge"
@@ -292,7 +370,7 @@ func input_relic() -> bool:
 	return true
 
 func input_dodge(side: int) -> void:
-	if over:
+	if over or p_state == P.STRUGGLE:
 		return
 	if p_state == P.DODGE and p_roll:
 		return                        # nothing chains out of a roll: it has to end first
@@ -318,7 +396,7 @@ func input_dodge(side: int) -> void:
 
 # ============================================================ tick
 func tick(dt: float) -> void:
-	if over:
+	if over or paused:
 		return
 	time += dt
 	if relic < RELIC_MAX:
@@ -448,8 +526,8 @@ func _resolve_player_hit(dir: String) -> void:
 		var dmg: float = pl.attack * mult * (1.0 - (0.0 if pierce else float(bd.get("armor", 0.0)))) * rng.randf_range(0.95, 1.05)
 		_gain_surge(7.0 + (6.0 if named != "" else 0.0))
 		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "named": named, "combo_id": combo_id})
-		if extra_posture > 0.0 and b_state == B.RECOVER:
-			_add_posture(extra_posture)
+		if extra_posture > 0.0 and b_state == B.RECOVER and _wear_poise(extra_posture, "cut"):
+			_poise_break("cut")
 		if on_rift and boss_open():
 			_next_rift()
 	elif b_state == B.SHIFT:
@@ -475,7 +553,8 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 	info["hp"] = b_hp
 	if not info.get("chip", false):
 		_emit(&"boss_hit", info)
-		_add_posture(4.0)
+		if b_state == B.RECOVER and _wear_poise(POISE_CUT, "cut"):
+			_poise_break("cut")
 	if b_hp <= floor_hp and b_phase + 1 < bd.phases.size():
 		b_phase += 1
 		var revive: float = float(phase().get("revive", 0.0))
@@ -484,7 +563,8 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 			b_hp = b_hp_max * revive
 		b_state = B.SHIFT
 		b_t = SHIFT_TIME
-		b_posture = 0.0
+		b_poise = b_poise_max
+		_emit(&"poise", {"frac": 1.0, "from": "phase"})
 		b_far = false
 		_end_opening()
 		_emit(&"phase_change", {"phase": b_phase, "roar": phase().get("roar", ""), "revive": float(phase().get("revive", 0.0)) > 0.0})
@@ -493,13 +573,52 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 		over = true
 		_emit(&"boss_dead", {"dir": info.get("dir", "D")})
 
-func _add_posture(v: float) -> void:
+## Wears the foe's poise down by `v`. True when that leaves none: the caller decides when it breaks.
+func _wear_poise(v: float, from: String) -> bool:
 	if b_state == B.STAGGER or b_state == B.SHIFT or b_state == B.DEAD:
+		return false
+	if training and (not lesson or not lesson_fights):
+		return false                # a practice dummy has no composure to lose
+	b_poise = maxf(0.0, b_poise - v)
+	_emit(&"poise", {"frac": poise_frac(), "from": from})
+	return b_poise <= 0.0
+
+## Poise is gone: the long opening. It comes back whole when the foe recovers.
+func _poise_break(from: String) -> void:
+	b_poise = 0.0
+	stats["breaks"] = int(stats.get("breaks", 0)) + 1
+	_emit(&"poise_break", {"from": from})
+	_stagger(STAGGER_BREAK, true)
+
+func _begin_struggle() -> void:
+	_struggle_last = time
+	s_need = struggle_need()
+	s_taps = 0
+	p_buffer = {}
+	b_state = B.STRUGGLE
+	b_t = STRUGGLE_TIME
+	_set_p(P.STRUGGLE, 1.0e9)
+	stats["struggles"] = int(stats.get("struggles", 0)) + 1
+	_emit(&"struggle_start", {"need": s_need, "time": STRUGGLE_TIME})
+
+func _end_struggle(won: bool) -> void:
+	_set_p(P.FREE, 0.0)
+	p_buffer = {}
+	_emit(&"struggle_end", {"won": won})
+	if won:
+		stats["struggles_won"] = int(stats.get("struggles_won", 0)) + 1
+		_gain_surge(12.0)
+		opening_from = "parry"
+		_poise_break("struggle")
 		return
-	b_posture += v
-	if b_posture >= float(bd.posture):
-		b_posture = 0.0
-		_stagger(STAGGER_BREAK, true)
+	# overpowered: shoved back, briefly stunned, and the foe takes the initiative again
+	_end_opening()
+	b_state = B.IDLE
+	b_t = 0.9
+	_damage_player(float(b_attack.dmg) * b_dmg_mult * STRUGGLE_DMG)
+	if p_state != P.DEAD:
+		_set_p(P.STUN, STRUGGLE_STUN)
+		_emit(&"boss_idle", {"far": b_far})
 
 func _stagger(t: float, broke: bool) -> void:
 	if opening_from == "":
@@ -539,8 +658,11 @@ func _tick_boss(dt: float) -> void:
 		return
 	b_t -= dt
 	match b_state:
+		B.STRUGGLE:
+			if b_t <= 0.0:
+				_end_struggle(false)
 		B.IDLE:
-			b_posture = maxf(0.0, b_posture - 3.0 * dt)
+			b_poise = minf(b_poise_max, b_poise + POISE_REGEN * dt)
 			if b_t <= 0.0:
 				_start_combo(_choose_combo(), false)
 		B.WINDUP:
@@ -560,12 +682,30 @@ func _tick_boss(dt: float) -> void:
 					b_opening_crit = false
 					_emit(&"boss_recover")
 			if b_t <= 0.0:
+				var broken := b_state == B.STAGGER
 				_end_opening()
-				_go_idle()
+				if broken:
+					b_poise = b_poise_max           # it gathers itself
+					_emit(&"poise", {"frac": 1.0, "from": "recover"})
+					_go_idle()
+				elif not b_far and not lesson and rng.randf() < press():
+					# pressure: no breathing space, straight into the next string
+					_emit(&"boss_press")
+					_go_idle(rng.randf_range(PRESS_IDLE_MIN, PRESS_IDLE_MAX))
+				else:
+					_go_idle()
 		B.SHIFT:
 			if b_t <= 0.0:
 				_emit(&"phase_ready", {"phase": b_phase})
 				_go_idle(0.6)
+				if b_phase == 1 and not _beat_sent and bd.get("boss", false) and not training:
+					# the second phase begins: the presentation may stop the fight here for a few words
+					_beat_sent = true
+					_emit(&"story_beat", {"foe": str(bd.id)})
+
+## How likely the foe is to chain straight into another string after an unbroken one (bosses.json "press").
+func press() -> float:
+	return minf(0.85, float(bd.get("press", 0.5)) + 0.1 * b_phase)
 
 func _go_idle(t: float = -1.0) -> void:
 	b_state = B.IDLE
@@ -727,32 +867,51 @@ func _resolve_strike() -> void:
 	if p_state == P.DEAD:
 		return
 	# --- what the boss does next
+	var wear := 0.0
+	match result:
+		"parried": wear = POISE_PARRY_PERFECT if perfect else POISE_PARRY
+		"dodged": wear = POISE_DODGE_PERFECT if perfect else POISE_DODGE
+		"blocked": wear = POISE_BLOCK_TIMED if perfect else POISE_BLOCK
+	var broke: bool = wear > 0.0 and _wear_poise(wear, result)
+	var defended: bool = result in ["parried", "dodged", "blocked"]
 	if result == "parried":
-		if perfect:
-			_stagger(STAGGER_PARRY, false)
+		if perfect and marks > 0:
+			marks = 0                                   # a perfect parry is an acquittal
+			_emit(&"marks", {"n": 0, "of": int(trait_v("marks"))})
+		if broke:
+			# parry break: the blade is beaten aside and the rest of the string never comes
+			opening_from = "perfect" if perfect else "parry"
+			_poise_break("parry")
 			return
-		_add_posture(18.0)
-		if b_state == B.STAGGER:
+		if _struggle_roll(a, perfect):
+			_begin_struggle()
+			return
+		if perfect:
+			# the string is cut short, but its guard is not broken: a riposte, not a feast
+			_recover(RIPOSTE_TIME / speed() * (trait_v("parry_open") if trait_v("parry_open") > 0.0 else 1.0), "perfect")
 			return
 	b_idx += 1
 	if b_idx < b_combo.attacks.size():
 		_start_attack()
 		return
-	var rec: float = float(b_combo.recover) / speed()
+	if defended and b_poise <= 0.0:
+		# worn out by the defences against this string: guard break
+		opening_from = "dodge" if result == "dodged" else ("parry" if result == "parried" else "")
+		_poise_break("dodge" if result == "dodged" else ("parry" if result == "parried" else "block"))
+		return
+	# not broken: only a short recovery, scaled by the string's own (the lesson foe keeps its full, patient one)
+	var full: float = float(b_combo.recover) / speed()
+	var rec: float = full if lesson else minf(full, maxf(SHORT_RECOVER_MIN, full * SHORT_RECOVER))
 	if result == "dodged" and perfect:
-		rec += 0.6
+		rec += 0.35
 	if result == "parried" and trait_v("parry_open") > 0.0:
 		rec *= trait_v("parry_open")
 	if result == "dodged" and trait_v("dodge_open") > 0.0:
 		rec *= trait_v("dodge_open")
-	if result == "parried" and perfect and marks > 0:
-		marks = 0                                   # a perfect parry is an acquittal
-		_emit(&"marks", {"n": 0, "of": int(trait_v("marks"))})
-	if result == "blocked" and perfect:
-		_add_posture(12.0)
-		if b_state == B.STAGGER:
-			return                    # that broke its posture: keep the break
-	opening_from = "dodge" if result == "dodged" else ("parry" if result == "parried" else "")
+	_recover(rec, "dodge" if result == "dodged" else ("parry" if result == "parried" else ""))
+
+func _recover(rec: float, from: String) -> void:
+	opening_from = from
 	if b_combo.get("retreat", false):
 		b_far = true
 		_emit(&"boss_retreat")
@@ -762,6 +921,14 @@ func _resolve_strike() -> void:
 	_emit(&"boss_recover", {"time": rec, "far": b_far})
 	if not b_far:
 		_next_rift()
+
+## Decided when the parry lands, from the fight's own seed: never by reading input.
+func _struggle_roll(a: Dictionary, perfect: bool) -> bool:
+	if perfect or lesson or training or not struggle_capable() or not heavy_attack(a):
+		return false
+	if time - _struggle_last < STRUGGLE_COOLDOWN:
+		return false
+	return force_struggle or rng.randf() < STRUGGLE_CHANCE
 
 ## Soul-eaters feed: a blow that lands restores them and empties you.
 func _drain(amount: float) -> void:

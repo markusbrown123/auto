@@ -21,6 +21,27 @@ static func knight() -> CineActor:
 	a.build(Duel.player_look(), false)
 	return a
 
+## What a foe looks like in a duel (its own model or its class's, and the weapon it carries), for showing it elsewhere.
+static func foe_look(foe_id: String) -> Dictionary:
+	var foe: Dictionary = Db.foes[foe_id]
+	var look: Dictionary = foe.rig.duplicate()
+	for candidate: String in ["res://assets/models/%s.glb" % foe_id, "res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_")]:
+		if ResourceLoader.exists(candidate):
+			look["skin"] = candidate
+			if not foe.boss:
+				look["skin_tint"] = foe.rig.get("metal", "#888888")
+			break
+	var carried: String = Duel.BOSS_WEAPON.get(foe_id, Duel.FOE_WEAPON.get(str(foe.rig.get("weapon", "")), ""))
+	if carried != "":
+		look.merge(Duel.weapon_model(carried))
+	return look
+
+## The model files a duel against this foe will need, for reading ahead of time.
+static func foe_files(foe_id: String) -> Array:
+	var foe: Dictionary = Db.foes.get(foe_id, {})
+	return ["res://assets/models/knight_%s.glb" % str(Game.profile.get("body", "m")), "res://assets/models/%s.glb" % foe_id,
+		"res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_")]
+
 ## Holds a whole-body clip, easing into it over `blend` seconds from whatever is showing.
 func hold(clip: String, blend: float = 0.6) -> void:
 	if not SkinDriver.has_clip(clip):

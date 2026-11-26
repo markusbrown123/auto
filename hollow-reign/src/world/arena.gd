@@ -1017,7 +1017,9 @@ func _layout_chamber() -> void:
 	box(Vector3(3.0, 1.6, 0.7), Vector3(0, 4.6, dz), null)
 	var door := box(Vector3(2.0, 3.3, 0.22), Vector3(0, 1.65, dz), Look.flat(Color("#3a3c3e"), 0.5, 0.8))
 	door.name = "Door"
-	box(Vector3(0.06, 3.0, 0.24), Vector3(0, 1.65, dz), amber).reparent(door)
+	var seam := box(Vector3(0.06, 3.0, 0.24), Vector3.ZERO, amber)
+	remove_child(seam)
+	door.add_child(seam)
 	# the passage beyond: short, and white with daylight at the end
 	for sx: float in [-1.0, 1.0]:
 		box(Vector3(0.6, 4.0, 6.0), Vector3(sx * 1.6, 2.0, dz - 3.4), null)

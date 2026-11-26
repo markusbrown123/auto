@@ -12,6 +12,9 @@ var _plan := {}          # response planned for the current telegraphed attack
 var _next_attack := 0.0
 var _alt := 0
 var _spam_t := 0.0
+var _tap_t := 0.0
+## Taps per second in a blade struggle, by style: practised hands win them, hesitant ones often do not.
+const TAP_RATE := {Style.SKILLED: 9.0, Style.SPAM: 7.0, Style.TURTLE: 4.0, Style.SLOPPY: 5.2}
 const CUTS := ["L", "R", "D", "UL", "DR", "U"]
 
 func _init(s: DuelSim, st: int = Style.SKILLED, seed_value: int = 1) -> void:
@@ -19,8 +22,15 @@ func _init(s: DuelSim, st: int = Style.SKILLED, seed_value: int = 1) -> void:
 	style = st
 	rng.seed = seed_value
 	sim.ev.connect(_on_ev)
+	# dev: `-- --struggle` makes every eligible parry lock blades, so a capture can show one
+	if OS.get_cmdline_user_args().has("--struggle"):
+		sim.force_struggle = true
 
 func _on_ev(n: StringName, d: Dictionary) -> void:
+	if n == &"struggle_start":
+		_tap_t = 0.3                      # the moment it takes to see what has happened
+		_plan = {}
+		return
 	if n != &"boss_telegraph" or style == Style.SPAM:
 		return
 	var a: Dictionary = d.attack
@@ -28,6 +38,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 	var lead := 0.07
 	if style == Style.SLOPPY:
 		lead = rng.randf_range(0.02, 0.42)   # human-ish timing error
+	if sim.force_struggle and DuelSim.heavy_attack(a):
+		lead = 0.2                           # dev: a good parry, not a perfect one, so blades can lock
 	if style == Style.TURTLE:
 		_plan = {"kind": "block", "at": impact - 0.3}
 	elif a.parry:
@@ -38,7 +50,14 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		_plan = {"kind": "block", "at": impact - 0.3}
 
 func tick(dt: float) -> void:
-	if sim.over:
+	if sim.over or sim.paused:
+		return
+	if sim.b_state == DuelSim.B.STRUGGLE:
+		_tap_t -= dt
+		if _tap_t <= 0.0:
+			var gap: float = 1.0 / float(TAP_RATE[style])
+			_tap_t = gap * (rng.randf_range(0.7, 1.6) if style == Style.SLOPPY else 1.0)
+			sim.input_struggle_tap()
 		return
 	if style == Style.SPAM:
 		_spam_t -= dt

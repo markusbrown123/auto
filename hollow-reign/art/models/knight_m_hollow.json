@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_hollow_m_v1.png",
+ "model": {
+  "task_id": "9e581ae6-d1db-45d2-b99b-6b4c716b4742",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "cbd1c7d3-bb99-4550-b864-62ac0885f43d",
+  "credits": 25.0
+ }
+}

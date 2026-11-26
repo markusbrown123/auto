@@ -197,6 +197,8 @@ B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of t
    C("drill_cross",2,[A("DL",1.15,20),A("DR",0.85,20)],1.6,tags=("anti_dodge",)),
    C("gate_thrust",2,[A("U",1.0,22,swing=0.22,kind="lunge")],1.4,range="far"),
    C("give_ground",2,[A("R",1.0,18,kind="sweep")],0.6,retreat=True),
+   # mixed answers: no single defence carries the whole string
+   C("watch_change",2,[A("L",1.2,16,kind="sweep",parry=False),A("U",0.95,22,swing=0.22,kind="lunge",unblockable=True,parry=False,dodge="R")],1.6,tags=("anti_block",)),
   ]),
   dict(at=0.5, speed=1.08, roar="The Sentinel's armour splits. Embers pour from the seams.", combos=[
    C("ember_charge",3,[A("D",1.1,30,kind="lunge",element="fire")],1.6,range="far"),
@@ -209,6 +211,9 @@ B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of t
    C("delayed",2,[A("D",2.1,34,swing=0.26,kind="slam")],1.9,tags=("anti_parry",)),
    C("pommel",2,[A("U",0.95,16,guard=75,kind="thrust")],1.3,tags=("anti_block",)),
    C("cinder_wave",1,[A("L",1.5,30,unblockable=True,dodge="none",kind="sweep",element="fire")],1.8,tags=("anti_block","anti_dodge")),
+   # block the low sweep, step off the thrust, turn the overhead
+   C("gate_drill",3,[A("R",1.15,18,kind="sweep",parry=False,dodge="none"),A("U",0.9,24,swing=0.22,kind="lunge",unblockable=True,parry=False,dodge="L"),A("D",1.0,30,swing=0.34,kind="slam",dodge="none")],2.0,tags=("anti_dodge",)),
+   C("bar_the_way",2,[A("U",1.0,22,swing=0.22,kind="lunge",unblockable=True,parry=False,dodge="R"),A("DL",0.9,24)],1.7,tags=("anti_block",)),
   ]),
   # the last order: he stops giving ground, and every pattern is the drill at full speed
   dict(at=0.22, speed=1.16, roar="He plants the blade and speaks the oath of the gate one last time.", combos=[
@@ -218,6 +223,7 @@ B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of t
    C("delayed",2,[A("D",2.0,38,swing=0.26,kind="slam")],1.9,tags=("anti_parry",)),
    C("pommel",2,[A("U",0.9,18,guard=80,kind="thrust")],1.3,tags=("anti_block",)),
    C("oath",1,[A("D",1.7,40,unblockable=True,kind="slam",element="fire")],2.2,tags=("anti_block",)),
+   C("last_drill",3,[A("L",1.05,20,kind="sweep",parry=False,dodge="none"),A("U",0.85,26,swing=0.22,kind="lunge",unblockable=True,parry=False,dodge="R"),A("D",0.95,34,swing=0.34,kind="slam",dodge="none",element="fire")],2.1,tags=("anti_dodge",)),
   ])]))
 # ---------------------------------------------------------------- 2 Hollow Executioner
 B.append(dict(id="hollow_executioner", name="The Hollow Executioner", title="Last Justice of the Blackwood", region="blackwood", boss=True,
@@ -579,6 +585,16 @@ TRAITS = {
 for f in B:
     if f["id"] in TRAITS:
         f["traits"] = TRAITS[f["id"]]
+# Poise: how much successful defending it takes to break a foe open (DuelSim POISE_*: perfect parry 45, parry 28,
+# perfect dodge 22, dodge 12, timed block 18, block 6). Defaults to the old posture figure; heavy guardians carry more.
+POISE = {}
+# Press: how likely it is to chain straight into another string after one that did not break it (+0.1 per phase).
+PRESS_BY_CLS = {"Humanoid": 0.5, "Heavy": 0.35, "Giant": 0.25, "Twin-Bladed": 0.7, "Double-Weapon": 0.6, "Monstrosity": 0.6, "Soul-Eater": 0.5}
+PRESS_BY_ID = {"ashen_sentinel": 0.45, "hollow_executioner": 0.4, "crimson_widow": 0.75, "cathedral_beast": 0.6, "gravewarden": 0.3,
+               "frostbound_king": 0.4, "pale_huntsman": 0.6, "forgotten_monarch": 0.6, "devourer": 0.65, "cinder_wyrm": 0.4, "rimewyrm": 0.4, "azhurion": 0.45}
+for f in B:
+    f["poise"] = POISE.get(f["id"], f["posture"])
+    f["press"] = PRESS_BY_ID.get(f["id"], PRESS_BY_CLS.get(f.get("cls", ""), 0.5))
 for f in B:
     c, k = FOOT_BY_ID.get(f["id"], FOOT_BY_CLS.get(f.get("cls", ""), (0.08, 0.7)))
     f["footwork"] = {"circle": c, "keep": k}

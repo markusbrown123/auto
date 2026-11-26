@@ -19,12 +19,24 @@ class Pad extends Control:
 	var tint := UI.GOLD
 	var _idx := -1
 	var glow := 0.0           # 1 while pressed, fades after release
+	## Lesson only: "" or how this pad is being demonstrated: "tap", "hold" (ring fills while held), "double" (two pulses, x2).
+	var teach := ""
+	var _teach_t := 0.0
+	var _hold_t := 0.0
+	const HOLD_FULL := 0.7
 	func _process(dt: float) -> void:
 		# near-invisible at rest, fully lit under the thumb, fading back afterwards
 		glow = 1.0 if held else maxf(0.0, glow - dt * 2.2)
 		var rest: float = float(Game.settings.get("pad_opacity", 0.2))
 		if charge >= 1.0:
 			rest = maxf(rest, 0.8)      # a full burst or flame announces itself
+		if teach != "":
+			# being taught: fully lit whatever the pad-opacity setting says
+			_teach_t += dt
+			_hold_t = _hold_t + dt if held else 0.0
+			modulate.a = 1.0
+			queue_redraw()
+			return
 		var a := lerpf(rest, 1.0, glow * glow * (3.0 - 2.0 * glow))
 		if not is_equal_approx(a, modulate.a) or glow > 0.0:
 			modulate.a = a
@@ -59,6 +71,8 @@ class Pad extends Control:
 		if glow > 0.0:
 			draw_arc(c, r - 3.0, 0, TAU, 48, Color(UI.GOLD.r, UI.GOLD.g, UI.GOLD.b, 0.45 * glow), 6.0, true)
 			draw_circle(c, r - 6.0, Color(UI.GOLD.r, UI.GOLD.g, UI.GOLD.b, 0.12 * glow))
+		if teach != "":
+			_draw_teach(c, r)
 		var col := UI.GOLD if held else UI.BONE
 		if charge >= 0.0:
 			var full := charge >= 1.0
@@ -88,6 +102,104 @@ class Pad extends Control:
 				var pts := PackedVector2Array([c + Vector2(-s, -s), c + Vector2(s, -s), c + Vector2(s, s * 0.2), c + Vector2(0, s * 1.25), c + Vector2(-s, s * 0.2), c + Vector2(-s, -s)])
 				draw_polyline(pts, col, 3.0, true)
 				draw_line(c + Vector2(0, -s), c + Vector2(0, s * 1.2), col, 1.5, true)
+
+	## The demonstration around a pad: a pulsing ring, plus a filling ring for "hold" or a double pulse and "x2" for a roll.
+	func _draw_teach(c: Vector2, r: float) -> void:
+		var hot := Color(1.0, 0.92, 0.6)
+		var font := UI.font("title")
+		draw_circle(c, r - 3.0, Color(hot.r, hot.g, hot.b, 0.16))
+		draw_arc(c, r, 0, TAU, 64, hot, 3.0, true)
+		var word := "TAP"
+		match teach:
+			"hold":
+				word = "HOLD"
+				var u := fmod(_teach_t, 1.1) / 1.1
+				if not held:
+					draw_arc(c, r + 6.0 + 16.0 * u, 0, TAU, 64, Color(hot.r, hot.g, hot.b, 0.9 * (1.0 - u)), 4.0, true)
+				# the ring that fills while the thumb stays down
+				draw_arc(c, r + 12.0, 0, TAU, 64, Color(0, 0, 0, 0.55), 9.0, true)
+				draw_arc(c, r + 12.0, -PI / 2, -PI / 2 + TAU * clampf(_hold_t / HOLD_FULL, 0.0, 1.0), 64, Color("#8fe39a") if _hold_t >= HOLD_FULL else hot, 7.0, true)
+			"double":
+				word = "×2"
+				# two quick pulses, a rest, and again
+				var t := fmod(_teach_t, 1.3)
+				for start: float in [0.0, 0.26]:
+					var u2 := (t - start) / 0.24
+					if u2 >= 0.0 and u2 <= 1.0:
+						draw_arc(c, r + 4.0 + 22.0 * u2, 0, TAU, 64, Color(hot.r, hot.g, hot.b, 1.0 - u2), 6.0, true)
+						draw_circle(c, r - 3.0, Color(hot.r, hot.g, hot.b, 0.35 * (1.0 - u2)))
+			_:
+				var u3 := fmod(_teach_t, 0.9) / 0.9
+				draw_arc(c, r + 6.0 + 18.0 * u3, 0, TAU, 64, Color(hot.r, hot.g, hot.b, 0.9 * (1.0 - u3)), 4.0, true)
+		var w := font.get_string_size(word, HORIZONTAL_ALIGNMENT_LEFT, -1, 26).x
+		var at := c + Vector2(-w * 0.5, -r - 30.0)
+		draw_string_outline(font, at, word, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, 8, Color(0, 0, 0, 0.85))
+		draw_string(font, at, word, HORIZONTAL_ALIGNMENT_LEFT, -1, 26, hot)
+
+## Blade struggle: one large temporary target. A touch anywhere in its area is a tap.
+class Struggle extends Control:
+	signal tapped
+	var need := 1
+	var n := 0
+	var total := 1.0
+	var left := 0.0
+	var active := false
+	var _kick := 0.0
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		visible = false
+	func begin(need_taps: int, time: float) -> void:
+		need = maxi(1, need_taps)
+		n = 0
+		total = time
+		left = time
+		active = true
+		visible = true
+		mouse_filter = Control.MOUSE_FILTER_STOP
+		queue_redraw()
+	func progress(taps: int) -> void:
+		n = taps
+		_kick = 1.0
+		queue_redraw()
+	func finish() -> void:
+		active = false
+		visible = false
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+	func _gui_input(e: InputEvent) -> void:
+		if not active:
+			return
+		if e is InputEventScreenTouch:
+			if e.pressed:
+				tapped.emit()
+			accept_event()
+		elif e is InputEventScreenDrag:
+			accept_event()
+	func _process(dt: float) -> void:
+		if active:
+			left = maxf(0.0, left - dt)
+			_kick = maxf(0.0, _kick - dt * 7.0)
+			queue_redraw()
+	func _draw() -> void:
+		if not active:
+			return
+		var c := size * Vector2(0.5, 0.6)
+		var r := minf(size.x, size.y) * 0.17 + 8.0 * _kick
+		var hot := Color(1.0, 0.9, 0.58)
+		var pulse := 0.5 + 0.5 * sin(Time.get_ticks_msec() / 70.0)
+		draw_circle(c, r, Color(0.03, 0.03, 0.04, 0.5))
+		draw_circle(c, r - 14.0, Color(hot.r, hot.g, hot.b, 0.08 + 0.14 * _kick))
+		# time left: a pale ring that runs out
+		draw_arc(c, r + 12.0, -PI / 2, -PI / 2 + TAU * clampf(left / maxf(total, 0.01), 0.0, 1.0), 72, Color(1, 1, 1, 0.75), 3.0, true)
+		# progress: a thick ring that fills with each tap
+		draw_arc(c, r, 0, TAU, 72, Color(0, 0, 0, 0.6), 13.0, true)
+		draw_arc(c, r, -PI / 2, -PI / 2 + TAU * clampf(float(n) / float(need), 0.0, 1.0), 72, hot, 10.0, true)
+		draw_arc(c, r - 12.0 - 5.0 * pulse, 0, TAU, 72, Color(hot.r, hot.g, hot.b, 0.35 + 0.4 * pulse), 2.0, true)
+		var font := UI.font("title")
+		var fs := int(r * 0.52)
+		var w := font.get_string_size("TAP", HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+		var at := c + Vector2(-w * 0.5, fs * 0.36)
+		draw_string_outline(font, at, "TAP", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 10, Color(0, 0, 0, 0.85))
+		draw_string(font, at, "TAP", HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(1, 1, 1).lerp(hot, 1.0 - _kick))
 
 ## The parry / dodge prompt with a closing timing ring.
 class Cue extends Control:
@@ -199,6 +311,9 @@ var pad_block: Pad
 var pad_surge: Pad
 var pad_relic: Pad
 var controls: Control
+var struggle: Struggle
+var _struggle_cb := Callable()
+var _poise_t := 0.0
 var _toast_tw: Tween
 var _sub_tw: Tween
 var _phase_pips: HBoxContainer
@@ -229,6 +344,13 @@ func _ready() -> void:
 	streak.width_curve = wc
 	root.add_child(streak)
 
+	# under the pads and the pause button, over the swipe area: any touch that is not on a pad is a tap
+	struggle = Struggle.new()
+	UI.full(struggle)
+	root.add_child(struggle)
+	struggle.tapped.connect(func():
+		if _struggle_cb.is_valid():
+			_struggle_cb.call())
 	rift = Rift.new()
 	rift.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rift.size = Vector2(260, 260)
@@ -262,7 +384,10 @@ func _ready() -> void:
 	boss_bar = UI.full(UI.bar(UI.BLOOD, 12))
 	boss_bar.add_theme_stylebox_override("background", StyleBoxEmpty.new())
 	stack.add_child(boss_bar)
-	posture_bar = UI.bar(UI.GOLD, 4)
+	# poise: full while the foe is composed, worn down by every good defence, gone when it breaks
+	posture_bar = UI.bar(Color("#d5dbe2"), 5)
+	posture_bar.max_value = 1.0
+	posture_bar.value = 1.0
 	top.add_child(posture_bar)
 	_phase_pips = HBoxContainer.new()
 	_phase_pips.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -394,8 +519,17 @@ func update_bars(sim: DuelSim, dt: float) -> void:
 	boss_bar.value = sim.b_hp
 	boss_ghost.max_value = sim.b_hp_max
 	boss_ghost.value = maxf(sim.b_hp, lerpf(boss_ghost.value, sim.b_hp, 1.0 - exp(-dt * 2.5)))
-	posture_bar.max_value = float(sim.bd.posture)
-	posture_bar.value = sim.b_posture if sim.b_state != DuelSim.B.STAGGER else posture_bar.max_value
+	_poise_t += dt
+	posture_bar.max_value = 1.0
+	if sim.b_state == DuelSim.B.STAGGER:
+		# broken: the meter turns gold and runs down with the opening
+		posture_bar.value = clampf(sim.b_t / DuelSim.STAGGER_BREAK, 0.0, 1.0)
+		posture_bar.modulate = Color(1.0, 0.78, 0.3).lerp(Color(1.6, 1.4, 0.9), 0.5 + 0.5 * sin(_poise_t * 14.0))
+	else:
+		var f := sim.poise_frac()
+		posture_bar.value = lerpf(posture_bar.value, f, 1.0 - exp(-dt * 14.0))
+		# nearly gone: it warms and flickers, so a break is seen coming
+		posture_bar.modulate = Color.WHITE if f > 0.35 else Color(1.0, 0.8, 0.45).lerp(Color(1.5, 1.1, 0.6), 0.5 + 0.5 * sin(_poise_t * 9.0))
 	pad_surge.charge = sim.surge / DuelSim.SURGE_MAX
 	pad_relic.charge = sim.relic / DuelSim.RELIC_MAX
 	pad_surge.queue_redraw()
@@ -413,6 +547,19 @@ func update_bars(sim: DuelSim, dt: float) -> void:
 		st = "BURNING"
 	status_label.text = st
 	status_label.add_theme_color_override("font_color", UI.FROST if sim.p_burn <= 0.0 or sim.p_frostbite > 0.0 else Color("#ff8a3a"))
+
+## Blade struggle: show the one big TAP target; `on_tap` is called for every touch in its area.
+func struggle_begin(need: int, time: float, on_tap: Callable) -> void:
+	_struggle_cb = on_tap
+	cue.clear()
+	struggle.begin(need, time)
+
+func struggle_progress(n: int) -> void:
+	struggle.progress(n)
+
+func struggle_end() -> void:
+	_struggle_cb = Callable()
+	struggle.finish()
 
 ## Training ground: the cuts made so far, and the name of whatever they completed.
 var _train_seq: SeqView
@@ -443,6 +590,7 @@ func show_training() -> void:
 class LessonStroke extends Control:
 	var dirs: Array = []
 	var _t := 0.0
+	const STEP := 1.15        # seconds per stroke: the fingertip travels, rests at the end, and starts again
 	func _ready() -> void:
 		mouse_filter = Control.MOUSE_FILTER_IGNORE
 	func _process(dt: float) -> void:
@@ -453,26 +601,62 @@ class LessonStroke extends Control:
 		if dirs.is_empty():
 			return
 		var n := dirs.size()
-		var cycle := fmod(_t, 1.25 * n + 0.6)
-		var i := mini(int(cycle / 1.25), n - 1)
-		var u := clampf((cycle - i * 1.25) / 0.7, 0.0, 1.0)
+		var cycle := fmod(_t, STEP * n)
+		var i := mini(int(cycle / STEP), n - 1)
+		var u := clampf((cycle - i * STEP) / 0.75, 0.0, 1.0)
 		var v: Vector2 = DuelSim.dir_vec(str(dirs[i]))
 		v = Vector2(v.x, -v.y).normalized()
 		var c := size * Vector2(0.5, 0.56)
-		var half := minf(size.x, size.y) * 0.22
+		var half := minf(size.x, size.y) * 0.25
 		var a := c - v * half
-		var b := a.lerp(c + v * half, ease(u, 0.5))
-		var fade := 1.0 - clampf((cycle - i * 1.25 - 0.7) / 0.4, 0.0, 1.0)
-		var col := Color(1.0, 0.9, 0.6, 0.85 * fade)
+		var z := c + v * half
+		var b := a.lerp(z, ease(u, 0.5))
 		var side := Vector2(-v.y, v.x)
-		draw_line(a, b, Color(1.0, 0.8, 0.4, 0.18 * fade), 34.0, true)
+		var col := Color(1.0, 0.9, 0.6, 0.9)
+		# the whole path is always there, faintly, so the gesture is never off screen
+		draw_line(a, z, Color(0, 0, 0, 0.28), 16.0, true)
+		draw_line(a, z, Color(1.0, 0.86, 0.5, 0.3), 8.0, true)
+		draw_colored_polygon(PackedVector2Array([z + v * 36.0, z + side * 24.0, z - side * 24.0]), Color(1.0, 0.86, 0.5, 0.45))
+		# the part already drawn, bright
+		draw_line(a, b, Color(1.0, 0.8, 0.4, 0.22), 34.0, true)
 		draw_line(a, b, col, 9.0, true)
-		draw_colored_polygon(PackedVector2Array([b + v * 34.0, b + side * 26.0, b - side * 26.0]), col)
-		draw_circle(a, 9.0, Color(1, 1, 1, 0.7 * fade))
+		draw_circle(a, 7.0, Color(1, 1, 1, 0.55))
+		# a soft fingertip leading the stroke
+		var press := 1.0 + 0.25 * (1.0 - clampf(u / 0.15, 0.0, 1.0))
+		draw_circle(b, 34.0 * press, Color(1, 1, 1, 0.14))
+		draw_circle(b, 24.0 * press, Color(1.0, 0.96, 0.86, 0.42))
+		draw_arc(b, 24.0 * press, 0, TAU, 40, Color(1, 1, 1, 0.85), 2.5, true)
+		draw_circle(b, 6.0, Color(1, 1, 1, 0.9))
+		# which cut of the sequence this is
+		if n > 1:
+			for k in n:
+				var o := c + Vector2((k - (n - 1) * 0.5) * 26.0, half + 62.0)
+				draw_circle(o, 8.0, Color(0, 0, 0, 0.5))
+				draw_circle(o, 6.0, col if k == i else Color(1, 1, 1, 0.35 if k > i else 0.6))
 
 var _train_sub: Label
 var _stroke: LessonStroke
-func lesson_text(t: String, sub: String = "", stroke: Array = [], good: bool = false) -> void:
+var _demo_pads := {}
+## What the lesson is demonstrating right now: {"stroke": [dirs], "pads": {"left"|"right"|"block": "tap"|"hold"|"double", "stamina": "watch"}}.
+func lesson_demo() -> Dictionary:
+	return {"stroke": _stroke.dirs.duplicate() if _stroke else [], "pads": _demo_pads.duplicate()}
+
+## Take every demonstration off the screen at once (the moment the thing is done).
+func lesson_demo_clear() -> void:
+	_demo_pads = {}
+	for p: Pad in [pad_l, pad_r, pad_block]:
+		p.teach = ""
+		p.queue_redraw()
+	st_bar.modulate = Color.WHITE
+	if _stroke:
+		_stroke.dirs = []
+		_stroke.queue_redraw()
+
+func _process(_dt: float) -> void:
+	if _demo_pads.has("stamina"):
+		st_bar.modulate = Color.WHITE.lerp(Color(2.0, 2.0, 1.2), 0.5 + 0.5 * sin(Time.get_ticks_msec() / 130.0))
+
+func lesson_text(t: String, sub: String = "", stroke: Array = [], good: bool = false, pads: Dictionary = {}) -> void:
 	if _train_head == null:
 		return
 	_train_head.text = t
@@ -491,9 +675,17 @@ func lesson_text(t: String, sub: String = "", stroke: Array = [], good: bool = f
 		UI.full(_stroke)
 		root.add_child(_stroke)
 	_train_sub.text = sub
+	lesson_demo_clear()
 	_stroke.dirs = stroke
 	_stroke._t = 0.0
 	_stroke.queue_redraw()
+	_demo_pads = pads.duplicate()
+	var by_name := {"left": pad_l, "right": pad_r, "block": pad_block}
+	for k: String in by_name:
+		var p: Pad = by_name[k]
+		p.teach = str(pads.get(k, ""))
+		p._teach_t = 0.0
+		p.queue_redraw()
 	# a small pulse so a change of instruction is noticed
 	_train_head.pivot_offset = _train_head.size * 0.5
 	_train_head.scale = Vector2(1.15, 1.15)

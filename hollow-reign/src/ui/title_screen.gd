@@ -12,6 +12,8 @@ signal set_out(region_id: String, use_shortcut: bool)
 const HERALDRY := CharacterSelect.HERALDRY
 const CAM_POS := Vector3(-0.6, 1.0, 4.4)
 const CAM_LOOK := Vector3(0.2, 1.75, -3.0)
+## Backdrop mode (off by default): the menu over the high road, the knight small on it, looking up at the Ring-Gate.
+static var vista := false
 
 var backdrop: Backdrop
 var layer: CanvasLayer
@@ -31,9 +33,11 @@ func _ready() -> void:
 		Game.load_slot(Game.latest_slot())
 	backdrop = Backdrop.new()
 	add_child(backdrop)
-	backdrop.build("courtyard")
+	backdrop.build("highland" if vista else "courtyard")
 	_pose_knight()
 	backdrop.move_camera(CAM_POS, CAM_LOOK, true)
+	if vista:
+		_vista()
 	_motes()
 	Sfx.music_for("theme", "menu")
 	Sfx.ambience("wind")
@@ -59,6 +63,17 @@ func _pose_knight() -> void:
 	if backdrop.rig:
 		backdrop.rig.rotation.y = PI * 0.15
 		backdrop.rig.position = Vector3(1.4, 0, 0)
+
+## The vista backdrop: the prologue's opening shot, with the player's own knight standing on the road.
+func _vista() -> void:
+	var at := Highland.road(30.0)
+	if backdrop.rig:
+		backdrop.rig.position = at
+		backdrop.rig.rotation.y = Highland.road_yaw(30.0)
+	backdrop.key.visible = false
+	backdrop.cam_fov = 34.0
+	backdrop.cam_drift = 2.0
+	backdrop.move_camera(Highland.on_ground(at.x + 6.5, at.z + 21.0, 3.1), Vector3(-16.0, -17.0, 0.0), true)
 
 ## Dust in the light and a few embers off the braziers, close to the camera.
 func _motes() -> void:

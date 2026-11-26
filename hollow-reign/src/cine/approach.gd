@@ -6,11 +6,15 @@ extends Node
 
 signal finished
 
-const DIST := 8.0
+const DIST := 11.0
 const WALK := 1.35
 const BEHIND := Vector3(0.75, 1.62, 3.3)
 const AHEAD := Vector3(0.1, 1.3, -3.0)
 const LAG := 0.8                 # how far the eased camera trails a walker at this pace
+## Mid-walk the camera lifts and widens to show where the road leads, then comes back down to the walker's shoulder:
+## it leaves the Awakening's framing and arrives at the road screen's, and in between the place is seen whole.
+const RISE_POS := Vector3(1.1, 1.7, 2.6)
+const RISE_LOOK := Vector3(-0.4, 0.9, -5.0)
 const HOLD_FOR_SPEECH := 14.0    # at most this long standing at the end while a line finishes
 
 var backdrop: Backdrop
@@ -42,7 +46,10 @@ func _at(v: Vector3) -> Vector3:
 
 func _track(snap: bool = false) -> void:
 	var p := backdrop.rig.position
-	backdrop.move_camera(p + _at(BEHIND + (Vector3(0, 0, -LAG) if not snap else Vector3.ZERO)), p + _at(AHEAD + (Vector3(0, 0, -LAG) if not snap else Vector3.ZERO)), snap)
+	var k := sin(clampf(1.0 - p.length() / DIST, 0.0, 1.0) * PI)
+	k *= k
+	var lag := Vector3(0, 0, -LAG) if not snap else Vector3.ZERO
+	backdrop.move_camera(p + _at(BEHIND + RISE_POS * k + lag), p + _at(AHEAD + RISE_LOOK * k + lag), snap)
 
 func _process(_dt: float) -> void:
 	if _walking and not _over:

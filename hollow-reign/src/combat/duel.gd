@@ -336,6 +336,8 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	Sfx.music_for("boss_" + foe_id, str(foe.music))
 	_noise.frequency = 2.0
 	_begin_intro(bool(opts.get("skip_intro", false)) or training)
+	# the weapon comes to the hand inside the intro (Recall or a draw); with no intro to fit in, the quick form
+	player_rig.present_weapon("auto", {"key": foe_id, "quick": stage == Stage.FIGHT})
 	player_rig.footsteps = true
 	if foe_rig is FighterRig:
 		foe_rig.footsteps = true
@@ -356,13 +358,56 @@ const BOSS_WEAPON := {"ashen_sentinel": "w_ashen_great", "hollow_executioner": "
 	"frostbound_king": "w_frost_great", "forgotten_monarch": "w_monarch", "pale_huntsman": "w_woodcutter"}
 
 static func weapon_model(item_id: String) -> Dictionary:
+	# a hand-modelled piece (assets/models/gear/, `gear_id` in the item data) is held by its manifest, not fitted
+	var g := str(Db.item(item_id).get("gear_id", ""))
+	if g != "" and not FighterRig.old_look and GearModel.exists(g):
+		return {"weapon_model": GearModel.DIR + g + ".glb", "gear": g}
 	var alias: Array = MODEL_ALIAS.get(item_id, [item_id, null])
 	var out := {"weapon_model": "res://assets/models/%s.glb" % alias[0]}
 	if alias[1] != null:
 		out["weapon_tint"] = alias[1]
 	return out
 
+## How the knight looks: the base body, the armour piece worn in each of the six slots (ArmorParts suits), and the
+## hand-modelled weapon and shield where the item has one. Built from Game.appearance_loadout(), so a cosmetic
+## "look as" is what is drawn; nothing here reaches Stats. `--oldlook` gives the whole-suit swap back.
 static func player_look() -> Dictionary:
+	var look := player_look_old()
+	if FighterRig.old_look:
+		return look
+	var body := str(Game.profile.get("body", "m"))
+	var eq: Dictionary = Game.profile.equipped
+	var worn: Dictionary = Game.appearance_loadout()
+	if ArmorParts.has_part(body, ArmorParts.host, "chest"):
+		var parts := {"body": body}
+		for slot: String in ["helm", "chest", "shoulders", "gauntlets", "legs", "boots"]:
+			var it: Dictionary = Db.item(str(worn[slot])) if worn.get(slot) != null else {}
+			# an empty slot, or a piece with no mesh of its own, shows the base body's piece
+			parts["arms" if slot == "gauntlets" else slot] = str(it.get("part", "")) if bool(it.get("part_ready", false)) else ""
+		look["parts"] = ArmorParts.resolve(parts)
+		look["parts"]["body"] = body
+		look["skin"] = ArmorParts.host_path(body)
+		look.erase("skin_tint")
+	var wid := str(worn.get("weapon")) if worn.get("weapon") != null and str(Db.item(str(worn.get("weapon"))).get("cls", "")) == str(Db.item(eq.weapon).cls) else str(eq.weapon)
+	var held := weapon_model(wid)
+	if held.has("gear"):
+		for k: String in ["weapon_tint", "weapon_scale"]:
+			look.erase(k)
+		held["gear_mod"] = GearModel.mod_from_visual(str(held.gear), Game.weapon_mods(str(eq.weapon)).visual)
+	look.merge(held, true)
+	var wit: Dictionary = Db.item(wid)
+	look["advanced"] = bool(wit.get("advanced", false)) or Db.tier(wit) in ["legendary", "relic"]
+	if look.has("shield") and worn.get("shield") != null:
+		var sit: Dictionary = Db.item(str(worn.shield))
+		look["shield"] = sit.get("look", {}).duplicate()
+		look["shield"]["model"] = "res://assets/models/%s.glb" % str(sit.id)
+		look["shield"]["advanced"] = bool(sit.get("advanced", false)) or Db.tier(sit) in ["legendary", "relic"]
+		var sg := str(sit.get("gear_id", ""))
+		if sg != "" and GearModel.exists(sg):
+			look["shield"]["gear"] = sg
+	return look
+
+static func player_look_old() -> Dictionary:
 	var eq: Dictionary = Game.profile.equipped
 	var chest: Dictionary = Db.item(eq.chest) if eq.chest != null else {}
 	var helm: Dictionary = Db.item(eq.helm) if eq.helm != null else {}

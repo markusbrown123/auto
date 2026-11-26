@@ -95,6 +95,14 @@ static func at_stop(region: String, stage: int, p: Dictionary = Game.profile) ->
 			out.append(s)
 	return out
 
+## Things at a stop that can be touched and only say something (the tell of a secret that is earned elsewhere).
+static func clues_at(region: String, stage: int) -> Array:
+	var out: Array = []
+	for c: Dictionary in data().get("clues", []):
+		if str(c.region) == region and int(c.stage) == stage:
+			out.append(c)
+	return out
+
 ## The id of the subtitle scene of a secret ("" when its speaker cannot speak yet).
 static func line_scene(s: Dictionary) -> String:
 	var id := "sx_" + str(s.id)

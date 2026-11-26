@@ -297,6 +297,16 @@ func _make_look() -> void:
 			_look.merge(Duel.weapon_model(carried))
 		_tag = foe_id
 	else:
+		# --wear=helm:frost,chest:black,arms:regal,...  armour by suit (items a_<suit>_<slot>; "worn" is the starting plate)
+		for kv: String in str(_args.get("wear", "")).split(",", false):
+			var slot := kv.get_slice(":", 0)
+			var wid := "a_%s_%s" % [kv.get_slice(":", 1), "gauntlets" if slot == "arms" else slot]
+			if not Db.item(wid).is_empty():
+				if not Game.owns(wid):
+					Game.profile.inventory.append(wid)
+				Game.profile.equipped[str(Db.item(wid).slot)] = wid
+		for id2: String in str(_args.get("unequip", "")).split(",", false):
+			Game.profile.equipped[id2] = null
 		_look = Duel.player_look()
 		_tag = "knight_" + str(Game.profile.body)
 		if _args.has("gear"):
@@ -463,8 +473,8 @@ func _collect() -> void:
 	_parts.clear()
 	_dom_names.clear()
 	for mi: MeshInstance3D in rig.find_children("*", "MeshInstance3D", true, false):
-		if mi.skin == null or mi.mesh == null:
-			continue
+		if mi.skin == null or mi.mesh == null or not mi.visible or mi.name == "part_under":
+			continue          # (what is drawn: the worn armour parts, not the body hidden under them)
 		var skel := mi.get_node_or_null(mi.skeleton) as Skeleton3D
 		if skel == null:
 			continue
@@ -482,7 +492,7 @@ func _collect() -> void:
 			if bones == null or pos.is_empty():
 				continue
 			var nb: int = bones.size() / pos.size()
-			var step: int = maxi(1, pos.size() / 5000)
+			var step: int = maxi(1, pos.size() / (5000 / (6 if mi.name.begins_with("part_") else 1)))      # (six parts are sampled as densely as one suit)
 			var p2 := PackedVector3Array()
 			var b2 := PackedInt32Array()
 			var w2 := PackedFloat32Array()
@@ -629,8 +639,19 @@ func _audit(stat: Dictionary, t: float) -> void:
 		_worse(stat, "blade" if w == fr.weapon_r else "blade_l", float(n), t, str(hits), false)
 		_worse(stat, "tip", minf(b.y, (gt * Vector3(0, -fr.weapon_len * 0.12, 0)).y) / s, t)
 	if fr.shield:
-		var st := fr.shield.global_transform
+		# the board itself (a hand-modelled shield's origin is its grip bar; the board stands off it), at its real size
+		var st := Transform3D(fr.shield.global_transform.basis, fr.shield.global_transform * fr._sh_c)
 		var inv := st.affine_inverse()
+		var ex: float = fr._sh_hw * fr._sh_hw * 0.82
+		var ey: float = fr._sh_hh * fr._sh_hh * 0.78
+		# the hand that holds it: skinned hand and finger vertices on the FACE side of the board (through the wood)
+		var thru := 0
+		for i in pts.size():
+			if names[i].begins_with("LeftHand"):
+				var lf := inv * pts[i]
+				if lf.z < -0.012 and lf.x * lf.x / ex + lf.y * lf.y / ey < 1.0:
+					thru += 1
+		_worse(stat, "fingers", float(thru), t, "", false)
 		var n2 := 0
 		var hits2 := {}
 		for i in pts.size():
@@ -638,7 +659,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 			if nm2.begins_with("Left") or nm2.begins_with("RightHand") or nm2 == "RightForeArm":
 				continue
 			var l := inv * pts[i]
-			if absf(l.z) < 0.03 and l.x * l.x / 0.06 + l.y * l.y / 0.13 < 1.0:
+			if absf(l.z) < 0.03 and l.x * l.x / ex + l.y * l.y / ey < 1.0:
 				n2 += 1
 				hits2[nm2] = int(hits2.get(nm2, 0)) + 1
 		_worse(stat, "shield", float(n2), t, str(hits2), false)
@@ -647,12 +668,12 @@ func _audit(stat: Dictionary, t: float) -> void:
 		var inside := 0
 		for i in 21:
 			var bp2 := inv * (wt2 * Vector3(0, fr.weapon_len * (0.15 + 0.85 * i / 20.0), 0))
-			if absf(bp2.z) < 0.025 and bp2.x * bp2.x / 0.068 + bp2.y * bp2.y / 0.15 < 1.0:
+			if absf(bp2.z) < 0.025 and bp2.x * bp2.x / (ex * 1.13) + bp2.y * bp2.y / (ey * 1.15) < 1.0:
 				inside += 1
 		_worse(stat, "bshield", float(inside), t, "", false)
 		var rim := 1e9
-		for c: Vector3 in [Vector3(0.28, 0.41, 0), Vector3(-0.28, 0.41, 0), Vector3(0.28, -0.41, 0), Vector3(-0.28, -0.41, 0)]:
-			rim = minf(rim, (st * c).y)
+		for c: Vector3 in [Vector3(1, 1, 0), Vector3(-1, 1, 0), Vector3(1, -1, 0), Vector3(-1, -1, 0), Vector3(0, -1, 0)]:
+			rim = minf(rim, (st * Vector3(c.x * fr._sh_hw, c.y * fr._sh_hh, 0)).y)
 		_worse(stat, "rim", rim / s, t)
 	if fr.skin:
 		var d: SkinDriver = fr.skin
@@ -683,7 +704,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 func _report(pose: String, stat: Dictionary) -> void:
 	var out := "%-16s" % pose
 	var flags := ""
-	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand", "delay", "dir_err", "yaw", "tipz"]:
+	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "fingers", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand", "delay", "dir_err", "yaw", "tipz"]:
 		if not stat.has(k):
 			continue
 		var e: Array = stat[k]
@@ -697,6 +718,7 @@ func _report(pose: String, stat: Dictionary) -> void:
 			"blade", "blade_l": bad = v >= 3.0
 			"shield": bad = v >= 3.0
 			"bshield": bad = v >= 1.0
+			"fingers": bad = v >= 1.0
 			"knee_min": bad = v < 35.0
 			"knee_back": bad = v < -0.03
 			"elbow_min": bad = v < 25.0

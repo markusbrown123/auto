@@ -155,6 +155,10 @@ func t_reachable() -> void:
 				ok(not f.is_empty() and not f.boss and Db.foes.has(str(Secrets.data().challengers[t.challenger].base)), "%s: its challenger is built from an existing foe" % s.id)
 			"feat":
 				ok(when_reachable({"feat": t.feat}), "%s: the deed is one a duel records" % s.id)
+				var pointed := false
+				for c: Dictionary in Secrets.data().clues:
+					pointed = pointed or (str(c.points_to) == str(s.id) and not Secrets.clues_at(str(c.region), int(c.stage)).is_empty() and str(c.text) != "")
+				ok(pointed, "%s: something on the road points at it" % s.id)
 			_:
 				ok(false, "%s: unknown trigger" % s.id)
 		if s.get("when", {}).has("secret"):
@@ -385,7 +389,7 @@ func t_hints() -> void:
 				ok(not str(s.hint).to_lower().contains(str(spot.label)), "%s: its hint does not name an inscription" % s.id)
 	everything()
 	c = Game.completion()
-	var left := c.remains.size()
+	var left: int = c.remains.size()
 	for r: Dictionary in c.regions:
 		left += r.remains.size()
 	ok(left == 0, "nothing is hinted at once everything is found")
@@ -505,9 +509,18 @@ func t_story_untouched() -> void:
 	ok(Game.game_complete() and Game.profile.secrets.is_empty(), "the story ends with no secret found")
 
 # ------------------------------------------------------------------ on the road itself
+## Lets a staged moment play out (lines skipped as a tap would), for at most twenty seconds.
+func settle(e: Explore) -> void:
+	var t0 := Time.get_ticks_msec()
+	while e._staging and Time.get_ticks_msec() - t0 < 20000:
+		await get_tree().process_frame
+		if Story.busy:
+			Story._skip = true
+
 func t_road() -> void:
 	fresh()
 	Game.profile.tutorial_done = true
+	Companion.mark_heard(Companion.discovery_id())      # the Witness is already found: his own staged scene is not what is tested here
 	Game.start_run("courtyard")
 	Game.run.stage = 2
 	var e := Explore.new()
@@ -521,13 +534,8 @@ func t_road() -> void:
 	Story.stop()
 	e._touch(e.spots[0])
 	ok(e._staging, "touching it takes the camera")
-	for i: int in 400:
-		await get_tree().process_frame
-		if Story.busy:
-			Story._skip = true
-		if not e._staging:
-			break
-	ok(Game.secret_found("cy_loose_stone") and not e._staging and e.spots.is_empty() and fights.is_empty(), "it is found, the road is given back, and no fight was started")
+	await settle(e)
+	ok(Game.secret_found("cy_loose_stone") and not e._staging and e.spots.is_empty() and fights.is_empty(), "it is found, the road is given back, and no fight was started (%s %s %d %d)" % [Game.secret_found("cy_loose_stone"), e._staging, e.spots.size(), fights.size()])
 	ok(Game.stage_options().size() >= 1 and Game.run.stage == 2, "the ways onward are what they were")
 	e.queue_free()
 	await get_tree().process_frame
@@ -541,16 +549,12 @@ func t_road() -> void:
 	e.layer.get_child(0).modulate.a = 1.0
 	Story.stop()
 	ok(e.spots.size() == 4, "four posts stand at the woodpile")
+	ok(Secrets.clues_at("roost", 0).size() == 1 and Secrets.at_stop("roost", 0).is_empty(), "the Glass Road holds a clue and no secret")
 	e._touch(e.spots[1])
 	ok(e._order.get("bw_woodpile_posts", []).is_empty() and not Game.secret_found("bw_woodpile_posts"), "the wrong post first does nothing")
 	for idx in Secrets.by_id["bw_woodpile_posts"].trigger.order:
 		e._touch(e.spots[int(idx)])
-	for i: int in 400:
-		await get_tree().process_frame
-		if Story.busy:
-			Story._skip = true
-		if not e._staging:
-			break
+	await settle(e)
 	ok(Game.secret_found("bw_woodpile_posts"), "the right order finds it")
 	e.queue_free()
 	await get_tree().process_frame

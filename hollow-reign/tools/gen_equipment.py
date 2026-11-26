@@ -310,7 +310,7 @@ SHIELD = {"s_plank": ["heater", "medium"], "s_garrison": ["kite", "medium"], "s_
     "s_reliquary": ["kite", "heavy"], "s_rime": ["curved", "medium"], "s_scale": ["segmented", "heavy"]}
 GEAR_MODEL = {"w_rusted_sword": "wayfarer", "w_dawnline": "silver_vow", "w_censer_sword": "ashbrand", "w_starfall": "veilcutter", "w_throneshard": "kings_remnant",
     "w_cold_resolve": "cold_resolve", "w_vigil_edge": "nightward", "w_twin_relics": "twin_relics",
-    "w_oath_axe": "oathbreaker", "w_monarch": "eternal_edge", "s_plank": "shield_heater", "s_round": "shield_round"}
+    "w_oath_axe": "oathbreaker", "w_monarch": "eternal_edge", "s_plank": "shield_heater", "s_round": "shield_round", "s_tower": "shield_tower"}
 DUEL_ALIAS = {"w_censer_sword": "w_vigil_edge", "w_monarch": "w_starfall", "w_woodcutter": "w_headsman", "w_oath_axe": "w_headsman"}    # duel.gd MODEL_ALIAS
 CHALLENGES = [
     {"id": "both_hands", "name": "Both Hands", "text": "Master two sets of twin blades.", "need": {"mastered_cls": "dual", "count": 2},
@@ -422,7 +422,7 @@ def visual(it):
     slot, iid = it["slot"], it["id"]
     if slot in ARMOUR:
         suit = it["look"]["set"]
-        part_suit = "base" if suit == "worn" else suit
+        part_suit = "crownless" if suit == "worn" else suit        # the starting plate is the sleek base knight's own pieces
         part_slot = "arms" if slot == "gauntlets" else slot
         out["part"] = part_suit
         out["part_slot"] = part_slot
@@ -441,6 +441,9 @@ def visual(it):
         if iid in GEAR_MODEL:
             out["gear_id"] = GEAR_MODEL[iid]                  # the name the hand-modelled gear is built under (assets/models/gear/)
             out["gear_ready"] = exists("assets/models/gear/%s.glb" % GEAR_MODEL[iid])
+            if out["gear_ready"] and out["visual"] == "none":     # drawn from the gear model alone: no first-generation mesh
+                out["visual"] = "model"
+                out["model"] = "gear/" + GEAR_MODEL[iid]
     return out
 
 def mastery(it):

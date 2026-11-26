@@ -20,15 +20,6 @@ var _hold_left := 0.0
 var _dip := 0.0              # seconds left of a lower-and-raise (a short weapon change)
 const DIP := 0.42
 
-## The rig carries a shield with its decorated face toward the wielder's own body: right for the duel, where the
-## camera stands behind the knight, and wrong here, where the knight is seen from the front (the plain back and its
-## grip would face the viewer, with the hand apparently on the shield's face). Here the board is turned about.
-func set_shield(look) -> void:
-	super(look)
-	if shield and look != null and PropModel.exists(str(look.get("model", ""))) and shield.get_child_count() > 0:
-		var m: Node3D = shield.get_child(0)
-		m.transform = Transform3D(Basis(Vector3.UP, PI), Vector3.ZERO) * m.transform
-
 ## Plays `clip` once (optionally only [from, to] seconds of it), then `hold` looping for `hold_time`, then the idle.
 func play_once(clip: String, from: float = 0.0, to: float = -1.0, hold: String = "", hold_time: float = 0.0) -> bool:
 	if not SkinDriver.has_clip(clip):

@@ -390,6 +390,7 @@ var _toast_tw: Tween
 var _sub_tw: Tween
 var _phase_pips: HBoxContainer
 var keen_mark: Control          # shown while the equipped blade's sharpened edge lasts
+var _dev_shield: Array = []
 
 func _ready() -> void:
 	layer = 5
@@ -494,6 +495,12 @@ func _ready() -> void:
 	frame.add_child(keen)
 	keen_mark = keen
 	set_keen(not Game.profile.is_empty() and Game.profile.equipped.get("weapon") != null and int(Game.weapon_mods(str(Game.profile.equipped.weapon)).edge) > 0)
+
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--hud_shield="):
+			_dev_shield = Array(a.trim_prefix("--hud_shield=").split(":"))
+		elif a == "--hud_keen":
+			set_keen(true)
 
 	var pause := UI.button("II", 18, 52)
 	pause.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
@@ -615,7 +622,14 @@ func shield_charges(d: Dictionary) -> void:
 		Game.haptic(30, 0.5)
 
 func update_bars(sim: DuelSim, dt: float) -> void:
-	if pad_block.pips != sim.p_shield_max:
+	if _dev_shield.size() == 2:
+		# capture harness (--hud_shield=<left>:<of>): hold the pips in a known state, lit
+		if pad_block.pips != int(_dev_shield[1]):
+			pad_block.set_pips(int(_dev_shield[1]), int(_dev_shield[1]), false, true)
+		elif pad_block.pips_left != int(_dev_shield[0]) and sim.time > 2.0:
+			shield_charges({"left": int(_dev_shield[0]), "max": int(_dev_shield[1])})
+		pad_block.notice = 1.0
+	elif pad_block.pips != sim.p_shield_max:
 		pad_block.set_pips(sim.p_shield, sim.p_shield_max, false, true)      # the fight's shield, before any blow
 	boss_bar.max_value = sim.b_hp_max
 	boss_bar.value = sim.b_hp

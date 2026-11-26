@@ -114,7 +114,7 @@ func _offer_opening(t: TitleScreen) -> void:
 	b.offset_right = -36
 	b.offset_bottom = -80
 	t.layer.add_child(b)
-	b.pressed.connect(func(): _fade_then(func(): show_opening(show_title)))
+	b.pressed.connect(func(): _fade_then(func(): show_prologue(show_title)))
 	var watch := Timer.new()
 	watch.wait_time = 0.15
 	watch.autostart = true
@@ -138,7 +138,20 @@ func _opening() -> void:
 	if Opening.seen_before():
 		show_awakening()
 	else:
-		show_opening()
+		show_prologue()
+
+## The high road, climbed twice before this knight wakes (src/cine/prologue.gd). It opens from black and ends on black.
+func show_prologue(then: Callable = Callable()) -> void:
+	var p := Prologue.new()
+	p.auto = _args.has("auto")
+	p.start_beat = int(_args.get("beat", "1"))
+	p.only_shot = int(_args.get("shot", "0"))
+	p.finished.connect(func():
+		if then.is_valid():
+			then.call()
+		else:
+			show_awakening())
+	_swap(p, 0.0)
 
 ## The fall of the kingdoms. It opens from black and ends on black, so nothing is faded here.
 func show_opening(then: Callable = Callable()) -> void:
@@ -419,6 +432,9 @@ func _dev_boot() -> void:
 			show_opening()
 		"awakening":
 			show_awakening()
+		"prologue":
+			# the high road by itself, then on into the chamber:  --beat=1..3  --shot=1..7 (hold one walk shot)  --auto (a bot fights)
+			show_prologue()
 		"approach":
 			Game.profile.tutorial_done = _args.has("bot")
 			show_approach()
@@ -453,7 +469,9 @@ func _dev_boot() -> void:
 			var pb := PartsBench.new()
 			pb.args = _args
 			_swap(pb, 0.0)
-		"title": show_title()
+		"title":
+			TitleScreen.vista = _args.has("vista")
+			show_title()
 		"sanctuary":
 			show_sanctuary()
 			if _args.has("tab"):

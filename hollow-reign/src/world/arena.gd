@@ -44,6 +44,10 @@ const THEMES := {
 	"chamber": {"sky": "#050607", "horizon": "#0a0c0e", "fog": "#0e1414", "fog_d": 0.03, "sun": "#8fb0b0", "sun_e": 0.0, "sun_rot": Vector3(-80, 160, 0),
 		"stone": "#5a5750", "floor": "#45433e", "fire": "#ffb45a", "layout": "chamber", "particles": "motes", "amb": "#2c3836",
 		"amb_e": 0.75, "fill_e": 0.0, "key": "#ffe9c8", "key_e": 3.0, "rim": "#6fd8c8", "rim_e": 0.0, "exp": 1.1, "sat": 0.92, "con": 1.08},
+	# the high road to the Ring-Gate: a headland of grass above the sea at dawn (src/world/highland.gd builds it and sets the light)
+	"highland": {"sky": "#34578f", "horizon": "#f0c692", "fog": "#d8b690", "fog_d": 0.0021, "sun": "#ffd6a2", "sun_e": 3.4, "sun_rot": Vector3(-11, 168, 0),
+		"stone": "#8d877b", "floor": "#8c8474", "fire": "#ff8a3a", "layout": "highland", "particles": "motes", "amb": "#8693a8", "day": true,
+		"amb_e": 0.95, "fill_e": 0.0, "key": "#fff0dc", "key_e": 2.6, "rim": "#ffd8a8", "rim_e": 0.3, "exp": 1.18, "sat": 1.02, "con": 1.06},
 }
 const LIGHT_DEFAULTS := {"amb_e": 1.5, "fill_e": 0.3, "key": "#ffffff", "key_e": 3.6, "rim": "#ffffff", "rim_e": 0.5, "exp": 1.1, "sat": 0.9, "con": 1.06, "bri": 1.0}
 const PARTICLE_BUDGET := 150       # live ambient particles per arena, flames included
@@ -1077,3 +1081,7 @@ func _layout_chamber() -> void:
 	box(Vector3(1.2, 0.14, 1.2), rack.position + Vector3(0, 0.07, 0), metal, Vector3(0, 20, 0))
 	rubble(Vector3(-3.6, 0, 2.6), 5, 1.0)
 	rubble(Vector3(3.4, 0, 3.4), 4, 0.8)
+
+## The high road and the Ring-Gate (the prologue's place, and a duel's): everything is in src/world/highland.gd.
+func _layout_highland() -> void:
+	Highland.build(self)

@@ -460,7 +460,9 @@ func _show_grid(on: bool) -> void:
 	var p := UI.panel(Color(0.03, 0.03, 0.036, 0.97), UI.GOLD_DIM)
 	p.get_theme_stylebox("panel").set_content_margin_all(8)
 	UI.full(p)
+	p.get_theme_stylebox("panel").content_margin_top = 62      # under the heading, which stays on top with its Grid button
 	carousel.get_parent().add_child(p)
+	carousel.get_parent().move_child(p, carousel.get_index() + 1)
 	_grid = p
 	var sc := ScrollContainer.new()
 	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -560,6 +562,21 @@ func _fill_light() -> void:
 	_extra.add_theme_color_override("font_color", ex[1])
 
 ## One honest line about the item: how to come by it when it is not held, otherwise what putting it on really changes.
+const PART_WORD := {"helm": "helm", "chest": "cuirass", "shoulders": "pauldrons", "arms": "gauntlets", "legs": "leg armour", "boots": "boots"}
+
+## What an armour piece really changes on the knight. Each piece with a mesh (`part_ready`) is its own geometry on
+## the figure (ArmorParts), whatever else is worn; two suits have pieces that only go together (ArmorParts.LINKED).
+static func part_note(it: Dictionary) -> String:
+	if not bool(it.get("part_ready", false)) or FighterRig.old_look:
+		return "No piece of its own yet: changes statistics, not the knight's appearance"
+	var part_slot := str(it.get("part_slot", it.slot))
+	var with: Array = ArmorParts.needs(str(it.get("part", "")), part_slot)
+	if with.is_empty():
+		return "Worn as its own piece: changes the knight's %s" % str(PART_WORD.get(part_slot, part_slot))
+	if str(ArmorParts.LINK_POLICY.get(str(it.part), "bring")) == "bring":
+		return "Worn with its %s: the two are one piece" % str(PART_WORD.get(str(with[0]), str(with[0])))
+	return "Shown over its own %s only: over another, that suit's %s are worn" % [str(PART_WORD.get(str(with[0]), str(with[0]))), str(PART_WORD.get(part_slot, part_slot))]
+
 func note_for(it: Dictionary) -> String:
 	if it.is_empty():
 		return ""
@@ -575,18 +592,12 @@ func note_for(it: Dictionary) -> String:
 			return "Locked · %d gold · %s" % [int(it.price), str(it.unlock_text)]
 		return "Locked · " + (Game.item_hint(id) if Game.item_hint(id) != "" else "Not yet found")
 	match str(it.slot):
-		"chest":
-			if ItemModel.is_full_suit(it, str(Game.profile.get("body", "m"))):
-				return "A complete armour suit: worn as one piece, it changes the whole knight"
-			return "This suit has no model of its own yet: shown as plate colour"
-		"helm", "gauntlets", "legs", "shoulders", "boots":
-			return "A fitting: changes statistics, not the knight's appearance"
+		"chest", "helm", "gauntlets", "legs", "shoulders", "boots":
+			return part_note(it)
 		"ring", "relic":
 			return "Worn unseen: changes statistics only"
 		"weapon", "shield":
-			if ItemModel.gear_id(it) != "":
-				return "Its new model is shown here; the knight still carries the older one"
-			if Duel.MODEL_ALIAS.has(id):
+			if Duel.MODEL_ALIAS.has(id) and (ItemModel.gear_id(it) == "" or FighterRig.old_look):
 				return "Shown with a borrowed blade until its own is forged"
 	return str(it.get("desc", ""))
 

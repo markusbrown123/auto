@@ -101,7 +101,7 @@ S("cr_whispered_name", "A Name You Answer To", "listen", "crypt", 5, WAIT(18),
   lore_title="A Name You Answer To",
   lore_text="The lamp reads its row aloud when someone sits long enough: a soldier's name, a child's, and a third with a line struck through it on the plate. You know all three the way you know your own hands. The lamp does not read a fourth, though there is room on the plate for one.")
 S("ro_no_shield", "Unshielded at the Summit", "mastery", "roost", 6, FEAT("noshield:cinder_wyrm"),
-  "The footprints fused into the Glass Road belonged to someone who carried less than you do.",
+  "Something stands fused into the Glass Road. Whoever left it carried less than you do.",
   (LY, "There are two footprints fused into the glass road below. Whoever made them carried no shield either. You walked down again.", "level"),
   "The sky is very large, and you met it with a blade and nothing else.",
   dict(trophy="t_glass_footprints", title="ti_unshielded"), spoil=("shield", "without", "two-handed"),
@@ -139,6 +139,13 @@ S("cy_cycle_count", "The Cycle Count", "cycle", "courtyard", 0, TAP,
   solution="Finish the story, begin a New Game Plus, and at the very first stop of the Courtyard tap the blade standing in the rubble on the right.",
   lore_title="The Cycle Count",
   lore_text="Somebody has been marking the breach each time they walked out through it. The cuts are old at one end and bright at the other, and all of them were made by the same hand at the same height. The Gravewarden's record said you were the first the chamber permitted to leave. It did not say you were the first to wake.")
+
+# ================================================================ clues: things in a scene that can be touched and only speak
+# Not secrets and not counted. A deed in a duel has no place to put a tell, so its tell stands on the road to it.
+CLUES = [
+ dict(id="clue_glass_footprints", region="roost", stage=0, tell="blade", pos=(-2.9, -3.6), points_to="ro_no_shield",
+      text="A sword fused upright in the glazed road, and two footprints set square before it. Whoever stood here against the summit carried no shield: there is none in the glass."),
+]
 
 # ================================================================ hidden challengers (existing rigs and models, retuned)
 CHALLENGERS.update({
@@ -226,7 +233,9 @@ for m in MILESTONES:
     assert m["reward"].get("finish", "f_half") in FINISHES and m["reward"].get("trophy", "t_complete") in TROPHIES
 assert sum(COMPLETION["weights"].values()) == 100 and sum(COMPLETION["region_weights"].values()) == 100
 
-json.dump(dict(secrets=SECRETS, challengers=CHALLENGERS, completion=COMPLETION, milestones=MILESTONES, finishes=FINISHES,
+for c in CLUES:
+    assert c["points_to"] in ids and c["region"] in REGIONS
+json.dump(dict(secrets=SECRETS, clues=CLUES, challengers=CHALLENGERS, completion=COMPLETION, milestones=MILESTONES, finishes=FINISHES,
                trophies={k: dict(name=v[0], text=v[1]) for k, v in TROPHIES.items()}, titles=TITLES), open("data/secrets.json", "w"), indent=1)
 q = json.load(open("data/quests.json"))
 q["side"] = SIDE

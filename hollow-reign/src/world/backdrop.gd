@@ -88,17 +88,26 @@ func dress_knight(preview: Dictionary = {}) -> String:
 	if rig == null or look_now.is_empty():
 		refresh_knight(preview)
 		return "body"
-	var hand_keys := ["weapon", "weapon_model", "weapon_tint", "blade", "glow", "curved", "shield"]
+	var hand_keys := ["weapon", "weapon_model", "weapon_tint", "blade", "glow", "curved", "shield", "gear", "gear_mod", "advanced"]
 	var a: Dictionary = look.duplicate()
 	var b: Dictionary = look_now.duplicate()
 	# keys that only shape the built-from-boxes body, which a knight wearing a model never shows
 	var unseen: Array = ["helm", "ember", "frost", "eye"] if rig.skin != null and look.has("skin") else []
+	if rig.has_parts() and look.has("parts"):
+		unseen.append("metal")      # the plate colour of a worn piece is its own texture
 	for k: String in hand_keys + unseen:
 		a.erase(k)
 		b.erase(k)
+	# armour pieces are swapped on the standing knight (ArmorParts.wear): no rebuild, the pose is kept
+	var parts_changed: bool = a.get("parts") != b.get("parts") and rig.has_parts() and a.has("parts")
+	if parts_changed:
+		a.erase("parts")
+		b.erase("parts")
 	if a != b:
 		refresh_knight(preview)
 		return "body"
+	if parts_changed:
+		rig.wear_parts(look.parts)
 	var weapon_changed := false
 	for k: String in hand_keys:
 		if k != "shield" and look.get(k) != look_now.get(k):
@@ -110,6 +119,8 @@ func dress_knight(preview: Dictionary = {}) -> String:
 		rig.set_weapon(str(look.weapon), look)
 	if weapon_changed or shield_changed:
 		rig.set_shield(look.get("shield"))
+	if parts_changed and not weapon_changed and not shield_changed:
+		return "body"
 	return "hands" if weapon_changed and shield_changed else ("weapon" if weapon_changed else ("shield" if shield_changed else ""))
 
 ## A key and a rim light on the knight for the armoury, in front of the place's own lighting.

@@ -14,19 +14,71 @@ These are recorded, not resolved. Section "Open contradictions" at the end lists
 - The boss intro cards and region blurbs in `data/bosses.json` and `data/regions.json` tell an older story (kings, weddings, a kingdom the player once served). The story bible says the 2026-11-25 brief "replaces all earlier narrative". Both texts are currently shown to the player.
 - `data/regions.json` makes all eight regions a single required chain. The story bible says the Wyrm's Roost and the Hollow Deep should be optional or secret.
 
-## Prologue: the opening and the chamber
+## Prologue: the high road, twice, and then the chamber
 
-| Beat | What happens | Scene ids |
+> **Owner decision (prologue, 2026-11-26)**
+> **Chosen: "The road is remembered."** Two people climb the high road to the Ring-Gate before the game proper and fall to the same guardian, the Ashen Sentinel: a father (played), then five years later his elder daughter (directed). The player's knight is not their third child. The knight is the Unbound, exactly as the story bible has it, and those two deaths are the strongest memories it was built from: the Crown keeps the mind of whoever dies on its threshold, and Lyra took those two back out of it. So the player lives the falls first and wakes with them ("Things I couldn't possibly have seen." / "Then it worked."), believing for half the game that this is a family duty. The Crypt takes that away and gives back something larger. The emotional engine is the owner's: someone you belong to went up this road before you. The mechanism is this game's own.
+> **Why this one:** it changes no recorded line and makes several of them mean more (list below); the first boss becomes the rematch, forty minutes in, which suits a two-to-three-hour game; the central mystery (what the Unbound is) and all three endings stand untouched.
+> **Alternative: "The third heir."** The knight is literally the youngest child, falls at the gate as a third death and is brought back in the cradle; the daughter is found later remade as a guardian. Closer to the owner's wording and simpler to say in one line, but it contradicts the bible's "made, not brought back" (the Crypt reveal would have to be rewritten), makes the Widow's recorded "someone inside you has" wrong, and needs a new guardian. Not built.
+> To switch, the code is the same; only the Crypt scene and the bible change.
+
+### Who they were (names are original to this game)
+- **Corvan Marrek.** Sergeant of the mortal levy under the commander the game later calls the Crimson Widow; warden of the low road after the levy was broken. The soldier "who taught that stance". In the ninth year of the Silence the far villages stop answering and the lamps on the high road come back on. He climbs to the outer gate of the old capital to find out who is giving orders behind it. He is one of the "six people I buried".
+- **Tessaly Marrek.** His elder daughter. Climbs in the fourteenth year, in his stance, with his answer. Falls at the same gate.
+- **The youngest Marrek** is never seen. PROPOSED: she is the "girl of nine" in Lyra's list of donors (`crypt_truth`), who gave what she remembered in the ordinary way, in the village, years before. The Unbound's "childhood" is hers. All three of the house are in the knight, and the knight is none of them.
+- **The Ring-Gate.** The outer gate of Vaelora: a ring of forty stones taller than the citadel behind it, an arc of it fallen, a seam in its inner face that is not stone. The Fallen Courtyard is the ward directly behind it; the resurrection chamber is under its foot. The fallen were carried down, not buried.
+- **What the old machines keep.** The Crown stores the mind of anyone who dies inside its precincts; that is what it was built to do. It could not remake two mortals who had no record on file, so it kept what they were carrying: their last road. This is the "donated" memory the Unbound least chose to receive, and the one thing Lyra stole rather than was given.
+
+### Beats
+
+| Beat | What happens | Played? | Scene ids |
+|---|---|---|---|
+| The vista | Dawn on the headland. An old knight, small, on a worn road; far ahead the Ring-Gate with the sun in its broken arc. The game's name. Card: "THE NINTH YEAR OF THE SILENCE". | watched | — |
+| The climb | Corvan walks the road: five designed shots (through the grass, the switchbacks, cresting the rise, the dead tree, the court). The narrator tells the fall of the immortal kingdoms over it: the history is the thing he is walking up to. | watched, skippable | `opening` (the six recorded narrator lines, unchanged) |
+| The gate | The Sentinel stands with his back to the road, facing the gate he was told to hold. He turns. | watched | — |
+| The first fall | A real duel, the game's own, against a guardian set far beyond him. "State your allegiance." / "I serve no crown." / "Then you have no passage." Two prompts say what a swipe is for. He cannot win; after 38 seconds the next blow is the last whatever the player does. | **played** | `sentinel_intro` (recorded; Corvan speaks the knight's line) |
+| The fourteenth year | The same view in autumn weather. Tessaly on the road. At the dead tree there is a cairn with her father's sword standing in it. At the gate, one wide shot: the same question, her answer, one blow turned and the next not. | watched | `prologue_cairn`, `prologue_gate` (new, text only; the Sentinel's two lines are his recorded takes) |
+| The nineteenth year | The same view in snow. Nobody on the road. Two swords in the cairn. The seam in the ring is lit. Black. | watched | — |
+| Awakening | The chamber under that gate. Lyra speaks first. "What do you remember?" / "Things I couldn't possibly have seen." / "Then it worked." | one tap | `awakening` (recorded, unchanged) |
+| First road | Lyra sends the Unbound up and out. | — | `first_road` (recorded, unchanged) |
+| Return visits | After a death: one of six Lyra lines. After the Courtyard is cleared: Lyra greets the return and points at the smith. | — | `rebirth_0` … `rebirth_5`, `sanctuary_return` |
+| Orren | First talk at the forge, then an idle line on later visits. | — | `orren_intro`, `orren_idle` |
+
+### Recorded lines: what the prologue does to them
+No recorded line becomes wrong. These change meaning, on purpose:
+
+| Line (recorded) | Before | Now |
 |---|---|---|
-| Opening | Black screen, narrator over the main theme. Six lines of history: mortals, the Everbound, the fall, three hundred years, "We were wrong." | `opening` |
-| Awakening | Fade up on the damaged resurrection chamber under the fortress (the Sanctuary set). Lyra speaks first. The Unbound admits to memories they could not have. | `awakening` |
-| First road | Lyra sends the Unbound up and out, and explains tap-to-move in fiction. | `first_road` |
-| Return visits | After a death: one of six Lyra lines, chosen at random. After the Courtyard is cleared: Lyra greets the return and points at the smith. | `rebirth_0` … `rebirth_5`, `sanctuary_return` |
-| Orren | First talk at the forge, then an idle line on later visits. | `orren_intro`, `orren_idle` |
+| `awakening_06` "Things I couldn't possibly have seen." | unexplained | the player has just played them |
+| `awakening_07` "Then it worked." | the waking worked | the memories took |
+| `sentinel_intro` (all three) | first meeting | the second time the player hears it; the knight gives Corvan's answer without knowing why |
+| `sentinel_death_03` "Then why did no one return for me?" | pathos | someone did, twice, and he cut them down for it |
+| `widow_intro_01` / `_03` "I knew the soldier who taught it." / "someone inside you has." | a hint | Corvan, by name if the player has been listening |
+| `widow_death_01` "You fight like six people I buried." | a hint | Corvan is one of the six (quest 4, the Donor Plates) |
+| `gravewarden_death_01` "You are not the first to enter this chamber…" | a hint | two came before, and stayed |
+| `opening_01` … `_06` (narrator) | over the throne hall | over the climb; same takes, same order |
+
+One casting consequence, not a text error: in the prologue duel `sentinel_intro_02` "I serve no crown." is Corvan's, and plays in the male knight's recorded take (the duel voices the player's line by the body in the profile, and for that duel the profile is his). For a male knight the father and the son therefore share a voice. That is defensible (the memory is the knight's own) but should be a deliberate decision when the cast is recorded: either keep it, or record `sentinel_intro_02` once more in an older voice for the prologue.
+
+### New lines
+In `data/dialogue.json` now, text only (`"recorded": false`), 2 lines:
+- `prologue_cairn_01`, Tessaly: "I kept the stance, Father. You would still find fault with it."
+- `prologue_gate_01`, Tessaly: "The same as my father's." (between the Sentinel's recorded `sentinel_intro_01` and `_03`; the Sentinel gets no new line, which keeps him inside the four-line limit of speech category B)
+
+On-screen cards (not dialogue, in `src/cine/prologue.gd`): "THE NINTH YEAR OF THE SILENCE", "THE FOURTEENTH YEAR", "THE NINETEENTH YEAR".
+
+PROPOSED (not recorded, not in data), 5 lines that would pay the prologue off later:
+- `courtyard_6`, appended, Player: "I know this gate." / Lyra: "You have never been here." / Player: "No."
+- `sentinel_memory`, appended, Archivist: "Addendum. Two intruders refused at the outer gate, years nine and fourteen. Remains transferred below. Reason not recorded."
+- `crypt_truth`, Lyra's third line amended: "You were not brought back. You were made. A warden and his daughter who fell at the gate above you. Soldiers, engineers, a baker, a girl of nine. They gave what they remembered so that one person could walk in here and not be owned."
+- `crypt_truth`, added after it, Player: "He was not my father." / Lyra: "He is the reason you know how to stand. Call that what you like."
+- Quest 4 (Donor Plates), the Widow naming the first of the six: "Corvan Marrek. He never once agreed with me, and he never once left."
 
 Notes
-- `rebirth_*` is picked with `randi() % 6`. The lines read as a progression (0 "sooner than I expected" to 5 "you don't owe the dead your future") but they do not play in order. PROPOSED: index by death count, capped at 5.
+- `rebirth_*` is picked with `randi() % 6`. The lines read as a progression but do not play in order. PROPOSED: index by death count, capped at 5.
 - The story bible places meeting Orren in Chapter II. In the game he is in the Sanctuary from the start and `sanctuary_return` introduces him after the Courtyard, which fits Chapter II.
+- The throne-hall opening (`src/cine/opening.gd`, the hall lit and then dead) is no longer part of a new journey; its narration moved to the climb. The scene is kept (`--screen=opening`). PROPOSED use: its last two shots, the dark hall and the lamps coming on down the aisle, as the arrival at Chapter VI, where the player finally stands in the room the narrator was describing.
+- Story bible to reconcile (not edited in this pass): "The player: the Unbound" should name the two gate deaths among the donated memories, and the timeline should carry the ninth and fourteenth years.
 
 ---
 

@@ -16,6 +16,7 @@ func _ready() -> void:
 	Game.new_game()
 	Game.profile.tutorial_done = true
 	Engine.time_scale = 6.0
+	await _gear_on_rig()
 	# --- menus
 	var t := TitleScreen.new()
 	add_child(t)
@@ -207,3 +208,115 @@ func _ready() -> void:
 	d2.queue_free()
 	print("\nintegration: %s" % ("PASS" if failed == 0 else "%d FAILED" % failed))
 	get_tree().quit(1 if failed > 0 else 0)
+
+
+# ---------------------------------------------------------------- real equipment on the rig
+func _wear(ids: Array) -> void:
+	for id: String in ids:
+		if not Game.owns(id):
+			Game.profile.inventory.append(id)
+		Game.equip(id)
+
+func _gear_on_rig() -> void:
+	var keep: Dictionary = Game.profile.duplicate(true)
+	# every equippable item resolves to something drawn, or says honestly that it is not
+	var unresolved: Array = []
+	for it: Dictionary in Db.item_list:
+		var slot := str(it.slot)
+		if Db.ARMOUR_SLOTS.has(slot):
+			var ps := str(it.get("part_slot", ""))
+			if not (bool(it.get("part_ready", false)) and ArmorParts.has_part("m", str(it.part), ps) and ArmorParts.has_part("f", str(it.part), ps)):
+				unresolved.append(it.id)
+		elif slot in ["weapon", "shield"]:
+			var g := str(it.get("gear_id", ""))
+			var has_gear := g != "" and GearModel.exists(g)
+			var has_old: bool = str(it.get("visual", "")) in ["model", "alias"] and ResourceLoader.exists("res://assets/models/%s.glb" % str(it.get("model", "")))
+			if not (has_gear or has_old or str(it.get("visual", "")) == "none"):
+				unresolved.append(it.id)
+			if str(it.get("visual", "")) == "none" and (has_gear or has_old):
+				unresolved.append(it.id)
+		elif str(it.get("visual", "")) != "none":
+			unresolved.append(it.id)
+	ok(unresolved.is_empty(), "every equippable item resolves to a part, a model or an honest 'none' %s" % str(unresolved))
+	# a new game starts in the sleek base knight
+	var look: Dictionary = Duel.player_look()
+	ok(look.get("skin", "") == ArmorParts.host_path(str(Game.profile.body)) and look.get("parts", {}).get("chest", "") == "crownless", "a new knight is the base body in Crownless plate")
+	ok(str(look.get("gear", "")) == "wayfarer" and str(look.get("shield", {}).get("gear", "")) == "shield_heater", "the starting sword and shield are the hand-modelled ones")
+	# mixed armour: one suit per slot, empty slots the base body's piece
+	_wear(["a_frost_helm", "a_black_chest", "a_regal_gauntlets", "a_ash_legs"])
+	look = Duel.player_look()
+	var p: Dictionary = look.get("parts", {})
+	ok(p.get("helm") == "frost" and p.get("chest") == "black" and p.get("arms") == "regal" and p.get("legs") == "ash" and p.get("shoulders") == "crownless" and p.get("boots") == "crownless",
+		"player_look gives a part per slot for mixed gear %s" % str(p))
+	_wear(["a_vigil_helm", "a_garrison_shoulders"])
+	p = Duel.player_look().get("parts", {})
+	ok(p.get("helm") == "vigil" and p.get("shoulders") == "vigil", "the Vigil hood brings its mantle")
+	_wear(["a_frost_helm"])
+	p = Duel.player_look().get("parts", {})
+	ok(p.get("shoulders") != "garrison", "Garrison pauldrons give way over another cuirass (%s)" % str(p.get("shoulders")))
+	_wear(["a_garrison_chest"])
+	ok(Duel.player_look().get("parts", {}).get("shoulders") == "garrison", "and are worn over their own")
+	Game.profile.cosmetics = {"helm": {"finish": "", "accent": "", "look_as": "a_black_helm"}}
+	_wear(["a_black_helm", "a_frost_helm"])
+	ok(Duel.player_look().get("parts", {}).get("helm") == "black", "a cosmetic 'look as' is what is drawn")
+	Game.profile.cosmetics = {}
+	# the rig wears them, and its volumes are measured from what is worn
+	Game.profile = keep.duplicate(true)
+	var plain := FighterRig.new()
+	add_child(plain)
+	plain.build(Duel.player_look(), false)
+	ok(plain.has_parts() and plain.parts.worn.get("helm") == "crownless" and plain.skin.parts == plain.parts, "the rig dresses the body from the loadout")
+	var hidden := 0
+	for mi: MeshInstance3D in plain.skin.root.find_children("*", "MeshInstance3D", true, false):
+		if not mi.name.begins_with("part_") and mi.visible:
+			hidden += 1
+	ok(hidden == 0, "the body's own mesh is hidden under the parts")
+	var head0: float = plain.skin.extent("Head", Vector3.UP)
+	var sh0: float = float(plain.skin.ball("LeftArm")[1])
+	_wear(["a_frost_helm", "a_wyrm_shoulders"])
+	var spiky := FighterRig.new()
+	add_child(spiky)
+	spiky.build(Duel.player_look(), false)
+	ok(spiky.skin.extent("Head", Vector3.UP) > head0 + 0.02 and float(spiky.skin.ball("LeftArm")[1]) > sh0 + 0.01,
+		"rig bounds include the worn parts (crowned helm %.2f > %.2f, horned pauldron %.2f > %.2f)" % [spiky.skin.extent("Head", Vector3.UP), head0, float(spiky.skin.ball("LeftArm")[1]), sh0])
+	ok(plain.wear_parts(spiky.cfg.parts) and is_equal_approx(plain.skin.extent("Head", Vector3.UP), spiky.skin.extent("Head", Vector3.UP)), "a piece swapped on a standing knight is measured again")
+	plain.skin.flash(1.0)
+	ok(plain.parts._params.has(&"flash"), "flash reaches the worn parts")
+	# gear models: reach, pommel and shield board come from the manifest
+	var h := GearModel.hold("wayfarer")
+	ok(is_equal_approx(plain.weapon_len, float(GearModel.info("wayfarer").tip) * GearModel.rig_scale("wayfarer")) and is_equal_approx(plain._pommel, float(h.pommel)), "the sword's length and pommel are the manifest's")
+	ok(is_equal_approx(plain.reach(), 0.05 + 0.5 + FighterRig.REACH_STEP + plain.weapon_len * 0.8), "reach() is fed by the gear model's length")
+	ok(plain.shield != null and is_equal_approx(plain._sh_hh, float(GearModel.info("shield_heater").height) * 0.5 * GearModel.rig_scale("shield_heater")), "the shield board is the manifest's")
+	Game.profile = keep.duplicate(true)
+	_wear(["w_oath_axe"])
+	var great := FighterRig.new()
+	add_child(great)
+	great.build(Duel.player_look(), false)
+	ok(great.two_handed and great.reach() > plain.reach() + 0.3 and is_equal_approx(great._off_grip, float(GearModel.hold("oathbreaker").off_hand)), "the greatsword reaches further and its second hand is where the manifest puts it")
+	Game.profile = keep.duplicate(true)
+	_wear(["w_twin_relics"])
+	var twin := FighterRig.new()
+	add_child(twin)
+	twin.build(Duel.player_look(), false)
+	var lg: Node3D = twin.weapon_l.get_child(0) if twin.weapon_l.get_child_count() > 0 else null
+	ok(twin.dual and lg != null and lg.transform.basis.determinant() < 0.0 and (twin.weapon_r.get_child(0) as Node3D).transform.basis.determinant() > 0.0, "Twin Relics are one blade and its mirror image")
+	# Recall for the advanced pieces, a draw (or nothing) for the rest
+	await get_tree().process_frame
+	ok(bool(twin.cfg.get("advanced", false)) and twin.present_weapon("auto", {"key": "test_foe"}) > 0.6, "an advanced weapon is recalled in full the first time")
+	var recalls := 0
+	for c in twin.weapon_r.get_children():
+		if c is Recall:
+			recalls += 1
+	ok(recalls == 1, "Recall runs on the weapon in the hand")
+	ok(twin.present_weapon("auto", {"key": "test_foe"}) <= 0.55, "and in its short form when the same foe is met again")
+	twin.swing(Vector2(1, 0), 0.3)
+	recalls = 0
+	for c in twin.weapon_r.get_children():
+		if c is Recall and not c.is_queued_for_deletion():
+			recalls += 1
+	ok(recalls == 0, "a cut thrown meanwhile finishes it")
+	ok(not bool(plain.cfg.get("advanced", false)) and plain.present_weapon("auto", {"quick": true}) == 0.0 and not plain.is_sheathed(), "an ordinary sword is simply in the hand when there is no intro")
+	ok(plain.present_weapon("auto", {}) > 0.0, "and is drawn when there is one")
+	for r: Node in [plain, spiky, great, twin]:
+		r.queue_free()
+	Game.profile = keep

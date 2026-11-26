@@ -1,8 +1,10 @@
 class_name ShopScreen
 extends Control
 ## Orren's counter: what he sells (and what he will sell later, shown locked with the line that says when),
-## a stall of shards and ore, and what he will buy. The left is the list, the right the piece itself turning,
-## its figures against what is worn, and the one button that spends gold.
+## a stall of shards and ore, and what he will buy.
+## Left: the wares as a row to flick through, the middle one large and turning, its neighbours smaller and dimmed
+## (`ItemCarousel`, the armoury's). Right: the gold held, the piece's name and rank, its mastery, the two or three
+## figures that matter most against what is worn, Compare for the rest, and the price beside one large Buy.
 ## Browsing writes nothing: only Buy, the stall's buttons, Sell and Equip change the journey.
 
 const MODES := ["Wares", "Materials", "Sell"]
@@ -15,7 +17,8 @@ var filter := 0
 var sel := ""                      # the item in the detail panel
 var bought := ""                   # the item just bought: the panel offers Equip / Inspect for it
 var rows: Array = []               # what the list shows now (catalogue entries, or ids when selling)
-var stage: ItemStage
+var carousel: ItemCarousel
+var compare_on := false            # every changed figure instead of the three that matter most
 var buy_btn: Button
 var sell_btn: Button
 var dialog: Control
@@ -25,10 +28,12 @@ var _modes: HBoxContainer
 var _filters: HBoxContainer
 var _list: VBoxContainer
 var _scroll: ScrollContainer
-var _detail: VBoxContainer
+var _case: Control
 var _info: VBoxContainer
 var _right: Control
 var _buttons := {}
+var _ids: Array = []               # the ids in the row, in order
+var _bought_at := 0
 var _demo: Array = []
 var _clock := 0.0
 
@@ -51,10 +56,11 @@ func _ready() -> void:
 	row.add_theme_constant_override("separation", 12)
 	UI.full(row)
 	add_child(row)
-	# --- the list
+	# --- the wares
 	var left := VBoxContainer.new()
 	left.add_theme_constant_override("separation", 6)
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	left.size_flags_stretch_ratio = 1.25
 	row.add_child(left)
 	_modes = HBoxContainer.new()
 	_modes.add_theme_constant_override("separation", 6)
@@ -62,6 +68,19 @@ func _ready() -> void:
 	_filters = HBoxContainer.new()
 	_filters.add_theme_constant_override("separation", 4)
 	left.add_child(_filters)
+	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.86), Color(0.3, 0.27, 0.2))
+	case.get_theme_stylebox("panel").set_content_margin_all(1)
+	case.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	left.add_child(case)
+	_case = case
+	carousel = ItemCarousel.new()
+	carousel.body = str(Game.profile.get("body", "m"))
+	carousel.zoom = 1.3
+	case.add_child(carousel)
+	carousel.centred.connect(func(_i: int): _on_centre())
+	carousel.settled.connect(func(_i: int): _on_centre())
+	carousel.tapped.connect(func(_i: int): open_inspect())
+	UI.corners(case, UI.GOLD_DIM, 12.0)
 	_scroll = ScrollContainer.new()
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
@@ -70,23 +89,14 @@ func _ready() -> void:
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", 4)
 	_scroll.add_child(_list)
-	# --- the piece
-	var p := UI.panel(Color(0.03, 0.03, 0.036, 0.9), Color(0.3, 0.27, 0.2))
+	# --- the counter
+	var p := UI.panel(Color(0.03, 0.03, 0.036, 0.92), Color(0.3, 0.27, 0.2))
 	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	p.size_flags_stretch_ratio = 1.12
 	row.add_child(p)
 	_right = p
-	_detail = VBoxContainer.new()
-	_detail.add_theme_constant_override("separation", 4)
-	p.add_child(_detail)
-	stage = ItemStage.new()
-	stage.body = str(Game.profile.get("body", "m"))
-	stage.custom_minimum_size.y = 210
-	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_detail.add_child(stage)
 	_info = VBoxContainer.new()
 	_info.add_theme_constant_override("separation", 3)
-	_detail.add_child(_info)
+	p.add_child(_info)
 	UI.corners(p, UI.GOLD_DIM, 12.0)
 	refresh()
 	for a in OS.get_cmdline_user_args():
@@ -131,10 +141,13 @@ func refresh() -> void:
 		fb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		fb.pressed.connect(func():
 			filter = i
+			bought = ""
 			refresh())
 		_filters.add_child(fb)
 	GearUI.clear(_list)
 	_buttons.clear()
+	_case.visible = mode != "Materials"
+	_scroll.visible = mode == "Materials"
 	_right.visible = mode != "Materials"
 	match mode:
 		"Wares": _fill_wares()
@@ -146,62 +159,63 @@ func set_mode(m: String) -> void:
 	mode = m
 	bought = ""
 	sel = ""
-	_scroll.scroll_vertical = 0
+	compare_on = false
+	_ids = []
 	refresh()
 
+## Brings an item to the middle of the row (at once: this is the screen's own doing, not a finger's).
 func select(id: String) -> void:
+	if not _ids.has(id):
+		return
 	if id != bought:
 		bought = ""
 	sel = id
-	for k: String in _buttons:
-		_paint_row(_buttons[k], k == sel)
+	if _ids.has(id):
+		carousel.jump(_ids.find(id))
 	_fill_detail()
 
-func _paint_row(b: Button, on: bool) -> void:
-	for state: String in ["normal", "hover", "pressed"]:
-		var sb: StyleBoxFlat = b.get_theme_stylebox(state).duplicate()
-		sb.bg_color = Color(0.1, 0.09, 0.07, 0.95) if on else Color(0.055, 0.055, 0.065, 0.9)
-		sb.border_color = UI.GOLD if on else b.get_theme_color("font_color")
-		if not on:
-			sb.set_border_width_all(1)
-			sb.border_width_left = 4
-		b.add_theme_stylebox_override(state, sb)
+func _on_centre() -> void:
+	var id := str(_ids[carousel.index]) if carousel.index < _ids.size() else ""
+	if id == sel:
+		return
+	if id != bought:
+		bought = ""
+	sel = id
+	_fill_detail()
+
+func _row_entry(id: String, locked: bool) -> Dictionary:
+	var it: Dictionary = Db.item(id)
+	return {"id": id, "slot": str(it.slot), "name": str(it.name), "color": Db.rarity_color(it) if not locked else Db.rarity_color(it).lerp(Color(0.35, 0.35, 0.37), 0.5),
+		"metal": str(it.get("look", {}).get("metal", it.get("look", {}).get("color", "#b8b4aa"))), "locked": locked, "dark": false,
+		"equipped": Game.is_equipped(id), "fav": Game.is_favourite(id)}
+
+## Fills the row. It is rebuilt only when what it holds has changed, so a purchase or a sale does not throw the
+## pieces away and build them again.
+func _set_row(ids: Array, entries: Array) -> void:
+	if ids != _ids or carousel.entries.size() != entries.size():
+		_ids = ids
+		if not ids.has(sel):
+			sel = str(ids[clampi(carousel.index, 0, ids.size() - 1)]) if not ids.is_empty() else ""
+		carousel.keep = 5
+		carousel.set_entries(entries, maxi(ids.find(sel), 0))
+	else:
+		for i in entries.size():
+			carousel.entries[i] = entries[i]
+		carousel.refresh()
 
 func _fill_wares() -> void:
 	rows = catalogue()
-	if rows.is_empty():
-		_list.add_child(UI.wrapped("Orren has nothing of this kind left to sell you. What remains must be taken.", GearUI.TEXT, UI.DIM, 400))
 	var ids: Array = rows.map(func(e): return str(e.id))
-	if bought == "" and not ids.has(sel):
-		sel = str(ids[0]) if not ids.is_empty() else ""
-	for e: Dictionary in rows:
-		var b := GearUI.item_row(e.item, str(e.id) == sel, not e.available)
-		if not e.available:
-			GearUI.right(b, "%d" % int(e.price), Color(0.5, 0.48, 0.44), "lock")
-		else:
-			GearUI.right(b, ("%d" % int(e.price)) + (" · back" if e.get("buyback", false) else ""), UI.GOLD if e.affordable else GearUI.BAD.lerp(UI.DIM, 0.35))
-		b.pressed.connect(func(): select(str(e.id)))
-		_list.add_child(b)
-		_buttons[str(e.id)] = b
+	# the piece just bought stays where it stood until the player moves on
+	if bought != "" and not ids.has(bought):
+		var at := clampi(_bought_at, 0, rows.size())
+		rows.insert(at, {"id": bought, "item": Db.item(bought), "price": 0, "available": true, "affordable": true, "unlock_text": "", "slot": Db.item(bought).slot, "owned": true})
+		ids.insert(at, bought)
+	_set_row(ids, rows.map(func(e): return _row_entry(str(e.id), not e.available)))
 
 func _fill_sell() -> void:
-	rows = Game.sorted_items()
-	if not rows.has(sel):
-		sel = str(rows[0]) if not rows.is_empty() else ""
-	for id: String in rows:
-		var it: Dictionary = Db.item(id)
-		if it.is_empty():
-			continue
-		var lvl := Game.upgrade_level(id)
-		var why := Game.sell_block(id)
-		var b := GearUI.item_row(it, id == sel, why != "", str(it.name) + (" +%d" % lvl if lvl > 0 else ""))
-		if why != "":
-			GearUI.right(b, why, UI.GOLD_DIM.lightened(0.15))
-		else:
-			GearUI.right(b, "+%d" % Game.sell_price(id), UI.GOLD)
-		b.pressed.connect(func(): select(id))
-		_list.add_child(b)
-		_buttons[id] = b
+	rows = Game.sorted_items().filter(func(id): return not Db.item(id).is_empty())
+	_set_row(rows.duplicate(), rows.map(func(id): return _row_entry(str(id), false)))
 
 func _fill_materials() -> void:
 	_list.add_child(UI.wrapped("Shards and ore for the forge. Orren sells the ore of any region you have cleared; he buys none of it back.", GearUI.TEXT, UI.DIM, 500))
@@ -264,19 +278,26 @@ func _fill_detail() -> void:
 	sell_btn = null
 	if mode == "Materials":
 		return
+	# --- the purse, always at the top
+	var purse := HBoxContainer.new()
+	purse.add_theme_constant_override("separation", 10)
+	var pl := UI.label("YOU HOLD", 18, UI.DIM, "head")
+	pl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	purse.add_child(pl)
+	purse.add_child(UI.label("%d gold" % int(Game.profile.gold), 26, UI.GOLD, "head"))
+	_info.add_child(purse)
+	_info.add_child(UI.rule(Color(0.3, 0.27, 0.2)))
 	var it: Dictionary = Db.item(sel)
 	if it.is_empty():
-		stage.show_item("")
-		_info.add_child(_line("Nothing chosen.", UI.DIM))
+		_info.add_child(_line("Orren has nothing of this kind left to sell you. What remains must be taken." if mode == "Wares" else "Nothing to sell.", UI.DIM))
 		return
-	stage.show_item(sel)
 	var col: Color = Db.rarity_color(it)
 	var lvl := Game.upgrade_level(sel) if Game.owns(sel) else 0
-	var ttl := UI.title(str(it.name) + ("  +%d" % lvl if lvl > 0 else ""), 26, col)
-	ttl.clip_text = true
-	ttl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	var ttl := UI.title(str(it.name) + ("  +%d" % lvl if lvl > 0 else ""), 28, col)
+	ttl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info.add_child(ttl)
 	_info.add_child(GearUI.kind_row(it, col))
+	_mastery_line(it)
 	if sel == bought:
 		_after_purchase(it)
 	elif mode == "Sell":
@@ -284,33 +305,91 @@ func _fill_detail() -> void:
 	else:
 		_ware_detail(it)
 
-## Against what is worn: only the rows that change, the same rows the armoury shows.
-func _compare_block(id: String, limit: int = 6) -> void:
+## Mastery: how far it has come if it is held, what it takes if it is not.
+func _mastery_line(it: Dictionary) -> void:
+	var need := Stats.mastery_needed(it)
+	var have := Game.mastery_points(sel) if Game.owns(sel) else 0
+	var h := HBoxContainer.new()
+	h.add_theme_constant_override("separation", 10)
+	h.add_child(UI.label("Mastery", GearUI.TEXT, UI.DIM))
+	var bar := UI.bar(UI.GOLD, 8)
+	bar.max_value = need
+	bar.value = have
+	bar.custom_minimum_size.x = 150
+	bar.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	h.add_child(bar)
+	h.add_child(UI.label("%d of %d fights" % [have, need], GearUI.TEXT, UI.GOLD if have >= need else UI.BONE))
+	_info.add_child(h)
+
+func _spacer() -> void:
+	var sp := Control.new()
+	sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	sp.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_info.add_child(sp)
+
+## Against what is worn: the three figures that matter most, or with Compare every one that changes.
+func _compare_block(id: String) -> void:
 	var it: Dictionary = Db.item(id)
 	var worn = Game.profile.equipped.get(str(it.slot))
-	var head := "AGAINST %s" % str(Db.item(str(worn)).name).to_upper() if worn != null else "AGAINST AN EMPTY SLOT"
-	_info.add_child(UI.label(head, 18, UI.DIM, "head"))
+	var head := HBoxContainer.new()
+	var hl := UI.label("AGAINST %s" % str(Db.item(str(worn)).name).to_upper() if worn != null else "AGAINST AN EMPTY SLOT", 18, UI.DIM, "head")
+	hl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	hl.clip_text = true
+	head.add_child(hl)
+	_info.add_child(head)
+	var changed: Array = Game.compare(str(it.slot), id).filter(func(r): return int(r.better) != 0 or r.now_text != r.then_text)
 	var grid := GridContainer.new()
-	grid.columns = 2
-	grid.add_theme_constant_override("h_separation", 22)
+	grid.columns = 2 if compare_on else 1
+	grid.add_theme_constant_override("h_separation", 20)
 	grid.add_theme_constant_override("v_separation", -3)
 	_info.add_child(grid)
-	var n := 0
-	for r in Game.compare(str(it.slot), id):
-		if n >= limit or (int(r.better) == 0 and r.now_text == r.then_text):
-			continue
+	for r in changed.slice(0, 8 if compare_on else 3):
 		grid.add_child(GearUI.effect(r))
-		n += 1
-	if n == 0:
+	if changed.is_empty():
 		grid.add_child(UI.label("No change to your numbers", GearUI.TEXT, UI.DIM))
+	if changed.size() > 3:
+		var cmp := GearUI.chip("Compare" if not compare_on else "Fewer", compare_on, 150)
+		cmp.pressed.connect(func():
+			compare_on = not compare_on
+			_fill_detail())
+		head.add_child(cmp)
 	if Game.requirement_text(id) != "" and not Game.meets_requirements(id):
 		_info.add_child(_line("Asks for %s: usable without, at a cost" % Game.requirement_text(id), GearUI.BAD))
 
-func _ware_detail(it: Dictionary) -> void:
+## The one large button of the panel, with the figure it spends or earns beside it.
+func _deal(amount: String, amount_col: Color, sub: String, text: String, enabled: bool, size: int = 26) -> Button:
+	var foot := HBoxContainer.new()
+	foot.add_theme_constant_override("separation", 14)
+	_info.add_child(foot)
+	var pv := VBoxContainer.new()
+	pv.add_theme_constant_override("separation", -6)
+	pv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if amount != "":
+		pv.add_child(UI.label(amount, 36, amount_col, "head"))
+	if sub != "":
+		pv.add_child(_line(sub, UI.DIM))
+	foot.add_child(pv)
+	var b := UI.button(text, size, 250)
+	b.custom_minimum_size.y = 76
+	b.focus_mode = Control.FOCUS_NONE
+	b.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	b.disabled = not enabled
+	if enabled:
+		var sb := UI.box(Color(0.2, 0.16, 0.08, 0.96), UI.GOLD, 2, 2, 12)
+		sb.shadow_color = Color(UI.GOLD, 0.18)
+		sb.shadow_size = 8
+		b.add_theme_stylebox_override("normal", sb)
+		b.add_theme_color_override("font_color", Color("#f2dfa8"))
+	foot.add_child(b)
+	return b
+
+func _ware_detail(_it: Dictionary) -> void:
 	var e := _entry(sel)
 	if e.is_empty():
 		return
 	var price := int(e.price)
+	var gold := int(Game.profile.gold)
 	if not e.available:
 		# a goal: seen, priced, not yet for sale. The line never names the guardian.
 		var lock := HBoxContainer.new()
@@ -318,34 +397,18 @@ func _ware_detail(it: Dictionary) -> void:
 		lock.add_child(InvGlyph.new("lock", UI.GOLD_DIM.lightened(0.3), 1, 20.0))
 		lock.add_child(_line(str(e.unlock_text) if str(e.unlock_text) != "" else "Not for sale yet.", UI.GOLD_DIM.lightened(0.3), "bold"))
 		_info.add_child(lock)
-	_compare_block(sel, 6 if e.available else 4)
-	var foot := HBoxContainer.new()
-	foot.add_theme_constant_override("separation", 14)
-	_info.add_child(foot)
-	var gold := int(Game.profile.gold)
-	var pv := VBoxContainer.new()
-	pv.add_theme_constant_override("separation", -4)
-	pv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pv.add_child(UI.label("%d gold" % price, 28, UI.GOLD if gold >= price else GearUI.BAD.lerp(UI.BONE, 0.25), "head"))
-	pv.add_child(UI.label("You hold %d" % gold + ("" if gold >= price else "  ·  %d short" % (price - gold)), GearUI.TEXT, UI.DIM))
-	foot.add_child(pv)
-	buy_btn = UI.button("Buy", 22, 230)
-	buy_btn.custom_minimum_size.y = 60
-	buy_btn.focus_mode = Control.FOCUS_NONE
-	buy_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	if not e.available:
-		buy_btn.text = "LOCKED"
-		buy_btn.disabled = true
-	elif gold < price:
-		buy_btn.text = "NOT ENOUGH GOLD"
-		buy_btn.add_theme_font_size_override("font_size", 17)
-		buy_btn.disabled = true
+	elif e.get("buyback", false):
+		_info.add_child(_line("Yours once. Orren kept it for you, at his price.", UI.GOLD_DIM.lightened(0.3)))
+	_compare_block(sel)
+	_spacer()
+	var sub := "" if gold >= price or not e.available else "%d short" % (price - gold)
+	buy_btn = _deal("%d gold" % price, UI.GOLD if gold >= price or not e.available else GearUI.BAD.lerp(UI.BONE, 0.25), sub,
+		"Locked" if not e.available else ("Buy" if gold >= price else "Not enough gold"), e.available and gold >= price, 26 if e.available and gold >= price else 17)
 	buy_btn.pressed.connect(func(): ask_buy(sel))
-	foot.add_child(buy_btn)
 
 func _sell_detail(it: Dictionary) -> void:
 	var why := Game.sell_block(sel)
-	for line in Stats.item_lines(it, Game.upgrade_level(sel), Db.classes).slice(0, 4):
+	for line in Stats.item_lines(it, Game.upgrade_level(sel), Db.classes).slice(0, 3):
 		var h := HBoxContainer.new()
 		var k := UI.label(str(line[0]), GearUI.TEXT, UI.DIM)
 		k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -355,36 +418,24 @@ func _sell_detail(it: Dictionary) -> void:
 	var reason := {"Equipped": "You are wearing it. Take it off in the armoury first.", "Favourite": "Marked as a favourite. Unmark it in the armoury to sell.",
 		"Keepsake": "A keepsake. Orren will not take it.", "Not for sale": "The blade you woke with. It stays.",
 		"Last weapon": "Your only weapon. Orren will not leave you unarmed.", "Last one-handed blade": "Your only one-handed blade: a shield needs one."}
-	var foot := HBoxContainer.new()
-	foot.add_theme_constant_override("separation", 14)
-	_info.add_child(foot)
-	var pv := VBoxContainer.new()
-	pv.add_theme_constant_override("separation", -4)
-	pv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	foot.add_child(pv)
+	_spacer()
 	if why != "":
-		pv.add_child(_line(str(reason.get(why, why + ".")), UI.GOLD_DIM.lightened(0.3)))
+		sell_btn = _deal("", UI.DIM, str(reason.get(why, why + ".")), why, false, 17)
 	else:
-		pv.add_child(UI.label("+%d gold" % Game.sell_price(sel), 28, UI.GOLD, "head"))
 		var back := "He keeps it: it can be bought back for %d." % int(ceil(Game.sell_price(sel) * float(Db.equipment.buyback_rate))) if int(it.get("price", 0)) <= 0 or not Game.shop_unlocked(it) else "He stocks these: it can be bought again."
-		pv.add_child(_line(back, UI.DIM))
-	sell_btn = UI.button("Sell" if why == "" else why, 22 if why == "" else 17, 230)
-	sell_btn.custom_minimum_size.y = 60
-	sell_btn.focus_mode = Control.FOCUS_NONE
-	sell_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	sell_btn.disabled = why != ""
+		sell_btn = _deal("+%d gold" % Game.sell_price(sel), UI.GOLD, back, "Sell", true)
 	sell_btn.pressed.connect(func(): ask_sell(sel))
-	foot.add_child(sell_btn)
 
-func _after_purchase(it: Dictionary) -> void:
+func _after_purchase(_it: Dictionary) -> void:
 	_info.add_child(_line("Yours. Orren wraps the hilt and says nothing more about it.", UI.GOLD, "bold"))
 	if not Game.is_equipped(sel):
-		_compare_block(sel, 4)
+		_compare_block(sel)
+	_spacer()
 	var foot := HBoxContainer.new()
 	foot.add_theme_constant_override("separation", 8)
 	_info.add_child(foot)
-	var eq := UI.button("Equipped" if Game.is_equipped(sel) else "Equip", 22, 0)
-	eq.custom_minimum_size.y = 60
+	var eq := UI.button("Equipped" if Game.is_equipped(sel) else "Equip", 24, 0)
+	eq.custom_minimum_size.y = 76
 	eq.focus_mode = Control.FOCUS_NONE
 	eq.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	eq.disabled = Game.is_equipped(sel)
@@ -393,19 +444,11 @@ func _after_purchase(it: Dictionary) -> void:
 		Game.equip(sel))
 	foot.add_child(eq)
 	buy_btn = eq
-	var ins := UI.button("Inspect", 20, 170)
-	ins.custom_minimum_size.y = 60
+	var ins := UI.button("Inspect", 20, 160)
+	ins.custom_minimum_size.y = 76
 	ins.focus_mode = Control.FOCUS_NONE
 	ins.pressed.connect(open_inspect)
 	foot.add_child(ins)
-	var on := UI.button("Keep Browsing", 17, 190)
-	on.custom_minimum_size.y = 60
-	on.focus_mode = Control.FOCUS_NONE
-	on.pressed.connect(func():
-		bought = ""
-		sel = ""
-		refresh())
-	foot.add_child(on)
 
 func open_inspect() -> void:
 	if sel == "" or (inspect and is_instance_valid(inspect)):
@@ -429,6 +472,7 @@ func ask_buy(id: String) -> bool:
 func buy(id: String) -> bool:
 	bought = id
 	sel = id
+	_bought_at = _ids.find(id)
 	if not Game.buy(id):          # (the profile change it announces rebuilds the lists, with `bought` already set)
 		bought = ""
 		return false
@@ -468,4 +512,9 @@ func _process(delta: float) -> void:
 				if inspect and is_instance_valid(inspect):
 					inspect.queue_free()
 			"mat": Game.buy_material(a, 1)
-			"scroll": _scroll.scroll_vertical = int(a)
+			"drag":
+				var x0 := carousel.size.x * 0.5
+				carousel.drag_begin(x0)
+				carousel.drag_move(x0 + float(a) * 0.5)
+				carousel.drag_move(x0 + float(a))
+			"release": carousel.drag_end(carousel._last_x)

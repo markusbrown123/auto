@@ -54,6 +54,11 @@ scene("sentinel_intro",
  ("sentinel", "State your allegiance.", "flat, immense, helmeted"),
  (P, "I serve no crown.", "steady"),
  ("sentinel", "Then you have no passage.", "final"))
+# the prologue (src/cine/prologue.gd): the two who climbed the high road before the knight woke. Text only, not recorded.
+# At the gate the Sentinel says to the daughter exactly what he says to everyone: his two recorded lines are reused, not rewritten.
+scene("prologue_cairn", ("tessaly", "I kept the stance, Father. You would still find fault with it.", "low, to the sword in the cairn"), once=False, new=True)
+scene("prologue_gate", ("tessaly", "The same as my father's.", "level, already drawing"), once=False, new=True)
+S["prologue_gate"]["lines"] = ["sentinel_intro_01", "prologue_gate_01", "sentinel_intro_03"]
 # speech category B: the Sentinel keeps only its challenge and its last words (the retry line was cut)
 scene("sentinel_death",
  ("sentinel", "Is the war... over?", "failing, suddenly human"),
@@ -396,7 +401,7 @@ for _lid, _l in L.items():
         if _takes.get(_f) == hashlib.sha1(_l["text"].encode()).hexdigest()[:12]:
             del _l["recorded"]
 NAMES = {"narrator": "", "lyra": "Lyra", "player": "", "orren": "Orren", "archivist": "The Archivist", "sentinel": "Ashen Sentinel", "executioner": "Hollow Executioner",
- "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness"}
+ "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness", "tessaly": "Tessaly Marrek"}
 OUT = {"lines": L, "scenes": S, "voices": VOICES, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}
 for path in ["data/dialogue.json", "docs/DIALOGUE_DATABASE.json"]:   # the docs copy is the same file, kept for readers
     json.dump(OUT, open(path, "w"), indent=1)

@@ -1,5 +1,15 @@
 # Inventory, forge and settings: how it works and what is not there yet
 
+## Follow-up pass (2026-11-26, later): what changed on the Armory
+- The rail is `Db.EQUIP_SLOTS` without the off hand (it has no items): helm, chest, pauldrons, gauntlets, greaves, boots, weapon, shield, ring, relic.
+- The case is taller (about 300 px at 720p instead of 225) with its heading, Sort and Grid laid over its top edge, and the middle piece is drawn at 1.25× (`ItemCarousel.zoom`; 1.1× for whole suits). The EQUIPPED tag moved under the piece.
+- Weapons and shields with a hand-modelled piece (`gear_id` + `gear_ready`) are shown as THAT model, in their forge state (blade and grip parts, ore tint, polished edge). **The knight still holds the older model** (the rig is a later pass); the note line says so for those items.
+- Every slot's view keeps the whole knight in frame, feet included; a slot only turns the knight and steps a little closer than Full Body.
+- Rows: weight class after the rank; a second line for an unmet requirement, a keen edge and forge state, or set progress ("Ashbound set 3 of 6 with this · 2 ✓ 4 – 6 – · at 4: …"); undiscovered pieces are silhouettes named "Unknown <kind>" with `Game.item_hint`; shop pieces show the price or `unlock_text`. Inspect lists requirement, forge work, weight text and all three set tiers.
+- Body text is 22 px. Upgrade stays enabled for a weapon at blade V (its other tracks live in the forge).
+- A spoken line no longer covers the buttons: the Sanctuary lifts the whole hub above the subtitle while `Story.busy`.
+- The Wares and Sell lists described under "Forge" below moved to the Shop tab; see `docs/UI_NOTES.md`.
+
 ## Equipment screen (Armory tab), rebuilt 2026-11-26
 Files: `src/ui/armory/armory_screen.gd` (the screen), `item_carousel.gd` (the reusable swipe row), `item_model.gd` (what an item looks like in 3D, and background loading), `armory_rig.gd` (the knight's clips), `armory_inspect.gd` (full-screen item). `sanctuary.gd` only creates the screen (`_tab_armory`), hides its right-hand panel for it, forwards `profile_changed` (`armory.on_profile()`) and takes the item for the forge (`open_forge`). Test: `tests/armory.tscn`.
 

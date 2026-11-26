@@ -423,6 +423,22 @@ func _place_secrets(frame: Control) -> void:
 			var spot := {"node": node, "button": b, "secret": s, "index": i, "lamp": node.get_node_or_null("Lamp")}
 			b.pressed.connect(func(): _touch(spot))
 			spots.append(spot)
+	# things that only speak when touched: the tell of something that is earned elsewhere
+	for c: Dictionary in Secrets.clues_at(str(Game.run.region), int(Game.run.stage)):
+		var node := _tell(str(c.tell), _at(angle, Vector3(float(c.pos[0]) - 0.3, 0, float(c.pos[1]))))
+		var b := Button.new()
+		b.flat = true
+		b.custom_minimum_size = Vector2(96, 96)
+		b.size = Vector2(96, 96)
+		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		frame.add_child(b)
+		frame.move_child(b, 0)
+		var text := str(c.text)
+		b.pressed.connect(func():
+			if _quiet():
+				_idle = 0.0
+				_whisper(text))
+		spots.append({"node": node, "button": b, "secret": {}, "index": 0, "lamp": node.get_node_or_null("Lamp"), "clue": true})
 
 func _tbox(n: Node3D, size: Vector3, pos: Vector3, mat: Material, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:
 	var mi := MeshInstance3D.new()
@@ -589,6 +605,8 @@ func _whisper(text: String) -> void:
 		return
 	var l := UI.label(text, 19, UI.DIM.lightened(0.3))
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size.x = 760
 	l.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	l.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	l.offset_top = 150
@@ -597,7 +615,7 @@ func _whisper(text: String) -> void:
 	l.modulate.a = 0.0
 	var tw := create_tween()
 	tw.tween_property(l, "modulate:a", 1.0, 0.3)
-	tw.tween_interval(2.4)
+	tw.tween_interval(2.0 + text.length() / 30.0)
 	tw.tween_property(l, "modulate:a", 0.0, 0.6)
 	tw.tween_callback(l.queue_free)
 
@@ -714,7 +732,7 @@ func dev_tap(id: String, after: float) -> void:
 	if not is_inside_tree():
 		return
 	for e: Dictionary in spots:
-		if str(e.secret.id) == id and str(e.secret.trigger.type) != "sequence":
+		if str(e.secret.get("id", "")) == id and str(e.secret.trigger.type) != "sequence":
 			_touch(e)
 			return
 	if Secrets.by_id.has(id):

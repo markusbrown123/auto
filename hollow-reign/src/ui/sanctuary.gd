@@ -421,7 +421,7 @@ func forge_work(id: String, track: String = "", ore_id: String = "") -> bool:
 			line = "For the next %d fights, win or lose." % int(w.edge)
 	if rows.is_empty() and line == "":
 		line = str(rule.text)
-	await _play_forge(ForgeSeq.new(backdrop, id, "%s · %s" % [it.name, what], rows.slice(0, 4), mod_before, line))
+	_play_forge(ForgeSeq.new(backdrop, id, "%s · %s" % [it.name, what], rows.slice(0, 4), mod_before, line))
 	return true
 
 func _play_forge(seq: ForgeSeq) -> void:

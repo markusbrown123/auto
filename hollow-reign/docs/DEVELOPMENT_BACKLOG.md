@@ -125,6 +125,15 @@ Order: benchmark set first, then roll out.
 10. [open] Sanctuary as a place; main menu shows equipped knight; equipped gear in all in-engine cinematics.
 11. [open] Review captures listed in Addendum 3; full equipment loop test.
 
+## J. Generational campaign (Addendum 4, 2026-11-26) — the definitive story structure
+1. [running] Story docs rewritten to three generations; recorded-line audit; Generation I playable opening on the scenic road; time-jump scene; Generation II arrival.
+2. [open, after 1 and after the secrets pass releases `game.gd`] Generation/world/campaign data separation, save migration v3, encounter director, canonical-death transitions, inheritance of everything earned.
+3. [open] Second Monarch fight (real duel, records choice, honest outcome if the player wins) and second transition.
+4. [open] Generation III: changed encounters, final three-phase Monarch, facility reveal, endings re-fitted, hidden endgame.
+5. [open] Lineage screen; menu wording (Continue, New Legacy); legacy journeys.
+6. [open, owner approval first] Casting and recording for father, son, heir and female equivalents; family and Monarch musical motifs.
+7. [open] Full-campaign test list in the brief; recordings.
+
 ## Owner decisions made 2026-11-26 (act on these)
 - **Animation library: buy the Game Dev Hero packs ($59.97)** — Sword And Shield Animation V3, Two Handed Sword Animation V3, Dual Sword Animation V1 (itch.io, $19.99 each). The owner buys them and supplies the `*_Mixamo.zip` from each. WAITING on the files. When they arrive: unpack under `art/anim_src/gamedevhero/` (git-ignored: the licence forbids redistribution, so never commit the sources), read the licence text and save it to `docs/licenses/`, list the clips, extend `tools/bake_anims.gd` (FBX via `FBXDocument`; Mixamo names need no bone map) and bake: eight directional cuts, combo chains, directional parries, shield blocks high/low, rolls, greatsword and dual sets, hit reactions, finishers. Then replace the IK sword arm with authored full-body clips per direction and give each of the sixteen combos its own chain.
 - **iOS:** the owner has a Mac with Xcode and an iPhone; the Apple Developer account is awaiting approval. Building needs a session on that Mac (this cloud container cannot reach it; no folders are shared with it yet). Prepare: `docs/IOS_BUILD.md` exact steps, export presets, icon, launch screen.

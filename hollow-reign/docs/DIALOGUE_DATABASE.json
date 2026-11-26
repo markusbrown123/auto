@@ -125,6 +125,18 @@
    "text": "Then you have no passage.",
    "dir": "final"
   },
+  "prologue_cairn_01": {
+   "speaker": "tessaly",
+   "text": "I kept the stance, Father. You would still find fault with it.",
+   "dir": "low, to the sword in the cairn",
+   "recorded": false
+  },
+  "prologue_gate_01": {
+   "speaker": "tessaly",
+   "text": "The same as my father's.",
+   "dir": "level, already drawing",
+   "recorded": false
+  },
   "sentinel_death_01": {
    "speaker": "sentinel",
    "text": "Is the war... over?",
@@ -1236,6 +1248,20 @@
    ],
    "once": true
   },
+  "prologue_cairn": {
+   "lines": [
+    "prologue_cairn_01"
+   ],
+   "once": false
+  },
+  "prologue_gate": {
+   "lines": [
+    "sentinel_intro_01",
+    "prologue_gate_01",
+    "sentinel_intro_03"
+   ],
+   "once": false
+  },
   "sentinel_death": {
    "lines": [
     "sentinel_death_01",
@@ -2195,7 +2221,8 @@
   "frostking": "Frostbound King",
   "monarch": "Forgotten Monarch",
   "devourer": "Devourer of Names",
-  "witness": "The Witness"
+  "witness": "The Witness",
+  "tessaly": "Tessaly Marrek"
  },
  "speech": {
   "ashen_sentinel": "B",

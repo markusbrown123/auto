@@ -638,6 +638,8 @@ var _finish := ""
 const FINISH_CLIP := {"Heavy": "sword_attack", "Guard-breaking": "shield_dash", "Counter": "lunge", "Armour-piercing": "lunge",
 	"Critical": "cut_c", "Finisher": "cut_c", "Fast": ""}
 func swing(dir: Vector2, time: float, finish: String = "") -> void:
+	if _present == "recall":
+		_present_stop()        # a cut thrown while the weapon is still forming: it is whole at once
 	_finish = finish
 	_pin_t = 0.0
 	_brace_t = 0.0
@@ -1210,6 +1212,9 @@ func _pose() -> void:
 			bl = ap[1]
 	elif has_shield:
 		hl = Vector3(-0.05, 1.3, -0.42) if blocking else Vector3(-0.3, 1.08, -0.24)
+		if _sh_gear != "" and not blocking:
+			# a strapped shield faces where the outside of the forearm faces: the forearm is carried across the body
+			hl = Vector3(-0.08, 1.15, -0.37)
 		if _brace_t > 0.0:
 			# the shield goes to where the blow lands, then is driven back toward the body by it
 			_brace_t -= get_process_delta_time() * time_scale
@@ -1224,7 +1229,7 @@ func _pose() -> void:
 	if has_shield and not blocking and _brace_t <= 0.0 and mode in [Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW, Mode.GUARD]:
 		across = clampf((0.12 - _hand.x) / 0.45, 0.0, 1.0)
 		# low when the sword passes high, high and forward when it passes low: the blade never has to go through the shield arm
-		hl = hl.lerp(Vector3(-0.5, 1.46, -0.14) if (_arc_dir.x < -0.3 and _arc_dir.y < -0.3) else Vector3(-0.56, 0.92, 0.04), across)
+		hl = hl.lerp(Vector3(-0.5, 1.46, -0.14) if (_arc_dir.x < -0.3 and _arc_dir.y < -0.3) else (Vector3(-0.52, 1.0, -0.2) if _sh_gear != "" else Vector3(-0.56, 0.92, 0.04)), across)
 	_shield_open = lerpf(_shield_open, across, 0.4)
 	_hand_l = _out_of_helm(_hand_l.lerp(hl, 0.4)) if not two_handed else hl
 	_blade_l = _blade_l.lerp(bl, 0.4).normalized()
@@ -1278,6 +1283,7 @@ var _whole_w := 0.0
 func _fit_props(hands: Dictionary) -> void:
 	var whole := skin.clip_full and skin.clip_w > 0.0
 	_whole_w = lerpf(_whole_w, 1.0 if whole else 0.0, 0.35)
+	skin.pole_l = Vector3(-1.0, -0.42, 0.3) if (shield and _sh_gear != "") else Vector3(-0.7, -0.8, 0.35)      # (a strapped shield: elbow out)
 	var caps := _body_caps()
 	if shield:
 		var fore := skin.frame("LeftForeArm")
@@ -1292,7 +1298,17 @@ func _fit_props(hands: Dictionary) -> void:
 			var up := Vector3.UP + Vector3(0, 0, 1) * x.y      # an arm let hang carries the board on its side, face outward
 			up = up - x * up.dot(x)
 			up = up.normalized() if up.length() > 0.05 else Vector3(0, 0, -1)
-			grip_at = skin.grip("Left", up)
+			# thrown about by a fall, a roll or a blow (clips made without a shield), the forearm is turned in its strap
+			# so that the board faces away from the chest instead of cutting through it
+			var body_w := _whole_w if (_au_state == "" or mode == Mode.DEAD) else 0.0
+			if body_w > 0.01:
+				var out := fore.origin.lerp(skin.point("LeftHand"), 0.6) - skin.point("Spine2")
+				out = out - x * out.dot(x)
+				if out.length() > 0.02:
+					var up_b := (-out.normalized()).cross(x).normalized()
+					up = (up.slerp(up_b, body_w) if up.dot(up_b) > -0.98 else up_b).normalized()
+					up = (up - x * up.dot(x)).normalized()
+			grip_at = _on_forearm(skin.grip("Left", up), x)
 			held = Transform3D(Basis(x, up, x.cross(up)), grip_at)
 		elif _whole_w < 0.01:
 			_shield_local = fore.affine_inverse() * held
@@ -1334,12 +1350,13 @@ func _fit_props(hands: Dictionary) -> void:
 		var shift := board.origin - board0
 		if strap and shift.length() > 0.003:
 			# the arm goes with the board it is strapped to (the hand never leaves the bar)
-			shift = shift.limit_length(0.16)
-			skin.reach_hand("Left", skin.point("LeftHand") + shift + (grip_at - skin.point("LeftHand")) * 0.0)
+			shift = shift.limit_length(0.16 if _whole_w < 0.5 else 0.3)
+			shift.y = maxf(shift.y, 0.07 - hands.l.y)      # (the hand is not pushed into the floor)
+			skin.reach_hand("Left", hands.l + shift)
 			var x2 := (skin.point("LeftHand") - skin.point("LeftForeArm")).normalized()
 			var up2 := held.basis.y - x2 * held.basis.y.dot(x2)
 			up2 = up2.normalized() if up2.length() > 0.05 else held.basis.y
-			held = Transform3D(Basis(x2, up2, x2.cross(up2)), skin.grip("Left", up2))
+			held = Transform3D(Basis(x2, up2, x2.cross(up2)), _on_forearm(skin.grip("Left", up2), x2))
 		else:
 			held.origin += shift
 		shield.transform = held
@@ -1356,7 +1373,8 @@ func _fit_props(hands: Dictionary) -> void:
 	if skin.xf_u() < 1.0 and _pin_t <= 0.0:
 		dir = _xf_dir_r.slerp(dir, skin.xf_u()) if _xf_dir_r.dot(dir) > -0.99 else dir
 	if _pin_t <= 0.0:
-		dir = _clear_blade(hands.r, dir, weapon_len, caps + ([] if two_handed else _arm_caps("Left")))
+		# (on the broad-shouldered base body a blade brought back over the shoulder also has to clear its own upper arm)
+		dir = _clear_blade(hands.r, dir, weapon_len, caps + ([] if two_handed else _arm_caps("Left")) + ([_arm_caps("Right")[0]] if parts != null and not two_handed else []))
 	if shield and _pin_t <= 0.0:
 		dir = _clear_shield(hands.r, dir, weapon_len)
 	dir = _off_floor(hands.r, dir, weapon_len, _pommel)
@@ -1395,6 +1413,12 @@ func _fit_props(hands: Dictionary) -> void:
 		weapon_l.position = hands.l
 	_fit_sheath()
 	_fit_fingers()
+
+## The grip bar of a strapped shield lies on the forearm's own line, in the middle of the fist: the point where the
+## hand closes, moved onto that line (the board then stands clear of the forearm by the depth of its grip posts).
+func _on_forearm(grip_at: Vector3, x: Vector3) -> Vector3:
+	var w: Vector3 = skin.point("LeftHand")
+	return w + x * maxf((grip_at - w).dot(x), 0.05)
 
 ## How a held weapon is turned about its own length. Hand-modelled gear has a true edge and a knuckle side (+X):
 ## it lies over the knuckles of the hand that holds it, so a cut leads with the edge and a knuckle bow guards the

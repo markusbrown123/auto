@@ -17,6 +17,7 @@ var skel: Skeleton3D
 var bone := {}                # short name -> index
 var rest := {}                # short name -> global rest Transform3D
 var ok := false
+var pole_l := Vector3(-0.7, -0.8, 0.35)      # where the left elbow falls (rig body space): outward and down; a strapped shield wants it further out
 var parts: ArmorParts         # the armour worn over this body (FighterRig dresses it); tint, flash and rim reach it too
 
 static func attach(parent: Node3D, path: String) -> SkinDriver:
@@ -210,7 +211,7 @@ func drive(j: Dictionary) -> Dictionary:
 			else:
 				tl = to_skel * hb
 	var hr := _limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
-	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
+	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * pole_l, 0.985, ELBOW_MIN)
 	if whole:
 		# whole-body clips (falling, dying) carry the arms too; the weapons follow the real hands
 		_overlay(true)
@@ -234,7 +235,7 @@ func drive(j: Dictionary) -> Dictionary:
 		if pin_r:
 			_limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
 		if pin_l:
-			_limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
+			_limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * pole_l, 0.985, ELBOW_MIN)
 		_ground(back, q, whole and not clip_look, true, true, whole and clip_look)
 	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
 	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
@@ -361,7 +362,7 @@ func reach_hand(side: String, target: Vector3) -> Vector3:
 	var to_skel := _back.affine_inverse()
 	var wrist: Vector3 = skel.get_bone_global_pose(bone[side + "Hand"]).origin
 	var off := _palm(side, wrist) - wrist
-	var pole := to_skel.basis.orthonormalized() * Vector3(0.7 if side == "Right" else -0.7, -0.8, 0.35)
+	var pole := to_skel.basis.orthonormalized() * (Vector3(0.7, -0.8, 0.35) if side == "Right" else pole_l)
 	var w := _limb(side + "Arm", side + "ForeArm", side + "Hand", to_skel * target - off, pole, 0.985, ELBOW_MIN)
 	return _back * _palm(side, w)
 

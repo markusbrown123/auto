@@ -46,6 +46,25 @@ static func hold(node: Node3D, at: float, opts: Dictionary = {}) -> Recall:
 	r._held = true
 	return r
 
+## Ends at once whatever Recall is running on `node`, leaving it whole and on its ordinary materials.
+static func cancel(node: Node3D) -> void:
+	if node == null:
+		return
+	for c in node.get_children():
+		if c is Recall:
+			(c as Recall).release()
+
+## Seconds this run takes from start to finish.
+func length() -> float:
+	return _dur
+
+## The Armory's hook (ArmoryScreen.play_recall): the piece is rebuilt in the knight's hand, hand timing included.
+static func play(rig: Node, item_id: String, short: bool = true) -> void:
+	if rig == null or not rig.has_method("present_weapon"):
+		return
+	var slot := str(Db.item(item_id).get("slot", "weapon"))
+	rig.call("present_weapon", "recall_short" if short else "recall", {"slot": slot})
+
 ## True when effects should take the cheaper path: Performance preset or reduced motion.
 static func reduced() -> bool:
 	return int(Game.settings.get("quality", 1)) == 0 or bool(Game.settings.get("reduce_motion", false))

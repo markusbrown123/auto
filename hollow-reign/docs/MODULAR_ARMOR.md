@@ -1,5 +1,24 @@
 # Modular armour: what the existing suits can do
 
+> **Integrated (2026-11-26, "gear on rig" pass).** The game now wears parts. What changed against the study below:
+> - **Base body = the sleek benchmark knights** (`knight_<body>_v3.glb`, suit id `crownless`). `tools/armor_split.gd`
+>   fits every suit to *their* skeleton (`--host=crownless`, the default; `--host=base` rebuilds the study's set), the
+>   undersuit is their body, and an empty slot wears their piece. Why: against the old base the v3 knights have a
+>   13-16% longer trunk, 11-17% longer arms and 11-14% wider shoulders, so conforming them would have squashed the
+>   benchmark; as host they are untouched (identity fit) and the nine older suits are stretched instead, inside the
+>   conform's 0.8-1.25 clamp. Looked at both ways (set and mix, both bodies): no holes either way.
+> - `FighterRig.build` dresses from `look.parts` (`Duel.player_look()` builds it from `Game.appearance_loadout()`);
+>   `FighterRig.wear_parts(loadout)` swaps pieces on a standing knight (the Armory); `ArmorParts.resolve` fills empty
+>   slots with the base piece and settles the two linked pieces (`LINK_POLICY`: the Vigil hood brings its mantle,
+>   Garrison pauldrons give way over another cuirass).
+> - The two gaps are closed: `SkinDriver.measure_parts` takes floor contact, blade clearances and hit volumes from the
+>   worn part meshes (cached per part); cinematic actors build through `Duel.player_look()` and inherit all of it.
+> - Tint, flash and rim reach the parts through `SkinDriver.tint/flash/rim` (and `Look.set_param` on the skin root).
+> - Suit textures are VRAM-compressed (import settings of the `knight_*_{Color,NormalGL,ORM}` files: S3TC/BPTC for
+>   the desktop renderer, ETC2 for iOS). Bench frame, male, software renderer: six parts from six suits
+>   **197.5 MB -> 106.4 MB**; one suit 101.3 -> 90.1 MB; an extra suit worn costs about 2.7 MB instead of 16.
+> - `--oldlook` (or `FighterRig.old_look = true`) restores the whole-suit swap and the first weapon models.
+
 Study and working prototype for Addendum 3 ("real equipment, not skins"). Nothing here is wired into the live game.
 Everything below was measured or looked at in engine captures (`marketing/parts_bench/`); where something was not
 checked it says so. Nothing has run on a phone.

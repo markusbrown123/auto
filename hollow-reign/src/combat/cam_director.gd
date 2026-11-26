@@ -12,7 +12,7 @@ extends RefCounted
 ## higher-priority shot for a while. During the fight every change is an ease; hard cuts happen only
 ## in the INTRO / FINISHER / DEATH stages.
 
-const PRIORITY := {"exchange": 1, "phase": 3, "clash": 4, "struggle": 5, "reveal": 6}
+const PRIORITY := {"exchange": 1, "phase": 3, "clash": 4, "struggle": 5, "story_beat": 5, "reveal": 6}
 ## Combat framing per class of foe. side/back: metres to the knight's sword side / behind the knight;
 ## y: camera height; fov; look_h: where on the foe to aim, as a multiple of its nominal height;
 ## look_x: sideways aim (negative puts the foe further right of the knight); wide: how much the
@@ -79,6 +79,12 @@ func cue(name: String, params: Dictionary = {}) -> void:
 			if bool(params.get("on", true)):
 				_take("struggle", 600.0, params)
 			elif _cue == "struggle":
+				_cue_left = 0.0
+			return
+		"story_beat":
+			if bool(params.get("on", true)):
+				_take("story_beat", 600.0, params)
+			elif _cue == "story_beat":
 				_cue_left = 0.0
 			return
 		"clash":
@@ -338,6 +344,12 @@ func _shot_opening() -> Dictionary:
 	var s := _combat(-0.35, 0.55, 0.12, -5.0)
 	s.look = Vector3(-0.1, _H * 0.82, _F.z + 0.3)
 	s.rate = 3.5
+	return s
+
+## The fight stops for them to speak (Duel._story_beat): over the shoulder at the foe, eased, held until they finish.
+func _shot_story_beat() -> Dictionary:
+	var s := _shot_ots()
+	s.rate = 3.0
 	return s
 
 ## Parry / perfect block: punch in at the crossed blades, then the base shot takes over again.

@@ -553,7 +553,9 @@ func _attach_skin(path: String) -> void:
 			(mi as MeshInstance3D).visible = false
 
 func _pose() -> void:
-	body.position = _root + Vector3(0, _lift - _sink * 0.55 + sin(_clock * 1.3) * 0.04, 0)
+	# (with a generated model the death is the model's own: it comes down onto its belly, see DragonSkin.drive;
+	# and its feet stay on the floor: the breathing is in the chest, not a bob of the whole animal)
+	body.position = _root + Vector3(0, _lift - (0.0 if skin else _sink * 0.55) + (0.0 if skin and _lift < 0.05 else sin(_clock * 1.3) * 0.04), 0)
 	body.rotation.x = _lift * 0.12
 	# neck: a curve from the shoulders to the head
 	var base := Vector3(0, 2.1, 0.25)

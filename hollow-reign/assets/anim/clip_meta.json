@@ -508,6 +508,7 @@
    "pack": "dw",
    "recovery": 0.93,
    "root_motion": false,
+   "seen": "ok: right blade from overhead down to the left",
    "source": "AS_DualSwordAnimV1_Attack8_IP.FBX",
    "swipe": "DL",
    "windup": 0.33
@@ -592,6 +593,7 @@
    "pack": "dw",
    "recovery": 0.5,
    "root_motion": false,
+   "seen": "ok: right blade high left to right",
    "source": "AS_DualSwordAnimV1_Attack10_Stage1_Complete_IP.FBX",
    "swipe": "DR",
    "windup": 0.0
@@ -654,8 +656,10 @@
    "pack": "dw",
    "recovery": 0.73,
    "root_motion": false,
+   "seen": "poor: the measured cut at 0.20 s is the blades crossing; the visible action is a spin later in the clip",
    "source": "AS_DualSwordAnimV1_Attack4_Stage2_Complete_IP.FBX",
    "swipe": "L",
+   "use_for": "",
    "windup": 0.0
   },
   "dw_cut_r": {
@@ -716,6 +720,7 @@
    "pack": "dw",
    "recovery": 0.5,
    "root_motion": false,
+   "seen": "ok: right blade left to right",
    "source": "AS_DualSwordAnimV1_Attack3_Stage2_Complete_IP.FBX",
    "swipe": "R",
    "windup": 0.53
@@ -834,6 +839,7 @@
    "loop": false,
    "pack": "dw",
    "root_motion": true,
+   "seen": "ok: pitches forward to the floor (named Bw in the pack)",
    "source": "AS_DualSwordAnimV1_Death_Bw_RM.FBX"
   },
   "dw_death_f": {
@@ -864,6 +870,7 @@
    "loop": false,
    "pack": "dw",
    "root_motion": true,
+   "seen": "ok: hop to the fighter's left",
    "source": "AS_DualSwordAnimV1_Dodge_L_RM.FBX"
   },
   "dw_dodge_r": {
@@ -1194,6 +1201,7 @@
    "pack": "dw",
    "recovery": 0.37,
    "root_motion": false,
+   "seen": "ok (side view): lunge with both blades, more cuts follow",
    "source": "AS_DualSwordAnimV1_Attack9_IP.FBX",
    "swipe": "thrust",
    "windup": 0.0
@@ -1216,6 +1224,7 @@
    "loop": false,
    "pack": "dw",
    "root_motion": true,
+   "seen": "ok: knocked back",
    "source": "AS_DualSwordAnimV1_Hit_Fw_RM.FBX"
   },
   "dw_hit_l": {
@@ -1246,6 +1255,7 @@
    "loop": true,
    "pack": "dw",
    "root_motion": false,
+   "seen": "ok, but only the right-hand sword is visible in the capture",
    "source": "AS_DualSwordAnimV1_Idle1_IP.FBX"
   },
   "dw_idle2": {
@@ -1338,6 +1348,7 @@
    "pack": "dw",
    "recovery": 1.0,
    "root_motion": false,
+   "seen": "ok: right blade down-left, then a jumping turn",
    "source": "AS_DualSwordAnimV1_Attack7_IP.FBX",
    "swipe": "DL",
    "windup": 0.1
@@ -1488,6 +1499,7 @@
    "pack": "dw",
    "recovery": 0.8,
    "root_motion": false,
+   "seen": "ok (side view): low spinning cuts",
    "source": "AS_DualSwordAnimV1_Attack10_IP.FBX",
    "swipe": "D",
    "windup": 0.0
@@ -1572,6 +1584,7 @@
    "pack": "dw",
    "recovery": 0.6,
    "root_motion": false,
+   "seen": "plausible: both blades drawn in then driven forward; hard to read from the front",
    "source": "AS_DualSwordAnimV1_Attack10_Stage2_Complete_IP.FBX",
    "swipe": "thrust",
    "windup": 0.07
@@ -1584,6 +1597,7 @@
    "loop": true,
    "pack": "dw",
    "root_motion": false,
+   "seen": "ok: walks forward with both blades",
    "source": "AS_DualSwordAnimV1_Walk_Fw_Loopable_IP.FBX"
   },
   "dw_x": {
@@ -1664,6 +1678,7 @@
    "pack": "dw",
    "recovery": 0.03,
    "root_motion": false,
+   "seen": "ok: turn with the back to the viewer, then crossing cuts",
    "source": "AS_DualSwordAnimV1_Attack6_IP.FBX",
    "swipe": "DL",
    "windup": 0.63
@@ -1676,6 +1691,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": false,
+   "seen": "ok: shield raised in front of chest and face, then lowered",
    "source": "A_SwordSwordAnimV3_Block1_IP.FBX"
   },
   "ss_block2": {
@@ -1686,6 +1702,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": false,
+   "seen": "ok: looks the same height as ss_block from front and side; no visible high/mid difference",
    "source": "A_SwordSwordAnimV3_Block2_IP.FBX"
   },
   "ss_block2_hit": {
@@ -1716,6 +1733,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "ok: shield held, body rocks back",
    "source": "A_SwordSwordAnimV3_Block1_Hit_RM.FBX"
   },
   "ss_block_idle": {
@@ -2406,8 +2424,10 @@
    "pack": "ss",
    "recovery": 0.47,
    "root_motion": false,
+   "seen": "ok: overhead chop ending low on the left; the best 'down' in the pack",
    "source": "A_SwordSwordAnimV3_Attack4_Stage1_Complete_IP.FBX",
    "swipe": "DL",
+   "use_for": "D",
    "windup": 0.0
   },
   "ss_cut_dl": {
@@ -2444,6 +2464,7 @@
    "pack": "ss",
    "recovery": 1.2,
    "root_motion": false,
+   "seen": "ok: from the right shoulder down to the left; starts from a mid-chain pose",
    "source": "A_SwordSwordAnimV3_Attack8_Stage3_Complete_IP.FBX",
    "swipe": "DL",
    "windup": 0.47
@@ -2482,6 +2503,7 @@
    "pack": "ss",
    "recovery": 0.44,
    "root_motion": false,
+   "seen": "ok: back turned in the wind-up, then high left to low right",
    "source": "A_SwordSwordAnimV3_Attack7_Stage1_Complete_IP.FBX",
    "swipe": "DR",
    "windup": 1.0
@@ -2520,6 +2542,7 @@
    "pack": "ss",
    "recovery": 0.47,
    "root_motion": false,
+   "seen": "ok: high left to low right; starts from a mid-chain pose",
    "source": "A_SwordSwordAnimV3_Attack8_Stage2_Complete_IP.FBX",
    "swipe": "DR",
    "windup": 0.5
@@ -2580,6 +2603,7 @@
    "pack": "ss",
    "recovery": 1.1,
    "root_motion": false,
+   "seen": "ok: cut right to left, dropping from shoulder to hip height",
    "source": "A_SwordSwordAnimV3_Attack9_IP.FBX",
    "swipe": "L",
    "windup": 0.17
@@ -2618,6 +2642,7 @@
    "pack": "ss",
    "recovery": 0.9,
    "root_motion": false,
+   "seen": "ok: spin with the back turned in the wind-up, then a level cut left to right",
    "source": "A_SwordSwordAnimV3_Attack2_Stage2_Complete_IP.FBX",
    "swipe": "R",
    "windup": 0.43
@@ -2656,6 +2681,7 @@
    "pack": "ss",
    "recovery": 1.03,
    "root_motion": false,
+   "seen": "ok: level cut left to right, then a turn behind the shield",
    "source": "A_SwordSwordAnimV3_Attack5_IP.FBX",
    "swipe": "R",
    "windup": 0.87
@@ -2718,6 +2744,7 @@
    "pack": "ss",
    "recovery": 0.57,
    "root_motion": false,
+   "seen": "ok: high cut left to right",
    "source": "A_SwordSwordAnimV3_Attack1_Stage3_Complete_IP.FBX",
    "swipe": "R",
    "windup": 0.63
@@ -2750,6 +2777,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "seen only leaving the frame to the right",
    "source": "A_SwordSwordAnimV3_Dash_R_RM.FBX"
   },
   "ss_death_b": {
@@ -2760,6 +2788,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "seen only leaving the frame backward",
    "source": "A_SwordSwordAnimV3_Death_Bw_RM.FBX"
   },
   "ss_death_f": {
@@ -2770,6 +2799,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "ok: pitches forward to the floor",
    "source": "A_SwordSwordAnimV3_Death_Fw_RM.FBX"
   },
   "ss_death_l": {
@@ -2800,6 +2830,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "ok: hop back",
    "source": "A_SwordSwordAnimV3_Dodge_Bw_RM.FBX"
   },
   "ss_dodge_l": {
@@ -2810,6 +2841,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "ok: hop to the fighter's left",
    "source": "A_SwordSwordAnimV3_Dodge_L_RM.FBX"
   },
   "ss_dodge_r": {
@@ -2856,6 +2888,7 @@
    "pack": "ss",
    "recovery": 1.9,
    "root_motion": false,
+   "seen": "ok: chop from high right down to the front",
    "source": "A_SwordSwordAnimV3_Attack7_Stage3_Complete_IP.FBX",
    "swipe": "DL",
    "windup": 0.07
@@ -2940,6 +2973,7 @@
    "pack": "ss",
    "recovery": 0.5,
    "root_motion": false,
+   "seen": "ok: level cut left to right, a turn, then a second cut",
    "source": "A_SwordSwordAnimV3_Attack4_Stage2_Complete_IP.FBX",
    "swipe": "R",
    "windup": 0.43
@@ -2978,6 +3012,7 @@
    "pack": "ss",
    "recovery": 1.5,
    "root_motion": false,
+   "seen": "plausible: shield in front, then the point driven low at the viewer",
    "source": "A_SwordSwordAnimV3_Attack4_Stage4_Complete_IP.FBX",
    "swipe": "thrust",
    "windup": 0.43
@@ -3038,6 +3073,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "ok: knocked back; travels about 1.8 m if the clip's travel is applied",
    "source": "A_SwordSwordAnimV3_Hit_Fw_RM.FBX"
   },
   "ss_hit_l": {
@@ -3048,6 +3084,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "ok: knocked to the fighter's right",
    "source": "A_SwordSwordAnimV3_Hit_L_RM.FBX"
   },
   "ss_hit_r": {
@@ -3088,6 +3125,7 @@
    "loop": false,
    "pack": "ss",
    "root_motion": true,
+   "seen": "ok: shield swept out to the fighter's left, opening the guard",
    "source": "A_SwordSwordAnimV3_Block1_Parry_RM.FBX"
   },
   "ss_run_f": {
@@ -3137,7 +3175,7 @@
      "tip_speed": 15.43
     }
    ],
-   "kind": "attack",
+   "kind": "shield_attack",
    "length": 1.37,
    "loop": false,
    "pack": "ss",
@@ -3172,12 +3210,13 @@
      "tip_speed": 13.66
     }
    ],
-   "kind": "attack",
+   "kind": "shield_attack",
    "length": 2.13,
    "loop": false,
    "pack": "ss",
    "recovery": 1.1,
    "root_motion": false,
+   "seen": "unclear: reads as a shove with the shield plus a small sword movement (seen in an early capture only)",
    "source": "A_SwordSwordAnimV3_Attack10_IP.FBX",
    "swipe": "R",
    "windup": 0.07
@@ -3209,7 +3248,7 @@
      "tip_speed": 12.27
     }
    ],
-   "kind": "attack",
+   "kind": "shield_attack",
    "length": 1.77,
    "loop": false,
    "pack": "ss",
@@ -3274,6 +3313,7 @@
    "pack": "ss",
    "recovery": 0.05,
    "root_motion": false,
+   "seen": "ok but showy: spin, then a cut from high right to low left; ends mid-chain with the back turned (trimmed clip)",
    "source": "A_SwordSwordAnimV3_Attack1_Stage1_IP.FBX",
    "source_range": [
     0.0,
@@ -3340,6 +3380,7 @@
    "pack": "ss",
    "recovery": 1.9,
    "root_motion": false,
+   "seen": "plausible: crouching lunge with the point toward the viewer; hard to read from the front",
    "source": "A_SwordSwordAnimV3_Attack6_Stage3_Complete_IP.FBX",
    "swipe": "thrust",
    "windup": 0.0
@@ -3402,6 +3443,7 @@
    "pack": "ss",
    "recovery": 0.56,
    "root_motion": false,
+   "seen": "plausible: low crouching thrust, shield lifted; small and hard to read from the front",
    "source": "A_SwordSwordAnimV3_Attack3_Stage2_Complete_IP.FBX",
    "swipe": "thrust",
    "windup": 0.0
@@ -3434,6 +3476,7 @@
    "loop": true,
    "pack": "ss",
    "root_motion": false,
+   "seen": "ok: walks forward, feet on the floor",
    "source": "A_SwordSwordAnimV3_Walk_Fw_Loopable_IP.FBX"
   },
   "ss_walk_l": {
@@ -3464,6 +3507,7 @@
    "loop": false,
    "pack": "th",
    "root_motion": false,
+   "seen": "ok: blade brought up to guard and back",
    "source": "AS_TwoHandedSwordAnimV3_Defense_IP.FBX"
   },
   "th_block_hit_b": {
@@ -3484,6 +3528,7 @@
    "loop": false,
    "pack": "th",
    "root_motion": true,
+   "seen": "ok: guard held, shoved back",
    "source": "AS_TwoHandedSwordAnimV3_Defense_Hit_Fw_RM.FBX"
   },
   "th_block_hit_l": {
@@ -3708,6 +3753,7 @@
    "pack": "th",
    "recovery": 0.43,
    "root_motion": false,
+   "seen": "ok: chop, chop, then a thrust",
    "source": "AS_TwoHandedSwordAnimV3_Attack1_IP.FBX",
    "swipe": "DL",
    "windup": 0.13
@@ -3746,6 +3792,7 @@
    "pack": "th",
    "recovery": 0.03,
    "root_motion": false,
+   "seen": "ok: overhead chop; the tip is fastest a few frames after the marked contact",
    "source": "AS_TwoHandedSwordAnimV3_Attack4_Stage1_Complete_IP.FBX",
    "swipe": "D",
    "windup": 0.03
@@ -3784,6 +3831,7 @@
    "pack": "th",
    "recovery": 0.43,
    "root_motion": false,
+   "seen": "ok: overhead chop driven into the ground in front",
    "source": "AS_TwoHandedSwordAnimV3_Attack1_Stage1_Complete_IP.FBX",
    "swipe": "D",
    "windup": 0.13
@@ -3822,6 +3870,7 @@
    "pack": "th",
    "recovery": 0.77,
    "root_motion": false,
+   "seen": "ok: leaping cut from high right to low left (both feet leave the floor)",
    "source": "AS_TwoHandedSwordAnimV3_Attack11_IP.FBX",
    "swipe": "DL",
    "windup": 0.47
@@ -3860,6 +3909,7 @@
    "pack": "th",
    "recovery": 0.44,
    "root_motion": false,
+   "seen": "ok: high right to low left",
    "source": "AS_TwoHandedSwordAnimV3_Attack9_Stage1_Complete_IP.FBX",
    "swipe": "DL",
    "windup": 0.33
@@ -3898,6 +3948,7 @@
    "pack": "th",
    "recovery": 0.1,
    "root_motion": false,
+   "seen": "ok: high left to low right",
    "source": "AS_TwoHandedSwordAnimV3_Attack7_Stage1_Complete_IP.FBX",
    "swipe": "DR",
    "windup": 0.43
@@ -3958,6 +4009,7 @@
    "pack": "th",
    "recovery": 0.0,
    "root_motion": false,
+   "seen": "ok: cut right to left, then a return cut",
    "source": "AS_TwoHandedSwordAnimV3_Attack5_Stage2_Complete_IP.FBX",
    "swipe": "L",
    "windup": 0.07
@@ -3996,6 +4048,7 @@
    "pack": "th",
    "recovery": 0.1,
    "root_motion": false,
+   "seen": "ok: level cut left to right",
    "source": "AS_TwoHandedSwordAnimV3_Attack3_Stage1_Complete_IP.FBX",
    "swipe": "R",
    "windup": 0.53
@@ -4034,6 +4087,7 @@
    "pack": "th",
    "recovery": 0.36,
    "root_motion": false,
+   "seen": "ok: level cut left to right from a mid-chain pose",
    "source": "AS_TwoHandedSwordAnimV3_Attack5_Stage3_Complete_IP.FBX",
    "swipe": "R",
    "windup": 0.3
@@ -4072,6 +4126,7 @@
    "pack": "th",
    "recovery": 0.0,
    "root_motion": false,
+   "seen": "ok: rising cut on the right side, low to overhead",
    "source": "AS_TwoHandedSwordAnimV3_Attack2_Stage1_Complete_IP.FBX",
    "swipe": "U",
    "windup": 0.13
@@ -4110,6 +4165,7 @@
    "pack": "th",
    "recovery": 0.0,
    "root_motion": false,
+   "seen": "ok: rising cut from low left to high right",
    "source": "AS_TwoHandedSwordAnimV3_Attack1_Stage3_Complete_IP.FBX",
    "swipe": "UR",
    "windup": 0.5
@@ -4170,6 +4226,7 @@
    "pack": "th",
    "recovery": 0.0,
    "root_motion": true,
+   "seen": "seen only leaving the frame toward the viewer",
    "source": "AS_TwoHandedSwordAnimV3_DashAttack_RM.FBX",
    "swipe": "L",
    "windup": 0.1
@@ -4192,6 +4249,7 @@
    "loop": false,
    "pack": "th",
    "root_motion": true,
+   "seen": "seen only leaving the frame backward",
    "source": "AS_TwoHandedSwordAnimV3_Death_Fw_RM.FBX"
   },
   "th_dodge_b": {
@@ -4232,6 +4290,7 @@
    "loop": true,
    "pack": "th",
    "root_motion": false,
+   "seen": "ok: blade held up across the front; the left hand is open, off the handle",
    "source": "AS_TwoHandedSwordAnimV3_Defense_Idle_IP.FBX"
   },
   "th_hit_b": {
@@ -4252,6 +4311,7 @@
    "loop": false,
    "pack": "th",
    "root_motion": true,
+   "seen": "ok: small flinch",
    "source": "AS_TwoHandedSwordAnimV3_Hit_Fw_RM.FBX"
   },
   "th_hit_l": {
@@ -4282,6 +4342,7 @@
    "loop": true,
    "pack": "th",
    "root_motion": false,
+   "seen": "ok: low guard, blade trailing behind",
    "source": "AS_TwoHandedSwordAnimV3_Idle1_IP.FBX"
   },
   "th_idle2": {
@@ -4328,6 +4389,7 @@
    "pack": "th",
    "recovery": 0.26,
    "root_motion": true,
+   "seen": "seen only leaving the frame toward the viewer (5.9 hip heights of travel)",
    "source": "AS_TwoHandedSwordAnimV3_JumpAttack_RM.FBX",
    "swipe": "D",
    "windup": 0.0
@@ -4410,6 +4472,7 @@
    "pack": "th",
    "recovery": 0.0,
    "root_motion": false,
+   "seen": "ok: two overhead chops",
    "source": "AS_TwoHandedSwordAnimV3_Attack8_IP.FBX",
    "swipe": "DL",
    "windup": 0.0
@@ -4422,6 +4485,7 @@
    "loop": false,
    "pack": "th",
    "root_motion": true,
+   "seen": "ok: blade snapped up overhead",
    "source": "AS_TwoHandedSwordAnimV3_Parry_Complete_RM.FBX"
   },
   "th_parry_attack": {

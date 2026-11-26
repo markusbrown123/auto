@@ -608,7 +608,8 @@ func flash(v: float = 1.0) -> void:
 ## (Measured on the rig: the hand is carried forward by the arc, by the step into the cut and by the lean of the body;
 ## the last fifth of the blade is what should meet the opponent, not its middle.)
 func reach() -> float:
-	return (0.05 + 0.5 * arm_scale + REACH_STEP + weapon_len * 0.8) * scale.x
+	# (a foe winds up leaning back and has stepped in less by the middle of its cut than the player has)
+	return (0.05 + 0.5 * arm_scale + REACH_STEP - (0.15 if mirror < 0.0 else 0.0) + weapon_len * 0.8) * scale.x
 
 const REACH_STEP := 0.4       # metres the step and lean of a cut carry the sword hand forward
 
@@ -841,6 +842,9 @@ func _arc_point(theta: float, lag: float) -> Array:
 	var d := _arc_dir
 	lag = _arc_low(theta + lag) - _arc_low(theta)
 	theta = _arc_low(theta)
+	# the follow-through ends with the blade out to the side, not wrapped back round the wielder's own shoulder
+	# (a two-handed grip cannot follow it there at all)
+	lag = minf(theta + lag, 1.4 if two_handed else 1.8) - theta
 	var c := Vector3(0.05 * signf(d.x) * -0.0, 1.34 - hunch * 0.25, -0.05)
 	var r := 0.5 * arm_scale
 	var p := c + (f * cos(theta) + d * sin(theta)) * r

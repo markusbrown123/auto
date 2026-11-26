@@ -399,10 +399,10 @@ func _init() -> void:
 		m["pack"] = pre
 		m["source"] = src.get_file()
 		m["loop"] = bool(e.get("loop", false))
-		for k: String in ["chain", "stage", "note", "seen"]:
+		for k: String in ["chain", "stage", "note", "seen", "use_for"]:
 			if e.has(k):
 				m[k] = e[k]
-		if e.kind != "attack" and e.kind != "combo" and e.kind != "finisher":
+		if not ["attack", "combo", "finisher", "shield_attack"].has(e.kind):
 			for k: String in ["hits", "hits_left", "windup", "contact", "recovery", "swipe"]:
 				m.erase(k)
 		meta[name] = m

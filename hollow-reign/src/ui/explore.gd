@@ -190,7 +190,7 @@ func _find_witness(region_id: String, stage: int) -> void:
 	backdrop.props.add_child(lamp)
 	var keep_pos := backdrop.cam_pos
 	var keep_look := backdrop.cam_look
-	backdrop.move_camera(rest + side * 2.3 + from * 0.9 + Vector3(0, 0.75, 0), rest + Vector3(0, 0.3, 0))
+	backdrop.move_camera(rest + side * 1.55 + from * 0.25 + Vector3(0, 0.5, 0), rest + Vector3(0, 0.22, 0))
 	var d := m - backdrop.rig.position
 	create_tween().tween_property(backdrop.rig, "rotation:y", atan2(-d.x, -d.z), 0.8).set_trans(Tween.TRANS_SINE)
 	var tw := create_tween()

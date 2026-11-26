@@ -111,6 +111,11 @@ Next actions, in order:
 | H7 | Measured responsiveness report (input-to-acknowledgement, transition, contact accuracy) | TODO |
 | H8 | The complete Sentinel encounter recorded end to end and compared with the reference principles | TODO |
 
+## Owner decisions made 2026-11-26 (act on these)
+- **Animation library: buy the Game Dev Hero packs ($59.97)** — Sword And Shield Animation V3, Two Handed Sword Animation V3, Dual Sword Animation V1 (itch.io, $19.99 each). The owner buys them and supplies the `*_Mixamo.zip` from each. WAITING on the files. When they arrive: unpack under `art/anim_src/gamedevhero/` (git-ignored: the licence forbids redistribution, so never commit the sources), read the licence text and save it to `docs/licenses/`, list the clips, extend `tools/bake_anims.gd` (FBX via `FBXDocument`; Mixamo names need no bone map) and bake: eight directional cuts, combo chains, directional parries, shield blocks high/low, rolls, greatsword and dual sets, hit reactions, finishers. Then replace the IK sword arm with authored full-body clips per direction and give each of the sixteen combos its own chain.
+- **iOS:** the owner has a Mac with Xcode and an iPhone; the Apple Developer account is awaiting approval. Building needs a session on that Mac (this cloud container cannot reach it; no folders are shared with it yet). Prepare: `docs/IOS_BUILD.md` exact steps, export presets, icon, launch screen.
+- **Female knight voice:** Victoria with the clarity treatment (recorded).
+
 ## Decisions waiting on the owner (do not block other work)
 - Paid animation library, if the free ones leave gaps (see A13).
 - Title: "Hollow Reign" in use; trademark search not done.

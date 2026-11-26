@@ -103,13 +103,16 @@ func _new_journey(heraldry: String, body: String, knight_name: String = "") -> v
 
 ## "Watch the opening" on the menu, once it has been seen: small, out of the way, and gone while a panel is open.
 func _offer_opening(t: TitleScreen) -> void:
-	var b := UI.menu_item("Watch the Opening", 15, 190)
+	var b := UI.menu_item("Watch the Opening", 16, 220)
+	b.alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	b.add_theme_color_override("font_color", UI.BONE)
+	b.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))      # it sits over bright paving, not over the menu's shade
+	b.add_theme_constant_override("outline_size", 5)
 	b.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
-	b.offset_left = -230
-	b.offset_top = -64
-	b.offset_right = -28
-	b.offset_bottom = -22
-	b.modulate.a = 0.75
+	b.offset_left = -290
+	b.offset_top = -124
+	b.offset_right = -36
+	b.offset_bottom = -80
 	t.layer.add_child(b)
 	b.pressed.connect(func(): _fade_then(func(): show_opening(show_title)))
 	var watch := Timer.new()

@@ -3,10 +3,16 @@ extends Node3D
 ## skinned vertices every frame (lowest point, blade through the wielder, shield through the body, joint angles),
 ## and rendered FRONT / SIDE / BACK into one sheet per state.
 ##
-##   xvfb-run -a -s "-screen 0 420x460x24" godot --path . --rendering-method mobile --resolution 420x460 --fixed-fps 30 \
+##   xvfb-run -a -s "-screen 0 420x470x24" godot --path . --rendering-method mobile --resolution 420x470 --fixed-fps 30 \
 ##       res://src/dev/pose_review.tscn -- --out=<dir> [--model=<glb>] [--body=f] [--gear=w_x,s_y] [--foe=<foe id>]
-##       [--witness] [--poses=guard,cut_R,...] [--noshots] [--zoom=1.0] [--aim=0,1,0]
-## With --headless and --noshots it only prints the measurements.
+##       [--witness] [--poses=guard,cut_R,...] [--t=0.1,0.2] [--clip=<authored clip>] [--zoom=1.0] [--aim=x,y,z] [--tag=name]
+##   --versus=<foe id> [--dirs=R,D] [--gap=m] [--nobite]   two fighters at the duel's striking distance, frames round contact
+##   --relic                                              the Witness relic alone from four sides
+## With --headless and --noshots it only prints the measurements (not for --versus or --relic).
+## A line per state: worst value @ time. `low`/`float` lowest skinned vertex (min / max over the state), `tip` `rim` weapon
+## and shield against the floor, `blade` `blade_l` body vertices within 3.5 cm of a blade, `shield` body vertices inside
+## the shield board, `bshield` blade samples inside it, knee and elbow angles, `offhand` distance from a two-handed grip.
+## `!!` marks a value past its limit.
 
 const VIEWS := [["front", Vector3(0, 0, -1)], ["side", Vector3(1, 0, 0)], ["back", Vector3(0, 0, 1)]]
 const DIRS := {"R": Vector2(1, 0), "L": Vector2(-1, 0), "U": Vector2(0, 1), "D": Vector2(0, -1),

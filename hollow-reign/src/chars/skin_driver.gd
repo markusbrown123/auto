@@ -210,9 +210,6 @@ func drive(j: Dictionary) -> Dictionary:
 	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
 	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
 	_back = back
-	if OS.has_environment("DBG"):
-		var fw := func(n: String) -> Vector3: return back.basis.orthonormalized() * (skel.get_bone_global_pose(bone[n]).basis.orthonormalized() * (rest[n] as Transform3D).basis.orthonormalized().inverse() * (q * Vector3(0, 0, -1)))
-		print("fwd clip=", clip, " w=", snappedf(clip_w, 0.01), " whole=", whole, " hips=", fw.call("Hips"), " chest=", fw.call("Spine2"), " head=", fw.call("Head"))
 	return {"r": back * _palm("Right", hr), "l": back * _palm("Left", hl)}
 
 var _back := Transform3D.IDENTITY      # skeleton space -> rig body space, as of the last drive()

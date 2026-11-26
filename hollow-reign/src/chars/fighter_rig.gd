@@ -558,6 +558,7 @@ func telegraph(dir: Vector2, windup: float, swing: float, kind: String = "slash"
 	else:
 		_go(Mode.WINDUP, windup)
 	_root_target = Vector3(0, 0, 0.18)
+	_au_begin("thrust" if (kind == "thrust" or kind == "lunge") else _au_label(), maxf(windup - swing * 0.5, 0.0), windup, "")
 
 ## Player attack: a short rise then the cut. Contact is at 60% of `time`.
 ## `finish` names the kind of combo this cut completes ("" for an ordinary cut): each kind has its own body.
@@ -572,6 +573,7 @@ func swing(dir: Vector2, time: float, finish: String = "") -> void:
 	_swing = time * 0.5
 	_go(Mode.WINDUP, time * 0.6)
 	_root_target = Vector3(0, 0, -0.25)
+	_au_begin(_au_label(), 0.0, time * 0.6, finish)
 
 var _parry_t := 0.0
 func parry(dir: Vector2) -> void:
@@ -579,6 +581,7 @@ func parry(dir: Vector2) -> void:
 	_arc_dir = Vector3(dir.x * mirror, dir.y, 0).normalized()
 	_swing = 0.16
 	_finish = ""
+	_au_stop()
 	_go(Mode.STRIKE, 0.16)
 	_theta = -0.9
 
@@ -608,6 +611,8 @@ func flash(v: float = 1.0) -> void:
 ## (Measured on the rig: the hand is carried forward by the arc, by the step into the cut and by the lean of the body;
 ## the last fifth of the blade is what should meet the opponent, not its middle.)
 func reach() -> float:
+	if not _au.is_empty():
+		return (float(_au.reach) + (AU_STEP if mirror > 0.0 else AU_STEP_FOE)) * scale.x
 	# (a foe winds up leaning back and has stepped in less by the middle of its cut than the player has)
 	return (0.05 + 0.5 * arm_scale + REACH_STEP - (0.15 if mirror < 0.0 else 0.0) + weapon_len * 0.8) * scale.x
 
@@ -637,6 +642,12 @@ func clash(world_point: Vector3, hold: float = 0.2) -> void:
 ## The blow has been stopped: hold the blade at the point of the cut where it reaches furthest forward,
 ## instead of letting it sweep on through whatever stopped it.
 func halt(hold: float = 0.2) -> void:
+	if not _au.is_empty():
+		# an authored cut is stopped where the rules settled it: at its contact pose, not on its way through
+		if float(_au.freeze) < 0.0:
+			_au.freeze = minf(_au_time(_au_t), float(_au.tc))
+		_solve(0.0)
+		return
 	var ap := _arc_point(-0.12, 0.0)
 	_pin_hand = ap[0]
 	_pin_blade = ap[1]
@@ -647,6 +658,11 @@ func halt(hold: float = 0.2) -> void:
 ## itself, see `auto_bite`). The blade is held where it meets the near side of that body, then drawn back.
 func bite(world_point: Vector3, hold: float = BITE_HOLD) -> void:
 	if _pin_t > 0.0 or mode == Mode.DEAD:
+		return
+	if not _au.is_empty():
+		if float(_au.freeze) < 0.0:
+			_au.freeze = _au_time(_au_t)
+			_go(Mode.FOLLOW, hold + 0.22)
 		return
 	var local: Vector3 = body.to_local(world_point)
 	# the near side: a little toward this fighter and toward the side the cut comes from
@@ -912,7 +928,7 @@ func _solve(dt: float) -> void:
 			var u2 := clampf(_t / _dur, 0.0, 1.0)
 			var full_cut := _dur > 0.17
 			var bitten := false
-			if full_cut and auto_bite and _pin_t <= 0.0 and dt > 0.0:
+			if full_cut and auto_bite and _pin_t <= 0.0 and dt > 0.0 and _au.is_empty():
 				# The arc is walked in small steps from where it was last frame: the first step at which the blade is in
 				# an opponent's body is where the cut stops. It bites there; it does not sail on through to the far side.
 				var u_from := clampf((_t - dt) / _dur, 0.0, 1.0)
@@ -947,7 +963,7 @@ func _solve(dt: float) -> void:
 			var thrust_to := Vector3(0.12, 1.2 - hunch * 0.2, -0.78 * arm_scale)
 			blade_t = Vector3(-0.05, 0.08, -1).normalized()
 			var stuck := false
-			if auto_bite and _pin_t <= 0.0 and dt > 0.0:
+			if auto_bite and _pin_t <= 0.0 and dt > 0.0 and _au.is_empty():
 				# the point goes in a hand's breadth and stops; the rest of the lunge is not driven through the body
 				var u_from2 := clampf((_t - dt) / _dur, 0.0, 1.0)
 				var targets2 := _targets()
@@ -1049,6 +1065,7 @@ func _solve(dt: float) -> void:
 	else:
 		_hand = _hand.lerp(hand_t, k)
 		_blade = _blade.lerp(blade_t, k).normalized()
+	_au_update(dt)
 	_lean = lerpf(_lean, lean_t, slow * 1.6)
 	_twist = lerpf(_twist, twist_t, slow * 1.6)
 	_crouch = lerpf(_crouch, crouch_t, slow * 1.4)
@@ -1153,10 +1170,11 @@ func _pose() -> void:
 	if skin:
 		# authored motion where it exists: the walk cycle out of combat, and the fall when killed
 		_pick_clip()
+		_au_apply()
 		var pinned := _pin_t > 0.0 or _brace_t > 0.0
 		var hands: Dictionary = skin.drive({"pelvis": pel + Vector3(0, 0.06, 0), "pelvis_rot": Basis.from_euler(pelvis.rotation), "chest_rot": cb,
 			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l,
-			"follow_r": 0.0 if _pin_t > 0.0 else 1.0, "follow_l": 0.0 if pinned else 1.0, "settle": true})
+			"follow_r": 0.0 if _pin_t > 0.0 else 1.0, "follow_l": 0.0 if pinned else 1.0, "settle": true, "dt": get_process_delta_time() * time_scale})
 		_fit_props(hands)
 		if _relic:
 			# hung from the belt just outside whatever armour this suit has at the hip; it turns and travels with the hips
@@ -1216,9 +1234,15 @@ func _fit_props(hands: Dictionary) -> void:
 	# --- right hand
 	var dir: Vector3 = weapon_r.transform.basis.y
 	var carried := skin.hand_axis("Right")
-	if _whole_w > 0.01 and carried != Vector3.ZERO and _pin_t <= 0.0:
+	var au_arm := whole and _au_state != "" and skin.arm_r > 0.0
+	if au_arm:
+		# an authored cut: the blade is where the clip's own hand holds it, from the first frame
+		dir = skin.clip_axis.get("Right", carried)
+	elif _whole_w > 0.01 and carried != Vector3.ZERO and _pin_t <= 0.0 and _au_state == "":
 		# a whole-body clip (a fall, a hit, a roll) throws the arm: the weapon goes with the hand, not with the old aim
 		dir = dir.slerp(carried, _whole_w) if dir.dot(carried) > -0.99 else carried
+	if skin.xf_u() < 1.0 and _pin_t <= 0.0:
+		dir = _xf_dir_r.slerp(dir, skin.xf_u()) if _xf_dir_r.dot(dir) > -0.99 else dir
 	if _pin_t <= 0.0:
 		dir = _clear_blade(hands.r, dir, weapon_len, caps + ([] if two_handed else _arm_caps("Left")))
 	if shield and _pin_t <= 0.0:
@@ -1230,6 +1254,7 @@ func _fit_props(hands: Dictionary) -> void:
 		dir = dir2
 		pr = skin.grip("Right", dir)
 	weapon_r.transform = Transform3D(_basis_y(dir, Vector3(0, 0, -1) if absf(dir.z) < 0.9 else Vector3.RIGHT), pr)
+	_last_dir_r = dir
 	# --- left hand
 	if two_handed:
 		weapon_l.position = pr
@@ -1239,8 +1264,13 @@ func _fit_props(hands: Dictionary) -> void:
 	elif dual:
 		var dl: Vector3 = weapon_l.transform.basis.y
 		var carried_l := skin.hand_axis("Left")
-		if _whole_w > 0.01 and carried_l != Vector3.ZERO:
+		if whole and _au_state != "" and skin.arm_l > 0.0:
+			dl = skin.clip_axis.get("Left", carried_l)
+		elif _whole_w > 0.01 and carried_l != Vector3.ZERO and _au_state == "":
 			dl = dl.slerp(carried_l, _whole_w) if dl.dot(carried_l) > -0.99 else carried_l
+		if skin.xf_u() < 1.0:
+			dl = _xf_dir_l.slerp(dl, skin.xf_u()) if _xf_dir_l.dot(dl) > -0.99 else dl
+		_last_dir_l = dl
 		dl = _clear_blade(hands.l, dl, weapon_len, caps + _arm_caps("Right"))
 		dl = _off_floor(hands.l, dl, weapon_len, _pommel)
 		var pl: Vector3 = skin.grip("Left", dl)
@@ -1516,3 +1546,178 @@ func _update_cape(dt: float) -> void:
 		cape_mesh.surface_set_normal(back)
 		cape_mesh.surface_add_vertex(_cape_pts[i] + right * ww)
 	cape_mesh.surface_end()
+
+
+# ================================================================ authored attacks
+## Cuts, thrusts and foes' blows are played from the bought whole-body clips (`ss_` sword and shield, `th_` two-handed,
+## `dw_` dual) instead of the procedural sword arm. The state machine above still runs underneath and owns the timing
+## (which is the rule simulation's): the clip is time-warped so that its own contact frame falls on the hit instant,
+## its long wind-up is cut away, and a small roll of the sword arm makes the blade travel the way that was swiped.
+## `--noauthored` (or `FighterRig.authored = false`) plays the old procedural arm, for comparison.
+static var authored: bool = not OS.get_cmdline_user_args().has("--noauthored")
+static var _au_meta := {}
+
+const AU_STEP := 0.2          # metres the player's step into a cut has carried the body forward by the hit
+const AU_STEP_FOE := 0.05
+const AU_ROLL_MAX := 0.85     # radians the sword arm may be rolled to put a clip's cut on the swiped line
+const AU_IN := 0.09           # seconds a player's cut takes to come in from the pose before it
+const AU_IN_FOE := 0.2
+const AU_OUT := 0.22
+
+## clip, index into its `hits` (clip_meta.json), options: arm_l 0 keeps the shield arm on its own guard, roll false
+## leaves the clip's own line. Swipe names are in the fighter's own frame (a foe facing the camera swaps left and right).
+const AU_CUTS := {
+	"ss": {
+		"L": ["ss_cut_l", 0], "R": ["ss_cut_r_high", 0], "D": ["ss_cut_d", 0], "DL": ["ss_cut_dl", 0], "DR": ["ss_cut_dr2", 0],
+		"U": ["th_cut_u", 0, {"arm_l": 0.0}], "UR": ["th_cut_ur", 0, {"arm_l": 0.0}], "UL": ["th_cut_u", 0, {"arm_l": 0.0}],
+		"thrust": ["ss_thrust2", 0]},
+	"th": {
+		"L": ["th_cut_l", 0], "R": ["th_cut_r", 0], "D": ["th_cut_d", 0], "DL": ["th_cut_dl2", 0], "DR": ["th_cut_dr", 0],
+		"U": ["th_cut_u", 0], "UR": ["th_cut_ur", 0], "UL": ["th_cut_u", 0], "thrust": ["th_combo_thrust", 2]},
+	"dw": {
+		"L": ["dw_double", 0], "R": ["dw_cut_r", 0], "DL": ["dw_cut_dl", 0], "DR": ["dw_cut_dr", 0], "thrust": ["dw_thrust", 0]},
+}
+
+static func clip_meta(n: String) -> Dictionary:
+	if _au_meta.is_empty():
+		var v = JSON.parse_string(FileAccess.get_file_as_string("res://assets/anim/clip_meta.json"))
+		_au_meta = v.get("clips", {}) if v is Dictionary else {"_": {}}
+	return _au_meta.get(n, {})
+
+## Which of the packs' sets this fighter's weapon is swung with ("" none: claws stay procedural).
+func au_set() -> String:
+	var w := str(cfg.get("weapon", "sword"))
+	if w == "claws":
+		return ""
+	return "th" if two_handed else ("dw" if dual else "ss")
+
+var _au := {}                 # the authored attack in progress (empty: none)
+var _au_t := 0.0              # seconds since it began
+var _au_state := ""           # what the authored layer is showing: "", "cut"
+var _xf_dir_r := Vector3.UP
+var _xf_dir_l := Vector3.UP
+var _last_dir_r := Vector3.UP
+var _last_dir_l := Vector3.UP
+
+func _au_label() -> String:
+	var a := atan2(_arc_dir.y, _arc_dir.x)
+	return ["R", "UR", "U", "UL", "L", "DL", "D", "DR"][posmod(int(round(a / (PI / 4.0))), 8)]
+
+## The clip for a swipe: [clip, hit index, options] or [] to stay procedural.
+func _au_pick(label: String, _finish_kind: String) -> Array:
+	var tbl: Dictionary = AU_CUTS.get(au_set(), {})
+	return tbl.get(label, [])
+
+func _xfade(dur: float) -> void:
+	_xf_dir_r = _last_dir_r
+	_xf_dir_l = _last_dir_l
+	skin.crossfade(dur)
+
+## `strike_from` and `hit_at`: seconds from now at which the blade starts into the blow and at which it lands.
+func _au_begin(label: String, strike_from: float, hit_at: float, finish: String) -> void:
+	_au_stop()
+	if not authored or skin == null or not skin.ok or test_clip != "" or not use_clips:
+		return
+	var spec := _au_pick(label, finish)
+	if spec.is_empty() or not SkinDriver.has_clip(str(spec[0])):
+		return
+	var m := clip_meta(str(spec[0]))
+	var hits: Array = m.get("hits", [])
+	if int(spec[1]) >= hits.size():
+		return
+	var opt: Dictionary = spec[2] if spec.size() > 2 else {}
+	var h: Dictionary = hits[int(spec[1])]
+	var tc := float(h.contact)
+	var ts := minf(float(h.start), tc - 0.1)
+	if opt.has("start"):
+		ts = float(opt.start)
+	ts = maxf(ts, 0.0)
+	var te := maxf(float(h.end), tc + 0.05)
+	# what follows the cut: its own recovery, but never the next cut of a chain
+	var t_out := float(m.get("length", te))
+	if int(spec[1]) + 1 < hits.size():
+		t_out = minf(t_out, float(hits[int(spec[1]) + 1].start) - 0.05)
+	t_out = clampf(te + 0.5, te, maxf(t_out, te))
+	var n := str(spec[0])
+	var roll := 0.0
+	if label != "thrust" and opt.get("roll", true):
+		var a0: Dictionary = skin.clip_hand(n, maxf(tc - 0.07, ts))
+		var a1: Dictionary = skin.clip_hand(n, minf(tc + 0.04, te))
+		var v: Vector3 = (a1.p + a1.axis * weapon_len) - (a0.p + a0.axis * weapon_len)
+		var v2 := Vector2(v.x, v.y)
+		if v2.length() > 0.04:
+			roll = clampf(v2.angle_to(Vector2(_arc_dir.x, _arc_dir.y)), -AU_ROLL_MAX, AU_ROLL_MAX)
+			if absf(roll) < 0.07:
+				roll = 0.0
+	var hc: Dictionary = skin.clip_hand(n, tc, "Right", roll)
+	_au = {"clip": n, "ts": ts, "tc": tc, "te": te, "t_out": t_out, "pre": maxf(0.0, ts - (0.3 if strike_from > 0.05 else 0.0)),
+		"from": strike_from, "hit": maxf(hit_at, strike_from + 0.02), "roll": roll, "freeze": -1.0, "arm_l": float(opt.get("arm_l", 1.0)),
+		"reach": -(hc.p.z + hc.axis.z * weapon_len * 0.8), "travel": 1.0 if float(m.get("hip_travel", 0.0)) < 0.8 else 0.0, "label": label}
+	_au_t = 0.0
+	_au_state = "cut"
+	_xfade(AU_IN if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
+
+## Clip time for a moment of the attack. The warning window eases into the wound-up pose and holds there; the blow
+## runs from there to the clip's contact frame, arriving at the hit instant; what follows plays at the clip's own pace.
+func _au_time(tau: float) -> float:
+	var from := float(_au.from)
+	var hit := float(_au.hit)
+	if tau < from:
+		var u := clampf(tau / maxf(from, 0.001), 0.0, 1.0)
+		return lerpf(float(_au.pre), float(_au.ts), 1.0 - pow(1.0 - u, 3.0))
+	if tau < hit:
+		var u2 := (tau - from) / (hit - from)
+		return lerpf(float(_au.ts), float(_au.tc), pow(u2, 1.5))
+	return minf(float(_au.tc) + (tau - hit) * 1.2, float(_au.t_out))
+
+func _au_stop() -> void:
+	if _au.is_empty():
+		return
+	_au = {}
+	_au_state = ""
+	_clip_w = 0.0
+	if skin:
+		_xfade(AU_OUT)
+
+func _au_update(dt: float) -> void:
+	if _au.is_empty():
+		return
+	if not (mode in [Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW, Mode.THRUST_WINDUP, Mode.THRUST]):
+		_au_stop()
+		return
+	var prev := _au_t
+	_au_t += dt
+	if float(_au.freeze) >= 0.0 or dt <= 0.0 or not auto_bite or _pin_t > 0.0 or _au_t <= float(_au.from):
+		return
+	# the blade stops in the first body it meets, as the procedural cut does: the clip is walked in small steps
+	var targets := _targets()
+	if targets.is_empty():
+		return
+	var thrust: bool = str(_au.label) == "thrust"
+	for i in range(1, 7):
+		var tau := lerpf(maxf(prev, float(_au.from)), _au_t, i / 6.0)
+		var ct := _au_time(tau)
+		if ct > float(_au.te) + 0.1:
+			break
+		var hd: Dictionary = skin.clip_hand(str(_au.clip), ct, "Right", float(_au.roll), float(_au.travel))
+		if _blade_in(hd.p, hd.axis, targets, 0.75 if thrust else 0.3, 0.35 if thrust else 0.3):
+			_au.freeze = ct
+			_go(Mode.FOLLOW, BITE_HOLD + 0.22)
+			break
+
+func _au_apply() -> void:
+	skin.arm_r = 1.0
+	skin.arm_l = 1.0
+	skin.clip_look = false
+	skin.clip_roll = 0.0
+	if _au.is_empty():
+		return
+	skin.clip = str(_au.clip)
+	skin.clip_t = float(_au.freeze) if float(_au.freeze) >= 0.0 else _au_time(_au_t)
+	skin.clip_full = true
+	skin.clip_w = 1.0
+	skin.clip_travel = float(_au.travel)
+	skin.clip_look = true
+	skin.clip_roll = float(_au.roll)
+	skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
+	skin.arm_l = 0.0 if _brace_t > 0.0 else float(_au.arm_l)

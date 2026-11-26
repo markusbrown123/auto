@@ -94,7 +94,11 @@ func _versus() -> void:
 				await get_tree().process_frame
 			var times: Array = [0.3, 0.37, 0.43, 0.5] if who == 0 else [0.78, 0.86, 0.93, 1.0]
 			if who == 0:
-				a.swing(DIRS[d], 0.55)
+				a.swing(DIRS[d], float(_args.get("swing", "0.55")))
+				if not _args.has("gap"):
+					gap = a.reach() + 0.18 * float(foe.rig.scale)
+					a.position.z = gap * 0.5
+					b.position.z = -gap * 0.5
 			else:
 				b.call("telegraph", DIRS[d], 0.8, 0.3, "bite" if dragon and d == "D" else "slash")
 			var t := 0.0
@@ -297,6 +301,7 @@ func _poses() -> Array:
 		var cn := str(_args.clip)
 		var cl := SkinDriver.clip_length(cn)
 		return [["clip_" + cn, func(): rig.combat_steps = false; rig.walking = false; rig.set("_clock", 0.0); rig.test_clip = cn, cl, [cl * 0.2, cl * 0.45, cl * 0.7, cl * 0.95]]]
+	var sw := float(_args.get("swing", "0.55"))
 	p.append(["guard", func(): pass, 1.4, [1.2]])
 	p.append(["block", func(): rig.blocking = true, 1.0, [0.8]])
 	p.append(["step_side", func(): _vel = Vector3(0.9, 0, 0), 1.3, [0.6, 0.85, 1.1]])
@@ -304,13 +309,13 @@ func _poses() -> Array:
 	p.append(["walk", func(): rig.combat_steps = false; _vel = Vector3(0, 0, -1.4), 2.2, [1.2, 1.45, 1.7, 1.95]])
 	if _as_foe:
 		for d: String in DIRS:
-			p.append(["tel_" + d, func(): rig.telegraph(DIRS[d], 0.8, 0.3, "slash"), 1.5, [0.55, 0.8, 0.95]])
+			p.append(["tel_" + d, func(): rig.telegraph(DIRS[d], 0.8, 0.3, "slash"), 1.5, [0.55, 0.8, 0.95], {"dir": DIRS[d], "hit": 0.8, "from": 0.65}])
 		p.append(["thrust", func(): rig.telegraph(DIRS["D"], 0.8, 0.3, "thrust"), 1.5, [0.55, 0.85, 1.0]])
 		p.append(["halt", func(): rig.telegraph(DIRS["R"], 0.5, 0.3, "slash"); _later(0.5, func(): rig.halt(0.3)), 1.0, [0.52, 0.7]])
 		p.append(["roar", func(): rig.roar(), 2.0, [0.6, 1.1]])
 	else:
 		for d: String in DIRS:
-			p.append(["cut_" + d, func(): rig.swing(DIRS[d], 0.55), 1.1, [0.28, 0.47, 0.66]])
+			p.append(["cut_" + d, func(): rig.swing(DIRS[d], sw), 0.55 + sw, [sw * 0.3, sw * 0.6, sw * 0.6 + 0.12], {"dir": DIRS[d], "hit": sw * 0.6, "from": 0.0}])
 		for f: String in ["Heavy", "Guard-breaking", "Counter", "Critical"]:
 			p.append(["fin_" + f, func(): rig.swing(DIRS["R"], 0.7, f), 1.3, [0.36, 0.6, 0.84]])
 		p.append(["parry", func(): rig.parry(DIRS["L"]), 0.6, [0.08, 0.2]])
@@ -343,6 +348,9 @@ func _run() -> void:
 		for i in 12:
 			await get_tree().process_frame
 		_timers.clear()
+		_cur = pose[4] if pose.size() > 4 else {}
+		_track.clear()
+		_track.append([0.0, _tip_local(), 0.0])
 		(pose[1] as Callable).call()
 		var t := 0.0
 		var todo: Array = (pose[3] as Array).duplicate()
@@ -366,13 +374,14 @@ func _run() -> void:
 					tiles.append(get_viewport().get_texture().get_image())
 				rig.time_scale = 1.0
 				await get_tree().process_frame
-			var dt := 1.0 / 30.0
+			var dt := 1.0 / float(_args.get("fps", "30"))
 			t += dt
 			rig.position += _vel * dt * rig.scale.x
 			for tm: Array in _timers.duplicate():
 				if t >= float(tm[0]):
 					_timers.erase(tm)
 					(tm[1] as Callable).call()
+		_motion(stat)
 		_report(str(pose[0]), stat)
 		if shots and not tiles.is_empty():
 			var w: int = tiles[0].get_width()
@@ -475,8 +484,53 @@ func _worse(stat: Dictionary, key: String, v: float, t: float, note: String = ""
 	if not stat.has(key) or (v < float(stat[key][0]) if lower else v > float(stat[key][0])):
 		stat[key] = [v, t, note]
 
+var _cur := {}                # the state being played, if it is a cut: {dir, hit, from}
+var _track: Array = []        # [t, blade tip in the rig's own space, chest yaw] per frame
+
+func _tip_local() -> Vector3:
+	if _is_dragon:
+		return Vector3.ZERO
+	return rig.global_transform.affine_inverse() * (rig as FighterRig).blade_tip()
+
+## What the cut did, from the blade tip's path on this rig: `delay` seconds from the swipe to the tip having moved 3 cm,
+## `dir_err` degrees between the tip's travel across the hit instant and the swipe (as seen from behind the fighter),
+## `yaw` the furthest the chest turned from facing the opponent (degrees), `tipz` how far ahead the tip is at the hit.
+func _motion(stat: Dictionary) -> void:
+	if _cur.is_empty() or _track.size() < 4:
+		return
+	var p0: Vector3 = _track[0][1]
+	for e: Array in _track:
+		if (e[1] as Vector3).distance_to(p0) >= 0.03:
+			stat["delay"] = [float(e[0]), 0.0, ""]
+			break
+	var hit: float = float(_cur.hit)
+	var a := Vector3.ZERO
+	var b := Vector3.ZERO
+	var got := 0
+	var yaw := 0.0
+	for e: Array in _track:
+		var t: float = e[0]
+		if t >= float(_cur.from) and t <= hit + 0.25:
+			yaw = maxf(yaw, absf(float(e[2])))
+		if got == 0 and t >= hit - 0.07:
+			a = e[1]
+			got = 1
+		if t <= hit + 0.035:
+			b = e[1]
+			if absf(t - hit) < 0.02:
+				stat["tipz"] = [-(e[1] as Vector3).z, t, ""]
+	var v := Vector2(b.x - a.x, b.y - a.y)
+	var want: Vector2 = _cur.dir
+	want.x *= (rig as FighterRig).mirror
+	if v.length() > 0.02:
+		stat["dir_err"] = [rad_to_deg(v.angle_to(want)), hit, ""]
+	stat["yaw"] = [rad_to_deg(yaw), 0.0, ""]
+
 func _audit(stat: Dictionary, t: float) -> void:
 	var s: float = rig.scale.x
+	if not _is_dragon and (rig as FighterRig).skin:
+		var f: Vector3 = (rig as FighterRig).skin.turn("Spine2") * Vector3(0, 0, -1)
+		_track.append([t, _tip_local(), atan2(f.x, -f.z)])
 	var sk: Array = _skinned()
 	var pts: PackedVector3Array = sk[0]
 	var names: Array = sk[1]
@@ -573,7 +627,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 func _report(pose: String, stat: Dictionary) -> void:
 	var out := "%-16s" % pose
 	var flags := ""
-	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand"]:
+	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand", "delay", "dir_err", "yaw", "tipz"]:
 		if not stat.has(k):
 			continue
 		var e: Array = stat[k]
@@ -592,6 +646,9 @@ func _report(pose: String, stat: Dictionary) -> void:
 			"elbow_min": bad = v < 25.0
 			"ankle_low": bad = v < -0.03
 			"offhand": bad = v > 0.06
+"delay": bad = v > 0.085
+"dir_err": bad = absf(v) > 25.0
+"yaw": bad = v > 75.0
 		out += " %s%s=%.2f@%.2f%s" % ["!!" if bad else "", k, v, float(e[1]), ("(" + str(e[2]) + ")") if str(e[2]) != "" and (bad or k == "low") else ""]
 		if bad:
 			flags += k + " "

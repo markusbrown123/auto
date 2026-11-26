@@ -14,9 +14,14 @@ extends RefCounted
 const DIR := "res://assets/models/parts/"
 const SLOTS := ["helm", "chest", "shoulders", "arms", "legs", "boots"]
 const SUITS := ["base", "garrison", "ash", "black", "vigil", "frost", "regal", "wyrm", "hollow"]
-## Suits whose listed slots cannot be worn apart from the rest of the suit without an obvious fault (docs/MODULAR_ARMOR.md).
-## `set_only(body, suit)` is what an equipment screen should show as "complete set".
-const SET_ONLY := {}
+## Parts that only look right next to another part of the same suit (docs/MODULAR_ARMOR.md): suit -> {slot: [slots that
+## must be the same suit]}. An equipment screen should show such a piece as "worn with ..." and not as a free piece.
+##   vigil helm     is a hood whose mantle is the shoulders part: alone it ends in a torn hem in the air
+##   garrison shoulders carry the top of the breastplate: on another chest that plate ends in a ragged edge
+const LINKED := {
+	"vigil": {"helm": ["shoulders"]},
+	"garrison": {"shoulders": ["chest"]},
+}
 ## Surface correction per suit for src/fx/armor_part.gdshader (docs/MODULAR_ARMOR.md, material study). The generated
 ## roughness maps sit in one narrow glossy band and paint the undersuit as glossy as the plate: roughness is spread
 ## and lifted, metal capped, near-black albedo turned into matt cloth. `tone` multiplies the colour.
@@ -55,9 +60,17 @@ var _hidden: Array = []               # the skeleton's own meshes, hidden while 
 static func has_part(b: String, suit: String, slot: String) -> bool:
 	return ResourceLoader.exists("%s%s_%s_%s.res" % [dir, b, suit, slot])
 
-## Slots of `suit` that only look right together with the rest of that suit; empty for a freely mixable suit.
-static func set_only(b: String, suit: String) -> Array:
-	return SET_ONLY.get("%s_%s" % [b, suit], SET_ONLY.get(suit, []))
+## The slots that must hold the same suit for `slot` of `suit` to look right; empty for a freely mixable piece.
+static func needs(suit: String, slot: String) -> Array:
+	return LINKED.get(suit.get_slice("_", 0), {}).get(slot, [])
+
+## True when every worn piece has the companions it needs.
+func is_clean() -> bool:
+	for slot: String in worn:
+		for other: String in needs(str(worn[slot]), slot):
+			if worn.get(other, "") != worn[slot]:
+				return false
+	return true
 
 static func mesh_of(b: String, suit: String, slot: String) -> ArrayMesh:
 	var key := "%s_%s_%s" % [b, suit, slot]

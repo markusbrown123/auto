@@ -1,0 +1,8977 @@
+{
+ "version": 1,
+ "slots": [
+  "weapon",
+  "offhand",
+  "shield",
+  "helm",
+  "chest",
+  "shoulders",
+  "gauntlets",
+  "legs",
+  "boots",
+  "ring",
+  "relic"
+ ],
+ "armour_slots": [
+  "helm",
+  "chest",
+  "shoulders",
+  "gauntlets",
+  "legs",
+  "boots"
+ ],
+ "tiers": {
+  "common": "common",
+  "uncommon": "uncommon",
+  "rare": "rare",
+  "epic": "legendary",
+  "legendary": "relic"
+ },
+ "tier_name": {
+  "common": "Common",
+  "uncommon": "Uncommon",
+  "rare": "Rare",
+  "legendary": "Legendary",
+  "relic": "Relic"
+ },
+ "tier_order": [
+  "common",
+  "uncommon",
+  "rare",
+  "legendary",
+  "relic"
+ ],
+ "weights": {
+  "light": {
+   "name": "Light",
+   "regen_pct": 2.0,
+   "swing_cost_pct": -1.0,
+   "block": 0.0,
+   "text": "Each piece: stamina returns 2% faster, swings cost 1% less."
+  },
+  "medium": {
+   "name": "Medium",
+   "regen_pct": 0.0,
+   "swing_cost_pct": 0.0,
+   "block": 0.0,
+   "text": "No penalty, no gift."
+  },
+  "heavy": {
+   "name": "Heavy",
+   "regen_pct": -2.0,
+   "swing_cost_pct": 1.0,
+   "block": 0.012,
+   "text": "Each piece: stamina returns 2% slower, swings cost 1% more, guarding costs 1.2% less."
+  }
+ },
+ "require_penalty": {
+  "attack_pct": -15.0,
+  "swing_cost_pct": 20.0,
+  "regen_pct": -3.0
+ },
+ "families": {
+  "crownless": {
+   "name": "Crownless",
+   "suits": [
+    "worn",
+    "garrison"
+   ],
+   "weight": "medium",
+   "region": "courtyard",
+   "why": "The knight's own plate and the garrison's: soldiers of a throne with nobody on it.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "stamina": 6
+     },
+     "text": "+6 stamina"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "hp": 12
+     },
+     "text": "+12 health"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "regen_pct": 3.0
+     },
+     "text": "stamina returns 3% faster"
+    }
+   ]
+  },
+  "ashbound": {
+   "name": "Ashbound",
+   "suits": [
+    "ash"
+   ],
+   "weight": "heavy",
+   "region": "courtyard",
+   "why": "The Ashen Sentinel's scorched plate.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "resist": 8
+     },
+     "text": "+8 resistance"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "block": 0.04
+     },
+     "text": "guarding costs 4% less"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "defense": 6
+     },
+     "text": "+6 defence"
+    }
+   ]
+  },
+  "widow": {
+   "name": "Widow",
+   "suits": [
+    "black"
+   ],
+   "weight": "light",
+   "region": "blackwood",
+   "why": "The black lacquered suit: the lightest and darkest of the eight, the one a mourner would wear to a duel.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "dex": 2
+     },
+     "text": "+2 dexterity"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "crit": 5
+     },
+     "text": "+5 critical"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "swing_cost_pct": -4.0
+     },
+     "text": "swings cost 4% less"
+    }
+   ]
+  },
+  "gravekeeper": {
+   "name": "Gravekeeper",
+   "suits": [
+    "vigil"
+   ],
+   "weight": "medium",
+   "region": "crypt",
+   "why": "The vigil plate of those who stood watch over the dead; the Gravewarden still carries half of it.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "hp": 10
+     },
+     "text": "+10 health"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "defense": 4
+     },
+     "text": "+4 defence"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "stamina": 10
+     },
+     "text": "+10 stamina"
+    }
+   ]
+  },
+  "frostwarden": {
+   "name": "Frostwarden",
+   "suits": [
+    "frost"
+   ],
+   "weight": "heavy",
+   "region": "citadel",
+   "why": "Rimebound plate of the Frozen Citadel.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "resist": 10
+     },
+     "text": "+10 resistance"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "hp": 15
+     },
+     "text": "+15 health"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "block": 0.05
+     },
+     "text": "guarding costs 5% less"
+    }
+   ]
+  },
+  "dragonforged": {
+   "name": "Dragonforged",
+   "suits": [
+    "wyrm"
+   ],
+   "weight": "heavy",
+   "region": "roost",
+   "why": "Broodscale harness from the Wyrm's Roost.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "resist": 8
+     },
+     "text": "+8 resistance"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "strength": 3
+     },
+     "text": "+3 strength"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "crit": 6
+     },
+     "text": "+6 critical"
+    }
+   ]
+  },
+  "sovereign": {
+   "name": "Sovereign",
+   "suits": [
+    "regal"
+   ],
+   "weight": "medium",
+   "region": "throne",
+   "why": "The Monarch's own harness.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "hp": 12
+     },
+     "text": "+12 health"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "strength": 2,
+      "dex": 2
+     },
+     "text": "+2 strength, +2 dexterity"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "defense": 8
+     },
+     "text": "+8 defence"
+    }
+   ]
+  },
+  "architect": {
+   "name": "Architect",
+   "suits": [
+    "hollow"
+   ],
+   "weight": "light",
+   "region": "deep",
+   "why": "The hollowed suit from the Deep: the oldest work, made by whoever built the guardians.",
+   "set": [
+    {
+     "pieces": 2,
+     "bonus": {
+      "stamina": 8
+     },
+     "text": "+8 stamina"
+    },
+    {
+     "pieces": 4,
+     "bonus": {
+      "regen_pct": 4.0
+     },
+     "text": "stamina returns 4% faster"
+    },
+    {
+     "pieces": 6,
+     "bonus": {
+      "crit": 8
+     },
+     "text": "+8 critical"
+    }
+   ]
+  }
+ },
+ "suit_family": {
+  "worn": "crownless",
+  "garrison": "crownless",
+  "ash": "ashbound",
+  "black": "widow",
+  "vigil": "gravekeeper",
+  "frost": "frostwarden",
+  "wyrm": "dragonforged",
+  "regal": "sovereign",
+  "hollow": "architect"
+ },
+ "materials": {
+  "m_iron": {
+   "name": "Old Iron",
+   "regions": [
+    "courtyard",
+    "blackwood"
+   ],
+   "desc": "Garrison stock, sound under the rust."
+  },
+  "m_silver": {
+   "name": "Grave Silver",
+   "regions": [
+    "cathedral",
+    "crypt"
+   ],
+   "desc": "Poured for the dead. It takes an edge the living never asked of it."
+  },
+  "m_scale": {
+   "name": "Wyrm Scale",
+   "regions": [
+    "roost"
+   ],
+   "desc": "Shed, not cut. Still warm."
+  },
+  "m_rime": {
+   "name": "Rimesteel",
+   "regions": [
+    "citadel"
+   ],
+   "desc": "Steel that wintered in the Citadel and did not come back the same."
+  },
+  "m_glass": {
+   "name": "Hollow Glass",
+   "regions": [
+    "deep",
+    "throne"
+   ],
+   "desc": "Not glass. Orren will not say what it was part of."
+  },
+  "m_core": {
+   "name": "Guardian Core",
+   "regions": [],
+   "desc": "What a guardian was built around. One to a guardian."
+  }
+ },
+ "region_material": {
+  "courtyard": "m_iron",
+  "blackwood": "m_iron",
+  "cathedral": "m_silver",
+  "crypt": "m_silver",
+  "roost": "m_scale",
+  "citadel": "m_rime",
+  "deep": "m_glass",
+  "throne": "m_glass"
+ },
+ "upgrade": {
+  "max": 5,
+  "gold_base": [
+   50,
+   80,
+   130,
+   210,
+   320
+  ],
+  "gold_step": [
+   1.0,
+   1.6,
+   2.4,
+   3.4,
+   4.6
+  ],
+  "shard": [
+   1,
+   1,
+   2,
+   2,
+   3
+  ],
+  "slot_mult": {
+   "weapon": 1.0,
+   "shield": 0.8,
+   "chest": 0.8,
+   "helm": 0.6,
+   "legs": 0.6,
+   "shoulders": 0.5,
+   "gauntlets": 0.5,
+   "boots": 0.5
+  },
+  "mat_from_level": 2,
+  "mat_min_rank": 2,
+  "core_min_rank": 3,
+  "growth": {
+   "weapon": {
+    "damage_pct": 10
+   },
+   "armour": {
+    "defense_pct": 10
+   },
+   "shield": {
+    "defense_pct": 10,
+    "block": 0.03
+   }
+  }
+ },
+ "sell_rate": 0.35,
+ "buyback_rate": 3.0,
+ "shop_stage": {
+  "common": 0,
+  "uncommon": 0,
+  "rare": 1,
+  "epic": 3,
+  "legendary": 5
+ },
+ "rewards": {
+  "repeat": [
+   1.0,
+   0.85,
+   0.7,
+   0.55,
+   0.4
+  ],
+  "window": 8,
+  "drop_chance": 0.1,
+  "elite_drop_chance": 0.22,
+  "discover_chance": 0.3,
+  "pity": 3,
+  "mat_fight": 1,
+  "mat_elite": 2,
+  "mat_boss": 4,
+  "mat_chance": 0.65,
+  "dup_gold": 0.25,
+  "dup_mats": 2,
+  "ng_item_chance": 0.5
+ },
+ "aliases": {
+  "w_wayfarer": "w_rusted_sword",
+  "w_silver_vow": "w_dawnline",
+  "w_ashbrand": "w_censer_sword",
+  "w_kings_remnant": "w_throneshard",
+  "w_nightward": "w_vigil_edge",
+  "w_oathbreaker": "w_oath_axe",
+  "w_veilcutter": "w_starfall",
+  "w_eternal_edge": "w_monarch"
+ },
+ "named": {
+  "Wayfarer": {
+   "id": "w_rusted_sword"
+  },
+  "Silver Vow": {
+   "id": "w_dawnline",
+   "was": "Dawnline"
+  },
+  "Ashbrand": {
+   "id": "w_censer_sword"
+  },
+  "King's Remnant": {
+   "id": "w_throneshard",
+   "was": "Throneshard"
+  },
+  "Cold Resolve": {
+   "id": "w_cold_resolve",
+   "new": true
+  },
+  "Nightward": {
+   "id": "w_vigil_edge",
+   "was": "Vigil Edge"
+  },
+  "Oathbreaker": {
+   "id": "w_oath_axe",
+   "note": "was an axe; now a greatsword as the brief asks. The id is kept."
+  },
+  "Veilcutter": {
+   "id": "w_starfall",
+   "was": "Starfall"
+  },
+  "Twin Relics": {
+   "id": "w_twin_relics",
+   "new": true
+  },
+  "Eternal Edge": {
+   "id": "w_monarch"
+  }
+ },
+ "boss_rewards": {
+  "ashen_sentinel": {
+   "first": [
+    "w_ashen_great"
+   ],
+   "pool": [
+    [
+     "s_tower",
+     0.6
+    ],
+    [
+     "a_ash_chest",
+     0.5
+    ],
+    [
+     "r_ember",
+     0.5
+    ],
+    [
+     "a_ash_helm",
+     0.5
+    ],
+    [
+     "a_ash_gauntlets",
+     0.5
+    ],
+    [
+     "a_ash_legs",
+     0.5
+    ],
+    [
+     "a_ash_boots",
+     0.5
+    ]
+   ],
+   "materials": {
+    "m_iron": 4,
+    "m_core": 1
+   }
+  },
+  "hollow_executioner": {
+   "first": [
+    "w_headsman"
+   ],
+   "pool": [
+    [
+     "x_tooth",
+     0.7
+    ],
+    [
+     "a_black_chest",
+     0.5
+    ],
+    [
+     "a_black_helm",
+     0.5
+    ]
+   ],
+   "materials": {
+    "m_iron": 4,
+    "m_core": 1
+   }
+  },
+  "crimson_widow": {
+   "first": [
+    "w_twin_fangs"
+   ],
+   "pool": [
+    [
+     "r_widow",
+     0.7
+    ],
+    [
+     "a_vigil_gauntlets",
+     0.5
+    ]
+   ],
+   "materials": {
+    "m_silver": 4,
+    "m_core": 1
+   }
+  },
+  "cathedral_beast": {
+   "first": [
+    "w_censer_sword"
+   ],
+   "pool": [
+    [
+     "x_bell",
+     0.7
+    ],
+    [
+     "s_reliquary",
+     0.6
+    ],
+    [
+     "a_vigil_chest",
+     0.5
+    ]
+   ],
+   "materials": {
+    "m_silver": 4,
+    "m_core": 1
+   }
+  },
+  "gravewarden": {
+   "first": [
+    "w_crypt_great"
+   ],
+   "pool": [
+    [
+     "a_vigil_legs",
+     0.5
+    ],
+    [
+     "a_vigil_helm",
+     0.5
+    ],
+    [
+     "r_iron",
+     0.3
+    ]
+   ],
+   "materials": {
+    "m_silver": 4,
+    "m_core": 1
+   }
+  },
+  "frostbound_king": {
+   "first": [
+    "w_frost_great"
+   ],
+   "pool": [
+    [
+     "s_rime",
+     0.6
+    ],
+    [
+     "x_tear",
+     0.7
+    ],
+    [
+     "a_frost_chest",
+     0.6
+    ],
+    [
+     "r_frost",
+     0.5
+    ]
+   ],
+   "materials": {
+    "m_rime": 4,
+    "m_core": 1
+   }
+  },
+  "forgotten_monarch": {
+   "first": [
+    "w_monarch",
+    "r_crown"
+   ],
+   "pool": [
+    [
+     "a_regal_chest",
+     0.7
+    ],
+    [
+     "a_regal_helm",
+     0.7
+    ]
+   ],
+   "materials": {
+    "m_glass": 4,
+    "m_core": 1
+   }
+  },
+  "pale_huntsman": {
+   "first": [
+    "w_pilgrim_blades"
+   ],
+   "pool": [
+    [
+     "a_black_legs",
+     0.6
+    ],
+    [
+     "a_black_gauntlets",
+     0.6
+    ]
+   ],
+   "materials": {
+    "m_iron": 4,
+    "m_core": 1
+   }
+  },
+  "cinder_wyrm": {
+   "first": [
+    "w_wyrmfang"
+   ],
+   "pool": [
+    [
+     "s_scale",
+     0.7
+    ],
+    [
+     "a_wyrm_chest",
+     0.7
+    ],
+    [
+     "a_wyrm_helm",
+     0.6
+    ],
+    [
+     "r_brood",
+     0.5
+    ]
+   ],
+   "materials": {
+    "m_scale": 4,
+    "m_core": 1
+   }
+  },
+  "rimewyrm": {
+   "first": [
+    "w_rime_sword"
+   ],
+   "pool": [
+    [
+     "a_frost_legs",
+     0.6
+    ],
+    [
+     "a_frost_gauntlets",
+     0.6
+    ]
+   ],
+   "materials": {
+    "m_rime": 4,
+    "m_core": 1
+   }
+  },
+  "azhurion": {
+   "first": [
+    "w_starfall"
+   ],
+   "pool": [],
+   "materials": {
+    "m_glass": 4,
+    "m_core": 1
+   }
+  },
+  "devourer": {
+   "first": [
+    "w_hunger",
+    "x_name"
+   ],
+   "pool": [
+    [
+     "a_hollow_chest",
+     0.6
+    ]
+   ],
+   "materials": {
+    "m_glass": 4,
+    "m_core": 1
+   }
+  }
+ },
+ "encounters": {
+  "pike_sergeant": "s_round",
+  "veil_dancer": "a_black_boots",
+  "gate_colossus": "a_ash_shoulders",
+  "bell_ringer": "a_vigil_shoulders",
+  "hoarbeast": "a_frost_shoulders",
+  "throne_colossus": "a_regal_shoulders",
+  "the_unburied": "a_hollow_shoulders",
+  "brood_keeper": "a_wyrm_shoulders"
+ },
+ "drops": {
+  "courtyard": [
+   "w_knight_sword",
+   "w_woodcutter",
+   "s_garrison",
+   "a_garrison_helm",
+   "a_garrison_chest",
+   "a_garrison_gauntlets",
+   "a_garrison_legs",
+   "a_worn_shoulders",
+   "a_worn_boots",
+   "a_garrison_shoulders",
+   "a_garrison_boots"
+  ],
+  "blackwood": [
+   "w_knight_sword",
+   "w_woodcutter",
+   "s_garrison",
+   "a_garrison_helm",
+   "a_garrison_chest",
+   "a_garrison_gauntlets",
+   "a_garrison_legs",
+   "a_black_helm",
+   "a_black_chest",
+   "a_black_gauntlets",
+   "a_black_legs",
+   "a_garrison_shoulders",
+   "a_garrison_boots",
+   "a_black_shoulders"
+  ],
+  "cathedral": [
+   "a_black_helm",
+   "a_black_chest",
+   "a_black_gauntlets",
+   "a_black_legs",
+   "a_black_shoulders"
+  ],
+  "crypt": [
+   "a_black_helm",
+   "a_black_chest",
+   "a_black_gauntlets",
+   "a_black_legs",
+   "a_vigil_helm",
+   "a_vigil_chest",
+   "a_vigil_gauntlets",
+   "a_vigil_legs",
+   "a_black_shoulders",
+   "a_vigil_boots"
+  ],
+  "roost": [
+   "a_vigil_helm",
+   "a_vigil_chest",
+   "a_vigil_gauntlets",
+   "a_vigil_legs",
+   "a_vigil_boots"
+  ],
+  "citadel": [
+   "a_vigil_helm",
+   "a_vigil_chest",
+   "a_vigil_gauntlets",
+   "a_vigil_legs",
+   "a_vigil_boots"
+  ],
+  "deep": [
+   "a_vigil_helm",
+   "a_vigil_chest",
+   "a_vigil_gauntlets",
+   "a_vigil_legs",
+   "a_vigil_boots"
+  ],
+  "throne": [
+   "a_vigil_helm",
+   "a_vigil_chest",
+   "a_vigil_gauntlets",
+   "a_vigil_legs",
+   "a_vigil_boots"
+  ]
+ },
+ "elites": [
+  "bell_ringer",
+  "brood_keeper",
+  "censer_knight",
+  "crypt_warden",
+  "gate_colossus",
+  "glacier_brute",
+  "oath_eater",
+  "rampart_brute",
+  "the_unburied",
+  "throne_colossus",
+  "woodward"
+ ],
+ "challenges": [
+  {
+   "id": "both_hands",
+   "name": "Both Hands",
+   "text": "Master two sets of twin blades.",
+   "need": {
+    "mastered_cls": "dual",
+    "count": 2
+   },
+   "reward": {
+    "item": "w_twin_relics"
+   }
+  }
+ ],
+ "finishes": {
+  "issued": "As issued",
+  "graphite": "Dark graphite",
+  "brushed": "Brushed steel",
+  "gilt": "Restrained gilt"
+ },
+ "accents": {
+  "heraldry": "Your heraldry",
+  "none": "None",
+  "ember": "Ember",
+  "frost": "Frost",
+  "gold": "Gold"
+ },
+ "items": {
+  "w_rusted_sword": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "start"
+    }
+   ],
+   "source": {
+    "type": "start"
+   },
+   "hint": "You woke with it.",
+   "visual": "model",
+   "model": "w_rusted_sword",
+   "gear_model": "gear/wayfarer",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 28,
+   "unsellable": true,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 50,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 80,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 120,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 230,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 1,
+      "type": "history",
+      "ref": "w_rusted_sword",
+      "text": "More of its history"
+     },
+     {
+      "at": 2,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_knight_sword": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "visual": "model",
+   "model": "w_knight_sword",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 91,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 130,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 370,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "history",
+      "ref": "w_knight_sword",
+      "text": "More of its history"
+     },
+     {
+      "at": 4,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_ashen_great": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "visual": "model",
+   "model": "w_ashen_great",
+   "req": {
+    "strength": 9
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 130,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 210,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 310,
+      "shards": 6,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 440,
+      "shards": 8,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 600,
+      "shards": 10,
+      "materials": {
+       "m_iron": 6
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_ashen_great",
+      "text": "More of its history"
+     },
+     {
+      "at": 5,
+      "type": "combo",
+      "ref": "greatsword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_woodcutter": {
+   "tier": "uncommon",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "region",
+     "id": "blackwood",
+     "region": "blackwood",
+     "stage": 3,
+     "label": "The Charcoal Burner's Hut"
+    },
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "blackwood",
+    "region": "blackwood",
+    "stage": 3,
+    "label": "The Charcoal Burner's Hut"
+   },
+   "hint": "Left behind somewhere along the road through The Blackwood.",
+   "visual": "alias",
+   "model": "w_headsman",
+   "req": {
+    "strength": 7
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 130,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 370,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "history",
+      "ref": "w_woodcutter",
+      "text": "More of its history"
+     },
+     {
+      "at": 4,
+      "type": "combo",
+      "ref": "axe",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_headsman": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "hollow_executioner",
+     "region": "blackwood",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "hollow_executioner",
+    "region": "blackwood",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Blackwood carries it.",
+   "visual": "model",
+   "model": "w_headsman",
+   "req": {
+    "strength": 9
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 130,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 210,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 310,
+      "shards": 6,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 440,
+      "shards": 8,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 600,
+      "shards": 10,
+      "materials": {
+       "m_iron": 6
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_headsman",
+      "text": "More of its history"
+     },
+     {
+      "at": 5,
+      "type": "combo",
+      "ref": "axe",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_twin_fangs": {
+   "tier": "legendary",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "crimson_widow",
+     "region": "cathedral",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "crimson_widow",
+    "region": "cathedral",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Cathedral of Ash carries it.",
+   "visual": "model",
+   "model": "w_twin_fangs",
+   "req": {
+    "dex": 11
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 210,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 335,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 505,
+      "shards": 6,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 715,
+      "shards": 8,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 965,
+      "shards": 10,
+      "materials": {
+       "m_iron": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_twin_fangs",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "dual",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_pilgrim_blades": {
+   "tier": "uncommon",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "pale_huntsman",
+     "region": "blackwood",
+     "guaranteed": true
+    },
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "pale_huntsman",
+    "region": "blackwood",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Blackwood carries it.",
+   "visual": "model",
+   "model": "w_pilgrim_blades",
+   "req": {
+    "dex": 7
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 118,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 130,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 370,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "history",
+      "ref": "w_pilgrim_blades",
+      "text": "More of its history"
+     },
+     {
+      "at": 4,
+      "type": "combo",
+      "ref": "dual",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_censer_sword": {
+   "tier": "legendary",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cathedral_beast",
+     "region": "cathedral",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cathedral_beast",
+    "region": "cathedral",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Cathedral of Ash carries it.",
+   "visual": "alias",
+   "model": "w_vigil_edge",
+   "req": {
+    "strength": 7,
+    "dex": 7
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 210,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 335,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 505,
+      "shards": 6,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 715,
+      "shards": 8,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 965,
+      "shards": 10,
+      "materials": {
+       "m_iron": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_censer_sword",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_crypt_great": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "gravewarden",
+     "region": "crypt",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "gravewarden",
+    "region": "crypt",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Sunken Crypt carries it.",
+   "visual": "model",
+   "model": "w_crypt_great",
+   "req": {
+    "strength": 11
+   },
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 210,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 335,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 505,
+      "shards": 6,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 715,
+      "shards": 8,
+      "materials": {
+       "m_silver": 4
+      }
+     },
+     {
+      "gold": 965,
+      "shards": 10,
+      "materials": {
+       "m_silver": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_crypt_great",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "greatsword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_frost_great": {
+   "tier": "relic",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "frostbound_king",
+     "region": "citadel",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "frostbound_king",
+    "region": "citadel",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "visual": "model",
+   "model": "w_frost_great",
+   "req": {
+    "strength": 13
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 320,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 510,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 770,
+      "shards": 9,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 1090,
+      "shards": 12,
+      "materials": {
+       "m_rime": 4
+      }
+     },
+     {
+      "gold": 1470,
+      "shards": 15,
+      "materials": {
+       "m_rime": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "history",
+      "ref": "w_frost_great",
+      "text": "More of its history"
+     },
+     {
+      "at": 8,
+      "type": "combo",
+      "ref": "greatsword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_rime_sword": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "rimewyrm",
+     "region": "citadel",
+     "guaranteed": true
+    },
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "rimewyrm",
+    "region": "citadel",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "visual": "model",
+   "model": "w_rime_sword",
+   "req": {
+    "strength": 7,
+    "dex": 7
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 489,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 210,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 335,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 505,
+      "shards": 6,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 715,
+      "shards": 8,
+      "materials": {
+       "m_rime": 4
+      }
+     },
+     {
+      "gold": 965,
+      "shards": 10,
+      "materials": {
+       "m_rime": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_rime_sword",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_monarch": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "forgotten_monarch",
+     "region": "throne",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "forgotten_monarch",
+    "region": "throne",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Hollow Throne carries it.",
+   "visual": "alias",
+   "model": "w_starfall",
+   "gear_model": "gear/eternal_edge",
+   "req": {
+    "strength": 8,
+    "dex": 8
+   },
+   "mat": "m_glass",
+   "advanced": true,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 320,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 510,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 770,
+      "shards": 9,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 1090,
+      "shards": 12,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 1470,
+      "shards": 15,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "history",
+      "ref": "w_monarch",
+      "text": "More of its history"
+     },
+     {
+      "at": 8,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_oath_axe": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "ng",
+     "ng": 1
+    }
+   ],
+   "source": {
+    "type": "ng",
+    "ng": 1
+   },
+   "hint": "Only offered to those who return.",
+   "visual": "alias",
+   "model": "w_headsman",
+   "gear_model": "gear/oathbreaker",
+   "req": {
+    "strength": 13
+   },
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 320,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 510,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 770,
+      "shards": 9,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 1090,
+      "shards": 12,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 1470,
+      "shards": 15,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "history",
+      "ref": "w_oath_axe",
+      "text": "More of its history"
+     },
+     {
+      "at": 8,
+      "type": "combo",
+      "ref": "greatsword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_ember_fangs": {
+   "tier": "relic",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "ng",
+     "ng": 1
+    }
+   ],
+   "source": {
+    "type": "ng",
+    "ng": 1
+   },
+   "hint": "Only offered to those who return.",
+   "visual": "model",
+   "model": "w_ember_fangs",
+   "req": {
+    "dex": 13
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 320,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 510,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 770,
+      "shards": 9,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 1090,
+      "shards": 12,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 1470,
+      "shards": 15,
+      "materials": {
+       "m_iron": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "history",
+      "ref": "w_ember_fangs",
+      "text": "More of its history"
+     },
+     {
+      "at": 8,
+      "type": "combo",
+      "ref": "dual",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "s_plank": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "start"
+    }
+   ],
+   "source": {
+    "type": "start"
+   },
+   "hint": "You woke with it.",
+   "weight": "medium",
+   "shield_class": "heater",
+   "visual": "model",
+   "model": "s_plank",
+   "gear_model": "gear/shield_heater",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 28,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10,
+     "block": 0.03
+    },
+    "costs": [
+     {
+      "gold": 40,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 95,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 135,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 2,
+      "type": "efficiency",
+      "text": "Learned: guarding with it costs 2% less"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "s_garrison": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "shield_class": "kite",
+   "visual": "model",
+   "model": "s_garrison",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 84,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10,
+     "block": 0.03
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 100,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 220,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 295,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Learned: guarding with it costs 2% less"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "s_tower": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "weight": "heavy",
+   "shield_class": "segmented",
+   "visual": "model",
+   "model": "s_tower",
+   "req": {
+    "endurance": 8
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10,
+     "block": 0.03
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 165,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 480,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Learned: guarding with it costs 2% less"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "s_reliquary": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cathedral_beast",
+     "region": "cathedral",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cathedral_beast",
+    "region": "cathedral",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Cathedral of Ash carries it.",
+   "weight": "heavy",
+   "shield_class": "kite",
+   "visual": "model",
+   "model": "s_reliquary",
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10,
+     "block": 0.03
+    },
+    "costs": [
+     {
+      "gold": 170,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 405,
+      "shards": 6,
+      "materials": {
+       "m_silver": 1
+      }
+     },
+     {
+      "gold": 570,
+      "shards": 8,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 775,
+      "shards": 10,
+      "materials": {
+       "m_silver": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Learned: guarding with it costs 2% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "s_rime": {
+   "tier": "relic",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "frostbound_king",
+     "region": "citadel",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "frostbound_king",
+    "region": "citadel",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "weight": "medium",
+   "shield_class": "curved",
+   "visual": "model",
+   "model": "s_rime",
+   "mat": "m_rime",
+   "advanced": true,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10,
+     "block": 0.03
+    },
+    "costs": [
+     {
+      "gold": 255,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 410,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 615,
+      "shards": 9,
+      "materials": {
+       "m_rime": 1
+      }
+     },
+     {
+      "gold": 870,
+      "shards": 12,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 1180,
+      "shards": 15,
+      "materials": {
+       "m_rime": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Learned: guarding with it costs 2% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_worn_helm": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "start"
+    }
+   ],
+   "source": {
+    "type": "start"
+   },
+   "hint": "You woke with it.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "base",
+   "part_slot": "helm",
+   "part_ready": true,
+   "set_piece": false,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 28,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 30,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 50,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 70,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 100,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 140,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 1,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 2,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_worn_chest": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "start"
+    }
+   ],
+   "source": {
+    "type": "start"
+   },
+   "hint": "You woke with it.",
+   "weight": "medium",
+   "visual": "suit",
+   "part": "base",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}",
+   "set_piece": false,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 28,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 40,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 95,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 135,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 1,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 2,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_worn_gauntlets": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "start"
+    }
+   ],
+   "source": {
+    "type": "start"
+   },
+   "hint": "You woke with it.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "base",
+   "part_slot": "arms",
+   "part_ready": true,
+   "set_piece": false,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 28,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 25,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 40,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 60,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 85,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 115,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 1,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 2,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_worn_legs": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "start"
+    }
+   ],
+   "source": {
+    "type": "start"
+   },
+   "hint": "You woke with it.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "base",
+   "part_slot": "legs",
+   "part_ready": true,
+   "set_piece": false,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 28,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 30,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 50,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 70,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 100,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 140,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 1,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 2,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_garrison_helm": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "region",
+     "id": "courtyard",
+     "region": "courtyard",
+     "stage": 4,
+     "label": "The Murder Hole"
+    },
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "courtyard",
+    "region": "courtyard",
+    "stage": 4,
+    "label": "The Murder Hole"
+   },
+   "hint": "Left behind somewhere along the road through The Fallen Courtyard.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "garrison",
+   "part_slot": "helm",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 61,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 50,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 75,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 115,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 165,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 220,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_garrison_chest": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "visual": "suit",
+   "part": "garrison",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_garrison",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 123,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 100,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 220,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 295,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_garrison_gauntlets": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "region",
+     "id": "courtyard",
+     "region": "courtyard",
+     "stage": 1,
+     "label": "The Guardhouse"
+    },
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "courtyard",
+    "region": "courtyard",
+    "stage": 1,
+    "label": "The Guardhouse"
+   },
+   "hint": "Left behind somewhere along the road through The Fallen Courtyard.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "garrison",
+   "part_slot": "arms",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 46,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 40,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 95,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 135,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_garrison_legs": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "garrison",
+   "part_slot": "legs",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 77,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 50,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 75,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 115,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 165,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 220,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_black_helm": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "hollow_executioner",
+     "region": "blackwood",
+     "guaranteed": false
+    },
+    {
+     "type": "shop",
+     "stage": 1
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "hollow_executioner",
+    "region": "blackwood",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Blackwood carries it.",
+   "weight": "light",
+   "visual": "none",
+   "part": "black",
+   "part_slot": "helm",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 179,
+   "shop_stage": 1,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 125,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 265,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 360,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "widow",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_black_chest": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "hollow_executioner",
+     "region": "blackwood",
+     "guaranteed": false
+    },
+    {
+     "type": "shop",
+     "stage": 1
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "hollow_executioner",
+    "region": "blackwood",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Blackwood carries it.",
+   "weight": "light",
+   "visual": "suit",
+   "part": "black",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_black",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 358,
+   "shop_stage": 1,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 165,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 480,
+      "shards": 10,
+      "materials": {
+       "m_iron": 6
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "widow",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_black_gauntlets": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "pale_huntsman",
+     "region": "blackwood",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "blackwood",
+     "region": "blackwood",
+     "stage": 2,
+     "label": "The Hollow Oak"
+    },
+    {
+     "type": "shop",
+     "stage": 1
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "pale_huntsman",
+    "region": "blackwood",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Blackwood carries it.",
+   "weight": "light",
+   "visual": "none",
+   "part": "black",
+   "part_slot": "arms",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 134,
+   "shop_stage": 1,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 105,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 220,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 300,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "widow",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_black_legs": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "pale_huntsman",
+     "region": "blackwood",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "blackwood",
+     "region": "blackwood",
+     "stage": 5,
+     "label": "Under the Gibbet"
+    },
+    {
+     "type": "shop",
+     "stage": 1
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "pale_huntsman",
+    "region": "blackwood",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Blackwood carries it.",
+   "weight": "light",
+   "visual": "none",
+   "part": "black",
+   "part_slot": "legs",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 224,
+   "shop_stage": 1,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 125,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 265,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 360,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "widow",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_ash_helm": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "ash",
+   "part_slot": "helm",
+   "part_ready": true,
+   "req": {
+    "endurance": 8
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 125,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 265,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 360,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "ashbound",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_ash_chest": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "weight": "heavy",
+   "visual": "suit",
+   "part": "ash",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_ash",
+   "req": {
+    "endurance": 8
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 165,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 480,
+      "shards": 10,
+      "materials": {
+       "m_iron": 6
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "ashbound",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_ash_gauntlets": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "ash",
+   "part_slot": "arms",
+   "part_ready": true,
+   "req": {
+    "endurance": 8
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 105,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 220,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 300,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "ashbound",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_ash_legs": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "ash",
+   "part_slot": "legs",
+   "part_ready": true,
+   "req": {
+    "endurance": 8
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 125,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 265,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 360,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "ashbound",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_vigil_helm": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "gravewarden",
+     "region": "crypt",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "crypt",
+     "region": "crypt",
+     "stage": 4,
+     "label": "The Royal Vault"
+    },
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "gravewarden",
+    "region": "crypt",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Sunken Crypt carries it.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "vigil",
+   "part_slot": "helm",
+   "part_ready": true,
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 364,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 125,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 200,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 300,
+      "shards": 6,
+      "materials": {
+       "m_silver": 1
+      }
+     },
+     {
+      "gold": 430,
+      "shards": 8,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 580,
+      "shards": 10,
+      "materials": {
+       "m_silver": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "gravekeeper",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_vigil_chest": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cathedral_beast",
+     "region": "cathedral",
+     "guaranteed": false
+    },
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cathedral_beast",
+    "region": "cathedral",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Cathedral of Ash carries it.",
+   "weight": "medium",
+   "visual": "suit",
+   "part": "vigil",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_vigil",
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 728,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 170,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 405,
+      "shards": 6,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 570,
+      "shards": 8,
+      "materials": {
+       "m_silver": 4
+      }
+     },
+     {
+      "gold": 775,
+      "shards": 10,
+      "materials": {
+       "m_silver": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "gravekeeper",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_vigil_gauntlets": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "crimson_widow",
+     "region": "cathedral",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "cathedral",
+     "region": "cathedral",
+     "stage": 3,
+     "label": "The Reliquary"
+    },
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "crimson_widow",
+    "region": "cathedral",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Cathedral of Ash carries it.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "vigil",
+   "part_slot": "arms",
+   "part_ready": true,
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 273,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_silver": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_silver": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "gravekeeper",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_vigil_legs": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "gravewarden",
+     "region": "crypt",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "crypt",
+     "region": "crypt",
+     "stage": 1,
+     "label": "The Ossuary"
+    },
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "gravewarden",
+    "region": "crypt",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Sunken Crypt carries it.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "vigil",
+   "part_slot": "legs",
+   "part_ready": true,
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 454,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 125,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 200,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 300,
+      "shards": 6,
+      "materials": {
+       "m_silver": 1
+      }
+     },
+     {
+      "gold": 430,
+      "shards": 8,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 580,
+      "shards": 10,
+      "materials": {
+       "m_silver": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "gravekeeper",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_frost_helm": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "region",
+     "id": "citadel",
+     "region": "citadel",
+     "stage": 5,
+     "label": "The Solar"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "citadel",
+    "region": "citadel",
+    "stage": 5,
+    "label": "The Solar"
+   },
+   "hint": "Left behind somewhere along the road through The Frozen Citadel.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "frost",
+   "part_slot": "helm",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 125,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 200,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 300,
+      "shards": 6,
+      "materials": {
+       "m_rime": 1
+      }
+     },
+     {
+      "gold": 430,
+      "shards": 8,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 580,
+      "shards": 10,
+      "materials": {
+       "m_rime": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "frostwarden",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_frost_chest": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "frostbound_king",
+     "region": "citadel",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "frostbound_king",
+    "region": "citadel",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "weight": "heavy",
+   "visual": "suit",
+   "part": "frost",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_frost",
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 170,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 405,
+      "shards": 6,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 570,
+      "shards": 8,
+      "materials": {
+       "m_rime": 4
+      }
+     },
+     {
+      "gold": 775,
+      "shards": 10,
+      "materials": {
+       "m_rime": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "frostwarden",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_frost_gauntlets": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "rimewyrm",
+     "region": "citadel",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "citadel",
+     "region": "citadel",
+     "stage": 1,
+     "label": "The Armoury"
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "rimewyrm",
+    "region": "citadel",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "frost",
+   "part_slot": "arms",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_rime": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_rime": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "frostwarden",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_frost_legs": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "rimewyrm",
+     "region": "citadel",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "rimewyrm",
+    "region": "citadel",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "frost",
+   "part_slot": "legs",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 125,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 200,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 300,
+      "shards": 6,
+      "materials": {
+       "m_rime": 1
+      }
+     },
+     {
+      "gold": 430,
+      "shards": 8,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 580,
+      "shards": 10,
+      "materials": {
+       "m_rime": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "frostwarden",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_regal_helm": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "forgotten_monarch",
+     "region": "throne",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "forgotten_monarch",
+    "region": "throne",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Hollow Throne carries it.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "regal",
+   "part_slot": "helm",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 305,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 460,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 655,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 885,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "sovereign",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_regal_chest": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "forgotten_monarch",
+     "region": "throne",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "forgotten_monarch",
+    "region": "throne",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Hollow Throne carries it.",
+   "weight": "medium",
+   "visual": "suit",
+   "part": "regal",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_regal",
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 255,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 410,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 615,
+      "shards": 9,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 870,
+      "shards": 12,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 1180,
+      "shards": 15,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "sovereign",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_regal_gauntlets": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "region",
+     "id": "throne",
+     "region": "throne",
+     "stage": 1,
+     "label": "The Treasury"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "throne",
+    "region": "throne",
+    "stage": 1,
+    "label": "The Treasury"
+   },
+   "hint": "Left behind somewhere along the road through The Hollow Throne.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "regal",
+   "part_slot": "arms",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 160,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 255,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 385,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 545,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 735,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "sovereign",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_regal_legs": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "region",
+     "id": "throne",
+     "region": "throne",
+     "stage": 1,
+     "label": "The Treasury"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "throne",
+    "region": "throne",
+    "stage": 1,
+    "label": "The Treasury"
+   },
+   "hint": "Left behind somewhere along the road through The Hollow Throne.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "regal",
+   "part_slot": "legs",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 305,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 460,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 655,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 885,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "sovereign",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_hollow_helm": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "region",
+     "id": "deep",
+     "region": "deep",
+     "stage": 4,
+     "label": "The Reliquary of Vows"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "deep",
+    "region": "deep",
+    "stage": 4,
+    "label": "The Reliquary of Vows"
+   },
+   "hint": "Left behind somewhere along the road through The Hollow Deep.",
+   "weight": "light",
+   "visual": "none",
+   "part": "hollow",
+   "part_slot": "helm",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 305,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 460,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 655,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 885,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "architect",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_hollow_chest": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "devourer",
+     "region": "deep",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "devourer",
+    "region": "deep",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Hollow Deep carries it.",
+   "weight": "light",
+   "visual": "suit",
+   "part": "hollow",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_hollow",
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 255,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 410,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 615,
+      "shards": 9,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 870,
+      "shards": 12,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 1180,
+      "shards": 15,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "architect",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_hollow_gauntlets": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "region",
+     "id": "deep",
+     "region": "deep",
+     "stage": 1,
+     "label": "The Unread Wall"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "deep",
+    "region": "deep",
+    "stage": 1,
+    "label": "The Unread Wall"
+   },
+   "hint": "Left behind somewhere along the road through The Hollow Deep.",
+   "weight": "light",
+   "visual": "none",
+   "part": "hollow",
+   "part_slot": "arms",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 160,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 255,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 385,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 545,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 735,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "architect",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_hollow_legs": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "region",
+     "id": "deep",
+     "region": "deep",
+     "stage": 4,
+     "label": "The Reliquary of Vows"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "deep",
+    "region": "deep",
+    "stage": 4,
+    "label": "The Reliquary of Vows"
+   },
+   "hint": "Left behind somewhere along the road through The Hollow Deep.",
+   "weight": "light",
+   "visual": "none",
+   "part": "hollow",
+   "part_slot": "legs",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 305,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 460,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 655,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 885,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "architect",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "r_iron": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "gravewarden",
+     "region": "crypt",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "courtyard",
+     "region": "courtyard",
+     "stage": 3,
+     "label": "The Well"
+    },
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "gravewarden",
+    "region": "crypt",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Sunken Crypt carries it.",
+   "visual": "none",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 31,
+   "shop_stage": 0,
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "r_ember": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "visual": "none",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "r_widow": {
+   "tier": "legendary",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "crimson_widow",
+     "region": "cathedral",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "crimson_widow",
+    "region": "cathedral",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Cathedral of Ash carries it.",
+   "visual": "none",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 154,
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "r_frost": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "frostbound_king",
+     "region": "citadel",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "citadel",
+     "region": "citadel",
+     "stage": 5,
+     "label": "The Solar"
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "frostbound_king",
+    "region": "citadel",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "visual": "none",
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "r_crown": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "forgotten_monarch",
+     "region": "throne",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "forgotten_monarch",
+    "region": "throne",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Hollow Throne carries it.",
+   "visual": "none",
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "quest_item": true,
+   "unsellable": true,
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "x_candle": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "region",
+     "id": "cathedral",
+     "region": "cathedral",
+     "stage": 1,
+     "label": "The Almoner's Box"
+    },
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "cathedral",
+    "region": "cathedral",
+    "stage": 1,
+    "label": "The Almoner's Box"
+   },
+   "hint": "Left behind somewhere along the road through The Cathedral of Ash.",
+   "visual": "none",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 105,
+   "shop_stage": 0,
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "x_bell": {
+   "tier": "rare",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cathedral_beast",
+     "region": "cathedral",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cathedral_beast",
+    "region": "cathedral",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Cathedral of Ash carries it.",
+   "visual": "none",
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 112,
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "x_tooth": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "hollow_executioner",
+     "region": "blackwood",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "hollow_executioner",
+    "region": "blackwood",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Blackwood carries it.",
+   "visual": "none",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "x_tear": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "frostbound_king",
+     "region": "citadel",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "frostbound_king",
+    "region": "citadel",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Frozen Citadel carries it.",
+   "visual": "none",
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "x_heart": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "region",
+     "id": "throne",
+     "region": "throne",
+     "stage": 4,
+     "label": "Behind the Throne"
+    },
+    {
+     "type": "ng",
+     "ng": 1
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "throne",
+    "region": "throne",
+    "stage": 4,
+    "label": "Behind the Throne"
+   },
+   "hint": "Left behind somewhere along the road through The Hollow Throne.",
+   "visual": "none",
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_wyrmfang": {
+   "tier": "relic",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cinder_wyrm",
+     "region": "roost",
+     "guaranteed": true
+    },
+    {
+     "type": "boss",
+     "id": "azhurion",
+     "region": "throne",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cinder_wyrm",
+    "region": "roost",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Wyrm's Roost carries it.",
+   "visual": "model",
+   "model": "w_wyrmfang",
+   "req": {
+    "strength": 13
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 320,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 510,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 770,
+      "shards": 9,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 1090,
+      "shards": 12,
+      "materials": {
+       "m_scale": 4
+      }
+     },
+     {
+      "gold": 1470,
+      "shards": 15,
+      "materials": {
+       "m_scale": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "history",
+      "ref": "w_wyrmfang",
+      "text": "More of its history"
+     },
+     {
+      "at": 8,
+      "type": "combo",
+      "ref": "greatsword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_hunger": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "devourer",
+     "region": "deep",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "devourer",
+    "region": "deep",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Hollow Deep carries it.",
+   "visual": "model",
+   "model": "w_hunger",
+   "req": {
+    "dex": 13
+   },
+   "mat": "m_glass",
+   "advanced": true,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 320,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 510,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 770,
+      "shards": 9,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 1090,
+      "shards": 12,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 1470,
+      "shards": 15,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "history",
+      "ref": "w_hunger",
+      "text": "More of its history"
+     },
+     {
+      "at": 8,
+      "type": "combo",
+      "ref": "dual",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "s_scale": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cinder_wyrm",
+     "region": "roost",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cinder_wyrm",
+    "region": "roost",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Wyrm's Roost carries it.",
+   "weight": "heavy",
+   "shield_class": "segmented",
+   "visual": "model",
+   "model": "s_scale",
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10,
+     "block": 0.03
+    },
+    "costs": [
+     {
+      "gold": 170,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 405,
+      "shards": 6,
+      "materials": {
+       "m_scale": 1
+      }
+     },
+     {
+      "gold": 570,
+      "shards": 8,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 775,
+      "shards": 10,
+      "materials": {
+       "m_scale": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Learned: guarding with it costs 2% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "r_brood": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cinder_wyrm",
+     "region": "roost",
+     "guaranteed": false
+    },
+    {
+     "type": "region",
+     "id": "roost",
+     "region": "roost",
+     "stage": 4,
+     "label": "The Clutch"
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cinder_wyrm",
+    "region": "roost",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Wyrm's Roost carries it.",
+   "visual": "none",
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "x_name": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "devourer",
+     "region": "deep",
+     "guaranteed": true
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "devourer",
+    "region": "deep",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Hollow Deep carries it.",
+   "visual": "none",
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "quest_item": true,
+   "unsellable": true,
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_wyrm_helm": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cinder_wyrm",
+     "region": "roost",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cinder_wyrm",
+    "region": "roost",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Wyrm's Roost carries it.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "wyrm",
+   "part_slot": "helm",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 125,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 200,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 300,
+      "shards": 6,
+      "materials": {
+       "m_scale": 1
+      }
+     },
+     {
+      "gold": 430,
+      "shards": 8,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 580,
+      "shards": 10,
+      "materials": {
+       "m_scale": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "dragonforged",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_wyrm_chest": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "cinder_wyrm",
+     "region": "roost",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "cinder_wyrm",
+    "region": "roost",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Wyrm's Roost carries it.",
+   "weight": "heavy",
+   "visual": "suit",
+   "part": "wyrm",
+   "part_slot": "chest",
+   "part_ready": true,
+   "model": "knight_{body}_wyrm",
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 170,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 405,
+      "shards": 6,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 570,
+      "shards": 8,
+      "materials": {
+       "m_scale": 4
+      }
+     },
+     {
+      "gold": 775,
+      "shards": 10,
+      "materials": {
+       "m_scale": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "dragonforged",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_wyrm_gauntlets": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "region",
+     "id": "roost",
+     "region": "roost",
+     "stage": 1,
+     "label": "The Tack Room"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "roost",
+    "region": "roost",
+    "stage": 1,
+    "label": "The Tack Room"
+   },
+   "hint": "Left behind somewhere along the road through The Wyrm's Roost.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "wyrm",
+   "part_slot": "arms",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_scale": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_scale": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "dragonforged",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "a_wyrm_legs": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "region",
+     "id": "roost",
+     "region": "roost",
+     "stage": 3,
+     "label": "The Keeper's Cell"
+    }
+   ],
+   "source": {
+    "type": "region",
+    "id": "roost",
+    "region": "roost",
+    "stage": 3,
+    "label": "The Keeper's Cell"
+   },
+   "hint": "Left behind somewhere along the road through The Wyrm's Roost.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "wyrm",
+   "part_slot": "legs",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 125,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 200,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 300,
+      "shards": 6,
+      "materials": {
+       "m_scale": 1
+      }
+     },
+     {
+      "gold": 430,
+      "shards": 8,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 580,
+      "shards": 10,
+      "materials": {
+       "m_scale": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "dragonforged",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   }
+  },
+  "w_dawnline": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "quest",
+     "id": "older_than_my_bloodline",
+     "giver": "Orren"
+    },
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "quest",
+    "id": "older_than_my_bloodline",
+    "giver": "Orren"
+   },
+   "hint": "Orren has asked something of you.",
+   "visual": "model",
+   "model": "w_dawnline",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 147,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 80,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 130,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 190,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 270,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 370,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "history",
+      "ref": "w_dawnline",
+      "text": "More of its history"
+     },
+     {
+      "at": 4,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "formerly": "Dawnline"
+  },
+  "w_vigil_edge": {
+   "tier": "rare",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "quest",
+     "id": "relief_of_the_gate",
+     "giver": "Lyra"
+    },
+    {
+     "type": "shop",
+     "stage": 1
+    }
+   ],
+   "source": {
+    "type": "quest",
+    "id": "relief_of_the_gate",
+    "giver": "Lyra"
+   },
+   "hint": "Lyra has asked something of you.",
+   "visual": "model",
+   "model": "w_vigil_edge",
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 315,
+   "shop_stage": 1,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 130,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 210,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 310,
+      "shards": 6,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 440,
+      "shards": 8,
+      "materials": {
+       "m_silver": 4
+      }
+     },
+     {
+      "gold": 600,
+      "shards": 10,
+      "materials": {
+       "m_silver": 6
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_vigil_edge",
+      "text": "More of its history"
+     },
+     {
+      "at": 5,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "formerly": "Vigil Edge"
+  },
+  "w_starfall": {
+   "tier": "legendary",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "azhurion",
+     "region": "throne",
+     "guaranteed": true
+    },
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "azhurion",
+    "region": "throne",
+    "guaranteed": true
+   },
+   "hint": "A guardian of The Hollow Throne carries it.",
+   "visual": "model",
+   "model": "w_starfall",
+   "req": {
+    "strength": 7,
+    "dex": 7
+   },
+   "mat": "m_glass",
+   "advanced": true,
+   "sell": 909,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 210,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 335,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 505,
+      "shards": 6,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 715,
+      "shards": 8,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 965,
+      "shards": 10,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_starfall",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "formerly": "Starfall"
+  },
+  "w_throneshard": {
+   "tier": "legendary",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "quest",
+     "id": "the_rain",
+     "giver": "Lyra"
+    },
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "quest",
+    "id": "the_rain",
+    "giver": "Lyra"
+   },
+   "hint": "Lyra has asked something of you.",
+   "visual": "model",
+   "model": "w_throneshard",
+   "req": {
+    "strength": 11
+   },
+   "mat": "m_glass",
+   "advanced": true,
+   "sell": 1120,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 210,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 335,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 505,
+      "shards": 6,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 715,
+      "shards": 8,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 965,
+      "shards": 10,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_throneshard",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "greatsword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "formerly": "Throneshard"
+  },
+  "a_worn_shoulders": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "base",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "set_piece": false,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 24,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 25,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 40,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 60,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 85,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 115,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 1,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 2,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_worn_shoulders",
+    "name": "Wayfarer Pauldrons",
+    "slot": "shoulders",
+    "rarity": "common",
+    "price": 70,
+    "desc": "Two plain plates on worn straps. They sit as if they had been yours for years.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#aeb2b8",
+     "set": "worn"
+    },
+    "defense": 1
+   }
+  },
+  "a_worn_boots": {
+   "tier": "common",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "base",
+   "part_slot": "boots",
+   "part_ready": true,
+   "set_piece": false,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 21,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 25,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 40,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 60,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 85,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 115,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 3,
+    "marks": [
+     {
+      "at": 1,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 2,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 3,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_worn_boots",
+    "name": "Wayfarer Boots",
+    "slot": "boots",
+    "rarity": "common",
+    "price": 60,
+    "desc": "Flat-soled and resoled. Whoever walked in them last walked a long way.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#aeb2b8",
+     "set": "worn"
+    },
+    "defense": 1,
+    "stamina": 2
+   }
+  },
+  "a_garrison_shoulders": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "garrison",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 43,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 40,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 95,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 135,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_garrison_shoulders",
+    "name": "Garrison Pauldrons",
+    "slot": "shoulders",
+    "rarity": "uncommon",
+    "price": 125,
+    "desc": "Stamped with a company number. The company is a line in a roll nobody reads.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#c4c8ce",
+     "set": "garrison"
+    },
+    "defense": 2,
+    "hp": 2
+   }
+  },
+  "a_garrison_boots": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 0
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 0
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "garrison",
+   "part_slot": "boots",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 36,
+   "shop_stage": 0,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 40,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 95,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 135,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 185,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 2,
+      "type": "discovery",
+      "ref": "crownless",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_garrison_boots",
+    "name": "Garrison Sabatons",
+    "slot": "boots",
+    "rarity": "uncommon",
+    "price": 105,
+    "desc": "Issued in pairs, in three sizes. These are the middle size.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#c4c8ce",
+     "set": "garrison"
+    },
+    "defense": 2,
+    "stamina": 2
+   }
+  },
+  "a_black_shoulders": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 1
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 1
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "light",
+   "visual": "none",
+   "part": "black",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 125,
+   "shop_stage": 1,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 105,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 220,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 300,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "widow",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_black_shoulders",
+    "name": "Blackwood Spaulders",
+    "slot": "shoulders",
+    "rarity": "rare",
+    "price": 360,
+    "desc": "Lacquered so the light slides off. Cut high, to leave the arms their reach.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#3c4038",
+     "set": "black"
+    },
+    "defense": 2,
+    "hp": 4
+   }
+  },
+  "a_black_boots": {
+   "tier": "rare",
+   "family": "widow",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "veil_dancer",
+     "region": "blackwood"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "veil_dancer",
+    "region": "blackwood"
+   },
+   "hint": "Something rare walks The Blackwood. It does not always show itself.",
+   "weight": "light",
+   "visual": "none",
+   "part": "black",
+   "part_slot": "boots",
+   "part_ready": true,
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 105,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 220,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 300,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "widow",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_black_boots",
+    "name": "Blackwood Treads",
+    "slot": "boots",
+    "rarity": "rare",
+    "price": 0,
+    "desc": "Soft at the ankle and silent on leaf-fall.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#3c4038",
+     "set": "black"
+    },
+    "defense": 3,
+    "stamina": 6
+   }
+  },
+  "a_ash_shoulders": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "gate_colossus",
+     "region": "courtyard"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "gate_colossus",
+    "region": "courtyard"
+   },
+   "hint": "Something rare walks The Fallen Courtyard. It does not always show itself.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "ash",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "req": {
+    "endurance": 8
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 105,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 220,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 300,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "ashbound",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_ash_shoulders",
+    "name": "Ashen Pauldrons",
+    "slot": "shoulders",
+    "rarity": "rare",
+    "price": 0,
+    "desc": "The scorch goes all the way through. They are heavier than they look, and they look heavy.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#4a4440",
+     "set": "ash"
+    },
+    "defense": 3,
+    "hp": 4,
+    "resist": 6
+   }
+  },
+  "a_ash_boots": {
+   "tier": "rare",
+   "family": "ashbound",
+   "sources": [
+    {
+     "type": "boss",
+     "id": "ashen_sentinel",
+     "region": "courtyard",
+     "guaranteed": false
+    }
+   ],
+   "source": {
+    "type": "boss",
+    "id": "ashen_sentinel",
+    "region": "courtyard",
+    "guaranteed": false
+   },
+   "hint": "A guardian of The Fallen Courtyard carries it.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "ash",
+   "part_slot": "boots",
+   "part_ready": true,
+   "req": {
+    "endurance": 8
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 112,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 105,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 6,
+      "materials": {
+       "m_iron": 1
+      }
+     },
+     {
+      "gold": 220,
+      "shards": 8,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 300,
+      "shards": 10,
+      "materials": {
+       "m_iron": 3
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 7,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "ashbound",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 5,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 7,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_ash_boots",
+    "name": "Ashen Sabatons",
+    "slot": "boots",
+    "rarity": "rare",
+    "price": 0,
+    "desc": "The soles have fused and been ground flat again, more than once.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#4a4440",
+     "set": "ash"
+    },
+    "defense": 3,
+    "stamina": 4,
+    "resist": 6
+   }
+  },
+  "a_vigil_shoulders": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "bell_ringer",
+     "region": "cathedral"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "bell_ringer",
+    "region": "cathedral"
+   },
+   "hint": "Something rare walks The Cathedral of Ash. It does not always show itself.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "vigil",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_silver": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_silver": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "gravekeeper",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_vigil_shoulders",
+    "name": "Vigil Mantle",
+    "slot": "shoulders",
+    "rarity": "epic",
+    "price": 0,
+    "desc": "A short mantle of plates, made to be stood in for a very long time.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#8c7a52",
+     "set": "vigil"
+    },
+    "defense": 4,
+    "hp": 6
+   }
+  },
+  "a_vigil_boots": {
+   "tier": "legendary",
+   "family": "gravekeeper",
+   "sources": [
+    {
+     "type": "shop",
+     "stage": 3
+    }
+   ],
+   "source": {
+    "type": "shop",
+    "stage": 3
+   },
+   "hint": "Orren sells it, once you have walked far enough.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "vigil",
+   "part_slot": "boots",
+   "part_ready": true,
+   "mat": "m_silver",
+   "advanced": false,
+   "sell": 218,
+   "shop_stage": 3,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_silver": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_silver": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_silver": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "gravekeeper",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_vigil_boots",
+    "name": "Vigil Sabatons",
+    "slot": "boots",
+    "rarity": "epic",
+    "price": 625,
+    "desc": "Worn smooth inside by one man standing still.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#8c7a52",
+     "set": "vigil"
+    },
+    "defense": 3,
+    "stamina": 6
+   }
+  },
+  "a_frost_shoulders": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "hoarbeast",
+     "region": "citadel"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "hoarbeast",
+    "region": "citadel"
+   },
+   "hint": "Something rare walks The Frozen Citadel. It does not always show itself.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "frost",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_rime": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_rime": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "frostwarden",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_frost_shoulders",
+    "name": "Rimebound Pauldrons",
+    "slot": "shoulders",
+    "rarity": "epic",
+    "price": 0,
+    "desc": "Frost gathers on them indoors.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#8fb0c0",
+     "set": "frost"
+    },
+    "defense": 4,
+    "hp": 6,
+    "resist": 6
+   }
+  },
+  "a_frost_boots": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "craft",
+     "id": "a_frost_boots",
+     "region": "citadel"
+    }
+   ],
+   "source": {
+    "type": "craft",
+    "id": "a_frost_boots",
+    "region": "citadel"
+   },
+   "hint": "Orren could make it, given what The Frozen Citadel leaves behind.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "frost",
+   "part_slot": "boots",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_rime": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_rime": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "frostwarden",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "craft": {
+    "gold": 700,
+    "shards": 6,
+    "materials": {
+     "m_rime": 6
+    }
+   },
+   "base": {
+    "id": "a_frost_boots",
+    "name": "Rimebound Sabatons",
+    "slot": "boots",
+    "rarity": "epic",
+    "price": 0,
+    "desc": "They grip ice as though they were part of it.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#8fb0c0",
+     "set": "frost"
+    },
+    "defense": 3,
+    "stamina": 6,
+    "resist": 6
+   }
+  },
+  "a_regal_shoulders": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "throne_colossus",
+     "region": "throne"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "throne_colossus",
+    "region": "throne"
+   },
+   "hint": "Something rare walks The Hollow Throne. It does not always show itself.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "regal",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 160,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 255,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 385,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 545,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 735,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "sovereign",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_regal_shoulders",
+    "name": "Monarch's Pauldrons",
+    "slot": "shoulders",
+    "rarity": "legendary",
+    "price": 0,
+    "desc": "Fluted, and gilded only where a hand would never touch.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#b89b5e",
+     "set": "regal"
+    },
+    "defense": 5,
+    "hp": 8
+   }
+  },
+  "a_regal_boots": {
+   "tier": "relic",
+   "family": "sovereign",
+   "sources": [
+    {
+     "type": "craft",
+     "id": "a_regal_boots",
+     "region": "throne"
+    }
+   ],
+   "source": {
+    "type": "craft",
+    "id": "a_regal_boots",
+    "region": "throne"
+   },
+   "hint": "Orren could make it, given what The Hollow Throne leaves behind.",
+   "weight": "medium",
+   "visual": "none",
+   "part": "regal",
+   "part_slot": "boots",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 160,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 255,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 385,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 545,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 735,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "sovereign",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "craft": {
+    "gold": 1200,
+    "shards": 10,
+    "materials": {
+     "m_glass": 8,
+     "m_core": 1
+    }
+   },
+   "base": {
+    "id": "a_regal_boots",
+    "name": "Monarch's Sabatons",
+    "slot": "boots",
+    "rarity": "legendary",
+    "price": 0,
+    "desc": "Made for a floor that was polished every morning.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#b89b5e",
+     "set": "regal"
+    },
+    "defense": 4,
+    "stamina": 8
+   }
+  },
+  "a_hollow_shoulders": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "the_unburied",
+     "region": "deep"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "the_unburied",
+    "region": "deep"
+   },
+   "hint": "Something rare walks The Hollow Deep. It does not always show itself.",
+   "weight": "light",
+   "visual": "none",
+   "part": "hollow",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 160,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 255,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 385,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 545,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 735,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "architect",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_hollow_shoulders",
+    "name": "Hollowed Spaulders",
+    "slot": "shoulders",
+    "rarity": "legendary",
+    "price": 0,
+    "desc": "Thin as a leaf and it will not dent. Nobody alive knows how to make the seam.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#1e1e24",
+     "set": "hollow"
+    },
+    "defense": 4,
+    "hp": 8
+   }
+  },
+  "a_hollow_boots": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "craft",
+     "id": "a_hollow_boots",
+     "region": "deep"
+    }
+   ],
+   "source": {
+    "type": "craft",
+    "id": "a_hollow_boots",
+    "region": "deep"
+   },
+   "hint": "Orren could make it, given what The Hollow Deep leaves behind.",
+   "weight": "light",
+   "visual": "none",
+   "part": "hollow",
+   "part_slot": "boots",
+   "part_ready": true,
+   "mat": "m_glass",
+   "advanced": false,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 160,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 255,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 385,
+      "shards": 9,
+      "materials": {
+       "m_glass": 1
+      }
+     },
+     {
+      "gold": 545,
+      "shards": 12,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 735,
+      "shards": 15,
+      "materials": {
+       "m_glass": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "discovery",
+      "ref": "architect",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 8,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "craft": {
+    "gold": 1200,
+    "shards": 10,
+    "materials": {
+     "m_glass": 8,
+     "m_core": 1
+    }
+   },
+   "base": {
+    "id": "a_hollow_boots",
+    "name": "Hollowed Treads",
+    "slot": "boots",
+    "rarity": "legendary",
+    "price": 0,
+    "desc": "They weigh nothing and leave no print.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#1e1e24",
+     "set": "hollow"
+    },
+    "defense": 4,
+    "stamina": 10
+   }
+  },
+  "a_wyrm_shoulders": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "brood_keeper",
+     "region": "roost"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "brood_keeper",
+    "region": "roost"
+   },
+   "hint": "Something rare walks The Wyrm's Roost. It does not always show itself.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "wyrm",
+   "part_slot": "shoulders",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_scale": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_scale": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "dragonforged",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "a_wyrm_shoulders",
+    "name": "Broodscale Pauldrons",
+    "slot": "shoulders",
+    "rarity": "epic",
+    "price": 0,
+    "desc": "Scales set in overlapping rows, each one drilled by hand.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#7a3a28",
+     "set": "wyrm"
+    },
+    "defense": 4,
+    "hp": 6,
+    "resist": 7
+   }
+  },
+  "a_wyrm_boots": {
+   "tier": "legendary",
+   "family": "dragonforged",
+   "sources": [
+    {
+     "type": "craft",
+     "id": "a_wyrm_boots",
+     "region": "roost"
+    }
+   ],
+   "source": {
+    "type": "craft",
+    "id": "a_wyrm_boots",
+    "region": "roost"
+   },
+   "hint": "Orren could make it, given what The Wyrm's Roost leaves behind.",
+   "weight": "heavy",
+   "visual": "none",
+   "part": "wyrm",
+   "part_slot": "boots",
+   "part_ready": true,
+   "req": {
+    "endurance": 10
+   },
+   "mat": "m_scale",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 105,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 170,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 250,
+      "shards": 6,
+      "materials": {
+       "m_scale": 1
+      }
+     },
+     {
+      "gold": 355,
+      "shards": 8,
+      "materials": {
+       "m_scale": 2
+      }
+     },
+     {
+      "gold": 485,
+      "shards": 10,
+      "materials": {
+       "m_scale": 3,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "discovery",
+      "ref": "dragonforged",
+      "text": "Word of another piece of its family"
+     },
+     {
+      "at": 6,
+      "type": "efficiency",
+      "text": "Worn in: stamina returns 1% faster while you wear it"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "craft": {
+    "gold": 700,
+    "shards": 6,
+    "materials": {
+     "m_scale": 6
+    }
+   },
+   "base": {
+    "id": "a_wyrm_boots",
+    "name": "Broodscale Sabatons",
+    "slot": "boots",
+    "rarity": "epic",
+    "price": 0,
+    "desc": "Scaled to the knee, and proof against a hot floor.",
+    "ng_min": 0,
+    "look": {
+     "metal": "#7a3a28",
+     "set": "wyrm"
+    },
+    "defense": 4,
+    "stamina": 6,
+    "resist": 7
+   }
+  },
+  "w_cold_resolve": {
+   "tier": "legendary",
+   "family": "frostwarden",
+   "sources": [
+    {
+     "type": "craft",
+     "id": "w_cold_resolve",
+     "region": "citadel"
+    }
+   ],
+   "source": {
+    "type": "craft",
+    "id": "w_cold_resolve",
+    "region": "citadel"
+   },
+   "hint": "Orren could make it, given what The Frozen Citadel leaves behind.",
+   "visual": "none",
+   "req": {
+    "strength": 7,
+    "dex": 7
+   },
+   "mat": "m_rime",
+   "advanced": false,
+   "sell": 154,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 210,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 335,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 505,
+      "shards": 6,
+      "materials": {
+       "m_rime": 2
+      }
+     },
+     {
+      "gold": 715,
+      "shards": 8,
+      "materials": {
+       "m_rime": 4
+      }
+     },
+     {
+      "gold": 965,
+      "shards": 10,
+      "materials": {
+       "m_rime": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_cold_resolve",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "craft": {
+    "gold": 1500,
+    "shards": 10,
+    "materials": {
+     "m_rime": 10,
+     "m_core": 1
+    }
+   },
+   "base": {
+    "id": "w_cold_resolve",
+    "name": "Cold Resolve",
+    "slot": "weapon",
+    "cls": "sword",
+    "rarity": "epic",
+    "damage": 40,
+    "price": 0,
+    "crit": 6,
+    "desc": "A narrow blade of folded rimesteel. It does not hurry, and it does not change its mind.",
+    "element": "frost",
+    "ng_min": 0,
+    "look": {
+     "metal": "#b8ccd8",
+     "glow": "#9fe0ff"
+    }
+   }
+  },
+  "w_twin_relics": {
+   "tier": "relic",
+   "family": "architect",
+   "sources": [
+    {
+     "type": "challenge",
+     "id": "both_hands"
+    }
+   ],
+   "source": {
+    "type": "challenge",
+    "id": "both_hands"
+   },
+   "hint": "Earned at the forge, by mastery.",
+   "visual": "none",
+   "req": {
+    "dex": 13
+   },
+   "mat": "m_glass",
+   "advanced": true,
+   "sell": 196,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 320,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 510,
+      "shards": 6,
+      "materials": {}
+     },
+     {
+      "gold": 770,
+      "shards": 9,
+      "materials": {
+       "m_glass": 2
+      }
+     },
+     {
+      "gold": 1090,
+      "shards": 12,
+      "materials": {
+       "m_glass": 4
+      }
+     },
+     {
+      "gold": 1470,
+      "shards": 15,
+      "materials": {
+       "m_glass": 6,
+       "m_core": 1
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 11,
+    "marks": [
+     {
+      "at": 4,
+      "type": "history",
+      "ref": "w_twin_relics",
+      "text": "More of its history"
+     },
+     {
+      "at": 8,
+      "type": "combo",
+      "ref": "dual",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 11,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "w_twin_relics",
+    "name": "Twin Relics",
+    "slot": "weapon",
+    "cls": "dual",
+    "rarity": "legendary",
+    "damage": 35,
+    "price": 0,
+    "crit": 18,
+    "desc": "Two short blades of the old make. Called, they assemble in the hand, hilt first.",
+    "element": null,
+    "ng_min": 0,
+    "look": {
+     "metal": "#c8ccd4",
+     "glow": "#9ad8ff",
+     "curved": false
+    }
+   }
+  },
+  "s_round": {
+   "tier": "uncommon",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "encounter",
+     "id": "pike_sergeant",
+     "region": "courtyard"
+    }
+   ],
+   "source": {
+    "type": "encounter",
+    "id": "pike_sergeant",
+    "region": "courtyard"
+   },
+   "hint": "Something rare walks The Fallen Courtyard. It does not always show itself.",
+   "weight": "light",
+   "shield_class": "round",
+   "visual": "none",
+   "gear_model": "gear/shield_round",
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 70,
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "defense_pct": 10,
+     "block": 0.03
+    },
+    "costs": [
+     {
+      "gold": 65,
+      "shards": 1,
+      "materials": {}
+     },
+     {
+      "gold": 100,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 155,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 220,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 295,
+      "shards": 5,
+      "materials": {}
+     }
+    ]
+   },
+   "mastery": {
+    "need": 5,
+    "marks": [
+     {
+      "at": 4,
+      "type": "efficiency",
+      "text": "Learned: guarding with it costs 2% less"
+     },
+     {
+      "at": 5,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "s_round",
+    "name": "Gatehouse Round",
+    "slot": "shield",
+    "rarity": "uncommon",
+    "price": 0,
+    "defense": 3,
+    "block": 0.1,
+    "stamina": 6,
+    "desc": "A small round shield, light enough to forget you are carrying.",
+    "ng_min": 0,
+    "look": {
+     "color": "#6a5a3a"
+    }
+   }
+  }
+ }
+}

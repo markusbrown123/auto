@@ -19,8 +19,22 @@ const RARITY_COLOR := {
 	"common": Color("#9a958c"), "uncommon": Color("#7d9a6a"), "rare": Color("#5f86b0"),
 	"epic": Color("#8d62b0"), "legendary": Color("#c9a14a"),
 }
+## The eight slots the first inventory screens were built around. Kept as it was for them.
 const SLOTS := ["weapon", "shield", "helm", "chest", "gauntlets", "legs", "ring", "relic"]
-const SLOT_NAME := {"weapon": "Weapon", "shield": "Shield", "helm": "Helm", "chest": "Chest", "gauntlets": "Gauntlets", "legs": "Greaves", "ring": "Ring", "relic": "Relic"}
+## Every equipment slot, in the order a screen should offer them. `offhand` exists in saves and rules but no item
+## uses it yet (docs/EQUIPMENT_PROGRESSION.md, "Proposed").
+const EQUIP_SLOTS := ["weapon", "offhand", "shield", "helm", "chest", "shoulders", "gauntlets", "legs", "boots", "ring", "relic"]
+const ARMOUR_SLOTS := ["helm", "chest", "shoulders", "gauntlets", "legs", "boots"]
+const SLOT_NAME := {"weapon": "Weapon", "offhand": "Off hand", "shield": "Shield", "helm": "Helm", "chest": "Chest", "shoulders": "Shoulders",
+	"gauntlets": "Gauntlets", "legs": "Greaves", "boots": "Boots", "ring": "Ring", "relic": "Relic"}
+const TIER_COLOR := {"common": Color("#9a958c"), "uncommon": Color("#7d9a6a"), "rare": Color("#5f86b0"), "legendary": Color("#8d62b0"), "relic": Color("#c9a14a")}
+
+## The equipment and progression rules (data/equipment.json, written by tools/gen_equipment.py).
+var equipment: Dictionary = {}
+var families: Dictionary = {}
+var materials: Dictionary = {}
+var aliases: Dictionary = {}
+var challenges: Dictionary = {}
 const ATTRS := ["health", "strength", "dex", "endurance", "defense", "crit", "resist"]
 const ATTR_NAME := {"health": "Health", "strength": "Strength", "dex": "Dexterity", "endurance": "Endurance", "defense": "Defense", "crit": "Critical", "resist": "Resistance"}
 const ATTR_DESC := {
@@ -36,6 +50,7 @@ func _ready() -> void:
 	item_list = d.items
 	for it in item_list:
 		items[it.id] = it
+	_load_equipment()
 	for f in _load("res://data/bosses.json").bosses:
 		foes[f.id] = f
 	combos = _load("res://data/combos.json").combos
@@ -57,8 +72,48 @@ func _load(path: String) -> Dictionary:
 	assert(v is Dictionary, "bad data file " + path)
 	return v
 
+## Lays the generated equipment layer over the base item list: new pieces are appended, every item gains its tier,
+## family, weight class, requirements, acquisition, visual reference and upgrade/mastery tracks.
+func _load_equipment() -> void:
+	equipment = _load("res://data/equipment.json")
+	families = equipment.families
+	materials = equipment.materials
+	aliases = equipment.aliases
+	for c in equipment.challenges:
+		challenges[c.id] = c
+	for id: String in equipment.items:
+		var e: Dictionary = equipment.items[id]
+		if e.has("base") and not items.has(id):
+			var it: Dictionary = e.base.duplicate(true)
+			item_list.append(it)
+			items[id] = it
+		if not items.has(id):
+			continue
+		for k: String in e:
+			if k != "base":
+				items[id][k] = e[k]
+	Stats.rules = equipment
+
+## An item definition by id. Old and alternative ids resolve to the stored one; an unknown id gives {}.
 func item(id: String) -> Dictionary:
-	return items.get(id, {})
+	return items.get(aliases.get(id, id), {})
+
+## The stored id for an id that may be an alias.
+func canon(id: String) -> String:
+	return str(aliases.get(id, id))
+
+## One of the five ranks shown to the player: common, uncommon, rare, legendary, relic.
+func tier(it: Dictionary) -> String:
+	return str(it.get("tier", equipment.tiers.get(it.get("rarity", "common"), "common")))
+
+func tier_color(it: Dictionary) -> Color:
+	return TIER_COLOR.get(tier(it), Color.WHITE)
+
+func family(it: Dictionary) -> Dictionary:
+	return families.get(it.get("family", ""), {})
+
+func material_name(id: String) -> String:
+	return "Shards" if id == "shards" else str(materials.get(id, {}).get("name", id))
 
 func rarity_color(it: Dictionary) -> Color:
 	return RARITY_COLOR.get(it.get("rarity", "common"), Color.WHITE)

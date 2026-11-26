@@ -993,6 +993,9 @@ func _pick_clip() -> void:
 				skin.clip_travel = 0.0      # the duel moves the body; the clip only shapes it
 			Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW:
 				n = "sword_attack" if _arc_dir.y < -0.7 else ("cut_a" if _arc_dir.x < 0.0 else "cut_b")
+				if two_handed:
+					# long blades are swung from the hips with the whole body behind them
+					n = "cut_c" if absf(_arc_dir.x) > 0.5 else "sword_attack"
 				var sig: String = FINISH_CLIP.get(_finish, "")
 				if sig != "" and SkinDriver.has_clip(sig):
 					n = sig          # a combo's last cut is thrown with its own, larger body movement

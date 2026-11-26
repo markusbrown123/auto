@@ -11826,7 +11826,7 @@
     {
      "at": 0.5,
      "speed": 1.15,
-     "roar": "She tears away the veil. There is nothing beneath it to pity.",
+     "roar": "She tears the feed line from her collar. Whatever has been keeping her alive, she is done owing it.",
      "combos": [
       {
        "id": "cross",
@@ -12786,7 +12786,7 @@
     {
      "at": 0.5,
      "speed": 1.12,
-     "roar": "The water rises to your knees. The dead are holding it up.",
+     "roar": "The water rises to your knees. Under it, row on row, the storage lamps come on.",
      "combos": [
       {
        "id": "sweep_l",
@@ -13615,7 +13615,7 @@
     {
      "at": 0.33,
      "speed": 1.2,
-     "roar": "The crown cracks. Winter is no longer something he commands. It is something he is.",
+     "roar": "The seals he froze himself behind give way. He looks almost relieved.",
      "combos": [
       {
        "id": "sweep_l",
@@ -14089,7 +14089,7 @@
     {
      "at": 0.66,
      "speed": 1.12,
-     "roar": "The Monarch rises from the throne at last. The hall remembers how to kneel.",
+     "roar": "The steward stands up from the machine at last. Every light in the hall turns to follow him.",
      "combos": [
       {
        "id": "court",
@@ -14320,7 +14320,7 @@
     {
      "at": 0.33,
      "speed": 1.22,
-     "roar": "The crown burns white. Every king this hall has ever held stands up inside him.",
+     "roar": "The Crown burns white. He is no longer running the machine. It is running him.",
      "combos": [
       {
        "id": "court",
@@ -17459,7 +17459,7 @@
      "at": 0.0,
      "revive": 0.45,
      "speed": 1.25,
-     "roar": "It falls, and is still. Then it says your name \u2014 the one you had before \u2014 and stands.",
+     "roar": "It falls, and is still. Then it says a name in a voice you know from the inside, and stands.",
      "combos": [
       {
        "id": "rakes5",

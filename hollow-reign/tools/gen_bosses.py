@@ -269,7 +269,7 @@ B.append(dict(id="crimson_widow", name="The Crimson Widow", title="Commander of 
    C("step_back",2,[A("R",0.65,14,swing=0.22)],0.5,retreat=True),
    C("pierce",1,[A("U",1.0,20,guard=70,swing=0.2,kind="thrust")],1.2,tags=("anti_block",)),
   ]),
-  dict(at=0.5, speed=1.15, roar="She tears away the veil. There is nothing beneath it to pity.", combos=[
+  dict(at=0.5, speed=1.15, roar="She tears the feed line from her collar. Whatever has been keeping her alive, she is done owing it.", combos=[
    C("cross",2,[A("DL",0.62,15,swing=0.2),A("DR",0.42,15,swing=0.2)],1.1),
    C("quad",3,[A("L",0.65,13,swing=0.2),A("R",0.42,13,swing=0.2),A("DL",0.42,13,swing=0.2),A("DR",0.42,16,swing=0.2)],1.5,tags=("anti_dodge",)),
    C("stutter",3,[A("L",0.6,14,swing=0.2),A("R",1.25,22,swing=0.18)],1.3,tags=("anti_parry",)),
@@ -319,7 +319,7 @@ B.append(dict(id="gravewarden", name="The Gravewarden", title="Keeper of the Sun
    C("bury",2,[A("D",2.0,42,swing=0.25,kind="slam")],1.7,tags=("anti_parry",)),
    C("rise_fall",3,[A("U",1.0,26),A("D",0.9,34,kind="slam")],1.7,tags=("anti_dodge",)),
   ]),
-  dict(at=0.5, speed=1.12, roar="The water rises to your knees. The dead are holding it up.", combos=[
+  dict(at=0.5, speed=1.12, roar="The water rises to your knees. Under it, row on row, the storage lamps come on.", combos=[
    C("sweep_l",2,[A("L",1.0,30)],1.3),
    C("sweep_r",2,[A("R",1.0,30)],1.3),
    C("spade",3,[A("D",1.2,36,guard=100,kind="slam")],1.5,tags=("anti_block",)),
@@ -360,7 +360,7 @@ B.append(dict(id="frostbound_king", name="The Frostbound King", title="Sovereign
    C("sceptre",2,[A("U",0.95,24,guard=110,kind="thrust")],1.3,tags=("anti_block",)),
    C("glacier",2,[A("L",1.5,44,unblockable=True,dodge="none",kind="sweep",element="frost")],1.8,tags=("anti_block","anti_dodge")),
   ]),
-  dict(at=0.33, speed=1.2, roar="The crown cracks. Winter is no longer something he commands. It is something he is.", combos=[
+  dict(at=0.33, speed=1.2, roar="The seals he froze himself behind give way. He looks almost relieved.", combos=[
    C("sweep_l",2,[A("L",0.95,34,element="frost")],1.2),
    C("sweep_r",2,[A("R",0.95,34,element="frost")],1.2),
    C("held_verdict",3,[A("D",2.4,52,swing=0.22,kind="slam",element="frost")],1.8,tags=("anti_parry",)),
@@ -384,7 +384,7 @@ B.append(dict(id="forgotten_monarch", name="The Forgotten Monarch", title="Stewa
    C("patience",3,[A("DL",2.0,44,swing=0.22)],1.5,tags=("anti_parry",)),
    C("gavel",2,[A("U",0.95,24,guard=110,kind="thrust")],1.2,tags=("anti_block",)),
   ]),
-  dict(at=0.66, speed=1.12, roar="The Monarch rises from the throne at last. The hall remembers how to kneel.", combos=[
+  dict(at=0.66, speed=1.12, roar="The steward stands up from the machine at last. Every light in the hall turns to follow him.", combos=[
    C("court",3,[A("L",0.85,28),A("R",0.6,28),A("DL",0.6,28),A("DR",0.6,32)],1.7,tags=("anti_dodge",)),
    C("patience",3,[A("DR",2.2,46,swing=0.2)],1.4,tags=("anti_parry",)),
    C("stutter",3,[A("L",0.8,26),A("D",1.5,40,swing=0.22,kind="slam")],1.5,tags=("anti_parry",)),
@@ -393,7 +393,7 @@ B.append(dict(id="forgotten_monarch", name="The Forgotten Monarch", title="Stewa
    C("withdraw",2,[A("L",0.7,24)],0.4,retreat=True),
    C("advance",3,[A("U",0.8,36,kind="lunge")],1.3,range="far"),
   ]),
-  dict(at=0.33, speed=1.22, roar="The crown burns white. Every king this hall has ever held stands up inside him.", combos=[
+  dict(at=0.33, speed=1.22, roar="The Crown burns white. He is no longer running the machine. It is running him.", combos=[
    C("court",3,[A("L",0.8,30),A("R",0.55,30),A("DL",0.55,30),A("DR",0.55,30),A("D",0.9,44,kind="slam")],1.9,tags=("anti_dodge",)),
    C("patience",3,[A("D",2.5,54,swing=0.2,kind="slam")],1.5,tags=("anti_parry",)),
    C("stutter2",3,[A("L",0.75,28),A("R",1.4,34,swing=0.2),A("U",0.6,32)],1.6,tags=("anti_parry",)),
@@ -551,7 +551,7 @@ B.append(dict(id="devourer", name="The Devourer of Names", title="What the Crown
    C("swoop",3,[A("D",0.85,36,drain=True,kind="lunge")],1.2,range="far"),
   ]),
   # it dies. Then it remembers a name it has not used yet.
-  dict(at=0.0, revive=0.45, speed=1.25, roar="It falls, and is still. Then it says your name — the one you had before — and stands.", combos=[
+  dict(at=0.0, revive=0.45, speed=1.25, roar="It falls, and is still. Then it says a name in a voice you know from the inside, and stands.", combos=[
    C("rakes5",3,[A("L",0.75,30,kind="sweep"),A("R",0.5,30,kind="sweep"),A("DL",0.5,30,kind="sweep"),A("DR",0.5,30,kind="sweep"),A("U",0.7,34,drain=True,kind="thrust")],1.9,tags=("anti_dodge",)),
    C("long_grasp",3,[A("U",2.5,42,drain=True,swing=0.2,kind="thrust",guard=100)],1.5,tags=("anti_parry","anti_block")),
    C("stutter",3,[A("L",0.7,28,kind="sweep"),A("U",1.5,36,drain=True,swing=0.2,kind="thrust")],1.5,tags=("anti_parry",)),

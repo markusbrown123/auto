@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_lesson"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -1377,6 +1377,182 @@ func t_struggle() -> void:
 	hud.struggle._gui_input(press)
 	ok(taps[0] == 3 and not hud.struggle.visible and hud.struggle.mouse_filter == Control.MOUSE_FILTER_IGNORE, "and it is gone, and deaf, when the struggle ends")
 	hud.queue_free()
+
+# ------------------------------------------------------------------ story options: end_on, beat_at, the seal, phase traits
+func t_story_options() -> void:
+	# (a) a story-ended fight: taken on a landed cut once the time has come, never lost, a third result
+	var s := mk("forgotten_monarch", 9, geared(6), {"end_on": {"cuts": 4, "not_before": 9.0, "release": 32.0, "floor": 0.25}})
+	var ends: Array = []
+	s.ev.connect(func(n, d): if n == &"story_end": ends.append(d))
+	for i in 5:
+		s.b_state = DuelSim.B.RECOVER; s.b_t = 9.0; s.p_state = DuelSim.P.FREE
+		s.input_swipe(["L", "R", "U", "D", "L"][i]); run_for(s, 0.5)
+	ok(s.cuts_landed == 5 and not s.over and ends.is_empty(), "end_on: cuts landed before `not_before` do not end it (%d cuts at %.1f s)" % [s.cuts_landed, s.time])
+	s.time = 9.5
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 9.0; s.p_state = DuelSim.P.FREE
+	s.input_swipe("R"); run_for(s, 0.5)
+	ok(s.over and s.interrupted == "ahead" and ends.size() == 1 and str(ends[0].how) == "ahead", "end_on: the next cut that lands after it is the one the story answers")
+	ok(s.b_state != DuelSim.B.DEAD and s.p_state != DuelSim.P.DEAD, "end_on: neither side is dead: it is not a win and not a loss")
+	var t0 := s.time
+	run_for(s, 1.0)
+	ok(s.time == t0 and ends.size() == 1, "end_on: an ended fight stays ended and says so once")
+	# release: a player who lands nothing is let go, and is told how it stood
+	var idle := mk("forgotten_monarch", 9, geared(6), {"end_on": {"cuts": 4, "not_before": 9.0, "release": 12.0, "floor": 0.25}})
+	idle.pl.mitigation = 1.0
+	run_for(idle, 20.0)
+	ok(idle.over and idle.interrupted == "behind" and idle.time >= 12.0 and idle.time < 12.1, "end_on: released at `release` with no cut landed: behind (%.1f s)" % idle.time)
+	var some := mk("forgotten_monarch", 9, geared(6), {"end_on": {"cuts": 4, "not_before": 9.0, "release": 12.0}})
+	some.pl.mitigation = 1.0
+	some.b_state = DuelSim.B.RECOVER; some.b_t = 1.0
+	some.input_swipe("L"); run_for(some, 20.0)
+	ok(some.interrupted == "even", "end_on: released with a cut landed: even")
+	# floor: an ordinary blow never loses it
+	var weak := mk("forgotten_monarch", 9, {}, {"end_on": {"cuts": 99, "not_before": 0.0, "release": 600.0, "floor": 0.25}})
+	run_for(weak, 120.0)
+	ok(weak.over and weak.interrupted != "" and weak.p_state != DuelSim.P.DEAD and weak.pl.hp >= 1.0 and weak.pl.hp <= weak.pl.max_hp * 0.25 + 0.01,
+		"end_on: with `floor` nobody dies to an ordinary blow (ended %s at %.0f of %.0f hp)" % [weak.interrupted, weak.pl.hp, weak.pl.max_hp])
+	var plain := mk("forgotten_monarch", 9)
+	run_for(plain, 120.0)
+	ok(plain.over and plain.interrupted == "" and plain.p_state == DuelSim.P.DEAD, "without the option the same fight is lost as it always was")
+	# seeded: the same seed and the same hands give the same story-ended fight
+	var runs: Array = []
+	for k in 2:
+		var r := mk("forgotten_monarch", 9, geared(6), {"end_on": {"cuts": 4, "not_before": 9.0, "release": 32.0, "floor": 0.25}})
+		var rb := DuelBot.new(r, DuelBot.Style.SKILLED, 4)
+		run_for(r, 60.0, rb)
+		runs.append([r.interrupted, snappedf(r.time, 0.001), r.cuts_landed, snappedf(r.b_hp, 0.01)])
+	ok(runs[0] == runs[1] and str(runs[0][0]) == "ahead" and float(runs[0][1]) >= 9.0, "end_on: a skilled hand is taken while ahead, the same way every time %s" % str(runs[0]))
+
+	# (b) a beat at any listed phase, and one when the player is near falling
+	var b := mk("forgotten_monarch", 7, {}, {"beat_at": [2]})
+	var beats: Array = []
+	b.ev.connect(func(n, d): if n == &"story_beat": beats.append(d))
+	b.pl.attack = 4000.0
+	b.pl.mitigation = 1.0
+	for i in 40:
+		if b.b_phase >= 1:
+			break
+		b.b_state = DuelSim.B.RECOVER; b.b_t = 9.0; b.p_state = DuelSim.P.FREE
+		b.input_swipe(["L", "R"][i % 2]); run_for(b, 0.5)
+	run_for(b, 3.5)
+	ok(b.b_phase == 1 and beats.is_empty(), "beat_at [2]: the second phase begins and nothing is said")
+	for i in 40:
+		if b.b_phase >= 2:
+			break
+		b.b_state = DuelSim.B.RECOVER; b.b_t = 9.0; b.p_state = DuelSim.P.FREE
+		b.input_swipe(["L", "R"][i % 2]); run_for(b, 0.5)
+	run_for(b, 3.5)
+	ok(b.b_phase == 2 and beats.size() == 1 and int(beats[0].phase) == 2 and not beats[0].get("low", false), "beat_at [2]: the beat is sent as the third phase begins, with its index")
+	var both := mk("frostbound_king", 7, {}, {"beat_at": [1, 2]})
+	var n2: Array = [0]
+	both.ev.connect(func(n, _d): if n == &"story_beat": n2[0] += 1)
+	both.pl.attack = 50000.0
+	for d: String in ["L", "R"]:
+		both.b_state = DuelSim.B.RECOVER; both.b_t = 99.0; both.p_state = DuelSim.P.FREE
+		both.input_swipe(d); run_for(both, 3.5)
+	ok(n2[0] == 2, "beat_at [1, 2]: one at each listed phase, each once")
+	var low := mk("forgotten_monarch", 7, {}, {"beat_at": [2], "beat_hp": 0.3})
+	var lows: Array = []
+	low.ev.connect(func(n, d): if n == &"story_beat": lows.append(d))
+	run_for(low, 200.0)
+	ok(lows.size() == 1 and lows[0].get("low", false) and low.p_state == DuelSim.P.DEAD, "beat_hp: one beat when the player is near falling, and the fight is still theirs to lose")
+	low = mk("forgotten_monarch", 7, {}, {"beat_at": [2], "beat_hp": 0.3})
+	low.ev.connect(func(n, _d): if n == &"story_beat": low.paused = true)
+	run_for(low, 200.0)
+	ok(low.paused and not low.over and low.pl.hp > 0.0 and low.pl.hp <= low.pl.max_hp * 0.3, "beat_hp: a scene that pauses on it holds a living player (%.0f hp)" % low.pl.hp)
+
+	# (c) the seal: restoration undone by what the player does
+	var foe: Dictionary = Encounters.foe("monarch_iii", Game.default_profile())
+	var kit := geared(6)
+	var m := mk("monarch_iii", 5, kit, {"seal": {"phase": 2, "need": 5}})
+	var log: Array = []
+	m.ev.connect(func(n, d): if n in [&"seal", &"seal_broken", &"restored", &"boss_dead"]: log.append([str(n), d.duplicate()]))
+	m.pl.attack = 1.0e7
+	m.pl.mitigation = 1.0
+	ok(m.seal_need == 0 and not m.seal_active(), "seal: nothing to break before its phase")
+	for i in 2:
+		m.b_state = DuelSim.B.RECOVER; m.b_t = 9.0; m.p_state = DuelSim.P.FREE; m.rift_dir = ""
+		m.input_swipe(["L", "R"][i]); run_for(m, 3.6)
+	ok(m.b_phase == 2 and m.seal_need == 5 and m.seal_left == 5 and str(log[0][0]) == "seal" and str(log[0][1].from) == "start", "seal: armed when the Last Defense begins (%d of %d)" % [m.seal_left, m.seal_need])
+	var stood: float = float(foe.phases[2].revive)
+	ok(is_equal_approx(m.b_hp, m.b_hp_max * stood), "he is stood up at the data's own share (%.0f%%)" % (stood * 100.0))
+	# felled with the seal whole: stood up again, and the seal is two the poorer
+	m.b_state = DuelSim.B.RECOVER; m.b_t = 9.0; m.p_state = DuelSim.P.FREE; m.rift_dir = ""
+	m.input_swipe("U"); run_for(m, 0.5)
+	ok(not m.over and m.b_state == DuelSim.B.SHIFT and m.seal_left == 3 and is_equal_approx(m.b_hp, m.b_hp_max * stood) and int(m.stats.get("restored", 0)) == 1,
+		"seal: felled while it holds, he is restored, and felling him cost the machinery two")
+	run_for(m, 3.0)
+	# a parry wears it by one, a perfect parry by two
+	m.pl.attack = 1.0
+	until_windup(m)
+	for i in 6:
+		if m.b_attack.parry:
+			break
+		run_for(m, 1.5); until_windup(m)
+	to_impact(m, 0.2)
+	m.input_swipe(DuelSim.parry_dir_for(m.b_attack.dir))
+	run_for(m, 0.3)
+	ok(m.seal_left == 2 and m.stats.parries >= 1, "seal: a parry in this phase wears it by one (%d left)" % m.seal_left)
+	ok(m.trait_v("lifesteal") == float(foe.traits.lifesteal) and m.trait_v("lifesteal") > 0.0, "while it holds he still feeds")
+	m.b_state = DuelSim.B.RECOVER; m.b_t = 9.0; m.p_state = DuelSim.P.FREE; m.rift_dir = "L"; m.p_last_dir = ""
+	m.input_swipe("L"); run_for(m, 0.5)
+	ok(m.seal_left == 1, "seal: a cut along the seam wears it by one")
+	m.b_state = DuelSim.B.IDLE; m.b_t = 0.0; m.p_state = DuelSim.P.FREE
+	until_windup(m)
+	for i in 6:
+		if m.b_attack.parry:
+			break
+		run_for(m, 1.5); until_windup(m)
+	to_impact(m, 0.05)
+	m.input_swipe(DuelSim.parry_dir_for(m.b_attack.dir))
+	run_for(m, 0.2)
+	ok(m.seal_left == 0 and not m.seal_active() and log.any(func(e): return str(e[0]) == "seal_broken"), "seal: the last of it goes, and it is announced")
+	ok(m.trait_v("lifesteal") == 0.0 and m.trait_v("parry_open") > 0.0, "broken: he no longer feeds; his other rules stand")
+	m.pl.attack = 1.0e7
+	m.b_state = DuelSim.B.RECOVER; m.b_t = 9.0; m.p_state = DuelSim.P.FREE
+	m.input_swipe("D"); run_for(m, 0.5)
+	ok(m.over and m.b_state == DuelSim.B.DEAD and str(log[-1][0]) == "boss_dead", "broken: felled now, he stays down")
+	# it cannot go on for ever: a player who never parries still ends it by cutting him down
+	var brute := mk("monarch_iii", 5, kit, {"seal": {"phase": 2, "need": 5}})
+	brute.pl.attack = 1.0e7
+	brute.pl.mitigation = 1.0
+	var falls := 0
+	for i in 12:
+		if brute.over:
+			break
+		brute.b_state = DuelSim.B.RECOVER; brute.b_t = 9.0; brute.p_state = DuelSim.P.FREE; brute.rift_dir = ""
+		brute.input_swipe(["L", "R"][i % 2]); run_for(brute, 3.6)
+		falls += 1
+	ok(brute.over and brute.b_state == DuelSim.B.DEAD and falls == 5 and int(brute.stats.restored) == 2, "seal 5, no parries: felled three times in the last phase and it is over (%d blows, %d restorations)" % [falls, int(brute.stats.get("restored", 0))])
+	# without the option the foe is exactly as it was
+	var old := mk("monarch_iii", 5, kit)
+	old.pl.attack = 1.0e7
+	for i in 3:
+		old.b_state = DuelSim.B.RECOVER; old.b_t = 9.0; old.p_state = DuelSim.P.FREE
+		old.input_swipe(["L", "R", "U"][i]); run_for(old, 3.6)
+	ok(old.over and old.seal_need == 0, "no seal asked for: one restoration from the data, then dead, as before")
+	# a whole fight, by bots: the skilled hand breaks the seal by defending; fewer needed is a shorter fight
+	var times: Array = []
+	for need: int in [9, 2]:
+		var f := mk("monarch_iii", 11, kit, {"seal": {"phase": 2, "need": need}})
+		f.pl.max_hp = 1.0e6; f.pl.hp = 1.0e6
+		var fb := DuelBot.new(f, DuelBot.Style.SKILLED, 11)
+		run_for(f, 900.0, fb)
+		ok(f.over and f.b_state == DuelSim.B.DEAD and f.seal_left == 0, "seal %d: a skilled bot ends the last fight in %.0f s (%d parries, %d restorations)" % [need, f.time, f.stats.parries, int(f.stats.get("restored", 0))])
+		times.append(f.time)
+	ok(times[1] <= times[0], "what the house learned shortens it (%.0f s with nine to break, %.0f s with two)" % [times[0], times[1]])
+
+	# (d) a phase may carry its own traits
+	var base: Dictionary = Db.foes["frostbound_king"].duplicate(true)
+	base.id = "t_phase_traits"
+	base["traits"] = {"parry_open": 1.2, "frenzy": 0.1}
+	base.phases[1]["traits"] = {"parry_open": 1.6, "lifesteal": 0.2}
+	Db.foes[base.id] = base
+	var pt := mk("t_phase_traits")
+	ok(pt.trait_v("parry_open") == 1.2 and pt.trait_v("lifesteal") == 0.0 and is_equal_approx(pt.trait_v("frenzy"), 0.1), "phase traits: the first phase has the foe's own")
+	pt.b_phase = 1
+	ok(pt.trait_v("parry_open") == 1.6 and is_equal_approx(pt.trait_v("lifesteal"), 0.2) and is_equal_approx(pt.trait_v("frenzy"), 0.1), "phase traits: a phase's own replace them key by key; the rest stand")
+	Db.foes.erase(base.id)
 
 func t_story_beat() -> void:
 	var s := mk("frostbound_king")

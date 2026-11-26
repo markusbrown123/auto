@@ -99,6 +99,25 @@ var force_struggle := false    # dev/tests: every eligible parry locks blades
 var paused := false            # a story beat holds the whole fight exactly where it is
 var _struggle_last := -99.0
 var _beat_sent := false
+## Story beats: the phase indices at whose start `story_beat {foe, phase}` is sent (opts or the foe's `beat_at`;
+## [1] when neither says), and a share of the player's health at which one is sent too (`beat_hp`, `low: true`).
+var beat_at: Array = [1]
+var beat_hp := 0.0
+var _beats := {}
+## A story-ended fight (opts or the foe's `end_on {cuts, not_before, release, floor}`): the duel is handed back to
+## the story on the cut that makes `cuts` landed once `not_before` seconds have passed ("ahead"), or at `release`
+## seconds ("even" with a cut landed, "behind" with none), or when a blow would take the player under `floor` of
+## their health. It is neither won nor lost: `interrupted` says how it stood, and `story_end {how}` is sent once.
+var end_on := {}
+var interrupted := ""
+var cuts_landed := 0
+## The seal: a phase's restoration, undone by what the player does in that phase. `seal {phase, need, parry,
+## perfect, rift, fell, marked, disables}` (opts, or `seal` on the phase itself). While it holds, a foe felled in
+## that phase is stood up again at the phase's `revive` share; each parry, each cut along the seam and each time it
+## is felled wears the seal down; once it is gone the traits in `disables` (lifesteal) stop and it can die.
+var seal := {}
+var seal_need := 0
+var seal_left := 0
 var b_state: int = B.IDLE
 var b_t := 0.0
 var b_phase := 0
@@ -170,6 +189,11 @@ func setup(player: Dictionary, boss: Dictionary, seed_value: int = 0, opts: Dict
 	b_phase = 0
 	b_poise_max = maxf(1.0, float(boss.get("poise", boss.get("posture", 100.0))))
 	b_poise = b_poise_max
+	beat_at = opts.get("beat_at", boss.get("beat_at", [1]))
+	beat_hp = float(opts.get("beat_hp", boss.get("beat_hp", 0.0)))
+	end_on = opts.get("end_on", boss.get("end_on", {}))
+	seal = opts.get("seal", {})
+	_arm_seal()
 	combos = []
 	for c in opts.get("combos", []):
 		if c.cls.is_empty() or c.cls.has(str(pl.get("weapon_cls", "sword"))):
@@ -243,7 +267,45 @@ func speed() -> float:
 ## frenzy, block_tax, marks + mark_mult, parry_open, dodge_open, lifesteal.
 var marks := 0
 func trait_v(key: String) -> float:
+	if seal_need > 0 and seal_left <= 0 and key in seal_now().get("disables", ["lifesteal"]):
+		return 0.0                    # the seal is broken: what it fed no longer feeds
+	var own: Dictionary = bd.phases[b_phase].get("traits", {}) if bd.has("phases") else {}
+	if own.has(key):
+		return float(own[key])        # a phase may carry its own rules (phases[i].traits)
 	return float(bd.get("traits", {}).get(key, 0.0))
+
+## The seal that belongs to the phase being fought ({} for none).
+func seal_now() -> Dictionary:
+	if not seal.is_empty() and int(seal.get("phase", -1)) == b_phase:
+		return seal
+	return bd.phases[b_phase].get("seal", {}) if bd.has("phases") else {}
+
+func seal_active() -> bool:
+	return seal_need > 0 and seal_left > 0
+
+func _arm_seal() -> void:
+	var s := seal_now()
+	seal_need = 0 if training else maxi(0, int(s.get("need", 0)))
+	seal_left = seal_need
+	if seal_need > 0:
+		_emit(&"seal", {"left": seal_left, "need": seal_need, "from": "start"})
+
+## Wears the seal down by `n`. Sends `seal {left, need, from}` and, when none is left, `seal_broken`.
+func _seal_hit(n: int, from: String) -> void:
+	if not seal_active() or n <= 0:
+		return
+	seal_left = maxi(0, seal_left - n)
+	stats["seals"] = int(stats.get("seals", 0)) + 1
+	_emit(&"seal", {"left": seal_left, "need": seal_need, "from": from})
+	if seal_left <= 0:
+		_emit(&"seal_broken", {"from": from})
+
+func _story_end(how: String) -> void:
+	if over:
+		return
+	interrupted = how
+	over = true
+	_emit(&"story_end", {"how": how, "cuts": cuts_landed, "time": time})
 
 func _emit(n: StringName, d: Dictionary = {}) -> void:
 	ev.emit(n, d)
@@ -418,6 +480,13 @@ func tick(dt: float) -> void:
 			_emit(&"relic_ready")
 	_tick_player(dt)
 	_tick_boss(dt)
+	if over:
+		return
+	if not end_on.is_empty() and time >= float(end_on.get("release", 1.0e9)):
+		_story_end("even" if cuts_landed > 0 else "behind")
+	elif beat_hp > 0.0 and not _beats.has("low") and pl.hp <= float(pl.max_hp) * beat_hp and bd.get("boss", false) and not training:
+		_beats["low"] = true
+		_emit(&"story_beat", {"foe": str(bd.id), "phase": b_phase, "low": true})
 
 func _set_p(s: int, t: float) -> void:
 	p_state = s
@@ -540,6 +609,7 @@ func _resolve_player_hit(dir: String) -> void:
 		if on_rift:
 			mult *= RIFT_MULT
 			stats.rifts += 1
+			_seal_hit(int(seal_now().get("rift", 1)), "rift")
 		var elem: bool = pl.element != null and pl.element == bd.get("weak")
 		if elem:
 			mult *= 1.25
@@ -572,6 +642,7 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 	info["dmg"] = dmg
 	info["hp"] = b_hp
 	if not info.get("chip", false):
+		cuts_landed += 1
 		_emit(&"boss_hit", info)
 		if b_state == B.RECOVER and _wear_poise(POISE_CUT * p_guard_dmg, "cut"):
 			_poise_break("cut")
@@ -588,10 +659,26 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 		b_far = false
 		_end_opening()
 		_emit(&"phase_change", {"phase": b_phase, "roar": phase().get("roar", ""), "revive": float(phase().get("revive", 0.0)) > 0.0})
+		_arm_seal()
 	elif b_hp <= 0.0:
+		if seal_active():
+			_seal_hit(int(seal_now().get("fell", 2)), "felled")      # felling it costs the machinery too
+		if seal_active():
+			# the seal still holds: it is stood up again, and the fight goes on
+			b_hp = b_hp_max * float(seal_now().get("restore", phase().get("revive", 0.3)))
+			b_state = B.SHIFT
+			b_t = SHIFT_TIME
+			b_poise = b_poise_max
+			b_far = false
+			_end_opening()
+			stats["restored"] = int(stats.get("restored", 0)) + 1
+			_emit(&"restored", {"hp": b_hp, "left": seal_left, "need": seal_need})
+			return
 		b_state = B.DEAD
 		over = true
 		_emit(&"boss_dead", {"dir": info.get("dir", "D")})
+	if not over and not end_on.is_empty() and not info.get("chip", false) and cuts_landed >= int(end_on.get("cuts", 1 << 30)) and time >= float(end_on.get("not_before", 0.0)):
+		_story_end("ahead")           # the story answers a cut that lands, not a health bar
 
 ## Wears the foe's poise down by `v`. True when that leaves none: the caller decides when it breaks.
 func _wear_poise(v: float, from: String) -> bool:
@@ -718,10 +805,11 @@ func _tick_boss(dt: float) -> void:
 			if b_t <= 0.0:
 				_emit(&"phase_ready", {"phase": b_phase})
 				_go_idle(0.6)
-				if b_phase == 1 and not _beat_sent and bd.get("boss", false) and not training:
-					# the second phase begins: the presentation may stop the fight here for a few words
+				if beat_at.has(b_phase) and not _beats.has(b_phase) and bd.get("boss", false) and not training:
+					# a listed phase begins: the presentation may stop the fight here for a few words, or a choice
+					_beats[b_phase] = true
 					_beat_sent = true
-					_emit(&"story_beat", {"foe": str(bd.id)})
+					_emit(&"story_beat", {"foe": str(bd.id), "phase": b_phase})
 
 ## How likely the foe is to chain straight into another string after an unbroken one (bosses.json "press").
 func press() -> float:
@@ -839,6 +927,8 @@ func _resolve_strike() -> void:
 			p_parry = {}
 			habits.parry += 1.0
 			stats.parries += 1
+			if not seal_now().get("marked", false) or a.get("seal", false):
+				_seal_hit(int(seal_now().get("perfect", 2)) if perfect else int(seal_now().get("parry", 1)), "perfect" if perfect else "parry")
 			_set_p(P.FREE, 0.0)
 			pl.stamina = minf(pl.max_stamina, pl.stamina + PARRY_COST)
 			if perfect:
@@ -990,6 +1080,13 @@ func _damage_player(raw: float, quiet: bool = false) -> void:
 	var dmg: float = raw if quiet else raw * (1.0 - float(pl.mitigation))
 	if lesson:
 		dmg = minf(dmg, maxf(0.0, pl.hp - 1.0)) * 0.0      # nobody is hurt while learning
+	if end_on.has("floor") and not over and pl.hp - dmg <= float(pl.max_hp) * float(end_on.floor):
+		# a story-ended fight is never lost to an ordinary blow: the story takes it here instead
+		var kept: float = maxf(1.0, minf(pl.hp, float(pl.max_hp) * float(end_on.floor)))
+		stats.taken += pl.hp - kept
+		pl.hp = kept
+		_story_end("even" if cuts_landed > 0 else "behind")
+		return
 	pl.hp = maxf(0.0, pl.hp - dmg)
 	stats.taken += dmg
 	if not quiet:

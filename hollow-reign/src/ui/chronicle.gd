@@ -22,7 +22,7 @@ func _init(start_tab: String = "Records") -> void:
 	tab = start_tab
 
 func tabs() -> Array:
-	var out := ["Records", "Sequences", "Guardians", "Endings", "Completion"]
+	var out := ["Lineage", "Records", "Sequences", "Guardians", "Endings", "Completion"]
 	if has_node("/root/Companion") and get_node("/root/Companion").has_method("archive"):
 		out.append("Stories")
 	return out
@@ -69,7 +69,7 @@ func show_tab(t: String) -> void:
 		_tabs.remove_child(c)
 		c.queue_free()
 	for name_: String in tabs():
-		var b := UI.button(name_, 17, 138)
+		var b := UI.button(name_, 17, 120)
 		b.custom_minimum_size.y = 44
 		if name_ == tab:
 			b.add_theme_color_override("font_color", UI.GOLD)
@@ -99,6 +99,158 @@ func _entry(heading: String, text: String, heading_color: Color = UI.BONE) -> vo
 	if text != "":
 		_body.add_child(UI.wrapped(text, 19, UI.DIM.lightened(0.25), 820))
 	_body.add_child(UI.spacer(4))
+
+## The house: everyone of it who has stood before the gates (Game.lineage()), oldest first. Who they were to the one
+## now on the road, when, what became of them, what they carried and wore (shown on the knight itself, drawn by the
+## same code that dresses the player), and what they did. Reading it changes nothing.
+const FATE_WORD := {"alive": "On the road", "fallen": "Fell", "kept": "Fell beneath the throne"}
+const CAUSE_LINE := {"sealed_hall": "Sealed in the hall, sending out what was found.", "saved_the_records": "Cut down at the seal, with the records secured."}
+func _tab_lineage() -> void:
+	var l: Dictionary = Game.lineage()
+	if l.is_empty():
+		_body.add_child(UI.label("Nobody of the house has yet set out.", 19, UI.DIM))
+		return
+	var held := 0
+	for r: Dictionary in l.records:
+		held += 1 if r.held else 0
+	_head("House %s" % str(l.house), "%d of %d inheritance records" % [held, l.records.size()])
+	for who: Dictionary in l.people:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 18)
+		_body.add_child(row)
+		row.add_child(_portrait(who))
+		var v := VBoxContainer.new()
+		v.add_theme_constant_override("separation", 3)
+		v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(v)
+		var kin := str(who.kin)
+		v.add_child(UI.label(("%s   ·   %s" % [str(who.chapter), "you" if who.current else "your " + kin.to_lower()]).to_upper(), 15, UI.GOLD_DIM.lightened(0.3), "head"))
+		var named: String = str(who.display) if str(who.name) != "" else str(who.ordinal).capitalize()
+		v.add_child(UI.title("%s, %s" % [named, str(who.ordinal)] if str(who.name) != "" else named, 24, UI.GOLD if who.current else UI.BONE))
+		var when: String = "now" if int(who.years_ago) == 0 else "%d years ago" % int(who.years_ago)
+		var fate := str(FATE_WORD.get(str(who.fate), str(who.fate).capitalize()))
+		if str(who.fate) == "kept" and Game.generation() >= 3 and (Game.profile.flags.has("kept_revealed") or Game.profile.defeated.has("the_kept")):
+			fate = "Kept by the throne" if not Game.profile.defeated.has("the_kept") else "Kept by the throne, and let go"
+		v.add_child(UI.label("The %s   ·   %s   ·   %s" % [str(who.relation).to_lower(), when, fate], 18, UI.BONE))
+		if CAUSE_LINE.has(str(who.cause)):
+			v.add_child(UI.wrapped(str(CAUSE_LINE[str(who.cause)]), 17, UI.DIM.lightened(0.25), 600))
+		# what they carried
+		var lo: Dictionary = who.loadout
+		var gear: Array = []
+		var w: Dictionary = lo.get("weapon", {})
+		if not w.is_empty() and Db.items.has(str(w.id)):
+			var forge: Array = []
+			if int(w.get("level", 0)) > 0:
+				forge.append("+%d" % int(w.level))
+			var mods: Dictionary = w.get("mods", {})
+			if int(mods.get("grip", 0)) > 0:
+				forge.append("grip %s" % UI.roman(int(mods.grip)))
+			if int(mods.get("ore", 0)) > 0:
+				forge.append("ore %s" % UI.roman(int(mods.ore)))
+			gear.append(str(Db.item(str(w.id)).name) + (" (%s)" % ", ".join(forge) if not forge.is_empty() else ""))
+		for slot: String in Db.EQUIP_SLOTS:
+			var id = lo.get("equipped", {}).get(slot)
+			if slot != "weapon" and id != null and Db.items.has(str(id)):
+				gear.append(str(Db.item(str(id)).name))
+		if not gear.is_empty():
+			v.add_child(UI.wrapped("Carried:  " + "  ·  ".join(gear), 17, UI.BONE, 600))
+		var left: Dictionary = who.weapon_left
+		if not left.is_empty() and Db.items.has(str(left.id)):
+			v.add_child(UI.wrapped("The blade stayed where it fell%s." % ("; the next of the house took it up" if left.get("taken", false) else ""), 17, UI.GOLD_DIM.lightened(0.3), 600))
+		# what they did
+		var d: Dictionary = who.deeds
+		var deeds: Array = []
+		if not d.guardians.is_empty():
+			deeds.append("Guardians ended:  " + ", ".join(d.guardians.map(func(g): return str(g.name))))
+		if not d.regions.is_empty():
+			deeds.append("Roads cleared:  " + ", ".join(d.regions.map(func(g): return str(g.name))))
+		if not d.routes.is_empty():
+			deeds.append("Ways opened:  " + ", ".join(d.routes.map(func(g): return str(g.name))))
+		if int(d.lore) + int(d.secrets) > 0:
+			deeds.append("%d record%s read, %d secret%s found" % [int(d.lore), "" if int(d.lore) == 1 else "s", int(d.secrets), "" if int(d.secrets) == 1 else "s"])
+		var st: Dictionary = who.stats
+		if int(st.get("fights", 0)) > 0:
+			deeds.append("%d fights, %d won" % [int(st.fights), int(st.wins)])
+		if deeds.is_empty():
+			deeds.append("What they did was not written down." if who.authored else "Nothing yet.")
+		for line: String in deeds:
+			v.add_child(UI.wrapped(line, 17, UI.DIM.lightened(0.25), 600))
+		_body.add_child(UI.spacer(6))
+		_body.add_child(UI.rule())
+		_body.add_child(UI.spacer(6))
+	_head("What the house holds")
+	for r: Dictionary in l.records:
+		_entry(str(r.name) if r.held else "Not yet gathered", str(r.text) if r.held else "", UI.GOLD if r.held else UI.DIM)
+	if str(l.ending) != "":
+		_body.add_child(UI.label("The house's story ended with %s." % str(ENDING_NAME.get(str(l.ending), l.ending)), 18, UI.GOLD_DIM.lightened(0.3)))
+
+## One of the house, standing, in what they wore: a small view of its own, built by the rig the game fights with.
+func _portrait(who: Dictionary) -> Control:
+	var frame := SubViewportContainer.new()
+	frame.custom_minimum_size = Vector2(190, 250)
+	frame.stretch = true
+	var vp := SubViewport.new()
+	vp.size = Vector2i(190, 250)
+	vp.own_world_3d = true
+	vp.transparent_bg = true
+	vp.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+	frame.add_child(vp)
+	var rig := FighterRig.new()
+	vp.add_child(rig)
+	rig.build(lineage_look(who), false)
+	rig.rotation.y = PI * 0.9
+	var cam := Camera3D.new()
+	vp.add_child(cam)
+	cam.position = Vector3(0.0, 1.05, 3.1)
+	cam.fov = 38.0
+	cam.look_at_from_position(cam.position, Vector3(0, 1.0, 0))
+	var env := WorldEnvironment.new()
+	var e := Environment.new()
+	e.background_mode = Environment.BG_COLOR
+	e.background_color = Color(0, 0, 0, 0)
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	e.ambient_light_color = Color("#8a8f99")
+	e.ambient_light_energy = 1.1
+	env.environment = e
+	vp.add_child(env)
+	var key := DirectionalLight3D.new()
+	key.light_energy = 1.8
+	key.rotation_degrees = Vector3(-35, 30, 0)
+	vp.add_child(key)
+	return frame
+
+## How one of the house looked, from their recorded loadout, by the code that dresses the player (the profile in
+## memory is stood in for during the call, as the echo's rig is built).
+static func lineage_look(who: Dictionary) -> Dictionary:
+	var lo: Dictionary = who.get("loadout", {})
+	var keep: Dictionary = Game.profile
+	var stand := Game.default_profile()
+	stand["body"] = str(who.get("body", "m"))
+	stand["heraldry"] = str(lo.get("heraldry", keep.get("heraldry", stand.heraldry))) if str(lo.get("heraldry", "")) != "" else str(keep.get("heraldry", stand.heraldry))
+	stand["cosmetics"] = lo.get("cosmetics", {}).duplicate(true)
+	stand["inventory"] = []
+	var eq: Dictionary = lo.get("equipped", {})
+	if int(who.get("index", 2)) == 1 and eq.size() <= 1:
+		# the first is recorded by their sword alone: they wore the garrison's silver (Prologue.KIT)
+		eq = {"weapon": eq.get("weapon", "w_knight_sword")}
+		for id: String in Prologue.KIT:
+			if Db.items.has(id):
+				eq[str(Db.item(id).slot)] = id
+	for slot: String in stand.equipped:
+		var id = eq.get(slot)
+		stand.equipped[slot] = id if id != null and Db.items.has(str(id)) else null
+		if stand.equipped[slot] != null:
+			stand.inventory.append(stand.equipped[slot])
+	if stand.equipped.weapon == null:
+		stand.equipped.weapon = "w_rusted_sword"
+	var w: Dictionary = lo.get("weapon", {})
+	if not w.is_empty() and w.has("mods"):
+		stand["mods"] = {str(w.id): w.mods.duplicate()}
+	Game.profile = stand
+	var look: Dictionary = Duel.player_look()
+	Game.profile = keep
+	look["witness"] = false
+	return look
 
 func _tab_records() -> void:
 	var total := 0

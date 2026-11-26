@@ -92,7 +92,9 @@ func _ready() -> void:
 	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	bottom.add_theme_constant_override("separation", 10)
 	frame.add_child(bottom)
-	prompt = UI.label(Game.run_stage().prompt, 24, UI.BONE)
+	# a stop the director tells differently for this generation has no line of the second generation's over it
+	var retold: bool = Game.generation() != 2 and Encounters.data().stops.get(str(Game.generation()), {}).get(str(region.id), {}).has(str(stage))
+	prompt = UI.label("" if retold else str(Game.run_stage().prompt), 24, UI.BONE)
 	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	prompt.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.95))
 	prompt.add_theme_constant_override("shadow_offset_y", 2)

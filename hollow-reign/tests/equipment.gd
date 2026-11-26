@@ -134,7 +134,8 @@ func t_data() -> void:
 	var weapons := 0
 	for it: Dictionary in Db.item_list:
 		weapons += 1 if it.slot == "weapon" else 0
-	ok(weapons >= 12 and weapons <= 22, "a collection of blades (%d)" % weapons)
+	# 22 blades to be found, and the one the Kept gives back (The Second's Edge: a copy of a blade already carried)
+	ok(weapons >= 12 and weapons <= 23 and Db.items.has("w_seconds_edge"), "a collection of blades (%d)" % weapons)
 	for m: String in Db.materials:
 		for r: String in Db.materials[m].regions:
 			ok(Db.region_by_id.has(r), "material %s region %s" % [m, r])
@@ -172,6 +173,9 @@ func t_sources() -> void:
 					good = int(it.price) > 0 and it.has("unlock") and (not it.unlock.has("boss") or (Db.foes.has(it.unlock.boss) and Db.foes[it.unlock.boss].boss))
 				"ng":
 					good = int(it.get("ng_min", 0)) >= 1
+				"story":
+					# given at one authored moment and by nothing else (the Kept's blade, src/cine/kept_scene.gd)
+					good = str(s.id) == str(Generations.data().echo.id) and it.sources.size() == 1 and int(it.price) == 0 and bool(it.get("unsellable", false))
 			ok(good, "%s source %s %s is real" % [it.id, s.type, s.get("id", "")])
 	# foes that carry something can be met on a road
 	var placed := {}

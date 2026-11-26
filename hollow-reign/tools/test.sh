@@ -4,7 +4,7 @@ cd "$(dirname "$0")/.." || exit 1
 GODOT="${1:-${GODOT:-.tools/Godot_v4.6-stable_linux.x86_64}}"
 "$GODOT" --headless --path . --import >/dev/null 2>&1
 rc=0
-for suite in tests equipment generations cine integration; do
+for suite in tests equipment generations secrets armory shop_forge cine integration campaign; do
 	echo "== $suite"
 	"$GODOT" --headless --path . "res://tests/$suite.tscn" > "/tmp/hr_$suite.log" 2>&1 || rc=1
 	grep -v -E "^(Godot Engine|$)|ObjectDB|object.cpp|resources still in use|resource.cpp" "/tmp/hr_$suite.log"

@@ -133,20 +133,34 @@ func _fill_card() -> void:
 	card.add_child(UI.ornament(340))
 	card.add_child(UI.wrapped(str(r.blurb), 19, UI.BONE, 340))
 	card.add_child(UI.spacer(2))
-	var last: Dictionary = r.stages[-1].options[-1]
+	# who keeps this road now is the encounter director's to say: it changes with the generation walking it
+	var gen := Game.generation()
+	var info: Dictionary = Encounters.region_info(str(r.id))
+	var keeper: Dictionary = info.get("guardian", {})
+	var last_label := str(r.stages[-1].options[-1].label)
+	for o: Dictionary in Encounters.stop(gen, str(r.id), r.stages.size() - 1).options:
+		last_label = str(o.label)
+	if gen != 2:
+		card.add_child(UI.wrapped("%s   ·   %d fight%s on the road" % [str(Generations.def(gen).chapter), int(info.fights), "" if int(info.fights) == 1 else "s"], 16, UI.GOLD_DIM.lightened(0.3), 340))
+		if str(info.get("why", "")) != "":
+			card.add_child(UI.wrapped(str(info.why), 18, UI.DIM.lightened(0.3), 340))
 	card.add_child(UI.label("OBJECTIVE", 15, UI.GOLD_DIM.lightened(0.3), "head"))
-	if cleared:
-		card.add_child(UI.wrapped("%s is ended. The road beyond is open." % str(Db.foes[last.foe].name), 19, UI.STAMINA.lightened(0.25), 340))
+	if keeper.is_empty():
+		card.add_child(UI.wrapped("Nobody keeps %s now. The road can be walked to its end." % last_label, 19, UI.STAMINA.lightened(0.25) if cleared else UI.BONE, 340))
+	elif cleared:
+		card.add_child(UI.wrapped("%s is ended. The road beyond is open." % str(keeper.name), 19, UI.STAMINA.lightened(0.25), 340))
 	else:
-		card.add_child(UI.wrapped("Reach %s and end what guards it." % str(last.label), 19, UI.BONE, 340))
+		card.add_child(UI.wrapped("Reach %s and end what guards it." % last_label, 19, UI.BONE, 340))
+		if gen != 2 and str(keeper.get("why", "")) != "":
+			card.add_child(UI.wrapped(str(keeper.why), 17, UI.DIM.lightened(0.3), 340))
 	var rec := records(str(r.id))
 	if rec.y > 0:
 		card.add_child(UI.label("RECORDS", 15, UI.GOLD_DIM.lightened(0.3), "head"))
 		card.add_child(UI.label("%d of %d found here" % [rec.x, rec.y], 19, UI.GOLD if rec.x == rec.y else UI.BONE))
 	var side: Array = []
-	for st in r.stages:
-		for o in st.options:
-			if o.get("optional", false) and o.has("foe"):
+	for i: int in r.stages.size():
+		for o: Dictionary in Encounters.stop(gen, str(r.id), i).options:
+			if o.get("optional", false) and o.has("foe") and Db.foes.has(str(o.foe)):
 				side.append("%s  —  %s" % [o.label, ("%s, ended" % Db.foes[o.foe].name) if Game.profile.defeated.has(o.foe) else "something waits off the road"])
 	if not side.is_empty():
 		card.add_child(UI.label("OFF THE ROAD", 15, UI.GOLD_DIM.lightened(0.3), "head"))
@@ -244,8 +258,13 @@ func _draw_sheet() -> void:
 	for r in Db.regions:
 		if Game.region_unlocked(r.id):
 			continue
-		if r.requires != null and Game.region_unlocked(str(r.requires)):
+		var state := str(Encounters.region_info(str(r.id)).state)
+		if (Game.generation() == 2 and r.requires != null and Game.region_unlocked(str(r.requires))) or (Game.generation() != 2 and state in ["locked", "sealed"]):
 			var p := _at(str(r.id))
+			if state == "sealed":
+				# known of, and shut: the last heir's map marks the door under the throne before it opens
+				sheet.draw_arc(p, 13.0, 0, TAU, 24, Color(TECH, 0.8), 2.0, true)
+				_name(p + Vector2(0, 40), "Sealed", 14, Color(ink, 0.6))
 			sheet.draw_arc(p, 9.0, 0, TAU, 20, Color(ink, 0.35), 1.5, true)
 			sheet.draw_string(UI.font("head"), p + Vector2(-5, 26), "?", HORIZONTAL_ALIGNMENT_LEFT, -1, 17, Color(ink, 0.45))
 	# the sanctuary

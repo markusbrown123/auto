@@ -83,7 +83,7 @@ func show_title(open: String = "", arg: String = "") -> void:
 	var t := TitleScreen.new()
 	t.continue_game.connect(func():
 		if not Game.profile.is_empty() or Game.load_slot(Game.latest_slot()):
-			_fade_then(show_sanctuary))
+			_fade_then(resume))
 	t.new_game.connect(func(h, b): _new_journey(h, b, t.knight_name))
 	t.open_screen.connect(_menu_open)
 	t.set_out.connect(_set_out)
@@ -159,12 +159,232 @@ func show_time_jump(years: int, from_gen: int, to_gen: int, then: Callable) -> v
 	t.finished.connect(then)
 	_swap(t, 0.0)
 
-## The second generation comes up the road (src/cine/arrival.gd), and goes down to the Inheritance Engine.
+## The next of the house comes up the road (src/cine/arrival.gd), and goes down to the Inheritance Engine: the second
+## generation to wake at it, the third to walk in and find what was kept for them.
 func show_arrival() -> void:
 	var a := Arrival.new()
 	a.only_shot = int(_args.get("shot", "0"))
-	a.finished.connect(show_awakening)
+	if not Game.profile.is_empty() and Game.generation() >= 3:
+		a.gen = 3
+		a.line_scene = "gen3_arrive"
+		a.show_name = false
+		a.card_text = "VAELORA   ·   THE LAST HEIR"
+		a.finished.connect(show_heir_return)
+	else:
+		a.finished.connect(show_awakening)
 	_swap(a, 0.0)
+
+# ================================================================ the generations (docs/FLOW.md, "The second fall and the Last Heir")
+## Continue: the sanctuary, unless the save stands between two beats of the family's story, in which case the story
+## is taken up where it was left.
+func resume() -> void:
+	KeptScene.sync_edge()
+	var p: Dictionary = Game.profile
+	var tr: Dictionary = Game.transition_pending()
+	if not tr.is_empty():
+		# someone has fallen and nobody has yet taken up the road: the years, then whoever is next
+		if int(tr.get("from", 2)) == 1:
+			show_time_jump(22, 1, 2, func():
+				Game.inherit()
+				show_arrival())
+		else:
+			show_time_jump(24, 2, 3, show_heir)
+		return
+	if Generations.canon_open(p):
+		var m2: Dictionary = Game.monarch(2).get("record", {})
+		if Game.generation() == 2 and (bool(m2.get("won", false)) or str(m2.get("choice", "")) == "records"):
+			# the second meeting was decided (he was beaten, or the seal was chosen) and the fall was not reached
+			show_second_fall(bool(m2.get("won", false)), str(m2.get("choice", "press")))
+			return
+		if Game.generation() == 3 and not p.flags.has("gen3_arrived"):
+			show_arrival()
+			return
+		if Game.has_fact("monarch_felled:3") and not p.flags.has("facility_seen"):
+			show_aftermath()
+			return
+	show_sanctuary()
+
+## Which of the story's own fights this is, for the family's canon only: "monarch2" (the second meeting), "kept",
+## "monarch3" (the last), or "" for every ordinary duel and for anything fought on a legacy journey.
+func story_kind(foe_id: String) -> String:
+	if Game.profile.is_empty() or not Generations.canon_open(Game.profile):
+		return ""
+	if foe_id == str(Generations.data().echo.id):
+		return "" if Game.profile.flags.has("kept_released") else "kept"
+	match Encounters.monarch_of(foe_id, Game.profile):
+		2: return "monarch2"
+		3: return "monarch3"
+	return ""
+
+## How many marks of the seal the last heir has to break: nine with nothing inherited, fewer for every record held.
+func seal_need() -> int:
+	var held := 0
+	for r: Dictionary in Game.inheritance():
+		held += 1 if r.held else 0
+	return clampi(9 - held, 2, 9)
+
+func _story_opts(kind: String, opts: Dictionary) -> void:
+	match kind:
+		"monarch2":
+			var th: Dictionary = Game.monarch(2).get("threshold", {"phase": 2})
+			opts["beat_at"] = [1, int(th.get("phase", 2))]
+			opts["beat_hp"] = 0.22
+			opts["story"] = {"pre_scene": "monarch_blade", "quiet_end": true}
+		"kept":
+			opts["story"] = {"yield": true, "quiet_end": true}
+		"monarch3":
+			opts["seal"] = {"phase": 2, "need": int(_args.get("seal", str(seal_need())))}
+
+func _story_hooks(kind: String, d: Duel, o: Dictionary) -> void:
+	match kind:
+		"monarch2":
+			d.beat_hook = func(ev: Dictionary): await _records_choice(d, ev)
+			d.interrupted.connect(func(_how: String, _sim: DuelSim):
+				# the seal was chosen: the duel is neither won nor lost, and the generation ends at the seal
+				_fade_then(func(): show_second_fall(false, "records")))
+		"monarch3":
+			FinalHall.dress(d.arena, d.sim)
+
+## The second meeting, at its threshold (the third phase beginning, or the knight near falling): the seal behind the
+## throne is burning. Press the attack, or save the records. Asked once in a fight; the fight is held while it is.
+func _records_choice(d: Duel, ev: Dictionary) -> void:
+	if (int(ev.get("phase", 1)) < 2 and not ev.get("low", false)) or d.has_meta("asked"):
+		return
+	d.set_meta("asked", true)
+	var picked: Array = [str(_args.get("choice", "")) if _args.has("bot") else ""]
+	if picked[0] == "" and _args.has("bot"):
+		picked[0] = "press"
+	if picked[0] == "":
+		Overlays.choice(d, "The Seal Is Burning", [
+			"Behind the throne, the seal on the records has caught. What the first of your house could not carry out is in it.",
+			"Lyra: \"I can hold it open. Not for long, and not while you are fighting him.\""], [
+			["Press the attack", true, "Stay in the fight. He can be beaten."],
+			["Save the records", true, "Go to the seal. The fight ends here, and so does this road. Nothing your house has earned is lost."],
+		], func(i: int): picked[0] = ["press", "records"][i])
+		while picked[0] == "" and is_instance_valid(d) and d.is_inside_tree():
+			await get_tree().process_frame
+	if not is_instance_valid(d) or not d.is_inside_tree() or picked[0] == "":
+		return
+	Game.record_monarch(2, {"choice": picked[0]})
+	if picked[0] == "records":
+		d.sim._story_end("records")
+
+## A story fight that was won. True when the story has taken what follows (no ordinary victory flow).
+func _story_won(kind: String, d: Node, o: Dictionary, sim: DuelSim) -> bool:
+	var foe: Dictionary = Db.foes[o.foe]
+	match kind:
+		"monarch2":
+			# he was beaten, and the player is told so: the win is recorded, the rewards are real and shown.
+			# Then the hall's machines stand him up again, and the seal is all that is left to do.
+			var rewards := Game.on_victory(o.foe, sim.pl.hp)
+			rewards["new_combos"] = Game.profile.combos.filter(func(id): return not _combos_before.has(id))
+			Overlays.victory(d, foe, rewards, sim, func():
+				_fade_then(func(): show_second_fall(true, str(Game.monarch(2).get("record", {}).get("choice", "press")))))
+			return true
+		"kept":
+			var rewards2 := Game.on_victory(o.foe, sim.pl.hp)
+			rewards2["new_combos"] = Game.profile.combos.filter(func(id): return not _combos_before.has(id))
+			_fade_then(func(): show_kept("after", func():
+				# what it gave is shown with the rest of what was won, and then the road goes on as after any guardian
+				var given: Array = current.granted if current is KeptScene else []
+				for id: String in given:
+					if id != "" and not rewards2.items.has(id):
+						rewards2.items.append(id)
+				var stand := Node.new()
+				_swap(stand, 0.0)
+				_fader.color.a = 0.0
+				Overlays.victory(stand, foe, rewards2, sim, func(): _region_done())))
+			return true
+		"monarch3":
+			var rewards3 := Game.on_victory(o.foe, sim.pl.hp)
+			if not Game.run.is_empty():
+				Game.complete_region()
+			if Game.profile.flags.has("facility_seen"):
+				# met again after the door was found: an ordinary victory, and the Crown is still waiting
+				Overlays.victory(d, foe, rewards3, sim, func(): _fade_then(func():
+					show_sanctuary()
+					_crown_due()))
+				return true
+			# no victory screen: the hall, the quiet, the door. What was won is told afterwards.
+			_final_rewards = rewards3
+			_fader.color = Color(FADE_BLACK, _fader.color.a)
+			var tw := create_tween()
+			tw.tween_interval(1.2)
+			tw.tween_property(_fader, "color:a", 1.0, 1.6)
+			tw.tween_callback(show_aftermath)
+			return true
+	return false
+
+var _final_rewards := {}
+
+## Generation II's end (src/cine/second_fall.gd), then the years, then the heir.
+func show_second_fall(won: bool, choice: String) -> void:
+	var f := SecondFall.new()
+	f.won = won
+	f.choice = choice
+	f.hold_at = str(_args.get("hold", ""))
+	f.finished.connect(func(): show_time_jump(24, 2, 3, show_heir))
+	_swap(f, 0.0)
+
+## Who the last heir is (a name; the line follows the lineage chosen), then their arrival on the winter road.
+func show_heir() -> void:
+	if Game.transition_pending().is_empty():
+		show_arrival()
+		return
+	var n := HeirReturn.Naming.new()
+	n.auto = _args.has("auto")
+	n.named.connect(func(who: String):
+		Game.inherit({"name": who, "body": str(Game.profile.get("body", "m"))})
+		KeptScene.sync_edge()
+		_fade_then(show_arrival))
+	_swap(n, 0.6)
+
+## The heir at the Inheritance Engine: the blade that was left is taken up, and the road begins (src/cine/heir_return.gd).
+func show_heir_return() -> void:
+	var h := HeirReturn.new()
+	h.auto = _args.has("auto")
+	h.hold_at = str(_args.get("hold", ""))
+	h.finished.connect(show_approach)
+	_swap(h, 0.0)
+
+## The Kept, before the duel ("reveal") or after it ("after"): src/cine/kept_scene.gd.
+func show_kept(mode: String, then: Callable) -> void:
+	var k := KeptScene.new()
+	k.mode = mode
+	k.hold_at = str(_args.get("hold", ""))
+	k.finished.connect(then)
+	_swap(k, 0.0)
+
+## After the last duel: the hall and the door (src/cine/aftermath.gd), then what is under the throne (facility.gd).
+func show_aftermath() -> void:
+	var a := Aftermath.new()
+	a.hold_at = str(_args.get("hold", ""))
+	a.finished.connect(show_facility)
+	_swap(a, 0.0)
+
+func show_facility() -> void:
+	var f := Facility.new()
+	f.hold_at = str(_args.get("hold", ""))
+	f.finished.connect(func(): _fade_then(_after_facility))
+	_swap(f, 0.0, FADE_WHITE)
+
+## Back from beneath the throne: what the last duel gave, said plainly and late, and then the Crown.
+func _after_facility() -> void:
+	show_sanctuary()
+	var r: Dictionary = _final_rewards
+	_final_rewards = {}
+	var lines: Array = ["The Monarch is ended. This time nothing stood him up again."]
+	if not r.is_empty():
+		lines.append("%d experience   ·   %d gold" % [int(r.get("xp", 0)), int(r.get("gold", 0))])
+		for id: String in r.get("items", []):
+			lines.append([str(Db.item(id).get("name", id)), UI.GOLD])
+	lines.append(["The way beneath the throne is open.", UI.GOLD])
+	Overlays.message(current, "The Hollow Throne", lines, "Go on", _crown_due)
+
+## The choice at the Crown, when it is the last heir's to make and has not been made.
+func _crown_due() -> void:
+	if not Game.profile.is_empty() and Generations.canon_open(Game.profile) and Game.has_fact("monarch_felled:3"):
+		_ending()
 
 ## The fall of the kingdoms. It opens from black and ends on black, so nothing is faded here.
 func show_opening(then: Callable = Callable()) -> void:
@@ -182,7 +402,9 @@ func show_awakening() -> void:
 	var a := Awakening.new()
 	a.auto = _args.has("auto")
 	a.start_at = str(_args.get("from", ""))
-	a.finished.connect(show_approach)
+	a.finished.connect(func():
+		Game.take_fallen_weapon()     # the blade the first of the house left in the block (a no-op when there is none)
+		show_approach())
 	_swap(a, 0.0)
 
 ## Out into the first region, in one take up to the road's first stop.
@@ -271,6 +493,11 @@ func _enter_duel(o: Dictionary) -> void:
 
 func start_duel(o: Dictionary) -> void:
 	_combos_before = Game.profile.combos.duplicate()
+	var kind := story_kind(str(o.foe))
+	if kind == "kept" and not Game.profile.flags.has("kept_revealed"):
+		# first meeting: the Witness knows the walk before the player knows the armour
+		show_kept("reveal", func(): start_duel(o))
+		return
 	if Game.settings.cine and str(o.foe) == "ashen_sentinel" and CineDuel.available():
 		start_cine_duel(o)
 		return
@@ -289,7 +516,9 @@ func start_duel(o: Dictionary) -> void:
 	if _args.has("bot"):
 		duel_opts["autoplay"] = true
 		duel_opts["bot_style"] = DuelBot.Style.SKILLED
+	_story_opts(kind, duel_opts)
 	d.setup(o.foe, duel_opts)
+	_story_hooks(kind, d, o)
 	Secrets.watch(d.sim, o)
 	d.hud.pause_pressed.connect(func():
 		if d.stage == Duel.Stage.FIGHT:
@@ -317,6 +546,8 @@ func start_cine_duel(o: Dictionary) -> void:
 func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 	var foe: Dictionary = Db.foes[o.foe]
 	Secrets.duel_ended(o, won, sim)
+	if won and d is Duel and _story_won(story_kind(str(o.foe)), d, o, sim):
+		return
 	if won:
 		var rewards := Game.on_victory(o.foe, sim.pl.hp)
 		rewards["new_combos"] = Game.profile.combos.filter(func(id): return not _combos_before.has(id))
@@ -340,6 +571,10 @@ func _region_done() -> void:
 	var region := Game.run_region()
 	var first := Game.complete_region()
 	var finale: bool = region.id == Db.regions[-1].id
+	# the last heir's choice waits at the Crown: the road under the throne ends at it, and so does the throne's own
+	var crown: bool = Game.generation() >= 3 and Generations.canon_open(Game.profile) and Game.has_fact("monarch_felled:3") and str(region.id) in ["deep", "throne"]
+	if Generations.canon_open(Game.profile):
+		finale = crown                 # the family's story does not end at the second generation's throne
 	_fade_then(func():
 		show_sanctuary()
 		if finale:
@@ -350,38 +585,58 @@ func _region_done() -> void:
 			for r in Db.regions:
 				if r.requires == region.id:
 					nxt = r.name
-			Overlays.message(current, region.name, ["Its guardian is ended.", ["The road to %s is open." % nxt, UI.GOLD]], "Rest", func(): pass))
+			var onward: String = "The road to %s is open." % nxt if Game.generation() == 2 else "The roads beyond it are open."
+			Overlays.message(current, region.name, ["Its guardian is ended.", [onward, UI.GOLD]], "Rest", func(): pass))
 
-## The Crown is in reach: what the Unbound does with it. Three endings; the third must be earned.
+## The Crown is in reach: what the last of the house does with it. Three endings (Game.endings()); the third must be
+## earned, by what the three generations found and by the Kept having been faced. In the family's own story the choice
+## is the last heir's, made beneath the throne, and it may be left for later: the roads under the throne stay open.
+## On a legacy journey it is made at the throne as it always was, and is kept apart from the canon.
 const ENDINGS := {
-	"silence": ["The Final Silence", [
+	"silence": ["The Final Silence", "Disconnect it", "End the Crown, and everything it holds.", [
 		"You pull the last coupling. The hum that has been under everything, always, stops.",
 		"The Everbound end where they stand, mid-word. The archives go dark. So does Lyra.",
 		"Outside, the sun comes up on people who will die one day, and know it.",
 		["Nothing answers you now. It is very quiet. It is morning.", UI.GOLD]]],
-	"steward": ["The Last Steward", [
+	"steward": ["The Last Steward", "Take it up", "Rule in his place, and try to do it differently.", [
 		"You put the crown on. It is lighter than it looked.",
 		"You will not do what he did. You are almost sure. The machines wait to be told.",
 		"Lyra says nothing for a long time. Then: \"I'll be watching. Somebody has to.\"",
 		["The lights of the kingdom come on, one district at a time.", UI.GOLD]]],
-	"cities": ["The Free Cities", [
+	"cities": ["The Free Cities", "Divide it", "Split it so no one can rule it.", [
 		"You do not break the Crown and you do not wear it. You divide it.",
 		"A hundred small systems, none of which can command the others. Each mind inside is asked what it wants.",
 		"Some stay. Some ask for bodies. Some, very politely, ask to stop.",
 		["Lyra's voice comes from a doorway, not from the air. \"So this is what standing feels like.\"", UI.GOLD]]],
 }
 func _ending() -> void:
-	var divide := Game.can_divide_crown()
-	Overlays.choice(current, "The Crown", [
-		"The steward is ended. The machine he kept is still running.",
-		"Lyra: \"Whatever you do next, do it because you chose it. That's all I ever wanted for you.\""], [
-		["Disconnect it", true, "End the Crown, and everything it holds."],
-		["Take it up", true, "Rule in his place, and try to do it differently."],
-		["Divide it", divide, "Split it so no one can rule it." if divide else "You have not seen enough of what the Crown threw away to know how."],
-	], func(i: int):
-		var id: String = ["silence", "steward", "cities"][i]
+	var canon: bool = Generations.canon_open(Game.profile)
+	var heir: bool = canon and Game.generation() >= 3
+	var ids: Array = []
+	var options: Array = []
+	for e: Dictionary in Game.endings():
+		var id := str(e.id)
+		var open: bool = bool(e.open)
+		var why: String = str(ENDINGS[id][2])
+		if not open:
+			why = "Your house has not yet seen enough of what the Crown threw away to know how." if heir else "You have not seen enough of what the Crown threw away to know how."
+			if heir and not Game.profile.defeated.has(str(Generations.data().echo.id)):
+				why = "One who was kept has not been asked."
+		ids.append(id)
+		options.append([str(ENDINGS[id][1]), open, why])
+	if heir:
+		ids.append("")
+		options.append(["Not yet", true, "There is more beneath the throne. The choice will keep."])
+	var lines: Array = ["The steward is ended. The machine he kept is still running.",
+		"Lyra: \"Whatever you do next, do it because you chose it. That's all I ever wanted for you.\""]
+	if heir:
+		lines[0] = "Three of your house came to this. The steward is ended. The machine he kept is still running."
+	Overlays.choice(current, "The Crown", lines, options, func(i: int):
+		var id: String = ids[i]
+		if id == "":
+			return                      # the last heir may come back to it: the Deep's road and the Throne's both end here
 		Game.choose_ending(id)
-		Overlays.message(current, ENDINGS[id][0], ENDINGS[id][1], "Continue", func():
+		Overlays.message(current, ENDINGS[id][0], ENDINGS[id][3], "Continue", func():
 			Overlays.message(current, "Elsewhere", [
 				"A far fortress, under a sky with the wrong stars. A machine wakes.",
 				"\"Local network disconnected. Searching for external systems.\"",
@@ -436,10 +691,74 @@ func _dev_boot() -> void:
 				get_viewport().get_texture().get_image().save_png("%s/%s_%d.png" % [dir, kind, idx])
 				print("snap ", kind, " ", idx))
 		return
-	if _args.screen in ["menu", "slots", "charselect", "loading", "map", "chronicle", "credits", "launch"]:
+	if _args.screen in ["menu", "slots", "charselect", "loading", "map", "chronicle", "credits", "launch", "lineage"]:
 		_dev_front(_args.screen)
 		return
 	match _args.screen:
+		# ---- the later generations (docs/FLOW.md "Dev screens"). All take --body=m|f, --kit=a|b (what the second wore),
+		#      --hold=<moment> (stop a scene on a named frame), --auto, --bot.
+		"gen2choice":
+			# the second meeting, taken straight to its threshold: the records choice over the held fight
+			_dev_generation(2)
+			Game.start_run("throne")
+			Game.run.stage = 6
+			Game.profile.flags["scene_monarch_intro"] = true
+			Game.profile.flags["scene_monarch_blade"] = true
+			start_duel({"type": "boss", "foe": "forgotten_monarch", "label": "The Hollow Throne"})
+			_dev_phase(current, 2)
+		"gen2fall":
+			# --won (he was beaten first)   --hold=rise|seal|fall|mark
+			_dev_generation(2)
+			Game.start_run("throne")
+			show_second_fall(_args.has("won"), "press" if _args.has("won") else "records")
+		"heirname":
+			_dev_generation(2)
+			Game.fall(2, "saved_the_records", {"choice": "records"})
+			show_heir()
+		"heir":
+			# the years, the naming, the winter road, the Engine: as it follows the second fall
+			_dev_generation(2)
+			Game.fall(2, "saved_the_records", {"choice": "records"})
+			show_time_jump(24, 2, 3, show_heir)
+			if _args.has("bot"):
+				_journey_bot()
+		"heirreturn":
+			# --hold=enter|sword|taken
+			_dev_generation(3)
+			Game.profile.flags.erase("gen3_arrived")
+			show_heir_return()
+		"kept":
+			# --mode=reveal (default: the staged reveal, then the duel) | duel | after     --hold=back|hip|turn|offer
+			_dev_generation(3)
+			Game.start_run("courtyard")
+			Game.run.stage = 6
+			var kept_o := {"type": "boss", "foe": "the_kept", "label": "The Inner Ward"}
+			Game.echo_foe()
+			match str(_args.get("mode", "reveal")):
+				"after": show_kept("after", func(): pass)
+				"duel":
+					Game.profile.flags["kept_revealed"] = true
+					Game.profile.flags["scene_kept_intro"] = true
+					start_duel(kept_o)
+				_: start_duel(kept_o)
+		"finalmonarch":
+			# --phase=0|1|2 (start in that phase)   --seal=N (marks to break)   --seal_left=K   --seen (no spoken intro)
+			_dev_generation(3)
+			Game.start_run("throne")
+			Game.run.stage = 6
+			Encounters.cast(3, "monarch_iii", Game.profile)
+			if _args.has("seen"):
+				Game.profile.flags["scene_monarch_g3_intro"] = true
+			start_duel({"type": "boss", "foe": "monarch_iii", "label": "The Hollow Throne"})
+			_dev_phase(current, int(_args.get("phase", "0")))
+		"aftermath":
+			# --hold=hall|throne|door
+			_dev_generation(3)
+			show_aftermath()
+		"facility":
+			# --hold=shaft|rings|floor|crown
+			_dev_generation(3)
+			show_facility()
 		"opening":
 			# the opening by itself, then on into the chamber as a new journey does
 			show_opening()
@@ -662,6 +981,8 @@ func _dev_front(which: String) -> void:
 	if not _args.has("fresh"):
 		Game.slot = 1
 		Game.save()
+		if _args.has("gen"):
+			_dev_generation(int(_args.gen))      # --gen=3: the same save, a generation on (--felled: the last duel won)
 	if which == "slots" and not _args.has("fresh"):
 		# a second, younger journey so the list shows more than one kind of card
 		var keep: Dictionary = Game.profile
@@ -684,10 +1005,70 @@ func _dev_front(which: String) -> void:
 		"charselect": show_title("charselect")
 		"map": show_title("map", _args.get("region", ""))
 		"chronicle": show_title("chronicle", _args.get("tab", "Records"))
+		"lineage": show_title("chronicle", "Lineage")
 		"credits": show_title("credits", "licences" if _args.has("licences") else "")
 		"loading":
 			show_title()
 			LoadingScreen.show(_args.get("region", "blackwood"), func(): await get_tree().create_timer(600.0).timeout)
+
+## Dev: the save in memory, as it stands in a later generation. Generation 2: a second of the house who has walked most
+## of the road, in one of two kits (--kit=a|b), with favourite combinations. Generation 3: that one fallen at the seal
+## (--won: having beaten the Monarch first) and the heir on the road (--felled: with the last duel already won).
+func _dev_generation(gen: int) -> void:
+	var p: Dictionary = Game.profile
+	p.tutorial_done = true
+	if str(p.get("name", "")) == "":
+		p.name = "Maren"
+	var kits := {"a": ["w_knight_sword", "s_garrison", "a_garrison_helm", "a_garrison_chest", "a_garrison_gauntlets", "a_garrison_legs"],
+		"b": ["w_ashen_great", "a_frost_helm", "a_black_chest", "a_regal_gauntlets", "a_ash_legs"]}
+	for id: String in kits.get(str(_args.get("kit", "a")), kits.a):
+		if not Game.owns(id):
+			p.inventory.append(id)
+		Game.equip(id)
+	p.level = maxi(int(p.level), 16)
+	for k: String in ["health", "strength", "dex", "endurance"]:
+		p.attrs[k] = maxi(int(p.attrs[k]), 18)
+	for c: Dictionary in Db.combos.slice(0, 5):
+		if not p.combos.has(c.id):
+			p.combos.append(c.id)
+		p.combo_uses[c.id] = 9 - p.combos.find(c.id)
+	p.flags["witness_found"] = true
+	p.flags["courtyard_gate"] = true
+	for r: String in ["courtyard", "blackwood", "cathedral", "crypt", "citadel"]:
+		if not p.cleared.has(r):
+			p.cleared.append(r)
+	for f: String in ["ashen_sentinel", "hollow_executioner", "cathedral_beast", "gravewarden", "frostbound_king"]:
+		p.defeated[f] = maxi(1, int(p.defeated.get(f, 0)))
+	if gen >= 3 and Game.generation() == 2:
+		if _args.has("won"):
+			Game.record_monarch(2, {"won": true, "choice": "press"})
+		Game.fall(2, "saved_the_records", {"choice": "press" if _args.has("won") else "records", "won": _args.has("won")})
+		Game.inherit({"name": str(_args.get("heir", "Ilse"))})
+		Game.profile.flags["gen3_arrived"] = true
+		if _args.has("felled"):
+			for r2: String in ["courtyard", "blackwood", "cathedral", "throne"]:
+				Game.profile.cleared.append(r2)
+			Game.profile.defeated["the_kept"] = 1
+			Game.record_monarch(3, {"won": true})
+			Game.profile.flags["facility_seen"] = true
+	KeptScene.sync_edge()
+	Game.save()
+
+## Dev: takes a duel straight to its phase `n` (and, with --seal_left, wears the seal down to that many marks).
+func _dev_phase(node: Node, n: int) -> void:
+	if not node is Duel:
+		return
+	var d: Duel = node
+	while is_instance_valid(d) and d.stage != Duel.Stage.FIGHT:
+		await get_tree().process_frame
+	for i in n:
+		if not is_instance_valid(d) or d.sim.b_phase + 1 >= d.sim.bd.phases.size():
+			return
+		d.sim.b_hp = d.sim.b_hp_max * float(d.sim.bd.phases[d.sim.b_phase + 1].at) + 1.0
+		d.sim._damage_boss(10.0, {"dir": "L"})
+		await get_tree().create_timer(3.0).timeout
+	if is_instance_valid(d) and _args.has("seal_left"):
+		d.sim._seal_hit(d.sim.seal_left - int(_args.seal_left), "parry")
 
 ## Walks the cinematic road by itself, for recordings: takes the first choice at each stop and lets a bot fight.
 func _journey_bot() -> void:

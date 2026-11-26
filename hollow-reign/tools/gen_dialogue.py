@@ -79,6 +79,58 @@ scene("gen1_close_m", (N, "His name disappeared from the royal histories.", "ele
 scene("gen1_close_f", (N, "Her name disappeared from the royal histories.", "elegiac"), (N, "But not from those of her house.", "near whisper"), once=False, new=True)
 scene("gen2_arrive_m", (P, "I know where you died, Father. I would know why.", "low, to the gate"), once=False, new=True)
 scene("gen2_arrive_f", (P, "I know where you died, Mother. I would know why.", "low, to the gate"), once=False, new=True)
+# ---- the second meeting, the second fall, and the Last Heir (docs/CAMPAIGN_SCRIPT.md "Generation II: what changes", "Generation III").
+# Text only. Staged by src/main.gd, src/cine/second_fall.gd, heir_return.gd, kept_scene.gd, aftermath.gd, facility.gd.
+scene("monarch_blade", ("monarch", "That blade. I had wondered when I would see it again.", "quiet, to the sword, not to its bearer"), new=True)
+scene("gen2_seal_burns", (LY, "The seal behind the throne is burning. What the first of your house could not carry out is still in it.", "urgent, held down"), once=False, new=True)
+scene("monarch_restored", ("monarch", "You see the difficulty. I am not the thing that is keeping me.", "rising, almost apologetic"), once=False, new=True)
+scene("gen2_seal",
+ (P, "All these years I thought I had come for your life.", "at the seal, back to him"),
+ ("monarch", "And what have you found instead?", "level"),
+ (P, "The means to end your reign.", "certain"), once=False, new=True)
+scene("gen2_close", (N, "The second of that house fell beneath the same throne.", "elegiac"),
+ (N, "But where the first had left a question, this one left an answer.", "near whisper"), once=False, new=True)
+scene("gen3_arrive",
+ (LY, "Three of your house have stood before those gates.", "far off, through old machinery"),
+ (P, "And how many returned?", "young, flat"),
+ (LY, "Not enough.", "plain"),
+ (P, "Then show me another way.", "quiet"), once=False, new=True)
+scene("gen3_engine", (LY, "I kept all of it. I could not keep them.", "low"), once=False, new=True)
+scene("kept_approach",
+ (W, "Stop. Do not go in yet.", "sharp, for once"),
+ (P, "It is one guardian.", "impatient"),
+ (W, "It is the walk. I was carried at that hip for a year.", "very quiet"), new=True, title="The Walk", kind="guardian", essential=True)
+scene("kept_intro",
+ ("kept", "State your... no. That was his question.", "a closed helm; a voice the player knows, slowed"),
+ (P, "Who were you?", "careful"),
+ ("kept", "Late. I was late home.", "as if reading it off something"), new=True)
+scene("kept_beat",
+ ("kept", "You stand the way I stood.", "mid-fight, without heat"),
+ (P, "Someone taught me how you stood.", "breathing hard"), new=True)
+scene("kept_after",
+ ("kept", "You kept the edge on it.", "looking at the heir's sword"),
+ ("kept", "Go on. I have held this gate as long as I was able.", "tired, courteous"),
+ (W, "I will set that down as it happened. All of it. Both times.", "barely audible"), once=False, new=True)
+scene("monarch_g3_intro",
+ ("monarch", "Your family has spent two lifetimes at my gates.", "regal, unhurried"),
+ (P, "Three. You are keeping one of them.", "cold"),
+ ("monarch", "I keep everything. It is the whole of my office.", "without shame"),
+ (P, "And you have mistaken survival for the right to rule.", "steady"),
+ ("monarch", "When these machines fall silent, they will remember whom to blame.", "a warning, not a threat"),
+ (P, "Then let them remember a choice was made.", "final"), new=True)
+scene("final_door", (W, "There is a door. Not from this side of the wall.", "remembering as it speaks"), once=False, new=True)
+scene("facility",
+ (LY, "This was never merely a kingdom.", "hushed"),
+ (P, "Then what was it?", "low"),
+ (LY, "A means of keeping one alive.", "plain"), once=False, new=True)
+# Generation III's road: a line where the heir first sets foot on each road. Written for this pass, not from the brief;
+# nobody has reviewed them. (`<region>_<stop>_g3` is what the companion looks for in the third generation.)
+scene("courtyard_0_g3", (LY, "The plate on these is new. He has been replacing what your house broke.", "dry"), new=True)
+scene("blackwood_0_g3", (W, "The lanterns were lit when I last came this way. I was on another hip.", "level"), new=True, title="Another Hip", kind="landmark")
+scene("cathedral_0_g3", (LY, "The door under the crossing was on no plan I was given. Neither was I.", "uneasy"), new=True)
+scene("citadel_0_g3", (W, "A king who gave up his crown, and the hall is still kept. Habit outlives everything.", "wry"), new=True, title="Habit", kind="landmark")
+scene("throne_0_g3", (LY, "Twice this door has opened for your house. Nobody came back through it.", "quiet"), new=True)
+scene("deep_0_g3", (LY, "Everything he kept is under here. So am I.", "very quiet"), new=True)
 # speech category B: the Sentinel keeps only its challenge and its last words (the retry line was cut)
 scene("sentinel_death",
  ("sentinel", "Is the war... over?", "failing, suddenly human"),
@@ -394,6 +446,11 @@ SPEECH = {"ashen_sentinel": "B", "hollow_executioner": "B", "gravewarden": "B",
  "cathedral_beast": "A", "cinder_wyrm": "A", "rimewyrm": "A", "azhurion": "A"}
 FOE_VOICE = {"ashen_sentinel": "sentinel", "hollow_executioner": "executioner", "pale_huntsman": "huntsman", "crimson_widow": "widow",
  "gravewarden": "gravewarden", "frostbound_king": "frostking", "devourer": "devourer", "forgotten_monarch": "monarch"}
+# the Kept (Generation III, built from the second generation's snapshot): very few words, in a voice the player knows
+SPEECH["the_kept"] = "C"
+FOE_VOICE["the_kept"] = "kept"
+# the last meeting ends on the recorded lines: the same takes, under the third generation's key
+S["monarch_g3_death"] = {"lines": list(S["monarch_death"]["lines"]), "once": True}
 for foe, cat in SPEECH.items():
     n = sum(1 for l in L.values() if l["speaker"] == FOE_VOICE.get(foe, foe))
     assert not (cat == "A" and n), foe + " is a creature and must not speak"
@@ -422,6 +479,7 @@ for _lid, _l in L.items():
             del _l["recorded"]
 NAMES = {"narrator": "", "lyra": "Lyra", "player": "", "orren": "Orren", "archivist": "The Archivist", "sentinel": "Ashen Sentinel", "executioner": "Hollow Executioner",
  "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness", "forebear": ""}
+NAMES["kept"] = "The Crownless Champion"
 OUT = {"lines": L, "scenes": S, "voices": VOICES, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}
 for path in ["data/dialogue.json", "docs/DIALOGUE_DATABASE.json"]:   # the docs copy is the same file, kept for readers
     json.dump(OUT, open(path, "w"), indent=1)

@@ -272,6 +272,16 @@ NEW += [
      "desc": "A small round shield, light enough to forget you are carrying.", "ng_min": 0, "look": {"color": "#6a5a3a"}},
 ]
 CRAFT_ONLY.append("w_cold_resolve")
+# "The Second's Edge" (docs/CAMPAIGN_SCRIPT.md, Generation III): what the Kept holds out, hilt first. In the data it is a
+# plain sword of the starting make; in play it is a copy of the blade the second generation carried, with that
+# generation's forge work (src/cine/kept_scene.gd `sync_edge` lays the snapshot's weapon over this entry and copies its
+# records). It has one source, the story, and is never sold, dropped or stocked.
+NEW += [
+    {"id": "w_seconds_edge", "name": "The Second's Edge", "slot": "weapon", "cls": "sword", "rarity": "epic", "damage": 36, "price": 0, "crit": 6,
+     "desc": "The blade the second of your house carried to the throne, kept as it was on the day. Someone kept the edge on it.", "element": None, "ng_min": 0,
+     "look": {"metal": "#9aa0a8"}},
+]
+STORY = {"w_seconds_edge": {"id": "the_kept", "region": "courtyard"}}       # item -> the story moment that gives it
 ALL = ITEMS + NEW
 for it in NEW:
     assert it["id"] not in BY_ID, it["id"]
@@ -296,7 +306,7 @@ ALIASES = {"w_wayfarer": "w_rusted_sword", "w_silver_vow": "w_dawnline", "w_ashb
     "w_nightward": "w_vigil_edge", "w_oathbreaker": "w_oath_axe", "w_veilcutter": "w_starfall", "w_eternal_edge": "w_monarch"}
 ADVANCED = ["w_monarch", "w_throneshard", "w_twin_relics", "w_hunger", "s_rime"]       # Recall-capable: the old make
 QUEST_ITEMS = ["x_name", "r_crown"]            # story keepsakes: never sold
-UNSELLABLE = ["w_rusted_sword"]
+UNSELLABLE = ["w_rusted_sword", "w_seconds_edge"]
 WEAPON_FAMILY = {"w_rusted_sword": "crownless", "w_knight_sword": "crownless", "w_dawnline": "crownless", "w_ashen_great": "ashbound",
     "w_censer_sword": "ashbound", "w_ember_fangs": "ashbound", "w_woodcutter": "widow", "w_headsman": "widow", "w_twin_fangs": "widow",
     "w_pilgrim_blades": "widow", "w_vigil_edge": "gravekeeper", "w_crypt_great": "gravekeeper", "w_frost_great": "frostwarden",
@@ -305,7 +315,7 @@ WEAPON_FAMILY = {"w_rusted_sword": "crownless", "w_knight_sword": "crownless", "
     "s_plank": "crownless", "s_garrison": "crownless", "s_round": "crownless", "s_tower": "ashbound", "s_reliquary": "gravekeeper",
     "s_rime": "frostwarden", "s_scale": "dragonforged", "r_iron": "crownless", "r_ember": "ashbound", "r_widow": "widow", "r_frost": "frostwarden",
     "r_crown": "sovereign", "r_brood": "dragonforged", "x_candle": "crownless", "x_bell": "gravekeeper", "x_tooth": "widow", "x_tear": "frostwarden",
-    "x_heart": "architect", "x_name": "architect"}
+    "x_heart": "architect", "x_name": "architect", "w_seconds_edge": "crownless"}
 SHIELD = {"s_plank": ["heater", "medium"], "s_garrison": ["kite", "medium"], "s_round": ["round", "light"], "s_tower": ["segmented", "heavy"],
     "s_reliquary": ["kite", "heavy"], "s_rime": ["curved", "medium"], "s_scale": ["segmented", "heavy"]}
 GEAR_MODEL = {"w_rusted_sword": "wayfarer", "w_dawnline": "silver_vow", "w_censer_sword": "ashbrand", "w_starfall": "veilcutter", "w_throneshard": "kings_remnant",
@@ -358,11 +368,13 @@ def find_sources(it):
     for c in CHALLENGES:
         if c["reward"].get("item") == iid:
             out.append({"type": "challenge", "id": c["id"]})
+    if iid in STORY:
+        out.append(dict({"type": "story"}, **STORY[iid]))
     if int(it.get("price", 0)) > 0:
         out.append({"type": "shop", "unlock": unlock_of(it)})
     if int(it.get("ng_min", 0)) >= 1 and int(it.get("price", 0)) <= 0:
         out.append({"type": "ng", "ng": int(it["ng_min"])})
-    order = ["start", "boss", "encounter", "region", "shop", "quest", "challenge", "craft", "ng"]
+    order = ["start", "boss", "encounter", "region", "shop", "quest", "challenge", "craft", "ng", "story"]
     out.sort(key=lambda s: (order.index(s["type"]), 0 if s.get("guaranteed", True) else 1))
     return out
 
@@ -393,6 +405,7 @@ def hint(src):
         "craft": "Orren could make it, given what %s leaves behind." % reg,
         "shop": "Orren sells it, once you have walked far enough.",
         "ng": "Only offered to those who return.",
+        "story": "Someone has been keeping it for you.",
     }[t]
 
 def requirement(it):

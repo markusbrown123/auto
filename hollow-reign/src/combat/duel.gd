@@ -4,6 +4,8 @@ extends Node3D
 ## sound, haptics, HUD). Emits `finished` when the duel is decided.
 
 signal finished(won: bool, sim: DuelSim)
+## The story took the fight (DuelSim `end_on`, or a scene calling sim._story_end): neither won nor lost.
+signal interrupted(how: String, sim: DuelSim)
 
 enum Stage { INTRO, FIGHT, FINISHER, DEATH, DONE }
 
@@ -46,6 +48,12 @@ var p_side := 0.0             # sideways distance the knight is off the line, mi
 var p_side_owed := 0.0        # sidestep still to be taken
 var training := false
 var _glinted := false
+## Story hooks (generational scenes). `beat_hook`: awaited at a story beat with the event ({foe, phase, low}), the
+## fight held exactly where it is. `story`: options given to setup under "story": {pre_scene (played before the
+## foe's own first words), quiet_end (no last words or companion lines after a win), yield (at no health the foe
+## lowers its blade instead of being cut down)}.
+var beat_hook: Callable
+var story := {}
 ## Onboarding: learn by doing. Each step waits for the thing itself to be done once.
 var _lesson := -1
 var _lesson_count := 0
@@ -203,11 +211,12 @@ static func beat_scene(foe_id: String) -> String:
 	return id if Story.has_scene(id) else ""
 
 ## Stops the fight exactly where it is, lets them speak, and takes it up again. Skipped on every later attempt.
-func _story_beat() -> void:
-	var id := Duel.beat_scene(str(foe.id))
-	if id == "":
+func _story_beat(d: Dictionary = {}) -> void:
+	var id := Duel.beat_scene(str(foe.id)) if int(d.get("phase", 1)) == 1 and not d.get("low", false) else ""
+	if id == "" and not beat_hook.is_valid():
 		return
-	Game.profile.flags["beat_" + str(foe.id)] = true
+	if id != "":
+		Game.profile.flags["beat_" + str(foe.id)] = true
 	sim.paused = true                 # DuelSim.tick and the bot do nothing while this is set: state is kept exactly
 	_on_block(false)
 	hud.cue.clear()
@@ -215,10 +224,14 @@ func _story_beat() -> void:
 	if "director" in self and director:
 		director.cue("story_beat", {"on": true})
 	Companion.leave_combat()
-	await Story.play(id, true)
+	if id != "":
+		await Story.play(id, true)
+	if beat_hook.is_valid() and is_inside_tree():
+		await beat_hook.call(d)
 	if not is_inside_tree():
 		return
-	Companion.enter_combat(self)
+	if stage == Stage.FIGHT:
+		Companion.enter_combat(self)
 	if "director" in self and director:
 		director.cue("story_beat", {"on": false})
 	if stage == Stage.FIGHT:
@@ -323,6 +336,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	hud.root.modulate.a = 0.0
 
 	var o := opts.duplicate()
+	story = opts.get("story", {})
 	o["assist"] = 1.3 if Game.settings.assist else 1.0
 	o["combos"] = Db.combos
 	training = bool(opts.get("training", false)) or bool(opts.get("lesson", false))
@@ -458,7 +472,7 @@ func _begin_intro(skip: bool) -> void:
 	Sfx.play("bell", -4.0)
 	# who may speak is data (dialogue.json "speech"): creatures have no voice key, and the companions set the scene instead
 	_voice_key = Companion.voice_key(str(foe.id))
-	if Story.pending(_voice_key + "_intro") or not Companion.pick_boss_approach(str(foe.id)).is_empty():
+	if Story.pending(_voice_key + "_intro") or Story.pending(str(story.get("pre_scene", ""))) or not Companion.pick_boss_approach(str(foe.id)).is_empty():
 		# first meeting: they speak before steel is drawn, and the fight waits for them
 		_intro_talk = true
 		foe_rig.guard()
@@ -500,6 +514,7 @@ func _begin_intro(skip: bool) -> void:
 func _speak_then_fight() -> void:
 	await get_tree().create_timer(1.2).timeout
 	await Companion.on_boss_approach(str(foe.id))
+	await Story.play(str(story.get("pre_scene", "")))
 	await Story.play(_voice_key + "_intro")
 	if not is_inside_tree():
 		return
@@ -657,10 +672,11 @@ func _finish(won: bool) -> void:
 	Companion.leave_combat()
 	if won:
 		# last words, what the dead leave behind, and then what the companions make of it
-		if _voice_key != "":
+		if _voice_key != "" and not story.get("quiet_end", false):
 			await Story.play(_voice_key + "_death")
 			await Story.play(_voice_key + "_memory")
-		await Companion.on_victory(str(foe.id))
+		if not story.get("quiet_end", false):
+			await Companion.on_victory(str(foe.id))
 		if not is_inside_tree():
 			return
 	finished.emit(won, sim)
@@ -801,7 +817,35 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				shake(0.6)
 				Game.haptic(70, 1.0)
 		&"story_beat":
-			_story_beat()
+			_story_beat(d)
+		&"story_end":
+			# the story has taken the fight: nothing is cut down, nobody falls; whoever asked for it carries on
+			stage = Stage.DONE
+			_stage_t = 0.0
+			_result_sent = true
+			_on_block(false)
+			hud.cue.clear()
+			hud.set_combat_visible(false, 0.25)
+			Companion.leave_combat()
+			interrupted.emit(str(d.get("how", "")), sim)
+		&"seal":
+			hud.seal(int(d.left), int(d.need), str(d.get("from", "")))
+		&"seal_broken":
+			hud.toast("THE ENGINES FALL SILENT", Color("#7fe6d8"), 1.8)
+			Sfx.play("guard_break", -2.0, 0.7)
+			arena.tint(Color("#7fe6d8"), 0.25)
+			shake(0.5)
+			Game.haptic(120, 0.9)
+		&"restored":
+			director.cue("phase")
+			foe_rig.roar()
+			hud.cue.clear()
+			_set_foe_blade_warning(false)
+			hud.toast("IT RISES", Color("#c08aff"), 1.4)
+			hud.subtitle("He falls. The engines stand him up again. Break what feeds him: turn his blows, cut along the seam.", 4.2)
+			Sfx.play("bell", -6.0, 0.8)
+			sparks(foe_rig.chest_point(), Vector3.UP, 40, Color("#c08aff"), 7.0)
+			shake(0.6)
 		&"marks":
 			if int(d.n) >= int(d.of):
 				hud.toast("SENTENCED", Color("#d23a2a"), 1.2)
@@ -926,6 +970,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				hud.subtitle(d.roar, 4.2 if d.get("revive", false) else 3.2)
 			if d.get("revive", false):
 				hud.toast("IT RISES", Color("#c08aff"), 1.4)
+			hud.set_phase_name(str(sim.phase().get("name", "")))
 		&"status":
 			if d.status == "drain":
 				hud.toast("DRAINED", Color("#c08aff"), 0.8)
@@ -938,6 +983,9 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			else:
 				Sfx.play("ember_burst", -8.0)
 		&"boss_dead":
+			if story.get("yield", false):
+				_begin_yield()
+				return
 			_creature("death", 0.0)
 			_begin_finisher(d)
 		&"player_dead":
@@ -1076,6 +1124,22 @@ func _begin_finisher(d: Dictionary) -> void:
 		if foe.boss:
 			Sfx.play("bell", -3.0, 0.8))
 	get_tree().create_timer(1.6).timeout.connect(func(): Sfx.play("victory", -2.0))
+
+## It is beaten, and is not cut down: it gives ground, and the blade comes down of its own accord. No killing blow,
+## no fall; the scene that follows is the story's.
+func _begin_yield() -> void:
+	stage = Stage.FINISHER
+	_stage_t = 1.3                     # past the blow's own shots: the camera goes to the beaten figure, then the victor
+	hud.set_combat_visible(false, 0.25)
+	hud.cue.clear()
+	hud.rift.show_dir("")
+	_on_block(false)
+	_slow = 0.9
+	foe_rig.stagger()
+	f_back_t = 1.4
+	Sfx.music("", 2.5)
+	if foe_rig.eye_light:
+		create_tween().tween_property(foe_rig.eye_light, "light_energy", 0.0, 2.0)
 
 func _begin_death() -> void:
 	stage = Stage.DEATH

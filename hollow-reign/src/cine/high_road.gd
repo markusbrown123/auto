@@ -58,46 +58,51 @@ func _process(_delta: float) -> void:
 	Highland.follow(arena, cam.global_position)
 
 ## The one composition that comes back in every generation: [camera, what it looks at, field of view].
+## The walker stands thirty metres up the road (the menu puts the player's knight there too): the camera is behind
+## their sword shoulder, close enough that they stand a third of the frame high, and looks a little left of the way
+## the road runs, so the figure is in the middle of the frame, the Ring-Gate is over their right shoulder and the
+## left of the picture is open sky for the game's name.
+const VISTA_S := 30.0
 static func vista() -> Array:
-	var h := Highland.road(30.0)
-	return [Highland.on_ground(h.x + 8.0, h.z + 34.0, 4.2), Vector3(-80.0, -14.0, 0.0), 27.0]
+	var h := Highland.road(VISTA_S)
+	var yaw := Highland.road_yaw(VISTA_S)
+	var fwd := Vector3(-sin(yaw), 0, -cos(yaw))
+	var right := Vector3(-fwd.z, 0, fwd.x)
+	var eye := h - fwd * 9.0 + right * 1.6 + Vector3(0, 1.55, 0)
+	var look := Basis(Vector3.UP, deg_to_rad(11.0)) * fwd
+	return [eye, eye + look * 100.0 + Vector3(0, 5.0, 0), 32.0]
 
 ## One designed shot. Each puts the walker on his stretch of road and frames it.
 func shot(i: int) -> void:
 	match i:
-		1:  # the vista: a small figure, the road ahead, and the Ring-Gate on the heights with the sun beside it
-			stand(30.0)
+		1:  # the vista: the walker in the foreground, the road ahead of them, and the Ring-Gate on the heights
+			stand(VISTA_S)
 			var v := vista()
 			cam.follow = null
 			cam.cut(v[0], v[1], v[2])
-			cam.move(v[0] + Vector3(-1.0, 0.5, -6.0), v[1] + Vector3(4.0, 2.0, 0.0), 14.0)
-		2:  # low, through the grass, beside him: the sea and the light beyond
+			cam.move(v[0] + Vector3(0.3, 0.5, -1.6), v[1] + Vector3(0.0, 1.5, 0.0), 14.0)
+		2:  # low, through the grass, beside them: the cliff's edge, the sea and the light beyond
 			stride(118.0, 134.0)
-			cam.ride(hero, Vector3(-4.8, 0.62, -2.4), Vector3(0.0, 1.25, -1.0))
-			cam.fov = 40.0
-		3:  # the climb, whole: the road folding up the slope, the walker small on it, the ring above
+			cam.ride(hero, Vector3(-3.3, 0.72, -2.1), Vector3(0.2, 1.2, -0.6))
+			cam.fov = 42.0
+		3:  # the climb: in profile on a leg of the switchback, the slope folding up behind and the ring over it
 			var s3 := Highland.road_at_z(196.0)
 			stride(s3 - 20.0, s3 - 6.0)
-			var eye := Highland.on_ground(-64.0, 262.0, 9.0)
-			cam.follow = null
-			cam.cut(eye, Vector3(4.0, -16.0, 150.0), 38.0)
-			cam.move(eye + Vector3(3.0, 1.0, -4.0), Vector3(4.0, -14.0, 150.0), 9.0)
+			cam.ride(hero, Vector3(-6.6, 0.9, -1.2), Vector3(5.0, 3.4, -2.4))
+			cam.fov = 44.0
 		4:  # over the shoulder, topping the rise: the gate's foot comes up out of the ground
 			var s4 := Highland.road_at_z(108.0)
 			stride(s4 - 12.0, s4 + 3.0)
-			cam.ride(hero, Vector3(0.62, 0.95, 2.5), Vector3(-0.25, 2.3, -8.0))
+			cam.ride(hero, Vector3(0.85, 1.2, 3.1), Vector3(-0.3, 2.5, -8.0))
 			cam.fov = 44.0
-		5:  # passing the dead tree, the ring filling the sky behind it
+		5:  # passing the dead tree: from low behind them, the tree going by and the ring filling the sky
 			var s5 := Highland.tree_s()
-			stride(s5 - 7.0, s5 + 5.0)
-			var t := Highland.road(s5, -5.5)
-			var low := Highland.on_ground(t.x - 5.5, t.z + 12.0, 0.7)
-			cam.follow = null
-			cam.cut(low, t + Vector3(3.5, 7.0, -16.0), 46.0)
-			cam.move(low + Vector3(1.2, 0.15, -0.8), t + Vector3(3.5, 7.4, -16.0), 9.0)
+			stride(s5 - 9.0, s5 + 4.0)
+			cam.ride(hero, Vector3(2.3, 0.7, 5.6), Vector3(-1.6, 3.6, -8.0))
+			cam.fov = 44.0
 		6:  # arrival: the court between the ring's feet, and the shut gate
-			var s6 := Highland.road_at_z(30.0)
+			var s6 := Highland.road_at_z(24.0)
 			stride(s6, Highland.road_length())
 			cam.follow = null
-			cam.cut(Vector3(8.5, 5.4, 36.0), Vector3(-1.0, 5.5, -12.0), 44.0)
-			cam.move(Vector3(6.5, 3.6, 28.0), Vector3(-1.0, 6.5, -12.0), 12.0)
+			cam.cut(Vector3(3.2, 1.45, 31.5), Vector3(-0.6, 6.2, -21.0), 40.0)
+			cam.move(Vector3(2.4, 1.8, 17.5), Vector3(-0.4, 6.8, -21.0), 13.0)

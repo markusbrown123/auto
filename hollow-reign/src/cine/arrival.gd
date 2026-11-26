@@ -10,6 +10,9 @@ var road: HighRoad
 var cards: CineCards
 var only_shot := 0                # dev: hold on one shot of the walk (1-6)
 var gen := 2
+var line_scene := ""              # the scene spoken on arriving ("" = the second generation's own line)
+var show_name := true             # the game's name over the road (the second generation's arrival only)
+var card_text := ""               # a chapter card under the first shot ("" = none)
 var _over := false
 
 func _ready() -> void:
@@ -36,7 +39,9 @@ func _run() -> void:
 	cards.fade(0.0, 1.6)
 	if not await _w(2.4):
 		return
-	var line := "gen2_arrive_" + str(Game.profile.get("body", "m"))
+	var line := line_scene if line_scene != "" else "gen2_arrive_" + str(Game.profile.get("body", "m"))
+	if card_text != "":
+		cards.show_card(card_text, 3.4)
 	Story.play(line, true)
 	while Story.busy and not _over:
 		await get_tree().process_frame
@@ -45,7 +50,8 @@ func _run() -> void:
 	# they set off, and the game's name comes up over the road
 	road.hero.walking = true
 	create_tween().tween_property(road, "s", 30.0 + 6.5 * HighRoad.WALK, 6.5)
-	cards.show_item(cards.logo, 3.6)
+	if show_name:
+		cards.show_item(cards.logo, 3.6)
 	if not await _w(6.4):
 		return
 	for i: int in [3, 4, 5, 6]:

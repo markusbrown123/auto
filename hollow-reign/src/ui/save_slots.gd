@@ -25,7 +25,7 @@ func _ready() -> void:
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 18)
 	m.add_child(v)
-	v.add_child(UI.header("Journeys" if mode == "load" else "Choose a place for the new journey", func(): closed.emit(),
+	v.add_child(UI.header("Legacies" if mode == "load" else "Choose a place for the new legacy", func(): closed.emit(),
 		"Three may be kept." if mode == "load" else "An occupied place is overwritten."))
 	v.add_child(UI.rule())
 	var mid := CenterContainer.new()
@@ -47,7 +47,7 @@ func _fill() -> void:
 func _card(n: int, s: Dictionary, latest: bool) -> Control:
 	var used := not s.is_empty()
 	var p := UI.panel(Color(0.045, 0.047, 0.056, 0.95), UI.GOLD if latest else UI.GOLD_DIM)
-	p.custom_minimum_size = Vector2(340, 440)
+	p.custom_minimum_size = Vector2(340, 500)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 1)
 	p.add_child(v)
@@ -94,11 +94,14 @@ func _card(n: int, s: Dictionary, latest: bool) -> Control:
 	v.add_child(UI.spacer(8))
 	v.add_child(UI.rule())
 	v.add_child(UI.spacer(8))
-	for pair: Array in [["Chapter", str(s.chapter)], ["Weapon", str(s.weapon)], ["Time walked", UI.playtime(float(s.playtime))], ["Last played", UI.when(float(s.last_played))]]:
+	# whose journey it is: the house, which of its three generations is on the road, and how far along
+	var gen_line := "%s  ·  %s" % [UI.roman(int(s.get("generation", 2))), str(s.get("generation_title", ""))]
+	var house := ("House %s" % str(s.family)) if str(s.get("family", "")) != "" else ""
+	for pair: Array in [["Generation", gen_line + (("\n" + house) if house != "" else "")], ["Road", str(s.chapter)], ["Weapon", str(s.weapon)], ["Time walked", UI.playtime(float(s.playtime))], ["Last played", UI.when(float(s.last_played))]]:
 		v.add_child(UI.label(str(pair[0]).to_upper(), 14, UI.DIM, "head"))
 		var val := UI.wrapped(str(pair[1]), 20, UI.BONE, 300)
 		v.add_child(val)
-		v.add_child(UI.spacer(5))
+		v.add_child(UI.spacer(2))
 	var fill2 := UI.spacer(0)
 	fill2.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(fill2)

@@ -239,6 +239,246 @@
    "dir": "low, to the gate",
    "recorded": false
   },
+  "monarch_blade_01": {
+   "speaker": "monarch",
+   "text": "That blade. I had wondered when I would see it again.",
+   "dir": "quiet, to the sword, not to its bearer",
+   "recorded": false
+  },
+  "gen2_seal_burns_01": {
+   "speaker": "lyra",
+   "text": "The seal behind the throne is burning. What the first of your house could not carry out is still in it.",
+   "dir": "urgent, held down",
+   "recorded": false
+  },
+  "monarch_restored_01": {
+   "speaker": "monarch",
+   "text": "You see the difficulty. I am not the thing that is keeping me.",
+   "dir": "rising, almost apologetic",
+   "recorded": false
+  },
+  "gen2_seal_01": {
+   "speaker": "player",
+   "text": "All these years I thought I had come for your life.",
+   "dir": "at the seal, back to him",
+   "recorded": false
+  },
+  "gen2_seal_02": {
+   "speaker": "monarch",
+   "text": "And what have you found instead?",
+   "dir": "level",
+   "recorded": false
+  },
+  "gen2_seal_03": {
+   "speaker": "player",
+   "text": "The means to end your reign.",
+   "dir": "certain",
+   "recorded": false
+  },
+  "gen2_close_01": {
+   "speaker": "narrator",
+   "text": "The second of that house fell beneath the same throne.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "gen2_close_02": {
+   "speaker": "narrator",
+   "text": "But where the first had left a question, this one left an answer.",
+   "dir": "near whisper",
+   "recorded": false
+  },
+  "gen3_arrive_01": {
+   "speaker": "lyra",
+   "text": "Three of your house have stood before those gates.",
+   "dir": "far off, through old machinery",
+   "recorded": false
+  },
+  "gen3_arrive_02": {
+   "speaker": "player",
+   "text": "And how many returned?",
+   "dir": "young, flat",
+   "recorded": false
+  },
+  "gen3_arrive_03": {
+   "speaker": "lyra",
+   "text": "Not enough.",
+   "dir": "plain",
+   "recorded": false
+  },
+  "gen3_arrive_04": {
+   "speaker": "player",
+   "text": "Then show me another way.",
+   "dir": "quiet",
+   "recorded": false
+  },
+  "gen3_engine_01": {
+   "speaker": "lyra",
+   "text": "I kept all of it. I could not keep them.",
+   "dir": "low",
+   "recorded": false
+  },
+  "kept_approach_01": {
+   "speaker": "witness",
+   "text": "Stop. Do not go in yet.",
+   "dir": "sharp, for once",
+   "recorded": false
+  },
+  "kept_approach_02": {
+   "speaker": "player",
+   "text": "It is one guardian.",
+   "dir": "impatient",
+   "recorded": false
+  },
+  "kept_approach_03": {
+   "speaker": "witness",
+   "text": "It is the walk. I was carried at that hip for a year.",
+   "dir": "very quiet",
+   "recorded": false
+  },
+  "kept_intro_01": {
+   "speaker": "kept",
+   "text": "State your... no. That was his question.",
+   "dir": "a closed helm; a voice the player knows, slowed",
+   "recorded": false
+  },
+  "kept_intro_02": {
+   "speaker": "player",
+   "text": "Who were you?",
+   "dir": "careful",
+   "recorded": false
+  },
+  "kept_intro_03": {
+   "speaker": "kept",
+   "text": "Late. I was late home.",
+   "dir": "as if reading it off something",
+   "recorded": false
+  },
+  "kept_beat_01": {
+   "speaker": "kept",
+   "text": "You stand the way I stood.",
+   "dir": "mid-fight, without heat",
+   "recorded": false
+  },
+  "kept_beat_02": {
+   "speaker": "player",
+   "text": "Someone taught me how you stood.",
+   "dir": "breathing hard",
+   "recorded": false
+  },
+  "kept_after_01": {
+   "speaker": "kept",
+   "text": "You kept the edge on it.",
+   "dir": "looking at the heir's sword",
+   "recorded": false
+  },
+  "kept_after_02": {
+   "speaker": "kept",
+   "text": "Go on. I have held this gate as long as I was able.",
+   "dir": "tired, courteous",
+   "recorded": false
+  },
+  "kept_after_03": {
+   "speaker": "witness",
+   "text": "I will set that down as it happened. All of it. Both times.",
+   "dir": "barely audible",
+   "recorded": false
+  },
+  "monarch_g3_intro_01": {
+   "speaker": "monarch",
+   "text": "Your family has spent two lifetimes at my gates.",
+   "dir": "regal, unhurried",
+   "recorded": false
+  },
+  "monarch_g3_intro_02": {
+   "speaker": "player",
+   "text": "Three. You are keeping one of them.",
+   "dir": "cold",
+   "recorded": false
+  },
+  "monarch_g3_intro_03": {
+   "speaker": "monarch",
+   "text": "I keep everything. It is the whole of my office.",
+   "dir": "without shame",
+   "recorded": false
+  },
+  "monarch_g3_intro_04": {
+   "speaker": "player",
+   "text": "And you have mistaken survival for the right to rule.",
+   "dir": "steady",
+   "recorded": false
+  },
+  "monarch_g3_intro_05": {
+   "speaker": "monarch",
+   "text": "When these machines fall silent, they will remember whom to blame.",
+   "dir": "a warning, not a threat",
+   "recorded": false
+  },
+  "monarch_g3_intro_06": {
+   "speaker": "player",
+   "text": "Then let them remember a choice was made.",
+   "dir": "final",
+   "recorded": false
+  },
+  "final_door_01": {
+   "speaker": "witness",
+   "text": "There is a door. Not from this side of the wall.",
+   "dir": "remembering as it speaks",
+   "recorded": false
+  },
+  "facility_01": {
+   "speaker": "lyra",
+   "text": "This was never merely a kingdom.",
+   "dir": "hushed",
+   "recorded": false
+  },
+  "facility_02": {
+   "speaker": "player",
+   "text": "Then what was it?",
+   "dir": "low",
+   "recorded": false
+  },
+  "facility_03": {
+   "speaker": "lyra",
+   "text": "A means of keeping one alive.",
+   "dir": "plain",
+   "recorded": false
+  },
+  "courtyard_0_g3_01": {
+   "speaker": "lyra",
+   "text": "The plate on these is new. He has been replacing what your house broke.",
+   "dir": "dry",
+   "recorded": false
+  },
+  "blackwood_0_g3_01": {
+   "speaker": "witness",
+   "text": "The lanterns were lit when I last came this way. I was on another hip.",
+   "dir": "level",
+   "recorded": false
+  },
+  "cathedral_0_g3_01": {
+   "speaker": "lyra",
+   "text": "The door under the crossing was on no plan I was given. Neither was I.",
+   "dir": "uneasy",
+   "recorded": false
+  },
+  "citadel_0_g3_01": {
+   "speaker": "witness",
+   "text": "A king who gave up his crown, and the hall is still kept. Habit outlives everything.",
+   "dir": "wry",
+   "recorded": false
+  },
+  "throne_0_g3_01": {
+   "speaker": "lyra",
+   "text": "Twice this door has opened for your house. Nobody came back through it.",
+   "dir": "quiet",
+   "recorded": false
+  },
+  "deep_0_g3_01": {
+   "speaker": "lyra",
+   "text": "Everything he kept is under here. So am I.",
+   "dir": "very quiet",
+   "recorded": false
+  },
   "sentinel_death_01": {
    "speaker": "sentinel",
    "text": "Is the war... over?",
@@ -1414,6 +1654,153 @@
    ],
    "once": false
   },
+  "monarch_blade": {
+   "lines": [
+    "monarch_blade_01"
+   ],
+   "once": true
+  },
+  "gen2_seal_burns": {
+   "lines": [
+    "gen2_seal_burns_01"
+   ],
+   "once": false
+  },
+  "monarch_restored": {
+   "lines": [
+    "monarch_restored_01"
+   ],
+   "once": false
+  },
+  "gen2_seal": {
+   "lines": [
+    "gen2_seal_01",
+    "gen2_seal_02",
+    "gen2_seal_03"
+   ],
+   "once": false
+  },
+  "gen2_close": {
+   "lines": [
+    "gen2_close_01",
+    "gen2_close_02"
+   ],
+   "once": false
+  },
+  "gen3_arrive": {
+   "lines": [
+    "gen3_arrive_01",
+    "gen3_arrive_02",
+    "gen3_arrive_03",
+    "gen3_arrive_04"
+   ],
+   "once": false
+  },
+  "gen3_engine": {
+   "lines": [
+    "gen3_engine_01"
+   ],
+   "once": false
+  },
+  "kept_approach": {
+   "lines": [
+    "kept_approach_01",
+    "kept_approach_02",
+    "kept_approach_03"
+   ],
+   "once": true,
+   "title": "The Walk",
+   "kind": "guardian",
+   "essential": true
+  },
+  "kept_intro": {
+   "lines": [
+    "kept_intro_01",
+    "kept_intro_02",
+    "kept_intro_03"
+   ],
+   "once": true
+  },
+  "kept_beat": {
+   "lines": [
+    "kept_beat_01",
+    "kept_beat_02"
+   ],
+   "once": true
+  },
+  "kept_after": {
+   "lines": [
+    "kept_after_01",
+    "kept_after_02",
+    "kept_after_03"
+   ],
+   "once": false
+  },
+  "monarch_g3_intro": {
+   "lines": [
+    "monarch_g3_intro_01",
+    "monarch_g3_intro_02",
+    "monarch_g3_intro_03",
+    "monarch_g3_intro_04",
+    "monarch_g3_intro_05",
+    "monarch_g3_intro_06"
+   ],
+   "once": true
+  },
+  "final_door": {
+   "lines": [
+    "final_door_01"
+   ],
+   "once": false
+  },
+  "facility": {
+   "lines": [
+    "facility_01",
+    "facility_02",
+    "facility_03"
+   ],
+   "once": false
+  },
+  "courtyard_0_g3": {
+   "lines": [
+    "courtyard_0_g3_01"
+   ],
+   "once": true
+  },
+  "blackwood_0_g3": {
+   "lines": [
+    "blackwood_0_g3_01"
+   ],
+   "once": true,
+   "title": "Another Hip",
+   "kind": "landmark"
+  },
+  "cathedral_0_g3": {
+   "lines": [
+    "cathedral_0_g3_01"
+   ],
+   "once": true
+  },
+  "citadel_0_g3": {
+   "lines": [
+    "citadel_0_g3_01"
+   ],
+   "once": true,
+   "title": "Habit",
+   "kind": "landmark"
+  },
+  "throne_0_g3": {
+   "lines": [
+    "throne_0_g3_01"
+   ],
+   "once": true
+  },
+  "deep_0_g3": {
+   "lines": [
+    "deep_0_g3_01"
+   ],
+   "once": true
+  },
   "sentinel_death": {
    "lines": [
     "sentinel_death_01",
@@ -2340,6 +2727,14 @@
    "once": false,
    "title": "The Cycle Count",
    "kind": "secret"
+  },
+  "monarch_g3_death": {
+   "lines": [
+    "monarch_death_01",
+    "monarch_death_02",
+    "monarch_death_03"
+   ],
+   "once": true
   }
  },
  "voices": {
@@ -2374,7 +2769,8 @@
   "monarch": "Forgotten Monarch",
   "devourer": "Devourer of Names",
   "witness": "The Witness",
-  "forebear": ""
+  "forebear": "",
+  "kept": "The Crownless Champion"
  },
  "speech": {
   "ashen_sentinel": "B",
@@ -2388,7 +2784,8 @@
   "cathedral_beast": "A",
   "cinder_wyrm": "A",
   "rimewyrm": "A",
-  "azhurion": "A"
+  "azhurion": "A",
+  "the_kept": "C"
  },
  "foe_voice": {
   "ashen_sentinel": "sentinel",
@@ -2398,7 +2795,8 @@
   "gravewarden": "gravewarden",
   "frostbound_king": "frostking",
   "devourer": "devourer",
-  "forgotten_monarch": "monarch"
+  "forgotten_monarch": "monarch",
+  "the_kept": "kept"
  },
  "companion": {
   "discovery": {

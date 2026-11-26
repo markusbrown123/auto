@@ -10307,6 +10307,152 @@
      "color": "#6a5a3a"
     }
    }
+  },
+  "w_seconds_edge": {
+   "tier": "legendary",
+   "family": "crownless",
+   "sources": [
+    {
+     "type": "story",
+     "id": "the_kept",
+     "region": "courtyard"
+    }
+   ],
+   "source": {
+    "type": "story",
+    "id": "the_kept",
+    "region": "courtyard"
+   },
+   "hint": "Someone has been keeping it for you.",
+   "visual": "none",
+   "req": {
+    "strength": 7,
+    "dex": 7
+   },
+   "mat": "m_iron",
+   "advanced": false,
+   "sell": 154,
+   "unsellable": true,
+   "mods": {
+    "grip": [
+     {
+      "gold": 310,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 520,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 780,
+      "shards": 4,
+      "materials": {}
+     }
+    ],
+    "ore": [
+     {
+      "gold": 520,
+      "shards": 3,
+      "materials": {}
+     },
+     {
+      "gold": 910,
+      "shards": 0,
+      "materials": {
+       "ore": 4
+      }
+     },
+     {
+      "gold": 1300,
+      "shards": 0,
+      "materials": {
+       "m_core": 1
+      }
+     }
+    ],
+    "sharpen": {
+     "gold": 85
+    }
+   },
+   "upgrade": {
+    "max": 5,
+    "growth": {
+     "damage_pct": 10
+    },
+    "costs": [
+     {
+      "gold": 260,
+      "shards": 2,
+      "materials": {}
+     },
+     {
+      "gold": 415,
+      "shards": 4,
+      "materials": {}
+     },
+     {
+      "gold": 625,
+      "shards": 6,
+      "materials": {
+       "m_iron": 2
+      }
+     },
+     {
+      "gold": 885,
+      "shards": 8,
+      "materials": {
+       "m_iron": 4
+      }
+     },
+     {
+      "gold": 1195,
+      "shards": 10,
+      "materials": {
+       "m_iron": 6
+      }
+     }
+    ]
+   },
+   "mastery": {
+    "need": 9,
+    "marks": [
+     {
+      "at": 3,
+      "type": "history",
+      "ref": "w_seconds_edge",
+      "text": "More of its history"
+     },
+     {
+      "at": 6,
+      "type": "combo",
+      "ref": "sword",
+      "text": "A technique for its class, and swings with it cost 3% less"
+     },
+     {
+      "at": 9,
+      "type": "attr_point",
+      "text": "Mastered: one attribute point"
+     }
+    ]
+   },
+   "base": {
+    "id": "w_seconds_edge",
+    "name": "The Second's Edge",
+    "slot": "weapon",
+    "cls": "sword",
+    "rarity": "epic",
+    "damage": 36,
+    "price": 0,
+    "crit": 6,
+    "desc": "The blade the second of your house carried to the throne, kept as it was on the day. Someone kept the edge on it.",
+    "element": null,
+    "ng_min": 0,
+    "look": {
+     "metal": "#9aa0a8"
+    }
+   }
   }
  }
 }

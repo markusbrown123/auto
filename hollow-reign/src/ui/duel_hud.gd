@@ -602,6 +602,28 @@ func set_foe(foe: Dictionary) -> void:
 	for c in _phase_pips.get_children():
 		c.queue_free()
 
+## The foe's present form, after its name ("THE FORGOTTEN MONARCH   ·   THE ANCIENT CROWN"); "" leaves the name alone.
+func set_phase_name(n: String) -> void:
+	if n != "":
+		boss_name.text = boss_name.text.split("   ·   ")[0] + "   ·   " + n.to_upper()
+
+## The seal on a foe's restoration (DuelSim `seal`): one mark for each thing still to be done, under its bars.
+## They go out one by one; the last leaves the row struck through.
+var _seal_row: Label
+func seal(left: int, need: int, from: String = "") -> void:
+	if _seal_row == null:
+		_seal_row = UI.title("", 15, Color("#c08aff"))
+		_seal_row.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_seal_row.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+		_seal_row.add_theme_constant_override("shadow_offset_y", 2)
+		_phase_pips.get_parent().add_child(_seal_row)
+	_seal_row.text = ("RESTORATION   " + "◆ ".repeat(left) + "◇ ".repeat(maxi(0, need - left))).strip_edges() if left > 0 else "RESTORATION BROKEN"
+	_seal_row.add_theme_color_override("font_color", Color("#c08aff") if left > 0 else Color("#7fe6d8"))
+	if from != "start":
+		_seal_row.pivot_offset = _seal_row.size * 0.5
+		_seal_row.scale = Vector2(1.18, 1.18)
+		create_tween().tween_property(_seal_row, "scale", Vector2.ONE, 0.25)
+
 func set_combat_visible(on: bool, time: float = 0.4) -> void:
 	var tw := create_tween()
 	tw.tween_property(root, "modulate:a", 1.0 if on else 0.0, time)

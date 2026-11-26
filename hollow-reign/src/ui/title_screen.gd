@@ -144,7 +144,16 @@ func status_line() -> String:
 			break
 	var who: String = str(Game.profile.get("name", ""))
 	var chapter: String = "a side road" if r.get("optional", false) else "Chapter %s" % UI.roman(n)
-	return "%sLevel %d   ·   %s, %s" % [(who + "   ·   ") if who != "" else "", int(Game.profile.level), chapter, r.name]
+	# which of the house is on the road comes first: the family's story is the save
+	var gen := Game.generation()
+	var of_house: String = "%s   ·   " % str(Generations.def(gen).chapter)
+	if gen != 2:
+		chapter = "Generation %s" % UI.roman(gen)
+		for x2 in Db.regions:
+			if Game.region_unlocked(x2.id) and not Game.profile.cleared.has(x2.id) and not x2.get("optional", false):
+				r = x2
+				break
+	return "%s%sLevel %d   ·   %s, %s" % [of_house, (who + "   ·   ") if who != "" else "", int(Game.profile.level), chapter, r.name]
 
 ## The entries that make sense right now, as [label, action].
 func entries() -> Array:
@@ -152,9 +161,9 @@ func entries() -> Array:
 	var out: Array = []
 	if saved:
 		out.append(["Continue", func(): continue_game.emit()])
-	out.append(["New Journey", _new])
+	out.append(["New Legacy", _new])
 	if saved:
-		out.append(["Journeys", func(): _slots("load")])
+		out.append(["Legacies", func(): _slots("load")])
 		out.append(["Character", func(): open_screen.emit("character")])
 		out.append(["Equipment", func(): open_screen.emit("equipment")])
 		out.append(["World Map", func(): open("map")])

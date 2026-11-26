@@ -26,7 +26,7 @@ Machine-readable twin of the tables below: `assets/anim/clip_meta.json` (written
 
 ## Clips from the bought packs (128)
 
-`ss_` sword and shield: 61 · `th_` two-handed: 41 · `dw_` dual swords: 26. None is used by the game yet: this pass only baked and measured them.
+`ss_` sword and shield: 61 · `th_` two-handed: 41 · `dw_` dual swords: 26. Since the rig pass they drive every cut, foe blow, parry body, block and draw (see "Authored combat" below); the tables here are the bake's own measurements on the source skeleton.
 
 Reading the attack tables. **Cut**: the way the right-hand blade tip travels while it is out in front of the body, in the fighter's own frame: R = toward the fighter's right, L = left, U = up, D = down, and the diagonals; an opponent facing the fighter sees left and right swapped. **Wind-up** = seconds from the clip's start to when the blade starts into the first cut; **contact** = when the tip is fastest while in front; **recovery** = seconds from the end of the last cut to the clip's end. **Dir** = unit vector [right, up, toward the opponent]. "By eye" is what was seen on `knight_m_ash` in the captures under `marketing/anim_pack_pass/`; a blank means the clip was baked and measured but **not looked at**.
 
@@ -214,13 +214,84 @@ First measured cut of each single attack (chains and finishers left out). Swipe 
 ### Chains (sword and shield)
 `ss_c4_1..4`, `ss_c8_1..3`, `ss_c7_1..3`, `ss_c1_1..3` are the stages of four pack attacks, in order (`chain` and `stage` in `clip_meta.json`). Each stage ends in a held pose and the next starts from it, so they can be played back to back; to stop a chain early, blend from the end of a stage to `ss_idle` (the packs' own `_Back` return clips were not baked). Stages with no measured cut (`ss_c4_3`, `ss_c7_2`, `ss_c1_2`) are shield shoves or steps between cuts. The chain stages were **not** looked at one by one; their parents were seen as `ss_cut_*` / `ss_fin_*` (`_Complete` versions of the same stages).
 
+## Authored combat (the rig pass)
+
+`FighterRig` now swings from these clips with the whole body. Code: the "authored attacks" part of `src/chars/fighter_rig.gd` (tables `AU_CUTS`, `AU_COMBOS`), and in `src/chars/skin_driver.gd` the per-arm mask (`arm_r`, `arm_l`), the eased change of pose (`crossfade`), the sword-arm roll (`clip_roll`) and `clip_hand()`, which works out where a clip puts a hand on the model in use without posing it. `--noauthored` (or `FighterRig.authored = false`) plays the old procedural arm for comparison.
+
+**The rules own the time.** The rig's state machine is unchanged and still follows `DuelSim`: a player's cut lands at 60% of the class's swing time (sword 0.16 s, axe 0.23 s, greatsword 0.28 s, dual 0.11 s after the swipe), a foe's at the end of its telegraph. For each attack the rig:
+1. finds the clip's *contact*: the moment in the cut at which the far part of the blade is furthest ahead of the fighter, measured on the model and weapon in use (`au_contact`; the bake's `contact`, tip fastest, is after the blade has passed the centre on a level cut);
+2. finds the *wound-up pose*: the moment before contact at which the blade is furthest back along the line it is about to travel (high for a falling cut, out to the left for a cut to the right);
+3. maps time: a player's cut starts 0.1 s of clip before the wound-up pose and runs to contact in the time the rules give (slow at first, fastest at contact), so the clip's own 0.4–1.0 s wind-up is never played; a foe eases into the wound-up pose in the first 0.2 s of its warning, **holds it for the whole warning window**, and goes from it to contact in the last half of its `swing`; after contact the clip runs on at 1.2 times its own pace;
+4. eases in from whatever pose came before over 0.09 s (0.05 s for dual blades), so the blade moves on the first frame;
+5. stops what is played of the follow-through where the chest would turn more than 75° from the opponent or the hand would come back beside the wielder's own neck (the packs' spins and over-the-shoulder recoveries are not shown), and never plays into the next cut of a multi-cut clip.
+
+**Direction.** The line the blade tip travels over the last 70 ms before the hit (as seen from behind the fighter) is computed for the clip on this model; the sword arm is then rolled about the line to the opponent (30% at the collar bone, 70% at the shoulder, at most 57°) until that line is the swiped one. Where two clips are offered for a swipe the one that ends nearer the line is played.
+
+**Contact.** The blade stops in the first body it meets (the clip is walked in sub-steps against the opponent's capsules, as the procedural cut was) and is held 0.13 s, longer for a combo's last cut. `halt()` freezes a foe's cut at its contact pose. `reach()` is that of the clip chosen, so the duel steps the fighter to where the blade arrives (the duel now asks after `swing()`). `clash()` and `brace()` are unchanged: the pinned arm is taken off the clip (`arm_r` / `arm_l` = 0) and solved to the world point on the frame it is asked for, while the body goes on with the clip.
+
+### Which clip for which swipe (as played)
+
+Swipes are in the fighter's own frame; a foe facing the camera swaps left and right. "roll" is what the solver applies on `knight_m` at the class's own swing time.
+
+| Swipe | Sword and shield (also axe, cleaver, sword alone) | Two-handed (greatsword, glaive) | Dual |
+|---|---|---|---|
+| R | `ss_cut_r_high` | `th_cut_r2` | `dw_cut_r` |
+| L | `ss_cut_l` (roll ≈ −20°) | `th_cut_l` first cut (roll ≈ −20°) | `dw_double` first cut (roll ≈ +25°) |
+| D | `ss_cut_d` | `th_cut_d` | `dw_cut_dr` (measures down-left on the rig; roll ≈ +30°) |
+| DL | `ss_cut_dl` | `th_cut_l` first cut (roll ≈ +20°) | `dw_cut_dl` |
+| DR | `ss_cut_dr2` (roll ≈ −20°) | `th_cut_dr` | `dw_cross` third cut |
+| U | `th_cut_u` with the sword arm only; shield arm on its own guard | `th_cut_u` | `th_cut_u` (both blades rise together) |
+| UL | `th_cut_u`, as U, rolled left | `th_cut_u` rolled left | `th_cut_u` rolled left |
+| UR | `ss_cut_r_high` rolled up ≈ 40° | `th_cut_u` rolled right or `th_cut_r2` rolled up, whichever ends nearer | `dw_cut_r` rolled up |
+| thrust (foes) | `ss_thrust2` | `th_combo_thrust` third blow | `dw_flurry` first blow |
+
+Claws stay procedural (no set suits them). **The missing rising cuts:** for sword and shield, U and UL borrow the two-handed rising cut one-handed (body and sword arm from the clip, shield arm masked back to its procedural guard), and UR is the high right cut rolled upward; chosen by looking at `marketing/authored_pass/ss_knight_m.jpg` against the procedural arm. Dual blades borrow the same rising cut with both hands.
+
+Rejected for ordinary cuts after looking or measuring on the rig: `ss_c8_1` (a raised knee through the whole cut), `ss_cut_r`, `ss_cut_dr`, `ss_c7_1`, `ss_fin_spin`, `th_cut_r`, `th_sweep` (start with the back to the opponent: chest 120–145° away), `th_cut_dl` (leaves the floor), `th_cut_dl2` (knee lifted to hip height in the wind-up), `dw_cross` first cut and `dw_cut_l` (side-on at contact). `tools/anim_pack_clips.json` was not changed: trimming is done at play time.
+
+### Combos
+
+`Duel` hands the rig the combos the player knows (`combo_book`). The rig keeps its own short history of swipes; from the second cut of a recognised sequence each cut is the one written for that place in that combo, and the cut that completes one (the rules name its kind) is its finisher, held or followed through longer. The first cut is always the ordinary one for its swipe: nothing is known yet. Every cut still lands on the rules' instant and is still rolled onto its swipe.
+
+| Combo (swipes) | Sword and shield / axe | Two-handed | Dual |
+|---|---|---|---|
+| Double Slash (L R) | return cut `ss_c8_2` | `th_cut_l` return cut | `dw_a2` second cut |
+| Riposte (U R) | `ss_fin_double` first cut | `th_cut_l` return cut | – |
+| Rising Fang (D U R) | last: `ss_c4_2` | last: `th_cut_l` return cut | last: `dw_a2` second cut |
+| Armor Splitter (R L D) | last: `ss_fin_cleave` | last: `th_cut_d2` (into the ground) | last: `dw_lunge` |
+| Crossbreaker (L UR DL) | last: `ss_c8_3` | last: `th_cut_dl2` | last: `dw_x` first cut |
+| Mirror Step (DR UL DR) | last: `ss_c8_2` | last: `th_spin` third cut | last: `dw_x` third cut |
+| Falling Crown (U D D) | `ss_c4_1`, then `th_cut_d2` one-handed | last: `th_cut_d2` | last: `dw_lunge` |
+| Reversal (R L R U) | third `ss_cut_r2`, last `th_cut_u` held | third `th_cut_l` return, last `th_cut_u` held | third `dw_a2` second cut |
+| Serpent's Path (DL UR L D) | last: `ss_c7_3` | last: `th_overhead` | last: `dw_lunge` |
+| Eternal Edge (U DR L UL D) | second `ss_c8_2`, last `th_cut_d` one-handed | last: `th_cut_d2` | last: `dw_lunge` |
+| Twin Fang (L R L R, dual) | | | `dw_a2` second cut, `dw_cut_l`, `dw_cut_r` |
+| Whirlwind (UL DR UR DL, dual) | | | second `dw_x` third cut, last `dw_x` first cut |
+| Headsman's Due (U D, axe) | last: `th_cut_d2` one-handed | | |
+| Timberfall (DL DR D, axe) | second `ss_c8_2`, last `ss_fin_cleave` | | |
+| Colossus (D D, greatsword) | | second: `th_cut_d2` | |
+| Tidebreaker (L R D U, greatsword) | | `th_cut_l` return, `th_cut_d2`, `th_cut_u` held | |
+
+Limits: combos sharing their first cuts cannot differ there; several finishers reuse a clip (`th_cut_d2`, `dw_lunge`); a finisher that bites is held in the body, so its own recovery is only seen when it meets nothing.
+
+### Parry, block, draw
+
+- Parry: body and shield arm from `ss_parry` (shield swept aside) or `th_parry`; the sword arm stays on the procedural parry arc and is then pinned by `clash()`. Dual: procedural, the packs have none.
+- Block: `ss_block_idle` / `th_guard` while the guard is up; on `brace()` the body plays `ss_block_hit` / `th_block_hit_f` and the shield arm is pinned to the blow.
+- `draw()` / `sheath()`: body from `ss_unsheath` / `ss_sheath` (all classes: only that pack has them). The weapon hangs at the left hip (long blades across the back, a second blade at the right hip); the hand is brought onto the grip by IK before the weapon moves, and carries it back before letting go.
+- Hit reactions, staggers, dodges, rolls and deaths are unchanged (the free-library clips of the QA pass); the packs' own were not tried.
+
+### Rig API added
+
+`sheath(instant := false) -> float`, `draw(instant := false) -> float` (seconds it will take), `is_sheathed() -> bool`, `preview_attack(dir := "R", time := 0.5) -> float`, `preview_block(hold := 1.0) -> float` (seconds until back in guard), `au_set() -> String`, `combo_book: Array`, static `authored: bool`, static `clip_meta(name) -> Dictionary`. `ArmoryRig` overrides `_pick_clip`; the authored layer runs after it (`_au_apply`), so these work there too while an attack, block or draw is in progress.
+
 ## How to play one of these clips with the arms (for the rig pass)
 The clips carry both arms, both hands and the spine. What decides whether the arms follow the clip is **`SkinDriver.clip_full`**:
 
 - `skin.clip_full = false` (what `FighterRig._pick_clip` sets for cuts today): `_overlay(false)` applies hips, spine, neck, head and legs only, limits the trunk's turn to `TRUNK_YAW`, and both arms are then solved by IK to the procedural hand targets.
 - `skin.clip_full = true` with `skin.clip_w > 0`: after the IK, `drive()` calls `_overlay(true)`, which writes the clip's `LeftShoulder/Arm/ForeArm/Hand` and `RightShoulder/Arm/ForeArm/Hand` rotations at weight `clip_w`; `FighterRig._fit_props` then sees `whole == true` and turns the sword to `skin.hand_axis("Right")` (and the second sword to `hand_axis("Left")`, the shield to the left forearm). This is exactly the path `test_clip` and the death and hit clips already use, and the path every capture in `marketing/anim_pack_pass/` went through.
 - Also set `skin.clip_travel = 0.0` unless the clip's own travel is wanted: the hip track stores travel from the first frame in hip heights, and the root-motion clips travel a long way (`hip_travel` in the meta: dodges 2.1, hits up to 1.8, `th_jump_attack` 5.9).
-- There is no per-bone mask yet: `clip_full` is all four limbs or none. A "sword arm from the clip, shield arm on IK" mix would need a small change in `_overlay` (`_is_arm(b) != arms` is the test to split).
+- Per-arm mask: `skin.arm_r` and `skin.arm_l` (0..1) scale how much of a whole-body clip each arm takes; 0 leaves that arm on IK.
 
 Suggested lookup for a swipe: read `assets/anim/clip_meta.json` once; for the weapon class take the prefix (`ss_` sword with shield, `th_` greatsword, `dw_` dual); among clips with `kind == "attack"` pick one whose `use_for` (if present) or else `swipe` equals the swipe (`"L"`, `"UR"`, ... or `"thrust"`); fall back to the present body clip plus IK arm where the table above says none. If the game's swipe is the direction on screen with the camera behind the player, it is already in the fighter's frame; for a foe facing the camera, left and right are swapped (`mirror`).
 
@@ -252,17 +323,17 @@ Captures: `marketing/anim_pack_pass/*.jpg`, all through the game's `FighterRig` 
 - Deaths are short (0.4 to 0.9 s) throws in four directions.
 
 ## What is still procedural
-- The sword arm in every cut (so that eight swipe directions exist at all), parries, the shield arm.
+- With `--noauthored`: the sword arm in every cut. Otherwise only: claws, dual-blade parries and blocks, the sword arm of a parry up to the pin, and the roll that aims a clip's cut along the swipe.
 - Combat footwork steps while circling (the stance clip fades out while the feet step).
 - Dragons: neck aim, claw swipe, jaw, gait, tail and wings are driven bone by bone (`src/chars/dragon_skin.gd`); no authored creature clips exist.
 
 ## Gaps against the brief
 | Wanted | Have | Needs |
 |---|---|---|
-| Eight authored directional cuts | baked, not yet used: L, R, D, DL, DR, thrust for sword and shield; all but UL for two-handed (table above) | the rig pass; rising cuts for sword and shield do not exist in the packs |
-| Sixteen individually animated combos | four baked chains (`ss_c*`) and four finishers, not yet used | the rig pass |
+| Eight authored directional cuts | in game for all three sets; rising cuts for sword and shield and for dual are the two-handed rising cut borrowed, UR a right cut rolled upward | true one-handed rising cuts do not exist in the packs |
+| Sixteen individually animated combos | each has its own table row from its second cut on (see Combos); finishers reuse a few clips | more finisher clips; first cuts cannot differ |
 | Directional parries, high/low shield blocks | one shield block height, one shield parry, one two-handed parry baked | not in the packs |
-| Greatsword and dual-blade sets | baked (`th_`, `dw_`), not yet used | the rig pass; dual has no block |
+| Greatsword and dual-blade sets | in game | dual has no block or parry clip |
 | Dragon walk, wing, bite, death clips | procedural bone driving | authored creature animation |
 
 ## Adding clips

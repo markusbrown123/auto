@@ -1324,7 +1324,7 @@ func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Ve
 			var tip := hand + dir * length
 			var a: Vector3 = c[0]
 			var b: Vector3 = c[1]
-			var r: float = float(c[2]) + _blade_half
+			var r: float = float(c[2]) + _blade_half + (AU_CLEAR if _au_state != "" else 0.0)
 			var p: Vector3
 			var q: Vector3
 			if a.is_equal_approx(b):
@@ -1782,6 +1782,7 @@ func au_contact(n: String, ts: float, te: float) -> float:
 	_au_tc[key] = best
 	return best
 
+const AU_CLEAR := 0.04        # metres more a blade is kept from the wielder's own armour in authored poses, which bring it close
 const AU_YAW_MAX := 1.3       # radians the chest may be turned from the opponent in what is played of a clip
 
 func _au_yaw(n: String, t: float) -> float:

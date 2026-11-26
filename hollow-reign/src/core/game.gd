@@ -49,6 +49,7 @@ func default_profile() -> Dictionary:
 		# equipment progression (save version 2). In memory the per-item state lives in the lists above and the two
 		# sets below; on disk it is one record per item (see _pack). Cosmetics never touch a statistic.
 		"materials": {}, "discovered": {}, "seen": {}, "sold": [], "challenges_done": [],
+		"mods": {}, "edge": {},     # weapon mods {id: {grip, ore, ore_id}} (blade tier is `upgrades`) and sharpened edges {id: fights left}
 		"cosmetics": {}, "rewards": {"seed": 0, "pity": 0, "recent": [], "cores": {}},
 	}
 
@@ -142,8 +143,14 @@ func _process(delta: float) -> void:
 func _p(path: String) -> String:
 	return path if save_dir_override == "" else save_dir_override + "/" + path.get_file()
 
-func new_game(heraldry: String = "#3d0f0f", body: String = "m") -> void:
+## `weapon` is the blade the knight wakes holding: one of the four basic swords (Db.equipment.basic_swords). Anything
+## else, or nothing, gives the Wayfarer's Blade. The other three are in Orren's first stock.
+func new_game(heraldry: String = "#3d0f0f", body: String = "m", weapon: String = "w_rusted_sword") -> void:
 	profile = default_profile()
+	weapon = Db.canon(weapon)
+	if Db.equipment.basic_swords.has(weapon):
+		profile.inventory[profile.inventory.find("w_rusted_sword")] = weapon
+		profile.equipped.weapon = weapon
 	profile.heraldry = heraldry
 	profile.body = body
 	profile.rewards.seed = rng.randi()
@@ -186,7 +193,7 @@ func _parse(txt: String) -> Variant:
 	return j.data if j.parse(txt) == OK else null
 
 ## Per-item fields that are lists or dictionaries in memory and one record per item on disk.
-const _ITEM_FIELDS := ["inventory", "upgrades", "mastery", "mastered", "favourites", "mastery_taught", "discovered", "seen"]
+const _ITEM_FIELDS := ["inventory", "upgrades", "mastery", "mastered", "favourites", "mastery_taught", "discovered", "seen", "mods", "edge"]
 
 ## The progress record of one item: what is known and held of it, apart from its definition in the data.
 func item_record(id: String, p: Dictionary = profile) -> Dictionary:
@@ -205,13 +212,18 @@ func _pack(p: Dictionary) -> Dictionary:
 		for id in (src.keys() if src is Dictionary else src):
 			if not ids.has(str(id)):
 				ids.append(str(id))
-		out.erase(k)
+		if k != "mastered" and k != "favourites":     # two short ordered lists: kept as they are, and mirrored in the records
+			out.erase(k)
 	var recs := {}
 	for id: String in ids:
 		var r := item_record(id, p)
 		r["order"] = p.get("inventory", []).find(id)
 		if p.get("mastery_taught", {}).has(id):
 			r["taught"] = p.mastery_taught[id]
+		if p.get("mods", {}).has(id):
+			r["mods"] = p.mods[id]
+		if int(p.get("edge", {}).get(id, 0)) > 0:
+			r["edge"] = int(p.edge[id])
 		recs[id] = r
 	out["items"] = recs
 	out["version"] = SAVE_VERSION
@@ -233,7 +245,7 @@ func _unpack(v: Dictionary) -> void:
 	for row: Array in rows:
 		inv.append(row[2])
 	v["inventory"] = inv
-	for k: String in ["upgrades", "mastery", "mastery_taught", "discovered", "seen"]:
+	for k: String in ["upgrades", "mastery", "mastery_taught", "discovered", "seen", "mods", "edge"]:
 		if not (v.get(k) is Dictionary):
 			v[k] = {}
 	for k: String in ["mastered", "favourites"]:
@@ -255,6 +267,10 @@ func _unpack(v: Dictionary) -> void:
 			v.discovered[id] = true
 		if r.get("seen", false):
 			v.seen[id] = true
+		if r.get("mods") is Dictionary:
+			v.mods[id] = r.mods
+		if int(r.get("edge", 0)) > 0:
+			v.edge[id] = int(r.edge)
 
 ## Brings a stored profile of any earlier shape up to the current one. Safe to run on its own output; nothing a
 ## save holds is dropped, including ids the data no longer (or does not yet) know.
@@ -279,9 +295,12 @@ func _migrate(v: Dictionary) -> Dictionary:
 		v[k] = int(v[k])
 	for k in v.attrs:
 		v.attrs[k] = int(v.attrs[k])
-	for d in ["upgrades", "mastery", "defeated", "combo_uses", "materials"]:
+	for d in ["upgrades", "mastery", "defeated", "combo_uses", "materials", "edge"]:
 		for k in v[d]:
 			v[d][k] = int(v[d][k])
+	for k in v.mods:
+		for t in ["grip", "ore"]:
+			v.mods[k][t] = int(v.mods[k].get(t, 0))
 	v.rewards.seed = int(v.rewards.seed)
 	v.rewards.pity = int(v.rewards.pity)
 	for k in v.rewards.cores:
@@ -313,6 +332,15 @@ func _migrate(v: Dictionary) -> Dictionary:
 			if Db.foes.has(foe_id) and Db.foes[foe_id].boss and not v.rewards.cores.has(foe_id):
 				v.rewards.cores[foe_id] = v.ng + 1
 				v.materials["m_core"] = int(v.materials.get("m_core", 0)) + 1
+		# a weapon's old upgrade level is its blade tier now; it is given the ore that level needs, so nothing paid for is lost
+		for id in v.upgrades:
+			var wit: Dictionary = Db.item(str(id))
+			if wit.get("slot", "") == "weapon" and not v.mods.has(id):
+				var ore := 0
+				while ore < 3 and int(Db.equipment.mods.ore.blade_cap[ore]) < v.upgrades[id]:
+					ore += 1
+				if ore > 0:
+					v.mods[id] = {"grip": 0, "ore": ore, "ore_id": str(wit.get("mat", "m_iron")) if ore >= 2 else ""}
 		if v.rewards.seed == 0:
 			v.rewards.seed = hash("%s|%s|%d|%d" % [str(v.heraldry), str(v.name), v.level, v.gold])
 	# a weapon that needs both hands leaves none for a shield (Oathbreaker became a greatsword); the shield stays owned
@@ -410,7 +438,8 @@ func unequip(slot: String) -> void:
 func upgrade_level(id: String) -> int:
 	return int(profile.upgrades.get(id, 0))
 
-## Why this item cannot be upgraded now, or "" when it can.
+## Why this item cannot be upgraded now, or "" when it can. For a weapon "upgrade" means the next blade tier, taking
+## the ore step with it when the blade has gone as far as its ore allows (see mod() for the tracks one at a time).
 func upgrade_block(id: String) -> String:
 	var it: Dictionary = Db.item(id)
 	if it.is_empty() or not owns(id):
@@ -420,15 +449,39 @@ func upgrade_block(id: String) -> String:
 	var lvl := upgrade_level(id)
 	if lvl >= int(it.upgrade.max):
 		return "Perfected"
-	var c := Stats.upgrade_cost(it, lvl)
-	if profile.gold < int(c.gold):
+	return _cost_block(upgrade_cost(id))
+
+## What Game.upgrade(id) would charge now: {gold, shards, materials}.
+func upgrade_cost(id: String) -> Dictionary:
+	var it: Dictionary = Db.item(id)
+	if it.get("slot", "") != "weapon" or not it.has("mods"):
+		return Stats.upgrade_cost(it, upgrade_level(id))
+	var c := mod_cost(id, "blade")
+	if upgrade_level(id) >= int(weapon_mods(id).caps.blade):
+		c = _sum_cost(c, mod_cost(id, "ore", str(it.get("mat", "m_iron"))))
+	return c
+
+func _sum_cost(a: Dictionary, b: Dictionary) -> Dictionary:
+	var out := {"gold": int(a.get("gold", 0)) + int(b.get("gold", 0)), "shards": int(a.get("shards", 0)) + int(b.get("shards", 0)), "materials": a.get("materials", {}).duplicate()}
+	for m: String in b.get("materials", {}):
+		out.materials[m] = int(out.materials.get(m, 0)) + int(b.materials[m])
+	return out
+
+func _cost_block(c: Dictionary) -> String:
+	if profile.gold < int(c.get("gold", 0)):
 		return "Not enough gold"
-	if profile.shards < int(c.shards):
+	if profile.shards < int(c.get("shards", 0)):
 		return "Not enough shards"
-	for m: String in c.materials:
+	for m: String in c.get("materials", {}):
 		if material_count(m) < int(c.materials[m]):
 			return "Needs %s" % Db.material_name(m)
 	return ""
+
+func _pay(c: Dictionary) -> void:
+	profile.gold -= int(c.get("gold", 0))
+	profile.shards -= int(c.get("shards", 0))
+	for m: String in c.get("materials", {}):
+		profile.materials[m] = material_count(m) - int(c.materials[m])
 
 func can_upgrade(id: String) -> bool:
 	return upgrade_block(id) == ""
@@ -437,22 +490,190 @@ func upgrade(id: String) -> bool:
 	id = Db.canon(id)
 	if not can_upgrade(id):
 		return false
-	var c := Stats.upgrade_cost(Db.item(id), upgrade_level(id))
-	profile.gold -= int(c.gold)
-	profile.shards -= int(c.shards)
-	for m: String in c.materials:
-		profile.materials[m] = material_count(m) - int(c.materials[m])
+	var it: Dictionary = Db.item(id)
+	if it.slot == "weapon" and it.has("mods") and upgrade_level(id) >= int(weapon_mods(id).caps.blade):
+		_pay(mod_cost(id, "ore", str(it.get("mat", "m_iron"))))
+		_raise_ore(id, str(it.get("mat", "m_iron")))
+	_pay(mod_cost(id, "blade") if it.slot == "weapon" and it.has("mods") else Stats.upgrade_cost(it, upgrade_level(id)))
 	profile.upgrades[id] = upgrade_level(id) + 1
 	save()
 	profile_changed.emit()
 	return true
 
+# ---------------------------------------------------------------- weapon mods: blade, grip, ore, sharpen
+## Where a weapon stands on its four tracks:
+##   {blade, grip, ore, ore_id, edge (fights of keen edge left), caps: {blade, grip}, max: {blade, grip, ore},
+##    visual: {blade_tier 0-3, grip_tier 0-3, ore: "iron"|"steel"|<material id>|"cored", ore_id, keen}}
+## `visual` is for whoever draws the sword; it changes no number.
+func weapon_mods(id: String, p: Dictionary = profile) -> Dictionary:
+	id = Db.canon(id)
+	var r: Dictionary = Db.equipment.mods
+	var m: Dictionary = p.get("mods", {}).get(id, {})
+	var blade: int = int(p.get("upgrades", {}).get(id, 0))
+	var ore: int = int(m.get("ore", 0))
+	var ore_id: String = str(m.get("ore_id", ""))
+	var edge: int = int(p.get("edge", {}).get(id, 0))
+	return {"blade": blade, "grip": int(m.get("grip", 0)), "ore": ore, "ore_id": ore_id, "edge": edge,
+		"caps": {"blade": int(r.ore.blade_cap[clampi(ore, 0, 3)]), "grip": int(r.ore.grip_cap[clampi(ore, 0, 3)])},
+		"max": {"blade": int(r.blade.tiers), "grip": int(r.grip.tiers), "ore": int(r.ore.tiers)},
+		"visual": {"blade_tier": mini(3, (blade * 3 + 4) / 5), "grip_tier": int(m.get("grip", 0)),
+			"ore": ["iron", "steel", ore_id, "cored"][clampi(ore, 0, 3)], "ore_id": ore_id, "keen": edge > 0}}
+
+## The cost of the next step on a track: {gold, shards, materials}. For the second ore tier `ore_id` is the region
+## material the blade is reforged in (Db.equipment.mods.ores); the third keeps it and asks for a guardian core.
+func mod_cost(id: String, track: String, ore_id: String = "") -> Dictionary:
+	var it: Dictionary = Db.item(id)
+	var w := weapon_mods(id)
+	var out := {"gold": 0, "shards": 0, "materials": {}}
+	if not it.has("mods"):
+		return out
+	var c: Dictionary = {}
+	match track:
+		"blade":
+			if w.blade < it.upgrade.costs.size():
+				c = it.upgrade.costs[w.blade]
+		"grip":
+			if w.grip < it.mods.grip.size():
+				c = it.mods.grip[w.grip]
+		"ore":
+			if w.ore < it.mods.ore.size():
+				c = it.mods.ore[w.ore]
+		"sharpen":
+			c = it.mods.sharpen
+	out.gold = int(c.get("gold", 0))
+	out.shards = int(c.get("shards", 0))
+	for m: String in c.get("materials", {}):
+		out.materials[ore_id if m == "ore" else m] = int(c.materials[m])
+	return out
+
+## Why the next step on a track cannot be taken, or "" when it can.
+func mod_block(id: String, track: String, ore_id: String = "") -> String:
+	id = Db.canon(id)
+	var it: Dictionary = Db.item(id)
+	if it.is_empty() or not owns(id):
+		return "Not yours"
+	if it.slot != "weapon" or not it.has("mods"):
+		return "Not a weapon"
+	var w := weapon_mods(id)
+	match track:
+		"blade":
+			if w.blade >= int(w.max.blade):
+				return "Perfected"
+			if w.blade >= int(w.caps.blade):
+				return "Needs better ore"
+		"grip":
+			if w.grip >= int(w.max.grip):
+				return "Perfected"
+			if w.grip >= int(w.caps.grip):
+				return "Needs better ore"
+		"ore":
+			if w.ore >= int(w.max.ore):
+				return "Perfected"
+			if w.ore == 1 and not Db.equipment.mods.ores.has(ore_id):
+				return "Choose an ore"
+		"sharpen":
+			if w.edge > 0:
+				return "Still keen"
+		_:
+			return "No such work"
+	return _cost_block(mod_cost(id, track, ore_id))
+
+func can_mod(id: String, track: String, ore_id: String = "") -> bool:
+	return mod_block(id, track, ore_id) == ""
+
+func _raise_ore(id: String, ore_id: String) -> void:
+	var m: Dictionary = profile.mods.get(id, {"grip": 0, "ore": 0, "ore_id": ""})
+	if int(m.get("ore", 0)) == 1:
+		m["ore_id"] = ore_id
+	m["ore"] = int(m.get("ore", 0)) + 1
+	profile.mods[id] = m
+
+## Takes the next step on a track, paying for it. Tracks: "blade", "grip", "ore", "sharpen".
+func mod(id: String, track: String, ore_id: String = "") -> bool:
+	id = Db.canon(id)
+	if not can_mod(id, track, ore_id):
+		return false
+	_pay(mod_cost(id, track, ore_id))
+	match track:
+		"blade":
+			profile.upgrades[id] = upgrade_level(id) + 1
+		"grip":
+			var m: Dictionary = profile.mods.get(id, {"grip": 0, "ore": 0, "ore_id": ""})
+			m["grip"] = int(m.get("grip", 0)) + 1
+			profile.mods[id] = m
+		"ore":
+			_raise_ore(id, ore_id)
+		"sharpen":
+			profile.edge[id] = int(Db.equipment.mods.sharpen.fights)
+	save()
+	profile_changed.emit()
+	return true
+
+func sharpen(id: String) -> bool:
+	return mod(id, "sharpen")
+
+## What the next step on a track would do to the duel's numbers, without doing it: compare()-style rows that change.
+## Only meaningful for the equipped weapon (others give []).
+func mod_preview(id: String, track: String, ore_id: String = "") -> Array:
+	id = Db.canon(id)
+	if not is_equipped(id) or Db.item(id).get("slot", "") != "weapon":
+		return []
+	var trial: Dictionary = profile.duplicate(true)
+	var m: Dictionary = trial.mods.get(id, {"grip": 0, "ore": 0, "ore_id": ""})
+	match track:
+		"blade": trial.upgrades[id] = int(trial.upgrades.get(id, 0)) + 1
+		"grip": m["grip"] = int(m.get("grip", 0)) + 1
+		"ore":
+			if int(m.get("ore", 0)) == 1:
+				m["ore_id"] = ore_id
+			m["ore"] = int(m.get("ore", 0)) + 1
+		"sharpen": trial.edge[id] = 1
+	trial.mods[id] = m
+	return _rows(stats(), Stats.compute(trial, Db.items, Db.classes)).filter(func(r): return int(r.better) != 0)
+
+## A fight is over, won or lost: the equipped weapon's keen edge is one fight nearer to dull.
+func _dull() -> void:
+	var w = profile.equipped.get("weapon")
+	if w != null and int(profile.edge.get(w, 0)) > 0:
+		profile.edge[w] = int(profile.edge[w]) - 1
+		if profile.edge[w] <= 0:
+			profile.edge.erase(w)
+
 ## How far along the road Orren's stock has come: regions cleared, or everything once the world has turned over.
 func shop_progress() -> int:
 	return 99 if int(profile.ng) > 0 else profile.cleared.size()
 
+## Has the road been walked far enough for Orren to stock this (a guardian ended, or enough regions cleared)?
+func shop_unlocked(it: Dictionary) -> bool:
+	var u: Dictionary = it.get("unlock", {})
+	if u.has("boss"):
+		return profile.defeated.has(u.boss)
+	return int(u.get("cleared", 0)) <= shop_progress()
+
 func _in_stock(it: Dictionary) -> bool:
-	return int(it.get("price", 0)) > 0 and int(it.get("ng_min", 0)) <= int(profile.ng) and int(it.get("shop_stage", 0)) <= shop_progress()
+	return int(it.get("price", 0)) > 0 and int(it.get("ng_min", 0)) <= int(profile.ng) and shop_unlocked(it)
+
+## A locked shop entry the player may already see: its guardian's region is open, or it is the next step of stock.
+func _shop_visible(it: Dictionary) -> bool:
+	if int(it.get("price", 0)) <= 0 or int(it.get("ng_min", 0)) > int(profile.ng):
+		return false
+	var u: Dictionary = it.get("unlock", {})
+	if u.has("boss"):
+		return region_unlocked(str(Db.foes[u.boss].region))
+	return int(u.get("cleared", 0)) <= shop_progress() + 1
+
+## The whole shop as a screen wants it: what is for sale now and what is visibly locked, cheapest first.
+## Each entry: {id, item, price, available, affordable, unlock_text ("" when available), slot}. Owned items are left out.
+func shop_catalog() -> Array:
+	var out: Array = []
+	for it in Db.item_list:
+		if owns(it.id) or not _shop_visible(it):
+			continue
+		var open := _in_stock(it)
+		out.append({"id": it.id, "item": it, "price": int(it.price), "available": open, "affordable": open and profile.gold >= int(it.price),
+			"unlock_text": "" if open else str(it.get("unlock_text", "")), "slot": it.slot})
+	out.sort_custom(func(a, b): return a.price < b.price if a.price != b.price else str(a.id) < str(b.id))
+	return out
 
 ## What the item costs to buy now: its price while Orren stocks it, the buy-back price for a one-of-a-kind item
 ## that was sold to him, 0 when it is not for sale.
@@ -598,6 +819,7 @@ func on_victory(foe_id: String, hp_left: float) -> Dictionary:
 		add_material(m, int(out.materials[m]))
 	for id: String in out.discoveries:
 		profile.discovered[id] = true
+	_dull()
 	# equipment mastery: fighting with a piece of gear teaches you its weight
 	var taught_all: Array = []
 	for slot in profile.equipped:
@@ -615,8 +837,10 @@ func on_victory(foe_id: String, hp_left: float) -> Dictionary:
 			profile.attr_points += 1
 			out.mastered.append(id)
 		for tier: int in range(before + 1, mastery_tier(id) + 1):
-			out.mastery_ups.append({"id": id, "slot": slot, "tier": tier, "text": mastery_tier_text(it, tier)})
 			var kind: String = _mark_type(it, tier)
+			if kind == "":
+				continue                # this kind of item has no mark at that point
+			out.mastery_ups.append({"id": id, "slot": slot, "tier": tier, "text": mastery_tier_text(it, tier)})
 			match kind:
 				"combo":
 					if taught != "":
@@ -677,6 +901,7 @@ func on_death() -> Dictionary:
 	# Everything earned is kept; only the route resets.
 	profile.deaths += 1
 	just_died = true
+	_dull()
 	var summary := run.duplicate(true)
 	run = {}
 	save()
@@ -991,6 +1216,8 @@ func sell(id: String) -> bool:
 	profile.gold += sell_price(id)
 	profile.inventory.erase(id)
 	profile.upgrades.erase(id)
+	profile.mods.erase(id)
+	profile.edge.erase(id)
 	# something Orren does not stock can be bought back from him; it is never lost for good
 	if not _in_stock(Db.item(id)) and not profile.sold.has(id):
 		profile.sold.append(id)
@@ -1026,6 +1253,7 @@ const COMPARE_ROWS := [
 	["Damage", "attack", 1.0, "%.1f", 1], ["Defence", "defense", 1.0, "%.0f", 1], ["Health", "max_hp", 1.0, "%.0f", 1],
 	["Stamina", "max_stamina", 1.0, "%.0f", 1], ["Stamina recovery", "stamina_regen", 1.0, "%.1f/s", 1], ["Swing time", "swing_time", 1.0, "%.2fs", -1], ["Swing cost", "swing_cost", 1.0, "%.0f", -1],
 	["Stagger damage", "crit_mult", 1.0, "×%.2f", 1], ["Guard", "block_eff", 100.0, "%.0f%%", 1], ["Resistance", "resist", 1.0, "%.0f", 1],
+	["Guard damage", "guard_dmg", 1.0, "×%.2f", 1], ["Shield blocks", "shield_blocks", 1.0, "%.0f", 1], ["Footwork", "footwork", 1.0, "%.0f%%", 1],
 ]
 
 ## What changes if this item is put on: one row per stat, each
@@ -1225,7 +1453,7 @@ func upgrade_preview(id: String) -> Dictionary:
 	id = Db.canon(id)
 	var it: Dictionary = Db.item(id)
 	var lvl := upgrade_level(id)
-	var out := {"level": lvl, "max": int(it.get("upgrade", {}).get("max", 0)), "cost": Stats.upgrade_cost(it, lvl), "block": upgrade_block(id),
+	var out := {"level": lvl, "max": int(it.get("upgrade", {}).get("max", 0)), "cost": upgrade_cost(id), "block": upgrade_block(id),
 		"rows": [], "item_now": Stats.item_power(it, lvl) if not it.is_empty() else 0.0, "item_then": Stats.item_power(it, lvl + 1) if not it.is_empty() else 0.0}
 	if it.is_empty() or not is_equipped(id) or lvl >= int(out.max):
 		return out
@@ -1315,7 +1543,7 @@ func claim_challenge(id: String) -> bool:
 # ---------------------------------------------------------------- discovery states
 func is_discovered(id: String) -> bool:
 	id = Db.canon(id)
-	return owns(id) or profile.get("discovered", {}).has(id) or _in_stock(Db.item(id))
+	return owns(id) or profile.get("discovered", {}).has(id) or _shop_visible(Db.item(id))
 
 ## "equipped", "owned", "discovered" (seen as a drop, in the shop, or heard of) or "undiscovered" (a silhouette and a hint).
 func item_state(id: String) -> String:
@@ -1367,7 +1595,9 @@ func items_for_slot(slot_name: String, include_locked: bool = false) -> Array:
 		out.append({"id": id, "state": state, "item": it, "name": str(it.name) if state != "undiscovered" else "Unknown",
 			"hint": str(it.get("hint", "")), "owned": owns(id), "equipped": state == "equipped", "is_new": is_new(id),
 			"favourite": is_favourite(id), "level": upgrade_level(id), "mastery_tier": mastery_tier(id),
-			"visual": str(it.get("visual", "none")), "meets_req": meets_requirements(id), "can_equip": owns(id)})
+			"visual": str(it.get("visual", "none")), "meets_req": meets_requirements(id), "can_equip": owns(id),
+			"shop": "" if owns(id) or not _shop_visible(it) else ("available" if _in_stock(it) else "locked"),
+			"price": buy_price(id), "unlock_text": "" if owns(id) or _in_stock(it) else str(it.get("unlock_text", ""))})
 	return out
 
 ## The profile as it would be with this item in this slot. Nothing is changed and nothing is saved. An item that

@@ -132,6 +132,14 @@ var _last_combo_id := ""
 var p_block_dropped := -9.0
 var p_block_fresh := true
 var p_block_since := -9.0     # when the shield went up, for timed blocks
+## A shield stops `shield_blocks` blows (player stat; 0 = no count, as with a two-handed blade) and is then spent:
+## a blow caught on a spent shield costs more stamina and part of it gets through. One charge returns for every
+## `shield_regen` seconds the guard is down. A timed block costs no charge. Announced as `shield_charges {left, max}`.
+var p_shield := 0
+var p_shield_max := 0
+var p_shield_idle := 0.0
+var p_move_cost := 1.0        # player stat `dodge_cost`: what the shield on the arm does to the price of a dodge or roll
+var p_guard_dmg := 1.0        # player stat `guard_dmg`: what a cut does to a raised guard, and to poise
 const PERFECT_BLOCK := 0.22
 var p_hist: Array = []
 var rift_dir := ""       # the seam in the foe's guard: cut along it for a telling blow
@@ -145,6 +153,11 @@ func setup(player: Dictionary, boss: Dictionary, seed_value: int = 0, opts: Dict
 	pl = player.duplicate(true)
 	pl["hp"] = float(opts.get("start_hp", pl.max_hp))
 	pl["stamina"] = float(pl.max_stamina)
+	p_shield_max = int(pl.get("shield_blocks", 0))
+	p_shield = p_shield_max
+	p_shield_idle = 0.0
+	p_move_cost = float(pl.get("dodge_cost", 1.0))
+	p_guard_dmg = float(pl.get("guard_dmg", 1.0))
 	bd = boss
 	var ng: int = opts.get("ng", 0)
 	assist = opts.get("assist", 1.0)
@@ -374,10 +387,10 @@ func input_dodge(side: int) -> void:
 		return
 	if p_state == P.DODGE and p_roll:
 		return                        # nothing chains out of a roll: it has to end first
-	if p_state == P.DODGE and side == p_dodge_side and not p_roll and p_elapsed <= ROLL_WINDOW and pl.stamina >= ROLL_EXTRA_COST:
+	if p_state == P.DODGE and side == p_dodge_side and not p_roll and p_elapsed <= ROLL_WINDOW and pl.stamina >= ROLL_EXTRA_COST * p_move_cost:
 		p_roll = true
 		p_t += ROLL_EXTRA_TIME
-		_spend(ROLL_EXTRA_COST)
+		_spend(ROLL_EXTRA_COST * p_move_cost)
 		stats["rolls"] = int(stats.get("rolls", 0)) + 1
 		_emit(&"player_roll", {"side": side})
 		return
@@ -387,7 +400,7 @@ func input_dodge(side: int) -> void:
 	if pl.stamina < 1.0:
 		_emit(&"exhausted")
 		return
-	_spend(DODGE_COST)
+	_spend(DODGE_COST * p_move_cost)
 	p_roll = false
 	p_dodge_side = side
 	_set_p(P.DODGE, DODGE_TIME)
@@ -440,6 +453,13 @@ func _tick_player(dt: float) -> void:
 		if p_frostbite > 0.0:
 			rate *= 0.4
 		pl.stamina = minf(pl.max_stamina, pl.stamina + rate * dt)
+	# a spent or worn shield comes back while the guard is down
+	if p_shield < p_shield_max and not p_block:
+		p_shield_idle += dt
+		if p_shield_idle >= float(pl.get("shield_regen", 4.0)):
+			p_shield_idle = 0.0
+			p_shield += 1
+			_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max})
 	# state timers
 	if p_state == P.FREE:
 		return
@@ -534,7 +554,7 @@ func _resolve_player_hit(dir: String) -> void:
 		_emit(&"deflected", {"dir": dir, "dmg": 0.0})
 	else:
 		# boss is guarding: chip damage, and recklessness is remembered
-		var chip: float = pl.attack * 0.12
+		var chip: float = pl.attack * 0.12 * p_guard_dmg
 		b_reckless += 1
 		_spend(pl.swing_cost * 0.75)   # the recoil off a raised guard is tiring
 		_emit(&"deflected", {"dir": dir, "dmg": chip})
@@ -553,7 +573,7 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 	info["hp"] = b_hp
 	if not info.get("chip", false):
 		_emit(&"boss_hit", info)
-		if b_state == B.RECOVER and _wear_poise(POISE_CUT, "cut"):
+		if b_state == B.RECOVER and _wear_poise(POISE_CUT * p_guard_dmg, "cut"):
 			_poise_break("cut")
 	if b_hp <= floor_hp and b_phase + 1 < bd.phases.size():
 		b_phase += 1
@@ -813,7 +833,7 @@ func _resolve_strike() -> void:
 			if perfect:
 				stats.perfect_dodges += 1
 				p_counter = true
-				pl.stamina = minf(pl.max_stamina, pl.stamina + DODGE_COST)
+				pl.stamina = minf(pl.max_stamina, pl.stamina + DODGE_COST * p_move_cost)
 		"parried":
 			_gain_surge(18.0 if perfect else 9.0)
 			p_parry = {}
@@ -834,6 +854,16 @@ func _resolve_strike() -> void:
 				perfect = true
 				stats["perfect_blocks"] = int(stats.get("perfect_blocks", 0)) + 1
 				_gain_surge(8.0)
+			# the shield's count: an untimed block uses one; with none left the blow is dearer and part of it gets through
+			var spent := false
+			if p_shield_max > 0 and not timed:
+				spent = p_shield <= 0
+				p_shield = maxi(0, p_shield - 1)
+				p_shield_idle = 0.0
+				if spent:
+					cost *= float(pl.get("shield_spent_cost", 2.0))
+					stats["spent_blocks"] = int(stats.get("spent_blocks", 0)) + 1
+				_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max, "spent": spent})
 			var broke: bool = not timed and pl.stamina - cost <= 0.0
 			_spend(cost)
 			_apply_element(a, 0.5)
@@ -845,7 +875,9 @@ func _resolve_strike() -> void:
 				if p_state != P.DEAD:
 					_set_p(P.STUN, STUN_TIME)
 			else:
-				if not timed:
+				if spent:
+					_damage_player(dmg * float(pl.get("shield_spent_leak", 0.35)))
+				elif not timed:
 					_damage_player(dmg * 0.08 * (1.0 - float(pl.block_eff)), true)
 		"hit":
 			_gain_surge(9.0)

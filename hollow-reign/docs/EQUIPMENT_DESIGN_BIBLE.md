@@ -1,168 +1,197 @@
 # Equipment design bible
 
-How swords and shields are designed and built after the owner's Addendum 3 brief (2026-11-26). The five benchmark
-pieces in `assets/models/gear/` are the reference; everything else is meant to be produced from parameter sets in
-the same generator. Judged on software-rendered captures (`marketing/gear_bench/`); nothing has been seen on a device.
-The owner's two reference pages could not be opened from the build machine (hosts not reachable), so this language
-comes from the written brief and from real arms, not from those pages.
+How swords and shields are designed and built. Second pass (2026-11-26), after the owner's feedback that the first
+benchmark was "too plain and historical" and should be a **futuristic style**: ornate, sculpted, jewellery-precise.
+Ten swords and three shields exist in `assets/models/gear/`; all come from parameter sets in one generator.
+Judged on software-rendered captures (`marketing/gear_bench/v2/`); nothing has been seen on a device.
+The owner's taste reference was a photo of four display swords from an existing game. It was described to the
+modeller in words only and none of the four is reproduced: the language was taken, the designs are our own.
+The two reference web pages named earlier could not be opened from the build machine.
 
 ## The language in one paragraph
 
-Real swords first. Every blade has the proportions of a historical type and would work as one; the science-fantasy
-part is how it is *made*: machined chamfers instead of forged rounding, fittings that meet in clean seams, at most one
-hairline of light. Roughly 70% medieval, 30% engineering. Nothing is spiky, nothing is oversized, nothing is chrome.
-Rarity buys precision and restraint, never mass: the legendary blade is the slimmest of the three.
+Every sword is recognised by its **silhouette**, and the silhouette is carried by the **guard**: a flat sculpted
+plate with pierced cut-outs, two to four times the blade's width, with a few gold studs. Blades are slim and long with
+a **waisted or leaf profile** and a recessed band down the flat that carries **engraved line-work**. Grips are
+slender: tight cord, or a spiral-twisted bar. Pommels are small distinctive shapes. Finish is even satin steel,
+never chrome and never battle-worn. Light, where a blade has it, is one hairline inside the engraving and is **off
+until the weapon is awakened**. Rarity and forge upgrades buy finer work, never more size or more points.
+
+## Roles: shape tells the stat
+
+| Role | Reads as | Sword | Shield |
+|---|---|---|---|
+| balanced | medium everything, symmetric | **Wayfarer**, King's Remnant, Eternal Edge | **Heater** |
+| light / fast | slimmest blade, shortest grip, small open guard | **Silver Vow**, Cold Resolve | **Round** (0.47 m) |
+| heavy / damage | broad thick blade with mass toward the point, blocky guard, longer grip | **Ashbrand**, Nightward, Oathbreaker | **Tower** (0.88 m, bolted bars) |
+| precision / combo | long slim blade, pierced fuller, asymmetric guard | **Veilcutter**, Twin Relics | - |
+
+`role` and `rarity` are fields in `gear_manifest.json` for the data owner. The four names in bold are the **basic
+swords** a player can start with and then mod at the forge.
 
 ## Pipeline
 
-- `tools/gear_gen.py` (Python + numpy, no Blender) writes `assets/models/gear/<id>.glb`, `<id>_lod.glb`, the shared
-  detail textures in `gear/tex/` and `gear_manifest.json`. Run it, then `tools/check.sh` to import.
-- `src/chars/gear_model.gd` (`GearModel.spawn(id)`) loads a piece with its low model on a visibility range and passes
-  it through `Look.sanitise(root, "weapon")`. `GearModel.info(id)` returns the manifest entry.
+- `tools/gear_gen.py` (Python + numpy + PIL, no Blender) writes every GLB, the shared textures in `gear/tex/` and
+  `gear_manifest.json`. Run it, then `tools/check.sh` to import. About 15 s for everything.
+- `src/chars/gear_model.gd`: `GearModel.spawn(id, lod_at, force_lod, mod)`, `GearModel.info(id)`,
+  `GearModel.ids("sword" | "shield")`, `GearModel.apply_mod(node, mod)`, `GearModel.awaken(node, on)`.
 - `--screen=gearbench` (`src/dev/gear_bench.gd`) is the viewer; its header lists the switches.
-- Modelling primitives: `loft` (rings skinned into a closed solid), `lathe`, `block` (all-edges-chamfered box),
-  `blade`, `guard_bar`, `grip`, `collar`, `board` (shield body from an outline), `arm_strap`, `hand_grip`, `rivet`.
-- **Hard edges are explicit.** Every face carries a smoothing group; normals are averaged only within a group.
-  A blade's flats, bevels and fuller are separate groups, so a 7 degree ridge is still a crisp line. Do not switch to
-  angle-threshold smoothing: blade facets are far below any usable threshold.
-- UVs are in metres x 16 (one 256 px tile = 6.25 cm). Blades are planar-mapped from the flat; grips are cylindrical
-  (the cord wrap tiles round them); everything else is box-mapped with the brushing along the part's length.
+- Primitives: `loft`, `lathe`, `block`, **`plate`** (2D outline with cut-outs, extruded, every rim chamfered; caps
+  by ear clipping), **`blade2`** (parametric blade), `ribbon` (swept outlines), `twist_grip`, `hilt_grip`, `dot`
+  (gold stud), `board` / `kite_shield` / `strip` / `boss` (shields), `arm_strap`, `hand_grip`, `rivet`.
+- **Hard edges are explicit**: every face has a smoothing group and normals are averaged only inside a group, so a
+  7 degree blade facet is still a crisp line. Plate walls crease automatically at corners sharper than 35 degrees.
+- UVs: metres x 16 for the brushed sets; the engraved band has its own mapping (band width = texture width, one tile
+  every 8 half-widths), so a 0.4 mm engraved line is about 3 texels and stays crisp in close-up.
 
-## Conventions (what the rig relies on)
+## Conventions (what the rig relies on) - unchanged from the first pass
 
 | | Swords | Shields |
 |---|---|---|
 | Units | metres, life size | metres, life size |
 | Origin | centre of the main hand on the grip | centre of the hand-grip bar |
 | +Y | toward the tip | up |
-| X | guard runs along X | +X is the bearer's right (grip side); the arm strap is at -X |
+| X | guard plate lies in the XY plane | +X is the bearer's right (grip side); the arm strap is at -X |
 | Z | flat of the blade faces +-Z (thin axis) | the FRONT faces -Z (the rig's "outward"); straps on +Z |
-| Manifest | `tip` (hand to tip), `pommel` (hand to pommel end), `off_hand` (second hand, two-handers), `grip_clear`, `guard_span` | `board_centre` (centre of the board from the origin), `width`, `height`, `strap_x`, `thickness` |
+| Manifest | `tip`, `pommel`, `off_hand` (two-handers), `grip_clear`, `guard_span`, `single_edged`, `pair` / `mirror_left` | `board_centre`, `width`, `height`, `strap_x`, `thickness` |
 | `rig_scale` | 1.15 | 1.15 |
 
-`rig_scale`: the knights are heroic figures with large gauntlets; life-size steel looks like a toy in their hands.
-The rig already draws swords at about 115% (`PropModel.LENGTH.sword` 1.12 m against a 0.97 m arming sword), so pieces
-are modelled true and scaled once, at the attach point.
+Asymmetric swords (Veilcutter, Nightward, Twin Relics): the long guard arm / knuckle side is toward **-X** on
+Veilcutter and **+X** on Nightward and Twin Relics; turn the model 180 degrees about Y at the attach point if the rig
+wants it on the other side. Twin Relics' left-hand blade is the same model with `scale.x = -1`.
 
-## Sword proportions
+## The ten swords
 
-All lengths in metres at life size. "Grip clear" is the wrapped length between guard and pommel; a palm is 0.09.
+Life size, metres. "Overall" is tip to pommel end. Triangles are detail / low model.
 
-| | Arming (Wayfarer) | Hand-and-a-half (Eternal Edge) | Greatsword (Oathbreaker) |
-|---|---|---|---|
-| Overall | 0.97 | 1.085 | 1.61 |
-| Blade | 0.80 | 0.865 | 1.21 |
-| Blade width at guard | 0.053 | 0.044 | 0.060 (0.054 across the ricasso) |
-| Width where the tip begins | 0.032 at 84% | 0.033 at 78% | 0.037 at 88% |
-| Thickness guard -> tip | 6.2 -> 3.2 mm | 6.6 -> 3.4 mm | 8.8 -> 4.2 mm |
-| Edge bevel width | 4.2 mm | 3.6 mm | 5.2 mm |
-| Grip clear | 0.106 (one palm + 1.6 cm) | 0.162 (palm and a half) | 0.302 (two palms + riser) |
-| Grip section (w x t) | 30 x 24 mm | 27 x 23 mm | 32 x 26 mm |
-| Guard span | 0.196 (3.7x blade width) | 0.164 (3.7x) | 0.316 (5.3x) |
-| Guard bar section at centre | 14 x 19 mm | 13 x 19 mm | 17 x 24 mm |
-| Pommel | wheel, 47 mm across, 27 mm thick | hexagonal cap, 32 mm, 40 mm long | faceted pear, 47 mm, 74 mm long |
-| Triangles (detail / low) | 1,744 / 572 | 1,932 / 864 | 1,716 / 768 |
+| Sword | Role, rarity | Overall | Blade profile (half-width mm at guard -> waist -> belly -> tip start) | Guard (our motif) | Grip, pommel | Engraving | Tris |
+|---|---|---|---|---|---|---|---|
+| **Wayfarer** | balanced, common | 0.97 | 23.8 -> 22.2 -> 25.0 -> 16.5 at 84%; gentle waist | symmetric slotted bar, tips turned down, span 0.196 | cord 0.106; pentagonal tab with a hexagonal eye | `rule` (hairlines and graduations) | 2,148 / 596 |
+| **Silver Vow** | light, common | 0.92 | 16.5 -> 14.0 -> 17.2 -> 15.0 at 72%; needle | small open lens frame, two pointed windows, span 0.109 | cord 0.095 (one palm); faceted bead | `lattice` | 2,318 / 664 |
+| **Ashbrand** | heavy, common | 1.03 | 21.5 -> 20.5 -> 30.0 at 62% -> 26.2 at 80%; leaf, 8 mm thick | blocky anvil plate, two windows, tall graphite collar, span 0.176 | cord 0.148; slotted block | `chevron` | 2,204 / 644 |
+| **Veilcutter** | precision, common | 1.10 | 16.8 -> 15.0 -> 17.2 -> 16.0 at 72%; long | asymmetric: short arm toward the point, long arm swept back past the knuckles | cord 0.113; spike | `feather`; **7 diamond openings pierced through the fuller** | 3,120 / 660 |
+| Oathbreaker | heavy, rare (greatsword) | 1.62 | 29 (24.5 across the blunt ricasso) -> 27.2 -> 19 at 88% | wide tiered "circuit" plate, windows and slots, clamp up the ricasso, span 0.30 | two-hand cord 0.30 with riser; keystone with slot | `circuit` | 3,172 / 776 |
+| Eternal Edge | balanced, legendary | 1.10 | 17.0 -> 15.8 -> 21.5 at 52% -> 15.0 at 80%; waisted leaf | slender arrow frame: short wings, two prongs running 9 cm up beside the blade, open slits between | cord 0.161 with gold rings; open hexagonal ring | `wave`; light channel | 2,628 / 632 |
+| King's Remnant | balanced, rare | 1.08 | 25.0 -> 23.8 at 70% -> 19.6 at 86%; parallel, strong point | "broken crown": merlons along the upper edge over a long window, span 0.192 | cord 0.135; disc pierced by a square | `meander`; gold-inlaid groove | 3,052 / 672 |
+| Cold Resolve | light, rare | 1.04 | 18.0 -> 15.0 -> 10.5 at 80%; needle taper | open hexagonal collar the blade stands in, a window each side, span 0.112 | cord 0.118; four-sided crystal | `hexcell`; light channel | 1,916 / 552 |
+| Nightward | heavy, uncommon | 0.94 | single-edged: 30 edge side, 9 spine side; blackened flats, bright edge; **six fins on the spine** | half-disc on the edge side only, three graduated ports | cord 0.111; tab with lanyard eye | `feather` | 1,778 / 600 |
+| Twin Relics | precision, relic (pair) | 0.78 | 18.0 -> 16.5 -> 23.5 at 55% -> 16.5 at 80%; short leaf | angular C-frame returning to the pommel as a knuckle bar | cord 0.146; hexagonal cap | `hexcell`; light channel | 2,224 / 572 |
 
 Rules that hold for every sword:
-- Blade thickness is about 1.3x a real blade's, never more. It is the faceting that stops a blade reading as
-  cardboard, not the bulk.
-- **Distal taper** (thickness) and **profile taper** (width) are both always present; the tip is an ogive that comes
-  to an actual point, with thickness falling to zero over its last third.
-- The grip is never shorter than palm + 1.5 cm per hand. The guard is 3.5x - 5.5x the blade's width and no thicker
-  than the grip. The pommel is no wider than the grip is long divided by two.
-- Guards end blunt (a small chamfered stop), not in points. Forward sweep is at most 1.5 cm and is straight, a
-  chevron, never a crescent or hook.
-- No holes through a blade, no serrations, no secondary blades, no asymmetry in X.
+- Blade thickness about 1.3x a real blade's (5.6 - 8.8 mm at the guard, tapering to about half). Distal and profile
+  taper always present; the tip is an ogive to a real point.
+- The grip is never shorter than one palm (0.09) plus 5 mm per hand; the lightest sword has the shortest grip.
+- A guard is a plate 10 - 18 mm thick with chamfered rims; cut-outs keep at least 4.5 mm of metal round them.
+  Ends are blunt. No guard is wider than 5x the blade.
+- One silhouette per sword. Before a new sword is accepted it is rendered black beside the others
+  (`--lineup=swords --silhouette`); two that read alike means one is redesigned.
+- Gold is studs, rings and (top blade tier) the centre groove only: under 2% of the surface.
+- No serrated cutting edges, no secondary blades, no spikes. Openings are inside the outline, not points on it.
 
-## Cross-sections
+## Blade cross-section (`blade2`)
 
-Built by `blade(prof, seg_mats, seg_groups, stations)`: `prof(s)` returns one quadrant from the edge to the centre.
+One quadrant, from the cutting edge to the centre line:
 
-| Section | Points edge -> centre | Used for |
-|---|---|---|
-| Fullered lenticular | edge, bevel shoulder (52% of thickness), fuller lip, 3-point trough | Wayfarer; fuller 15.6 mm wide, 1.2 mm deep, closes to a point at 60% |
-| Ricasso + fullered | the same, with a 3 mm blunt edge and a narrower blade over the first 10.5%, blending out over 3% | Oathbreaker; fuller 21 mm wide, 3% to 56% |
-| Rail and core | edge, shoulder, rail lip, 0.55 mm step down, core, light channel wall, channel floor | Eternal Edge; graphite core 15.6 mm wide closing at 70%, channel 2.2 mm wide from 7.5% to 60% |
-| Diamond | edge, shoulder, ridge (fuller width 0) | what every section becomes beyond its fuller; daggers, Veilcutter |
-| Hexagonal | edge, shoulder, wide flat lip, no trough | Nightward, cleavers |
+`edge -> bevel shoulder (50% of thickness) -> flat -> lip of the recessed band -> band (0.5 mm lower) -> groove lip -> groove floor -> centre`
 
-## Shield proportions
+- **Band**: 55 - 80% of the flat's width, closes to a point at 60 - 74% of the blade. It carries the engraving.
+- **Groove**: 2 - 7 mm wide in the middle of the band; plain steel, gold inlay (tier 3), or a light channel.
+- **Pierced openings** (`holes`): the groove floor is left out between stations and walled, so they are real holes
+  through the blade and show in silhouette. Diamond-shaped because the section is lofted.
+- **Ricasso** (`ric`): narrower, blunt-edged first 10% (greatswords).
+- **Single edge** (`wl`): the other side becomes a 9 mm blunt spine; fins are small plates set on it.
+- Width comes from control points through a smooth curve, then an ogive from `s_tip`: that is how waists and
+  leaf bellies are made.
 
-| | Heater | Round (technological) |
-|---|---|---|
-| Size | 0.49 wide x 0.67 tall | 0.51 across |
-| Outline | flat top lifted 12 mm at the middle, 34 mm corner radius, straight shoulders to 31 cm, then `x = hw(1 - t^2.15)` to a point | circle |
-| Curvature | wrapped round the arm, radius 0.47; shallow rounded keel 6 mm; slight top-to-bottom dish | dome, radius 0.72 (46 mm of rise) |
-| Board | 8 mm | 9 mm |
-| Rim | steel, 30 mm wide, 4.2 mm proud, chamfered both sides, 10 rivets | steel, 40 mm, 4.5 mm proud, 8 hex bolts |
-| Face | graphite-blue enamel, one 1 mm gold line inside the rim | two stepped tiers (graphite over enamel) cut by four seams, hub ringed by one 3.5 mm light channel and a gold ring |
-| Rear | grip bar 104 mm on two steel posts at the origin; leather arm strap 42 mm wide 20.5 cm toward the elbow, on sheared steel plates; forearm pad between | the same bar and strap; a hub housing at the centre |
-| Hand clearance | 35-40 mm between bar and board | 40 mm |
-| Triangles (detail / low) | 3,524 / 1,100 | 4,012 / 1,252 |
+## Engraving
 
-Other classes, not yet built: **kite** (heater outline stretched to 0.95 tall, `y_mid` raised, same rim table),
-**curved technological tower** (rectangular outline with 6 cm corner radii, wrap radius 0.38, seams as horizontal
-grooves), **segmented** (round or kite board whose field is three overlapping `board` plates with 3 mm steps).
+Eight tiling patterns, 128 x 512 px each (albedo with a darker fill, normal, roughness/metal): `rule`, `lattice`,
+`chevron`, `feather`, `circuit`, `wave`, `meander`, `hexcell`. One pattern per sword (`ENGRAVE` in the generator);
+shields use `circuit` on the spine. The light channel is geometry (a `glow` surface in the groove), so it sits
+exactly inside the engraving; `GearModel.spawn` leaves it dark and `GearModel.awaken(node, true)` lights it.
+
+## Forge mods (the four basic swords)
+
+| Parameter | Values | What changes on the model | How it is delivered |
+|---|---|---|---|
+| `blade_tier` | 0 | plain recessed band, plain centre groove | file `<id>__blade0.glb` |
+| | 1 | band engraved with the sword's pattern | `<id>__blade1.glb` |
+| | 2 | + gold studs at the foot of each flat | `<id>__blade2.glb` |
+| | 3 | + centre groove inlaid in gold | `<id>__blade3.glb` |
+| `grip_tier` | 0 | plain cord | `<id>__hilt0.glb` |
+| | 1 | cord between steel ferrules | `<id>__hilt1.glb` |
+| | 2 | finer, darker wrap divided by gold rings | `<id>__hilt2.glb` |
+| | 3 | spiral-twisted steel bar banded in gold | `<id>__hilt3.glb` |
+| `ore` | `steel`, `silver`, `graphite`, `bronze`, `frost` | tint of the blade's own surfaces (flats, groove, engraving, edge) | material only, at load; palette in manifest `_mods.ores` |
+| `sharpened` | false / true | edge bevel from dull (roughness 0.52, darker) to polished (0.30, bright) | material only, at load |
+
+`GearModel.spawn("ashbrand", 9.0, false, {"blade_tier": 3, "grip_tier": 2, "ore": "bronze", "sharpened": true})`.
+The guard and pommel belong to the hilt part and do not change with tier: a mod never alters the silhouette, the
+length or the role. `<id>.glb` is the whole sword at `default_mod` (blade 1, grip 1) for anything that just wants
+the item.
+
+**Pre-built or at load?** Geometry tiers are pre-built as parts, material mods are applied at load. Per basic sword:
+8 part models x 2 detail levels = 16 files, about 0.55 MB; they combine into all 16 blade x grip states, times 5
+ores, times sharpened = 160 looks without another file. Building every combination whole would be 16 x 2 files
+and about 1.7 MB per sword; generating at load would mean porting the generator to GDScript (not done).
+Cost of a modded sword at run time: two mesh instances instead of one, same surfaces.
+
+Captures: `marketing/gear_bench/v2/mods_<id>.png` and `mods_<id>_close.png`.
+
+## Shields
+
+| | Round (light) | Heater (balanced) | Tower (heavy) |
+|---|---|---|---|
+| Size | 0.47 across | 0.49 x 0.67 | 0.52 x 0.88 |
+| Board | 8 mm, dome radius 0.72 | 8 mm, wrap radius 0.47, 6 mm keel | 11 mm, wrap radius 0.42 |
+| Rim | two-tone turned rim 38 mm (graphite inner ring, raised steel lip), 8 hex bolts | steel 30.5 mm, 4.2 mm proud, five graphite inlays, 10 rivets | steel 40 mm, 5.8 mm proud, five inlays, 16 hex bolts |
+| Face | two stepped tiers, four seams, two engraved rings, hexagonal boss in a light-channel ring | enamel field with an engraved contour line, engraved spine under a hexagonal boss | graphite field, the same spine and boss, **two bolted reinforcing bars** |
+| Rear | grip bar on posts, arm strap, low housing under a hexagonal cap | grip bar, strap, forearm pad | grip bar, wider strap, pad |
+| Triangles | 4,908 / 1,372 | 4,212 / 1,212 | 5,448 / 1,276 |
+
+Heater and Tower are one function (`kite_shield`) with different outlines and numbers; a **kite** proper and a
+**segmented** shield would be two more parameter sets. Brushing on the round shield now runs round the centre
+(polar UVs).
 
 ## Material palette
 
-Shared 256 px tiling textures (13 files, 0.5 MB on disk); colour comes from the glTF base-colour factor.
+Shared tiling textures: 13 brushed / bead-blast / cord files at 256 px and 24 engraving files at 128 x 512 px.
+Colour comes from the glTF base-colour factor; every textured surface renders through `pbr_clamp` (roughness floor 0.30).
 
-| Material | Albedo (linear) | Metal | Roughness | Detail | Use |
-|---|---|---|---|---|---|
-| `steel` | 0.45 cool grey | 1.0 | 0.47 - 0.57 | brushed along the part, normal scale 0.22 | blade flats, guards, pommels, rims |
-| `edge` | 0.80 | 1.0 | 0.30 (the class minimum) | none, untextured | the ground bevel only |
-| `fuller` | steel x 0.62 | 1.0 | as steel | stronger brushing | fuller trough |
-| `graphite` | 0.09 blue-black | 0.8 | 0.46 - 0.54 | bead-blast | cores, collars, tech plates |
-| `enamel` | 0.075 / 0.095 / 0.135 | 0.8 | as graphite | bead-blast | shield fields |
-| `gold` | 0.43 / 0.30 / 0.12 antique | 1.0 | as steel | brushed | lines and rings only; never a whole part |
-| `grip` | 0.07 graphite cord (Oathbreaker: dark brown) | 0 | 0.76 - 0.9 | cord wrap, 8 turns per 3.8 cm | grips, shield grip bar |
-| `leather` | 0.10 brown-black | 0 | 0.8 - 0.88 | fine grain | straps, pads, heater lining |
-| `glow` | emissive (0.38, 0.8, 1.0) x 1.0 | 0 | 0.6 | none | one hairline per piece at most |
-| worn steel (variant) | 0.33, faint warm stains along the blade | 0.85 - 1.0 | 0.5 - 0.7 | brushing + sparse pits | Oathbreaker; any "weathered" blade |
+| Material | Albedo (linear) | Metal | Roughness | Use |
+|---|---|---|---|---|
+| `steel`, `blade` | 0.45 cool grey | 0.9 | 0.49 - 0.59 | guards, pommels, rims; `blade` is the same set under its own name so ore can tint it |
+| `blade_groove` | blade x 0.6 | 0.9 | as blade | plain centre groove |
+| `engrave_<pattern>` | blade, lines 62% darker | 0.65 - 0.9 | 0.5 - 0.85 | engraved band |
+| `edge` | 0.80 | 1.0 | 0.30 | the ground bevel (dull variant when not sharpened) |
+| `graphite` | 0.09 blue-black | 0.8 | 0.46 - 0.54 | collars, bosses, Nightward's flats, tower field |
+| `enamel` | 0.075 / 0.095 / 0.135 | 0.8 | as graphite | heater and round fields |
+| `gold` | 0.43 / 0.30 / 0.12 | 0.9 | as steel | studs, rings, inlaid groove |
+| `grip`, `grip_fine` | 0.07 / 0.05 cord | 0 | 0.76 - 0.9 | grips, shield grip bars |
+| `leather` | 0.10 brown-black | 0 | 0.8 - 0.88 | straps, pads, shield linings |
+| `glow` | emissive (0.38, 0.8, 1.0) x 1.0 when awake; dark graphite when not | - | - | one hairline per piece |
 
-Each material is one surface (one draw). Benchmark pieces have 4 - 7 surfaces. Gold covers under 2% of any piece.
-Emission is below the bloom threshold's blow-out point: the channel reads as a pale line, not a neon tube.
+Steel is 90% metallic, not 100%, and a little rougher than in the first pass: with the viewer's all-round soft
+box a flat now shows a gradient at every yaw (`steel_yaw_sweep_wayfarer.png`) instead of dropping to black or
+clipping. One surface per material; swords have 6 - 8 surfaces, shields 6 - 7.
 
-## What rarity changes, and what it does not
+## What rarity and upgrades change, and what they do not
 
-| Changes | Does not change |
+| Change | Never change |
 |---|---|
-| Construction: one-piece forged look (common) -> separate fitted parts with seams (rare) -> composite blade, inlaid core (legendary / relic) | Overall size. A legendary is within 10% of the common sword of its class |
-| Edge and chamfer precision: wider, softer bevels at the bottom; narrow exact ones at the top | Silhouette complexity. No added spikes, wings, hooks or holes at any tier |
-| Finish: worn or plain satin -> even satin -> satin with polished bevels and one gold line | Gloss. Roughness never goes below 0.30; higher tiers are *more* even, not shinier |
-| Accent: none (common, uncommon) -> gold rings (rare) -> gold + one light channel (legendary, relic) | Number of light channels: one, 2 - 3.5 mm wide |
-| Grip: cord -> cord with risers -> divided by fitted rings | Grip length rules, guard rules |
-| Recall: only pieces with a `glow` surface are Recalled; the rest are drawn and sheathed | |
+| Engraving: none -> pattern -> pattern with studs -> gold-inlaid groove | Overall size, blade width, guard outline (the role silhouette) |
+| Grip: plain cord -> ferrules -> fine wrap and gold rings -> twisted bar | Grip length |
+| Blade metal (ore) and edge polish | Gloss beyond the 0.30 floor |
+| Light channel: only rare and above have one; dark until awakened | The number of channels: one |
 
-## Parameter sets for the remaining pieces
+## Known limits (second pass)
 
-Not built yet. Each is a new `build_*` in `gear_gen.py` that calls the same primitives with these numbers
-(half-widths `w` in mm at guard -> at tip start; `t` thickness guard -> tip; `L` blade; all life size).
-
-| Blade | Class / rarity | Blade | Section | Guard | Grip / pommel | Materials and accent |
-|---|---|---|---|---|---|---|
-| **Silver Vow** | sword, uncommon | L 0.82, w 25 -> 15 at 82%, t 6.4 -> 3.2, bevel 4.0 | fullered lenticular, narrow fuller 10 mm to 72% | straight, span 0.21, section 13 x 18, end_scale 0.6, small disc stops (flare 0.25) | grip 0.11, steel riser at mid; wheel pommel 45 mm with a recessed gold disc | bright even `steel`, `grip` in pale grey cord (0.42, 0.43, 0.46); one gold disc |
-| **Ashbrand** | sword, rare | L 0.80, w 27 -> 17 at 80%, t 7.0 -> 3.4, bevel 4.6 | hexagonal, flat 40% of width, no fuller | span 0.19, sweep 0.010 chevron, section 15 x 20, `graphite` | grip 0.115 dark brown; pear pommel 6 flats, 55 mm | worn steel variant darkened x 0.8 with a heat-blue tint toward the tip (base-colour gradient by vertex row is NOT supported yet: use the darker worn set); no gold, no glow |
-| **King's Remnant** | sword, rare | L 0.86, w 26 -> 15 at 84%, t 6.6 -> 3.2, bevel 4.0 | fullered, double narrow fuller (two 5 mm troughs 6 mm apart) to 45% | span 0.23, section 14 x 19, steel with one gold seam block as on Eternal Edge | grip 0.14 (hand and a half) with two gold rings; wheel pommel 50 mm, gold recessed centre | `steel`, gold under 2%; worn set on the guard and pommel only |
-| **Cold Resolve** | sword, rare | L 0.84, w 23 -> 15 at 80%, t 6.0 -> 3.0, bevel 3.4 | diamond with a 0.6 mm flat-bottomed channel 3 mm wide to 55% | span 0.17, straight, section 12 x 17, squared ends (flare 0) | grip 0.12 in pale cord; long hexagonal cap 36 mm | cool steel (base factor 0.93, 0.97, 1.0); channel in `glow` recoloured to frost (0.55, 0.8, 1.0) x 0.6; no gold |
-| **Nightward** | sword, uncommon | L 0.78, w 28 -> 20 at 86% (broad, short tip p 1.5), t 6.8 -> 3.6, bevel 5.0 | hexagonal, flat 50% | span 0.20, section 16 x 22, end_scale 0.8, heavy block | grip 0.11 graphite; faceted pear 8 flats 50 mm | flats in `graphite` (blackened blade), `edge` bright: the only sword whose flats are dark; no accent |
-| **Veilcutter** | sword (light), legendary | L 0.90, w 18 -> 12 at 76% (long needle tip p 2.3), t 6.0 -> 2.8, bevel 3.0 | diamond over a rail-and-core root: core 8 mm wide closing at 40%, channel to 34% | span 0.14, sweep 0.008, section 11 x 16, `steel`; chevron collar 45 mm | grip 0.15 with three gold rings; hexagonal cap 28 mm | `steel`, `graphite` core, one `glow` channel; the narrowest blade in the game |
-| **Twin Relics** | dual, relic | two mirrored blades L 0.62, w 21 -> 14 at 78%, t 5.6 -> 2.8, bevel 3.4 | rail and core, core to 60%, channel 10% - 52% | span 0.12, sweep 0.012, guard offset: long arm 0.07 on the knuckle side, 0.05 on the other (mirror the pair in X; this is the one allowed asymmetry) | grip 0.105; cap 28 mm; a gold ring each end | as Eternal Edge; left blade's channel may take a second relic colour |
-| Greatswords beyond Oathbreaker | rare / legendary | L 1.15 - 1.25, w 28 - 31 -> 18 - 20, ricasso 9 - 11% | Oathbreaker's, or rail and core with the core closing at 60% | span 0.30 - 0.34, sweep <= 0.015 | grip 0.29 - 0.31 with a riser; no lugs wider than the guard | per rarity table |
-
-Estimated cost per new sword: 1,600 - 2,100 triangles, 500 - 900 low; no new textures unless a new material class
-is introduced.
-
-## Known limits (benchmark pass)
-
-- Rim and hub brushing on the round shield runs straight across, not round the ring (box-mapped UVs).
-- Brushed steel is a normal/roughness detail, not true anisotropic shading; at a grazing key light a flat can still
-  clip to white in the studio viewer.
-- No per-vertex colour, so no heat-tint gradients or edge wear masks yet; "weathered" is a tiling texture.
-- Fittings pass through each other where they meet (blade into guard block) instead of being welded; invisible at
-  any normal distance, wasteful by a few dozen hidden triangles.
-- The rig's off-hand is posed open: with the hand on the shield's grip bar the fingers pass through the board
-  (see `marketing/gear_bench/hand_wayfarer_heater_front.png`). The integration pass must close the left fist.
-- The low models are built by the same code with fewer stations and segments; they are not yet checked at their
-  switch distance in a duel.
+- Guards and pommels are flat plates: sculpted in outline, not in relief. There is no surface modelling on a guard's
+  face beyond chamfers, bosses and studs.
+- Engraving is a normal/albedo pattern in a 0.5 mm recess, not cut geometry; it tiles every 7 - 14 cm.
+- The whole blade is one material tint: no heat gradients, no wear masks, no per-vertex colour.
+- Pierced openings are diamonds only (a consequence of lofting); round or slotted piercings need a different blade build.
+- Plate caps are ear-clipped: fine for shading (they are flat) but the triangles are long and thin.
+- Fittings pass through each other where they meet instead of being welded.
+- The rig's off-hand is posed open, so fingers pass through a shield board when the hand is on the grip bar.
+- Low models and the 1.15 rig scale have not been checked in a duel; nothing has run on a device.

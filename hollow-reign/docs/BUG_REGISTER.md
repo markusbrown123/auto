@@ -72,6 +72,30 @@ This pass also closes two rows that were open: 12 (Sentinel's greatsword through
 | 51 | B | Beast claws and hands 5 cm in the floor in low wind-ups; long skirts 6 cm under in lunges | `--foe=cathedral_beast --poses=tel_U`, `--foe=forgotten_monarch --poses=thrust` | No floor test for hands or cloth | Hand targets kept a hand's radius above the floor; hips lifted by up to 3 cm for what hangs from them | audit: −0.03 and −0.02 |
 | 59 | A | The two lesser dragons (Cinder Whelp, Frost Drake) fought as the bare primitive rig — orange blobs and boxes — with a small unposed humanoid standing inside | `tools/shoot.sh <dir> 4 --demo=cinder_whelp --skip_intro` | The duel hands every ordinary foe its class model; for class Monstrosity that is a humanoid, which `DragonSkin` rejected without removing it, and the rig then kept its primitive body | A rejected model is freed; `DragonRig._attach_skin` falls back to the dragon model of the animal's own breed. (The cleaner cure is one line in `duel.gd`: do not override `skin` when `foe.rig.kind == "dragon"`.) | `before/duel_cinder_whelp.png` against `after/duel_cinder_whelp.png` |
 
+## Authored combat pass (bought clips drive the cuts)
+
+Measured with `src/dev/pose_review.tscn`, which now also follows the blade tip: `delay` (swipe to 3 cm of tip travel), `dir_err`
+(tip travel over the hit against the swipe), `yaw` (chest away from the opponent), `tipz`; `--swing=`, `--fps=`, `--motiononly`,
+`--clipscan=ss|th|dw`, `--noauthored`. Sheets in `marketing/authored_pass/`. Numbers are metres on a 1.95 m figure.
+
+| # | Sev | Issue | Reproduce | Root cause | Fix | Verified by |
+|---|---|---|---|---|---|---|
+| 60 | A | Row 10: sword strikes were a procedural arm over a body clip | any swing | no directional attack clips | Cuts, foes' blows, parry body, block and draw play the bought whole-body clips, time-warped onto the rules' hit instant and rolled onto the swiped line (`FighterRig` authored layer; `docs/ANIMATION_LIBRARY.md` "Authored combat") | 120 fps tip audit: motion 17 ms after the swipe in all 24 direction/set cases; `dir_err` within 13° (sword and shield, both knights), 17° (greatsword), 12° (dual) at the classes' own swing times; `ss_knight_m.jpg`, `th_knight_m.jpg`, `dw_knight_m.jpg` |
+| 61 | A | With whole-body clips a long skirt rigid to the hips lifted the whole fighter 35 cm off the floor (Forgotten Monarch) | `--foe=forgotten_monarch --poses=tel_R` during development | whole-body grounding tests every part, as for a fall | Authored standing poses are grounded by the feet; hips sunk further than a skirt allows are held up and the legs solved again (`SkinDriver._ground`) | audit: Monarch lowest −0.05 (skirt), others ≥ 0.00 |
+| 62 | B | The bake's `contact` (tip fastest) fell after a level cut had passed the centre: the blade was out to the side at the hit | `--poses=cut_R` at the hit instant | measured on tip speed | Contact is taken where the far part of the blade is furthest ahead (`au_contact`) | `tipz` 1.0–1.9 m at the hit for every cut |
+| 63 | B | A foe's warning pose did not show the blow's direction for clips whose wind-up starts from a low guard (overhead chop held at the hip) | `--foe=ashen_sentinel --poses=tel_D --t=0.62` | the clip's `start` is not the top of the back-swing | The pose held is the moment the blade is furthest back along its line | `foe_telegraph_sentinel.jpg` |
+
+Open after this pass:
+
+| # | Sev | Issue | Reproduce | Suspected cause | Plan |
+|---|---|---|---|---|---|
+| 64 | C | In some authored wind-ups the blade lies within 3.5 cm of the wielder's own armour: over the left upper arm in the right cut's wind-up (knight, 29–36 sampled vertices for two or three frames), beside the right leg in the rising cut's wind-up (greatsword 16, Sentinel 33 while it holds the warning), Monarch's shoulder for one frame as a rising cut is let go (55) | `--poses=cut_R,fin_Heavy`, `--gear=w_ashen_great --poses=cut_U`, `--foe=ashen_sentinel --poses=tel_U` | the body capsules are thinner than the armour; the clips carry the blade close | capsules from the measured armour, or per-clip offsets |
+| 65 | C | Greatsword up-right cut is 17–27° off the swipe at the class's swing time (44° at a slow 0.55 s test swing): no two-handed clip rises to the right without first turning the back | `--gear=w_ashen_great --swing=0.46 --poses=cut_UR --motiononly --fps=120` | pack gap; roll capped at 57° | a rising-right two-handed clip |
+| 66 | C | Blade tip passes through the wielder's own shield board for one or two frames in L, UR and finisher wind-ups (2–4 of 21 blade samples) | `--poses=cut_L,cut_UR` | authored shield is smaller than ours | mask the shield arm in those wind-ups |
+| 67 | C | Feet 3–9 cm off the floor for a frame or two as an authored cut eases back to guard (Sentinel rising cut 0.07, Monarch 0.09); measured, not visible in the sheets | `--foe=forgotten_monarch --poses=tel_R` | blend of leg rotations between two grounded poses | leg IK on the blended ankles |
+| 68 | B | Combos that share their first cuts look the same until they diverge, and several finishers reuse `th_cut_d2` / `dw_lunge`; a finisher that bites is held in the body, so its recovery flourish is only seen on a miss | `--screen=training --showcase=combos` | one cut per swipe, on the rules' clock | more finisher clips |
+| 69 | C | Hit reactions, deaths, dodges and rolls still use the free-library clips; the packs' own were not tried. Dual blades have no authored parry or block | — | time | try `ss_hit_*`, `ss_death_*` with travel off |
+
 ## Open
 
 | # | Sev | Issue | Reproduce | Suspected cause | Plan |

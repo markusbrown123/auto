@@ -16,10 +16,24 @@ static var rules: Dictionary = {}
 static func upgrade_cost(it: Dictionary, level: int) -> Dictionary:
 	var costs: Array = it.get("upgrade", {}).get("costs", [])
 	if level >= 0 and level < costs.size():
-		var mats := {}
+		var out := {"gold": int(costs[level].gold), "shards": int(costs[level].shards), "materials": {}}
 		for m: String in costs[level].get("materials", {}):
-			mats[m] = int(costs[level].materials[m])
-		return {"gold": int(costs[level].gold), "shards": int(costs[level].shards), "materials": mats}
+			out.materials[m] = int(costs[level].materials[m])
+		# a weapon's level is its blade tier. Where the blade has reached what its ore allows, the next level
+		# includes the ore step (in the weapon's own material), as Game.upgrade() takes both together.
+		var caps: Array = rules.get("mods", {}).get("ore", {}).get("blade_cap", [])
+		var step := -1
+		for i: int in caps.size():
+			if int(caps[i]) == level:
+				step = i
+		if it.get("slot", "") == "weapon" and it.has("mods") and step >= 0 and step < it.mods.ore.size():
+			var o: Dictionary = it.mods.ore[step]
+			out.gold += int(o.gold)
+			out.shards += int(o.shards)
+			for m: String in o.get("materials", {}):
+				var key: String = str(it.get("mat", "m_iron")) if m == "ore" else m
+				out.materials[key] = int(out.materials.get(key, 0)) + int(o.materials[m])
+		return out
 	var rank: int = ["common", "uncommon", "rare", "epic", "legendary"].find(it.get("rarity", "common"))
 	return {"gold": (120 + rank * 110) * (level + 1), "shards": (level + 1) * (1 + rank / 2), "materials": {}}
 
@@ -57,8 +71,10 @@ static func item_lines(it: Dictionary, level: int, classes: Dictionary) -> Array
 	if it.slot == "weapon":
 		var c: Dictionary = classes[it.cls]
 		out.append(["Damage", snappedf(float(it.damage) * up, 0.1)])
-		out.append(["Swing", "%.2fs" % c.swing])
-		out.append(["Stamina", c.stamina])
+		out.append(["Swing", "%.2fs" % (float(c.swing) * float(it.get("swing", 1.0)))])
+		out.append(["Stamina", snappedf(float(c.stamina) * float(it.get("cost", 1.0)), 0.1)])
+		if float(it.get("guard_dmg", 1.0)) != 1.0:
+			out.append(["Guard damage", "×%.1f" % float(it.guard_dmg)])
 		if it.get("element") != null:
 			out.append(["Element", str(it.element).capitalize()])
 	for k in [["defense", "Defense"], ["hp", "Health"], ["stamina", "Stamina"], ["strength", "Strength"], ["dex", "Dexterity"], ["crit", "Critical"], ["resist", "Resistance"]]:
@@ -69,6 +85,9 @@ static func item_lines(it: Dictionary, level: int, classes: Dictionary) -> Array
 			out.append([k[1], snappedf(v * (up if k[0] == "defense" else 1.0), 0.1)])
 	if float(it.get("block", 0)) > 0.0:
 		out.append(["Guard", "%d%%" % int(float(it.block) * 100.0)])
+	if it.has("blocks"):
+		out.append(["Blocks", int(it.blocks) + level / 2])
+		out.append(["Footwork", "×%.2f" % float(it.mobility)])
 	if it.has("weight") and rules.get("weights", {}).has(it.weight):
 		out.append(["Weight", str(rules.weights[it.weight].name)])
 	return out
@@ -140,7 +159,28 @@ static func compute(profile: Dictionary, items: Dictionary, classes: Dictionary)
 	var strength: float = float(a.strength) + bonus.strength
 	var dex: float = float(a.dex) + bonus.dex
 	var scale: float = strength * float(cls.scale.strength) + dex * float(cls.scale.dex)
-	var wdmg: float = float(weapon.get("damage", 6)) * (1.0 + 0.1 * int(up.get(weapon.get("id", ""), 0)))
+	# the weapon's mods: blade tier is the old upgrade level; grip, ore and a sharpened edge are kept beside it
+	var wid: String = str(weapon.get("id", ""))
+	var mr: Dictionary = rules.get("mods", {})
+	var wm: Dictionary = profile.get("mods", {}).get(wid, {})
+	var blade: int = int(up.get(wid, 0))
+	var grip: int = int(wm.get("grip", 0))
+	var ore: int = int(wm.get("ore", 0))
+	var edge: bool = int(profile.get("edge", {}).get(wid, 0)) > 0
+	var ore_trait: Dictionary = mr.get("ores", {}).get(wm.get("ore_id", ""), {}).get("trait", {}) if ore >= 2 else {}
+	var element = weapon.get("element")
+	if element == null and ore_trait.has("element"):
+		element = ore_trait.element
+	bonus.crit += float(ore_trait.get("crit", 0))
+	var wdmg: float = float(weapon.get("damage", 6)) * (1.0 + 0.1 * blade) * (1.0 + float(mr.get("ore", {}).get("damage_pct", 0.0)) / 100.0 * ore) \
+		* (1.0 + (float(mr.get("sharpen", {}).get("damage_pct", 0.0)) / 100.0 if edge else 0.0))
+	var swing_time: float = float(cls.swing) * float(weapon.get("swing", 1.0)) * (1.0 + float(mr.get("grip", {}).get("swing_time_pct", 0.0)) / 100.0 * grip)
+	mods.swing_cost_pct += float(mr.get("grip", {}).get("swing_cost_pct", 0.0)) * grip
+	var guard_dmg: float = float(weapon.get("guard_dmg", 1.0)) * (1.0 + float(mr.get("blade", {}).get("guard_dmg_pct", 0.0)) / 100.0 * blade) \
+		* (1.0 + float(ore_trait.get("guard_dmg_pct", 0.0)) / 100.0)
+	# the shield: how many blows it stops, how soon that returns, what it does to footwork
+	var sh: Dictionary = items.get(eq.get("shield"), {}) if eq.get("shield") != null and not cls.two_handed else {}
+	var sh_lvl: int = int(up.get(sh.get("id", ""), 0))
 	var defense: float = bonus.defense + float(a.defense) * 2.0
 	var endurance: float = float(a.endurance)
 	# two-handed classes have no shield: blocking with the blade costs more
@@ -157,14 +197,21 @@ static func compute(profile: Dictionary, items: Dictionary, classes: Dictionary)
 		"max_stamina": 100.0 + 6.0 * endurance + bonus.stamina,
 		"stamina_regen": (26.0 + 0.8 * endurance) * maxf(0.4, 1.0 + float(mods.regen_pct) / 100.0),
 		"attack": wdmg * (1.0 + 0.025 * scale) * maxf(0.4, 1.0 + float(mods.attack_pct) / 100.0),
-		"swing_time": float(cls.swing),
-		"swing_cost": float(cls.stamina) * maxf(0.5, 1.0 + float(mods.swing_cost_pct) / 100.0),
+		"swing_time": swing_time,
+		"swing_cost": float(cls.stamina) * float(weapon.get("cost", 1.0)) * maxf(0.5, 1.0 + float(mods.swing_cost_pct) / 100.0),
 		"mitigation": defense / (defense + 110.0),
 		"defense": defense,
 		"crit_mult": 1.5 + 0.02 * (float(a.crit) + bonus.crit),
 		"resist": float(a.resist) * 3.0 + bonus.resist,
 		"block_eff": block_eff,
-		"element": weapon.get("element"),
+		"element": element,
+		"guard_dmg": guard_dmg,
+		"shield_blocks": int(sh.get("blocks", 0)) + (sh_lvl / 2 if not sh.is_empty() else 0),
+		"shield_regen": float(sh.get("regen", 4.0)),
+		"dodge_cost": float(sh.get("mobility", 1.0)),
+		"footwork": 100.0 / float(sh.get("mobility", 1.0)),      # shown: how freely the knight moves (the duel reads dodge_cost)
+		"shield_spent_cost": float(rules.get("shield_rules", {}).get("spent_cost", 2.0)),
+		"shield_spent_leak": float(rules.get("shield_rules", {}).get("spent_leak", 0.35)),
 		"weapon_cls": weapon.get("cls", "sword"),
 		# not read by the duel: what the equipment screens say about how the numbers above came to be
 		"burden": burden, "weights": weights, "sets": sets, "unmet": unmet_ids,

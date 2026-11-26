@@ -370,12 +370,20 @@ func _poses() -> Array:
 		p.append(["dodge_l", func(): rig.dodge(-1.0), 0.7, [0.15, 0.3, 0.45]])
 		p.append(["roll_r", func(): rig.roll(1.0), 1.0, [0.2, 0.42, 0.64]])
 		p.append(["roll_l", func(): rig.roll(-1.0), 1.0, [0.2, 0.42, 0.64]])
+	if only_has("sheath") or only_has("draw") or only_has("preview_attack") or only_has("preview_block"):
+		p.append(["sheath", func(): rig.sheath(), 1.3, [0.15, 0.36, 0.5, 0.7, 1.1]])
+		p.append(["draw", func(): rig.sheath(true); _later(0.3, func(): rig.draw()), 1.5, [0.25, 0.5, 0.66, 0.8, 1.0, 1.3]])
+		p.append(["preview_attack", func(): rig.preview_attack("DR"), 1.2, [0.12, 0.3, 0.45, 0.9]])
+		p.append(["preview_block", func(): rig.preview_block(0.6), 1.2, [0.3, 0.55, 1.1]])
 	p.append(["recover", func(): rig.recover(), 1.2, [1.0]])
 	p.append(["stagger", func(): rig.stagger(), 1.4, [0.5, 1.2]])
 	p.append(["hurt", func(): rig.hurt(), 0.6, [0.1, 0.25]])
 	p.append(["die_a", func(): rig.die(1.0), 3.2, [0.5, 1.0, 1.6, 3.0]])
 	p.append(["die_b", func(): rig.die(-1.0), 3.2, [1.0, 3.0]])
 	return p
+
+func only_has(n: String) -> bool:
+	return str(_args.get("poses", "")).split(",", false).has(n)
 
 var _timers: Array = []
 func _later(t: float, f: Callable) -> void:

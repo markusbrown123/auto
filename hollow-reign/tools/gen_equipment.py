@@ -23,6 +23,73 @@ REGION = {r["id"]: r for r in REGIONS}
 QUESTS = load("quests.json")["quests"]
 RANK = BASE["rarity_order"]                       # common uncommon rare epic legendary (the stored values)
 
+# ------------------------------------------------------------------ the four basic swords, and the shop's price ladder
+# Base fields this layer replaces (items.json keeps the first telling; Db lays these over it). `swing` and `cost`
+# multiply the class's swing time and stamina cost; `guard_dmg` multiplies what a cut does to a raised guard and to poise.
+BASIC = ["w_rusted_sword", "w_dawnline", "w_censer_sword", "w_starfall"]
+OVERRIDE = {
+    "w_rusted_sword": {"damage": 14, "price": 120, "role": "balanced", "role_text": "Balanced: nothing given up, nothing gained."},
+    "w_dawnline":     {"rarity": "uncommon", "damage": 10, "swing": 0.85, "cost": 0.8, "price": 140, "role": "light",
+                       "role_text": "Light: quicker and cheaper to swing, each cut lands softer."},
+    "w_censer_sword": {"rarity": "uncommon", "damage": 20, "swing": 1.3, "cost": 1.35, "guard_dmg": 1.6, "crit": 0, "price": 160, "role": "heavy",
+                       "role_text": "Heavy: hits hardest and breaks guards, slow and tiring to swing."},
+    "w_starfall":     {"rarity": "uncommon", "damage": 11, "swing": 0.95, "cost": 0.9, "crit": 8, "price": 150, "role": "precision",
+                       "role_text": "Precision: modest cuts that punish a staggered foe hard, light on stamina for long sequences."},
+    # the shop is where blades come from: prices for what guardians used to drop
+    "w_ashen_great": {"price": 900}, "w_headsman": {"price": 1900}, "w_crypt_great": {"price": 2800}, "w_rime_sword": {"price": 4800},
+    "w_wyrmfang": {"price": 9000}, "w_throneshard": {"price": 9500}, "w_hunger": {"price": 14000}, "w_vigil_edge": {"price": 900},
+    "w_oath_axe": {"price": 20000}, "w_ember_fangs": {"price": 20000},
+}
+for _id, _o in OVERRIDE.items():
+    BY_ID[_id].update(_o)
+# When Orren stocks a priced item. Default: by rank (SHOP_STAGE regions cleared). Blades wait on the guardian that carried them.
+UNLOCK = {
+    "w_ashen_great": {"boss": "ashen_sentinel"}, "w_headsman": {"boss": "hollow_executioner"}, "w_crypt_great": {"boss": "gravewarden"},
+    "w_rime_sword": {"boss": "rimewyrm"}, "w_wyrmfang": {"boss": "cinder_wyrm"}, "w_throneshard": {"boss": "azhurion"},
+    "w_hunger": {"boss": "devourer"}, "w_vigil_edge": {"cleared": 1}, "w_oath_axe": {"cleared": 0}, "w_ember_fangs": {"cleared": 0},
+    "w_dawnline": {"cleared": 0}, "w_censer_sword": {"cleared": 0}, "w_starfall": {"cleared": 0},
+}
+# The only weapons a guardian drops, in the whole campaign: one in the middle, one late, one at the end. Never sold.
+BOSS_WEAPONS = {"crimson_widow": "w_twin_fangs", "frostbound_king": "w_frost_great", "forgotten_monarch": "w_monarch"}
+# What every other guardian is sure to give the first time instead of a weapon (a piece of its own gear), where it has one.
+BOSS_FIRST = {"ashen_sentinel": ["s_tower"], "hollow_executioner": ["x_tooth"], "cathedral_beast": ["x_bell"], "pale_huntsman": ["a_black_legs"],
+    "cinder_wyrm": ["s_scale"], "rimewyrm": ["a_frost_legs"], "devourer": ["x_name"], "forgotten_monarch": ["w_monarch", "r_crown"],
+    "gravewarden": ["a_vigil_legs"], "azhurion": [], "crimson_widow": ["w_twin_fangs"], "frostbound_king": ["w_frost_great"]}
+
+# Shields: how many blows one stops before it is spent, how fast that comes back, and what carrying it does to footwork.
+# blocks: charges. regen: seconds without blocking for one charge to return. mobility: multiplies the stamina a dodge or roll costs.
+SHIELD_STATS = {
+    "s_plank":     {"blocks": 3, "regen": 4.0, "mobility": 1.0},
+    "s_round":     {"blocks": 2, "regen": 3.0, "mobility": 0.8},
+    "s_garrison":  {"blocks": 4, "regen": 4.5, "mobility": 1.1},
+    "s_tower":     {"blocks": 6, "regen": 5.0, "mobility": 1.25},
+    "s_reliquary": {"blocks": 5, "regen": 5.0, "mobility": 1.2},
+    "s_scale":     {"blocks": 5, "regen": 4.5, "mobility": 1.15},
+    "s_rime":      {"blocks": 4, "regen": 3.0, "mobility": 0.95},
+}
+SHIELD_RULES = {"spent_cost": 2.0, "spent_leak": 0.35,      # a spent shield: the blow costs twice the stamina and this share of it gets through
+    "text": "A shield stops so many blows, then it is spent until you give it a few seconds. A block timed to the blow costs it nothing."}
+
+# Weapon mods at the forge. Blade tier is the old upgrade level, so nothing an old save paid for is lost.
+MODS = {
+    "blade": {"name": "Blade", "tiers": 5, "damage_pct": 10.0, "guard_dmg_pct": 8.0, "text": "Reforge: +10% damage and +8% guard damage a tier."},
+    "grip":  {"name": "Grip", "tiers": 3, "swing_time_pct": -3.0, "swing_cost_pct": -5.0, "gold_step": [1.2, 2.0, 3.0], "shards": [2, 3, 4],
+              "text": "Rewrap and rebalance: swings 3% quicker and 5% cheaper a tier."},
+    "ore":   {"name": "Ore", "tiers": 3, "damage_pct": 3.0, "blade_cap": [2, 3, 4, 5], "grip_cap": [1, 2, 3, 3], "gold_step": [2.0, 3.5, 5.0],
+              "shards": [3, 0, 0], "ore_count": 4, "names": ["Iron", "Steel", "", "Cored"],
+              "text": "The metal itself: +3% damage a tier, and it sets how far blade and grip can be taken."},
+    # the second ore tier is reforged in a region's material, which leaves its mark on the blade
+    "ores": {
+        "m_iron":   {"name": "Old Iron",     "trait": {"guard_dmg_pct": 10.0}, "text": "+10% guard damage"},
+        "m_silver": {"name": "Grave Silver", "trait": {"crit": 4},             "text": "+4 critical"},
+        "m_scale":  {"name": "Wyrm Scale",   "trait": {"element": "fire"},     "text": "Burns: a fire edge, if the blade has no element"},
+        "m_rime":   {"name": "Rimesteel",    "trait": {"element": "frost"},    "text": "Bites: a frost edge, if the blade has no element"},
+        "m_glass":  {"name": "Hollow Glass", "trait": {"crit": 6},             "text": "+6 critical"},
+    },
+    "sharpen": {"name": "Sharpen", "damage_pct": 8.0, "fights": 3, "gold": 25, "gold_per_rank": 20,
+                "text": "A keen edge: +8% damage for the next three fights, win or lose. It cannot be stacked."},
+}
+
 # ------------------------------------------------------------------ vocabulary
 SLOTS = ["weapon", "offhand", "shield", "helm", "chest", "shoulders", "gauntlets", "legs", "boots", "ring", "relic"]
 ARMOUR = ["helm", "chest", "shoulders", "gauntlets", "legs", "boots"]
@@ -227,7 +294,7 @@ NAMED = {
 # Semantic ids that resolve to the stored ones (Db.item accepts either; saves holding them are rewritten on load).
 ALIASES = {"w_wayfarer": "w_rusted_sword", "w_silver_vow": "w_dawnline", "w_ashbrand": "w_censer_sword", "w_kings_remnant": "w_throneshard",
     "w_nightward": "w_vigil_edge", "w_oathbreaker": "w_oath_axe", "w_veilcutter": "w_starfall", "w_eternal_edge": "w_monarch"}
-ADVANCED = ["w_monarch", "w_starfall", "w_throneshard", "w_twin_relics", "w_hunger", "s_rime"]       # Recall-capable: the old make
+ADVANCED = ["w_monarch", "w_throneshard", "w_twin_relics", "w_hunger", "s_rime"]       # Recall-capable: the old make
 QUEST_ITEMS = ["x_name", "r_crown"]            # story keepsakes: never sold
 UNSELLABLE = ["w_rusted_sword"]
 WEAPON_FAMILY = {"w_rusted_sword": "crownless", "w_knight_sword": "crownless", "w_dawnline": "crownless", "w_ashen_great": "ashbound",
@@ -241,7 +308,9 @@ WEAPON_FAMILY = {"w_rusted_sword": "crownless", "w_knight_sword": "crownless", "
     "x_heart": "architect", "x_name": "architect"}
 SHIELD = {"s_plank": ["heater", "medium"], "s_garrison": ["kite", "medium"], "s_round": ["round", "light"], "s_tower": ["segmented", "heavy"],
     "s_reliquary": ["kite", "heavy"], "s_rime": ["curved", "medium"], "s_scale": ["segmented", "heavy"]}
-GEAR_MODEL = {"w_rusted_sword": "wayfarer", "w_oath_axe": "oathbreaker", "w_monarch": "eternal_edge", "s_plank": "shield_heater", "s_round": "shield_round"}
+GEAR_MODEL = {"w_rusted_sword": "wayfarer", "w_dawnline": "silver_vow", "w_censer_sword": "ashbrand", "w_starfall": "veilcutter", "w_throneshard": "kings_remnant",
+    "w_cold_resolve": "cold_resolve", "w_vigil_edge": "nightward", "w_twin_relics": "twin_relics",
+    "w_oath_axe": "oathbreaker", "w_monarch": "eternal_edge", "s_plank": "shield_heater", "s_round": "shield_round"}
 DUEL_ALIAS = {"w_censer_sword": "w_vigil_edge", "w_monarch": "w_starfall", "w_woodcutter": "w_headsman", "w_oath_axe": "w_headsman"}    # duel.gd MODEL_ALIAS
 CHALLENGES = [
     {"id": "both_hands", "name": "Both Hands", "text": "Master two sets of twin blades.", "need": {"mastered_cls": "dual", "count": 2},
@@ -262,11 +331,15 @@ def rank(it): return RANK.index(it["rarity"])
 def find_sources(it):
     out = []
     iid = it["id"]
-    if iid in ["w_rusted_sword", "s_plank", "a_worn_helm", "a_worn_chest", "a_worn_gauntlets", "a_worn_legs"]:
+    if iid in BASIC:
+        out.append({"type": "start", "choice": True})
+    if iid in ["s_plank", "a_worn_helm", "a_worn_chest", "a_worn_gauntlets", "a_worn_legs"]:
         out.append({"type": "start"})
     for f in FOES.values():
         pool = list(f.get("loot", [])) + BOSS_EXTRA.get(f["id"], [])
         for e in pool:
+            if BY_ID[e[0]]["slot"] == "weapon" and BOSS_WEAPONS.get(f["id"]) != e[0]:
+                continue                    # guardians drop three weapons in all; the rest are Orren's to sell
             if e[0] == iid and f["boss"]:
                 out.append({"type": "boss", "id": f["id"], "region": f["region"], "guaranteed": float(e[1]) >= 1.0})
     for foe, item in ENCOUNTERS.items():
@@ -286,12 +359,20 @@ def find_sources(it):
         if c["reward"].get("item") == iid:
             out.append({"type": "challenge", "id": c["id"]})
     if int(it.get("price", 0)) > 0:
-        out.append({"type": "shop", "stage": SHOP_STAGE[it["rarity"]]})
-    if int(it.get("ng_min", 0)) >= 1:
+        out.append({"type": "shop", "unlock": unlock_of(it)})
+    if int(it.get("ng_min", 0)) >= 1 and int(it.get("price", 0)) <= 0:
         out.append({"type": "ng", "ng": int(it["ng_min"])})
-    order = ["start", "boss", "encounter", "region", "quest", "challenge", "craft", "shop", "ng"]
+    order = ["start", "boss", "encounter", "region", "shop", "quest", "challenge", "craft", "ng"]
     out.sort(key=lambda s: (order.index(s["type"]), 0 if s.get("guaranteed", True) else 1))
     return out
+
+def unlock_of(it):
+    return UNLOCK.get(it["id"], {"cleared": SHOP_STAGE[it["rarity"]]})
+
+def unlock_text(u):
+    if "boss" in u:
+        return "Unlocks when the guardian of %s falls." % REGION[FOES[u["boss"]]["region"]]["name"]
+    return "In stock." if u["cleared"] == 0 else "Unlocks further along the road (%d region%s cleared)." % (u["cleared"], "" if u["cleared"] == 1 else "s")
 
 def family_of(it):
     suit = it.get("look", {}).get("set")
@@ -303,7 +384,7 @@ def hint(src):
     t = src["type"]
     reg = REGION[src["region"]]["name"] if "region" in src else ""
     return {
-        "start": "You woke with it.",
+        "start": "You woke with it." if not src.get("choice") else "One of the four blades a knight may wake holding. Orren keeps the others.",
         "boss": "A guardian of %s carries it." % reg,
         "encounter": "Something rare walks %s. It does not always show itself." % reg,
         "region": "Left behind somewhere along the road through %s." % reg,
@@ -357,8 +438,9 @@ def visual(it):
         elif iid in DUEL_ALIAS:
             out["visual"] = "alias"
             out["model"] = DUEL_ALIAS[iid]
-        if iid in GEAR_MODEL and exists("assets/models/gear/%s.glb" % GEAR_MODEL[iid]):
-            out["gear_model"] = "gear/" + GEAR_MODEL[iid]      # the hand-modelled replacement, for the pass that adopts it
+        if iid in GEAR_MODEL:
+            out["gear_id"] = GEAR_MODEL[iid]                  # the name the hand-modelled gear is built under (assets/models/gear/)
+            out["gear_ready"] = exists("assets/models/gear/%s.glb" % GEAR_MODEL[iid])
     return out
 
 def mastery(it):
@@ -387,7 +469,7 @@ def upgrade_cost(it, level):
     out = {"gold": gold, "shards": u["shard"][r] * (level + 1), "materials": {}}
     if level >= u["mat_from_level"] and r >= u["mat_min_rank"]:
         out["materials"][material_of(it)] = (level - u["mat_from_level"] + 1) * (1 if it["slot"] not in ("weapon", "chest") else 2)
-    if level == u["max"] - 1 and r >= u["core_min_rank"]:
+    if level == u["max"] - 1 and r >= u["core_min_rank"] and it["slot"] != "weapon":
         out["materials"]["m_core"] = 1
     return out
 
@@ -424,7 +506,21 @@ for it in ALL:
     if iid in QUEST_ITEMS or iid in UNSELLABLE:
         e["unsellable"] = True
     if int(it.get("price", 0)) > 0:
-        e["shop_stage"] = SHOP_STAGE[it["rarity"]]
+        e["unlock"] = unlock_of(it)
+        e["unlock_text"] = unlock_text(e["unlock"])
+    if iid in OVERRIDE:
+        e.update(OVERRIDE[iid])
+    if iid in SHIELD_STATS:
+        e.update(SHIELD_STATS[iid])
+    if it["slot"] == "weapon":
+        r = rank(it)
+        g = UPGRADE["gold_base"][r]
+        e["mods"] = {
+            "grip": [{"gold": int(round(g * MODS["grip"]["gold_step"][n] / 5.0)) * 5, "shards": MODS["grip"]["shards"][n], "materials": {}} for n in range(3)],
+            "ore": [{"gold": int(round(g * MODS["ore"]["gold_step"][n] / 5.0)) * 5, "shards": MODS["ore"]["shards"][n],
+                     "materials": ({} if n == 0 else ({"ore": MODS["ore"]["ore_count"]} if n == 1 else {"m_core": 1}))} for n in range(3)],
+            "sharpen": {"gold": MODS["sharpen"]["gold"] + MODS["sharpen"]["gold_per_rank"] * r},
+        }
     if it["slot"] in UPGRADE["slot_mult"]:
         kind = "weapon" if it["slot"] == "weapon" else ("shield" if it["slot"] == "shield" else "armour")
         e["upgrade"] = {"max": UPGRADE_MAX, "growth": UPGRADE["growth"][kind], "costs": [upgrade_cost(it, n) for n in range(UPGRADE_MAX)]}
@@ -440,33 +536,38 @@ for it in ALL:
 
 # guardians: what the first kill always gives, what it may also give, and what a later kill gives instead
 BOSS = {}
-FIRST_OVERRIDE = {"azhurion": ["w_starfall"]}      # was a second Wyrmfang: a guardian's guaranteed reward is its own
 taken = {}
 for f in FOES.values():
     if not f["boss"]:
         continue
-    loot = list(f.get("loot", [])) + BOSS_EXTRA.get(f["id"], [])
-    first = FIRST_OVERRIDE.get(f["id"], [e[0] for e in loot if float(e[1]) >= 1.0])
-    pool = [[e[0], float(e[1])] for e in loot if e[0] not in first and float(e[1]) < 1.0]
+    loot = [e for e in list(f.get("loot", [])) + BOSS_EXTRA.get(f["id"], []) if BY_ID[e[0]]["slot"] != "weapon"]
+    first = BOSS_FIRST[f["id"]]
+    pool = [[e[0], min(float(e[1]), 0.8)] for e in loot if e[0] not in first]
     for iid in first:
         if iid in taken:
             problems.append("%s is guaranteed by both %s and %s" % (iid, taken[iid], f["id"]))
         taken[iid] = f["id"]
-    BOSS[f["id"]] = {"first": first, "pool": pool, "materials": {REGION_MAT[f["region"]]: REWARDS["mat_boss"], "m_core": 1}}
+        if BY_ID[iid]["slot"] == "weapon" and (BOSS_WEAPONS.get(f["id"]) != iid or int(BY_ID[iid].get("price", 0)) > 0):
+            problems.append("%s: a dropped weapon must be one of the three, and never sold" % iid)
+    BOSS[f["id"]] = {"first": first, "pool": pool, "materials": {REGION_MAT[f["region"]]: REWARDS["mat_boss"], "m_core": 1},
+        "unlocks": [i for i, u in UNLOCK.items() if u.get("boss") == f["id"]]}
 for iid, bid in taken.items():
-    s = [x for x in OUT[iid]["sources"] if x["type"] == "boss" and x["id"] == bid]
-    if s:
-        s[0]["guaranteed"] = True
-        OUT[iid]["sources"].sort(key=lambda x: 0 if (x["type"] == "boss" and x.get("guaranteed")) else 1)
-        OUT[iid]["source"] = OUT[iid]["sources"][0]
-        OUT[iid]["hint"] = hint(OUT[iid]["source"])
+    s_ = [x for x in OUT[iid]["sources"] if x["type"] == "boss" and x["id"] == bid]
+    if not s_:
+        OUT[iid]["sources"].insert(0, {"type": "boss", "id": bid, "region": FOES[bid]["region"], "guaranteed": True})
+    else:
+        s_[0]["guaranteed"] = True
+    OUT[iid]["sources"].sort(key=lambda x: 0 if (x["type"] == "boss" and x.get("guaranteed")) else 1)
+    OUT[iid]["source"] = OUT[iid]["sources"][0]
+    OUT[iid]["hint"] = hint(OUT[iid]["source"])
 
 # what an ordinary foe of a region may drop: gear Orren would otherwise sell, of that region's rank
 BAND = {"courtyard": [0, 1], "blackwood": [1, 2], "cathedral": [2], "crypt": [2, 3], "roost": [3], "citadel": [3], "deep": [3], "throne": [3]}
 DROPS = {}
 for r in REGIONS:
     DROPS[r["id"]] = [it["id"] for it in ALL if int(it.get("price", 0)) > 0 and rank(it) in BAND[r["id"]] and it["slot"] not in ("ring", "relic")
-        and it["id"] not in [q["reward"].get("item") for q in QUESTS] and it["id"] not in taken]
+        and it["id"] not in [q["reward"].get("item") for q in QUESTS] and it["id"] not in taken
+        and "boss" not in UNLOCK.get(it["id"], {}) and int(it.get("ng_min", 0)) == 0]
 ELITES = sorted(f["id"] for f in FOES.values() if not f["boss"] and float(f.get("poise", 0)) >= 85)
 
 if problems:
@@ -484,6 +585,7 @@ doc = {
     "materials": MATERIALS, "region_material": REGION_MAT,
     "upgrade": UPGRADE, "sell_rate": SELL_RATE, "buyback_rate": BUYBACK_RATE, "shard_price": SHARD_PRICE, "shop_stage": SHOP_STAGE,
     "rewards": REWARDS,
+    "basic_swords": BASIC, "boss_weapons": BOSS_WEAPONS, "mods": MODS, "shield_rules": SHIELD_RULES,
     "aliases": ALIASES, "named": NAMED, "region_order": [r["id"] for r in REGIONS],
     "boss_rewards": BOSS, "encounters": ENCOUNTERS, "drops": DROPS, "elites": ELITES,
     "challenges": CHALLENGES,

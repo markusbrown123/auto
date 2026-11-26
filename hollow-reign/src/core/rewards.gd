@@ -14,6 +14,7 @@ extends RefCounted
 ##   first                       the first time this foe has fallen
 ##   repeat                      share paid because of recent repeats of this foe (1.0 = full)
 ##   compensation                {gold, materials} paid in place of a guaranteed item already held
+##   shop_unlocks                ids Orren stocks from now on because this guardian fell (first kill only)
 ##   pity                        true when the dry-streak rule forced something new into this result
 
 static func rules() -> Dictionary:
@@ -64,7 +65,7 @@ static func roll(profile: Dictionary, foe_id: String) -> Dictionary:
 	var mats := {}
 	var out := {"xp": int(foe.xp * (1.0 + float(r.ng_xp) * ng) * rep), "gold": int(foe.gold * (1.0 + float(r.ng_gold) * ng) * rep), "shards": int(r.shards_fight),
 		"items": items, "items_new": items, "materials": mats, "discoveries": [], "mastery_ups": [], "unlocks": [],
-		"levels": 0, "mastered": [], "first": first, "repeat": rep, "compensation": {}, "pity": false, "core": false}
+		"levels": 0, "mastered": [], "first": first, "repeat": rep, "compensation": {}, "pity": false, "core": false, "shop_unlocks": []}
 	var has := func(id: String) -> bool: return profile.get("inventory", []).has(id) or items.has(id)
 	if foe.boss:
 		out.shards = int(r.shards_boss) + int(r.shards_boss_per_region) * maxi(0, eq.region_order.find(region))
@@ -91,10 +92,14 @@ static func roll(profile: Dictionary, foe_id: String) -> Dictionary:
 				items.append(str(e[0]))
 		if ng > 0 and rng.randf() < float(r.ng_item_chance):
 			for it: Dictionary in Db.item_list:
-				if int(it.get("ng_min", 0)) >= 1 and int(it.ng_min) <= ng and not has.call(str(it.id)):
+				if int(it.get("ng_min", 0)) >= 1 and int(it.ng_min) <= ng and int(it.get("price", 0)) <= 0 and not has.call(str(it.id)):
 					items.append(str(it.id))
 					break
 		if first:
+			# what Orren can sell now that this guardian is gone
+			for id: String in b.get("unlocks", []):
+				if not has.call(id):
+					out.shop_unlocks.append(id)
 			for e: Array in b.pool:
 				if not known(profile, str(e[0])) and not items.has(str(e[0])):
 					out.discoveries.append(str(e[0]))

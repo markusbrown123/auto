@@ -28,11 +28,15 @@ Costs are stated as texture samples and passes; no figure in this file is a devi
 
 ## Equipment materials (`assets/models/gear/`, built by `tools/gear_gen.py`)
 
-Hand-modelled gear ships as glTF materials over 13 shared 256 px tiling textures (`gear/tex/`): `steel`, `fuller`,
-`gold` (brushed set), worn steel (Oathbreaker), `graphite`, `enamel`, `leather` (bead-blast set), `grip` (cord wrap);
-`edge` and `glow` are untextured. On load `GearModel.spawn` runs `Look.sanitise(root, "weapon")`, so the textured
-ones render through `pbr_clamp` (roughness floor 0.30); the two untextured ones stay StandardMaterial3D.
-Values and rules: `docs/EQUIPMENT_DESIGN_BIBLE.md`. One surface per material, 4 - 7 surfaces per piece.
+Hand-modelled gear ships as glTF materials over shared tiling textures in `gear/tex/`: 13 files at 256 px
+(brushed steel, bead-blast, cord wrap, an unused worn-steel set) and 24 at 128 x 512 px (eight engraving patterns:
+albedo, normal, roughness/metal). Surfaces: `steel`, `blade`, `blade_groove`, `engrave_<pattern>`, `gold`, `graphite`,
+`enamel`, `leather`, `grip`, `grip_fine`; `edge` and `glow` are untextured. On load `GearModel.spawn` runs
+`Look.sanitise(root, "weapon")`, so the textured ones render through `pbr_clamp` (roughness floor 0.30); the two
+untextured ones stay StandardMaterial3D. `glow` (the light channel) is swapped for a dark material until
+`GearModel.awaken(node, true)`; forge `ore` is the `tint` uniform on the blade's own surfaces and `sharpened` is the
+edge bevel's roughness and colour (`GearModel.apply_mod`). Values and rules: `docs/EQUIPMENT_DESIGN_BIBLE.md`.
+One surface per material, 6 - 8 per piece.
 
 ## Asset classes (`Look.SURFACE`)
 

@@ -215,7 +215,10 @@ func drive(j: Dictionary) -> Dictionary:
 					var g := skel.get_bone_global_pose(bone[part[0]])
 					skel.set_bone_global_pose(bone[part[0]], Transform3D(Basis(fwd_axis, clip_roll * arm_r * clip_w * float(part[1])) * g.basis, g.origin))
 		clip_axis = {"Right": hand_axis("Right"), "Left": hand_axis("Left")}
-	_ground(back, q, whole, bool(j.get("settle", false)))
+	# (an authored cut or guard is a standing figure: grounded by its feet, like the procedural pose, not by every
+	# part of it as a fall is, or a long skirt rigid to the hips would lift the whole fighter off the floor)
+	var fallen := whole and not clip_look
+	_ground(back, q, fallen, bool(j.get("settle", false)), whole and clip_look)
 	if _xf_left > 0.0:
 		# (an arm pinned to a contact point is not eased: it is solved again to its target on the eased trunk)
 		var pin_r := float(j.get("follow_r", 1.0)) <= 0.0
@@ -225,7 +228,7 @@ func drive(j: Dictionary) -> Dictionary:
 			_limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
 		if pin_l:
 			_limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
-		_ground(back, q, true, false)
+		_ground(back, q, whole and not clip_look, true, true, whole and clip_look)
 	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
 	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
 	return {"r": back * _palm("Right", hr), "l": back * _palm("Left", hl)}
@@ -585,8 +588,37 @@ func _plant(back: Transform3D, q: Basis, whole: bool) -> void:
 
 ## Whole body: lift the hips until nothing is under the floor. Standing figures are tested at the feet and shins
 ## (a knee in a deep lunge); figures in a whole-body clip (falls, rolls, deaths) at every part.
-func _ground(back: Transform3D, q: Basis, whole: bool, settle: bool) -> void:
+func _ground(back: Transform3D, q: Basis, whole: bool, settle: bool, standing_clip: bool = false, hold_hips: bool = true) -> void:
 	var low := 1e9
+	if standing_clip and hold_hips and not whole:
+		# a clip that sinks the hips further than the skirt or fauld hanging from them allows: the hips are held up
+		# and both legs solved again to where the feet already stand
+		var hang0 := 0.0
+		for nm0: String in ["Hips", "LeftUpLeg", "RightUpLeg"]:
+			hang0 = minf(hang0, _low(nm0, back))
+		if hang0 < -0.03:
+			var feet := {}
+			for side: String in ["Left", "Right"]:
+				feet[side] = skel.get_bone_global_pose(bone[side + "Foot"])
+			var h0 := skel.get_bone_global_pose(bone["Hips"])
+			var up0 := (q * Vector3.UP).normalized()
+			var rise: float = minf(-0.03 - hang0, 0.3) / back.basis.get_scale().y
+			# (no further than the legs can follow with the feet still on the floor)
+			for side: String in ["Left", "Right"]:
+				var d: Vector3 = (feet[side] as Transform3D).origin - skel.get_bone_global_pose(bone[side + "UpLeg"]).origin
+				var leg: float = ((rest[side + "Leg"].origin - rest[side + "UpLeg"].origin).length() + (rest[side + "Foot"].origin - rest[side + "Leg"].origin).length()) * 0.985
+				var flat2: float = d.length_squared() - d.dot(up0) * d.dot(up0)
+				rise = minf(rise, maxf(0.0, sqrt(maxf(leg * leg - flat2, 0.0)) - absf(d.dot(up0))))
+			skel.set_bone_global_pose(bone["Hips"], Transform3D(h0.basis, h0.origin + up0 * rise))
+			for side: String in ["Left", "Right"]:
+				var hip: Vector3 = skel.get_bone_global_pose(bone[side + "UpLeg"]).origin
+				var knee: Vector3 = skel.get_bone_global_pose(bone[side + "Leg"]).origin
+				var f: Transform3D = feet[side]
+				var pole := knee - hip.lerp(f.origin, 0.5)
+				if pole.length() < 0.02 * (knee - hip).length():
+					pole = q * Vector3(0.15 if side == "Right" else -0.15, 0.1, -1)
+				var o := _limb(side + "UpLeg", side + "Leg", side + "Foot", f.origin, pole)
+				skel.set_bone_global_pose(bone[side + "Foot"], Transform3D(f.basis, o))
 	if whole:
 		for nm: String in _contact:
 			low = minf(low, _low(nm, back))
@@ -599,13 +631,17 @@ func _ground(back: Transform3D, q: Basis, whole: bool, settle: bool) -> void:
 		for nm2: String in ["Hips", "LeftUpLeg", "RightUpLeg"]:
 			hang = minf(hang, _low(nm2, back))
 		low = minf(low, maxf(hang, -0.03))
+		if standing_clip:
+			# the clip's own feet are not re-planted one by one: the figure stands on whichever is lower
+			for nm3: String in ["LeftFoot", "RightFoot"]:
+				low = minf(low, _low(nm3, back))
 	if low > 1e8:
 		return
 	low -= SOLE
-	if low < 0.0 or (settle and whole and low > 0.0):
+	if low < 0.0 or (settle and (whole or standing_clip) and low > 0.0):
 		var hi: int = bone["Hips"]
 		var cur := skel.get_bone_global_pose(hi)
-		var lift := -low * (clip_w if low > 0.0 else 1.0)
+		var lift := -low * (clip_w if low > 0.0 and not standing_clip else 1.0)
 		skel.set_bone_global_pose(hi, Transform3D(cur.basis, cur.origin + (q * Vector3.UP).normalized() * (lift / back.basis.get_scale().y)))
 
 # ---------------------------------------------------------------- authored clips

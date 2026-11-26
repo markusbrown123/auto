@@ -41,7 +41,7 @@ func to_impact(s: DuelSim, before: float) -> void:
 func geared(tier: int) -> Dictionary:
 	# a profile roughly as strong as a player arriving at boss `tier` would be
 	var p := Game.default_profile()
-	var weapons := ["w_rusted_sword", "w_knight_sword", "w_ashen_great", "w_headsman", "w_censer_sword", "w_crypt_great", "w_frost_great"]
+	var weapons := ["w_rusted_sword", "w_knight_sword", "w_ashen_great", "w_headsman", "w_rime_sword", "w_crypt_great", "w_frost_great"]
 	var sets := ["worn", "garrison", "black", "vigil", "vigil", "frost", "regal"]
 	p.equipped.weapon = weapons[tier]
 	p.inventory.append(weapons[tier])
@@ -617,6 +617,8 @@ func t_progression() -> void:
 	var s1 := Game.stats()
 	ok(s1.attack > base.attack, "better weapon raises attack")
 	ok(Game.upgrade("w_knight_sword") and Game.stats().attack > s1.attack, "blacksmith upgrade")
+	Game.add_material("m_iron", 4)       # the ore steps on the way to the cap ask for the weapon's material and a guardian core
+	Game.add_material("m_core", 1)
 	for i in 10:
 		Game.upgrade("w_knight_sword")
 	ok(Game.upgrade_level("w_knight_sword") == Stats.MAX_UPGRADE, "upgrade cap")
@@ -989,7 +991,7 @@ func t_inventory_settings() -> void:
 	Game.grant_item("w_dawnline")           # same rarity as the longsword: ties keep acquisition order
 	Game.profile.mastery["w_twin_fangs"] = 5
 	var weapons := ["weapon"]
-	ok(Game.sorted_items(weapons, "damage")[0] == "w_ashen_great" and Game.sorted_items(weapons, "damage")[-1] == "w_rusted_sword", "damage order")
+	ok(Game.sorted_items(weapons, "damage")[0] == "w_ashen_great" and Game.sorted_items(weapons, "damage")[-1] == "w_dawnline", "damage order")
 	var by_r: Array = Game.sorted_items(weapons, "rarity")
 	ok(by_r[0] == "w_twin_fangs" and by_r.find("w_knight_sword") < by_r.find("w_dawnline") and by_r[-1] == "w_rusted_sword", "rarity order, ties stable (%s)" % str(by_r))
 	ok(Game.sorted_items(weapons, "recent")[0] == "w_dawnline" and Game.sorted_items(weapons, "recent")[-1] == "w_rusted_sword", "newest first")

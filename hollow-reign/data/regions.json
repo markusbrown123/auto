@@ -1085,6 +1085,13 @@
        "type": "shrine",
        "label": "Steady Yourself",
        "hint": "Breathe."
+      },
+      {
+       "type": "boss",
+       "label": "The Roof of the Hall",
+       "hint": "Something vast is folded up among the rafters. It has been listening.",
+       "foe": "azhurion",
+       "optional": true
       }
      ],
      "pouches": 1

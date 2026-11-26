@@ -15583,6 +15583,665 @@
    "cls": "Wyrm"
   },
   {
+   "id": "azhurion",
+   "name": "Azhurion, the Last Wing",
+   "title": "The Oldest Thing They Built",
+   "region": "throne",
+   "boss": true,
+   "hp": 7350,
+   "armor": 0.28,
+   "posture": 190,
+   "patience": 3,
+   "adapt": 1.0,
+   "idle": [
+    0.8,
+    1.4
+   ],
+   "weak": "frost",
+   "xp": 3600,
+   "gold": 2200,
+   "loot": [
+    [
+     "w_wyrmfang",
+     1.0
+    ],
+    [
+     "w_starfall",
+     0.5
+    ]
+   ],
+   "music": "combat_b",
+   "arena": "throne",
+   "intro": "Part animal, part armour, part engine. It was the first, and nobody ever wrote down how to stop it.",
+   "rig": {
+    "kind": "dragon",
+    "scale": 2.45,
+    "size": 1.2,
+    "hide": "#2e2c30",
+    "belly": "#8a7448",
+    "eye": "#ffe9b0",
+    "glow": "#ffd27a",
+    "wings": true
+   },
+   "punish": {
+    "dir": "U",
+    "windup": 0.5,
+    "dmg": 34,
+    "swing": 0.22,
+    "guard": 44,
+    "parry": true,
+    "unblockable": false,
+    "element": null,
+    "kind": "bite",
+    "dodge": "any"
+   },
+   "phases": [
+    {
+     "at": 1.0,
+     "speed": 1.0,
+     "combos": [
+      {
+       "id": "measure_l",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "L",
+         "windup": 1.1,
+         "dmg": 32,
+         "swing": 0.3,
+         "guard": 42,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        }
+       ],
+       "recover": 1.4,
+       "tags": [
+        "basic"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "measure_r",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "R",
+         "windup": 1.1,
+         "dmg": 32,
+         "swing": 0.3,
+         "guard": 42,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "R"
+        }
+       ],
+       "recover": 1.4,
+       "tags": [
+        "basic"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "metronome",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "DL",
+         "windup": 1.0,
+         "dmg": 30,
+         "swing": 0.3,
+         "guard": 39,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        },
+        {
+         "dir": "DL",
+         "windup": 0.8,
+         "dmg": 30,
+         "swing": 0.3,
+         "guard": 39,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        },
+        {
+         "dir": "DR",
+         "windup": 0.8,
+         "dmg": 34,
+         "swing": 0.3,
+         "guard": 44,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "R"
+        }
+       ],
+       "recover": 1.8,
+       "tags": [
+        "anti_dodge"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "press",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "D",
+         "windup": 1.5,
+         "dmg": 46,
+         "swing": 0.3,
+         "guard": 60,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slam",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.7,
+       "tags": [
+        "basic"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "lance",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "L",
+         "windup": 1.5,
+         "dmg": 42,
+         "swing": 0.4,
+         "guard": 55,
+         "parry": false,
+         "unblockable": true,
+         "element": "fire",
+         "kind": "breath",
+         "dodge": "L"
+        }
+       ],
+       "recover": 1.8,
+       "tags": [
+        "anti_block",
+        "anti_parry"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "lance_r",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "R",
+         "windup": 1.5,
+         "dmg": 42,
+         "swing": 0.4,
+         "guard": 55,
+         "parry": false,
+         "unblockable": true,
+         "element": "fire",
+         "kind": "breath",
+         "dodge": "R"
+        }
+       ],
+       "recover": 1.8,
+       "tags": [
+        "anti_block",
+        "anti_parry"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "dive",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "D",
+         "windup": 1.2,
+         "dmg": 46,
+         "swing": 0.3,
+         "guard": 60,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "lunge",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.5,
+       "tags": [
+        "basic"
+       ],
+       "range": "far",
+       "retreat": false,
+       "gap": 0.15
+      }
+     ]
+    },
+    {
+     "at": 0.6,
+     "speed": 1.1,
+     "roar": "Plates along its spine lift and lock. Something inside it changes gear.",
+     "combos": [
+      {
+       "id": "metronome",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "DL",
+         "windup": 0.95,
+         "dmg": 32,
+         "swing": 0.3,
+         "guard": 42,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        },
+        {
+         "dir": "DL",
+         "windup": 0.75,
+         "dmg": 32,
+         "swing": 0.3,
+         "guard": 42,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        },
+        {
+         "dir": "DR",
+         "windup": 0.75,
+         "dmg": 36,
+         "swing": 0.3,
+         "guard": 47,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "R"
+        },
+        {
+         "dir": "U",
+         "windup": 0.8,
+         "dmg": 36,
+         "swing": 0.3,
+         "guard": 47,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "bite",
+         "dodge": "any"
+        }
+       ],
+       "recover": 2.0,
+       "tags": [
+        "anti_dodge"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "held_press",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "D",
+         "windup": 2.3,
+         "dmg": 54,
+         "swing": 0.24,
+         "guard": 70,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slam",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.8,
+       "tags": [
+        "anti_parry"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "crossfire",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "L",
+         "windup": 1.3,
+         "dmg": 44,
+         "swing": 0.4,
+         "guard": 57,
+         "parry": false,
+         "unblockable": true,
+         "element": "fire",
+         "kind": "breath",
+         "dodge": "L"
+        },
+        {
+         "dir": "R",
+         "windup": 1.0,
+         "dmg": 44,
+         "swing": 0.4,
+         "guard": 57,
+         "parry": false,
+         "unblockable": true,
+         "element": "fire",
+         "kind": "breath",
+         "dodge": "R"
+        }
+       ],
+       "recover": 2.0,
+       "tags": [
+        "anti_block",
+        "anti_parry"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "tail_gate",
+       "w": 2,
+       "attacks": [
+        {
+         "dir": "R",
+         "windup": 1.1,
+         "dmg": 32,
+         "swing": 0.3,
+         "guard": 140,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "R"
+        }
+       ],
+       "recover": 1.3,
+       "tags": [
+        "anti_block"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "dive",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "D",
+         "windup": 1.1,
+         "dmg": 48,
+         "swing": 0.3,
+         "guard": 62,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "lunge",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.4,
+       "tags": [
+        "basic"
+       ],
+       "range": "far",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "take_wing",
+       "w": 2,
+       "attacks": [
+        {
+         "dir": "U",
+         "windup": 0.9,
+         "dmg": 32,
+         "swing": 0.3,
+         "guard": 42,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "any"
+        }
+       ],
+       "recover": 0.5,
+       "tags": [
+        "basic"
+       ],
+       "range": "near",
+       "retreat": true,
+       "gap": 0.15
+      }
+     ]
+    },
+    {
+     "at": 0.25,
+     "speed": 1.18,
+     "roar": "The engine in its chest is failing. It fights like something that knows it is the last.",
+     "combos": [
+      {
+       "id": "last_measure",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "L",
+         "windup": 0.9,
+         "dmg": 34,
+         "swing": 0.3,
+         "guard": 44,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        },
+        {
+         "dir": "R",
+         "windup": 0.7,
+         "dmg": 34,
+         "swing": 0.3,
+         "guard": 44,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "R"
+        },
+        {
+         "dir": "DL",
+         "windup": 0.7,
+         "dmg": 36,
+         "swing": 0.3,
+         "guard": 47,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        },
+        {
+         "dir": "D",
+         "windup": 0.9,
+         "dmg": 50,
+         "swing": 0.3,
+         "guard": 65,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slam",
+         "dodge": "any"
+        }
+       ],
+       "recover": 2.3,
+       "tags": [
+        "anti_dodge"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "held_press",
+       "w": 2,
+       "attacks": [
+        {
+         "dir": "D",
+         "windup": 2.1,
+         "dmg": 58,
+         "swing": 0.24,
+         "guard": 75,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slam",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.8,
+       "tags": [
+        "anti_parry"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "crossfire",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "L",
+         "windup": 1.2,
+         "dmg": 46,
+         "swing": 0.4,
+         "guard": 60,
+         "parry": false,
+         "unblockable": true,
+         "element": "fire",
+         "kind": "breath",
+         "dodge": "L"
+        },
+        {
+         "dir": "R",
+         "windup": 0.95,
+         "dmg": 46,
+         "swing": 0.4,
+         "guard": 60,
+         "parry": false,
+         "unblockable": true,
+         "element": "fire",
+         "kind": "breath",
+         "dodge": "R"
+        }
+       ],
+       "recover": 1.9,
+       "tags": [
+        "anti_block",
+        "anti_parry"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "dive",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "D",
+         "windup": 1.0,
+         "dmg": 50,
+         "swing": 0.3,
+         "guard": 65,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "lunge",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.4,
+       "tags": [
+        "basic"
+       ],
+       "range": "far",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "snap",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "U",
+         "windup": 0.85,
+         "dmg": 38,
+         "swing": 0.3,
+         "guard": 49,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "bite",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.2,
+       "tags": [
+        "basic"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      }
+     ]
+    }
+   ],
+   "traits": {
+    "parry_open": 0.85,
+    "frenzy": 0.18
+   },
+   "footwork": {
+    "circle": 0.08,
+    "keep": 0.7
+   },
+   "cls": "Wyrm"
+  },
+  {
    "id": "devourer",
    "name": "The Devourer of Names",
    "title": "What the Crown Discarded",

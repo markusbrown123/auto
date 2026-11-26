@@ -462,6 +462,39 @@ B.append(dict(id="rimewyrm", name="Skeldra, the White Ruin", title="What the Kin
    C("chain_lash",2,[A("R",1.1,30,guard=130,kind="sweep")],1.3,tags=("anti_block",)),
   ])]))
 # ---------------------------------------------------------------- The Devourer of Names
+# ---------------------------------------------------------------- Azhurion, the third dragon (optional, above the throne hall)
+B.append(dict(id="azhurion", name="Azhurion, the Last Wing", title="The Oldest Thing They Built", region="throne", boss=True,
+ hp=2100, armor=0.28, posture=190, patience=3, adapt=1.0, idle=[0.8,1.4], weak="frost", xp=3600, gold=2200,
+ loot=[["w_wyrmfang",1.0],["w_starfall",0.5]], music="combat_b", arena="throne",
+ intro="Part animal, part armour, part engine. It was the first, and nobody ever wrote down how to stop it.",
+ rig=dict(kind="dragon",scale=2.45,size=1.2,hide="#2e2c30",belly="#8a7448",eye="#ffe9b0",glow="#ffd27a",wings=True),
+ punish=A("U",0.5,34,swing=0.22,kind="bite"),
+ phases=[
+  # an engine's manners: exact, evenly spaced, the same angle twice so the third can be different
+  dict(at=1.0, speed=1.0, combos=[
+   C("measure_l",3,[A("L",1.1,32,kind="sweep")],1.4),
+   C("measure_r",3,[A("R",1.1,32,kind="sweep")],1.4),
+   C("metronome",3,[A("DL",1.0,30,kind="sweep"),A("DL",0.8,30,kind="sweep"),A("DR",0.8,34,kind="sweep")],1.8,tags=("anti_dodge",)),
+   C("press",3,[A("D",1.5,46,kind="slam")],1.7),
+   C("lance",3,[breath("L",1.5,42,el="fire")],1.8,tags=("anti_block","anti_parry")),
+   C("lance_r",3,[breath("R",1.5,42,el="fire")],1.8,tags=("anti_block","anti_parry")),
+   C("dive",3,[A("D",1.2,46,kind="lunge")],1.5,range="far"),
+  ]),
+  dict(at=0.6, speed=1.1, roar="Plates along its spine lift and lock. Something inside it changes gear.", combos=[
+   C("metronome",3,[A("DL",0.95,32,kind="sweep"),A("DL",0.75,32,kind="sweep"),A("DR",0.75,36,kind="sweep"),A("U",0.8,36,kind="bite")],2.0,tags=("anti_dodge",)),
+   C("held_press",3,[A("D",2.3,54,swing=0.24,kind="slam")],1.8,tags=("anti_parry",)),
+   C("crossfire",3,[breath("L",1.3,44,el="fire",dodge="L"),breath("R",1.0,44,el="fire",dodge="R")],2.0,tags=("anti_block","anti_parry")),
+   C("tail_gate",2,[A("R",1.1,32,guard=140,kind="sweep")],1.3,tags=("anti_block",)),
+   C("dive",3,[A("D",1.1,48,kind="lunge")],1.4,range="far"),
+   C("take_wing",2,[A("U",0.9,32,kind="sweep")],0.5,retreat=True),
+  ]),
+  dict(at=0.25, speed=1.18, roar="The engine in its chest is failing. It fights like something that knows it is the last.", combos=[
+   C("last_measure",3,[A("L",0.9,34,kind="sweep"),A("R",0.7,34,kind="sweep"),A("DL",0.7,36,kind="sweep"),A("D",0.9,50,kind="slam")],2.3,tags=("anti_dodge",)),
+   C("held_press",2,[A("D",2.1,58,swing=0.24,kind="slam")],1.8,tags=("anti_parry",)),
+   C("crossfire",3,[breath("L",1.2,46,el="fire",dodge="L"),breath("R",0.95,46,el="fire",dodge="R")],1.9,tags=("anti_block","anti_parry")),
+   C("dive",3,[A("D",1.0,50,kind="lunge")],1.4,range="far"),
+   C("snap",3,[A("U",0.85,38,kind="bite")],1.2),
+  ])]))
 B.append(dict(id="devourer", name="The Devourer of Names", title="What the Crown Discarded", region="deep", boss=True,
  hp=1500, armor=0.1, posture=140, patience=2, adapt=1.3, idle=[0.6,1.2], weak=None, xp=3600, gold=2200,
  loot=[["w_hunger",1.0],["x_name",1.0],["a_hollow_chest",0.6]], music="final", arena="deep",
@@ -509,7 +542,8 @@ TRAITS = {
  "frostbound_king": {"block_tax": 1.4, "dodge_open": 1.3},      # punishes standing still, rewards movement
  "pale_huntsman": {"dodge_open": 0.7, "frenzy": 0.15},
  "forgotten_monarch": {"marks": 4, "mark_mult": 1.5, "parry_open": 1.15},
- "devourer": {"lifesteal": 0.25, "frenzy": 0.2},                # it feeds on what it takes
+ "devourer": {"lifesteal": 0.25, "frenzy": 0.2},
+ "azhurion": {"parry_open": 0.85, "frenzy": 0.18},               # armoured: a parry buys less; it speeds up as the engine fails                # it feeds on what it takes
 }
 for f in B:
     if f["id"] in TRAITS:

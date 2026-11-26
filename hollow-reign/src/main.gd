@@ -444,6 +444,11 @@ func _dev_boot() -> void:
 				Game.profile.defeated["devourer"] = 1
 				Game.profile.cleared.append("roost")
 			_ending()
+		"partsbench":
+			# dev: modular armour viewer and seam measurements (src/dev/parts_bench.gd)
+			var pb := PartsBench.new()
+			pb.args = _args
+			_swap(pb, 0.0)
 		"title": show_title()
 		"sanctuary":
 			show_sanctuary()

@@ -1,0 +1,177 @@
+{
+ "wayfarer": {
+  "class": "sword",
+  "name": "Wayfarer",
+  "blade": 0.8,
+  "tip": 0.8660000000000001,
+  "pommel": 0.107,
+  "grip_clear": 0.106,
+  "guard_span": 0.196,
+  "hands": 1,
+  "lo": [
+   -0.0996,
+   -0.107,
+   -0.0133
+  ],
+  "hi": [
+   0.0996,
+   0.866,
+   0.0133
+  ],
+  "materials": [
+   "steel",
+   "fuller",
+   "edge",
+   "grip"
+  ],
+  "tris": 1744,
+  "verts": 1866,
+  "bytes": 74660,
+  "tris_lod": 572,
+  "verts_lod": 702,
+  "bytes_lod": 30364
+ },
+ "oathbreaker": {
+  "class": "greatsword",
+  "name": "Oathbreaker",
+  "blade": 1.21,
+  "tip": 1.286,
+  "pommel": 0.324,
+  "grip_clear": 0.302,
+  "guard_span": 0.316,
+  "hands": 2,
+  "off_hand": -0.165,
+  "lo": [
+   -0.1601,
+   -0.324,
+   -0.0217
+  ],
+  "hi": [
+   0.1601,
+   1.286,
+   0.0217
+  ],
+  "materials": [
+   "steel",
+   "fuller",
+   "edge",
+   "grip"
+  ],
+  "tris": 1716,
+  "verts": 1860,
+  "bytes": 74300,
+  "tris_lod": 768,
+  "verts_lod": 997,
+  "bytes_lod": 40984
+ },
+ "eternal_edge": {
+  "class": "sword",
+  "name": "Eternal Edge",
+  "blade": 0.865,
+  "tip": 0.931,
+  "pommel": 0.158,
+  "grip_clear": 0.162,
+  "guard_span": 0.164,
+  "hands": 1.5,
+  "emissive": true,
+  "lo": [
+   -0.0835,
+   -0.158,
+   -0.0153
+  ],
+  "hi": [
+   0.0835,
+   0.931,
+   0.0153
+  ],
+  "materials": [
+   "steel",
+   "edge",
+   "graphite",
+   "gold",
+   "grip",
+   "glow"
+  ],
+  "tris": 1932,
+  "verts": 2284,
+  "bytes": 91344,
+  "tris_lod": 864,
+  "verts_lod": 1185,
+  "bytes_lod": 49756
+ },
+ "shield_heater": {
+  "class": "shield",
+  "name": "Heater",
+  "width": 0.49,
+  "height": 0.6719999999999999,
+  "board_centre": [
+   -0.105,
+   -0.12499999999999999,
+   -0.058
+  ],
+  "strap_x": -0.205,
+  "thickness": 0.008,
+  "lo": [
+   -0.35,
+   -0.455,
+   -0.0639
+  ],
+  "hi": [
+   0.14,
+   0.217,
+   0.0381
+  ],
+  "materials": [
+   "steel",
+   "enamel",
+   "gold",
+   "grip",
+   "leather"
+  ],
+  "tris": 3524,
+  "verts": 3471,
+  "bytes": 138032,
+  "tris_lod": 1100,
+  "verts_lod": 1373,
+  "bytes_lod": 56324
+ },
+ "shield_round": {
+  "class": "shield",
+  "name": "Round",
+  "width": 0.51,
+  "height": 0.51,
+  "board_centre": [
+   -0.098,
+   0.0,
+   -0.06
+  ],
+  "strap_x": -0.2,
+  "thickness": 0.009,
+  "emissive": true,
+  "lo": [
+   -0.353,
+   -0.255,
+   -0.0685
+  ],
+  "hi": [
+   0.157,
+   0.255,
+   0.034
+  ],
+  "materials": [
+   "steel",
+   "graphite",
+   "enamel",
+   "gold",
+   "grip",
+   "leather",
+   "glow"
+  ],
+  "tris": 3932,
+  "verts": 4353,
+  "bytes": 170720,
+  "tris_lod": 1252,
+  "verts_lod": 1593,
+  "bytes_lod": 65300
+ }
+}

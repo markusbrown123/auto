@@ -15,6 +15,12 @@ var _clock := 0.0
 var props: Node3D
 var knight_yaw := PI * 0.92       # kept across rebuilds; the equipment screen turns it by drag
 var forge: Node3D                 # Orren's anvil, built the first time the forge is used
+var rig_script: Script            # a FighterRig subclass to build the knight from (the armoury's), or null
+var look_now := {}                # the look the knight was last dressed from
+var cam_speed := 1.6              # how quickly the camera glides to where it is sent
+var cam_drift := 1.0              # how much of the idle drift is applied (close framings want less)
+var cam_fov := 50.0
+var _studio: Node3D
 
 func build(theme: String, with_knight: bool = true) -> void:
 	arena = Arena.new()
@@ -39,13 +45,8 @@ func build(theme: String, with_knight: bool = true) -> void:
 	if with_knight:
 		refresh_knight()
 
-## Rebuilds the knight from what is equipped. `preview` is a profile to dress it from instead
-## (the equipment screen's "what if"), and `tint` overrides the plate colour for that preview.
-func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
-	if rig:
-		rig.queue_free()
-	rig = FighterRig.new()
-	add_child(rig)
+## The look dictionary for what is equipped, or for `preview` (a what-if profile) when one is given.
+func knight_look(preview: Dictionary = {}, tint: String = "") -> Dictionary:
 	var look := {"metal": "#4a4038", "cloth": "#3d0f0f", "cape": true, "weapon": "sword", "helm": "kettle", "eye": "#000000", "shield": {"color": "#4a3a2a"}}
 	if not Game.profile.is_empty():
 		var real: Dictionary = Game.profile
@@ -56,6 +57,17 @@ func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
 		if tint != "" and look.has("skin_tint"):      # a suit with its own model keeps its own colours
 			look["metal"] = tint
 			look["skin_tint"] = tint
+	return look
+
+## Rebuilds the knight from what is equipped. `preview` is a profile to dress it from instead
+## (the equipment screen's "what if"), and `tint` overrides the plate colour for that preview.
+func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
+	if rig:
+		rig.queue_free()
+	rig = rig_script.new() if rig_script else FighterRig.new()
+	add_child(rig)
+	var look := knight_look(preview, tint)
+	look_now = look
 	rig.build(look, false)
 	rig.rotation.y = knight_yaw
 	if rig.skin and look.has("skin_tint"):
@@ -67,6 +79,71 @@ func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
 				var mat = mi.get_surface_override_material(surf)
 				if mat is BaseMaterial3D:
 					mat.albedo_color = plate
+
+## Dresses the knight from what is equipped (or from `preview`) changing as little as possible: only the hand-held
+## pieces are swapped when the body is the same, so the knight keeps its pose. Returns what changed:
+## "" nothing, "weapon", "shield", "hands" (both) or "body" (the whole knight was rebuilt).
+func dress_knight(preview: Dictionary = {}) -> String:
+	var look := knight_look(preview)
+	if rig == null or look_now.is_empty():
+		refresh_knight(preview)
+		return "body"
+	var hand_keys := ["weapon", "weapon_model", "weapon_tint", "blade", "glow", "curved", "shield"]
+	var a: Dictionary = look.duplicate()
+	var b: Dictionary = look_now.duplicate()
+	for k: String in hand_keys:
+		a.erase(k)
+		b.erase(k)
+	if a != b:
+		refresh_knight(preview)
+		return "body"
+	var weapon_changed := false
+	for k: String in hand_keys:
+		if k != "shield" and look.get(k) != look_now.get(k):
+			weapon_changed = true
+	var shield_changed: bool = look.get("shield") != look_now.get("shield")
+	look_now = look
+	rig.cfg = look
+	if weapon_changed:
+		rig.set_weapon(str(look.weapon), look)
+	if weapon_changed or shield_changed:
+		rig.set_shield(look.get("shield"))
+	return "hands" if weapon_changed and shield_changed else ("weapon" if weapon_changed else ("shield" if shield_changed else ""))
+
+## A key and a rim light on the knight for the armoury, in front of the place's own lighting.
+## `from_x` is the side of the knight the camera stands on; the rim is left out on the lowest preset.
+func studio(on: bool, from_x: float = -1.0, rim: bool = true) -> void:
+	if _studio:
+		_studio.queue_free()
+		_studio = null
+	if not on:
+		return
+	_studio = Node3D.new()
+	add_child(_studio)
+	var k := SpotLight3D.new()
+	k.light_color = Color("#ffe6c4")
+	k.light_energy = 9.0
+	k.spot_range = 9.0
+	k.spot_angle = 30.0
+	k.spot_attenuation = 0.6
+	k.shadow_enabled = true
+	_studio.add_child(k)
+	k.look_at_from_position(Vector3(from_x * 2.3 - 0.6, 3.0, 3.4), Vector3(0, 1.05, 0))
+	var fill := OmniLight3D.new()
+	fill.light_color = Color("#8ea0b8")
+	fill.light_energy = 0.55
+	fill.omni_range = 5.0
+	fill.position = Vector3(1.8, 0.9, 2.6)
+	_studio.add_child(fill)
+	if rim:
+		var r := SpotLight3D.new()
+		r.light_color = Color("#a9c4ee")
+		r.light_energy = 14.0
+		r.spot_range = 8.0
+		r.spot_angle = 34.0
+		r.spot_attenuation = 0.5
+		_studio.add_child(r)
+		r.look_at_from_position(Vector3(1.9, 2.5, -2.6), Vector3(0, 1.25, 0))
 
 func turn_knight(by: float) -> void:
 	knight_yaw = wrapf(knight_yaw + by, -PI, PI)
@@ -105,6 +182,8 @@ func move_camera(pos: Vector3, look: Vector3, snap: bool = false) -> void:
 	if snap:
 		_pos = pos
 		_look = look
+		if cam:
+			cam.fov = cam_fov
 
 func clear_props() -> void:
 	for c in props.get_children():
@@ -195,10 +274,11 @@ func _box(parent: Node3D, size: Vector3, pos: Vector3, mat: Material) -> void:
 
 func _process(delta: float) -> void:
 	_clock += delta
-	var k := 1.0 - exp(-delta * 1.6)
+	var k := 1.0 - exp(-delta * cam_speed)
 	_pos = _pos.lerp(cam_pos, k)
 	_look = _look.lerp(cam_look, k)
-	var drift := Vector3(sin(_clock * 0.23) * 0.12, sin(_clock * 0.31) * 0.05, cos(_clock * 0.19) * 0.1)
+	cam.fov = lerpf(cam.fov, cam_fov, k)
+	var drift := Vector3(sin(_clock * 0.23) * 0.12, sin(_clock * 0.31) * 0.05, cos(_clock * 0.19) * 0.1) * cam_drift
 	if Game.settings.reduce_motion:
 		drift = Vector3.ZERO
 	cam.position = _pos + drift

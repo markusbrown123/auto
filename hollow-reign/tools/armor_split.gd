@@ -57,13 +57,19 @@ func _init() -> void:
 	var tag := str(args.get("tag", ""))
 	for body: String in ["m", "f"]:
 		var host := _read(body, "base")
+		var hull := {}
 		for suit: String in SUITS:
 			var id := "%s_%s" % [body, suit]
-			if not only.is_empty() and not only.has(id):
+			var wanted := only.is_empty() or only.has(id)
+			if not wanted and (tag != "" or args.has("nohull")):
 				continue
 			var t0 := Time.get_ticks_msec()
 			var src := host if suit == "base" else _read(body, suit)
 			var m := _conform(src, host)
+			if tag == "" and not args.has("nohull"):
+				_hull_add(hull, m, host)
+			if not wanted:
+				continue
 			var moved := 0
 			if spike.has("all") or spike.has(id) or spike.has(suit):
 				moved = _despike(m, host, float(args.get("spike_k", "1.0")))
@@ -75,13 +81,6 @@ func _init() -> void:
 				line += "%s %d  " % [SLOTS[r], part.idx.size() / 3]
 				_save(part, "%s%s%s_%s.res" % [out_dir, id, tag, SLOTS[r]], id)
 			if suit == "base" and tag == "":
-				# the undersuit: the base body from the neck down
-				var f := PackedFloat32Array()
-				f.resize(m.pos.size())
-				for v in m.pos.size():
-					f[v] = -(m.rw[v * 6] - maxf(m.rw[v * 6 + 1], m.rw[v * 6 + 2]))
-				_save(_clip(m, f, -0.35, PackedInt32Array()), "%s%s_under.res" % [out_dir, body], id)
-			if suit == "base" and tag == "":
 				# the Skin every part is bound with: the base skeleton's own rest pose, bone by name
 				var sk := Skin.new()
 				for i in (host.names as Array).size():
@@ -90,6 +89,17 @@ func _init() -> void:
 			if tag == "":
 				_save_material(src, "%s%s_mat.res" % [out_dir, id])
 			print("%s%s: %d tris in -> parts %d tris (%s) despiked verts=%d  %d ms" % [id, tag, m.idx.size() / 3, total, line, moved, Time.get_ticks_msec() - t0])
+		if tag == "" and not args.has("nohull"):
+			# the undersuit: the base body without head and hands, drawn in to lie inside every suit
+			var u := _conform(host, host)
+			var inside := _hull_apply(hull, u, host)
+			var f := PackedFloat32Array()
+			f.resize(u.pos.size())
+			for v in u.pos.size():
+				f[v] = -u.ex[v]
+			var under := _clip(u, f, -0.5, PackedInt32Array())
+			_save(under, "%s%s_under.res" % [out_dir, body], body + "_under")
+			print("%s_under: %d tris, %d of %d vertices drawn in" % [body, under.idx.size() / 3, inside, u.pos.size()])
 	quit()
 
 # ---------------------------------------------------------------- reading
@@ -175,7 +185,11 @@ func _conform(s: Dictionary, h: Dictionary) -> Dictionary:
 		remap.append((h.names as Array).find(b))
 	var n: int = (s.pos as PackedVector3Array).size()
 	var o := {"pos": PackedVector3Array(), "nrm": PackedVector3Array(), "tan": PackedFloat32Array(), "uv": s.uv, "bones": PackedInt32Array(),
-		"weights": s.weights, "idx": s.idx, "rw": PackedFloat32Array(), "top": PackedInt32Array()}
+		"weights": s.weights, "idx": s.idx, "rw": PackedFloat32Array(), "top": PackedInt32Array(), "ex": PackedFloat32Array()}
+	o.ex.resize(n)
+	var excl := PackedInt32Array()
+	for b2: String in s.names:
+		excl.append(1 if (driver(b2) in ["Head", "LeftHand", "RightHand"]) else 0)
 	o.pos.resize(n); o.nrm.resize(n); o.tan.resize(n * 4); o.bones.resize(n * 4); o.rw.resize(n * 6); o.top.resize(n)
 	var sp: PackedVector3Array = s.pos
 	var sn: PackedVector3Array = s.nrm
@@ -198,6 +212,7 @@ func _conform(s: Dictionary, h: Dictionary) -> Dictionary:
 			nn += (rots[bi] as Basis) * sn[v] * w
 			tt += (rots[bi] as Basis) * t0 * w
 			o.rw[v * 6 + reg[bi]] += w
+			o.ex[v] += w * excl[bi]
 			if w > sw[v * 4 + best]:
 				best = j
 		o.pos[v] = p
@@ -206,6 +221,68 @@ func _conform(s: Dictionary, h: Dictionary) -> Dictionary:
 		o.tan[v * 4] = tt.x; o.tan[v * 4 + 1] = tt.y; o.tan[v * 4 + 2] = tt.z; o.tan[v * 4 + 3] = stn[v * 4 + 3]
 		o.top[v] = remap[sb[v * 4 + best]]
 	return o
+
+# ---------------------------------------------------------------- inner hull (undersuit)
+const HULL_BIN := 0.0125
+const HULL_SECTORS := 12
+
+## The cell a vertex lies in: its bone, how far along the bone, and which way round it. Returns [key, radius, foot point, radial unit].
+func _cell(m: Dictionary, h: Dictionary, v: int) -> Array:
+	var names: Array = h.names
+	var b: String = driver(names[m.top[v]])
+	var j: Vector3 = (h.rest[b] as Transform3D).origin
+	var axis := Vector3.UP
+	if CHILD.has(b):
+		axis = ((h.rest[CHILD[b]] as Transform3D).origin - j).normalized()
+	elif b.ends_with("Foot"):
+		var toe: Vector3 = (h.rest[b.replace("Foot", "ToeBase")] as Transform3D).origin - j
+		axis = Vector3(toe.x, 0, toe.z).normalized()
+	var e1 := axis.cross(Vector3.RIGHT if absf(axis.x) < 0.9 else Vector3.UP).normalized()
+	var e2 := axis.cross(e1)
+	var d: Vector3 = (m.pos[v] as Vector3) - j
+	var along := d.dot(axis)
+	var radial := d - axis * along
+	var sector := int(floor((atan2(radial.dot(e2), radial.dot(e1)) + PI) / TAU * HULL_SECTORS)) % HULL_SECTORS
+	return [Vector3i((names as Array).find(b), int(floor(along / HULL_BIN)), sector), radial.length(), j + axis * along, radial.normalized()]
+
+func _hull_add(hull: Dictionary, m: Dictionary, h: Dictionary) -> void:
+	var cells := {}
+	for v in (m.pos as PackedVector3Array).size():
+		var c := _cell(m, h, v)
+		if not cells.has(c[0]):
+			cells[c[0]] = []
+		(cells[c[0]] as Array).append(c[1])
+	for key: Vector3i in cells:
+		var rs: Array = cells[key]
+		if rs.size() < 3:
+			continue
+		rs.sort()
+		var r: float = rs[int(rs.size() * 0.35)]
+		hull[key] = minf(float(hull.get(key, 1e9)), r)
+
+func _hull_apply(hull: Dictionary, m: Dictionary, h: Dictionary) -> int:
+	var moved := 0
+	for v in (m.pos as PackedVector3Array).size():
+		var c := _cell(m, h, v)
+		var key: Vector3i = c[0]
+		# the limit here and in the cells round it, so the surface does not step from cell to cell
+		var lim := 0.0
+		var cnt := 0.0
+		for da: int in [-1, 0, 1]:
+			for ds: int in [-1, 0, 1]:
+				var k2 := Vector3i(key.x, key.y + da, (key.z + ds + HULL_SECTORS) % HULL_SECTORS)
+				if hull.has(k2):
+					var w := 2.0 if (da == 0 and ds == 0) else 1.0
+					lim += float(hull[k2]) * w
+					cnt += w
+		if cnt == 0.0:
+			continue
+		lim = lim / cnt * 0.9
+		if float(c[1]) > lim:
+			m.pos[v] = (c[2] as Vector3) + (c[3] as Vector3) * lim
+			moved += 1
+	_renormal(m)
+	return moved
 
 # ---------------------------------------------------------------- de-spike
 ## Pulls thin protrusions back toward the limb they stand on. For every bone the distance of its vertices from the

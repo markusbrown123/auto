@@ -39,27 +39,59 @@ Gaps and oddities in the file list
 
 ---
 
-## 1. The opening
+## 1. The opening: Generation I, the years, and the heir's arrival
 
-Status: **EXISTS (live)** since the flow pass of 2026-11-26, in three scenes staged in real time: `src/cine/opening.gd`, `src/cine/awakening.gd`, `src/cine/approach.gd`. Step-by-step flow, lengths and joins are in `docs/FLOW.md`. The earlier version (a black screen with narration, then a camera move in the Sanctuary set) is gone, and so is the Sanctuary as the first place a new knight sees.
+Status: **EXISTS (live)** since 2026-11-26, staged in real time: `src/cine/prologue.gd` (Generation I), `src/cine/time_jump.gd`, `src/cine/arrival.gd`, then the existing `awakening.gd` and `approach.gd`. Flow, lengths and hooks are in `docs/FLOW.md`; the story is in `CAMPAIGN_SCRIPT.md`, "The Inherited Oath". The set is new: the high road (`src/world/highland.gd`), an `Arena` theme.
 
-Stills of every shot were looked at during the pass (`marketing/flow_pass/`). Nobody has listened to it: timing against the recorded lines is by the line on screen, not by ear.
+Stills of the road shots, the three generations of the vista, the throne exchange and the time jump were looked at (`marketing/prologue_pass/`). No full recording exists: the software renderer on the build machine ran this set at well under one frame a second while other work shared it. Nobody has listened to any of it.
 
-### 1a. The fall (`opening.gd`, about 39 s, skippable after 2 s, first new journey only)
+### 1.0 The high road: one set, three generations
+A headland of grass and heather above the sea; a worn road that climbs it in switchbacks; waystones in pairs, a ruined arch at the head of the climb, a king's fallen head where the road tops the rise, a dead tree in the saddle, old banners on the last stretch; and at the top **the Ring-Gate**, the outer gate of Vaelora: forty stones in a ring a hundred metres high with the gatehouse between its feet and the citadel's two stepped spires seen through it. It is this game's landmark and is the same from every distance.
 
-Built in one set, the `throne` arena, relit. The planned shot list (a walled city, a crowd at a gate, a time-lapse) needed sets that do not exist; this tells the same six lines in the hall where the story ends, without naming it.
+| Generation | Light and air | The ring | The road | Kept things |
+|---|---|---|---|---|
+| I | summer dawn, low sun beside the ring, warm haze, moving cloud | whole; the seam in its inner face barely lit | worn clear | fires lit at the gate, banners up |
+| II | autumn dusk under heavy cloud, hard wind, the turf gone bronze | an arc gone from the upper right; its stones lie on the slope east of the court | half taken back by turf | fires dead, banners gone |
+| III | winter, still, snow lying and falling | as II; the seam alight all the way round | under snow | none |
 
+**The vista** (`HighRoad.vista()`): camera 34 m behind and 4 m above a figure on the lower road, 27-degree lens, the road leading from the bottom left through the figure to the switchbacks and the ring in the right third, the sun right of the ring, the sea haze beyond. Used for Generation I's first shot, both ends of the time jump, the arrival, and (behind a flag) the main menu.
+
+### 1a. Generation I (`prologue.gd`)
 | # | Line | Framing | Camera | Action | Status |
 |---|---|---|---|---|---|
-| 1 | `opening_01` | ELS, the hall at its height from the doors: banners, fires, the seat at the far end | Slow push in and down | — | EXISTS (live) |
-| 2 | `opening_02` | Low angle from the aisle floor up at the seat | Creep forward, tilt up | — | EXISTS (live) |
-| 3 | `opening_03` | MS, a line of armoured figures (guardian models, standing), dark against firelight | Lateral track, 10.5 s | They do not move. | EXISTS (live) |
-| 4 | `opening_04` | LS down the aisle from the doors | Handheld drift forward | A red light grows from behind the camera and flickers; the hall reddens. | EXISTS (live) |
-| 5 | `opening_05` | The shot-1 view, cold, fogged, fires dead, the figures fallen | Dip through black, then pull back | — | EXISTS (live) |
-| 6 | `opening_05` (second half) | CU from floor height on one fallen figure | Slow drift | — | EXISTS (live) |
-| 7 | `opening_06` | Floor level down the dark aisle | Creep forward, tilt up | Lamps set in the floor come on in sequence toward the seat; the seat lights, teal. Hold, cut to black. | EXISTS (live) |
+| R1 | card "VAELORA · THE FIRST OATH"; `opening_01` | ELS, the vista, Generation I | slow push, 14 s | the forebear stands, then sets off | EXISTS (live) |
+| R2 | `opening_02`, `_03` | MS profile, from 0.6 m, through the grass | rides beside the walker | sea and light beyond | EXISTS (live) |
+| R3 | `opening_04` | ELS from the west flank: the road folding up the slope, the ring above, the sun between its feet | slow drift | the walker small on the second leg | EXISTS (live) |
+| R4 | `opening_05` | OTS, low, behind the right shoulder | rides with the walker | topping the rise: the fallen crowned head on the left, the ring's foot and the spires come up out of the ground | EXISTS (live) |
+| R5 | `opening_06` | LS from the ground beside the dead tree, the ring filling the sky | creep | the walker passes behind the trunk | EXISTS (live) |
+| R6 | `gen1_open` | LS, high, down the last of the road into the court | crane down, 12 s | the walker crosses the court to the gate | EXISTS (live) |
+| T1 | — | LS down the throne hall from the doors, behind the forebear | follows in, 8.6 s | the walk up the aisle; the Monarch before the throne, a guard at the wall | EXISTS (live) |
+| T2 | `gen1_throne` 1, 3 | MCU on the forebear from the Monarch's side | slow drift | — | EXISTS (live) |
+| T3 | `gen1_throne` 2, 4 | low angle up at the Monarch, banners behind | slow drift | — | EXISTS (live) |
+| T4 | `gen1_guard` | from the floor past the forebear's feet | pans with the guard | the Throne Guard leaves the wall, walks to the aisle, turns to face. Fade. | EXISTS (live) |
+| D1 | — | the duel's own camera | `CamDirector` | **the guardian duel** | EXISTS (live) |
+| T5 | `gen1_records` 1 | MS toward the seal in the wall | push | the forebear goes for the seal | EXISTS (live) |
+| T6 | `gen1_records` 2 | low angle | pans | the Monarch comes down | EXISTS (live) |
+| D2 | — | the duel's own camera | `CamDirector` | **the clash**; taken on a landed cut | EXISTS (live) |
+| F1 | — | MS by the block in the Engine's room | ease in | the door comes down; the forebear reaches the block; the sword goes in; light | EXISTS (live) |
+| F2 | `gen1_seal` 1, 2 | LS across the cradle to the door | slow drift | the Monarch in the doorway; the forebear goes down at the foot of the cradle | EXISTS (live) |
+| F3 | `gen1_seal` 3 | MCU, low: **the frame the Awakening opens on** | slow drift back | the one light goes out | EXISTS (live) |
+| F4 | `gen1_close_*` | black; the mark | — | — | EXISTS (live) |
 
-Not built from the earlier plan: the city exterior (O2), the crowd itself (O4, now only its light), the passing seasons (O5). Music: `theme` in from the first frame, out on the cut to black. The "single tone" on shot 7 is a pitched-down stock chime, a placeholder.
+Not built: the Monarch seated (the rig has no seated pose: he stands before the throne); a visible seal coming down across the hall at the moment the clash is taken (it is a sound, a held frame and a fade); the sword visibly leaving the hand (it is in the hand, then in the block).
+
+### 1a-2. The years (`time_jump.gd`) and the arrival (`arrival.gd`)
+| # | Line | Framing | Action | Status |
+|---|---|---|---|---|
+| J1 | card "TWENTY-TWO YEARS" | the vista, Generation I, nobody on the road | holds | EXISTS (live) |
+| J2 | — | white | the weather closes; the set changes in place | EXISTS (live) |
+| J3 | — | the vista, Generation II | holds, then black | EXISTS (live) |
+| A1 | `gen2_arrive_*` | the vista, Generation II, the player's knight | stands; speaks; sets off | EXISTS (live) |
+| A2 | the game's name | the same shot | the name over the road, 3.6 s | EXISTS (live) |
+| A3–A6 | — | R3, R4, R5, R6 again, in Generation II's state | the same walk, twenty-two years on | EXISTS (live) |
+
+### 1b-0. The retired hall opening (`opening.gd`)
+The seven-shot throne-hall opening is no longer played. Its six narrator lines are R1 to R5 above; its hall is T1 to T6. `--screen=opening` still shows it.
 
 ### 1b. The chamber (`awakening.gd`, about 36 s plus one tap)
 
@@ -76,9 +108,9 @@ New set: the `chamber` arena theme (`_layout_chamber` in `src/world/arena.gd`). 
 | A7 | — | MS by the block | Ease in | On the tap the knight walks to the block and takes sword and shield. | EXISTS (live) |
 | A8 | `first_road` | From behind the knight | Rides with the knight | The door slides up, daylight; the knight walks out; white. | EXISTS (live) |
 
-### 1c. The walk out (`approach.gd`, about 6 s)
+### 1c. The walk out (`approach.gd`, about 9 s)
 
-From white, behind the walking knight at the same offset as A8, across the first stretch of the Fallen Courtyard to the first stop, where the road screen takes over the same place with no cut. EXISTS (live). The planned stair up to daylight (O9) is the doorway and a short passage.
+From white, behind the walking knight at the same offset as A8, across the first stretch of the Fallen Courtyard to the first stop (mid-walk the camera lifts and widens to show the ward, then comes down again), where the road screen takes over the same place with no cut. EXISTS (live). The planned stair up to daylight (O9) is the doorway and a short passage.
 
 ---
 

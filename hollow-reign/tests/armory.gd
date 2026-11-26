@@ -89,8 +89,11 @@ func _ready() -> void:
 	ok(seen == expect, "every item of this journey was brought to the middle and previewed (%d of %d)" % [seen, expect])
 	ok(locked > 10, "items not yet held are shown locked (%d)" % locked)
 	ok(visible_change.has("weapon") and visible_change.has("shield") and visible_change.has("chest"), "weapon, shield and chest previews change the knight (%s)" % str(visible_change.keys()))
-	ok(not visible_change.has("helm") and not visible_change.has("gauntlets") and not visible_change.has("legs") and not visible_change.has("ring") and not visible_change.has("relic"),
-		"helm, gauntlets, greaves, ring and relic previews change nothing that is seen (and the screen says so)")
+	ok(visible_change.has("helm") and visible_change.has("gauntlets") and visible_change.has("legs"),
+		"helm, gauntlet and greave previews really change the knight: each is its own piece (%s)" % str(visible_change.keys()))
+	ok(not visible_change.has("ring") and not visible_change.has("relic"), "ring and relic previews change nothing that is seen (and the screen says so)")
+	ok(ArmoryScreen.part_note(Db.item("a_frost_helm")).begins_with("Worn as its own piece") and ArmoryScreen.part_note(Db.item("a_vigil_helm")).contains("pauldrons")
+		and ArmoryScreen.part_note(Db.item("a_garrison_shoulders")).contains("cuirass"), "the notes say what each piece changes, and which two are linked")
 	# --- a finger: drag follows 1:1, the flick carries on, the row rests on an item
 	a._enter_slot("weapon")
 	await settle(a)

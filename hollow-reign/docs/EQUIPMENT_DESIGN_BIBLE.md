@@ -193,5 +193,6 @@ clipping. One surface per material; swords have 6 - 8 surfaces, shields 6 - 7.
 - Pierced openings are diamonds only (a consequence of lofting); round or slotted piercings need a different blade build.
 - Plate caps are ear-clipped: fine for shading (they are flat) but the triangles are long and thin.
 - Fittings pass through each other where they meet instead of being welded.
-- The rig's off-hand is posed open, so fingers pass through a shield board when the hand is on the grip bar.
-- Low models and the 1.15 rig scale have not been checked in a duel; nothing has run on a device.
+- On the rig (gear pass): the shield hand closes on the grip bar and the forearm lies in the strap (`pose_review` "fingers" = 0);
+  the Tower shield is worn at life size (`GearModel.RIG_SCALE`), the rest at 1.15. Seen in duel frames on the software
+  renderer; nothing has run on a device.

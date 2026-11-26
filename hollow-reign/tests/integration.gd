@@ -16,7 +16,7 @@ func _ready() -> void:
 	Game.new_game()
 	Game.profile.tutorial_done = true
 	Engine.time_scale = 6.0
-	#await _gear_on_rig()
+	await _gear_on_rig()
 	# --- menus
 	var t := TitleScreen.new()
 	add_child(t)
@@ -119,7 +119,7 @@ func _ready() -> void:
 		ok(cache.type == "treasure" and after > gold and Game.profile.gold - after < after - gold and Game.owns("a_garrison_gauntlets"), "cinematic road: a cache gives its contents once")
 		cr2.queue_free()
 		await get_tree().process_frame
-	# --- the story chain through the real router: New Journey → opening → chamber → walk → first stop
+	# --- the story chain through the real router: New Journey → Generation I → years → arrival → chamber → walk → first stop
 	if FileAccess.file_exists(Game._p(Opening.SEEN_FILE)):
 		DirAccess.remove_absolute(Game._p(Opening.SEEN_FILE))
 	var m: Node = load("res://src/main.tscn").instantiate()
@@ -127,14 +127,49 @@ func _ready() -> void:
 	await get_tree().process_frame
 	m._new_journey("#16332c", "f")
 	await get_tree().create_timer(1.2).timeout
-	ok(m.current is Opening and Game.profile.body == "f", "new journey: opens on the opening")
-	m.current.skip()
+	ok(m.current is Prologue and Game.profile.body == "f", "new journey: opens on Generation I")
+	if m.current is Prologue:
+		var pr: Prologue = m.current
+		var mine: Dictionary = Game.profile
+		var dir_before: String = Game.save_dir_override
+		ok(pr.beat == 1 and pr.road != null and str(pr.road.hero.cfg.skin).contains("_f") and pr.road.gen == 1, "generation I: the forebear of a woman's line is a woman, on the kept road")
+		ok(str(Prologue.forebear().equipped.weapon) == str(mine.equipped.weapon), "generation I: the forebear carries the very sword the heir will take up")
+		# every beat can be passed over; the duels borrow the profile and give it back
+		pr.skip_beat()
+		await get_tree().process_frame
+		ok(pr.beat == 2 and pr.hall != null and pr.monarch != null and pr.guard != null, "generation I: the road, skipped, leads to the throne")
+		pr.skip_beat()
+		await get_tree().process_frame
+		ok(pr.beat == 3 and pr.duel != null and str(pr.duel.foe.id) == Prologue.GUARDIAN and not is_same(Game.profile, mine), "generation I: the guardian is a real duel, fought as the forebear")
+		ok(not Game.save_dir_override.contains("itest"), "generation I: nothing can be saved to a slot while the forebear fights")
+		pr.skip_beat()
+		await get_tree().process_frame
+		ok(pr.beat == 4 and is_same(Game.profile, mine) and Game.save_dir_override == dir_before, "generation I: the profile and the save folder are given back")
+		pr.skip_beat()
+		await get_tree().process_frame
+		ok(pr.beat == 5 and pr.hall.get_child(0) is Arena and (pr.hall.get_child(0) as Arena)._theme_id == "chamber", "generation I: the fall is in the room the heir wakes in")
+		pr.skip_beat()
 	await get_tree().process_frame
 	await get_tree().process_frame
-	ok(m.current is Awakening, "new journey: the opening, skipped, leads to the chamber")
+	ok(m.current is TimeJump, "generation I, skipped through, leads to the time jump")
+	ok(bool(Game.profile.flags.get("gen1_complete", false)) and str(Game.profile.flags.get("inherited_weapon", "")) == str(Game.profile.equipped.weapon), "the hooks for the generational pass are written")
+	if m.current is TimeJump:
+		ok(m.current.years == 22 and m.current.from_gen == 1 and m.current.to_gen == 2 and int(m.current.road.arena.get_meta("generation", 0)) == 1, "time jump: twenty-two years, from the first generation's road")
+		m.current.skip()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	ok(m.current is Arrival and int(Game.profile.flags.get("generation", 0)) == 2, "the time jump leads to the second generation's arrival")
+	if m.current is Arrival:
+		var ar: Arrival = m.current
+		ok(int(ar.road.arena.get_meta("generation", 0)) == 2 and not (ar.road.arena.get_node("HLRingArc") as Node3D).visible and str(ar.road.hero.cfg.skin).contains("_f"),
+			"arrival: the same road twenty-two years on (the arc of the ring is down), and the player's own knight on it")
+		ar.skip()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	ok(m.current is Awakening, "new journey: the arrival leads down to the chamber")
 	if m.current is Awakening:
 		var kn: CineActor = m.current.knight
-		ok(str(kn.cfg.skin).contains("knight_f") and str(kn.cfg.get("weapon_model", "")).contains(str(Game.profile.equipped.weapon)) and not kn.weapon_r.visible,
+		ok(str(kn.cfg.skin).contains("knight_f") and (str(kn.cfg.get("weapon_model", "")).contains(str(Game.profile.equipped.weapon)) or (str(kn.cfg.get("gear", "")) != "" and str(kn.cfg.get("gear", "")) == str(Db.item(str(Game.profile.equipped.weapon)).get("gear_id", "")))) and not kn.weapon_r.visible,
 			"chamber: the chosen knight, with her own sword still in the block")
 		m.current.skip()
 	await get_tree().process_frame
@@ -168,7 +203,8 @@ func _ready() -> void:
 	# a later new journey passes over the opening; Continue never replays either scene
 	m._new_journey("#3d0f0f", "m")
 	await get_tree().create_timer(1.2).timeout
-	ok(m.current is Awakening, "a later new journey passes over the opening")
+	ok(m.current is Awakening and Game.profile.body == "m", "a later new journey passes over Generation I (both bodies reach the chamber)")
+	ok(str(Prologue.forebear_look().skin).contains("_m") and Prologue.forebear().body == "m", "generation I: a man's line has a father")
 	Game.save()
 	m.show_title()
 	await get_tree().process_frame

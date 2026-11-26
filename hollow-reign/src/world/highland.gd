@@ -46,7 +46,7 @@ const SEASONS := [
 		"amb": "#8693a8", "amb_e": 0.8, "exp": 0.95, "sat": 1.02,
 		"grass_a": "#56692c", "grass_b": "#8f8a3c", "heather": "#6a4466", "heather_amt": 1.0, "dry": 0.1, "snow": 0.0,
 		"cloud": 0.48, "cloud_lit": "#fff0d8", "cloud_dark": "#8a8494", "wind": 1.0, "seam": 0.25, "weather": "", "wear": 1.0, "whole": true},
-	{"sky": "#272c3a", "horizon": "#9a6a4c", "fog": "#6a5a56", "fog_d": 0.0042, "sun": "#ff9a5a", "sun_e": 2.1, "sun_rot": Vector3(-6, 192, 0),
+	{"sky": "#272c3a", "horizon": "#9a6a4c", "fog": "#6a5a56", "fog_d": 0.0026, "sun": "#ff9a5a", "sun_e": 2.1, "sun_rot": Vector3(-6, 192, 0),
 		"amb": "#5e6474", "amb_e": 1.0, "exp": 1.12, "sat": 0.9,
 		"grass_a": "#6a5628", "grass_b": "#9a7436", "heather": "#5a3a34", "heather_amt": 0.5, "dry": 1.0, "snow": 0.0,
 		"cloud": 0.36, "cloud_lit": "#c08a66", "cloud_dark": "#3a3640", "wind": 2.0, "seam": 0.0, "weather": "", "wear": 0.45, "whole": false},

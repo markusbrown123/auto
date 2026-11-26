@@ -307,6 +307,22 @@ func _make_look() -> void:
 				Game.profile.equipped[str(Db.item(wid).slot)] = wid
 		for id2: String in str(_args.get("unequip", "")).split(",", false):
 			Game.profile.equipped[id2] = null
+		# --forge=blade:5,grip:3,ore:2,ore_id:m_scale,edge:3   the equipped weapon's forge state (Game.weapon_mods)
+		if _args.has("forge"):
+			var wid2 := str(Game.profile.equipped.weapon)
+			var mods := {}
+			for kv2: String in str(_args.forge).split(",", false):
+				var k2 := kv2.get_slice(":", 0)
+				var v2 := kv2.get_slice(":", 1)
+				if k2 == "blade":
+					Game.profile.upgrades[wid2] = int(v2)
+				elif k2 == "edge":
+					Game.profile.edge[wid2] = int(v2)
+				elif k2 == "ore_id":
+					mods[k2] = v2
+				else:
+					mods[k2] = int(v2)
+			Game.profile.mods[wid2] = mods
 		_look = Duel.player_look()
 		_tag = "knight_" + str(Game.profile.body)
 		if _args.has("gear"):
@@ -385,6 +401,11 @@ func _poses() -> Array:
 		p.append(["draw", func(): rig.sheath(true); _later(0.3, func(): rig.draw()), 1.5, [0.25, 0.5, 0.66, 0.8, 1.0, 1.3]])
 		p.append(["preview_attack", func(): rig.preview_attack("DR"), 1.2, [0.12, 0.3, 0.45, 0.9]])
 		p.append(["preview_block", func(): rig.preview_block(0.6), 1.2, [0.3, 0.55, 1.1]])
+	if only_has("recall") or only_has("recall_short") or only_has("present"):
+		# the weapon coming to the hand: Recall (hand open, hilt first, hand closes), and whatever present_weapon picks
+		p.append(["recall", func(): rig.weapon_r.visible = false; _later(0.2, func(): rig.present_weapon("recall")), 1.5, [0.22, 0.4, 0.55, 0.7, 0.9, 1.3]])
+		p.append(["recall_short", func(): rig.weapon_r.visible = false; _later(0.2, func(): rig.present_weapon("recall_short")), 1.0, [0.22, 0.35, 0.5, 0.75]])
+		p.append(["present", func(): rig.present_weapon("auto", {}), 1.5, [0.1, 0.35, 0.55, 0.75, 1.0, 1.4]])
 	p.append(["recover", func(): rig.recover(), 1.2, [1.0]])
 	p.append(["stagger", func(): rig.stagger(), 1.4, [0.5, 1.2]])
 	p.append(["hurt", func(): rig.hurt(), 0.6, [0.1, 0.25]])

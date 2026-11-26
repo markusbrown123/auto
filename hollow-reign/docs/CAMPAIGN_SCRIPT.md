@@ -14,75 +14,167 @@ These are recorded, not resolved. Section "Open contradictions" at the end lists
 - The boss intro cards and region blurbs in `data/bosses.json` and `data/regions.json` tell an older story (kings, weddings, a kingdom the player once served). The story bible says the 2026-11-25 brief "replaces all earlier narrative". Both texts are currently shown to the player.
 - `data/regions.json` makes all eight regions a single required chain. The story bible says the Wyrm's Roost and the Hollow Deep should be optional or secret.
 
-## Prologue: the high road, twice, and then the chamber
+## The Inherited Oath: three generations (2026-11-26, supersedes the single-knight campaign)
 
-> **Owner decision (prologue, 2026-11-26)**
-> **Chosen: "The road is remembered."** Two people climb the high road to the Ring-Gate before the game proper and fall to the same guardian, the Ashen Sentinel: a father (played), then five years later his elder daughter (directed). The player's knight is not their third child. The knight is the Unbound, exactly as the story bible has it, and those two deaths are the strongest memories it was built from: the Crown keeps the mind of whoever dies on its threshold, and Lyra took those two back out of it. So the player lives the falls first and wakes with them ("Things I couldn't possibly have seen." / "Then it worked."), believing for half the game that this is a family duty. The Crypt takes that away and gives back something larger. The emotional engine is the owner's: someone you belong to went up this road before you. The mechanism is this game's own.
-> **Why this one:** it changes no recorded line and makes several of them mean more (list below); the first boss becomes the rematch, forty minutes in, which suits a two-to-three-hour game; the central mystery (what the Unbound is) and all three endings stand untouched.
-> **Alternative: "The third heir."** The knight is literally the youngest child, falls at the gate as a third death and is brought back in the cradle; the daughter is found later remade as a guardian. Closer to the owner's wording and simpler to say in one line, but it contradicts the bible's "made, not brought back" (the Crypt reveal would have to be rewritten), makes the Widow's recorded "someone inside you has" wrong, and needs a new guardian. Not built.
-> To switch, the code is the same; only the Crypt scene and the bible change.
+Source: `docs/GENERATIONAL_CAMPAIGN_BRIEF.md` and the owner's decision on the twist ("a mix of 1 and 3"). This section is the campaign. The chapter sections after it are kept as the detail of **Generation II's** journey: places, stages, foes and loot are unchanged, and each chapter carries a short note where the generations change what it means. Where an older paragraph below still speaks of "the Unbound" as a made person, read "the heir": that origin is withdrawn.
 
-### Who they were (names are original to this game)
-- **Corvan Marrek.** Sergeant of the mortal levy under the commander the game later calls the Crimson Widow; warden of the low road after the levy was broken. The soldier "who taught that stance". In the ninth year of the Silence the far villages stop answering and the lamps on the high road come back on. He climbs to the outer gate of the old capital to find out who is giving orders behind it. He is one of the "six people I buried".
-- **Tessaly Marrek.** His elder daughter. Climbs in the fourteenth year, in his stance, with his answer. Falls at the same gate.
-- **The youngest Marrek** is never seen. PROPOSED: she is the "girl of nine" in Lyra's list of donors (`crypt_truth`), who gave what she remembered in the ordinary way, in the village, years before. The Unbound's "childhood" is hers. All three of the house are in the knight, and the knight is none of them.
-- **The Ring-Gate.** The outer gate of Vaelora: a ring of forty stones taller than the citadel behind it, an arc of it fallen, a seam in its inner face that is not stone. The Fallen Courtyard is the ward directly behind it; the resurrection chamber is under its foot. The fallen were carried down, not buried.
-- **What the old machines keep.** The Crown stores the mind of anyone who dies inside its precincts; that is what it was built to do. It could not remake two mortals who had no record on file, so it kept what they were carrying: their last road. This is the "donated" memory the Unbound least chose to receive, and the one thing Lyra stole rather than was given.
+> **Owner decision box**
+> **Scripted and partly built: "The sword stays, and the throne keeps what it takes."**
+> 1. *The first death comes when you are winning.* Generation I is short and playable. In the clash with the Monarch the story takes the fight on a cut the player lands, not on a health bar: the hall is sealed, the forebear gets through the seal to the Inheritance Engine, drives the sword into its block to send the records out, and dies at the foot of the cradle. The sword stays in the block. Twenty-two years later the heir comes to in the same spot, in the same frame, and the first thing the game asks is "TAKE UP YOUR SWORD": the same item, with whatever has been done to it. **Built** (Generation I, the time jump, the arrival; the chamber scene is the existing one).
+> 2. *The second death is not a death.* The second generation falls saving the records, and it plays as a hero's end. In Generation III the first guardian the heir meets, standing in the Ashen Sentinel's old post, wears the armour, sword, shield and forge mods the player had equipped as Generation II and fights with the combinations that player used most. The Witness knows the walk before the player knows the armour. **Scripted, not built** (the snapshot and the mirror foe are specified in `docs/FLOW.md`).
+> **Where the echo stands, and why:** the Inner Ward of the Fallen Courtyard, first guardian of Generation III, not the last door before the throne. Generation III is the fast pass, so its strongest moment should come while the player still expects a rerun; it is the post where Generation II began its own road ("why did no one return for me?" is answered by the one person who cannot); and it leaves the whole of Generation III to carry what the heir learned there to the Monarch. Putting it at the throne door would make it a prelude to the last fight and compete with it.
+> **Not chosen, noted as garnish only:** a false ending after a Generation II win; the fallen speaking one line each in the last fight.
+> **Decisions still the owner's:** (a) whether ordinary defeat is in the fiction (the Engine returns the heir) or a plain retry: six recorded Lyra lines and one of the Witness's depend on it; (b) whether the gear the second generation was wearing is withheld until the Kept is beaten (stronger, but it bends "nothing earned is lost"; the script below does **not** withhold it); (c) casting for four new voices (below).
 
-### Beats
+### The family and the fixed points (names are original)
+- **House Marrek**, wardens of the low road. The game never says the given names aloud unless the player names their knight; the Lineage screen lists "the First", "the Second", "the Last" under the player's chosen names.
+- **Generation I, the First Oath:** the Father (or the Mother). A veteran in weathered silver, a clean sword, a practical shield. Speaker key `forebear`.
+- **Generation II, the Broken Crown:** the Son (or the Daughter), twenty-two years on. The player's chosen knight. Motive: to know why, and to make someone pay.
+- **Generation III, the Last Heir:** the Grandson (or Granddaughter), twenty-four years after that. Raised on the story of two graves, one of which is empty.
+- **The Forgotten Monarch** does not age. He is fought three times: a clash (I), a full duel (II), the last duel in three phases (III).
+- **The Inheritance Engine** is the cradle and its room under the Ring-Gate (the existing `chamber` set). It keeps the house's records, its trained hand, and the door to its vault. It does not copy people. Lyra is the stored mind that tends it: "Someone who has been waiting a very long time."
+- **The Witness** is found by the second generation in the Courtyard monument, as staged today, and is not kin. It simply remembers all three.
+- **Orren** is at the forge in Generation II. In Generation III he is old, half-blind, and still there; his recorded lines belong to II.
+- **The fortress** is always seen from one composition on the high road (`HighRoad.vista()`): Generation I whole and kept, II with an arc of the Ring-Gate fallen and the road half grown over, III under snow with the seam in the ring alight.
+- **Recall**, the knight's summoning of the blade, is the Engine's first gift and is first shown in Generation II's first duel, as it is today.
 
-| Beat | What happens | Played? | Scene ids |
-|---|---|---|---|
-| The vista | Dawn on the headland. An old knight, small, on a worn road; far ahead the Ring-Gate with the sun in its broken arc. The game's name. Card: "THE NINTH YEAR OF THE SILENCE". | watched | — |
-| The climb | Corvan walks the road: five designed shots (through the grass, the switchbacks, cresting the rise, the dead tree, the court). The narrator tells the fall of the immortal kingdoms over it: the history is the thing he is walking up to. | watched, skippable | `opening` (the six recorded narrator lines, unchanged) |
-| The gate | The Sentinel stands with his back to the road, facing the gate he was told to hold. He turns. | watched | — |
-| The first fall | A real duel, the game's own, against a guardian set far beyond him. "State your allegiance." / "I serve no crown." / "Then you have no passage." Two prompts say what a swipe is for. He cannot win; after 38 seconds the next blow is the last whatever the player does. | **played** | `sentinel_intro` (recorded; Corvan speaks the knight's line) |
-| The fourteenth year | The same view in autumn weather. Tessaly on the road. At the dead tree there is a cairn with her father's sword standing in it. At the gate, one wide shot: the same question, her answer, one blow turned and the next not. | watched | `prologue_cairn`, `prologue_gate` (new, text only; the Sentinel's two lines are his recorded takes) |
-| The nineteenth year | The same view in snow. Nobody on the road. Two swords in the cairn. The seam in the ring is lit. Black. | watched | — |
-| Awakening | The chamber under that gate. Lyra speaks first. "What do you remember?" / "Things I couldn't possibly have seen." / "Then it worked." | one tap | `awakening` (recorded, unchanged) |
-| First road | Lyra sends the Unbound up and out. | — | `first_road` (recorded, unchanged) |
-| Return visits | After a death: one of six Lyra lines. After the Courtyard is cleared: Lyra greets the return and points at the smith. | — | `rebirth_0` … `rebirth_5`, `sanctuary_return` |
-| Orren | First talk at the forge, then an idle line on later visits. | — | `orren_intro`, `orren_idle` |
-
-### Recorded lines: what the prologue does to them
-No recorded line becomes wrong. These change meaning, on purpose:
-
-| Line (recorded) | Before | Now |
+### Length (target about 2 to 3 hours in all)
+| Part | Target | Content |
 |---|---|---|
-| `awakening_06` "Things I couldn't possibly have seen." | unexplained | the player has just played them |
-| `awakening_07` "Then it worked." | the waking worked | the memories took |
-| `sentinel_intro` (all three) | first meeting | the second time the player hears it; the knight gives Corvan's answer without knowing why |
-| `sentinel_death_03` "Then why did no one return for me?" | pathos | someone did, twice, and he cut them down for it |
-| `widow_intro_01` / `_03` "I knew the soldier who taught it." / "someone inside you has." | a hint | Corvan, by name if the player has been listening |
-| `widow_death_01` "You fight like six people I buried." | a hint | Corvan is one of the six (quest 4, the Donor Plates) |
-| `gravewarden_death_01` "You are not the first to enter this chamber…" | a hint | two came before, and stayed |
-| `opening_01` … `_06` (narrator) | over the throne hall | over the climb; same takes, same order |
+| Generation I | 5 to 6 minutes as built (the brief allows 8 to 10) | the road, the throne, one winnable duel, the clash, the fall |
+| Time jump and arrival | about 1.5 minutes | the same view changed; the heir's line; the game's name; the walk to the gate |
+| Generation II | about 85 to 100 minutes | the Engine, the Courtyard (Witness, lesson, Sentinel), Blackwood, Cathedral, Crypt, Citadel, the Throne and the second meeting. The Roost is optional. Not every guardian has to fall. |
+| Generation III | about 40 to 50 minutes | the same places with changed encounters, entered by the routes II opened; the Kept; the last duel; the door under the throne |
+| Beneath the throne | optional, 20 minutes and up | the facility (the Hollow Deep's set), the Devourer, the dragons, the third ending's conditions |
 
-One casting consequence, not a text error: in the prologue duel `sentinel_intro_02` "I serve no crown." is Corvan's, and plays in the male knight's recorded take (the duel voices the player's line by the body in the profile, and for that duel the profile is his). For a male knight the father and the son therefore share a voice. That is defensible (the memory is the knight's own) but should be a deliberate decision when the cast is recorded: either keep it, or record `sentinel_intro_02` once more in an older voice for the prologue.
+### Who stands where (the existing roster, reused; nothing new is modelled)
+| Place | Generation I | Generation II | Generation III |
+|---|---|---|---|
+| The Hollow Throne, the hall | **Royal Gatekeeper** = `throne_guard` (Throne Guard); the Monarch (clash) | `throne_guard`, `kingsblade`, `crownless`, `herald`; the Monarch (full duel) | `throne_colossus` (The King's Shadow) at the door; the Monarch (three phases) |
+| The Fallen Courtyard | passed on the way in: the gate is kept and manned, nobody bars a warden with a petition | `hollow_soldier`, `banneret`, `rampart_brute`; **Ashen Sentinel** | **"The Crownless Champion"** on the card = **the Kept** (a mirror foe built from the Generation II snapshot); lesser foes `pike_sergeant`, `gate_colossus` |
+| The Blackwood | Royal Patrol = `pike_sergeant` (PROPOSED, only if Generation I is lengthened) | **Pale Huntsman** (optional), **Hollow Executioner** | **Awakened Beast** = `maulbeast` promoted to the Clearing; the Huntsman, if spared in II, stands with the heir |
+| The Cathedral of Ash | sealed | **Crimson Widow**, **Cathedral Beast** | **Ancient Laboratory Guardian** = `gate_colossus` re-dressed (the kind that is "bolted into its armour"), at the lower door the Beast's fall uncovered |
+| The Sunken Crypt | shut | **Gravewarden** | the way down: **The Devourer of Names** (set: the Hollow Deep) |
+| The Frozen Citadel | shut | **Frostbound King** | optional **Skeldra** |
+| The Wyrm's Roost | a far light on the vista | optional **Veyrath** | the dragon hunt: Veyrath if she lives, then **Azhurion** |
+| Beneath the throne | unknown | glimpsed through the seal | the Eternal Crown's facility |
+
+Consequences that carry: the Winch Gate, the Rope Bridge, the Sacristy Door, the Sluice, the Ice Lift and the King's Door stay as Generation II left them (the existing shortcut flags, read by Generation III); a guardian II killed is replaced in III, a guardian II spared is still there and remembers.
+
+### Generation I, scene by scene (built: `src/cine/prologue.gd`)
+| Beat | What happens | Played? | Lines |
+|---|---|---|---|
+| The vista | Dawn on the headland. The forebear small on the worn road; far ahead the Ring-Gate, whole, the citadel's two spires inside it. Card: "VAELORA · THE FIRST OATH". | watched | `opening` begins (recorded) |
+| The climb | Five designed shots: through the grass, the switchbacks, cresting the rise, the dead tree, the court between the ring's feet. The narrator tells how the immortal kingdoms fell: the history is the thing being walked up to. | watched | `opening` (six recorded lines, unchanged) |
+| The gate | The court. The new narration brings it down to one reign and one person. | watched | `gen1_open` (3, new) |
+| The hall | The forebear walks the length of the throne hall. The exchange. | watched | `gen1_throne` (4, new) |
+| The guardian | "Show the warden to the gate." A Throne Guard leaves the wall and turns. **A real duel**, winnable; two prompts say what the shield and a cut are for. Lost: it is taken again. | **played** | `gen1_guard` (1, new) |
+| The records | The forebear goes for the seal instead of the door. The Monarch comes down himself. | watched | `gen1_records` (2, new) |
+| The clash | **A real duel** with the Monarch at full strength. After nine seconds, the cut that makes four landed is the one the story answers: the hall is sealed mid-exchange. (A player who lands nothing is released at 32 seconds; nobody dies to an ordinary blow here.) | **played** | none: no words in a fight |
+| The fall | Behind the seal, the Engine's room. The door comes down. The sword goes into the block; light goes out through it. The forebear reaches the foot of the cradle. The Monarch, in the doorway. | watched | `gen1_seal` (3, new) |
+| The mark | Black. The family's mark. | watched | `gen1_close_m` / `_f` (2 each, new) |
+
+Lines as written (all new, text only):
+- `gen1_open`, Narrator: "For centuries the bells of Vaelora rang beneath the same sovereign." / "Harvests failed and were mended. Villages fell silent and were forgotten. Upon the throne, nothing changed." / "One warden of the low road dared to ask what such permanence had cost."
+- `gen1_throne`: Forebear: "Three villages have fallen silent. Their names are struck from your records." / Monarch: "Their silence has bought another winter for thousands." / Forebear: "You speak of people as though they were coin." / Monarch: "A ruler must count what others refuse to count."
+- `gen1_guard`, Monarch: "Show the warden to the gate."
+- `gen1_records`: Forebear: "The count is behind that seal. I did not climb this far to be told the sum." / Monarch: "Then you climbed for nothing."
+- `gen1_seal`: Monarch: "Enough. Seal the hall." / Monarch: "You have done nothing but leave this burden to another." / Forebear: "Then another will come better prepared."
+- `gen1_close_m` (`_f`), Narrator: "His (Her) name disappeared from the royal histories." / "But not from those of his (her) house."
+
+### The time jump and Generation II's arrival (built: `src/cine/time_jump.gd`, `src/cine/arrival.gd`)
+| Beat | What happens | Lines |
+|---|---|---|
+| Twenty-two years | The one view, as Generation I left it. Card: "TWENTY-TWO YEARS". Weather closes over it and opens on the same view: an arc of the ring down, its stones on the slope, the fires out, the banners gone, turf over half the road, an autumn dusk. | none |
+| The heir | The player's own knight, in what they chose, standing where the forebear stood. | `gen2_arrive_m`: "I know where you died, Father. I would know why." (`_f`: "…, Mother.") |
+| The name | They set off. **HOLLOW REIGN** comes up over the road. | none |
+| The walk | The climb, the rise, the dead tree, the court. The gate is not kept: nobody is there. | none |
+| The Engine | Black, then one light: the existing chamber scene, unchanged. The heir is on the floor at the foot of the cradle, in the forebear's last frame. Lyra: "Can you hear me?" … "Then it worked." The sword is in the block. **TAKE UP YOUR SWORD.** | `awakening`, `first_road` (recorded) |
+| Out | The door, the walk out, the Fallen Courtyard, the Witness at the second stop, the lesson, the Sentinel. | as today |
+
+### Generation II: what changes in the chapters below
+The chapters are played as written, with these differences. PROPOSED lines here are not in `data/dialogue.json`.
+- **Courtyard.** After `witness_discovery`, on leaving the stop, PROPOSED `witness_walk`: Witness: "Well. You have his manner of walking." (`_f`: "her") / Heir: "You knew my father." / Witness: "I knew what he was looking for. That is a somewhat different matter."
+- **Sanctuary.** After `orren_intro`, PROPOSED `orren_sword`: Orren: "That sword has seen better years." / Heir: "It belonged to my father." / Orren: "Then I shall mend it. I cannot teach it to forgive your mistakes."
+- **Cathedral.** At the Beast's door, after `w_beast_approach`, PROPOSED one line, Witness: "They heard what breathed under it and took the breathing for the voice of a god."
+- **Crypt.** The Gravewarden is the first clue: he keeps names, not bodies (`gravewarden_intro`, recorded). PROPOSED after his fall, Witness: "Kept as writing. One wonders where the hands go."
+- **Citadel.** Before `frostking_death`, PROPOSED, Frostbound King: "You cannot free a kingdom by starving it. Learn what lies beneath the throne before you raise your sword against it."
+- **Throne, the Antechamber.** The second clue. The Kingsblade bows in a form the Witness knows (`w_throne_guard` is recorded and already says it of the guard: "It is the same order, you know. Only the handwriting differs."). PROPOSED, Witness: "That salute went out of use before your grandfather was born. He did not learn it from a book."
+- **Throne, the second meeting** (replaces "Boss: The Forgotten Monarch" for this generation). PROPOSED `monarch_blade`, Monarch: "That blade. I had wondered when I would see it again." Then `monarch_intro` (recorded, five lines). A real duel in two phases. At 33 per cent, or when the heir is near falling, the seal behind the throne starts to burn: the records the forebear could only send part of. The player chooses, in play: keep cutting, or go to the seal (a marked spot, three held taps under attack). Going to the seal ends the generation. Not going means the fight continues until the player wins or is beaten; a win is acknowledged (PROPOSED, Monarch, rising again as the hall's machines turn over: "You see the difficulty. I am not the thing that is keeping me.") and the seal is then the only thing left to do. A defeat here is an ordinary defeat.
+- **The second fall.** PROPOSED `gen2_seal`: Heir: "All these years I thought I had come for your life." / Monarch: "And what have you found instead?" / Heir: "The means to end your reign." The heir is cut down at the seal with the transfer complete. The camera does not leave the Monarch; it does not show the body being taken up. PROPOSED `gen2_close`, Narrator: "The second of that house fell beneath the same throne." / "But where the first had left a question, this one left an answer." Card: "TWENTY-FOUR YEARS" (`TimeJump.make(24, 2, 3)`).
+
+### Generation III: the Last Heir (scripted, not built)
+| Beat | What happens | Lines (all PROPOSED) |
+|---|---|---|
+| The view | The same composition under snow. The seam in the ring is lit all the way round. A third figure. | Lyra: "Three of your house have stood before those gates." / Heir: "And how many returned?" / Lyra: "Not enough." / Heir: "Then show me another way." |
+| The Engine | No waking on the floor: the heir walks in. Two things are in the block's place: the first sword's scabbard, and nothing else. Everything the house earned is in the vault. | Lyra: "I kept all of it. I could not keep them." |
+| The Courtyard | The Winch Gate is as the second left it. The road is quicker. At the Inner Ward a guardian stands in the Sentinel's post. The card reads "The Crownless Champion". | Witness: "Stop. Do not go in yet." / Heir: "It is one guardian." / Witness: "It is the walk. I was carried at that hip for a year." |
+| **The Kept** | The guardian turns. It is wearing what the player wore. It fights with what the player favoured. It is the hardest humanoid before the throne, and it is fair: every pattern in it is one the player made. Speech category C, very few words. | The Kept: "State your… no. That was his question." / Heir: "Who were you?" / The Kept: "Late. I was late home." |
+| After | It does not die like a guardian. It lowers the sword and holds it out, hilt first. | The Kept: "You kept the edge on it." / "Go on. I have held this gate as long as I was able." / Witness: "I will set that down as it happened. All of it. Both times." |
+| What it gives | The Kept's own sword as a second copy of the inherited blade with its Generation II mods, renamed (PROPOSED "The Second's Edge"); the record "One Who Was Kept"; and one of the conditions of the third ending: a stored mind that was asked, and chose. | |
+| The road | Blackwood (the Awakened Beast), the Cathedral's lower door (the Laboratory Guardian), the Citadel (optional Skeldra), in any order the open routes allow. Two of the three are enough. | |
+| The last meeting | The hall with its floor open and the machinery showing. Three phases: the Sovereign, the Ancient Crown, the Last Defence (the restoration engines; broken by parrying into them, cut by cut). | Monarch: "Your family has spent two lifetimes at my gates." / Heir: "Three. You are keeping one of them." / Monarch: "I keep everything. It is the whole of my office." / Heir: "And you have mistaken survival for the right to rule." / Monarch: "When these machines fall silent, they will remember whom to blame." / Heir: "Then let them remember a choice was made." Then `monarch_death` (recorded). |
+| The door | No victory screen. The Witness remembers a door. | Witness: "There is a door. Not from this side of the wall." / Lyra: "This was never merely a kingdom." / Heir: "Then what was it?" / Lyra: "A means of keeping one alive." |
+| Beneath | The facility; the Devourer; the dragons; the choice at the Crown. | as "The three endings" below |
+
+The three endings stand as written below. The third (The Free Cities) gains one condition and loses none: the Kept was faced and let go.
+
+### Every recorded line (208 lines in `data/dialogue.json`, 231 takes in `assets/audio/vo/takes.json`)
+| Recorded scene(s) | Lines | Verdict | Where it lives now |
+|---|---|---|---|
+| opening | 6 | Reassign | Generation I, over the climb of the high road (was: over the throne hall). Same takes, same order. |
+| awakening | 7 | Reassign | Generation II, at the Inheritance Engine: the heir comes to where the forebear died. "Things I couldn't possibly have seen" is now what the Engine carried; "Then it worked" is the transmission, twenty-two years late. |
+| first_road | 2 | Keep | Generation II, leaving the Engine. "Your body remembers how, even if you don't" is the inherited combat knowledge. |
+| courtyard_0 … courtyard_6 | 7 | Keep | Generation II, the Fallen Courtyard stops. |
+| sentinel_intro, sentinel_death, sentinel_memory | 9 | Keep | Generation II. The owner's one-line "None shall pass." is not needed: the recorded challenge does that job in three. |
+| sanctuary_return, orren_intro, orren_idle | 6 | Keep | Generation II. "So you're what she woke up" now means what Lyra woke at the Engine. The owner's new forge exchange is added after it, not instead of it. |
+| rebirth_0 … rebirth_5 | 6 | Keep (soft) | Any generation, on return after an ordinary defeat. They assume the Engine brings the heir back; if ordinary defeat is to be a plain retry with no fiction, these six go unused. `rebirth_5` ("You don't owe the dead your future") is the theme of the whole game and should be kept whatever is decided. |
+| executioner_intro, executioner_death | 4 | Keep | Generation II, the Blackwood. |
+| huntsman_intro | 3 | Keep | Generation II, optional. "One of their things": he takes a knight carrying Engine knowledge for the kings' work. |
+| widow_intro, widow_death | 5 | Keep (soft) | Generation II, the Cathedral steps. "I knew the soldier who taught it" / "someone inside you has" is now the forebear, plainly. "Six people I buried" overstates one forebear: read as the Engine's older holdings, or re-record as "like someone I buried". |
+| beast_intro, beast_death | 4 | Keep | Generation II, the Cathedral. |
+| gravewarden_intro, gravewarden_death | 5 | Keep | Generation II, the Crypt. "Names, not bodies" is the planted clue for the Kept; "You are not the first to enter this chamber" is the forebear. |
+| frostking_intro, frostking_retry, frostking_death | 5 | Keep | Generation II, the Citadel. The owner's "You cannot free a kingdom by starving it" is added as a new line before `frostking_death`. |
+| wyrm_intro | 1 | Keep | Generation II (optional) or III (the dragon hunt), whichever meets her first. |
+| monarch_intro, monarch_retry | 6 | Reassign | Generation II, the second meeting with the Monarch, after the new "That blade." line. "A kingdom that should have been allowed to die" is the son's anger; the heir would not say it. |
+| monarch_death | 3 | Reassign | Generation III, the end of the last fight ("I think I remember the rain." / "Tell me about it."). |
+| devourer_death (the knight's two lines) | 2 | Reassign | Generation III, beneath the throne. |
+| witness_discovery | 9 | Keep | Generation II, the Courtyard monument, exactly as staged. The owner's "You have his manner of walking" is added as a second scene on leaving the stop. |
+| Witness: road remarks, before/after each guardian, sanctuary talks (`w_*`, 68 scenes) | 118 | Keep | Generation II. Two need a ruling, neither is wrong: `w_talk_return` ("I die, and I wake here") depends on the same decision as `rebirth_*`; `w_throne_guard` ("Unrelieved. Like the first one you met.") is the second planted clue for the Kept. Scenes for foes moved to Generation III (`w_devourer_*`, `w_azhurion_*`, `w_rimewyrm_*`) play there unchanged. |
+| **Total** | **208** | | **0 now wrong.** 24 reassigned, the rest kept; 3 groups kept "soft" (they work, a re-record would fit better). |
 
 ### New lines
-In `data/dialogue.json` now, text only (`"recorded": false`), 2 lines:
-- `prologue_cairn_01`, Tessaly: "I kept the stance, Father. You would still find fault with it."
-- `prologue_gate_01`, Tessaly: "The same as my father's." (between the Sentinel's recorded `sentinel_intro_01` and `_03`; the Sentinel gets no new line, which keeps him inside the four-line limit of speech category B)
+**In `data/dialogue.json` now, text only (`"recorded": false`): 19 lines in 9 scenes.**
+| Speaker | Lines | Scenes |
+|---|---|---|
+| Narrator | 7 | `gen1_open` 3, `gen1_close_m` 2, `gen1_close_f` 2 |
+| Forebear (Father and Mother read the same words) | 4 | `gen1_throne` 2, `gen1_records` 1, `gen1_seal` 1 |
+| Forgotten Monarch | 6 | `gen1_throne` 2, `gen1_guard` 1, `gen1_records` 1, `gen1_seal` 2 |
+| The second generation (the knight) | 2 | `gen2_arrive_m` 1, `gen2_arrive_f` 1 |
 
-On-screen cards (not dialogue, in `src/cine/prologue.gd`): "THE NINTH YEAR OF THE SILENCE", "THE FOURTEENTH YEAR", "THE NINETEENTH YEAR".
+**PROPOSED above, not in data: 41 lines.** Witness 9, Monarch 6, the second generation 4, the Last Heir 8, Lyra 5, the Kept 4, Orren 2, Frostbound King 1, Narrator 2. Generation III's road remarks and Orren's old-age lines are not yet written.
 
-PROPOSED (not recorded, not in data), 5 lines that would pay the prologue off later:
-- `courtyard_6`, appended, Player: "I know this gate." / Lyra: "You have never been here." / Player: "No."
-- `sentinel_memory`, appended, Archivist: "Addendum. Two intruders refused at the outer gate, years nine and fourteen. Remains transferred below. Reason not recorded."
-- `crypt_truth`, Lyra's third line amended: "You were not brought back. You were made. A warden and his daughter who fell at the gate above you. Soldiers, engineers, a baker, a girl of nine. They gave what they remembered so that one person could walk in here and not be owned."
-- `crypt_truth`, added after it, Player: "He was not my father." / Lyra: "He is the reason you know how to stand. Call that what you like."
-- Quest 4 (Donor Plates), the Widow naming the first of the six: "Corvan Marrek. He never once agreed with me, and he never once left."
+**Casting needed (nothing is to be recorded until the story is approved):**
+| Role | Voice |
+|---|---|
+| The Son (Generation II, male) | Malcolm: the approved male knight. All existing male takes are his and stay. |
+| The Daughter (Generation II, female) | Victoria: the approved female knight. All existing female takes stay. |
+| The Father | **new**: older and rougher than Malcolm. 4 lines. |
+| The Mother | **new**: older than Victoria. The same 4 lines. |
+| The Grandson, the Granddaughter | **new**, two voices: younger, lighter than II, never bright. About 8 lines each so far. |
+| The Kept | no new voice: the second generation's own (Malcolm or Victoria) through the guardians' closed-helm treatment. That is the point of it. |
+| Narrator, Witness, Sentinel | Graham, Hamish, Mortimer as approved. |
+| Monarch, Lyra, Orren | still the unapproved provisional cast; the Monarch now has 13 more lines to carry. |
 
 Notes
-- `rebirth_*` is picked with `randi() % 6`. The lines read as a progression but do not play in order. PROPOSED: index by death count, capped at 5.
-- The story bible places meeting Orren in Chapter II. In the game he is in the Sanctuary from the start and `sanctuary_return` introduces him after the Courtyard, which fits Chapter II.
-- The throne-hall opening (`src/cine/opening.gd`, the hall lit and then dead) is no longer part of a new journey; its narration moved to the climb. The scene is kept (`--screen=opening`). PROPOSED use: its last two shots, the dark hall and the lamps coming on down the aisle, as the arrival at Chapter VI, where the player finally stands in the room the narrator was describing.
-- Story bible to reconcile (not edited in this pass): "The player: the Unbound" should name the two gate deaths among the donated memories, and the timeline should carry the ninth and fourteenth years.
+- `rebirth_*` is picked with `randi() % 6`. PROPOSED: index by defeat count, capped at 5.
+- The throne-hall opening (`src/cine/opening.gd`) is no longer played: its narration moved to the climb and its hall is where Generation I's exchange happens. The class is kept because the "seen" mark lives in it and `--screen=opening` still shows it. PROPOSED later use: its ruined-hall shots for the Generation III throne room.
+- `STORY_BIBLE.md`, `CHARACTER_BIBLE.md` and `WORLD_HISTORY.md` still describe the Unbound as a made person and count "nineteen years after the Great Silence". They were not edited in this pass and must be brought into line once this is approved.
 
 ---
 
 ## Chapter I. The Broken Oath — The Fallen Courtyard (`courtyard`)
+*Generations: II as written here. III: the same ward, the Winch Gate as II left it, and the Kept in the Sentinel's post.*
 Ambience `wind`. Music `explore_courtyard` (exists), boss `boss_ashen_sentinel` (exists). Shortcut: The Winch Gate (flag `courtyard_gate`, returns to stage 4). What the player learns: the enemies were people.
 
 | # | Stage (data) | What happens | Dialogue | Collectibles |
@@ -294,6 +386,7 @@ Ambience `wind`. Music `explore_throne` (missing), boss music `final`. Shortcut:
 ---
 
 ## The three endings
+*Chosen by the Last Heir, beneath the throne, after the door. The Free Cities also needs the Kept to have been faced and let go.*
 The endings and their choice are not built. Outcomes are from the story bible. All trigger conditions and lines below are PROPOSED (not recorded) except where the bible states them.
 
 | Ending | Outcome (story bible) | Condition (PROPOSED unless noted) |

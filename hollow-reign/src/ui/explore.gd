@@ -678,14 +678,23 @@ func _banner(got: Dictionary) -> void:
 	var l2 := CanvasLayer.new()
 	l2.layer = 5
 	add_child(l2)
+	# a dark plate behind the words: the place behind them is too busy to read against
+	var plate := UI.panel(Color(0.02, 0.02, 0.03, 0.8), UI.GOLD_DIM)
+	plate.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	plate.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	plate.offset_top = 56
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l2.add_child(plate)
+	var pad := MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 18 if side in ["left", "right"] else 10)
+	pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.add_child(pad)
 	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	v.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	v.offset_top = 70
 	v.alignment = BoxContainer.ALIGNMENT_CENTER
 	v.add_theme_constant_override("separation", 4)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	l2.add_child(v)
+	pad.add_child(v)
 	var parts: Array = [UI.label("A SECRET OF THE ROAD", 14, UI.GOLD_DIM.lightened(0.35), "bold"), UI.title(str(got.name), 32, UI.GOLD),
 		UI.wrapped(str(got.found), 19, UI.BONE, 760)]
 	for line in got.lines:
@@ -695,11 +704,11 @@ func _banner(got: Dictionary) -> void:
 		c.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.95))
 		c.add_theme_constant_override("shadow_offset_y", 2)
 		v.add_child(c)
-	v.modulate.a = 0.0
+	plate.modulate.a = 0.0
 	var tw := create_tween()
-	tw.tween_property(v, "modulate:a", 1.0, 0.5)
+	tw.tween_property(plate, "modulate:a", 1.0, 0.5)
 	tw.tween_interval(3.6)
-	tw.tween_property(v, "modulate:a", 0.0, 0.7)
+	tw.tween_property(plate, "modulate:a", 0.0, 0.7)
 	tw.tween_callback(l2.queue_free)
 	await tw.finished
 

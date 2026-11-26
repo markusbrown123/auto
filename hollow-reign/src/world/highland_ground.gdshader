@@ -38,7 +38,7 @@ void fragment() {
 	pm = smoothstep(0.3, 0.62, pm + (n3 - 0.5) * 0.5 + (n2 - 0.5) * 0.3);
 	// the road: pale worn stone, with earth showing between the setts
 	vec3 road = mix(vec3(0.3, 0.25, 0.18), vec3(0.5, 0.47, 0.41), smoothstep(0.44, 0.54, n3)) * (0.7 + 0.6 * n2);
-	pm *= mix(smoothstep(0.42, 0.6, n1 * 0.5 + n2 * 0.5 + wear * 0.35), 1.0, step(0.99, wear));
+	pm *= mix(smoothstep(0.44, 0.54, n1 * 0.45 + n2 * 0.55 + (wear - 0.5) * 0.3), 1.0, step(0.99, wear));
 	c = mix(c, road, pm);
 	c = mix(c, vec3(0.86, 0.88, 0.93), snow * smoothstep(0.45, 0.75, wnrm.y * 0.55 + n2 * 0.55) * (1.0 - pm * 0.45));
 	float cl = texture(noise_tex, wpos.xz * 0.0028 + TIME * wind * 0.006).r;

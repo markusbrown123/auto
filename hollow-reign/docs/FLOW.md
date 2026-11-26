@@ -6,39 +6,75 @@ How one screen becomes the next, what is on screen in between, and where a wait 
 
 Nothing here has run on a phone. Times are the scene's own clock at 30 fps on the development machine.
 
-## A new journey
+## A new journey (the generational opening, 2026-11-26)
+
+Story: `docs/CAMPAIGN_SCRIPT.md`, "The Inherited Oath". Shots: `docs/CINEMATIC_SCRIPT.md`, section 1.
 
 | # | Step | File | Length | How it ends, and what joins it to the next |
 |---|---|---|---|---|
-| 1 | Main menu | `ui/title_screen.gd` | — | New Journey opens character select over the same backdrop (no change of screen). |
+| 1 | Main menu | `ui/title_screen.gd` | — | New Journey opens character select over the same backdrop. |
 | 2 | Character select | `ui/character_select.gd` | — | Confirm: 0.35 s fade to black. |
-| 3 | Opening | `cine/opening.gd` | about 39 s | Opens from black, ends on black (0.3 s). First new journey only; see "Seen before". |
-| 4 | Awakening | `cine/awakening.gd` | about 36 s plus the player's one tap | Black, then one light. Ends with the knight walking away from the camera into the white of the open door (0.45 s to white). |
-| 5 | Approach | `cine/approach.gd` | about 6 s (longer if a line is still being spoken) | Comes out of the same white (0.5 s) behind the same walking knight, same camera offset. Ends standing at the first stop. |
-| 6 | First stop of the road | `ui/explore.gd` | — | **No transition at all**: the road screen takes over the place the Approach built (`Explore.adopted`), the camera eases to its usual view, Lyra's remark plays, the choices fade in. |
-| 7 | The foe is shown | `ui/explore.gd` `_reveal_then` | 1.7 s | The foe has been standing at its marker since the stop was reached. Choosing the fight starts the knight toward it; the camera goes low and looks up at it. 0.35 s fade to black. |
-| 8 | First duel: the lesson | `combat/duel.gd` (`lesson`) | player-paced | Same arena, same two figures. Ends on "THE OLD LESSONS HOLD", 0.35 s fade. |
-| 9 | First duel: the real fight | `combat/duel.gd` | player-paced | Finisher and victory overlay are the duel's own. |
-| 10 | Rewards | `ui/overlays.gd` `victory` | — | Continue: 0.35 s fade to the next stop of the road. No menu in between. |
+| 3 | **Generation I** | `cine/prologue.gd` | about 5 to 6 min, two duels in it | Opens from black, ends on black. First new journey only; see "Seen before". |
+| 3a | · the road | `cine/high_road.gd` | about 62 s | Six shots; 0.5 s fade. |
+| 3b | · the throne | | about 34 s | The guardian turns; 0.35 s fade. |
+| 3c | · the royal guardian | `combat/duel.gd` | player-paced, about 1 min | Won: 0.5 s fade on. Lost: 0.5 s fade and the same duel again. |
+| 3d | · the records | | about 14 s | 0.35 s fade. |
+| 3e | · the clash | `combat/duel.gd` | 9 to 32 s | Taken by the story on the fourth cut the player lands (never before 9 s): the sim is paused where it stands, 0.45 s fade. |
+| 3f | · the fall | | about 40 s | The Engine's room (`chamber`). Last frame is the Awakening's first frame. Black, the mark, the narrator. |
+| 4 | **Time jump** | `cine/time_jump.gd` | about 12 s | The one view in Generation I's state, "TWENTY-TWO YEARS", white, the same view in Generation II's state, 0.5 s to black. |
+| 5 | **Arrival** | `cine/arrival.gd` | about 45 s | The same view from black with the player's knight; the line; the game's name; four shots up the road; 0.6 s to black at the gate. |
+| 6 | Awakening (the Inheritance Engine) | `cine/awakening.gd` | about 36 s plus one tap | Unchanged. Ends walking into the white of the door. |
+| 7 | Approach | `cine/approach.gd` | about 9 s | Out of the same white behind the same knight; mid-walk the camera lifts and widens to show where the road leads, then comes down to the road screen's view. |
+| 8 | First stop of the road | `ui/explore.gd` | — | No transition: the road screen takes over the place the Approach built. |
+| 9 | The foe is shown, the lesson, the first real duel, rewards | as before | | as before |
 
-The filmed road (`settings.cine_road`, `cine/cine_road.gd`) replaces step 6 where footage exists. It is other
-footage, so the Approach ends with a 0.35 s fade into it instead of handing the place over.
+To the first fight of Generation II a first-time player who skips nothing sees about 8.5 minutes, of which the two Generation I duels are about a minute and a half of play. With SKIP used on every beat it is under 20 seconds. This is longer than the 4 to 6 minutes first asked for; the generational brief allows 8 to 10 for Generation I alone.
 
-### Opening (`--screen=opening`, one shot held with `--shot=1..7`)
-One hall (the `throne` arena), lit and full, then dark and empty. One shot to a line of the narrator; shots change
-when the line on screen changes (the scene is played through `Story`, so subtitles, voice and ducking are the game's own).
+### Generation I (`--screen=prologue`, `--beat=1..5`, `--shot=1..6` holds one road shot, `--auto` lets a bot fight)
+The forebear is a profile, not a special case: `Prologue.forebear()` is the default knight with veteran attributes, the garrison's silver armour and shield, the player's chosen body, and **the player's own sword item** (`Prologue.inherited_sword()`: what `Game.profile.equipped.weapon` holds if it is a one-handed sword, with its upgrade, mod and edge records copied). Both duels are the game's own `Duel`; for their length `Game.profile` is the forebear's and `Game.save_dir_override` points at a scratch folder, so nothing can be written to a save slot. Both are given back in `_give_back()` (also on leaving the tree).
 
-| Shot | Line | Picture |
+- The guardian (`throne_guard`) is an ordinary duel with `skip_intro`. Over it, one line of instruction at a time: with a blow coming "HOLD YOUR SHIELD UP · OR SWIPE INTO THE BLOW TO TURN IT", with the foe open "HE IS OPEN · SWIPE ACROSS HIM TO CUT". Losing replays it.
+- The clash (`forgotten_monarch`, his real data, phase one) is taken by the story in `Prologue._on_duel_ev` on the sim's own `boss_hit` event: the cut that makes `CLASH_CUTS` (4) landed, once `CLASH_MIN` (9 s) has passed. `CLASH_TIME` (32 s) releases a player who lands nothing; `CLASH_FLOOR` (a quarter of health) is a safety so nobody dies to a stray blow. Nothing in `src/combat` was changed, no damage is faked, and the result is stored (`clash_result`: "ahead", "even", "behind").
+- The fall is staged in the `chamber` set so that the sword is left in the block ("Rack") and the forebear ends at `Awakening.SEAT`, which is where the heir is found.
+
+SKIP (top right, every beat) goes to the next beat; skipping the last ends it.
+
+### The time jump (`--screen=timejump --years=22 --from=1 --to=2`)
+`TimeJump.make(years, from_gen, to_gen)`, signal `finished`. It builds the high road once and changes it in place with `Highland.generation(arena, g)`. `main.show_time_jump(years, from, to, then)` is the router's entry; the second use is `show_time_jump(24, 2, 3, …)`.
+
+### The arrival (`--screen=arrival`, `--shot=1..6`, `--gen=1..3` shows that generation's road)
+`Arrival.gen` (2 by default) chooses the road's state; the walker is `Duel.player_look()`. For Generation III set `gen = 3` and give it the third heir's line scene.
+
+### The high road (`src/world/highland.gd`, `src/cine/high_road.gd`)
+An `Arena` theme, `"highland"`: any screen that takes a theme can stand in it (`Backdrop`, `Duel`, the story scenes). `Highland.generation(arena, 1|2|3)`: 1 kept (summer dawn, the Ring-Gate whole, fires lit, banners up, the road worn clear), 2 damaged and overgrown (autumn dusk, an arc of the ring fallen and lying on the slope, fires dead, banners gone, turf over half the road, hard wind), 3 ancient technology waking (winter, snow on the ground and falling, the seam round the ring alight). `HighRoad.vista()` is the one composition every generation is shown from.
+
+The menu can use it: `TitleScreen.vista = true` (off by default; `--screen=title --vista`) puts the menu over that composition with the player's knight on the road, in the generation their save has reached.
+
+## Hooks for the generational pass
+Nothing below is generational architecture; it is what these scenes already emit and what they need to be given.
+
+| Moment | Signal / call | Flags written (`Game.profile.flags`, the existing dictionary) |
 |---|---|---|
-| 1 | "Once, men begged the gods…" | The hall at its height from the doors, slow push in. Warm light, fires, banners. |
-| 2 | "Then men became gods." | From the floor, up at the seat at the end of the hall. |
-| 3 | "They built bodies that could not grow old…" | A track along a line of armoured figures (guardian models, standing still), each a shape against firelight. |
-| 4 | "But even eternity could not protect them…" | Back at the doors, handheld; a red light grows behind the camera. |
-| 5 | "The crowns shattered…" | Dip through black (0.35 s out, 0.9 s in): the same hall, cold, fogged, fires dead, the figures down. Pulling back. |
-| 6 | (same line, second half) | One of the fallen, close, from floor height. |
-| 7 | "We were wrong." | Down the length of the dark floor: lamps set in the aisle come on one after another toward the seat, then the seat itself, in the wrong colour. Hold 2.6 s, cut to black. |
+| Generation I ends (played or skipped) | `Prologue.finished` | `gen1_complete = true`; `gen1_clash = "ahead" / "even" / "behind" / ""` (empty if skipped before the clash); `inherited_weapon = <item id>` |
+| First time jump ends | `TimeJump.finished` | none |
+| Generation II arrives | `Arrival.finished` | `generation = 2` (written when the scene starts) |
+| Generation II falls | to be emitted by that pass | wanted: `gen2_complete`, and the snapshot below |
+| Second time jump | `main.show_time_jump(24, 2, 3, then)` | none |
+| Generation III arrives | `Arrival` with `gen = 3` | `generation = 3` |
 
-Any tap after 2 s ends it ("TAP TO SKIP", top right). Nothing is named and nothing is explained.
+Missing from `Game` and worked around here: there is no way to dress or fight as anyone but `Game.profile`, so Generation I swaps the profile for the length of a duel. A `Duel.setup` option naming the profile to fight as (and a `player_look(profile)` argument) would remove the swap and the scratch save folder. There is no flag API beyond the dictionary itself; it was enough.
+
+**The inherited sword.** Today the hand-over is by identity: the forebear fights with the item id the player's knight has equipped, and `Awakening` stands that same equipped weapon in the block. When generations get their own data, Generation I should own the item and its record (`Game.item_record(id)`: tier, mods, edge) and the Engine should move that record into Generation II's inventory at "TAKE UP YOUR SWORD"; the scenes need no change, only `Prologue.inherited_sword()`.
+
+**The Kept: what must be captured at the Generation II fall** (one dictionary, stored with the campaign, never edited afterwards):
+- `body` ("m" / "f") and `name`, `heraldry`.
+- `look`: the result of `Duel.player_look()` at that moment. It already resolves all six armour slots through `Game.appearance_loadout()` (so cosmetics, finishes and "look as" are in it), the weapon model with `gear_mod` (the forge mods as they are drawn), and the shield.
+- `equipped`: the item id in every slot, and for the weapon and shield `Game.item_record(id)` (upgrade tier, mods, edge) so its numbers can be rebuilt.
+- `stats`: `Game.stats()` (health, damage, stamina, shield blocks) so the foe is as strong as the player was, not as strong as a table says.
+- `combos`: the five highest entries of `profile.combo_uses` with their counts, each with its sequence of directions from `Db.combo_by_id`.
+- `level`, `playtime`, and the count of guardians beaten, for the record screen.
+
+**How a duel can build that foe with what exists.** There is no "mirror" option in `duel_sim.gd` or `duel_bot.gd`: the bot plays the player's side only, and the sim's foe is driven by data. What exists and is enough for most of it: `Duel.setup(foe_id)` reads `Db.foes[foe_id]`, a plain dictionary, so a record can be added at run time. Its `rig` is used as the look (`foe.rig.duplicate()`), and because the weapon model is merged without overwriting, a `rig` that already carries `skin`, `parts`, `weapon_model`, `gear`, `gear_mod` and `shield` (that is, the saved `look` plus `scale`) is drawn as saved provided the record's `cls` names no class model and no `assets/models/<id>.glb` exists. `hp` and the attack damage come from the saved `stats`; `phases[].combos[]` are lists of attacks with a direction each, so each saved combination becomes one foe combo (same directions, windups from the weapon class); `arena` chooses the place; `speech` and `foe_voice` in `data/dialogue.json` need an entry for it to speak. **Missing:** (1) this has not been run: whether `FighterRig.build(look, true)` draws armour parts and a hand-modelled weapon correctly on the foe's side is unverified; (2) foes do not raise a shield or dodge in the sim, so the Kept would attack like the player but not defend like them; (3) the voice: the player's takes exist only for the lines the player had. All three belong to the generational pass.
 
 ### Awakening (`--screen=awakening`, `--from=sword` starts at the prompt, `--auto` answers it)
 The `chamber` arena (new: a round stone-and-metal room, the cradle, machine pylons, a block with the sword in it, one door).
@@ -58,7 +94,7 @@ The knight is `Duel.player_look()`: the chosen body and whatever is equipped.
 | The door | The panel slides up, daylight floods in, `first_road` plays ("The doors above you open…"). The knight turns and walks out. | Behind the knight, riding with them, to white. |
 
 ### Approach (`--screen=approach`)
-The region's own arena, built once. The knight walks 8 m to the stop's standing point with the camera at the offset the
+The region's own arena, built once. The knight walks 11 m to the stop's standing point with the camera at the offset the
 Awakening ended on. On arrival the camera eases to the road screen's view; if `first_road` is still being spoken the
 knight waits for it (at most 14 s), then the road screen adopts the place.
 
@@ -74,10 +110,7 @@ Continue → the sanctuary of the latest save (0.35 s fade). It never plays the 
 progress is not stored in a save (a run ends with the session), so there is nowhere further along to return to.
 
 ## Seen before
-`Opening.SEEN_FILE` (`user://opening_seen`, beside the settings, not in a save slot) is written when the opening ends or
-is skipped. Later new journeys go from character select straight to the chamber. The menu then shows a small
-"Watch the Opening" at the bottom right; it plays the opening and returns to the menu. The chamber always plays for a
-new knight: it is where that knight begins, and its lines can be tapped through.
+`Opening.SEEN_FILE` (`user://opening_seen`, beside the settings, not in a save slot) is written when Generation I ends or is skipped through. Later new journeys go from character select straight to the chamber: no Generation I, no time jump, no arrival. The menu then shows a small "Watch the Opening" at the bottom right; it plays Generation I (duels included) and returns to the menu. The chamber always plays for a new knight. New Game Plus does not pass through any of this.
 
 ## Where a wait or a cut is still shown
 | Where | What the player sees | Why |
@@ -91,7 +124,9 @@ new knight: it is where that knight begins, and its lines can be tapped through.
 | Opening and chamber shot changes | Hard cuts | Ordinary cutting between shots of one scene. |
 
 ## Dev screens
-`--screen=opening [--shot=N]`, `--screen=awakening [--from=sword] [--auto]`, `--screen=approach [--auto]`,
+`--screen=prologue [--beat=1..5] [--shot=1..6] [--auto] [--body=m|f]`, `--screen=timejump [--years=22 --from=1 --to=2]`,
+`--screen=arrival [--shot=1..6] [--gen=1..3] [--body=m|f]`, `--screen=title --vista`, `--screen=opening [--shot=N]` (the retired hall opening),
+`--screen=awakening [--from=sword] [--auto]`, `--screen=approach [--auto]`,
 `--screen=newgame [--body=m|f] [--auto] [--seen] [--bot]` (the whole chain from character select; `--auto` confirms the
-knight after 2.5 s, answers the sword prompt and takes the first way onward at each stop; `--seen` passes over the
-opening; `--bot` lets a bot fight and skips the lesson).
+knight after 2.5 s, lets a bot fight Generation I's duels, answers the sword prompt and takes the first way onward at each stop; `--seen`
+passes over Generation I; `--bot` lets a bot fight on the road and skips the lesson).

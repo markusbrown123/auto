@@ -8,9 +8,12 @@ extends Node3D
 ##   beat 1  the road       six designed shots; the recorded narrator over them, then the new narration
 ##   beat 2  the throne     the exchange with the Monarch; the guardian steps out
 ##   beat 3  the guardian   a real duel (the game's own), winnable, retried if lost; it teaches cut and guard
-##   beat 4  the records    the reach for the seal, and a real clash with the Monarch that is cut short by the
-##                          story at a threshold, whoever is ahead: he seals the hall rather than finish it
-##   beat 5  the fall       the transmission, the last exchange, the family's mark, the narrator's close
+##   beat 4  the records    the reach for the seal, and a real clash with the Monarch. The story takes it from the
+##                          player while they are doing well: on a cut that lands, once a few have, the hall is
+##                          sealed. It is not lost on health and the fight is not rigged.
+##   beat 5  the fall       the chamber behind the seal (the Inheritance Engine: the same room the heir wakes in).
+##                          The forebear drives the sword into its block to send the records, and dies where the
+##                          heir will come to. The sword stays in the block: it is the item the heir takes up.
 ##
 ## Both duels are the game's own Duel. For their length Game.profile is the forebear's (so the knight on screen
 ## and the numbers are theirs) and anything saved goes to a scratch folder, never to a save slot.
@@ -19,11 +22,13 @@ extends Node3D
 signal finished
 
 const GUARDIAN := "throne_guard"          # who plays the Royal Gatekeeper
-const CLASH_TIME := 30.0                  # the Monarch ends the clash after this long,
-const CLASH_HURT := 0.45                  # or when the forebear is this far down,
-const CLASH_DENT := 0.86                  # or when he himself is (so a strong player is answered, not cheated)
-## The first of the house: a veteran in the garrison's weathered silver, a clean sword, a practical shield.
-const KIT := ["w_knight_sword", "s_garrison", "a_garrison_helm", "a_garrison_chest", "a_garrison_gauntlets", "a_garrison_legs"]
+const CLASH_MIN := 9.0                    # the clash is the player's for at least this long;
+const CLASH_CUTS := 4                     # then the cut that makes this many landed is the one the story answers
+const CLASH_TIME := 32.0                  # (or this long, for a player who lands none)
+const CLASH_FLOOR := 0.25                 # safety only: the forebear is never let die to an ordinary blow here
+## The first of the house: a veteran in the garrison's weathered silver and a practical shield. The sword is not
+## in this list: it is the very item the player's knight will carry (see forebear()).
+const KIT := ["s_garrison", "a_garrison_helm", "a_garrison_chest", "a_garrison_gauntlets", "a_garrison_legs"]
 const SEAL := Vector3(6.2, 0, -8.2)       # where the records are, in the hall
 const MONARCH_AT := Vector3(0, 0, -8.6)
 
@@ -44,6 +49,7 @@ var _token := 0
 var _over := false
 var _clock := 0.0
 var _fight_t := 0.0
+var _cuts := 0                    # cuts the player has landed in the clash
 var _kept := {}                   # what a duel borrows from Game, to give back
 var _seal_light: OmniLight3D
 var _alarm: OmniLight3D
@@ -77,7 +83,24 @@ static func forebear() -> Dictionary:
 			if not p.inventory.has(id):
 				p.inventory.append(id)
 			p.equipped[str(Db.item(id).slot)] = id
+	# the sword is the heir's own: the same item, with whatever has been done to it (blade tier, mods, edge)
+	var sword := inherited_sword()
+	if not p.inventory.has(sword):
+		p.inventory.append(sword)
+	p.equipped.weapon = sword
+	if not Game.profile.is_empty():
+		for rec: String in ["upgrades", "mods", "edge"]:
+			if Game.profile.get(rec, {}).has(sword):
+				p[rec][sword] = Game.profile[rec][sword]
 	return p
+
+## The item that passes down: what the player's knight has in hand, if it is a one-handed sword a shield goes with.
+static func inherited_sword() -> String:
+	if not Game.profile.is_empty():
+		var id := str(Game.profile.equipped.get("weapon", ""))
+		if Db.items.has(id) and str(Db.item(id).get("cls", "")) == "sword":
+			return id
+	return "w_knight_sword"
 
 ## How the forebear looks, by the same code that dresses the player's knight.
 static func forebear_look() -> Dictionary:
@@ -169,6 +192,7 @@ func _end() -> void:
 	if not Game.profile.is_empty():
 		Game.profile.flags["gen1_complete"] = true
 		Game.profile.flags["gen1_clash"] = clash_result
+		Game.profile.flags["inherited_weapon"] = inherited_sword()
 	finished.emit()
 
 func _process(delta: float) -> void:
@@ -229,6 +253,15 @@ func _hall(with_guard: bool) -> void:
 	var arena := Arena.new()
 	hall.add_child(arena)
 	arena.build("throne")
+	# the hall at its height: warm, bright, the fires fed (as the old opening lit it)
+	arena.env.ambient_light_energy = 2.2
+	arena.env.tonemap_exposure = 1.75
+	var crown := OmniLight3D.new()
+	crown.light_color = Color("#ffd890")
+	crown.light_energy = 3.2
+	crown.omni_range = 9.0
+	crown.position = MONARCH_AT + Vector3(1.2, 3.4, 2.6)
+	hall.add_child(crown)
 	cam = CineCam.new()
 	hall.add_child(cam)
 	hero = CineActor.new()
@@ -347,6 +380,8 @@ func _fight(foe_id: String, opts: Dictionary) -> void:
 	opts["skip_intro"] = true
 	duel.setup(foe_id, opts)
 	_fight_t = 0.0
+	_cuts = 0
+	duel.sim.ev.connect(_on_duel_ev)
 
 ## One line of instruction, in the fight's own terms, as the moment for it comes.
 func _duel_tick(delta: float) -> void:
@@ -364,15 +399,26 @@ func _duel_tick(delta: float) -> void:
 			cards.say("", delta)
 		return
 	cards.say("", delta)
-	# the clash with the Monarch: the story takes it at a threshold, whoever is ahead
-	var mine: float = float(sim.pl.hp) / maxf(float(sim.pl.max_hp), 1.0)
-	var his: float = sim.b_hp / maxf(sim.b_hp_max, 1.0)
-	if _fight_t >= CLASH_TIME or mine <= CLASH_HURT or his <= CLASH_DENT:
-		clash_result = "ahead" if (1.0 - his) * 3.0 > (1.0 - mine) else ("behind" if mine <= CLASH_HURT else "even")
-		sim.paused = true
-		var d := duel
-		duel = null
-		_sealed(d, _token)
+	# the clash with the Monarch: a player who lands nothing is not kept there for ever, nor let die to a stray blow
+	if _fight_t >= CLASH_TIME or float(sim.pl.hp) / maxf(float(sim.pl.max_hp), 1.0) <= CLASH_FLOOR:
+		_take_clash("even" if _cuts > 0 else "behind")
+
+## The story's blow comes on the player's own: the cut that lands, once enough have. Doing well is what triggers it.
+func _on_duel_ev(n: StringName, _e: Dictionary) -> void:
+	if beat != 4 or duel == null or n != &"boss_hit":
+		return
+	_cuts += 1
+	if _cuts >= CLASH_CUTS and _fight_t >= CLASH_MIN:
+		_take_clash("ahead")
+
+func _take_clash(how: String) -> void:
+	if duel == null:
+		return
+	clash_result = how
+	duel.sim.paused = true
+	var d := duel
+	duel = null
+	_sealed(d, _token)
 
 # ---------------------------------------------------------------- beat 3: the royal guardian
 func _beat_guardian(me: int) -> void:
@@ -444,47 +490,106 @@ func _sealed(d: Duel, me: int) -> void:
 	_begin(5)
 
 # ---------------------------------------------------------------- beat 5: the fall
+## Behind the seal: the Inheritance Engine. This is the `chamber` set, the room the heir wakes in (Awakening),
+## and everything is left as that scene finds it: the sword in its block, and the place by the cradle.
 func _beat_fall(me: int) -> void:
-	_hall(false)
-	Sfx.music("", 2.5)
-	# the hall is shut: its light is the alarm's, and the seal's
+	hall = Node3D.new()
+	add_child(hall)
+	var arena := Arena.new()
+	hall.add_child(arena)
+	arena.build("chamber")
+	arena.env.ambient_light_energy = 1.3
+	var rack: Node3D = arena.get_node("Rack")
+	(arena.get_node("Lyra") as OmniLight3D).light_energy = 0.6
+	cam = CineCam.new()
+	hall.add_child(cam)
+	hero = CineActor.new()
+	hall.add_child(hero)
+	hero.build(forebear_look(), false)
+	hero.footsteps = true
+	monarch = FighterRig.new()
+	hall.add_child(monarch)
+	monarch.build(CineActor.foe_look("forgotten_monarch"), true)
+	monarch.position = Vector3(0, 0, -7.4)
+	monarch.rotation.y = PI
+	monarch.time_scale = 0.7
+	var key := SpotLight3D.new()
+	key.light_color = Color("#ffd9a0")
+	key.light_energy = 4.0
+	key.spot_range = 10.0
+	key.spot_angle = 42.0
+	key.position = Vector3(0.6, 5.0, 3.4)
+	hall.add_child(key)
+	key.look_at(Vector3(1.4, 0.6, 0.2))
 	_alarm = OmniLight3D.new()
 	_alarm.light_color = Color("#ff4a22")
-	_alarm.omni_range = 30.0
-	_alarm.position = Vector3(0, 6.0, 9.0)
+	_alarm.omni_range = 14.0
+	_alarm.position = Vector3(0, 3.2, -5.0)
 	hall.add_child(_alarm)
-	hero.position = SEAL + Vector3(-1.0, 0, 0.7)
-	hero.rotation.y = -PI * 0.5 - 0.3
-	monarch.position = Vector3(1.6, 0, -3.0)
-	monarch.time_scale = 0.7
-	_face(monarch, hero.position, 0.01)
-	_seal_light.light_energy = 3.0
-	cam.cut(Vector3(1.8, 1.3, -4.2), SEAL + Vector3(-0.4, 1.3, 0.4), 40.0)
-	cam.move(Vector3(2.6, 1.4, -5.0), SEAL + Vector3(-0.4, 1.3, 0.4), 9.0)
+	_seal_light = OmniLight3D.new()
+	_seal_light.light_color = Color("#5fe0c8")
+	_seal_light.light_energy = 0.4
+	_seal_light.omni_range = 7.0
+	_seal_light.position = rack.position + Vector3(-0.5, 1.5, 0.6)
+	hall.add_child(_seal_light)
+	Sfx.ambience("crypt")
+	Sfx.music("", 2.5)
+	# through the door as it comes down, hurt, and straight to the block
+	hero.position = Vector3(0.3, 0, -4.4)
+	var at_block: Vector3 = rack.position + Vector3(-0.75, 0, 0.6)
+	cam.cut(Vector3(4.9, 1.5, 2.4), rack.position + Vector3(-0.6, 1.1, 0.0), 44.0)
+	cam.move(Vector3(4.5, 1.4, 1.6), rack.position + Vector3(-0.4, 1.1, 0.2), 7.0)
+	var door: Node3D = arena.get_node("Door")
+	door.position.y = 5.2
+	(arena.get_node("DoorGlow") as OmniLight3D).light_energy = 2.0
+	door.create_tween().tween_property(door, "position:y", 1.65, 2.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	create_tween().tween_property(arena.get_node("DoorGlow"), "light_energy", 0.0, 2.4)
+	Sfx.play("shield_scrape", -8.0, 0.5)
 	cards.fade(0.0, 0.8)
-	Story.play("gen1_seal", true)
-	# the records go out through the seal while he speaks
-	create_tween().tween_property(_seal_light, "light_energy", 9.0, 7.0)
-	if not await _until("gen1_seal", 1, me):
+	await _walk(hero, at_block, 1.05).finished
+	if me != _token or _over:
 		return
-	hero.hold("wounded", 2.2)
-	cam.cut(Vector3(4.6, 0.7, -5.2), monarch.position + Vector3(0, 2.2, 0), 38.0)
-	cam.move(Vector3(4.9, 0.8, -5.6), monarch.position + Vector3(0, 2.2, 0), 5.0)
-	if not await _until("gen1_seal", 2, me):
+	_face(hero, rack.position, 0.5)
+	if not await _w(0.7, me):
 		return
-	cam.cut(Vector3(3.2, 0.55, -6.4), SEAL + Vector3(-0.8, 0.8, 0.6), 36.0)
-	cam.move(Vector3(3.0, 0.6, -6.1), SEAL + Vector3(-0.8, 0.8, 0.6), 6.0)
-	if not await _spoken(me):
-		return
+	# the sword goes into the block, and stays there: what was found goes out through it
+	hero.set_armed(false)
+	var blade := Node3D.new()
+	rack.add_child(blade)
+	var look: Dictionary = hero.cfg
+	var length := PropModel.weapon(blade, str(look.get("weapon_model", "")), str(look.get("weapon", "sword")), look.get("weapon_tint"), float(look.get("weapon_scale", 1.0)))
+	blade.rotation = Vector3(PI, 0.4, 0.06)
+	blade.position = Vector3(0, 0.42 + maxf(length, 0.6) * 0.86, 0)
+	Sfx.play("swing", -6.0, 0.7)
 	Sfx.play("levelup", -8.0, 0.5)
 	var flare := create_tween()
-	flare.tween_property(_seal_light, "light_energy", 26.0, 0.9)
-	flare.tween_property(_seal_light, "light_energy", 0.0, 1.4)
-	if not await _w(1.2, me):
+	flare.tween_property(_seal_light, "light_energy", 14.0, 0.5)
+	flare.tween_property(_seal_light, "light_energy", 3.5, 2.5)
+	if not await _w(1.6, me):
+		return
+	# and then the few steps to the foot of the cradle, which is as far as there is
+	Story.play("gen1_seal", true)
+	await _walk(hero, Awakening.SEAT, 0.8).finished
+	if me != _token or _over:
+		return
+	hero.create_tween().tween_property(hero, "rotation:y", PI, 1.2)
+	hero.hold("wounded", 2.4)
+	cam.cut(Vector3(-2.6, 1.1, 5.2), Vector3(0.4, 1.0, -2.0), 42.0)
+	cam.move(Vector3(-2.0, 0.9, 5.0), Vector3(0.6, 0.9, -2.0), 9.0)
+	if not await _until("gen1_seal", 2, me):
+		return
+	# the last word is the forebear's: low and close, where the heir will be found
+	cam.cut(Vector3(0.75, 0.42, 3.45), Vector3(0.0, 0.72, 1.7), 40.0)
+	cam.move(Vector3(0.95, 0.5, 3.75), Vector3(0.0, 0.78, 1.7), 7.0)
+	if not await _spoken(me):
+		return
+	create_tween().tween_property(key, "light_energy", 0.0, 2.2)
+	if not await _w(1.4, me):
 		return
 	await cards.fade(1.0, 1.4)
 	if me != _token or _over:
 		return
+	_alarm = null
 	# the family's mark, and what was written of them
 	cards.show_item(cards.emblem, 6.0, 1.6)
 	Story.play("gen1_close_" + body(), true)

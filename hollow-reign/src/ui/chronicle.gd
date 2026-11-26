@@ -208,12 +208,20 @@ func _tab_completion() -> void:
 	if who != "":
 		_body.add_child(UI.label("You are known as %s." % who, 19, UI.GOLD))
 	_body.add_child(_meter(float(c.pct)))
-	var bits: Array = []
-	for cat: String in c.categories:
-		bits.append("%s  %d / %d" % [c.categories[cat].name, int(c.categories[cat].done), int(c.categories[cat].total)])
-	_body.add_child(UI.wrapped("   ·   ".join(bits), 18, UI.BONE, 820))
+	_body.add_child(_counts(c.categories, 18))
 	for line: String in c.remains:
 		_body.add_child(UI.wrapped("Something remains:  " + line, 18, UI.DIM.lightened(0.25), 820))
+	_body.add_child(UI.spacer(8))
+	for r: Dictionary in c.regions:
+		if not r.unlocked:
+			continue
+		_head(str(r.name), "%s%%" % _pct_text(float(r.pct)))
+		_body.add_child(_meter(float(r.pct)))
+		_body.add_child(_counts(r.categories, 17))
+		for line: String in r.remains:
+			_body.add_child(UI.wrapped("Something remains here:  " + line, 17, UI.DIM.lightened(0.25), 820))
+		_body.add_child(UI.spacer(8))
+	_body.add_child(UI.label("Roads not yet reached are not listed.", 18, UI.GOLD_DIM.lightened(0.3)))
 	_body.add_child(UI.spacer(8))
 	_head("Milestones")
 	for m: Dictionary in c.milestones:
@@ -223,20 +231,17 @@ func _tab_completion() -> void:
 		_head("Kept in the sanctuary", "%d" % held.size())
 		for id: String in held:
 			_entry(Secrets.label_of("trophy", id), str(Secrets.data().trophies.get(id, {}).get("text", "")), UI.BONE)
-	_body.add_child(UI.spacer(8))
-	for r: Dictionary in c.regions:
-		if not r.unlocked:
-			continue
-		_head(str(r.name), "%s%%" % _pct_text(float(r.pct)))
-		_body.add_child(_meter(float(r.pct)))
-		var parts: Array = []
-		for cat: String in r.categories:
-			parts.append("%s  %d / %d" % [r.categories[cat].name, int(r.categories[cat].done), int(r.categories[cat].total)])
-		_body.add_child(UI.wrapped("   ·   ".join(parts), 17, UI.BONE, 820))
-		for line: String in r.remains:
-			_body.add_child(UI.wrapped("Something remains here:  " + line, 17, UI.DIM.lightened(0.25), 820))
-		_body.add_child(UI.spacer(8))
-	_body.add_child(UI.label("Roads not yet reached are not listed.", 18, UI.GOLD_DIM.lightened(0.3)))
+
+## "Stops walked 21 / 56" and the rest, each kept whole on its line.
+func _counts(cats: Dictionary, size: int) -> Control:
+	var flow := HFlowContainer.new()
+	flow.custom_minimum_size.x = 820
+	flow.add_theme_constant_override("h_separation", 26)
+	flow.add_theme_constant_override("v_separation", 2)
+	for cat: String in cats:
+		var whole: bool = int(cats[cat].done) == int(cats[cat].total)
+		flow.add_child(UI.label("%s  %d / %d" % [cats[cat].name, int(cats[cat].done), int(cats[cat].total)], size, UI.GOLD if whole else UI.BONE))
+	return flow
 
 func _pct_text(v: float) -> String:
 	return "%d" % int(v) if is_equal_approx(v, roundf(v)) else "%.1f" % v

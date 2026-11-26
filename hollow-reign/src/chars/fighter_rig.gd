@@ -421,6 +421,10 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 	elif _gear != "":
 		# hand-modelled gear is already in the rig's conventions and in metres: placed by its manifest, never measured
 		var h := GearModel.hold(_gear)
+		var ws := float(look.get("weapon_scale", 1.0))      # (a foe's own scaling of what it carries)
+		for k: String in ["scale", "len", "pommel", "off_hand", "half"]:
+			h[k] = float(h[k]) * ws
+		_gear_hold = h
 		var low := int(Game.settings.get("quality", 1)) == 0
 		for n: Node3D in ([weapon_r, weapon_l] if dual else [weapon_r]):
 			var g := GearModel.spawn(_gear, 9.0, low, look.get("gear_mod", {}))
@@ -462,7 +466,7 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 	_blade_half = 0.11 if kind in ["axe", "cleaver"] else (0.05 if kind in ["greatsword", "glaive"] else 0.025)
 	if _gear != "":
 		# the manifest's own measurements: where the pommel ends, where the second hand closes, how wide the blade is
-		var h2 := GearModel.hold(_gear)
+		var h2 := _gear_hold
 		_pommel = float(h2.pommel)
 		_off_grip = float(h2.off_hand) if two_handed else clampf(_pommel * 0.62, 0.08, 0.22)
 		_blade_half = float(h2.half)
@@ -470,6 +474,7 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 	if dual or two_handed:
 		set_shield(null)
 
+var _gear_hold := {}
 var _gear := ""                # the hand-modelled piece in the sword hand (GearModel id), "" for a fitted or built weapon
 var _pommel := 0.14
 var _blade_half := 0.025      # half the width of the blade or axe head: what must also clear the body

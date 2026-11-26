@@ -86,6 +86,7 @@ func music(track: String, fade: float = 1.5) -> void:
 	if track == _music_name:
 		return
 	_music_name = track
+	set_intensity("explore" if (track.begins_with("explore") or track == "menu") else "combat")
 	set_layer("", 0.5)
 	var old: AudioStreamPlayer = _music[_music_i]
 	_music_i = 1 - _music_i
@@ -102,6 +103,27 @@ func music(track: String, fade: float = 1.5) -> void:
 	tw.chain().tween_callback(old.stop)
 
 ## A second track played in sync over the current one (boss phase intensity).
+## Adaptive music: the same cue is opened up, held back or muffled as the fight changes.
+## "explore" soft and distant · "combat" full · "danger" muffled, as if heard through blood.
+const INTENSITY := {"explore": [5200.0], "combat": [20000.0], "danger": [1500.0]}
+var _intensity := ""
+var _filter: AudioEffectLowPassFilter
+func set_intensity(state: String, fade: float = 0.8) -> void:
+	if state == _intensity or not INTENSITY.has(state):
+		return
+	_intensity = state
+	var idx := AudioServer.get_bus_index("Music")
+	if idx < 0:
+		return
+	if _filter == null:
+		_filter = AudioEffectLowPassFilter.new()
+		_filter.cutoff_hz = 20000.0
+		AudioServer.add_bus_effect(idx, _filter)
+	create_tween().tween_property(_filter, "cutoff_hz", float(INTENSITY[state][0]), fade)
+
+func current_music() -> String:
+	return _music_name
+
 func set_layer(track: String, fade: float = 1.2) -> void:
 	if _layer_tween:
 		_layer_tween.kill()
@@ -129,3 +151,4 @@ func ambience(track: String) -> void:
 		if s:
 			_amb.stream = s
 			_amb.play()
+

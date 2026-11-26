@@ -335,6 +335,10 @@ func _process(delta: float) -> void:
 		ts = 0.35
 	player_rig.time_scale = ts
 	foe_rig.time_scale = ts
+	if stage == Stage.FIGHT:
+		Sfx.set_intensity("danger" if sim.pl.hp < sim.pl.max_hp * 0.3 else "combat")
+	elif stage == Stage.DONE:
+		Sfx.set_intensity("explore", 1.5)
 	match stage:
 		Stage.INTRO:
 			if _stage_t > 4.6 and not _intro_talk:
@@ -671,8 +675,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			_set_foe_blade_warning(false)
 			Sfx.play("roar", 0.0, 0.8)
 			Sfx.play("bell", -6.0)
-			if str(foe.music) == "combat_a":
-				Sfx.set_layer("combat_b")
+			if Sfx.current_music() == "combat_a":
+				Sfx.set_layer("combat_b")      # the layer was written against this cue only
 			var eye := Color(str(foe.rig.get("eye", "#ff6a2a")))
 			arena.tint(eye, 0.3 * int(d.phase))
 			sparks(foe_rig.chest_point(), Vector3.UP, 40, eye, 7.0)

@@ -241,6 +241,16 @@ B.append(dict(id="hollow_executioner", name="The Hollow Executioner", title="Las
    C("breaker2",3,[A("D",1.1,22,guard=90,kind="slam"),A("U",0.8,22,guard=90,kind="thrust")],1.6,tags=("anti_block",)),
    C("frenzy",3,[A("DL",0.9,22),A("DR",0.65,22),A("DL",0.65,22),A("D",1.3,34,swing=0.24,kind="slam")],2.2,tags=("anti_dodge",)),
    C("reap",2,[A("R",1.4,38,unblockable=True,dodge="none",kind="sweep")],1.8,tags=("anti_block","anti_dodge")),
+  ]),
+  # the docket is nearly cleared: he reads the sentence aloud between blows and gives no ground
+  dict(at=0.25, speed=1.2, roar="He stops, sets the cleaver down, and recites a name. It is not yours. He picks the cleaver up again.", combos=[
+   C("hack_l",2,[A("DL",0.8,28)],1.1),
+   C("hack_r",2,[A("DR",0.8,28)],1.1),
+   C("due_process",3,[A("DL",0.85,24),A("DR",0.6,24),A("DL",0.6,24),A("DR",0.6,24),A("D",1.2,38,swing=0.24,kind="slam")],2.3,tags=("anti_dodge",)),
+   C("feint_chop",3,[A("D",2.4,44,swing=0.22,kind="slam")],1.7,tags=("anti_parry",)),
+   C("breaker2",3,[A("D",1.0,24,guard=100,kind="slam"),A("U",0.75,24,guard=100,kind="thrust")],1.5,tags=("anti_block",)),
+   C("seize",2,[A("U",1.2,30,unblockable=True,parry=False,dodge="R",kind="thrust")],1.7,tags=("anti_block","anti_parry")),
+   C("reap",2,[A("R",1.3,40,unblockable=True,dodge="none",kind="sweep")],1.8,tags=("anti_block","anti_dodge")),
   ])]))
 # ---------------------------------------------------------------- 3 Crimson Widow
 B.append(dict(id="crimson_widow", name="The Crimson Widow", title="Commander of the Last Rising", region="cathedral", boss=True,
@@ -316,6 +326,16 @@ B.append(dict(id="gravewarden", name="The Gravewarden", title="Keeper of the Sun
    C("bury",3,[A("D",2.2,46,swing=0.24,kind="slam")],1.7,tags=("anti_parry",)),
    C("four",3,[A("L",1.0,26),A("R",0.75,26),A("U",0.75,26),A("D",1.0,38,kind="slam")],2.1,tags=("anti_dodge",)),
    C("tide",2,[A("R",1.5,40,unblockable=True,dodge="none",kind="sweep")],1.8,tags=("anti_block","anti_dodge")),
+  ]),
+  # he stops defending the vault and starts apologising to it: slower to begin, heavier, and he will not be moved
+  dict(at=0.22, speed=1.05, roar="He turns his back on you for a moment and lays a hand on the nearest tomb. Then he turns round.", combos=[
+   C("lay_to_rest",3,[A("D",2.4,54,swing=0.24,kind="slam")],1.8,tags=("anti_parry",)),
+   C("spade",3,[A("D",1.15,40,guard=120,kind="slam")],1.5,tags=("anti_block",)),
+   C("six_feet",3,[A("L",0.95,28),A("R",0.7,28),A("L",0.7,28),A("U",0.75,28),A("D",0.95,42,kind="slam")],2.4,tags=("anti_dodge",)),
+   C("toll",2,[A("U",1.3,34,kind="lunge")],1.6,range="far"),
+   C("tide",2,[A("L",1.4,42,unblockable=True,dodge="none",kind="sweep")],1.8,tags=("anti_block","anti_dodge")),
+   C("sweep_l",2,[A("L",0.95,32)],1.3),
+   C("sweep_r",2,[A("R",0.95,32)],1.3),
   ])]))
 # ---------------------------------------------------------------- 5 Frostbound King
 B.append(dict(id="frostbound_king", name="The Frostbound King", title="Sovereign of the Frozen Citadel", region="citadel", boss=True,

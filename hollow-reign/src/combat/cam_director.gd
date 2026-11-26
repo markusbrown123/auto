@@ -18,9 +18,9 @@ const PRIORITY := {"exchange": 1, "phase": 3, "clash": 4, "struggle": 5, "reveal
 ## look_x: sideways aim (negative puts the foe further right of the knight); wide: how much the
 ## cinematic shots open up for it.
 const CLASS := {
-	"humanoid": {"side": 1.3, "back": 1.15, "y": 0.55, "fov": 60.0, "look_h": 0.92, "look_x": -0.15, "wide": 1.0},
-	"giant": {"side": 1.45, "back": 1.3, "y": 0.4, "fov": 66.0, "look_h": 1.06, "look_x": -0.2, "wide": 1.0},
-	"dragon": {"side": 2.1, "back": 2.6, "y": 0.45, "fov": 72.0, "look_h": 0.8, "look_x": -0.3, "wide": 1.5},
+	"humanoid": {"side": 1.35, "back": 1.0, "y": 1.2, "fov": 54.0, "look_h": 1.12, "look_x": -0.25, "wide": 1.0},
+	"giant": {"side": 1.45, "back": 1.05, "y": 0.95, "fov": 58.0, "look_h": 1.05, "look_x": -0.25, "wide": 1.0},
+	"dragon": {"side": 2.2, "back": 2.4, "y": 0.8, "fov": 68.0, "look_h": 0.8, "look_x": -0.3, "wide": 1.5},
 }
 const ARENA_R := 8.4          # the arena is about 9 m across its radius: stay inside the props
 const MIN_Y := 0.25
@@ -272,6 +272,9 @@ func _shot_reverse() -> Dictionary:
 ## left corner and the foe towers. `back` widens (metres), `round` swings toward side-on.
 func _combat(back: float, round: float, lift: float, dfov: float) -> Dictionary:
 	var c: Dictionary = CLASS[cls]
+	if OS.has_environment("HR_CAM"):      # dev tuning: side,back,y,fov,look_h,look_x
+		var v := OS.get_environment("HR_CAM").split_floats(",")
+		c = {"side": v[0], "back": v[1], "y": v[2], "fov": v[3], "look_h": v[4], "look_x": v[5]}
 	var far := 0.1 if duel.sim.b_far else 0.0
 	back += far - 0.18 * _tight + 0.7 * _wide
 	return {"pos": Vector3(float(c.side) + _side + duel.p_side * 0.6 + round + 0.25 * _wide, float(c.y) + lift + 0.1 * _wide, _K.z + float(c.back) + back),
@@ -298,9 +301,9 @@ func _shot_opening() -> Dictionary:
 func _shot_clash() -> Dictionary:
 	var s := _shot_combat()
 	var at: Vector3 = _ring(_cue_params.get("at", duel.player_rig.chest_point()))
-	var strong := 0.42 if _cue_params.get("perfect", false) else 0.32
+	var strong := 0.36 if _cue_params.get("perfect", false) else 0.28
 	s.pos = (s.pos as Vector3).lerp(at + Vector3(0.5, -0.1, 0.3), strong)
-	s.look = (s.look as Vector3).lerp(at, 0.6)
+	s.look = (s.look as Vector3).lerp(at, 0.45)
 	s.fov = float(s.fov) - (8.0 if _cue_params.get("perfect", false) else 6.0)
 	s.rate = 16.0
 	return s

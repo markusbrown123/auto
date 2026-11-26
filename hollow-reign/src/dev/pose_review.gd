@@ -1,0 +1,421 @@
+extends Node3D
+## Dev: animation QA. One rig in a neutral lit room on a floor grid; every state is played, measured on the real
+## skinned vertices every frame (lowest point, blade through the wielder, shield through the body, joint angles),
+## and rendered FRONT / SIDE / BACK into one sheet per state.
+##
+##   xvfb-run -a -s "-screen 0 420x460x24" godot --path . --rendering-method mobile --resolution 420x460 --fixed-fps 30 \
+##       res://src/dev/pose_review.tscn -- --out=<dir> [--model=<glb>] [--body=f] [--gear=w_x,s_y] [--foe=<foe id>]
+##       [--witness] [--poses=guard,cut_R,...] [--noshots] [--zoom=1.0] [--aim=0,1,0]
+## With --headless and --noshots it only prints the measurements.
+
+const VIEWS := [["front", Vector3(0, 0, -1)], ["side", Vector3(1, 0, 0)], ["back", Vector3(0, 0, 1)]]
+const DIRS := {"R": Vector2(1, 0), "L": Vector2(-1, 0), "U": Vector2(0, 1), "D": Vector2(0, -1),
+	"UR": Vector2(0.7, 0.7), "UL": Vector2(-0.7, 0.7), "DR": Vector2(0.7, -0.7), "DL": Vector2(-0.7, -0.7)}
+
+var _args := {}
+var rig: Node3D
+var cam: Camera3D
+var _is_dragon := false
+var _as_foe := false
+var _look := {}
+var _parts: Array = []        # per skinned mesh: {mi, skel, pos, bones, weights, nb, dom, binds}
+var _dom_names: Array = []
+var _out := ""
+var _tag := ""
+var _vel := Vector3.ZERO
+var _zoom := 1.0
+
+func _ready() -> void:
+	for a in OS.get_cmdline_user_args():
+		var kv := a.trim_prefix("--").split("=")
+		_args[kv[0]] = kv[1] if kv.size() > 1 else "1"
+	_out = str(_args.get("out", "user://pose_review"))
+	DirAccess.make_dir_recursive_absolute(_out)
+	_zoom = float(_args.get("zoom", "1.0"))
+	_room()
+	_make_look()
+	_run()
+
+func _room() -> void:
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.36, 0.38, 0.42)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.85, 0.87, 0.9)
+	env.ambient_light_energy = 0.9
+	var we := WorldEnvironment.new()
+	we.environment = env
+	add_child(we)
+	var sun := DirectionalLight3D.new()
+	sun.rotation_degrees = Vector3(-50, 35, 0)
+	sun.light_energy = 1.3
+	add_child(sun)
+	# floor: a see-through sheet with a half-metre grid, so anything below y = 0 shows dimmed under it
+	var sh := Shader.new()
+	sh.code = "shader_type spatial; render_mode unshaded, cull_disabled, depth_draw_never;
+varying vec3 wp;
+void vertex(){ wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
+void fragment(){ vec2 g = abs(fract(wp.xz * 2.0) - 0.5); float l = step(0.47, max(g.x, g.y));
+ALBEDO = mix(vec3(0.16, 0.2, 0.26), vec3(0.95, 0.85, 0.3), l); ALPHA = mix(0.55, 0.95, l); }"
+	var sm := ShaderMaterial.new()
+	sm.shader = sh
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(60, 60)
+	var floor_mi := MeshInstance3D.new()
+	floor_mi.mesh = pm
+	floor_mi.material_override = sm
+	add_child(floor_mi)
+	cam = Camera3D.new()
+	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
+	cam.near = 0.1
+	cam.far = 80.0
+	add_child(cam)
+	cam.make_current()
+
+func _make_look() -> void:
+	Game.save_dir_override = "user://pose_review_tmp"
+	Game.profile = Game.default_profile()
+	Game.profile.body = str(_args.get("body", "m"))
+	if _args.has("witness"):
+		Game.profile.flags["witness_found"] = true
+	for id in str(_args.get("gear", "")).split(",", false):
+		if not Game.owns(id):
+			Game.profile.inventory.append(id)
+		Game.equip(id)
+	if _args.has("foe"):
+		var foe_id := str(_args.foe)
+		var foe: Dictionary = Db.foes[foe_id]
+		_is_dragon = str(foe.rig.get("kind", "")) == "dragon"
+		_as_foe = true
+		_look = foe.rig.duplicate()
+		for candidate in ["res://assets/models/%s.glb" % foe_id, "res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_")]:
+			if ResourceLoader.exists(candidate) and not _is_dragon:
+				_look["skin"] = candidate
+				break
+		var carried: String = Duel.BOSS_WEAPON.get(foe_id, Duel.FOE_WEAPON.get(str(foe.rig.get("weapon", "")), ""))
+		if carried != "":
+			_look.merge(Duel.weapon_model(carried))
+		_tag = foe_id
+	else:
+		_look = Duel.player_look()
+		_tag = "knight_" + str(Game.profile.body)
+		if _args.has("gear"):
+			_tag += "_" + str(_args.gear).replace(",", "+")
+	if _args.has("model"):
+		_look["skin"] = "res://assets/models/%s.glb" % str(_args.model)
+		_tag = str(_args.model) + ("" if not _args.has("gear") else "_" + str(_args.gear).replace(",", "+"))
+	if _args.has("noskin"):
+		_look.erase("skin")
+
+func _fresh() -> void:
+	if rig:
+		rig.free()
+	rig = DragonRig.new() if _is_dragon else FighterRig.new()
+	add_child(rig)
+	rig.call("build", _look, _as_foe)
+	_vel = Vector3.ZERO
+	if not _is_dragon:
+		rig.walking = true
+		rig.combat_steps = true
+	_collect()
+
+# ---------------------------------------------------------------- states
+func _poses() -> Array:
+	var p: Array = []
+	if _is_dragon:
+		p.append(["guard", func(): pass, 1.2, [1.0]])
+		p.append(["walk", func(): _vel = Vector3(0.9, 0, -0.5), 1.6, [0.8, 1.2]])
+		for d: String in ["R", "L", "D"]:
+			p.append(["slash_" + d, func(): rig.telegraph(DIRS[d], 0.9, 0.35, "slash"), 1.5, [0.6, 0.9, 1.05]])
+		p.append(["bite", func(): rig.telegraph(DIRS["D"], 0.9, 0.35, "bite"), 1.5, [0.6, 0.95, 1.1]])
+		p.append(["claw_R", func(): rig.telegraph(DIRS["R"], 0.9, 0.35, "sweep"), 1.5, [0.6, 0.9, 1.05]])
+		p.append(["claw_L", func(): rig.telegraph(DIRS["L"], 0.9, 0.35, "sweep"), 1.5, [0.6, 0.9, 1.05]])
+		p.append(["breath", func(): rig.telegraph(DIRS["R"], 0.9, 0.6, "breath"), 1.8, [0.6, 1.0, 1.3]])
+		p.append(["recover", func(): rig.recover(), 1.2, [1.0]])
+		p.append(["stagger", func(): rig.stagger(), 1.2, [1.0]])
+		p.append(["roar", func(): rig.roar(), 2.0, [0.6, 1.1]])
+		p.append(["far", func(): rig.set_far(true), 2.5, [1.0, 2.2]])
+		p.append(["die", func(): rig.die(), 3.0, [0.8, 1.6, 2.8]])
+		return p
+	p.append(["guard", func(): pass, 1.4, [1.2]])
+	p.append(["block", func(): rig.blocking = true, 1.0, [0.8]])
+	p.append(["step_side", func(): _vel = Vector3(0.9, 0, 0), 1.3, [0.6, 0.85, 1.1]])
+	p.append(["step_back", func(): _vel = Vector3(0, 0, 0.9), 1.3, [0.6, 0.85, 1.1]])
+	p.append(["walk", func(): rig.combat_steps = false; _vel = Vector3(0, 0, -1.4), 2.2, [1.2, 1.45, 1.7, 1.95]])
+	if _as_foe:
+		for d: String in DIRS:
+			p.append(["tel_" + d, func(): rig.telegraph(DIRS[d], 0.8, 0.3, "slash"), 1.5, [0.55, 0.8, 0.95]])
+		p.append(["thrust", func(): rig.telegraph(DIRS["D"], 0.8, 0.3, "thrust"), 1.5, [0.55, 0.85, 1.0]])
+		p.append(["halt", func(): rig.telegraph(DIRS["R"], 0.5, 0.3, "slash"); _later(0.5, func(): rig.halt(0.3)), 1.0, [0.52, 0.7]])
+		p.append(["roar", func(): rig.roar(), 2.0, [0.6, 1.1]])
+	else:
+		for d: String in DIRS:
+			p.append(["cut_" + d, func(): rig.swing(DIRS[d], 0.55), 1.1, [0.28, 0.47, 0.66]])
+		for f: String in ["Heavy", "Guard-breaking", "Counter", "Critical"]:
+			p.append(["fin_" + f, func(): rig.swing(DIRS["R"], 0.7, f), 1.3, [0.36, 0.6, 0.84]])
+		p.append(["parry", func(): rig.parry(DIRS["L"]), 0.6, [0.08, 0.2]])
+		p.append(["clash", func(): rig.clash(rig.global_transform * Vector3(0.1, 1.5, -0.8), 0.3), 0.5, [0.1]])
+		p.append(["brace", func(): rig.blocking = true; _later(0.4, func(): rig.brace(rig.global_transform * Vector3(-0.1, 1.3, -0.7), 0.3)), 0.9, [0.45, 0.7]])
+		p.append(["dodge_r", func(): rig.dodge(1.0), 0.7, [0.15, 0.3, 0.45]])
+		p.append(["dodge_l", func(): rig.dodge(-1.0), 0.7, [0.15, 0.3, 0.45]])
+		p.append(["roll_r", func(): rig.roll(1.0), 1.0, [0.2, 0.42, 0.64]])
+		p.append(["roll_l", func(): rig.roll(-1.0), 1.0, [0.2, 0.42, 0.64]])
+	p.append(["recover", func(): rig.recover(), 1.2, [1.0]])
+	p.append(["stagger", func(): rig.stagger(), 1.4, [0.5, 1.2]])
+	p.append(["hurt", func(): rig.hurt(), 0.6, [0.1, 0.25]])
+	p.append(["die_a", func(): rig.die(1.0), 3.2, [0.5, 1.0, 1.6, 3.0]])
+	p.append(["die_b", func(): rig.die(-1.0), 3.2, [1.0, 3.0]])
+	return p
+
+var _timers: Array = []
+func _later(t: float, f: Callable) -> void:
+	_timers.append([t, f])
+
+func _run() -> void:
+	var only: PackedStringArray = str(_args.get("poses", "")).split(",", false)
+	var shots := not _args.has("noshots")
+	print("== pose review: %s%s" % [_tag, " (foe)" if _as_foe else ""])
+	for pose: Array in _poses():
+		if not only.is_empty() and not only.has(str(pose[0])):
+			continue
+		_fresh()
+		# settle into guard first, as in a fight
+		for i in 12:
+			await get_tree().process_frame
+		_timers.clear()
+		(pose[1] as Callable).call()
+		var t := 0.0
+		var todo: Array = (pose[3] as Array).duplicate()
+		var tiles: Array = []
+		var stat := {}
+		while t < float(pose[2]):
+			await get_tree().process_frame
+			var dt := 1.0 / 30.0
+			t += dt
+			rig.position += _vel * dt * rig.scale.x
+			for tm: Array in _timers.duplicate():
+				if t >= float(tm[0]):
+					_timers.erase(tm)
+					(tm[1] as Callable).call()
+			await get_tree().process_frame      # the rig has now solved with this frame's position
+			_audit(stat, t)
+			if shots and not todo.is_empty() and t >= float(todo[0]) - 0.001:
+				todo.pop_front()
+				rig.time_scale = 0.0
+				var keep := _vel
+				_vel = Vector3.ZERO
+				for v: Array in VIEWS:
+					_aim_cam(v[1])
+					await RenderingServer.frame_post_draw
+					await RenderingServer.frame_post_draw
+					tiles.append(get_viewport().get_texture().get_image())
+				_vel = keep
+				rig.time_scale = 1.0
+		_report(str(pose[0]), stat)
+		if shots and not tiles.is_empty():
+			var w: int = tiles[0].get_width()
+			var h: int = tiles[0].get_height()
+			var sheet := Image.create(w * 3, h * (tiles.size() / 3), false, Image.FORMAT_RGB8)
+			for i in tiles.size():
+				var im: Image = tiles[i]
+				im.convert(Image.FORMAT_RGB8)
+				sheet.blit_rect(im, Rect2i(0, 0, w, h), Vector2i((i % 3) * w, (i / 3) * h))
+			sheet.save_png("%s/%s__%s.png" % [_out, _tag, pose[0]])
+	get_tree().quit()
+
+func _aim_cam(dir: Vector3) -> void:
+	var s: float = rig.scale.x
+	var centre: Vector3 = rig.global_position + Vector3(0, (1.6 if _is_dragon else 0.95) * s, (1.2 * s) if _is_dragon else 0.0)
+	if _args.has("aim"):
+		var a: PackedStringArray = str(_args.aim).split(",")
+		centre = rig.global_position + Vector3(float(a[0]), float(a[1]), float(a[2])) * s
+	cam.size = (9.5 if _is_dragon else 2.75) * s / _zoom
+	cam.position = centre + (dir + Vector3(0, 0.12, 0)).normalized() * 30.0
+	cam.look_at(centre)
+
+# ---------------------------------------------------------------- measurement
+func _collect() -> void:
+	_parts.clear()
+	_dom_names.clear()
+	for mi: MeshInstance3D in rig.find_children("*", "MeshInstance3D", true, false):
+		if mi.skin == null or mi.mesh == null:
+			continue
+		var skel := mi.get_node_or_null(mi.skeleton) as Skeleton3D
+		if skel == null:
+			continue
+		var binds: Array = []
+		for b in mi.skin.get_bind_count():
+			var bi := mi.skin.get_bind_bone(b)
+			if bi < 0:
+				bi = skel.find_bone(mi.skin.get_bind_name(b))
+			binds.append([bi, mi.skin.get_bind_pose(b)])
+		for s in mi.mesh.get_surface_count():
+			var arr := mi.mesh.surface_get_arrays(s)
+			var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+			var bones = arr[Mesh.ARRAY_BONES]
+			var weights = arr[Mesh.ARRAY_WEIGHTS]
+			if bones == null or pos.is_empty():
+				continue
+			var nb: int = bones.size() / pos.size()
+			var step: int = maxi(1, pos.size() / 5000)
+			var p2 := PackedVector3Array()
+			var b2 := PackedInt32Array()
+			var w2 := PackedFloat32Array()
+			var dom := PackedInt32Array()
+			for i in range(0, pos.size(), step):
+				p2.append(pos[i])
+				var best := 0
+				for k in nb:
+					b2.append(int(bones[i * nb + k]))
+					w2.append(float(weights[i * nb + k]))
+					if float(weights[i * nb + k]) > float(weights[i * nb + best]):
+						best = k
+				dom.append(int(binds[int(bones[i * nb + best])][0]))
+			_parts.append({"mi": mi, "skel": skel, "pos": p2, "bones": b2, "weights": w2, "nb": nb, "dom": dom, "binds": binds})
+
+func _short(skel: Skeleton3D, i: int) -> String:
+	var n := skel.get_bone_name(i)
+	return n.get_slice(":", n.get_slice_count(":") - 1).trim_prefix("mixamorig_").trim_prefix("mixamorig")
+
+## World positions of the sampled skinned vertices, with the name of the bone that mostly carries each.
+func _skinned() -> Array:
+	var out_p := PackedVector3Array()
+	var out_n: Array = []
+	for part: Dictionary in _parts:
+		var skel: Skeleton3D = part.skel
+		var mats: Array = []
+		var g: Transform3D = skel.global_transform
+		for b: Array in part.binds:
+			mats.append(g * skel.get_bone_global_pose(int(b[0])) * (b[1] as Transform3D))
+		var nb: int = part.nb
+		var pos: PackedVector3Array = part.pos
+		var bones: PackedInt32Array = part.bones
+		var weights: PackedFloat32Array = part.weights
+		for i in pos.size():
+			var v := Vector3.ZERO
+			var wsum := 0.0
+			for k in nb:
+				var w := weights[i * nb + k]
+				if w > 0.0:
+					v += (mats[bones[i * nb + k]] as Transform3D * pos[i]) * w
+					wsum += w
+			out_p.append(v / maxf(wsum, 0.0001))
+			out_n.append(_short(skel, part.dom[i]))
+	return [out_p, out_n]
+
+func _seg_dist(p: Vector3, a: Vector3, b: Vector3) -> float:
+	var ab := b - a
+	var u := clampf((p - a).dot(ab) / maxf(ab.length_squared(), 0.000001), 0.0, 1.0)
+	return p.distance_to(a + ab * u)
+
+func _worse(stat: Dictionary, key: String, v: float, t: float, note: String = "", lower: bool = true) -> void:
+	if not stat.has(key) or (v < float(stat[key][0]) if lower else v > float(stat[key][0])):
+		stat[key] = [v, t, note]
+
+func _audit(stat: Dictionary, t: float) -> void:
+	var s: float = rig.scale.x
+	var sk: Array = _skinned()
+	var pts: PackedVector3Array = sk[0]
+	var names: Array = sk[1]
+	var lo := 1e9
+	var lo_n := ""
+	for i in pts.size():
+		if pts[i].y < lo:
+			lo = pts[i].y
+			lo_n = names[i]
+	if not pts.is_empty():
+		_worse(stat, "low", lo / s, t, lo_n)
+		_worse(stat, "float", lo / s, t, lo_n, false)
+	if _is_dragon:
+		return
+	var fr: FighterRig = rig
+	# blade against the wielder's own body
+	for wn: Array in [[fr.weapon_r, ["RightHand", "RightForeArm"]], [fr.weapon_l, ["LeftHand", "LeftForeArm"]]]:
+		var w: Node3D = wn[0]
+		if w.get_child_count() == 0:
+			continue
+		var gt := w.global_transform
+		var a := gt * Vector3(0, fr.weapon_len * 0.14, 0)
+		var b := gt * Vector3(0, fr.weapon_len, 0)
+		var hits := {}
+		var n := 0
+		for i in pts.size():
+			var nm: String = names[i]
+			if nm.begins_with("RightHand") or nm.begins_with("LeftHand") or wn[1].has(nm):
+				continue
+			if fr.two_handed and (nm == "LeftForeArm" or nm == "RightForeArm"):
+				continue
+			if _seg_dist(pts[i], a, b) < 0.035 * s:
+				n += 1
+				hits[nm] = int(hits.get(nm, 0)) + 1
+		_worse(stat, "blade" if w == fr.weapon_r else "blade_l", float(n), t, str(hits), false)
+		_worse(stat, "tip", minf(b.y, (gt * Vector3(0, -fr.weapon_len * 0.12, 0)).y) / s, t)
+	if fr.shield:
+		var st := fr.shield.global_transform
+		var inv := st.affine_inverse()
+		var n2 := 0
+		var hits2 := {}
+		for i in pts.size():
+			var nm2: String = names[i]
+			if nm2.begins_with("Left"):
+				continue
+			var l := inv * pts[i]
+			if l.z < -0.03 and l.x * l.x / 0.07 + l.y * l.y / 0.14 < 1.0:
+				n2 += 1
+				hits2[nm2] = int(hits2.get(nm2, 0)) + 1
+		_worse(stat, "shield", float(n2), t, str(hits2), false)
+		var rim := 1e9
+		for c: Vector3 in [Vector3(0.28, 0.41, 0), Vector3(-0.28, 0.41, 0), Vector3(0.28, -0.41, 0), Vector3(-0.28, -0.41, 0)]:
+			rim = minf(rim, (st * c).y)
+		_worse(stat, "rim", rim / s, t)
+	if fr.skin:
+		var d: SkinDriver = fr.skin
+		var g := d.skel.global_transform
+		var bp := func(n3: String) -> Vector3: return g * d.skel.get_bone_global_pose(d.bone[n3]).origin
+		for side: String in ["Left", "Right"]:
+			var hip: Vector3 = bp.call(side + "UpLeg")
+			var knee: Vector3 = bp.call(side + "Leg")
+			var ank: Vector3 = bp.call(side + "Foot")
+			var ka := rad_to_deg((hip - knee).angle_to(ank - knee))
+			_worse(stat, "knee_min", ka, t, side)
+			# a knee that sits behind the hip-ankle line, seen along the pelvis' forward, bends the wrong way
+			var fwd: Vector3 = (g.basis * d.skel.get_bone_global_pose(d.bone["Hips"]).basis * d.rest["Hips"].basis.inverse() * (d.rest["LeftToeBase"].origin - d.rest["LeftFoot"].origin if d.bone.has("LeftToeBase") else Vector3(0, 0, 1)))
+			fwd.y = 0.0
+			var mid := hip.lerp(ank, (knee - hip).dot(ank - hip) / maxf((ank - hip).length_squared(), 0.0001))
+			if ka < 165.0:
+				_worse(stat, "knee_back", (knee - mid).dot(fwd.normalized()) / s, t, side)
+			var sh: Vector3 = bp.call(side + "Arm")
+			var el: Vector3 = bp.call(side + "ForeArm")
+			var ha: Vector3 = bp.call(side + "Hand")
+			_worse(stat, "elbow_min", rad_to_deg((sh - el).angle_to(ha - el)), t, side)
+			_worse(stat, "ankle_low", (ank.y - g.origin.y) / s - d.rest[side + "Foot"].origin.y * d.root.scale.y * (d.root.global_transform.affine_inverse() * d.skel.global_transform).basis.get_scale().y / 1.0, t, side)
+		if fr.two_handed:
+			var lh: Vector3 = fr.weapon_l.global_position
+			var wt := fr.weapon_r.global_transform
+			_worse(stat, "offhand", _seg_dist(lh, wt * Vector3(0, -0.35, 0), wt * Vector3(0, 0.05, 0)) / s, t, "", false)
+
+func _report(pose: String, stat: Dictionary) -> void:
+	var out := "%-16s" % pose
+	var flags := ""
+	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand"]:
+		if not stat.has(k):
+			continue
+		var e: Array = stat[k]
+		var v: float = e[0]
+		var bad := false
+		match k:
+			"low": bad = v < -0.02
+			"float": bad = v > 0.06 and not pose.begins_with("roll") and not pose == "far"
+			"tip": bad = v < -0.01
+			"rim": bad = v < -0.01
+			"blade", "blade_l": bad = v >= 3.0
+			"shield": bad = v >= 3.0
+			"knee_min": bad = v < 35.0
+			"knee_back": bad = v < -0.03
+			"elbow_min": bad = v < 25.0
+			"ankle_low": bad = v < -0.03
+			"offhand": bad = v > 0.06
+		out += " %s%s=%.2f@%.2f%s" % ["!!" if bad else "", k, v, float(e[1]), ("(" + str(e[2]) + ")") if str(e[2]) != "" and (bad or k == "low") else ""]
+		if bad:
+			flags += k + " "
+	print(out)

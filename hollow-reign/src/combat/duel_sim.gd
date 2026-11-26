@@ -888,7 +888,7 @@ func _resolve_strike() -> void:
 			return
 		if perfect:
 			# the string is cut short, but its guard is not broken: a riposte, not a feast
-			_recover(RIPOSTE_TIME / speed() * (trait_v("parry_open") if trait_v("parry_open") > 0.0 else 1.0), "perfect")
+			_recover(1.0e9 if lesson else RIPOSTE_TIME / speed() * (trait_v("parry_open") if trait_v("parry_open") > 0.0 else 1.0), "perfect")
 			return
 	b_idx += 1
 	if b_idx < b_combo.attacks.size():
@@ -908,6 +908,8 @@ func _resolve_strike() -> void:
 		rec *= trait_v("parry_open")
 	if result == "dodged" and trait_v("dodge_open") > 0.0:
 		rec *= trait_v("dodge_open")
+	if lesson and defended:
+		rec = 1.0e9               # the lesson foe waits for the answering cut (DuelSim.lesson_hold(false) sets it going again)
 	_recover(rec, "dodge" if result == "dodged" else ("parry" if result == "parried" else ""))
 
 func _recover(rec: float, from: String) -> void:

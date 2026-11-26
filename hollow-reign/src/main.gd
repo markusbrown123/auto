@@ -39,19 +39,34 @@ func _notification(what: int) -> void:
 		Game.save()
 		Game.save_settings()
 
-func _swap(next: Node) -> void:
+const FADE_BLACK := Color(0.01, 0.01, 0.012)
+const FADE_WHITE := Color(1.0, 0.97, 0.9)
+
+## Replaces the screen and fades in from `from` over `fade` seconds (0: at once, for scenes that open on their own black).
+func _swap(next: Node, fade: float = 0.7, from: Color = FADE_BLACK) -> void:
 	get_tree().paused = false
 	if current:
 		current.queue_free()
 	current = next
 	add_child(next)
-	_fader.color.a = 1.0
+	_fader.color = Color(from, 1.0 if fade > 0.0 else 0.0)
 	if _fade_tw:
 		_fade_tw.kill()
-	_fade_tw = create_tween()
-	_fade_tw.tween_property(_fader, "color:a", 0.0, 0.7)
+	if fade > 0.0:
+		_fade_tw = create_tween()
+		_fade_tw.tween_property(_fader, "color:a", 0.0, fade)
+
+## Replaces the screen with nothing in between: for a screen that carries on in the place already on show.
+func _swap_live(next: Node) -> void:
+	get_tree().paused = false
+	var old := current
+	current = next
+	add_child(next)
+	if old:
+		old.queue_free()
 
 func _fade_then(f: Callable) -> void:
+	_fader.color = Color(FADE_BLACK, _fader.color.a)
 	var tw := create_tween()
 	tw.tween_property(_fader, "color:a", 1.0, 0.35)
 	tw.tween_callback(f)
@@ -69,17 +84,39 @@ func show_title(open: String = "", arg: String = "") -> void:
 	t.continue_game.connect(func():
 		if not Game.profile.is_empty() or Game.load_slot(Game.latest_slot()):
 			_fade_then(show_sanctuary))
-	t.new_game.connect(func(h, b):
-		Game.new_game(h, b)
-		if t.knight_name != "":
-			Game.profile.name = t.knight_name
-			Game.save()
-		_fade_then(_opening))
+	t.new_game.connect(func(h, b): _new_journey(h, b, t.knight_name))
 	t.open_screen.connect(_menu_open)
 	t.set_out.connect(_set_out)
 	_swap(t)
 	if open != "":
 		t.open(open, arg)
+	if Opening.seen_before():
+		_offer_opening(t)
+
+## A new knight: straight into the story. Opening (the first time) → the chamber → the walk out → the road.
+func _new_journey(heraldry: String, body: String, knight_name: String = "") -> void:
+	Game.new_game(heraldry, body)
+	if knight_name != "":
+		Game.profile.name = knight_name
+		Game.save()
+	_fade_then(_opening)
+
+## "Watch the opening" on the menu, once it has been seen: small, out of the way, and gone while a panel is open.
+func _offer_opening(t: TitleScreen) -> void:
+	var b := UI.menu_item("Watch the Opening", 15, 190)
+	b.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT)
+	b.offset_left = -230
+	b.offset_top = -64
+	b.offset_right = -28
+	b.offset_bottom = -22
+	b.modulate.a = 0.75
+	t.layer.add_child(b)
+	b.pressed.connect(func(): _fade_then(func(): show_opening(show_title)))
+	var watch := Timer.new()
+	watch.wait_time = 0.15
+	watch.autostart = true
+	b.add_child(watch)
+	watch.timeout.connect(func(): b.visible = t._panel == null)
 
 func _menu_open(which: String) -> void:
 	match which:
@@ -92,26 +129,49 @@ func _set_out(region: String, shortcut: bool) -> void:
 	Game.start_run(region, shortcut)
 	LoadingScreen.show(region, show_stage)
 
+## The start of a new journey. The opening plays the first time and is passed over after that (it can be watched
+## again from the menu); the chamber always plays, because it is where this knight begins.
 func _opening() -> void:
-	# darkness and the narrator; then the chamber, and a voice in the walls
-	show_sanctuary()
-	var s: Sanctuary = current
-	s.layer.visible = false
-	s.backdrop.move_camera(Vector3(0.4, 1.0, 1.6), Vector3(1.0, 1.5, 0), true)
-	if _fade_tw:
-		_fade_tw.kill()
-	_fader.color.a = 1.0
-	Sfx.music_for("theme", "menu")
-	await get_tree().create_timer(1.2).timeout
-	await Story.play("opening")
-	create_tween().tween_property(_fader, "color:a", 0.0, 2.5)
-	s.backdrop.move_camera(Vector3(2.5, 1.45, 3.4), Vector3(1.15, 1.05, 0))
-	await get_tree().create_timer(1.6).timeout
-	await Story.play("awakening")
-	await Story.play("first_road")
-	if is_instance_valid(s):
-		s.layer.visible = true
-		Sfx.music_for("hub", "sanctuary")
+	if Opening.seen_before():
+		show_awakening()
+	else:
+		show_opening()
+
+## The fall of the kingdoms. It opens from black and ends on black, so nothing is faded here.
+func show_opening(then: Callable = Callable()) -> void:
+	var o := Opening.new()
+	o.finished.connect(func():
+		if then.is_valid():
+			then.call()
+		else:
+			show_awakening())
+	_swap(o, 0.0)
+
+## The resurrection chamber. Ends walking into the light of the door; the Approach picks the same shot up outside.
+func show_awakening() -> void:
+	var a := Awakening.new()
+	a.auto = _args.has("auto")
+	a.finished.connect(show_approach)
+	_swap(a, 0.0)
+
+## Out into the first region, in one take up to the road's first stop.
+func show_approach() -> void:
+	if Game.run.is_empty():
+		Game.start_run(Db.regions[0].id)
+	var ap := Approach.new()
+	ap.finished.connect(func(): _approach_done(ap))
+	_swap(ap, 0.5, FADE_WHITE)
+
+func _approach_done(ap: Approach) -> void:
+	if ap != current:
+		return
+	if Game.settings.cine_road and CineRoad.available(str(Game.run.region)):
+		_fade_then(show_stage)          # the filmed road is other footage: a change of picture, so a fade
+		return
+	# the real-time road carries on in the very place the knight has just walked into
+	var e := _explore()
+	e.adopted = ap.backdrop
+	_swap_live(e)
 
 func show_sanctuary(tab: String = "") -> void:
 	var s := Sanctuary.new()
@@ -146,13 +206,16 @@ func show_stage() -> void:
 	if Game.settings.cine_road and CineRoad.available(str(Game.run.region)):
 		show_cine_road()
 		return
+	_swap(_explore())
+
+func _explore() -> Explore:
 	var e := Explore.new()
 	e.fight.connect(_enter_duel)
 	e.moved_on.connect(_next_stage)
 	e.turned_back.connect(func():
 		Game.run = {}
 		_fade_then(show_sanctuary))
-	_swap(e)
+	return e
 
 func _next_stage() -> void:
 	if Game.advance_stage():
@@ -160,13 +223,18 @@ func _next_stage() -> void:
 	else:
 		_region_done()
 
-## Into a duel behind a loading screen. The foe's model is read on a thread first, so the picture keeps moving
-## for that part; building the arena and the two fighters is the part that holds it still.
+## Into a duel. The road reads the foe's files ahead while the player is choosing, so in the ordinary case
+## everything is in memory and a short fade is all there is. The loading screen is kept for when it is not
+## (a model still being read): then the wait is real, and it reads on a thread behind a moving picture.
 func _enter_duel(o: Dictionary) -> void:
-	var warm: Array = ["res://assets/models/knight_%s.glb" % str(Game.profile.get("body", "m"))]
-	var foe: Dictionary = Db.foes.get(str(o.foe), {})
-	warm.append("res://assets/models/%s.glb" % str(o.foe))
-	warm.append("res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_"))
+	var warm: Array = CineActor.foe_files(str(o.foe))
+	var ready := true
+	for p: String in warm:
+		if ResourceLoader.exists(p) and not ResourceLoader.has_cached(p):
+			ready = false
+	if ready:
+		_fade_then(func(): start_duel(o))
+		return
 	LoadingScreen.show(str(Game.run.get("region", "")), func(): start_duel(o), warm)
 
 func start_duel(o: Dictionary) -> void:
@@ -336,6 +404,34 @@ func _dev_boot() -> void:
 		_dev_front(_args.screen)
 		return
 	match _args.screen:
+		"opening":
+			# the opening by itself, then on into the chamber as a new journey does
+			show_opening()
+		"awakening":
+			show_awakening()
+		"approach":
+			Game.profile.tutorial_done = _args.has("bot")
+			show_approach()
+			if _args.has("auto"):
+				_journey_bot()
+		"newgame":
+			# the whole chain as a player meets it: character select → opening → chamber → walk → first stop
+			#   --body=m|f   --auto answers every prompt   --seen passes over the opening   --bot lets a bot fight
+			for n in range(1, Game.SLOT_COUNT + 1):
+				Game.delete_slot(n)
+			Game.profile = {}
+			if FileAccess.file_exists(Game._p(Opening.SEEN_FILE)):
+				DirAccess.remove_absolute(Game._p(Opening.SEEN_FILE))
+			if _args.has("seen"):
+				Opening.mark_seen()
+			show_title("charselect")
+			if _args.has("auto"):
+				await get_tree().create_timer(2.5).timeout
+				Game.slot = 1
+				_new_journey("#3d0f0f", str(_args.get("body", "m")))
+				if _args.has("bot"):
+					Game.profile.tutorial_done = true
+				_journey_bot()
 		"ending":
 			show_sanctuary()
 			if _args.has("all"):
@@ -534,6 +630,14 @@ func _journey_bot() -> void:
 				if is_instance_valid(b):
 					b.pressed.emit()
 				break
+		if current is Explore and not current._leaving and not current._staging and not Story.busy and current.layer.get_child(0).modulate.a > 0.95:
+			var opts: Array = Game.stage_options()
+			for i in opts.size():
+				if opts[i].type in ["fight", "boss", "pass"]:
+					await get_tree().create_timer(2.0).timeout
+					if is_instance_valid(current) and current is Explore:
+						current._choose(opts[i], i)
+					break
 		if current is CineRoad and not current._busy and not current._travelling and not Story.busy:
 			for b in current.ui.find_children("*", "Button", true, false):
 				if b.flat and b.is_visible_in_tree():

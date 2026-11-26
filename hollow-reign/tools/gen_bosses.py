@@ -181,7 +181,7 @@ B += [
 ]
 # ---------------------------------------------------------------- 1 Ashen Sentinel
 B.append(dict(id="ashen_sentinel", name="The Ashen Sentinel", title="Warden of the Fallen Courtyard", region="courtyard", boss=True,
- hp=620, armor=0.1, posture=100, patience=3, adapt=0.5, idle=[1.0,1.7], weak="frost", xp=400, gold=300,
+ hp=560, armor=0.1, posture=100, patience=3, adapt=0.5, idle=[1.0,1.7], weak="frost", xp=400, gold=300,
  loot=[["w_ashen_great",1.0],["s_tower",0.6],["a_ash_chest",0.5],["r_ember",0.5]], music="combat_a", arena="courtyard",
  intro="A gate sergeant. They told him the post was for one winter.",
  rig=dict(scale=1.45,bulk=1.25,metal="#3e3a37",cloth="#2a1410",weapon="greatsword",eye="#ff6a2a",helm="great",crest="plume",ember=True,cape=True),
@@ -286,7 +286,7 @@ B.append(dict(id="crimson_widow", name="The Crimson Widow", title="Commander of 
   ])]))
 # ---------------------------------------------------------------- 4 Cathedral Beast
 B.append(dict(id="cathedral_beast", name="The Cathedral Beast", title="Keeper of the Lower Works", region="cathedral", boss=True,
- hp=1500, armor=0.08, posture=130, patience=3, adapt=0.9, idle=[0.8,1.5], weak="fire", xp=1500, gold=900,
+ hp=1300, armor=0.08, posture=130, patience=3, adapt=0.9, idle=[0.8,1.5], weak="fire", xp=1500, gold=900,
  loot=[["w_censer_sword",1.0],["x_bell",0.7],["s_reliquary",0.6],["a_vigil_chest",0.5]], music="combat_b", arena="cathedral",
  intro="It was made to keep what lies under the cathedral. Nobody remembers telling it to stop.",
  rig=dict(scale=1.75,bulk=1.7,metal="#8c7a52",cloth="#4a4038",weapon="claws",eye="#ffe08a",helm="beast",hunch=0.5,horns=True),
@@ -376,7 +376,7 @@ B.append(dict(id="frostbound_king", name="The Frostbound King", title="Sovereign
   ])]))
 # ---------------------------------------------------------------- 6 Forgotten Monarch
 B.append(dict(id="forgotten_monarch", name="The Forgotten Monarch", title="Steward of the Crown", region="throne", boss=True,
- hp=2800, armor=0.15, posture=160, patience=2, adapt=1.4, idle=[0.6,1.2], weak=None, xp=5000, gold=3000,
+ hp=2500, armor=0.15, posture=160, patience=2, adapt=1.4, idle=[0.6,1.2], weak=None, xp=5000, gold=3000,
  loot=[["w_monarch",1.0],["r_crown",1.0],["a_regal_chest",0.7],["a_regal_helm",0.7]], music="final", arena="throne",
  intro="He was never a king. He was the one left to keep the machines running.",
  rig=dict(scale=1.5,bulk=1.1,metal="#b89b5e",cloth="#3a0e0e",weapon="sword",weapon_glow="#ffd98a",eye="#ffffff",helm="crown",cape=True,skirt=True,regal=True),
@@ -442,7 +442,7 @@ def breath(dir, windup, dmg, el="fire", **k):
     # a sweeping gout: cannot be blocked or parried, only stepped out of
     return A(dir, windup, dmg, unblockable=True, parry=False, kind="breath", element=el, swing=0.4, **k)
 B.append(dict(id="cinder_wyrm", name="Veyrath, the Cinder Wyrm", title="The Siege That Outlived Its War", region="roost", boss=True,
- hp=1900, armor=0.22, posture=170, patience=3, adapt=0.9, idle=[0.9,1.6], weak="frost", xp=2400, gold=1400,
+ hp=1650, armor=0.22, posture=170, patience=3, adapt=0.9, idle=[0.9,1.6], weak="frost", xp=2400, gold=1400,
  loot=[["w_wyrmfang",1.0],["s_scale",0.7],["a_wyrm_chest",0.7],["a_wyrm_helm",0.6],["r_brood",0.5]], music="combat_b", arena="roost",
  intro="Built to break sieges, and woken under the mountain when there was nothing left to besiege.",
  rig=dict(kind="dragon",scale=2.3,size=1.25,hide="#5a2a20",belly="#b8602a",eye="#ffb040",glow="#ff5a14",wings=True),
@@ -476,7 +476,7 @@ B.append(dict(id="cinder_wyrm", name="Veyrath, the Cinder Wyrm", title="The Sieg
   ])]))
 # ---------------------------------------------------------------- optional: the Rimewyrm
 B.append(dict(id="rimewyrm", name="Skeldra, the White Ruin", title="What the King Kept Chained", region="citadel", boss=True,
- hp=1700, armor=0.2, posture=160, patience=3, adapt=0.9, idle=[0.9,1.5], weak="fire", xp=2600, gold=1500,
+ hp=1500, armor=0.2, posture=160, patience=3, adapt=0.9, idle=[0.9,1.5], weak="fire", xp=2600, gold=1500,
  loot=[["w_rime_sword",1.0],["a_frost_legs",0.6],["a_frost_gauntlets",0.6]], music="combat_b", arena="citadel",
  intro="The chain froze through an age ago. It stayed anyway. It had been told to.",
  rig=dict(kind="dragon",scale=2.2,size=1.15,hide="#8aa8b8",belly="#d8e8f0",eye="#9fe4ff",glow="#7fd4ff",wings=True),
@@ -585,6 +585,9 @@ TRAITS = {
 for f in B:
     if f["id"] in TRAITS:
         f["traits"] = TRAITS[f["id"]]
+# Health after the poise change (defences no longer open the foe every time, so the same fight takes more exchanges):
+# Sentinel 620->560, Cathedral Beast 1500->1300, Cinder Wyrm 1900->1650, Rimewyrm 1700->1500, Monarch 2800->2500,
+# which puts the skilled-bot fight lengths back near where they were. The rest moved by under a quarter and were left alone.
 # Poise: how much successful defending it takes to break a foe open (DuelSim POISE_*: perfect parry 45, parry 28,
 # perfect dodge 22, dodge 12, timed block 18, block 6). Defaults to the old posture figure; heavy guardians carry more.
 POISE = {}

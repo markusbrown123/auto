@@ -50,22 +50,130 @@ var _glinted := false
 var _lesson := -1
 var _lesson_count := 0
 ## Each lesson: what to do in a few big words, why in one plain line, and the stroke to draw (if any).
+## The fourth entry is what completes the step and what is demonstrated on screen:
+## "cuts" three cuts · "combo:<id>" that combination (its stroke list comes from combos.json) · "parry" · "dodge" · "roll" · "block" · "stamina".
 const LESSONS := [
-	["SWIPE TO STRIKE", "Drag a finger across your foe, any direction. Land three cuts.", ["R"]],
-	["LEFT, THEN RIGHT", "Two cuts in a pattern end in a harder blow. There are more patterns to find.", ["L", "R"]],
-	["PARRY", "It is about to cut at you. Swipe INTO the blow as its blade glints.", []],
-	["DODGE", "Tap an arrow as the blow comes. Tap it twice to roll clear.", []],
-	["BLOCK", "Hold the shield and let the blow land on it.", []],
+	["SWIPE TO STRIKE", "Drag a finger across your foe, any direction. Land three cuts.", ["R"], "cuts"],
+	["LEFT, THEN RIGHT", "Two cuts in a pattern end in a harder blow. There are more patterns to find.", [], "combo:double_slash"],
+	["PARRY", "Swipe INTO the blow as its blade glints.", [], "parry"],
+	["DODGE", "Tap the lit arrow as the blow comes.", [], "dodge"],
+	["ROLL", "Tap the same arrow twice, quickly, to roll clear.", [], "roll"],
+	["BLOCK", "Hold the shield and let the blow land on it.", [], "block"],
+	["THREE CUTS", "Longer patterns hit harder. This one cracks its poise.", [], "combo:armor_splitter"],
+	["STAMINA", "Every cut, parry and dodge spends the green bar. Cut until it runs low, then let it return.", ["L", "R"], "stamina"],
 ]
 ## What the defence just bought, said the moment it works, so cause and effect are unmistakable.
-const LESSON_PAYOFF := {2: ["PARRIED", "A parry throws its guard wide open."], 3: ["IT MISSED", "A dodge leaves it off balance."], 4: ["BLOCKED", "Blocking gives you a chance to attack."]}
+const LESSON_PAYOFF := {"parry": ["PARRIED", "Each parry wears its poise down. Break it for a long opening."], "dodge": ["IT MISSED", "A clean dodge leaves it off balance for a moment."], "block": ["BLOCKED", "The shield holds, at a cost in stamina. Answer quickly."]}
 var _lesson_strike := false      # the defence worked; now the lesson waits for the answering cut
+var _lesson_t := 0.0             # time spent in the stamina step
+var _lesson_low := false         # stamina has been seen below 40% in the stamina step
+var _lesson_watching := false
+var _break_from := ""            # what broke the foe's poise last ("parry", "struggle", "dodge", "block", "cut")
+var _struggle_pt := Vector3.ZERO # where the locked blades cross
+
+func _lesson_kind(step: int = -2) -> String:
+	var i := _lesson if step == -2 else step
+	return str(LESSONS[i][3]) if i >= 0 and i < LESSONS.size() else ""
+
+## First step of a given kind ("parry", "dodge", "roll", "block", "stamina"), or -9.
+func _lesson_step(kind: String) -> int:
+	for i in LESSONS.size():
+		if str(LESSONS[i][3]) == kind:
+			return i
+	return -9
+
+## What a step shows on screen: [stroke directions, pads to light]. Every step has one or the other.
+func _lesson_demo(step: int) -> Array:
+	var kind := _lesson_kind(step)
+	var a: Dictionary = sim.lesson_attack()
+	var pad := "right" if str(a.get("dodge", "any")) == "R" else "left"
+	match kind:
+		"parry":
+			return [[DuelSim.parry_dir_for(str(a.get("dir", "L")))], {}]      # the stroke INTO the blow
+		"dodge":
+			return [[], {pad: "tap"}]
+		"roll":
+			return [[], {pad: "double"}]
+		"block":
+			return [[], {"block": "hold"}]
+		"stamina":
+			return [LESSONS[step][2], {"stamina": "watch"}]
+	if kind.begins_with("combo:"):
+		for c in Db.combos:
+			if str(c.id) == kind.trim_prefix("combo:"):
+				return [c.seq, {}]
+	return [LESSONS[step][2], {}]
+
+## Puts the current step on screen and sets the foe to match: open for cutting steps, attacking for defensive ones.
+func _lesson_show() -> void:
+	if not _lesson_watching:
+		_lesson_watching = true
+		# dev: `-- --screen=lesson --step=N` starts at step N (0-based), so each step can be captured directly
+		for arg in OS.get_cmdline_user_args():
+			if arg.begins_with("--step="):
+				_lesson = clampi(int(arg.trim_prefix("--step=")), 0, LESSONS.size() - 1)
+		_lesson_watch()
+	_lesson_t = 0.0
+	_lesson_low = false
+	sim.lesson_hold(not _lesson_kind() in ["parry", "dodge", "roll", "block"])
+	var demo := _lesson_demo(_lesson)
+	hud.lesson_text(str(LESSONS[_lesson][0]), str(LESSONS[_lesson][1]), demo[0], false, demo[1])
+
+## The per-frame part of the lesson: the stamina step's condition, and slowing the taught blow for the parry.
+func _lesson_watch() -> void:
+	var dev_press := ""
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--press="):
+			dev_press = arg.trim_prefix("--press=")       # dev captures: show a pad as held
+	while is_inside_tree() and _lesson >= 0:
+		await get_tree().process_frame
+		if not is_inside_tree() or _lesson < 0:
+			return
+		_lesson_stamina_tick(get_process_delta_time())
+		# the taught blow slows as it arrives, so the moment to swipe can be seen (lesson only)
+		if _lesson_kind() == "parry" and not _lesson_strike and sim.b_state == DuelSim.B.WINDUP and sim.b_t <= 0.6:
+			_slow = maxf(_slow, 0.1)
+		if dev_press == "block":
+			hud.pad_block.held = true
+
+## Stamina step: done once the bar has been run below 40% and has come back above 70%, or after ten seconds.
+func _lesson_stamina_tick(dt: float) -> void:
+	if _lesson_kind() != "stamina":
+		return
+	_lesson_t += dt
+	var f: float = float(sim.pl.stamina) / float(sim.pl.max_stamina)
+	if f < 0.4:
+		_lesson_low = true
+	if (_lesson_low and f > 0.7) or _lesson_t >= 10.0:
+		_lesson_done(_lesson)
+
 func _lesson_defended(step: int) -> void:
-	if _lesson != step or _lesson_strike:
+	if step < 0 or _lesson != step or _lesson_strike:
 		return
 	_lesson_strike = true
+	_slow = 0.0
 	Sfx.play("loot", -8.0, 1.4)
-	hud.lesson_text(str(LESSON_PAYOFF[step][0]) + "  ·  SWIPE TO STRIKE", str(LESSON_PAYOFF[step][1]), ["R"], true)
+	var kind := _lesson_kind()
+	if kind == "roll":
+		# rolling clear is the whole lesson: nothing to answer
+		hud.lesson_demo_clear()
+		hud.toast("ROLLED CLEAR", Color("#8fe39a"), 0.9)
+		_lesson_done(step)
+		return
+	# the indicator goes at once; the payoff and the stroke for the answering cut take its place
+	hud.lesson_text(str(LESSON_PAYOFF[kind][0]) + "  ·  SWIPE TO STRIKE", str(LESSON_PAYOFF[kind][1]), ["R"], true)
+
+## A cut landed during the lesson.
+func _lesson_hit(d: Dictionary) -> void:
+	var kind := _lesson_kind()
+	if _lesson_strike:
+		_lesson_done(_lesson)      # the answering cut landed: lesson learned
+	elif kind == "cuts":
+		_lesson_count += 1
+		if _lesson_count >= 3:
+			_lesson_done(_lesson)
+	elif kind.begins_with("combo:") and str(d.get("combo_id", "")) == kind.trim_prefix("combo:"):
+		_lesson_done(_lesson)
 
 func _lesson_done(step: int) -> void:
 	if _lesson != step:
@@ -76,6 +184,7 @@ func _lesson_done(step: int) -> void:
 	Sfx.play("loot", -6.0, 1.2)
 	if _lesson >= LESSONS.size():
 		_lesson = -1
+		hud.lesson_demo_clear()
 		hud.lesson_text("", "", [])
 		hud.toast("THE OLD LESSONS HOLD", UI.GOLD, 1.4)
 		await get_tree().create_timer(1.8).timeout
@@ -83,11 +192,49 @@ func _lesson_done(step: int) -> void:
 		stage = Stage.DONE
 		finished.emit(true, sim)      # no death, no last words: the real fight follows
 		return
-	if _lesson == 2:
-		sim.lesson_fights = true
-		sim.b_t = 0.8
-	hud.lesson_text(str(LESSONS[_lesson][0]), str(LESSONS[_lesson][1]), LESSONS[_lesson][2])
+	_lesson_show()
+
+## Mid-battle story beat: the scene to play when this foe's second phase begins, or "" for none.
+## Only foes who hold a conversation (speech category C), only once per save, only if the scene has been written.
+static func beat_scene(foe_id: String) -> String:
+	if Companion.speech(foe_id) != "C" or Game.profile.is_empty() or Game.profile.flags.has("beat_" + foe_id):
+		return ""
+	var id := Companion.voice_key(foe_id) + "_beat"
+	return id if Story.has_scene(id) else ""
+
+## Stops the fight exactly where it is, lets them speak, and takes it up again. Skipped on every later attempt.
+func _story_beat() -> void:
+	var id := Duel.beat_scene(str(foe.id))
+	if id == "":
+		return
+	Game.profile.flags["beat_" + str(foe.id)] = true
+	sim.paused = true                 # DuelSim.tick and the bot do nothing while this is set: state is kept exactly
+	_on_block(false)
+	hud.cue.clear()
+	hud.set_combat_visible(false)
+	if "director" in self and director:
+		director.cue("story_beat", {"on": true})
+	Companion.leave_combat()
+	await Story.play(id, true)
+	if not is_inside_tree():
+		return
+	Companion.enter_combat(self)
+	if "director" in self and director:
+		director.cue("story_beat", {"on": false})
+	if stage == Stage.FIGHT:
+		hud.set_combat_visible(true)
+	sim.paused = false
+
+## Blade struggle: both hold the crossed blades where they met; re-pinned on every tap to sustain the lock.
+func _struggle_lock(hold: float) -> void:
+	if foe_rig is FighterRig:
+		foe_rig.halt(hold)
+		_struggle_pt = foe_rig.weapon_r.global_position.lerp(foe_rig.blade_tip(), 0.72)
+	else:
+		_struggle_pt = player_rig.chest_point().lerp(foe_rig.chest_point(), 0.45)
+	player_rig.clash(_struggle_pt, hold)
 var foot := {"circle": 0.08, "keep": 0.7}
+const KEEP_CLOSE := 0.25      # share of a foe's authored stand-off it actually keeps while prowling: close enough to feel engaged
 var _can_step := true
 var _voice_key := ""
 var _intro_talk := false
@@ -191,7 +338,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 		foe_rig.footsteps = true
 	if _lesson >= 0:
 		hud.show_training()
-		hud.lesson_text(str(LESSONS[0][0]), str(LESSONS[0][1]), LESSONS[0][2])
+		_lesson_show()
 		foe_rig.recover()
 	elif training:
 		hud.show_training()
@@ -423,7 +570,7 @@ func _footwork(dt: float) -> void:
 			DuelSim.B.IDLE:
 				# prowling: turn about the player, holding its preferred distance
 				ring += ring_dir * float(foot.circle) * late * dt
-				f_back_t = (1.7 if sim.b_far else float(foot.keep) / late)
+				f_back_t = (1.7 if sim.b_far else float(foot.keep) * KEEP_CLOSE / late)
 			DuelSim.B.WINDUP:
 				# step to exactly striking distance, so the blade arrives where the knight is
 				f_back_t = clampf(foe_rig.reach() + 0.22 - gap - p_back, -1.0, 1.4) if foe_rig is FighterRig else 0.05
@@ -556,6 +703,56 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			player_rig.roll(float(d.side))
 			fx.dust(_feet(player_rig), 8)
 			Sfx.play("roll", -2.0)
+			_lesson_defended(_lesson_step("roll") if _lesson >= 0 and _lesson_kind() == "roll" else -9)
+		&"poise_break":
+			_break_from = str(d.get("from", ""))
+			Sfx.play("guard_break", -6.0, 1.15)
+		&"boss_press":
+			pass      # camera: the foe is chaining straight into another string (no cue defined for it yet)
+		&"struggle_start":
+			# blades locked: both rigs hold the cross, the HUD shows the one TAP target
+			_struggle_lock(float(d.time) + 0.2)
+			hud.struggle_begin(int(d.need), float(d.time), sim.input_struggle_tap)
+			hud.toast("BLADES LOCKED", UI.BONE, 0.8)
+			_set_foe_blade_warning(false)
+			p_back_t = -0.3
+			Sfx.play("clash", -2.0, 0.7)
+			Sfx.play("shield_scrape", -6.0, 0.8)
+			Game.haptic(40, 0.8)
+			if "director" in self and director:
+				director.cue("struggle", {"on": true, "at": _struggle_pt})
+		&"struggle_tap":
+			var u: float = float(d.n) / maxf(float(d.need), 1.0)
+			_struggle_lock(maxf(0.3, sim.b_t + 0.2))
+			sparks(_struggle_pt, cam.global_basis.x * (1.0 if int(d.n) % 2 == 0 else -1.0) + Vector3.UP * 0.7, 6, Color(1.0, 0.85, 0.55), 3.0 + 2.5 * u)      # the grind
+			Sfx.play("clash", -9.0 + 4.0 * u, 1.1 + 0.5 * u)
+			shake(0.06 + 0.08 * u)
+			Game.haptic(8, 0.4 + 0.5 * u)
+			hud.struggle_progress(int(d.n))
+		&"struggle_end":
+			hud.struggle_end()
+			if "director" in self and director:
+				director.cue("struggle", {"on": false})
+			if d.won:
+				# thrown off: the poise break and stagger that follow do the rest
+				sparks(_struggle_pt, Vector3(0, 0.8, 0.4), Fx.BUDGET.perfect, Color(1.0, 0.82, 0.5), 7.0)
+				Sfx.play("parry_perfect", -1.0, 0.9)
+				hitstop(0.1)
+				shake(0.4)
+				Game.haptic(60, 1.0)
+			else:
+				# overpowered: shoved back across the stones
+				p_back_t = 1.1
+				player_rig.hurt()
+				foe_rig.guard()
+				fx.dust(_feet(player_rig), 8)
+				hud.toast("OVERPOWERED", Color("#d23a2a"), 0.9)
+				hud.hurt_flash(0.4)
+				Sfx.play("guard_break", 0.0)
+				shake(0.6)
+				Game.haptic(70, 1.0)
+		&"story_beat":
+			_story_beat()
 		&"marks":
 			if int(d.n) >= int(d.of):
 				hud.toast("SENTENCED", Color("#d23a2a"), 1.2)
@@ -616,14 +813,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			shake(0.22 if crit else 0.12)
 			Game.haptic(18 if crit else 10, 0.5)
 			hud.combo(int(d.get("combo", 1)))
-			if _lesson >= 2 and _lesson_strike:
-				_lesson_done(_lesson)      # the answering cut landed: lesson learned
-			if _lesson == 0:
-				_lesson_count += 1
-				if _lesson_count >= 3:
-					_lesson_done(0)
-			elif _lesson == 1 and str(d.get("named", "")) != "":
-				_lesson_done(1)
+			if _lesson >= 0:
+				_lesson_hit(d)
 			if training:
 				hud.training_cuts(sim.p_hist.slice(maxi(0, sim.p_hist.size() - 5)), str(d.get("named", "")))
 			if str(d.get("named", "")) != "":
@@ -649,7 +840,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			_set_foe_blade_warning(false)
 			Sfx.play("stagger", -2.0)
 			if d.get("break", false):
-				hud.toast("POSTURE BROKEN", UI.GOLD, 1.0)
+				hud.toast("PARRY BREAK" if _break_from in ["parry", "struggle"] else "GUARD BREAK", UI.GOLD, 1.0)
 				shake(0.5)
 				_slow = 0.35
 		&"boss_recover":
@@ -745,8 +936,8 @@ func _on_strike(d: Dictionary) -> void:
 		var a0: Vector3 = foe_rig.weapon_r.global_position
 		var a1: Vector3 = foe_rig.blade_tip()
 		meet = a0.lerp(a1, 0.72)
-	if _lesson >= 2:
-		_lesson_defended({"parried": 2, "dodged": 3, "blocked": 4}.get(str(d.result), -9))
+	if _lesson >= 0:
+		_lesson_defended(_lesson_step({"parried": "parry", "dodged": "dodge", "blocked": "block"}.get(str(d.result), "")))
 	# effects that belong to the blow itself, whatever came of it
 	if str(a.get("kind", "")) == "slam":
 		# where the blow comes down: beside the knight if it was dodged, otherwise just in front of the feet

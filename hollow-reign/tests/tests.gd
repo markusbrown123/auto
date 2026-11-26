@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_lesson"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -147,7 +147,8 @@ func t_parry() -> void:
 	var hp: float = s.pl.hp
 	run_for(s, 0.2)
 	ok(s.pl.hp == hp, "perfect parry: no damage")
-	ok(s.b_state == DuelSim.B.STAGGER, "perfect parry staggers")
+	# a perfect parry no longer breaks the foe by itself: it cuts the string short and wears the most poise
+	ok(s.b_state == DuelSim.B.RECOVER and not s.b_opening_crit and is_equal_approx(s.b_poise, s.b_poise_max - DuelSim.POISE_PARRY_PERFECT), "perfect parry: a riposte window and a deep cut in its poise, not a stagger")
 	ok(s.stats.perfect_parries == 1, "perfect parry counted")
 	# normal parry (inside window, outside perfect)
 	s = mk("ashen_sentinel")
@@ -157,7 +158,7 @@ func t_parry() -> void:
 	hp = s.pl.hp
 	run_for(s, 0.3)
 	ok(s.pl.hp == hp and s.stats.parries == 1 and s.stats.perfect_parries == 0, "normal parry")
-	ok(s.b_posture > 0.0, "normal parry builds posture")
+	ok(is_equal_approx(s.b_poise, s.b_poise_max - DuelSim.POISE_PARRY), "normal parry wears poise")
 	# too early → whiff, then hit
 	s = mk("ashen_sentinel")
 	until_windup(s)
@@ -255,9 +256,7 @@ func t_block() -> void:
 func t_attack() -> void:
 	var s := mk("ashen_sentinel")
 	until_windup(s)
-	to_impact(s, 0.06)
-	s.input_swipe(DuelSim.parry_dir_for(s.b_attack.dir))
-	run_for(s, 0.1)
+	s._stagger(3.0, true)          # a broken foe (a perfect parry alone no longer staggers)
 	var hp := s.b_hp
 	var hits: Array = []
 	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
@@ -398,11 +397,11 @@ func t_meters_combos() -> void:
 	s = mk("ashen_sentinel"); hits.clear()
 	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
 	s.b_state = DuelSim.B.RECOVER; s.b_t = 30.0
-	var post: float = s.b_posture
+	var post: float = s.b_poise
 	for d in ["R", "L", "D"]:
 		s.input_swipe(d); run_for(s, 0.4)
 	ok(hits.size() == 3 and hits[2].named == "Armor Splitter", "right-left-down is an Armor Splitter")
-	ok(s.b_posture - post >= 30.0 or s.b_state == DuelSim.B.STAGGER, "Armor Splitter cracks posture")
+	ok(post - s.b_poise >= 30.0 or s.b_state == DuelSim.B.STAGGER, "Armor Splitter cracks poise")
 	s = mk("ashen_sentinel"); hits.clear()
 	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
 	s.b_state = DuelSim.B.RECOVER; s.b_t = 30.0
@@ -536,6 +535,7 @@ func t_drain() -> void:
 	ok(s != null, "found a draining attack")
 	s.b_hp = s.b_hp_max * 0.5
 	var hp := s.b_hp
+	s.pl.stamina = s.pl.max_stamina      # the search may already have let earlier grasps land
 	var st: float = s.pl.stamina
 	to_impact(s, 0.0); s.tick(1.0 / 60.0)
 	ok(s.b_hp > hp, "a landed grasp feeds the eater")
@@ -1128,3 +1128,367 @@ func t_save_slots() -> void:
 		Game.delete_slot(n)
 	Game.slot = 1
 	Game.new_game()
+
+# ------------------------------------------------------------------ poise, pressure, struggle, story beat, lesson
+## A fresh fight with the foe already winding up exactly this attack (or string), so a rule can be tested on its own.
+func _with_attack(foe: String, attacks: Array, seed_value: int = 7, opts: Dictionary = {}, recover: float = 1.5) -> DuelSim:
+	var s := mk(foe, seed_value, {}, opts)
+	s._start_combo({"id": "test", "attacks": attacks, "recover": recover, "tags": [], "gap": 0.15}, true)
+	return s
+
+## Runs until the blow being wound up has landed (or been answered), and no further.
+func _strike(s: DuelSim) -> void:
+	var idx := s.b_idx
+	var combo: Dictionary = s.b_combo
+	for i in 2000:
+		if s.b_state != DuelSim.B.WINDUP or s.b_idx != idx or not is_same(s.b_combo, combo):
+			return
+		s.tick(1.0 / 120.0)
+
+func t_poise() -> void:
+	var cut := {"dir": "L", "windup": 1.0, "dmg": 20, "swing": 0.3, "guard": 26, "parry": true, "unblockable": false, "element": null, "kind": "slash", "dodge": "L"}
+	var mx: float = mk("ashen_sentinel").b_poise_max
+	ok(mx == float(Db.foes.ashen_sentinel.poise) and float(Db.foes.gravewarden.poise) > mx and float(Db.foes.banneret.poise) < mx, "poise comes from data and heavy guardians carry more")
+	# each defence wears a stated amount
+	var want := {"parry": DuelSim.POISE_PARRY, "perfect parry": DuelSim.POISE_PARRY_PERFECT, "dodge": DuelSim.POISE_DODGE, "perfect dodge": DuelSim.POISE_DODGE_PERFECT,
+		"timed block": DuelSim.POISE_BLOCK_TIMED, "block": DuelSim.POISE_BLOCK}
+	ok(want["perfect parry"] > want["parry"] and want["parry"] > want["perfect dodge"] and want["perfect dodge"] > want["dodge"] and want["timed block"] > want["block"] and want["dodge"] > want["block"], "parries wear most, plain blocks least")
+	for how: String in want:
+		var s := _with_attack("ashen_sentinel", [cut])
+		var recs: Array = []
+		var breaks: Array = []
+		s.ev.connect(func(n, d):
+			if n == &"boss_recover": recs.append(d.time)
+			if n == &"poise_break": breaks.append(d.from))
+		match how:
+			"parry": to_impact(s, 0.22); s.input_swipe("R")
+			"perfect parry": to_impact(s, 0.06); s.input_swipe("R")
+			"dodge": to_impact(s, 0.36); s.input_dodge(-1)
+			"perfect dodge": to_impact(s, 0.12); s.input_dodge(-1)
+			"timed block": to_impact(s, 0.1); s.input_block(true)
+			"block": s.input_block(true)
+		var hp: float = s.pl.hp
+		_strike(s)
+		ok(is_equal_approx(s.b_poise, mx - float(want[how])), "%s wears %d poise (left %.0f of %.0f)" % [how, int(want[how]), s.b_poise, mx])
+		ok(s.b_state == DuelSim.B.RECOVER and not s.b_opening_crit and breaks.is_empty() and recs.size() == 1, "%s alone does not break it open" % how)
+		# only a short recovery: a share of the string's own, or the riposte after a perfect parry
+		var short: float = maxf(DuelSim.SHORT_RECOVER_MIN, 1.5 * DuelSim.SHORT_RECOVER)
+		var expect: float = DuelSim.RIPOSTE_TIME if how == "perfect parry" else short + (0.35 if how == "perfect dodge" else 0.0)
+		ok(recs.size() == 1 and is_equal_approx(float(recs[0]), expect) and expect < 1.5, "%s buys a short recovery (%.2fs, not the old 1.5s)" % [how, expect])
+		ok(s.pl.hp > hp - 3.0, "%s keeps the knight whole" % how)
+	# a blow that lands wears nothing
+	var h := _with_attack("ashen_sentinel", [cut])
+	_strike(h)
+	ok(h.b_poise == mx and h.stats.hits_taken == 1, "being hit wears no poise")
+	# the short recovery scales with the string's own recover, within its floor
+	var r2: Array = []
+	h = _with_attack("ashen_sentinel", [cut], 7, {}, 2.4)
+	h.ev.connect(func(n, d): if n == &"boss_recover": r2.append(d.time))
+	h.input_block(true); _strike(h)
+	ok(r2.size() == 1 and is_equal_approx(float(r2[0]), 2.4 * DuelSim.SHORT_RECOVER) and float(r2[0]) > DuelSim.SHORT_RECOVER_MIN, "a heavier string leaves a longer (still short) recovery")
+	# repeated defences break it: the long, critical opening, and then it gathers itself
+	var s2 := mk("ashen_sentinel")
+	var ev2: Array = []
+	s2.ev.connect(func(n, d):
+		if n == &"poise_break": ev2.append("break:" + str(d.from))
+		if n == &"boss_stagger": ev2.append("stagger:%.1f:%s" % [d.time, str(d["break"])]))
+	var parries := 0
+	for i in 8:
+		s2._start_combo({"id": "test", "attacks": [cut], "recover": 1.5, "tags": [], "gap": 0.15}, true)
+		to_impact(s2, 0.22); s2.input_swipe("R"); _strike(s2)
+		parries += 1
+		if s2.b_state == DuelSim.B.STAGGER:
+			break
+	ok(parries == int(ceil(mx / DuelSim.POISE_PARRY)) and parries >= 3, "it takes %d parries, not one, to break the Sentinel" % parries)
+	ok(ev2 == ["break:parry", "stagger:%.1f:true" % DuelSim.STAGGER_BREAK] and s2.b_state == DuelSim.B.STAGGER and s2.b_opening_crit and s2.b_poise == 0.0 and is_equal_approx(s2.b_t, DuelSim.STAGGER_BREAK), "parry break: a %.1fs critical opening" % DuelSim.STAGGER_BREAK)
+	ok(s2.poise_frac() == 0.0 and DuelSim.STAGGER_BREAK > 3.0 * maxf(DuelSim.SHORT_RECOVER_MIN, 1.5 * DuelSim.SHORT_RECOVER), "the break opening is several times the short recovery")
+	var hits: Array = []
+	s2.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	for d in ["R", "L", "D", "U", "R", "L"]:
+		s2.input_swipe(d); run_for(s2, 0.4)
+	ok(hits.size() >= 5 and hits[0].crit, "there is time in it for a chosen combination (%d cuts)" % hits.size())
+	run_for(s2, 1.5)
+	ok(s2.b_state != DuelSim.B.STAGGER and s2.b_poise == s2.b_poise_max, "after the opening its poise is whole again")
+	# a parry break interrupts the rest of the string
+	var s3 := _with_attack("ashen_sentinel", [cut, cut.duplicate(), cut.duplicate()])
+	s3.b_poise = 10.0
+	to_impact(s3, 0.22); s3.input_swipe("R"); _strike(s3)
+	ok(s3.b_state == DuelSim.B.STAGGER and s3.b_idx == 0, "a parry break stops the string where it is")
+	# a dodge cannot stop a string: poise worn out by dodging breaks only when the string ends
+	s3 = _with_attack("ashen_sentinel", [cut, cut.duplicate()])
+	s3.b_poise = 5.0
+	to_impact(s3, 0.36); s3.input_dodge(-1); _strike(s3)
+	ok(s3.b_state == DuelSim.B.WINDUP and s3.b_idx == 1 and s3.b_poise == 0.0, "dodged to nothing mid-string: the string carries on")
+	run_for(s3, 0.4)
+	to_impact(s3, 0.36); s3.input_dodge(-1); _strike(s3)
+	ok(s3.b_state == DuelSim.B.STAGGER, "and it breaks when the string is over")
+	# pressure: after an unbroken string it often comes straight back
+	var counts := {"press": 0, "recover": 0, "gap_short": 0}
+	var last_strike := [0.0]
+	var p := mk("ashen_sentinel", 3, geared(0))
+	p.pl.max_hp = 1.0e6; p.pl.hp = 1.0e6; p.pl.attack = 0.01
+	var bot := DuelBot.new(p, DuelBot.Style.SLOPPY, 3)
+	p.ev.connect(func(n, d):
+		if n == &"boss_press": counts.press += 1
+		if n == &"boss_recover": counts.recover += 1
+		if n == &"boss_strike": last_strike[0] = p.time
+		if n == &"boss_combo" and p.time - last_strike[0] < 1.6 and last_strike[0] > 0.0: counts.gap_short += 1)
+	run_for(p, 120.0, bot)
+	ok(counts.press >= 8 and counts.press < counts.recover, "the foe presses on after some strings, not all (%d of %d)" % [counts.press, counts.recover])
+	ok(counts.gap_short >= 8, "strings follow one another without a long idle (%d inside 1.6s)" % counts.gap_short)
+	ok(is_equal_approx(mk("crimson_widow").press(), float(Db.foes.crimson_widow.press)) and float(Db.foes.crimson_widow.press) > float(Db.foes.gravewarden.press), "how hard a foe presses is its own")
+	# the Sentinel's mixed strings: no single defence answers every blow
+	var mixed := 0
+	for ph in Db.foes.ashen_sentinel.phases:
+		for c in ph.combos:
+			var only := {}
+			for a in c.attacks:
+				if a.unblockable and not a.parry and a.dodge != "none":
+					only["dodge"] = true
+				elif not a.parry and not a.unblockable and a.dodge == "none":
+					only["block"] = true
+				elif a.parry:
+					only["parry"] = true
+			if c.attacks.size() >= 2 and c.attacks.size() <= 3 and only.size() >= 2:
+				mixed += 1
+	ok(mixed >= 3, "the Sentinel has mixed-answer strings (%d)" % mixed)
+	# the practice dummy has no poise to lose
+	var t := mk("ashen_sentinel", 7, {}, {"training": true})
+	for d in ["R", "L", "D"]:
+		t.input_swipe(d); run_for(t, 0.4)
+	ok(t.b_poise == t.b_poise_max and t.b_state == DuelSim.B.RECOVER, "training cuts wear nothing")
+
+func t_struggle() -> void:
+	var slam := {"dir": "D", "windup": 1.45, "dmg": 28, "swing": 0.34, "guard": 36, "parry": true, "unblockable": false, "element": null, "kind": "slam", "dodge": "any"}
+	var light := slam.duplicate(); light.kind = "slash"; light.windup = 0.9
+	ok(DuelSim.heavy_attack(slam) and not DuelSim.heavy_attack(light), "slams and long-wound cuts are heavy; quick cuts are not")
+	var lock := func(foe: String, a: Dictionary, before: float, force: bool, opts: Dictionary = {}, sd: int = 7) -> DuelSim:
+		var s := _with_attack(foe, [a], sd, opts)
+		s.force_struggle = force
+		to_impact(s, before); s.input_swipe("U"); _strike(s)
+		return s
+	# start conditions
+	var s: DuelSim = lock.call("ashen_sentinel", slam, 0.22, true)
+	ok(s.stats.parries == 1 and s.b_state == DuelSim.B.STRUGGLE and s.p_state == DuelSim.P.STRUGGLE and is_equal_approx(s.b_t, DuelSim.STRUGGLE_TIME), "a parried slam can lock blades for %.1fs" % DuelSim.STRUGGLE_TIME)
+	ok(s.s_need == s.struggle_need() and s.s_need == 9, "the Sentinel needs nine taps (%d)" % s.s_need)
+	ok(lock.call("ashen_sentinel", slam, 0.06, true).b_state != DuelSim.B.STRUGGLE, "a perfect parry never locks: it is already won")
+	ok(lock.call("ashen_sentinel", light, 0.22, true).b_state != DuelSim.B.STRUGGLE, "a light cut never locks")
+	ok(lock.call("cathedral_beast", slam, 0.22, true).b_state != DuelSim.B.STRUGGLE and lock.call("cinder_wyrm", slam, 0.22, true).b_state != DuelSim.B.STRUGGLE, "claws and dragons never lock blades")
+	ok(not mk("cathedral_beast").struggle_capable() and mk("hollow_soldier").struggle_capable(), "only blade-bearers struggle")
+	var les: DuelSim = lock.call("ashen_sentinel", slam, 0.22, true, {"lesson": true})
+	ok(les.b_state != DuelSim.B.STRUGGLE, "never during the lesson")
+	# need scales with the foe and the assist setting
+	ok(mk("hollow_soldier").struggle_need() == 6 and mk("frostbound_king").struggle_need() == 10 and mk("ashen_sentinel", 7, {}, {"assist": 1.3}).struggle_need() == 7 and mk("ashen_sentinel", 7, {}, {"ng": 2}).struggle_need() == 11, "taps needed scale with the foe, the journey and assist")
+	# winning
+	var evs: Array = []
+	s.ev.connect(func(n, d):
+		if n in [&"struggle_tap", &"struggle_end", &"poise_break", &"boss_stagger"]: evs.append([n, d]))
+	var hp: float = s.pl.hp
+	s.input_swipe("L"); s.input_dodge(1)
+	ok(s.p_state == DuelSim.P.STRUGGLE and s.p_buffer.is_empty() and not s.input_surge(), "nothing but tapping does anything in a struggle")
+	for i in s.s_need - 1:
+		run_for(s, 0.1)
+		s.input_struggle_tap()
+	ok(s.b_state == DuelSim.B.STRUGGLE and evs.size() == s.s_need - 1 and int(evs[-1][1].n) == s.s_need - 1, "taps are counted")
+	s.input_struggle_tap()
+	ok(evs.size() == s.s_need + 3 and evs[-3][0] == &"struggle_end" and evs[-3][1].won and evs[-2][0] == &"poise_break" and evs[-2][1].from == "struggle", "enough taps win it and break its poise")
+	ok(s.b_state == DuelSim.B.STAGGER and is_equal_approx(s.b_t, DuelSim.STAGGER_BREAK) and s.b_opening_crit and s.p_state == DuelSim.P.FREE and s.pl.hp == hp, "winning: the foe staggers into the long opening, the knight is free and unhurt")
+	s.input_struggle_tap()
+	ok(evs.size() == s.s_need + 3, "taps after it is over are ignored")
+	# losing
+	s = lock.call("ashen_sentinel", slam, 0.22, true)
+	var ended: Array = []
+	s.ev.connect(func(n, d): if n == &"struggle_end": ended.append(d.won))
+	hp = s.pl.hp
+	for i in 4:
+		s.input_struggle_tap()
+	run_for(s, DuelSim.STRUGGLE_TIME + 0.05)
+	ok(ended == [false] and s.p_state == DuelSim.P.STUN and s.b_state == DuelSim.B.IDLE, "too few taps: overpowered and stunned")
+	ok(s.pl.hp < hp and s.pl.hp > hp - float(slam.dmg) * 0.6 and not s.over, "losing costs modest damage (%.0f)" % (hp - s.pl.hp))
+	var stun_left: float = s.p_t
+	ok(stun_left <= DuelSim.STRUGGLE_STUN and stun_left < s.b_t + 0.45, "the stun is short and over before the next blow can land")
+	run_for(s, 0.8)
+	ok(s.p_state == DuelSim.P.FREE, "control comes back")
+	# cannot repeat inside its cooldown
+	var locks := func(sim: DuelSim) -> bool:
+		sim.pl.hp = sim.pl.max_hp
+		sim.b_poise = sim.b_poise_max      # (a parry that breaks its poise outright never needs a struggle)
+		sim._start_combo({"id": "test", "attacks": [slam], "recover": 1.5, "tags": [], "gap": 0.15}, true)
+		to_impact(sim, 0.22); sim.input_swipe("U"); _strike(sim)
+		return sim.b_state == DuelSim.B.STRUGGLE
+	ok(not locks.call(s), "a second lock cannot follow at once")
+	run_for(s, 0.6)
+	s.time += DuelSim.STRUGGLE_COOLDOWN - 10.0
+	ok(not locks.call(s), "nor anywhere inside %ds" % int(DuelSim.STRUGGLE_COOLDOWN))
+	run_for(s, 0.6)
+	s.time += 8.0
+	ok(locks.call(s), "after the cooldown it can happen again")
+	# the roll is seeded, modest, and made when the parry lands
+	var n := 0
+	var first: Array = []
+	var second: Array = []
+	for sd in range(1, 201):
+		var a: DuelSim = lock.call("ashen_sentinel", slam, 0.22, false, {}, sd)
+		first.append(a.b_state == DuelSim.B.STRUGGLE)
+		if first[-1]:
+			n += 1
+	for sd in range(1, 201):
+		var b: DuelSim = lock.call("ashen_sentinel", slam, 0.22, false, {}, sd)
+		second.append(b.b_state == DuelSim.B.STRUGGLE)
+	ok(first == second, "whether blades lock is decided by the seed alone")
+	ok(n >= 40 and n <= 80, "about three eligible parries in ten lock (%d of 200)" % n)
+	# whole fights: bots tap; the practised win their struggles, and results repeat
+	var f1 := mk("ashen_sentinel", 11, geared(0)); f1.force_struggle = true
+	run_for(f1, 600.0, DuelBot.new(f1, DuelBot.Style.SKILLED, 11))
+	ok(f1.b_state == DuelSim.B.DEAD and int(f1.stats.get("struggles", 0)) >= 1 and int(f1.stats.get("struggles_won", 0)) == int(f1.stats.struggles), "the skilled bot wins its struggles (%d) and the fight" % int(f1.stats.get("struggles", 0)))
+	var f2 := mk("ashen_sentinel", 21, geared(0)); f2.force_struggle = true
+	run_for(f2, 600.0, DuelBot.new(f2, DuelBot.Style.SLOPPY, 21))
+	var f3 := mk("ashen_sentinel", 21, geared(0)); f3.force_struggle = true
+	run_for(f3, 600.0, DuelBot.new(f3, DuelBot.Style.SLOPPY, 21))
+	ok(int(f2.stats.get("struggles", 0)) >= 1 and f2.stats.get("struggles") == f3.stats.get("struggles") and f2.stats.get("struggles_won", 0) == f3.stats.get("struggles_won", 0) and is_equal_approx(f2.time, f3.time), "fights with struggles are deterministic per seed (%d locked, %d won)" % [int(f2.stats.get("struggles", 0)), int(f2.stats.get("struggles_won", 0))])
+	var tt := mk("ashen_sentinel", 5, geared(0)); tt.force_struggle = true
+	tt.pl.max_hp = 1.0e6; tt.pl.hp = 1.0e6
+	var tb := DuelBot.new(tt, DuelBot.Style.TURTLE, 5)
+	tt._start_combo({"id": "test", "attacks": [slam], "recover": 1.5, "tags": [], "gap": 0.15}, true)
+	to_impact(tt, 0.22); tt.input_swipe("U"); _strike(tt)
+	run_for(tt, 2.5, tb)
+	ok(int(tt.stats.get("struggles", 0)) == 1 and int(tt.stats.get("struggles_won", 0)) == 0, "a slow hand (4 taps a second) loses to the Sentinel")
+
+func t_story_beat() -> void:
+	var s := mk("frostbound_king")
+	var beats: Array = []
+	s.ev.connect(func(n, d): if n == &"story_beat": beats.append(d.foe))
+	s.pl.attack = 50000.0
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 99.0
+	s.input_swipe("L"); run_for(s, 0.4)
+	ok(beats.is_empty() and s.b_state == DuelSim.B.SHIFT, "nothing is said while it is still turning")
+	run_for(s, 2.5)
+	ok(beats == ["frostbound_king"] and s.b_phase == 1, "the beat fires when the second phase begins")
+	# the presentation pauses the fight: nothing moves, nothing is lost
+	s.paused = true
+	var snap := [s.time, s.b_hp, s.pl.hp, s.b_phase, s.b_state, s.b_t, s.pl.stamina, s.b_poise, s.relic, s.surge]
+	var bot := DuelBot.new(s, DuelBot.Style.SKILLED, 3)
+	s.input_struggle_tap()
+	run_for(s, 8.0, bot)
+	ok(snap == [s.time, s.b_hp, s.pl.hp, s.b_phase, s.b_state, s.b_t, s.pl.stamina, s.b_poise, s.relic, s.surge], "a paused fight keeps its exact state (hp, phase, timers)")
+	s.paused = false
+	run_for(s, 1.0)
+	ok(s.time > float(snap[0]) + 0.9, "and carries on when released")
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 99.0; s.p_state = DuelSim.P.FREE
+	s.input_swipe("R"); run_for(s, 3.5)
+	ok(s.b_phase == 2 and beats.size() == 1, "it fires once in a fight, not at every phase")
+	var lesser := mk("hollow_soldier")
+	lesser.ev.connect(func(n, d): if n == &"story_beat": beats.append(d.foe))
+	run_for(lesser, 20.0)
+	ok(beats.size() == 1, "lesser foes have no beat")
+	# who gets one, and only once per save
+	var saved: Dictionary = Game.profile
+	Game.new_game("#123456")
+	var cs: Array = []
+	var missing: Array = []
+	for f: String in Db.foes:
+		if Companion.speech(f) == "C":
+			cs.append(f)
+			var id: String = Companion.voice_key(f) + "_beat"
+			if not Story.has_scene(id):
+				missing.append(id)
+			ok(Duel.beat_scene(f) == (id if Story.has_scene(id) else ""), "%s: the beat plays only if its scene is written" % f)
+		else:
+			ok(Duel.beat_scene(f) == "", "%s holds no conversation mid-fight" % f)
+	ok(cs.size() == 4 and cs.has("forgotten_monarch") and cs.has("crimson_widow"), "four foes may speak mid-battle")
+	if not missing.is_empty():
+		print("    story-beat scenes not yet written (the pause is skipped for these): ", ", ".join(missing))
+	var had: bool = Story.data.scenes.has("monarch_beat")
+	if not had:
+		Story.data.scenes["monarch_beat"] = {"lines": []}
+	ok(Duel.beat_scene("forgotten_monarch") == "monarch_beat", "with its scene written, the Monarch's beat is offered")
+	Game.profile.flags["beat_forgotten_monarch"] = true
+	ok(Duel.beat_scene("forgotten_monarch") == "", "and never again on that save")
+	if not had:
+		Story.data.scenes.erase("monarch_beat")
+	Game.profile = saved
+
+func t_lesson() -> void:
+	var saved: Dictionary = Game.profile
+	Game.new_game("#123456")
+	var d := Duel.new()
+	add_child(d)
+	d.setup("ashen_sentinel", {"lesson": true, "skip_intro": true, "seed": 7})
+	var s: DuelSim = d.sim
+	var cut := func(dir: String) -> void:
+		s.input_swipe(dir); run_for(s, 0.45)
+	var kinds: Array = Duel.LESSONS.map(func(l): return str(l[3]))
+	ok(kinds == ["cuts", "combo:double_slash", "parry", "dodge", "roll", "block", "combo:armor_splitter", "stamina"], "the lesson teaches cuts, a pair, parry, dodge, roll, block, three cuts and stamina")
+	var three: Dictionary = {}
+	for c in Db.combos:
+		if c.id == "armor_splitter":
+			three = c
+	ok(three.seq.size() == 3 and (three.cls.is_empty() or three.cls.has("sword")), "the three-cut step uses a real sword combination")
+	var a: Dictionary = s.lesson_attack()
+	for step in Duel.LESSONS.size():
+		var kind: String = kinds[step]
+		ok(d._lesson == step, "lesson reaches step %d (%s)" % [step, kind])
+		if d._lesson != step:
+			break
+		var demo: Dictionary = d.hud.lesson_demo()
+		ok(not demo.stroke.is_empty() or not demo.pads.is_empty(), "%s has a demonstration on screen (%s)" % [kind, str(demo)])
+		ok(s.b_state != DuelSim.B.STRUGGLE and s.pl.hp == s.pl.max_hp, "%s: nobody is hurt" % kind)
+		match kind:
+			"cuts":
+				ok(demo.stroke == ["R"], "cuts: a stroke is drawn")
+				for dir in ["R", "U", "L"]:
+					cut.call(dir)
+			"combo:double_slash":
+				ok(demo.stroke == ["L", "R"], "pair: both strokes are drawn")
+				cut.call("L"); cut.call("R")
+			"parry":
+				ok(demo.stroke == [DuelSim.parry_dir_for(a.dir)] and DuelSim.parry_quality(demo.stroke[0], a.dir) == 2, "parry: the stroke points into the blow")
+				until_windup(s); to_impact(s, 0.2); s.input_swipe(demo.stroke[0]); run_for(s, 0.3)
+			"dodge":
+				ok(demo.pads == {("right" if a.dodge == "R" else "left"): "tap"} and d.hud.pad_l.teach == "tap", "dodge: the pad on the safe side is lit")
+				until_windup(s); to_impact(s, 0.3); s.input_dodge(1 if a.dodge == "R" else -1); run_for(s, 0.4)
+			"roll":
+				ok(demo.pads.values() == ["double"] and d.hud.pad_l.teach == "double", "roll: the pad shows a double tap")
+				run_for(s, 0.3)
+				s.input_dodge(-1); run_for(s, 0.1); s.input_dodge(-1)
+				ok(d.hud.pad_l.teach != "double", "roll: the double-tap mark goes the moment the roll is made")
+				run_for(s, 1.0)
+			"block":
+				ok(demo.pads == {"block": "hold"} and d.hud.pad_block.teach == "hold", "block: the shield pad is lit with a hold ring")
+				until_windup(s); s.input_block(true); _strike(s); s.input_block(false)
+			"combo:armor_splitter":
+				ok(demo.stroke == three.seq, "three cuts: the combination's own strokes are drawn")
+				run_for(s, 0.3)
+				for dir in three.seq:
+					cut.call(dir)
+			"stamina":
+				ok(demo.pads.has("stamina") and not demo.stroke.is_empty(), "stamina: the bar is marked and a stroke invites cutting")
+				d._lesson_stamina_tick(1.0)
+				ok(d._lesson == step, "stamina: not done while the bar is full")
+				d._lesson_t = 9.95
+				d._lesson_stamina_tick(0.1)
+				ok(d._lesson == -1, "stamina: ten seconds is enough")
+				d._lesson = step; d._lesson_show()
+				s.pl.stamina = s.pl.max_stamina * 0.3
+				d._lesson_stamina_tick(0.1)
+				s.pl.stamina = s.pl.max_stamina * 0.6
+				d._lesson_stamina_tick(0.1)
+				ok(d._lesson == step, "stamina: low, but not yet recovered")
+				s.pl.stamina = s.pl.max_stamina * 0.75
+				d._lesson_stamina_tick(0.1)
+				ok(d._lesson == -1, "stamina: done once it has run low and come back")
+		if kind in ["parry", "dodge", "block"]:
+			# the defence worked: its indicator is gone at once, the payoff is up, and the stroke invites the answering cut
+			var after: Dictionary = d.hud.lesson_demo()
+			ok(d._lesson == step and d._lesson_strike and after.pads.is_empty() and after.stroke == ["R"], "%s: indicator cleared, answering stroke shown" % kind)
+			ok(d.hud.pad_l.teach == "" and d.hud.pad_block.teach == "" and d.hud._train_head.text.ends_with("SWIPE TO STRIKE"), "%s: payoff line shown" % kind)
+			ok(s.boss_open(), "%s: the foe waits for the answering cut" % kind)
+			run_for(s, 3.0)
+			ok(s.boss_open(), "%s: however long it takes" % kind)
+			cut.call("R")
+		var now: Dictionary = d.hud.lesson_demo()
+		ok(d._lesson != step and (d._lesson == -1 or now != demo), "%s: completing the step clears its demonstration" % kind)
+	var last: Dictionary = d.hud.lesson_demo()
+	ok(d._lesson == -1 and last.stroke.is_empty() and last.pads.is_empty() and d.hud.pad_l.teach == "" and d.hud.pad_block.teach == "", "when the lesson ends nothing is left on screen")
+	d.queue_free()
+	Game.profile = saved

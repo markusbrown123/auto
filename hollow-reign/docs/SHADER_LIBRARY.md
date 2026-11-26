@@ -10,6 +10,7 @@ Costs are stated as texture samples and passes; no figure in this file is a devi
 |---|---|---|---|
 | `pbr_clamp.gdshader` | every generated (Tripo) model: scenery, weapons, shields, characters, dragons. Applied by `Look.sanitise(root, class)` | Albedo + normal + packed ORM, like StandardMaterial3D, but roughness is clamped per pixel into `[rough_min, rough_max]` and metallic is capped at `metal_max`, by asset class (`Look.SURFACE`). Uniforms: `tint` (per-foe tint), `flash` (hit flash, replaces the old emission toggle), `rim_color`/`rim_power` (fresnel edge in the region's light, characters only), `emissive`/`emissive_tex` (carried over from the source material), `spec`. A two-sided variant is built at load for materials that were `cull_disabled`. | 3 texture samples (4 if the source was emissive), one `pow`. Opaque, single pass, casts shadows normally. Albedo and normal use anisotropic mip filtering. |
 | `grass_sway.gdshader` | grass tufts (`Arena._grass`, Courtyard and Blackwood MultiMesh) | Alpha-cut crossed quads; the top edge sways on two sines phased by world position. | 1 texture sample, 3 trig calls per vertex (8 vertices per tuft). No shadows cast. |
+| `recall.gdshader` | `Recall` (`src/fx/recall.gd`), on any weapon or shield MeshInstance tree, only while the effect runs | The same PBR reads as `pbr_clamp`, plus a reveal along the piece's long axis (or outward from the grip for shields, `radial`) driven by one uniform `progress` 0..1: 0 - 0.72 surface revealed behind a thin emissive front with a faceted leading edge; 0.72 - 1.0 one narrow pulse runs the length; at 1.0 every effect term is exactly zero and `Recall` restores the original surface materials. Playing `progress` 1 -> 0 is the dismissal. Uniforms: `progress`, `to_root`, `axis_origin`, `axis_dir`, `axis_len`, `radial`, `front_color`, `front_energy`, `cheap` (no facet jitter, no pulse). | Same 3 samples as `pbr_clamp` (4 if emissive). Adds one mat4 multiply per vertex, one hash and one `exp` per pixel (none when `cheap`), one `discard`. Opaque, single pass; the partial piece casts a matching shadow. |
 
 ## Material recipes built in code (StandardMaterial3D)
 
@@ -24,6 +25,14 @@ Costs are stated as texture samples and passes; no figure in this file is a devi
 | `Fx._streak_material()` | sparks, ice chips | Unshaded, additive, vertex colour; mesh is two crossed tapered quads aligned to velocity (4 triangles per spark). |
 | stone-chip material | `Fx` "chips" emitter | Lit, roughness 0.95, vertex colour = floor colour. |
 | unblockable overlay | `FighterRig` (`_warn_overlay`, gameplay-owned) | Additive unshaded `material_overlay` on the weapon. Listed for completeness; not changed in this pass. |
+
+## Equipment materials (`assets/models/gear/`, built by `tools/gear_gen.py`)
+
+Hand-modelled gear ships as glTF materials over 13 shared 256 px tiling textures (`gear/tex/`): `steel`, `fuller`,
+`gold` (brushed set), worn steel (Oathbreaker), `graphite`, `enamel`, `leather` (bead-blast set), `grip` (cord wrap);
+`edge` and `glow` are untextured. On load `GearModel.spawn` runs `Look.sanitise(root, "weapon")`, so the textured
+ones render through `pbr_clamp` (roughness floor 0.30); the two untextured ones stay StandardMaterial3D.
+Values and rules: `docs/EQUIPMENT_DESIGN_BIBLE.md`. One surface per material, 4 - 7 surfaces per piece.
 
 ## Asset classes (`Look.SURFACE`)
 
@@ -44,13 +53,15 @@ Class is chosen from the file name in `PropModel.scenery_class()`.
 The Game's three graphics presets (`Game.GRAPHICS`, owned by core) change render scale, MSAA, shadow size and
 distance, LOD and the particle multiplier. Effects read the multiplier through `Fx.pscale()`:
 spark, dust, chip, elemental and ambient counts are all multiplied by it (0.5 / 0.8 / 1.0).
-**No shader has per-tier variants yet**: `pbr_clamp` and `grass_sway` are the same on all three presets.
+**No surface shader has per-tier variants yet**: `pbr_clamp` and `grass_sway` are the same on all three presets.
+`recall.gdshader` is the exception: `Recall.reduced()` (Performance preset or `reduce_motion`) sets `cheap`, drops the
+sparks and shortens the effect (0.5 s; 0.35 s with reduced motion).
 
 ## Not built
 
 These are named in the brief or would be expected of a shader library, and do not exist:
 
-- dissolve / burn-away for dying foes; frost-creep and burn overlays on a struck body
+- dissolve / burn-away for dying foes (the Recall dismissal is for equipment only); frost-creep and burn overlays on a struck body
 - heat haze or refraction over fire and dragon breath (needs screen texture; deliberately avoided on Mobile)
 - water / wet-floor reflections (the "wet" floors are plain damp stone)
 - soft particles (depth fade where a billboard meets geometry)

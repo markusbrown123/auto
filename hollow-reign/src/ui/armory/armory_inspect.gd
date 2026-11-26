@@ -10,7 +10,7 @@ var _piece: Node3D
 var _cam: Camera3D
 var _yaw := 0.6
 var _pitch := 0.0
-var _dist := 3.2
+var _dist := 2.7
 var _touches := {}
 var _pinch0 := 0.0
 var _clock := 0.0

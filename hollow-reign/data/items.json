@@ -255,7 +255,7 @@
    "id": "w_oath_axe",
    "name": "Oathbreaker",
    "slot": "weapon",
-   "cls": "axe",
+   "cls": "greatsword",
    "rarity": "legendary",
    "damage": 66,
    "price": 0,
@@ -1415,7 +1415,7 @@
   },
   {
    "id": "w_dawnline",
-   "name": "Dawnline",
+   "name": "Silver Vow",
    "slot": "weapon",
    "cls": "sword",
    "rarity": "uncommon",
@@ -1429,7 +1429,7 @@
   },
   {
    "id": "w_vigil_edge",
-   "name": "Vigil Edge",
+   "name": "Nightward",
    "slot": "weapon",
    "cls": "sword",
    "rarity": "rare",
@@ -1443,7 +1443,7 @@
   },
   {
    "id": "w_starfall",
-   "name": "Starfall",
+   "name": "Veilcutter",
    "slot": "weapon",
    "cls": "sword",
    "rarity": "epic",
@@ -1457,7 +1457,7 @@
   },
   {
    "id": "w_throneshard",
-   "name": "Throneshard",
+   "name": "King's Remnant",
    "slot": "weapon",
    "cls": "greatsword",
    "rarity": "epic",

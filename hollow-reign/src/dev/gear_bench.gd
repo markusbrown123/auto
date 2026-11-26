@@ -197,7 +197,7 @@ func _compare() -> void:
 	var new_ := _spawn(str(args.get("item", "wayfarer")))
 	add_child(new_)
 	var yaw := float(args.get("yaw", "25"))
-	for e: Array in [[old, 0.13, "OLD  w_rusted_sword.glb (image-to-3D, fitted by PropModel)"], [new_, -0.13, "NEW  gear/wayfarer.glb (modelled)"]]:
+	for e: Array in [[old, 0.1, "OLD  w_rusted_sword.glb (image-to-3D, fitted by PropModel)"], [new_, -0.2, "NEW  gear/wayfarer.glb (modelled)"]]:
 		var n: Node3D = e[0]
 		n.rotation_degrees = Vector3(0, 0, -90)
 		n.rotate_object_local(Vector3.UP, deg_to_rad(yaw))
@@ -205,10 +205,14 @@ func _compare() -> void:
 		var lab := Label3D.new()
 		lab.text = e[2]
 		lab.pixel_size = 0.0008
-		lab.position = Vector3(0.0, float(e[1]) + 0.1, 0)
+		lab.position = Vector3(0.05, float(e[1]) + (0.17 if float(e[1]) > 0 else 0.09), 0)
 		lab.modulate = Color(0.7, 0.73, 0.8)
 		add_child(lab)
 	_camera(Vector3(float(args.get("focus", "0.06")), 0, 0), float(args.get("dist", "1.42")))
+	if args.has("recall"):
+		# the effect on a generated model fitted by PropModel as well as on a modelled one
+		_loop = [old, new_]
+		_cycle()
 
 func _lineup() -> void:
 	var xs := [-1.05, -0.72, -0.4, 0.2, 0.95]

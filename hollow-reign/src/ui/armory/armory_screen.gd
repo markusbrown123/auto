@@ -23,7 +23,7 @@ const FOCUS := {
 	"gauntlets": ["Spine", 0.0, 2.9, 0.46, 0.3, "rest"],
 	"legs": ["Hips", -0.5, 3.0, 0.47, 0.25, "rest"],
 	"weapon": ["Spine2", 0.0, 3.3, 0.47, 0.55, "arms"],
-	"shield": ["Spine2", -0.1, 3.0, 0.47, -0.5, "arms"],
+	"shield": ["Spine2", -0.1, 3.0, 0.47, -0.8, "arms"],
 	"ring": ["", 0.0, 4.25, 0.485, 0.2, "rest"],
 	"relic": ["", 0.0, 4.25, 0.485, 0.2, "rest"],
 }
@@ -241,12 +241,17 @@ func _build() -> void:
 	left.add_child(_note)
 	var plate := UI.panel(Color(0.03, 0.03, 0.036, 0.86), Color(0.22, 0.2, 0.16))
 	plate.get_theme_stylebox("panel").set_content_margin_all(8)
-	plate.custom_minimum_size.y = 136
 	left.add_child(plate)
+	# a fixed height, so the row above never changes size from one item to the next; a long comparison scrolls
+	var psc := ScrollContainer.new()
+	psc.custom_minimum_size.y = 150
+	psc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	plate.add_child(psc)
 	var pv := VBoxContainer.new()
 	pv.add_theme_constant_override("separation", 0)
-	plate.add_child(pv)
-	_stats_head = UI.label("", 17, UI.DIM, "head")
+	pv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	psc.add_child(pv)
+	_stats_head = UI.label("", 18, UI.DIM, "head")
 	pv.add_child(_stats_head)
 	_stats = GridContainer.new()
 	_stats.columns = 2
@@ -293,13 +298,17 @@ func _build() -> void:
 	_pad.mouse_filter = Control.MOUSE_FILTER_STOP
 	_pad.gui_input.connect(_pad_input)
 	row.add_child(_pad)
+	var pill := UI.panel(Color(0.03, 0.03, 0.036, 0.82), Color(0.3, 0.27, 0.2))
+	pill.get_theme_stylebox("panel").set_content_margin_all(6)
+	pill.get_theme_stylebox("panel").content_margin_left = 14
+	pill.get_theme_stylebox("panel").content_margin_right = 14
+	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pill.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	pill.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	pill.offset_top = 4
+	_pad.add_child(pill)
 	_tag = UI.label("", 20, UI.GOLD, "head")
-	_tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_tag.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	_tag.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	_tag.offset_bottom = -64
-	_tag.offset_top = -92
-	_pad.add_child(_tag)
+	pill.add_child(_tag)
 	var foot := HBoxContainer.new()
 	_foot = foot
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -434,7 +443,8 @@ func _show_grid(on: bool) -> void:
 	for i in entries.size():
 		var e: Dictionary = entries[i]
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(maxf(170.0, (carousel.size.x - 40.0) / 3.0 - 6.0), 62)
+		b.custom_minimum_size = Vector2(maxf(200.0, (carousel.size.x - 34.0) / 2.0 - 6.0), 60)
+		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		b.focus_mode = Control.FOCUS_NONE
 		b.text = str(e.name)
 		b.clip_text = true
@@ -866,7 +876,7 @@ func _process(delta: float) -> void:
 	var dim: float = 0.12 if Story.busy else 1.0
 	_acts.modulate.a = lerpf(_acts.modulate.a, dim, 1.0 - exp(-delta * 8.0))
 	_foot.modulate.a = _acts.modulate.a
-	_tag.modulate.a = _acts.modulate.a
+
 	_run_demo(delta)
 
 # ================================================================ scripted input for captures

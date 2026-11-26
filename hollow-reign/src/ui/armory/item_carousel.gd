@@ -394,10 +394,17 @@ func _draw_over() -> void:
 				_over.draw_string(font, c + Vector2(-w * 0.5, size.y * 0.47), _fit_text(font, str(e.name), w, 20), HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(e.color, na))
 		var top := c + Vector2(0, -size.y * 0.5 + 6.0 + 16.0 * (1.0 - s))
 		if e.get("equipped", false):
-			var tw := 118.0 * s
-			_over.draw_rect(Rect2(top + Vector2(-tw * 0.5, 0), Vector2(tw, 26.0 * s)), Color(0.05, 0.05, 0.06, 0.85 * a))
-			_over.draw_rect(Rect2(top + Vector2(-tw * 0.5, 0), Vector2(tw, 26.0 * s)), Color(UI.GOLD, 0.8 * a), false, 1.0)
-			_over.draw_string(UI.font("head"), top + Vector2(-tw * 0.5, 20.0 * s), "EQUIPPED", HORIZONTAL_ALIGNMENT_CENTER, tw, int(18 * s), Color(UI.GOLD, a))
+			if near > 0.6:
+				var tw := 118.0
+				var ta := a * (near - 0.6) / 0.4
+				_over.draw_rect(Rect2(top + Vector2(-tw * 0.5, 0), Vector2(tw, 26.0)), Color(0.05, 0.05, 0.06, 0.85 * ta))
+				_over.draw_rect(Rect2(top + Vector2(-tw * 0.5, 0), Vector2(tw, 26.0)), Color(UI.GOLD, 0.8 * ta), false, 1.0)
+				_over.draw_string(UI.font("head"), top + Vector2(-tw * 0.5, 20.0), "EQUIPPED", HORIZONTAL_ALIGNMENT_CENTER, tw, 18, Color(UI.GOLD, ta))
+			else:
+				# a neighbour that is the worn piece carries a gold diamond instead of the word
+				var d := 9.0
+				var dc := c + Vector2(0, -size.y * 0.36 * s)
+				_over.draw_colored_polygon(PackedVector2Array([dc + Vector2(0, -d), dc + Vector2(d, 0), dc + Vector2(0, d), dc + Vector2(-d, 0)]), Color(UI.GOLD, a))
 		if e.get("fav", false):
 			var sh := 22.0 * s
 			InvGlyph.paint(_over, "star", c + Vector2(size.y * 0.3 * s, -size.y * 0.36 * s), sh, Color(UI.GOLD, a), 1)

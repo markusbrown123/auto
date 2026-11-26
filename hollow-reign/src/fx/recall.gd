@@ -208,7 +208,7 @@ func _make_sparks(color: Color) -> void:
 		_sparks.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
 		_sparks.emission_sphere_radius = 0.02
 	_sparks.emitting = false
-	add_child(_sparks)
+	root.add_child(_sparks)       # in the piece's own space, so the emitter rides the front wherever the hand goes
 
 static var _spark: QuadMesh
 static func _spark_mesh() -> QuadMesh:
@@ -257,11 +257,8 @@ func release() -> void:
 		_sparks.emitting = false
 		var s := _sparks
 		_sparks = null
-		remove_child(s)
-		if is_instance_valid(root) and root.get_parent():
-			root.get_parent().add_child(s)
-			s.global_transform = root.global_transform * Transform3D(Basis.IDENTITY, s.position)
+		if is_instance_valid(s) and s.is_inside_tree():
 			s.get_tree().create_timer(0.4).timeout.connect(s.queue_free)
-		else:
+		elif is_instance_valid(s):
 			s.queue_free()
 	queue_free()

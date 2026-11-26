@@ -66,6 +66,23 @@ No attack in `data/bosses.json` or `data/items.json` carries an `ancient` or `co
 two effects are reachable only through the rift cut and the drain status.
 Pools: 2 emitters each for embers, ice, motes; one arc mesh.
 
+## Recall (equipment materialising in the hand)
+
+| | |
+|---|---|
+| Files | `src/fx/recall.gd` (`class_name Recall`), `src/fx/recall.gdshader` |
+| Call | `Recall.summon(node)`, `Recall.dismiss(node)`, `Recall.hold(node, progress)`; each returns the running `Recall` node (`finished` signal). `node` is any weapon or shield MeshInstance tree with its origin at the grip: a `GearModel`, or the holder `PropModel` made |
+| Sequence | hilt first: the surface is revealed along the long axis behind a thin pale-cyan front (2.2% of the length, with a 16% cooling zone behind it) over the first 72% of the time; then one narrow pulse (about 4% of the length) runs hilt to tip; then nothing. Shields open outward from the grip in a ring |
+| End state | at progress 1.0 the helper puts back each surface's previous override (or none): the piece is on its ordinary material, no glow, no extra node |
+| Dismissal | the same in reverse (pulse tip to hilt, then the piece recedes into the grip); the node is hidden at the end |
+| Duration | 0.95 s; `{"short": true}` 0.5 s for repeat viewings; Performance preset 0.5 s; `reduce_motion` 0.35 s |
+| Sparks | one `CPUParticles3D` riding the front: 18 x `Game.particle_scale()` quads of 14 mm, life 0.28 s, 0.08 - 0.45 m/s, additive pale cyan. Off on the cheaper path |
+| Cheaper path | `Recall.reduced()` is true on the Performance preset or with `reduce_motion`: no sparks, no pulse, no faceted edge (a ruled front only), shorter |
+| Light | none. The front is emissive at 2.4 over a band a few millimetres wide, so bloom stays a thin line |
+| Colour | "old energy" (0.62, 0.9, 1.0); override with `{"color": Color}` |
+| Budget | no extra draw calls (materials are swapped, not layered); up to 18 particles |
+| Not built | Recall sound, the hand pose that receives the weapon, authored drawing/sheathing for ordinary weapons, mechanical unfolding of shield plates (the ring reveal stands in for it) |
+
 ## Ambient life (`src/world/arena.gd`, `_particles` / `_ambient` / `fire`)
 
 Budget: **150 live ambient particles per arena**, flames included (`Arena.PARTICLE_BUDGET`, enforced by `_allot`),

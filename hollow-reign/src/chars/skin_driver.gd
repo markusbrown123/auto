@@ -159,6 +159,7 @@ func drive(j: Dictionary) -> Dictionary:
 	_clip_ankle.clear()
 	_overlay(false)
 	var back := to_skel.affine_inverse()
+	_back = back
 	var whole := clip_full and clip_w > 0.0
 	if clip_w > 0.0 and clip_w < 0.98:
 		# A clip mixed in by turning each bone part of the way does not put the feet part of the way: a foot the clip
@@ -177,7 +178,7 @@ func drive(j: Dictionary) -> Dictionary:
 				var o := _limb(side + "UpLeg", side + "Leg", side + "Foot", Vector3(f.origin.x, want_y, f.origin.z), pole)
 				skel.set_bone_global_pose(fi, Transform3D(f.basis, o))
 	_plant(back, q, whole)
-	if clip_w > 0.0 and not whole:
+	if clip_w > 0.0 and (not whole or clip_look):
 		# eyes on the opponent: a body clip turns the trunk, the head keeps the procedural aim as far as the neck allows
 		var chest_now: Basis = skel.get_bone_global_pose(bone["Spine2"]).basis.orthonormalized() * (rest["Spine2"] as Transform3D).basis.orthonormalized().inverse()
 		var rel := (chest_now.inverse() * head_rot).get_rotation_quaternion()
@@ -206,13 +207,129 @@ func drive(j: Dictionary) -> Dictionary:
 	if whole:
 		# whole-body clips (falling, dying) carry the arms too; the weapons follow the real hands
 		_overlay(true)
+		if clip_roll != 0.0 and arm_r > 0.0:
+			# the sword arm turned about the line to the opponent, so the cut travels the way that was swiped
+			var fwd_axis := (q * Vector3(0, 0, 1)).normalized()
+			for part: Array in [["RightShoulder", ROLL_CLAVICLE], ["RightArm", 1.0 - ROLL_CLAVICLE]]:
+				if bone.has(part[0]):
+					var g := skel.get_bone_global_pose(bone[part[0]])
+					skel.set_bone_global_pose(bone[part[0]], Transform3D(Basis(fwd_axis, clip_roll * arm_r * clip_w * float(part[1])) * g.basis, g.origin))
+		clip_axis = {"Right": hand_axis("Right"), "Left": hand_axis("Left")}
 	_ground(back, q, whole, bool(j.get("settle", false)))
+	if _xf_left > 0.0:
+		_xf_apply(float(j.get("dt", 0.0)))
+		_ground(back, q, true, false)
 	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
 	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
-	_back = back
 	return {"r": back * _palm("Right", hr), "l": back * _palm("Left", hl)}
 
 var _back := Transform3D.IDENTITY      # skeleton space -> rig body space, as of the last drive()
+
+# ---------------------------------------------------------------- change of pose without a pop
+## A change from one source of pose to another (guard to an authored cut, one cut to the next, a cut back to guard)
+## is eased from the pose the skeleton had on the frame before: call crossfade() before the next drive().
+var _xf_left := 0.0
+var _xf_dur := 0.0
+var _xf_rot := {}             # bone index -> local rotation when the change began
+var _xf_hips := Vector3.ZERO
+
+func crossfade(dur: float) -> void:
+	_xf_rot.clear()
+	for b: String in CLIP_BONES:
+		if bone.has(b):
+			_xf_rot[bone[b]] = skel.get_bone_pose_rotation(bone[b])
+	_xf_hips = skel.get_bone_pose_position(bone["Hips"])
+	_xf_dur = maxf(dur, 0.001)
+	_xf_left = _xf_dur
+
+## How far the change of pose has come: 0 at its first frame, 1 when the new pose stands alone.
+func xf_u() -> float:
+	return 1.0 if _xf_left <= 0.0 else smoothstep(0.0, 1.0, 1.0 - _xf_left / _xf_dur)
+
+func _xf_apply(dt: float) -> void:
+	_xf_left = maxf(0.0, _xf_left - dt)
+	var u := xf_u()
+	if u >= 1.0:
+		return
+	for i: int in _xf_rot:
+		skel.set_bone_pose_rotation(i, (_xf_rot[i] as Quaternion).slerp(skel.get_bone_pose_rotation(i), u))
+	var hi: int = bone["Hips"]
+	skel.set_bone_pose_position(hi, _xf_hips.lerp(skel.get_bone_pose_position(hi), u))
+
+# ---------------------------------------------------------------- a clip's sword hand without posing the skeleton
+var _chain := {}              # side -> bone names from the hips out to the hand
+
+## Where a whole-body clip puts a hand at time `t` on this skeleton, by forward kinematics over the arm's chain:
+## {p: grip point, axis: the way a handle held in it points, chest: the way the chest faces, hips: the way the hips face},
+## all in rig body space. `roll` as `clip_roll`. Used to choose and aim cuts and to know how far a cut reaches.
+func clip_hand(cn: String, t: float, side: String = "Right", roll: float = 0.0, travel: float = 1.0) -> Dictionary:
+	if not has_clip(cn):
+		return {}
+	if not _canon_ready:
+		_prepare_canon()
+	var a: Animation = _lib.get_animation(cn)
+	var map := _track_map(cn)
+	var src_dir: Dictionary = a.get_meta("rest_dir", {})
+	t = fposmod(t, a.length) if a.loop_mode != Animation.LOOP_NONE else clampf(t, 0.0, a.length)
+	if not _chain.has(side):
+		var names: Array = []
+		var i: int = bone[side + "Hand"]
+		while i >= 0:
+			var n := skel.get_bone_name(i)
+			names.push_front(n.get_slice(":", n.get_slice_count(":") - 1).trim_prefix("mixamorig_").trim_prefix("mixamorig"))
+			if names[0] == "Hips":
+				break
+			i = skel.get_bone_parent(i)
+		_chain[side] = names
+	var cb := _canon.inverse()
+	var to_skel := _back.affine_inverse()
+	var fwd_axis := (to_skel.basis.orthonormalized() * Vector3(0, 0, 1)).normalized()
+	var h: float = rest["Hips"].origin.y
+	var o := to_skel * Vector3.ZERO
+	var d_par := Basis.IDENTITY
+	var extra := Basis.IDENTITY
+	var prev := ""
+	var out := {}
+	for b: String in _chain[side]:
+		if prev == "":
+			if map.has("_pos"):
+				var hp: Vector3 = a.position_track_interpolate(map["_pos"], t)
+				o = Vector3(o.x, hp.y * h, o.z) + cb * Vector3(hp.x, 0, hp.z) * h * travel
+			else:
+				o.y = h
+		else:
+			o += d_par * (rest[b].origin - rest[prev].origin)
+		if roll != 0.0 and side == "Right" and (b == "RightShoulder" or b == "RightArm"):
+			extra = Basis(fwd_axis, roll * (ROLL_CLAVICLE if b == "RightShoulder" else 1.0 - ROLL_CLAVICLE)) * extra
+		if map.has(b):
+			var d := Basis(a.rotation_track_interpolate(map[b], t))
+			if _my_dir.has(b) and src_dir.has(b):
+				d = d * Basis(Quaternion(_my_dir[b], src_dir[b]))
+			d_par = extra * (cb * d * _canon)
+		if b == "Hips" or b == "Spine2":
+			out["hips" if b == "Hips" else "chest"] = (_back.basis.orthonormalized() * (d_par * (to_skel.basis.orthonormalized() * Vector3(0, 0, -1)))).normalized()
+		prev = b
+	var ax := _grip_rest(side)
+	var palm := o
+	var axis := Vector3.ZERO
+	if not ax.is_empty():
+		axis = (_back.basis.orthonormalized() * (d_par * (ax[0] as Vector3))).normalized()
+		palm = o + d_par * ((rest[side + "HandMiddle1"].origin - rest[side + "Hand"].origin) * 0.75)
+	out["p"] = _back * palm
+	out["axis"] = axis
+	return out
+
+func _track_map(cn: String) -> Dictionary:
+	if not _tracks.has(cn):
+		var a: Animation = _lib.get_animation(cn)
+		var m := {}
+		for t in a.get_track_count():
+			if a.track_get_type(t) == Animation.TYPE_POSITION_3D:
+				m["_pos"] = t
+			else:
+				m[str(a.track_get_path(t)).get_slice(":", 1)] = t
+		_tracks[cn] = m
+	return _tracks[cn]
 var _clip_ankle := {}                  # "Left"/"Right" -> the ankle's height in the clip's own pose (skeleton space)
 
 ## Where a bone is, in rig body space (after drive()).
@@ -489,6 +606,12 @@ var clip_t := 0.0
 var clip_w := 0.0
 var clip_full := false        # false: body and legs only, sword and shield arms stay on IK
 var clip_travel := 1.0        # how much of a whole-body clip's own travel to apply
+var arm_r := 1.0              # share of a whole-body clip the sword arm takes; 0 leaves it on IK (a pinned blade)
+var arm_l := 1.0              # the same for the shield / off arm (a braced shield)
+var clip_look := false        # whole-body clip, but the head is still turned to the opponent as far as the neck allows
+var clip_roll := 0.0          # radians the sword arm is turned about the line to the opponent (+ lifts a rightward cut)
+var clip_axis := {}           # "Right"/"Left" -> the way the clip itself points a handle in that hand, this frame
+const ROLL_CLAVICLE := 0.3    # share of `clip_roll` taken at the collar bone; the rest at the shoulder joint
 static var _lib: AnimationLibrary
 static var _tracks: Dictionary = {}      # clip -> {bone: track index}, plus "_pos" for the hips
 ## Parent-first order; the clips store each bone's model-space turn away from rest, facing -Z.
@@ -532,15 +655,7 @@ func _overlay(arms: bool) -> void:
 	if not _canon_ready:
 		_prepare_canon()
 	var a: Animation = _lib.get_animation(clip)
-	if not _tracks.has(clip):
-		var m := {}
-		for t in a.get_track_count():
-			if a.track_get_type(t) == Animation.TYPE_POSITION_3D:
-				m["_pos"] = t
-			else:
-				m[str(a.track_get_path(t)).get_slice(":", 1)] = t
-		_tracks[clip] = m
-	var map: Dictionary = _tracks[clip]
+	var map := _track_map(clip)
 	var src_dir: Dictionary = a.get_meta("rest_dir", {})
 	var t := fposmod(clip_t, a.length) if a.loop_mode != Animation.LOOP_NONE else clampf(clip_t, 0.0, a.length)
 	var back := _canon.inverse()
@@ -573,7 +688,12 @@ func _overlay(arms: bool) -> void:
 		var origin: Vector3 = skel.get_bone_global_pose(i).origin if b == "Hips" else _fk_origin(b)
 		if pre.has(b):
 			cur_b = pre[b]      # (a bone already carried round by its parent would otherwise be turned twice over)
-		var mixed := Basis(cur_b.get_rotation_quaternion().slerp(target.get_rotation_quaternion(), clip_w))
+		var bw := clip_w
+		if arms:
+			bw *= arm_r if b.begins_with("Right") else arm_l
+			if bw <= 0.0:
+				continue
+		var mixed := Basis(cur_b.get_rotation_quaternion().slerp(target.get_rotation_quaternion(), bw))
 		if pre.has(b):
 			# The arms stay on IK toward targets set for a body that faces its opponent. A clip may coil the trunk for a
 			# cut, but only so far: past this the sword arm would have to reach behind the back and through the shield.

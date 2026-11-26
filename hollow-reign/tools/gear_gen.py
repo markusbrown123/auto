@@ -660,7 +660,7 @@ def build_round(B, q):
         B.part()
         zb = back_z(0, 0)
         lathe(B, [(zb - 0.002, 0.050), (zb + 0.008, 0.050), (zb + 0.011, 0.046), (zb + 0.011, 0.020), (zb + 0.008, 0.020), (zb + 0.008, 0.017), (zb + 0.011, 0.017), (zb + 0.011, 0.0001)],
-              ["graphite", "graphite", "steel", "graphite", "glow", "graphite", "graphite"], seg=20, hard=range(8), y_axis=2)
+              ["graphite", "steel", "graphite", "graphite", "glow", "graphite", "graphite"], seg=20, hard=range(8), y_axis=2)
         for i in range(B.start, len(B.P)):
             B.P[i] = tuple(p + np.array([off[0], off[1], 0.0]) for p in B.P[i])
         B.close()
@@ -720,13 +720,13 @@ def textures():
     _save("steel_n", _normal_from(h, 1.0))
     _save("steel_orm", _orm(0.52 + 0.10 * (h - 0.5), 1.0))
     # --- worn steel: the same brushing under a patina, pits and stray scratches
-    pat = _norm01(_blur_wrap(rng.random((S, S)), 14, 14) + 0.5 * _blur_wrap(rng.random((S, S)), 4, 4))
-    pat = np.clip((pat - 0.35) * 2.2, 0, 1)
+    pat = _norm01(_blur_wrap(rng.random((S, S)), 34, 10) + 0.3 * _blur_wrap(rng.random((S, S)), 8, 3))
+    pat = np.clip((pat - 0.42) * 2.4, 0, 1)
     pits = np.clip((_norm01(_blur_wrap(rng.random((S, S)), 1.6, 1.6)) - 0.78) * 5, 0, 1)
-    scr = np.clip((_norm01(_blur_wrap(rng.random((S, S)), 0.6, 30)) - 0.74) * 6, 0, 1) * 0.6
+    scr = np.clip((_norm01(_blur_wrap(rng.random((S, S)), 0.7, 12)) - 0.9) * 10, 0, 1) * 0.5
     hw = h * 0.8 - pits * 0.22 - scr * 0.2 + pat * 0.05
-    val = 0.62 + 0.05 * (h - 0.5) - 0.10 * pat - 0.03 * pits + 0.03 * scr
-    warm = pat * 0.10
+    val = 0.62 + 0.05 * (h - 0.5) - 0.08 * pat - 0.03 * pits + 0.03 * scr
+    warm = pat * 0.045
     _save("worn_a", (np.clip(np.stack([val * (0.99 + warm * 0.6), val * 0.985, val * (1.0 - warm)], axis=-1), 0, 1) * 255).astype(np.uint8))
     _save("worn_n", _normal_from(_norm01(hw), 1.4))
     _save("worn_orm", _orm(0.50 + 0.10 * (h - 0.5) + 0.16 * pat + 0.06 * pits - 0.05 * scr, 1.0 - 0.15 * pat))

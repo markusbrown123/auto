@@ -217,7 +217,14 @@ func drive(j: Dictionary) -> Dictionary:
 		clip_axis = {"Right": hand_axis("Right"), "Left": hand_axis("Left")}
 	_ground(back, q, whole, bool(j.get("settle", false)))
 	if _xf_left > 0.0:
-		_xf_apply(float(j.get("dt", 0.0)))
+		# (an arm pinned to a contact point is not eased: it is solved again to its target on the eased trunk)
+		var pin_r := float(j.get("follow_r", 1.0)) <= 0.0
+		var pin_l := float(j.get("follow_l", 1.0)) <= 0.0
+		_xf_apply(float(j.get("dt", 0.0)), pin_r, pin_l)
+		if pin_r:
+			_limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
+		if pin_l:
+			_limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
 		_ground(back, q, true, false)
 	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
 	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
@@ -230,14 +237,14 @@ var _back := Transform3D.IDENTITY      # skeleton space -> rig body space, as of
 ## is eased from the pose the skeleton had on the frame before: call crossfade() before the next drive().
 var _xf_left := 0.0
 var _xf_dur := 0.0
-var _xf_rot := {}             # bone index -> local rotation when the change began
+var _xf_rot := {}             # bone name -> local rotation when the change began
 var _xf_hips := Vector3.ZERO
 
 func crossfade(dur: float) -> void:
 	_xf_rot.clear()
 	for b: String in CLIP_BONES:
 		if bone.has(b):
-			_xf_rot[bone[b]] = skel.get_bone_pose_rotation(bone[b])
+			_xf_rot[b] = skel.get_bone_pose_rotation(bone[b])
 	_xf_hips = skel.get_bone_pose_position(bone["Hips"])
 	_xf_dur = maxf(dur, 0.001)
 	_xf_left = _xf_dur
@@ -246,13 +253,16 @@ func crossfade(dur: float) -> void:
 func xf_u() -> float:
 	return 1.0 if _xf_left <= 0.0 else smoothstep(0.0, 1.0, 1.0 - _xf_left / _xf_dur)
 
-func _xf_apply(dt: float) -> void:
+func _xf_apply(dt: float, skip_r: bool = false, skip_l: bool = false) -> void:
 	_xf_left = maxf(0.0, _xf_left - dt)
 	var u := xf_u()
 	if u >= 1.0:
 		return
-	for i: int in _xf_rot:
-		skel.set_bone_pose_rotation(i, (_xf_rot[i] as Quaternion).slerp(skel.get_bone_pose_rotation(i), u))
+	for b: String in _xf_rot:
+		if _is_arm(b) and ((skip_r and b.begins_with("Right")) or (skip_l and b.begins_with("Left"))):
+			continue
+		var i: int = bone[b]
+		skel.set_bone_pose_rotation(i, (_xf_rot[b] as Quaternion).slerp(skel.get_bone_pose_rotation(i), u))
 	var hi: int = bone["Hips"]
 	skel.set_bone_pose_position(hi, _xf_hips.lerp(skel.get_bone_pose_position(hi), u))
 

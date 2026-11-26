@@ -1097,8 +1097,8 @@ func mastery_tier_text(it: Dictionary, tier: int) -> String:
 		2:
 			var taught := str(profile.get("mastery_taught", {}).get(it.id, ""))
 			if taught != "":
-				return "Technique learned: %s" % Db.combo_by_id[taught].name
-			return "A %s technique, written into the journal" % str(Db.classes[it.cls].name).to_lower()
+				return "Technique learned: %s. Swings with it cost 3%% less" % Db.combo_by_id[taught].name
+			return "A %s technique, written into the journal. Swings with it cost 3%% less" % str(Db.classes[it.cls].name).to_lower()
 		3: return "Mastered: one attribute point"
 	return ""
 
@@ -1144,4 +1144,268 @@ func item_history(id: String) -> Array:
 		_histories = v if v is Dictionary else {"_": ""}
 	if _histories.has(id) and mastery_tier(id) >= 1:
 		out.append(str(_histories[id]))
+	return out
+
+# ================================================================ equipment: materials, forge, discovery, cosmetics
+## The rules are in data/equipment.json (tools/gen_equipment.py) and docs/EQUIPMENT_PROGRESSION.md.
+
+func material_count(id: String) -> int:
+	return int(profile.shards) if id == "shards" else int(profile.get("materials", {}).get(id, 0))
+
+## Adds (or, with a negative count, takes) a material. Never goes below zero; false when it would.
+func add_material(id: String, n: int) -> bool:
+	if material_count(id) + n < 0:
+		return false
+	if id == "shards":
+		profile.shards += n
+	else:
+		profile.materials[id] = material_count(id) + n
+	return true
+
+## Every material with what is held: [{id, name, desc, count}], shards first.
+func materials_list() -> Array:
+	var out: Array = [{"id": "shards", "name": "Shards", "desc": "Splinters of the Crown. Orren works them into anything.", "count": int(profile.shards)}]
+	for id: String in Db.materials:
+		out.append({"id": id, "name": str(Db.materials[id].name), "desc": str(Db.materials[id].desc), "count": material_count(id)})
+	return out
+
+# ---------------------------------------------------------------- requirements
+func meets_requirements(id: String) -> bool:
+	return Stats.unmet(profile.attrs, Db.item(id)).is_empty()
+
+## "Strength 9" style line for what the item asks, "" when it asks nothing.
+func requirement_text(id: String) -> String:
+	var bits: Array = []
+	for k: String in Db.item(id).get("req", {}):
+		bits.append("%s %d" % [Db.ATTR_NAME.get(k, k), int(Db.item(id).req[k])])
+	return ", ".join(bits)
+
+# ---------------------------------------------------------------- forge: upgrade preview, crafting
+## What the next upgrade would do, without doing it: {level, max, cost, block, rows} where rows are compare()-style
+## rows of the stats the duel reads, now against after. Empty rows when the item is not worn (its own figures are in
+## `item_now` / `item_then`: damage or defence, and guard for a shield).
+func upgrade_preview(id: String) -> Dictionary:
+	id = Db.canon(id)
+	var it: Dictionary = Db.item(id)
+	var lvl := upgrade_level(id)
+	var out := {"level": lvl, "max": int(it.get("upgrade", {}).get("max", 0)), "cost": Stats.upgrade_cost(it, lvl), "block": upgrade_block(id),
+		"rows": [], "item_now": Stats.item_power(it, lvl) if not it.is_empty() else 0.0, "item_then": Stats.item_power(it, lvl + 1) if not it.is_empty() else 0.0}
+	if it.is_empty() or not is_equipped(id) or lvl >= int(out.max):
+		return out
+	var trial: Dictionary = profile.duplicate(true)
+	trial.upgrades[id] = lvl + 1
+	out.rows = _rows(stats(), Stats.compute(trial, Db.items, Db.classes)).filter(func(r): return int(r.better) != 0)
+	return out
+
+func _rows(now: Dictionary, then: Dictionary) -> Array:
+	var out: Array = []
+	for r in COMPARE_ROWS:
+		var a: float = float(now[r[1]]) * float(r[2])
+		var b: float = float(then[r[1]]) * float(r[2])
+		var d := b - a
+		out.append({"label": r[0], "key": r[1], "now": a, "then": b, "delta": d,
+			"better": 0 if is_zero_approx(d) else (1 if d * float(r[4]) > 0.0 else -1),
+			"now_text": str(r[3]) % a, "then_text": str(r[3]) % b})
+	return out
+
+## Why this cannot be made now, or "" when it can.
+func craft_block(id: String) -> String:
+	var it: Dictionary = Db.item(id)
+	if it.is_empty() or not it.has("craft"):
+		return "No pattern"
+	if owns(id):
+		return "Already yours"
+	var fam: Dictionary = Db.family(it)
+	if not fam.is_empty() and not region_unlocked(str(fam.region)):
+		return "Unknown work"
+	var c: Dictionary = it.craft
+	if profile.gold < int(c.get("gold", 0)):
+		return "Not enough gold"
+	if profile.shards < int(c.get("shards", 0)):
+		return "Not enough shards"
+	for m: String in c.get("materials", {}):
+		if material_count(m) < int(c.materials[m]):
+			return "Needs %s" % Db.material_name(m)
+	return ""
+
+func can_craft(id: String) -> bool:
+	return craft_block(id) == ""
+
+func craft(id: String) -> bool:
+	id = Db.canon(id)
+	if not can_craft(id):
+		return false
+	var c: Dictionary = Db.item(id).craft
+	profile.gold -= int(c.get("gold", 0))
+	profile.shards -= int(c.get("shards", 0))
+	for m: String in c.get("materials", {}):
+		profile.materials[m] = material_count(m) - int(c.materials[m])
+	grant_item(id)
+	save()
+	profile_changed.emit()
+	return true
+
+## Patterns Orren can work from now (the family's region has been reached and the piece is not held).
+func craft_stock() -> Array:
+	var out: Array = []
+	for it in Db.item_list:
+		if it.has("craft") and not owns(it.id) and craft_block(it.id) != "Unknown work":
+			out.append(it)
+	return out
+
+# ---------------------------------------------------------------- mastery challenges
+func challenge_ready(id: String) -> bool:
+	if not Db.challenges.has(id) or profile.challenges_done.has(id):
+		return false
+	var need: Dictionary = Db.challenges[id].need
+	var n := 0
+	for item_id in profile.mastered:
+		if Db.item(str(item_id)).get("cls", "") == need.get("mastered_cls", "-"):
+			n += 1
+	return n >= int(need.get("count", 1))
+
+func claim_challenge(id: String) -> bool:
+	if not challenge_ready(id):
+		return false
+	var reward: Dictionary = Db.challenges[id].reward
+	if reward.has("item"):
+		grant_item(str(reward.item))
+	profile.challenges_done.append(id)
+	save()
+	profile_changed.emit()
+	return true
+
+# ---------------------------------------------------------------- discovery states
+func is_discovered(id: String) -> bool:
+	id = Db.canon(id)
+	return owns(id) or profile.get("discovered", {}).has(id) or _in_stock(Db.item(id))
+
+## "equipped", "owned", "discovered" (seen as a drop, in the shop, or heard of) or "undiscovered" (a silhouette and a hint).
+func item_state(id: String) -> String:
+	if is_equipped(id):
+		return "equipped"
+	if owns(id):
+		return "owned"
+	return "discovered" if is_discovered(id) else "undiscovered"
+
+## The spoiler-free line about where an item is to be had.
+func item_hint(id: String) -> String:
+	return str(Db.item(id).get("hint", ""))
+
+## Marks an item as looked at (clears its "new" mark). Saved with the next save; never writes on its own.
+func mark_seen(id: String) -> void:
+	if owns(id):
+		profile.seen[Db.canon(id)] = true
+
+func is_new(id: String) -> bool:
+	return owns(id) and not profile.get("seen", {}).has(Db.canon(id))
+
+## Records that the player has come across an item (a drop seen, a line of lore). True when that was news.
+func discover(id: String) -> bool:
+	id = Db.canon(id)
+	if not Db.items.has(id) or profile.discovered.has(id):
+		return false
+	profile.discovered[id] = true
+	return true
+
+## Everything a slot's row needs. Owned items first, in the stored sort order; with `include_locked`, then the
+## discovered and then the undiscovered ones. Each entry:
+##   {id, state, item (the definition), name ("Unknown" while undiscovered), hint, owned, equipped, is_new, favourite,
+##    level, mastery_tier, visual, meets_req, can_equip}
+## Items only offered on a later cycle stay out until that cycle or until discovered.
+func items_for_slot(slot_name: String, include_locked: bool = false) -> Array:
+	var ids: Array = sorted_items([slot_name])
+	if include_locked:
+		for want: String in ["discovered", "undiscovered"]:
+			for it in Db.item_list:
+				if it.slot != slot_name or owns(it.id) or item_state(it.id) != want:
+					continue
+				if want == "undiscovered" and int(it.get("ng_min", 0)) > int(profile.ng):
+					continue
+				ids.append(it.id)
+	var out: Array = []
+	for id: String in ids:
+		var it: Dictionary = Db.item(id)
+		var state := item_state(id)
+		out.append({"id": id, "state": state, "item": it, "name": str(it.name) if state != "undiscovered" else "Unknown",
+			"hint": str(it.get("hint", "")), "owned": owns(id), "equipped": state == "equipped", "is_new": is_new(id),
+			"favourite": is_favourite(id), "level": upgrade_level(id), "mastery_tier": mastery_tier(id),
+			"visual": str(it.get("visual", "none")), "meets_req": meets_requirements(id), "can_equip": owns(id)})
+	return out
+
+## The profile as it would be with this item in this slot. Nothing is changed and nothing is saved. An item that
+## does not belong to the slot gives an unchanged copy. Works for items not owned, so locked gear can be previewed.
+func preview_profile(slot_name: String, item_id: String) -> Dictionary:
+	if Db.item(item_id).get("slot", "") != slot_name:
+		return profile.duplicate(true)
+	return trial_profile(item_id)
+
+## The duel's numbers for that what-if profile.
+func preview_stats(slot_name: String, item_id: String) -> Dictionary:
+	return Stats.compute(preview_profile(slot_name, item_id), Db.items, Db.classes)
+
+## The set bonuses of a profile: [{family, name, pieces, tiers: [{pieces, text, active}]}], families worn only.
+func set_status(p: Dictionary = profile) -> Array:
+	var out: Array = []
+	for s: Dictionary in Stats.compute(p, Db.items, Db.classes).sets:
+		var fam: Dictionary = Db.families[s.family]
+		var tiers: Array = []
+		for t: Dictionary in fam.set:
+			tiers.append({"pieces": int(t.pieces), "text": str(t.text), "active": int(s.pieces) >= int(t.pieces)})
+		out.append({"family": s.family, "name": str(fam.name), "pieces": int(s.pieces), "tiers": tiers})
+	return out
+
+# ---------------------------------------------------------------- cosmetics (never a statistic)
+## A slot's cosmetic layer: {finish, accent, look_as}. `look_as` is "" or the id of an owned item of the same slot
+## whose appearance is shown instead of the equipped one's.
+func cosmetic(slot_name: String) -> Dictionary:
+	var c: Dictionary = profile.get("cosmetics", {}).get(slot_name, {})
+	return {"finish": str(c.get("finish", "issued")), "accent": str(c.get("accent", "heraldry")), "look_as": str(c.get("look_as", ""))}
+
+func _cosmetic_set(slot_name: String, key: String, value: String) -> void:
+	if not profile.cosmetics.has(slot_name):
+		profile.cosmetics[slot_name] = {}
+	if value == "":
+		profile.cosmetics[slot_name].erase(key)
+	else:
+		profile.cosmetics[slot_name][key] = value
+	save()
+	profile_changed.emit()
+
+func set_finish(slot_name: String, finish: String) -> bool:
+	if not Db.EQUIP_SLOTS.has(slot_name) or not Db.equipment.finishes.has(finish):
+		return false
+	_cosmetic_set(slot_name, "finish", finish)
+	return true
+
+func set_accent(slot_name: String, accent: String) -> bool:
+	if not Db.EQUIP_SLOTS.has(slot_name) or not Db.equipment.accents.has(accent):
+		return false
+	_cosmetic_set(slot_name, "accent", accent)
+	return true
+
+## Shows another owned item of the same slot in place of the equipped one. "" removes the override.
+func set_look_as(slot_name: String, item_id: String) -> bool:
+	item_id = Db.canon(item_id) if item_id != "" else ""
+	if not Db.EQUIP_SLOTS.has(slot_name):
+		return false
+	if item_id != "" and (not owns(item_id) or Db.item(item_id).get("slot", "") != slot_name):
+		return false
+	_cosmetic_set(slot_name, "look_as", item_id)
+	return true
+
+## The item whose appearance a slot shows: the override if one is set and still valid, else what is equipped ("" for none).
+func appearance(slot_name: String, p: Dictionary = profile) -> String:
+	var look: String = str(p.get("cosmetics", {}).get(slot_name, {}).get("look_as", ""))
+	if look != "" and p.inventory.has(look) and Db.item(look).get("slot", "") == slot_name and p.equipped.get(slot_name) != null:
+		return look
+	return str(p.equipped[slot_name]) if p.equipped.get(slot_name) != null else ""
+
+## A copy of the profile's loadout with every appearance override applied: hand this to whatever draws the knight.
+## Never hand it to Stats.
+func appearance_loadout(p: Dictionary = profile) -> Dictionary:
+	var out := {}
+	for slot_name in p.equipped:
+		var id := appearance(slot_name, p)
+		out[slot_name] = id if id != "" else null
 	return out

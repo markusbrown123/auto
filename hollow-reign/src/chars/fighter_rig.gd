@@ -1871,14 +1871,14 @@ func _holster(side: String) -> Array:
 func _fit_sheath() -> void:
 	if _sheath_w <= 0.0 and _draw_dir == 0:
 		return
-	var u := clampf(_draw_t / AU_DRAW_TIME, 0.0, 1.0) if _draw_dir != 0 else 1.0
+	var u := clampf(_draw_t / AU_DRAW_TIME, 0.0, 1.0) if _draw_dir != 0 else 0.0
 	if _draw_dir < 0:
 		u = 1.0 - u      # sheathing is the draw run backward
 	# u: 0 the weapon hangs and the hand is away; DRAW_GRAB the hand is on the grip; DRAW_FREE the weapon is carried freely
-	var on_grip := smoothstep(0.0, DRAW_GRAB, u) * (1.0 - smoothstep(DRAW_GRAB, DRAW_FREE, u)) if _draw_dir != 0 else 0.0
-	if _draw_dir != 0 and u >= DRAW_GRAB:
-		on_grip = 1.0 - smoothstep(DRAW_GRAB, DRAW_FREE, u)
-	var freed := smoothstep(DRAW_GRAB, DRAW_FREE, u) if _draw_dir != 0 else 0.0
+	var on_grip := 0.0
+	if _draw_dir != 0:
+		on_grip = smoothstep(0.05, DRAW_GRAB, u) if u < DRAW_GRAB else 1.0 - smoothstep(DRAW_GRAB, DRAW_FREE, u)
+	var freed := smoothstep(DRAW_GRAB, DRAW_FREE, u)
 	for side: String in (["Right", "Left"] if dual else ["Right"]):
 		var w: Node3D = weapon_r if side == "Right" else weapon_l
 		var hs := _holster(side)
@@ -1890,7 +1890,7 @@ func _fit_sheath() -> void:
 			var palm: Vector3 = skin.reach_hand(side, in_hand.origin.lerp(hpos, on_grip))
 			in_hand.origin = palm
 		var d := hdir.slerp(in_hand.basis.y.normalized(), freed) if hdir.dot(in_hand.basis.y) > -0.99 else hdir
-		var pos := hpos if u < DRAW_GRAB else in_hand.origin
+		var pos := hpos.lerp(in_hand.origin, smoothstep(DRAW_GRAB, DRAW_GRAB + 0.06, u))
 		if u >= DRAW_GRAB and u < 1.0:
 			skin.grip(side, d)
 		w.transform = Transform3D(_basis_y(d, Vector3(0, 0, -1) if absf(d.z) < 0.9 else Vector3.RIGHT), pos)

@@ -148,15 +148,15 @@ class Pad extends Control:
 	## back swells into place; the one just lost flares and empties. With reduced motion they simply change.
 	func _draw_pips(c: Vector2, r: float, broken: bool) -> void:
 		var still: bool = bool(Game.settings.get("reduce_motion", false))
-		var step := 0.3
+		var step := 0.37
 		var a0 := -PI * 0.5 - step * (pips - 1) * 0.5
 		var shake := Vector2.ZERO
 		if _hit_t < 0.3 and not still:
 			shake = Vector2(sin(_hit_t * 70.0) * 3.0 * (1.0 - _hit_t / 0.3), 0)
 		for i in pips:
 			var a := a0 + step * i
-			var at := c + Vector2(cos(a), sin(a)) * (r + 13.0) + shake
-			var d := 6.5
+			var at := c + Vector2(cos(a), sin(a)) * (r + 16.0) + shake
+			var d := 8.0
 			var full := i < pips_left
 			var col := UI.BONE.lerp(UI.GOLD, 0.45)
 			if i == _pip_at and _pip_t < 0.45 and not still:
@@ -618,7 +618,7 @@ func shield_charges(d: Dictionary) -> void:
 	var was := pad_block.pips_left
 	pad_block.set_pips(left, int(d.get("max", 0)), bool(d.get("spent", false)))
 	if left == 0 and was > 0:
-		toast("SHIELD SPENT", UI.CRIMSON.lightened(0.4), 0.6)
+		toast("SHIELD SPENT", Color("#e08a7c"), 0.7)
 		Game.haptic(30, 0.5)
 
 func update_bars(sim: DuelSim, dt: float) -> void:

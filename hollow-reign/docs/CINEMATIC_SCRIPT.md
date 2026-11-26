@@ -114,6 +114,21 @@ From white, behind the walking knight at the same offset as A8, across the first
 
 ---
 
+### 1d. The second fall and Generation III — PLANNED (story in `CAMPAIGN_SCRIPT.md`; nothing below is built)
+| # | Scene | Framing | Action |
+|---|---|---|---|
+| G1 | The second meeting | as 3.11 below, with "That blade." first | the Monarch looks at the sword before the knight |
+| G2 | The seal burns | insert, the seal behind the throne, during play | the fight does not stop for it |
+| G3 | The second fall | LS, the knight at the seal, the Monarch between it and the camera | the camera stays on the Monarch; the body is not shown being taken up. `gen2_close`. |
+| G4 | Twenty-four years | J1 to J3 with Generations II and III | `TimeJump.make(24, 2, 3)` (exists) |
+| G5 | The Last Heir | the vista, Generation III | `Arrival` with `gen = 3` (exists; needs the heir's body and line) |
+| K1 | The Kept, seen | LS across the Inner Ward to the Sentinel's post, snow | a figure with its back to us, in armour the player knows. Hold. No music. |
+| K2 | The Witness | CU on the mask at the heir's hip, its light guttering | "It is the walk." |
+| K3 | The Kept turns | low angle, the same framing T4 used for the Throne Guard in Generation I | the turn; the card says "The Crownless Champion"; then the duel's own intro |
+| K4 | After | two-shot, level, no camera move | the sword held out hilt first; the Kept's light goes out standing up |
+| M1 | The last meeting | the hall with the floor open | three phases; `monarch_death`; no overlay; hold on the empty throne |
+| M2 | The door | behind the throne, a seam of light | the Witness's line; the door; white; the facility |
+
 ## 2. Courtyard exploration walks
 
 Status: EXISTS (in-engine render), seven clips of 6.0 s. Each plays once in full; on a retry or return the player arrives at the still at once (`cine_road.gd`). Tap skips after 0.4 s. Five footstep sounds are fired on a fixed timer (0.6 s, then every 0.85 s), not from the footage. After arrival the still (the walk's last frame) shows with hotspots, and the stage remark plays.

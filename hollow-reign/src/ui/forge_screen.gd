@@ -226,7 +226,7 @@ func _strip(title: String, at: int, cap: int, top: int, tier_note: String, effec
 			var l := UI.label(str(e), GearUI.TEXT, UI.BONE)
 			if str(e).length() > 34:
 				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-				l.custom_minimum_size.x = 340
+				l.custom_minimum_size.x = 320
 			fx.add_child(l)
 	v.add_child(fx)
 	if extra:
@@ -236,8 +236,10 @@ func _strip(title: String, at: int, cap: int, top: int, tier_note: String, effec
 		v.add_child(GearUI.cost_flow(cost))
 		var lack := GearUI.shortfall_text(cost)
 		if lack != "":
-			v.add_child(UI.label(lack, GearUI.TEXT, UI.GOLD_DIM.lightened(0.25)))
-	var b := UI.button(verb if block == "" else block, 20 if block == "" else 16, 176)
+			var ll := UI.wrapped(lack, GearUI.TEXT, UI.GOLD_DIM.lightened(0.25), 300)
+			ll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			v.add_child(ll)
+	var b := UI.button(verb if block == "" else block, 20 if block == "" else 16, 168)
 	b.custom_minimum_size.y = 64
 	b.focus_mode = Control.FOCUS_NONE
 	b.size_flags_vertical = Control.SIZE_SHRINK_CENTER

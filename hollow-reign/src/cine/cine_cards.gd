@@ -33,10 +33,10 @@ func _init() -> void:
 	orn.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	v.add_child(orn)
 	logo = v
-	card = UI.title("", 24, UI.BONE)
+	card = UI.title("", 34, UI.BONE)
 	card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
 	card.offset_left = 70
-	card.offset_top = -168
+	card.offset_top = -190
 	card.offset_right = 1000
 	card.offset_bottom = -120
 	hint = UI.title("", 20, UI.GOLD)

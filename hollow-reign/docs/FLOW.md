@@ -14,13 +14,13 @@ Story: `docs/CAMPAIGN_SCRIPT.md`, "The Inherited Oath". Shots: `docs/CINEMATIC_S
 |---|---|---|---|---|
 | 1 | Main menu | `ui/title_screen.gd` | — | New Journey opens character select over the same backdrop. |
 | 2 | Character select | `ui/character_select.gd` | — | Confirm: 0.35 s fade to black. |
-| 3 | **Generation I** | `cine/prologue.gd` | about 5 to 6 min, two duels in it | Opens from black, ends on black. First new journey only; see "Seen before". |
-| 3a | · the road | `cine/high_road.gd` | about 62 s | Six shots; 0.5 s fade. |
-| 3b | · the throne | | about 34 s | The guardian turns; 0.35 s fade. |
+| 3 | **Generation I** | `cine/prologue.gd` | about 4 min, two duels in it | Opens from black, ends on black. First new journey only; see "Seen before". |
+| 3a | · the road | `cine/high_road.gd` | about 70 s | Six shots; 0.5 s fade. |
+| 3b | · the throne | | about 36 s | The guardian turns; 0.35 s fade. |
 | 3c | · the royal guardian | `combat/duel.gd` | player-paced, about 1 min | Won: 0.5 s fade on. Lost: 0.5 s fade and the same duel again. |
-| 3d | · the records | | about 14 s | 0.35 s fade. |
+| 3d | · the records | | about 11 s | 0.35 s fade. |
 | 3e | · the clash | `combat/duel.gd` | 9 to 32 s | Taken by the story on the fourth cut the player lands (never before 9 s): the sim is paused where it stands, 0.45 s fade. |
-| 3f | · the fall | | about 40 s | The Engine's room (`chamber`). Last frame is the Awakening's first frame. Black, the mark, the narrator. |
+| 3f | · the fall | | about 32 s | The Engine's room (`chamber`). Last frame is the Awakening's first frame. Black, the mark, the narrator. |
 | 4 | **Time jump** | `cine/time_jump.gd` | about 12 s | The one view in Generation I's state, "TWENTY-TWO YEARS", white, the same view in Generation II's state, 0.5 s to black. |
 | 5 | **Arrival** | `cine/arrival.gd` | about 45 s | The same view from black with the player's knight; the line; the game's name; four shots up the road; 0.6 s to black at the gate. |
 | 6 | Awakening (the Inheritance Engine) | `cine/awakening.gd` | about 36 s plus one tap | Unchanged. Ends walking into the white of the door. |
@@ -28,7 +28,7 @@ Story: `docs/CAMPAIGN_SCRIPT.md`, "The Inherited Oath". Shots: `docs/CINEMATIC_S
 | 8 | First stop of the road | `ui/explore.gd` | — | No transition: the road screen takes over the place the Approach built. |
 | 9 | The foe is shown, the lesson, the first real duel, rewards | as before | | as before |
 
-To the first fight of Generation II a first-time player who skips nothing sees about 8.5 minutes, of which the two Generation I duels are about a minute and a half of play. With SKIP used on every beat it is under 20 seconds. This is longer than the 4 to 6 minutes first asked for; the generational brief allows 8 to 10 for Generation I alone.
+To the first stop of Generation II's road a first-time player who skips nothing sees about 6 minutes, of which the two Generation I duels are about a minute and a quarter of play. These figures are summed from the scenes' own timers and the length of the lines (new lines are text-only and are held for 1.4 s plus a fifteenth of a second a character); the chain has not been played through in one sitting on the build machine, and the guardian duel's length is a guess until a person has fought it. With SKIP used on every beat it is under 20 seconds.
 
 ### Generation I (`--screen=prologue`, `--beat=1..5`, `--shot=1..6` holds one road shot, `--auto` lets a bot fight)
 The forebear is a profile, not a special case: `Prologue.forebear()` is the default knight with veteran attributes, the garrison's silver armour and shield, the player's chosen body, and **the player's own sword item** (`Prologue.inherited_sword()`: what `Game.profile.equipped.weapon` holds if it is a one-handed sword, with its upgrade, mod and edge records copied). Both duels are the game's own `Duel`; for their length `Game.profile` is the forebear's and `Game.save_dir_override` points at a scratch folder, so nothing can be written to a save slot. Both are given back in `_give_back()` (also on leaving the tree).

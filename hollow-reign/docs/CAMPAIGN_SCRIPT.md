@@ -41,7 +41,7 @@ Source: `docs/GENERATIONAL_CAMPAIGN_BRIEF.md` and the owner's decision on the tw
 ### Length (target about 2 to 3 hours in all)
 | Part | Target | Content |
 |---|---|---|
-| Generation I | 5 to 6 minutes as built (the brief allows 8 to 10) | the road, the throne, one winnable duel, the clash, the fall |
+| Generation I | about 4 minutes as built (the brief allows 8 to 10) | the road, the throne, one winnable duel, the clash, the fall |
 | Time jump and arrival | about 1.5 minutes | the same view changed; the heir's line; the game's name; the walk to the gate |
 | Generation II | about 85 to 100 minutes | the Engine, the Courtyard (Witness, lesson, Sentinel), Blackwood, Cathedral, Crypt, Citadel, the Throne and the second meeting. The Roost is optional. Not every guardian has to fall. |
 | Generation III | about 40 to 50 minutes | the same places with changed encounters, entered by the routes II opened; the Kept; the last duel; the door under the throne |

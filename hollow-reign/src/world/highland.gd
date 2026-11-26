@@ -50,8 +50,8 @@ const SEASONS := [
 		"amb": "#5e6474", "amb_e": 1.0, "exp": 1.12, "sat": 0.9,
 		"grass_a": "#6a5628", "grass_b": "#9a7436", "heather": "#5a3a34", "heather_amt": 0.5, "dry": 1.0, "snow": 0.0,
 		"cloud": 0.36, "cloud_lit": "#c08a66", "cloud_dark": "#3a3640", "wind": 2.0, "seam": 0.0, "weather": "", "wear": 0.45, "whole": false},
-	{"sky": "#5f7088", "horizon": "#cfd6dc", "fog": "#bcc6ce", "fog_d": 0.0034, "sun": "#eaf0fa", "sun_e": 2.0, "sun_rot": Vector3(-14, 160, 0),
-		"amb": "#8d99ab", "amb_e": 1.15, "exp": 1.1, "sat": 0.8,
+	{"sky": "#465a78", "horizon": "#b9c4d0", "fog": "#aab6c2", "fog_d": 0.0013, "sun": "#eaf0fa", "sun_e": 2.0, "sun_rot": Vector3(-14, 160, 0),
+		"amb": "#8d99ab", "amb_e": 0.95, "exp": 0.92, "sat": 0.85,
 		"grass_a": "#6e7260", "grass_b": "#8e8c74", "heather": "#6a5a60", "heather_amt": 0.4, "dry": 0.7, "snow": 0.85,
 		"cloud": 0.42, "cloud_lit": "#f4f6fa", "cloud_dark": "#8e98a6", "wind": 0.6, "seam": 4.5, "weather": "snow", "wear": 0.6, "whole": false},
 ]
@@ -483,7 +483,7 @@ static func _ring(a: Arena) -> StandardMaterial3D:
 	var seam := Look.glow(Color("#5fe0c8"), 0.5)
 	seam.albedo_color = Color(0.08, 0.1, 0.1)
 	var strip := BoxMesh.new()
-	strip.size = Vector3(block.size.x * 0.62, 0.5, 0.5)
+	strip.size = Vector3(block.size.x * 0.7, 1.5, 0.6)
 	_batch(a, "HLRing", block, xf, stone, true)
 	_batch(a, "HLRingArc", block, arc, stone, true)
 	_batch(a, "HLRingFallen", block, fallen, stone, true)
@@ -580,7 +580,7 @@ static func _wayside(a: Arena, st: Dictionary) -> void:
 	lintel.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	# the dead tree in the saddle below the gate
 	var s_tree := tree_s()
-	_shadowed(a.prop("tree", 10.5, road(s_tree, -5.5) - Vector3(0, 0.3, 0), 75.0))
+	_dead_tree(a, road(s_tree, -5.5) - Vector3(0, 0.3, 0))
 	# a king's head, off its statue, where the road tops the rise
 	var sh := road_at_z(103.0)
 	_shadowed(a.prop("statue_head", 4.6, road(sh, 9.0) - Vector3(0, 1.1, 0), -150.0))
@@ -615,6 +615,43 @@ static func _wayside(a: Arena, st: Dictionary) -> void:
 	rocks.multimesh = mm
 	rocks.material_override = Look.stone(Color("#7b766c"), 0.3, 0.95, "crag")
 	a.add_child(rocks)
+
+## The dead tree: bare, wind-bent toward the land, one mesh. (The kit's "tree" is a block of masonry.)
+static func _dead_tree(a: Arena, at: Vector3) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 314
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# [base, direction, length, radius, depth]
+	var todo: Array = [[Vector3.ZERO, Vector3(-0.12, 1.0, 0.05).normalized(), 3.6, 0.42, 0]]
+	while not todo.is_empty():
+		var b: Array = todo.pop_back()
+		var from: Vector3 = b[0]
+		var dir: Vector3 = b[1]
+		var length: float = b[2]
+		var r: float = b[3]
+		var depth: int = b[4]
+		var limb := CylinderMesh.new()
+		limb.top_radius = r * 0.62
+		limb.bottom_radius = r
+		limb.height = length
+		limb.radial_segments = 7 if depth < 2 else 5
+		limb.rings = 1
+		var basis := Basis(Quaternion(Vector3.UP, dir))
+		st.append_from(limb, 0, Transform3D(basis, from + dir * length * 0.5))
+		if depth >= 4:
+			continue
+		var tip := from + dir * length
+		for k in (2 if depth > 0 else 3):
+			# every limb leans the way the wind has pushed it for three hundred years
+			var bend := Vector3(rng.randf_range(-1.0, 1.0), rng.randf_range(0.1, 0.9), rng.randf_range(-1.0, 1.0)) + Vector3(-0.8, 0.0, 0.5)
+			todo.append([tip - dir * rng.randf_range(0.0, length * 0.3), (dir * 0.75 + bend.normalized() * 0.75).normalized(), length * rng.randf_range(0.55, 0.78), r * 0.6, depth + 1])
+	var mi := MeshInstance3D.new()
+	mi.name = "HLTree"
+	mi.mesh = st.commit()
+	mi.material_override = Look.stone(Color("#3b342d"), 0.9, 0.95, "bark")
+	mi.position = at
+	a.add_child(mi)
 
 ## Where on the road the dead tree stands.
 static func tree_s() -> float:
@@ -690,6 +727,9 @@ static func generation(a: Arena, g: int) -> void:
 	cloud.set_shader_parameter("haze", Color(str(s.horizon)))
 	cloud.set_shader_parameter("wind", wind)
 	(st.seam as StandardMaterial3D).emission_energy_multiplier = float(s.seam)
+	# awake, it is seen through any weather
+	(st.seam as StandardMaterial3D).disable_fog = float(s.seam) > 1.0
+	(st.seam as StandardMaterial3D).albedo_color = Color("#5fe0c8") if float(s.seam) > 1.0 else Color(0.08, 0.1, 0.1)
 	var old := a.get_node_or_null("HLWeather")
 	if old:
 		old.free()

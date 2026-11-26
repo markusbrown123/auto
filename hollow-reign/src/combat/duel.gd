@@ -34,6 +34,7 @@ var _blade_had_emission := false
 var _intro_card: Control
 var _noise := FastNoiseLite.new()
 var _sparks: Array = []
+var fx: Fx                    # pooled contact effects (src/fx/fx.gd)
 var _result_sent := false
 ## Footwork. The fighters stand on a line through the arena's centre; the line turns as they circle,
 ## and each has an offset along it for advancing, giving ground and being driven back.
@@ -89,6 +90,9 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	arena = Arena.new()
 	add_child(arena)
 	arena.build(Arena.theme_for(region.theme, str(foe.get("arena", ""))))
+	fx = Fx.new()
+	add_child(fx)
+	fx.ground = Color(arena.theme.floor)
 	gap = 2.5 + (float(foe.rig.scale) - 1.0) * 1.5
 
 	player_rig = FighterRig.new()
@@ -122,16 +126,26 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	f_back = float(foot.keep)
 	f_back_t = f_back
 
+	# the key follows the fight; its colour and strength are the region's (Arena.THEMES key / key_e)
 	var key := SpotLight3D.new()
-	key.light_color = Color(arena.theme.sun).lerp(Color.WHITE, 0.5)
-	key.light_energy = 5.0
-	key.spot_range = 16.0
-	key.spot_angle = 42.0
+	key.light_color = Color(str(arena.light("key")))
+	key.light_energy = float(arena.light("key_e"))
+	key.light_specular = 0.6
+	key.spot_range = 18.0
+	key.spot_angle = 40.0
 	key.spot_attenuation = 0.6
 	key.shadow_enabled = false
 	add_child(key)
 	key.position = Vector3(4.5, 6.5, 4.0)
 	key.look_at(Vector3(0, 1.2, 0))
+	fx.follow_key(key, player_rig, foe_rig)
+	# generated bodies: clamp gloss (dragons are not loaded through SkinDriver) and edge them in the region's light
+	var rim_c := Color(str(arena.light("rim"))) * (float(arena.light("rim_e")) * 0.4)
+	for rig: Node in [player_rig, foe_rig]:
+		var sk = rig.get("skin")
+		if sk != null and sk.get("root") != null:
+			Look.sanitise(sk.root, "character", true)
+			Look.set_param(sk.root, &"rim_color", Color(rim_c.r, rim_c.g, rim_c.b))
 	cam = Camera3D.new()
 	cam.fov = 58.0
 	cam.near = 0.1
@@ -505,48 +519,30 @@ func hitstop(t: float) -> void:
 
 
 # ================================================================ effects
+## Kept as the duel's entry point; the work is done by the pooled emitters in Fx.
 func sparks(at: Vector3, dir: Vector3, amount: int = 18, color: Color = Color(1.0, 0.75, 0.4), speed: float = 5.0) -> void:
-	var p := CPUParticles3D.new()
-	p.one_shot = true
-	p.explosiveness = 0.95
-	p.amount = amount
-	p.lifetime = 0.45
-	p.mesh = _spark_mesh()
-	p.material_override = Look.particle(color)
-	p.direction = dir.normalized() if dir.length() > 0.01 else Vector3.UP
-	p.spread = 38.0
-	p.initial_velocity_min = speed * 0.4
-	p.initial_velocity_max = speed
-	p.gravity = Vector3(0, -9.0, 0)
-	p.scale_amount_min = 0.4
-	p.scale_amount_max = 1.0
-	p.damping_min = 1.0
-	p.damping_max = 3.0
-	var g := Gradient.new()
-	g.set_color(0, Color(1, 1, 1, 1))
-	g.set_color(1, Color(1, 0.3, 0.05, 0))
-	p.color_ramp = g
-	add_child(p)
-	p.global_position = at
-	p.emitting = true
-	get_tree().create_timer(1.2).timeout.connect(p.queue_free)
-	# a brief flash of light sells the impact
-	var l := OmniLight3D.new()
-	l.light_color = color
-	l.light_energy = 3.0
-	l.omni_range = 4.0
-	add_child(l)
-	l.global_position = at
-	var tw := create_tween()
-	tw.tween_property(l, "light_energy", 0.0, 0.18)
-	tw.tween_callback(l.queue_free)
+	fx.sparks(at, dir, amount, color, speed)
 
-var _spark_m: QuadMesh
-func _spark_mesh() -> QuadMesh:
-	if _spark_m == null:
-		_spark_m = QuadMesh.new()
-		_spark_m.size = Vector2(0.07, 0.07)
-	return _spark_m
+## Where on the ground a body stands.
+func _feet(rig: Node3D) -> Vector3:
+	var c: Vector3 = rig.chest_point()
+	return Vector3(c.x, 0.0, c.z)
+
+## The way sparks leave a deflected blow: back against its travel across the screen, upward, and a little away from the camera.
+func _deflect_dir(a: Dictionary) -> Vector3:
+	var v := DuelSim.dir_vec(str(a.get("dir", "")))
+	return cam.global_basis.x * (-v.x * 0.9) + Vector3.UP * (0.55 + 0.3 * absf(v.y)) - cam.global_basis.z * 0.25
+
+## The point on the player's blade nearest the foe's body: where a landed cut actually touches.
+func _cut_point() -> Vector3:
+	var a0: Vector3 = player_rig.weapon_r.global_position
+	var a1: Vector3 = player_rig.blade_tip()
+	var c: Vector3 = foe_rig.chest_point()
+	var ab := a1 - a0
+	var t := clampf((c - a0).dot(ab) / maxf(ab.length_squared(), 0.0001), 0.35, 1.0)
+	# on the body's surface, on the side the blade comes from: the rig's blade may be a frame short of the
+	# torso when the sim calls the hit, and sparks must not hang in the air beside it
+	return c + (a0 + ab * t - c).limit_length(0.3 * float(foe.rig.scale))
 
 func _screen_to_world_dir(d: String) -> Vector3:
 	var v := DuelSim.dir_vec(d)
@@ -589,10 +585,12 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		&"player_dodge":
 			p_side_owed += float(d.side) * 1.25     # a real step across the ground, not a lean
 			player_rig.dodge(float(d.side))
+			fx.dust(_feet(player_rig), 5, null, 0.8)
 			Sfx.play("dodge", -3.0)
 		&"player_roll":
 			p_side_owed += float(d.side) * 1.3      # the roll carries on past where the sidestep would have stopped
 			player_rig.roll(float(d.side))
+			fx.dust(_feet(player_rig), 8)
 			Sfx.play("roll", -2.0)
 		&"marks":
 			if int(d.n) >= int(d.of):
@@ -633,12 +631,18 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			if d.get("crit", false) or str(d.get("named", "")) != "":
 				_creature("pain", -5.0, 0.9)
 			f_back += 0.05
-			var at: Vector3 = foe_rig.chest_point() + Vector3(randf_range(-0.2, 0.2), randf_range(-0.2, 0.3), 0.35)
+			var at: Vector3 = _cut_point()
 			var crit: bool = d.get("crit", false) or d.get("rift", false)
 			if d.get("rift", false):
 				Sfx.play("clash", -5.0, 1.5)
 				hud.rift.burst()
-			sparks(at, _screen_to_world_dir(d.dir) + Vector3(0, 0.3, 0.8), 22 if crit else 12, Color(1.0, 0.8, 0.5) if not d.get("weak", false) else Color(0.6, 0.85, 1.0), 6.0)
+			var cut: Vector2 = DuelSim.dir_vec(str(d.dir))
+			sparks(at, cam.global_basis.x * cut.x - cam.global_basis.y * cut.y * 0.6 + Vector3(0, 0.35, 0) + cam.global_basis.z * 0.3, Fx.BUDGET.hit if crit else 10, Color(1.0, 0.8, 0.5) if not d.get("weak", false) else Color(0.6, 0.85, 1.0), 5.0)
+			if d.get("rift", false):
+				fx.element("rift", at)
+			var p_elem = sim.pl.get("element") if sim.get("pl") is Dictionary else null
+			if p_elem != null:
+				fx.element(str(p_elem), at, Vector3.UP)
 			foe_rig.flash(1.0 if crit else 0.6)
 			Sfx.play("hit_armor", -2.0 if crit else -5.0, 1.0 + 0.04 * int(d.get("combo", 1)))
 			if crit:
@@ -673,6 +677,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			f_back_t = 1.0                 # reels away; the player follows in
 			p_back_t = -0.55
 			foe_rig.stagger()
+			fx.dust(_feet(foe_rig), 7)
 			hud.cue.clear()
 			_set_foe_blade_warning(false)
 			Sfx.play("stagger", -2.0)
@@ -718,7 +723,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				hud.toast("DRAINED", Color("#c08aff"), 0.8)
 				hud.flash_stamina()
 				Sfx.play("frost", -4.0, 0.6)
-				sparks(player_rig.chest_point(), foe_rig.chest_point() - player_rig.chest_point(), 26, Color(0.75, 0.5, 1.0), 9.0)
+				fx.element("drain", player_rig.chest_point())
 			elif d.status == "frostbite":
 				hud.toast("FROSTBITTEN", UI.FROST, 1.0)
 				Sfx.play("frost", -3.0)
@@ -774,11 +779,16 @@ func _on_strike(d: Dictionary) -> void:
 		meet = a0.lerp(a1, 0.72)
 	if _lesson >= 2:
 		_lesson_done({"parried": 2, "dodged": 3, "blocked": 4}.get(str(d.result), -9))
+	# effects that belong to the blow itself, whatever came of it
+	if str(a.get("kind", "")) == "slam":
+		fx.chips(foe_rig.blade_tip())
+	if a.get("element") != null and str(d.result) != "dodged":
+		fx.element(str(a.element), meet if str(d.result) != "hit" else player_rig.chest_point(), _deflect_dir(a))
 	match d.result:
 		"parried":
 			player_rig.guard()
 			player_rig.clash(meet, 0.3 if d.perfect else 0.22)
-			sparks(meet, Vector3(0, 0.8, 0.6), 34 if d.perfect else 16, Color(1.0, 0.85, 0.55), 7.0 if d.perfect else 5.0)
+			sparks(meet, _deflect_dir(a), Fx.BUDGET.perfect if d.perfect else Fx.BUDGET.parry, Color(1.0, 0.82, 0.5), 6.5 if d.perfect else 5.0)
 			Sfx.play("clash", 0.0)
 			shake(0.35 if d.perfect else 0.2)
 			hitstop(0.13 if d.perfect else 0.06)
@@ -793,7 +803,8 @@ func _on_strike(d: Dictionary) -> void:
 				Game.haptic(15, 0.4)
 		"blocked":
 			player_rig.brace(meet, 0.34 if heavy else 0.26)
-			sparks(meet, Vector3(0, 0.5, 1), 8, Color(1, 0.8, 0.6), 3.5)
+			sparks(meet, _deflect_dir(a), 10 if heavy else 7, Color(1, 0.8, 0.55), 3.5)
+			fx.dust(_feet(player_rig), 7 if heavy else 4, null, 1.0 if heavy else 0.7)
 			p_back_t = 0.75 if heavy else 0.4          # the blow shoves the player back across the stones
 			Sfx.play("shield_heavy" if heavy else "block", 0.0)
 			get_tree().create_timer(0.09).timeout.connect(func(): Sfx.play("shield_scrape", -9.0))      # the blade sliding off
@@ -801,7 +812,8 @@ func _on_strike(d: Dictionary) -> void:
 			hitstop(0.04)
 			Game.haptic(22, 0.6)
 		"guard_break":
-			sparks(meet, Vector3(0, 0.5, 1), 20, Color(1, 0.7, 0.4), 5.0)
+			sparks(meet, _deflect_dir(a), Fx.BUDGET.hit, Color(1, 0.72, 0.4), 5.0)
+			fx.dust(_feet(player_rig), 8)
 			p_back_t = 1.1
 			Sfx.play("guard_break", 0.0)
 			player_rig.hurt()
@@ -812,7 +824,8 @@ func _on_strike(d: Dictionary) -> void:
 			hitstop(0.09)
 			Game.haptic(70, 1.0)
 		"hit":
-			sparks(player_rig.chest_point(), Vector3(0, 0.6, 1), 14, Color(0.8, 0.12, 0.08), 4.0)
+			sparks(player_rig.chest_point(), _deflect_dir(a), 12, Color(0.8, 0.12, 0.08), 3.5)
+			fx.dust(_feet(player_rig), 7 if heavy else 4)
 			p_back_t = 0.95 if heavy else 0.55
 			Sfx.play("hit_armor", 0.0, 0.9)
 			Sfx.play("hit_flesh", -2.0)

@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -1088,3 +1088,42 @@ func t_inventory_settings() -> void:
 	Game.apply_settings()
 	DirAccess.remove_absolute(Game.save_dir_override + "/settings.json")
 	Game.profile = saved_profile
+
+func t_save_slots() -> void:
+	for n in range(1, Game.SLOT_COUNT + 1):
+		Game.delete_slot(n)
+	ok(not Game.has_save() and Game.latest_slot() == 0 and Game.free_slot() == 1, "no journeys: nothing to continue, first place free")
+	# an old single save, written the way the game wrote it before there were slots, is slot 1
+	var f := FileAccess.open(Game.save_dir_override + "/save.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify({"attrs": {"health": 9}, "equipped": {"weapon": "w_rusted_sword"}, "level": 6, "cleared": ["courtyard"], "body": "f"}))
+	f.close()
+	var old := Game.slot_summary(1)
+	ok(Game.has_save() and old.get("level", 0) == 6 and old.get("body", "") == "f" and old.get("chapter_id", "") == "blackwood" and Game.slot_summary(2).is_empty(), "an old single save is read as slot 1")
+	ok(Game.load_slot(1) and Game.slot == 1 and Game.profile.level == 6 and Game.profile.attrs.strength == 5 and Game.save() and Game.slot_summary(1).level == 6, "the old save loads, migrates and saves back in place")
+	# three slots, independent
+	for n in range(1, Game.SLOT_COUNT + 1):
+		Game.slot = n
+		Game.new_game("#123456", "m" if n != 2 else "f")
+		Game.profile.gold = 100 * n
+		Game.profile.level = n + 1
+		Game.profile.last_played = 0.0
+		Game.save()
+	var golds: Array = []
+	for n in range(1, Game.SLOT_COUNT + 1):
+		Game.profile = {}
+		golds.append(Game.profile.gold if Game.load_slot(n) else -1)
+	ok(golds == [100, 200, 300] and Game.slot_summary(2).body == "f" and Game.slot_summary(3).level == 4 and Game.free_slot() == 0, "three slots keep separate journeys")
+	Game.load_slot(2)
+	Game.profile.gold = 999
+	Game.save()
+	ok(Game.latest_slot() == 2 or Game.slot_summary(2).last_played >= Game.slot_summary(3).last_played, "the slot saved last is the one Continue resumes")
+	ok(Game.load_slot(1) and Game.profile.gold == 100 and Game.load_slot(3) and Game.profile.gold == 300, "saving one slot leaves the others alone")
+	# delete
+	Game.load_slot(2)
+	Game.delete_slot(2)
+	ok(not Game.slot_exists(2) and Game.slot_summary(2).is_empty() and Game.profile.is_empty() and Game.free_slot() == 2, "delete empties the slot and the profile in memory")
+	ok(Game.slot_exists(1) and Game.slot_exists(3) and not Game.load_slot(2) and Game.load_slot(3) and Game.profile.gold == 300, "delete leaves the other slots, and an empty slot does not load")
+	for n in range(1, Game.SLOT_COUNT + 1):
+		Game.delete_slot(n)
+	Game.slot = 1
+	Game.new_game()

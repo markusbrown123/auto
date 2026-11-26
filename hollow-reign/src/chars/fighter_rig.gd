@@ -1079,8 +1079,8 @@ func _update_trail() -> void:
 	var col := Color(0.82, 0.87, 0.94)
 	if mat_blade.emission_enabled:
 		col = col.lerp(mat_blade.emission, 0.6)
-	var width := (0.07 if heavy else 0.045) * scale.x
-	var strength := 0.6 if heavy else 0.42
+	var width := (0.08 if heavy else 0.055) * scale.x
+	var strength := 0.7 if heavy else 0.55
 	var eye := cam.global_position
 	var n := _trail_pts.size()
 	for lane in 2:      # 0: the tip, 1: the 70% point (thinner and fainter)
@@ -1105,8 +1105,10 @@ func _update_trail() -> void:
 				var s := tan.cross(eye - p)
 				if s.length_squared() > 1e-10:
 					side = s.normalized()
-				var w := w0 * (1.0 - u) * 0.5
-				var a := a0 * (1.0 - u) * (1.0 - u)
+				# a few centimetres at most, and never a broad band when the blade passes close to the camera
+				var w := minf(w0, eye.distance_to(p) * 0.009) * (1.0 - u) * 0.5
+				# the faster the edge travels, the thinner the light is spread
+				var a := a0 * (1.0 - u) * (1.0 - u) * clampf(10.0 * maxf(t1 - t2, 0.001) / maxf(p1.distance_to(p2), 0.001), 0.3, 1.0)
 				trail_mesh.surface_set_color(Color(col.r, col.g, col.b, a))
 				trail_mesh.surface_set_uv(Vector2(0, u))
 				trail_mesh.surface_add_vertex(p - side * w)

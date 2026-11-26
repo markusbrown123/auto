@@ -140,3 +140,131 @@ static func soft_dot() -> Texture2D:
 	t.height = 32
 	_cache["dot"] = t
 	return t
+
+# ================================================================ generated-model materials
+## Roughness/metallic ranges by asset class (see docs/GRAPHICS_BIBLE.md). Generated PBR sets tend to
+## come out as liquid chrome or wet plastic; every loaded model goes through `sanitise` once.
+const SURFACE := {
+	"stone": {"rough_min": 0.78, "rough_max": 1.0, "metal_max": 0.05, "spec": 0.3},
+	"wood": {"rough_min": 0.8, "rough_max": 1.0, "metal_max": 0.0, "spec": 0.25},
+	"scenery_metal": {"rough_min": 0.5, "rough_max": 1.0, "metal_max": 0.6, "spec": 0.4},
+	"regal": {"rough_min": 0.58, "rough_max": 1.0, "metal_max": 0.45, "spec": 0.35},
+	"ice": {"rough_min": 0.38, "rough_max": 0.9, "metal_max": 0.0, "spec": 0.5},
+	"weapon": {"rough_min": 0.3, "rough_max": 1.0, "metal_max": 1.0, "spec": 0.5},
+	"character": {"rough_min": 0.33, "rough_max": 1.0, "metal_max": 0.85, "spec": 0.35},
+}
+const PBR_SHADER := "res://src/fx/pbr_clamp.gdshader"
+
+static func _pbr_shader(two_sided: bool) -> Shader:
+	var key := "pbr2" if two_sided else "pbr1"
+	if _cache.has(key):
+		return _cache[key]
+	var base: Shader = load(PBR_SHADER)
+	var sh := base
+	if two_sided:
+		sh = Shader.new()
+		sh.code = base.code.replace("; //CULL", ", cull_disabled;")
+	_cache[key] = sh
+	return sh
+
+static func _white() -> Texture2D:
+	if not _cache.has("white"):
+		var img := Image.create(4, 4, false, Image.FORMAT_RGB8)
+		img.fill(Color.WHITE)
+		_cache["white"] = ImageTexture.create_from_image(img)
+	return _cache["white"]
+
+## Replaces each textured, opaque generated material under `root` with the clamped PBR shader for its
+## class. `unique` gives this instance its own materials (characters: tint, flash, rim are per fighter);
+## otherwise one material is shared by every instance of the same source material.
+## Untextured (primitive) and transparent materials are left alone apart from a scalar clamp on the latter.
+static func sanitise(root: Node, cls: String, unique: bool = false) -> void:
+	if root == null or not SURFACE.has(cls):
+		return
+	var r: Dictionary = SURFACE[cls]
+	var list: Array = root.find_children("*", "MeshInstance3D", true, false)
+	if root is MeshInstance3D:
+		list.append(root)
+	for mi: MeshInstance3D in list:
+		if mi.mesh == null:
+			continue
+		for s in mi.mesh.get_surface_count():
+			var mat: Material = mi.get_active_material(s)
+			if not (mat is BaseMaterial3D):
+				continue
+			var bm: BaseMaterial3D = mat
+			if bm.albedo_texture == null or bm.shading_mode == BaseMaterial3D.SHADING_MODE_UNSHADED:
+				continue
+			var key := "san%d%s" % [bm.get_instance_id(), cls]
+			if not unique and _cache.has(key):
+				mi.set_surface_override_material(s, _cache[key])
+				continue
+			var out: Material
+			if bm.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED:
+				var sm := ShaderMaterial.new()
+				sm.shader = _pbr_shader(bm.cull_mode == BaseMaterial3D.CULL_DISABLED)
+				sm.set_shader_parameter("albedo_tex", bm.albedo_texture)
+				sm.set_shader_parameter("tint", bm.albedo_color)
+				if bm.normal_enabled and bm.normal_texture:
+					sm.set_shader_parameter("normal_tex", bm.normal_texture)
+					sm.set_shader_parameter("normal_scale", bm.normal_scale)
+				var orm: Texture2D = bm.roughness_texture if bm.roughness_texture else bm.metallic_texture
+				if orm:
+					sm.set_shader_parameter("orm_tex", orm)
+				# without a packed texture the scalar values stand in: white ORM -> rough_max / metal_max
+				var top: float = float(r.rough_max) if orm else clampf(bm.roughness, float(r.rough_min), float(r.rough_max))
+				var metal: float = float(r.metal_max) if bm.metallic_texture else minf(bm.metallic, float(r.metal_max))
+				sm.set_shader_parameter("rough_min", r.rough_min)
+				sm.set_shader_parameter("rough_max", top)
+				sm.set_shader_parameter("metal_max", metal)
+				sm.set_shader_parameter("spec", r.spec)
+				if bm.emission_enabled:
+					sm.set_shader_parameter("emissive", bm.emission * bm.emission_energy_multiplier)
+					sm.set_shader_parameter("emissive_tex", bm.emission_texture if bm.emission_texture else _white())
+				out = sm
+			else:
+				var d: BaseMaterial3D = bm.duplicate()
+				d.metallic = minf(d.metallic, float(r.metal_max))
+				d.metallic_specular = r.spec
+				d.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+				if d.roughness_texture:
+					d.roughness_texture = null
+					d.roughness = lerpf(float(r.rough_min), float(r.rough_max), 0.6)
+				out = d
+			if not unique:
+				_cache[key] = out
+			mi.set_surface_override_material(s, out)
+
+## Sets a shader parameter on every sanitised material under `root` (tint, flash, rim_color ...).
+static func set_param(root: Node, param: StringName, value: Variant) -> void:
+	if root == null:
+		return
+	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		if mi.mesh == null:
+			continue
+		for s in mi.mesh.get_surface_count():
+			var m: Material = mi.get_surface_override_material(s)
+			if m is ShaderMaterial:
+				(m as ShaderMaterial).set_shader_parameter(param, value)
+
+## A small dead leaf for falling-leaf particles (billboarded, spun by the emitter).
+static func leaf() -> StandardMaterial3D:
+	if _cache.has("leaf"):
+		return _cache["leaf"]
+	var img := Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	for y in 16:
+		for x in 16:
+			var u := (x - 7.5) / 7.5
+			var v := (y - 7.5) / 3.6
+			if u * u + v * v < 1.0:
+				img.set_pixel(x, y, Color(1, 1, 1, 1).darkened(0.25 * absf(v)))
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_texture = ImageTexture.create_from_image(img)
+	m.vertex_color_use_as_albedo = true
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
+	_cache["leaf"] = m
+	return m

@@ -66,26 +66,25 @@ func _fit() -> void:
 		root.rotation.y = -root.rotation.y
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
 		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	# generated PBR: clamp metal and gloss, own materials per fighter (tint, flash and rim are per instance)
+	Look.sanitise(root, "character", true)
 
 func tint(c: Color, amount: float = 0.45) -> void:
 	var m: float = maxf(maxf(c.r, c.g), maxf(c.b, 0.01))
 	var t := Color.WHITE.lerp(Color(c.r / m, c.g / m, c.b / m), amount)
-	for mi in root.find_children("*", "MeshInstance3D", true, false):
-		for s in mi.mesh.get_surface_count():
-			var mat = mi.get_active_material(s)
-			if mat is BaseMaterial3D:
-				var dup: BaseMaterial3D = mat.duplicate()
-				dup.albedo_color = t
-				mi.set_surface_override_material(s, dup)
+	Look.set_param(root, &"tint", t)
 
 func flash(v: float) -> void:
-	for mi in root.find_children("*", "MeshInstance3D", true, false):
-		for s in mi.mesh.get_surface_count():
-			var mat = mi.get_surface_override_material(s)
-			if mat is BaseMaterial3D:
-				mat.emission_enabled = v > 0.0
-				mat.emission = Color(1, 0.9, 0.8)
-				mat.emission_energy_multiplier = v * 0.25
+	if is_equal_approx(v, _flash_v):
+		return
+	_flash_v = v
+	Look.set_param(root, &"flash", Color(1, 0.9, 0.8) * (v * 0.22))
+
+## A faint fresnel edge in the arena's light so the figure reads against a dark background.
+func rim(c: Color, strength: float = 1.0) -> void:
+	Look.set_param(root, &"rim_color", Color(c.r * strength, c.g * strength, c.b * strength))
+
+var _flash_v := 0.0
 
 func _pose_bone(name: String, basis: Basis, origin: Vector3) -> void:
 	skel.set_bone_global_pose(bone[name], Transform3D(basis.orthonormalized(), origin))

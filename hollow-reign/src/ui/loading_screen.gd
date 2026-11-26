@@ -147,9 +147,11 @@ func _process(delta: float) -> void:
 func _art() -> Texture2D:
 	if _what == "courtyard" or _theme_id() == "courtyard":
 		var pre := "courtyard_f_stop" if str(Game.profile.get("body", "m")) == "f" else "courtyard_stop"
-		var n := randi() % 7
-		for i in 7:
-			var path := "res://assets/video/stills/%s_%d.jpg" % [pre, (n + i) % 7]
+		# only stops already walked on this journey, and never the last one: that still shows the guardian
+		var top := clampi(int(Game.run.get("stage", 0)), 0, 5) + 1
+		var n := randi() % top
+		for i in top:
+			var path := "res://assets/video/stills/%s_%d.jpg" % [pre, (n + i) % top]
 			if ResourceLoader.exists(path):
 				return load(path)
 	return null

@@ -60,7 +60,7 @@ func _clear() -> void:
 func _line(text: String, size: int, color: Color, kind: String = "body") -> void:
 	var l := UI.wrapped(text, size, color, 0.0, kind)
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	l.custom_minimum_size.x = 760
+	l.custom_minimum_size.x = 920
 	l.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_col.add_child(l)
 

@@ -11,7 +11,7 @@ const BODIES := [
 	["m", "The Knight", "Broad in the shoulder and slow to anger. Whoever he was, he was buried standing."],
 	["f", "The Blade", "Lean, exact, and very still. Whoever she was, somebody made sure she kept her sword."],
 ]
-const SPOT := {"m": Vector3(-1.7, 0, 0.6), "f": Vector3(1.7, 0, 0.6)}
+const SPOT := {"m": Vector3(-2.4, 0, 0.6), "f": Vector3(2.4, 0, 0.6)}
 const FACING := PI * 0.94
 
 var body := "m"

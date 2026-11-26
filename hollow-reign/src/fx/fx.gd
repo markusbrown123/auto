@@ -62,8 +62,8 @@ static func streak_mesh() -> ArrayMesh:
 		return _res["streak"]
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var w := 0.006
-	var h := 0.085
+	var w := 0.011
+	var h := 0.13
 	for ax: Vector3 in [Vector3.RIGHT, Vector3.BACK]:
 		var a := -ax * w
 		var b := ax * w
@@ -129,9 +129,9 @@ func _make(kind: String) -> CPUParticles3D:
 			p.damping_max = 2.4
 			p.scale_amount_min = 0.5
 			p.scale_amount_max = 1.2
-			p.color_ramp = _ramp([Color(1, 1, 1, 1), Color(1, 0.8, 0.5, 0.9), Color(1, 0.35, 0.08, 0)])
+			p.color_ramp = _ramp([Color(1, 0.92, 0.72, 1), Color(1, 0.7, 0.36, 0.9), Color(1, 0.3, 0.06, 0)])
 		"dust":
-			p.mesh = _quad(0.5)
+			p.mesh = _quad(0.34)
 			p.material_override = Look.particle(Color.WHITE, false)
 			p.explosiveness = 0.85
 			p.lifetime = 0.75
@@ -147,7 +147,7 @@ func _make(kind: String) -> CPUParticles3D:
 			p.scale_amount_min = 0.5
 			p.scale_amount_max = 1.0
 			p.scale_amount_curve = _curve(0.45, 1.3)
-			p.color_ramp = _ramp([Color(1, 1, 1, 0), Color(1, 1, 1, 0.2), Color(1, 1, 1, 0.1), Color(1, 1, 1, 0)])
+			p.color_ramp = _ramp([Color(1, 1, 1, 0), Color(1, 1, 1, 0.13), Color(1, 1, 1, 0.07), Color(1, 1, 1, 0)])
 		"chips":
 			var b := BoxMesh.new()
 			b.size = Vector3(0.06, 0.04, 0.05)
@@ -267,7 +267,7 @@ func sparks(at: Vector3, dir: Vector3, amount: int = 16, color: Color = Color(1.
 
 ## A low puff at the feet: rolls, sidesteps, being driven back.
 func dust(at: Vector3, amount: int = 6, tint = null, strength: float = 1.0) -> void:
-	var c: Color = tint if tint != null else ground.lerp(Color(0.8, 0.78, 0.74), 0.55)
+	var c: Color = tint if tint != null else ground.lerp(Color(0.72, 0.7, 0.66), 0.4)
 	c.a = clampf(strength, 0.2, 1.5)
 	_fire("dust", Vector3(at.x, maxf(at.y, 0.0) + 0.08, at.z), Vector3.UP, count(amount, BUDGET.dust), c)
 

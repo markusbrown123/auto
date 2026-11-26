@@ -3,29 +3,46 @@ extends Node3D
 ## Builds a region's duel arena procedurally from a theme table.
 ## The fight happens on the Z axis around the origin; the camera sits at +Z.
 
+## Per-region look. Lighting fields (all optional, defaults in LIGHT_DEFAULTS):
+##   amb / amb_e   ambient colour and energy          fill_e   camera-side fill (no shadows)
+##   key / key_e   the duel's follow spot             rim / rim_e   back light and the fighters' fresnel edge
+##   exp           exposure      sat / con / bri      colour grade (Environment adjustments)
+##   particles     ambient emitters joined with "+" (see _particles; budget: 150 live in total with flames)
 const THEMES := {
 	# clear cold morning: the kingdom is cursed, but the sun still rises on it
-	"courtyard": {"sky": "#2f5f9e", "horizon": "#c4d6e6", "fog": "#a8bccc", "fog_d": 0.005, "sun": "#fff2dc", "sun_e": 2.3, "sun_rot": Vector3(-42, 145, 0),
-		"stone": "#9a9284", "floor": "#8c8474", "fire": "#ff8a3a", "layout": "ruin", "particles": "motes", "amb": "#8494aa", "day": true},
-	"roost": {"sky": "#2a3c72", "horizon": "#ffb478", "fog": "#d09868", "fog_d": 0.006, "sun": "#ffcf9a", "sun_e": 2.1, "sun_rot": Vector3(-18, 160, 0),
-		"stone": "#7a6858", "floor": "#6a5848", "fire": "#ff7a2a", "layout": "crag", "particles": "embers", "amb": "#8a7068", "day": true},
-	"deep": {"sky": "#020104", "horizon": "#1c0c2e", "fog": "#10081c", "fog_d": 0.05, "sun": "#9a7ad8", "sun_e": 0.55, "sun_rot": Vector3(-60, 170, 0),
-		"stone": "#342c3c", "floor": "#16121c", "fire": "#b07aff", "layout": "abyss", "particles": "motes", "amb": "#241a34", "wet": true},
-	"blackwood": {"sky": "#0a100e", "horizon": "#26362a", "fog": "#1a261e", "fog_d": 0.035, "sun": "#a8c4ae", "sun_e": 1.1, "sun_rot": Vector3(-55, 120, 0),
-		"stone": "#3a3a32", "floor": "#2c2e25", "fire": "#c8d86a", "layout": "forest", "particles": "motes", "amb": "#1c2a20"},
-	"cathedral": {"sky": "#120b08", "horizon": "#4a2414", "fog": "#2a1810", "fog_d": 0.04, "sun": "#ffb070", "sun_e": 0.9, "sun_rot": Vector3(-30, 200, 0),
-		"stone": "#5a4e44", "floor": "#4c423a", "fire": "#ff6a22", "layout": "nave", "particles": "ash", "amb": "#3a2418"},
-	"cathedral_steps": {"sky": "#120b08", "horizon": "#5a2a16", "fog": "#2a1810", "fog_d": 0.03, "sun": "#ffb070", "sun_e": 1.0, "sun_rot": Vector3(-25, 170, 0),
-		"stone": "#5a4e44", "floor": "#4c423a", "fire": "#ff6a22", "layout": "facade", "particles": "ash", "amb": "#3a2418"},
-	"crypt": {"sky": "#020405", "horizon": "#06100f", "fog": "#0a1614", "fog_d": 0.07, "sun": "#5fa894", "sun_e": 0.35, "sun_rot": Vector3(-70, 90, 0),
-		"stone": "#3c4440", "floor": "#1a2422", "fire": "#5fe0b8", "layout": "vault", "particles": "motes", "amb": "#10201c", "wet": true},
-	"citadel": {"sky": "#0c1220", "horizon": "#5a7088", "fog": "#3a4a5c", "fog_d": 0.045, "sun": "#bcd4f0", "sun_e": 1.3, "sun_rot": Vector3(-35, 140, 0),
-		"stone": "#6a7480", "floor": "#8a96a2", "fire": "#7fd4ff", "layout": "hall", "particles": "snow", "amb": "#3c4c60"},
-	"sanctuary": {"sky": "#07070a", "horizon": "#1c1a1c", "fog": "#15120f", "fog_d": 0.045, "sun": "#c8b8a0", "sun_e": 0.5, "sun_rot": Vector3(-50, 160, 0),
-		"stone": "#5c564e", "floor": "#48423a", "fire": "#ffb45a", "layout": "chapel", "particles": "motes", "amb": "#3a3028"},
-	"throne": {"sky": "#060404", "horizon": "#2a1a10", "fog": "#16100c", "fog_d": 0.03, "sun": "#ffd9a0", "sun_e": 0.9, "sun_rot": Vector3(-48, 180, 0),
-		"stone": "#4a443c", "floor": "#2e2a26", "fire": "#ffc860", "layout": "throne", "particles": "motes", "amb": "#2a2018", "wet": true},
+	"courtyard": {"sky": "#2f5f9e", "horizon": "#c4d6e6", "fog": "#a8bccc", "fog_d": 0.005, "sun": "#fff2dc", "sun_e": 2.1, "sun_rot": Vector3(-42, 145, 0),
+		"stone": "#9a9284", "floor": "#8c8474", "fire": "#ff8a3a", "layout": "ruin", "particles": "motes", "amb": "#7e8ea6", "day": true,
+		"amb_e": 0.95, "fill_e": 0.0, "key": "#fff4e2", "key_e": 2.2, "rim": "#ffe6c4", "rim_e": 0.35, "exp": 1.0, "sat": 0.95, "con": 1.06},
+	"roost": {"sky": "#2a3c72", "horizon": "#ffb478", "fog": "#d09868", "fog_d": 0.006, "sun": "#ffcf9a", "sun_e": 2.0, "sun_rot": Vector3(-18, 160, 0),
+		"stone": "#7a6858", "floor": "#6a5848", "fire": "#ff7a2a", "layout": "crag", "particles": "embers+ash", "amb": "#8a7068", "day": true,
+		"amb_e": 0.95, "fill_e": 0.0, "key": "#ffe0c0", "key_e": 2.4, "rim": "#ffb070", "rim_e": 0.4, "exp": 1.0, "sat": 0.98, "con": 1.06},
+	"deep": {"sky": "#0a0716", "horizon": "#241438", "fog": "#1a1030", "fog_d": 0.026, "sun": "#a48ae0", "sun_e": 0.95, "sun_rot": Vector3(-60, 170, 0),
+		"stone": "#3c3446", "floor": "#262030", "fire": "#b07aff", "layout": "abyss", "particles": "spores+motes", "amb": "#3a2e54", "wet": true,
+		"amb_e": 1.7, "fill_e": 0.45, "key": "#d8ccff", "key_e": 5.5, "rim": "#b890ff", "rim_e": 0.75, "exp": 1.18, "sat": 0.9, "con": 1.05},
+	"blackwood": {"sky": "#101a16", "horizon": "#2e4234", "fog": "#1e2c24", "fog_d": 0.022, "sun": "#b4d0ba", "sun_e": 1.45, "sun_rot": Vector3(-55, 120, 0),
+		"stone": "#3a3a32", "floor": "#30332a", "fire": "#c8d86a", "layout": "forest", "particles": "leaves+motes", "amb": "#2e4234",
+		"amb_e": 1.6, "fill_e": 0.4, "key": "#e4f0dc", "key_e": 5.0, "rim": "#c8e09a", "rim_e": 0.6, "exp": 1.15, "sat": 0.88, "con": 1.06},
+	"cathedral": {"sky": "#1a100c", "horizon": "#52291a", "fog": "#2e1c14", "fog_d": 0.024, "sun": "#ffb47a", "sun_e": 1.25, "sun_rot": Vector3(-30, 200, 0),
+		"stone": "#5a4e44", "floor": "#4c423a", "fire": "#ff6a22", "layout": "nave", "particles": "ash+embers", "amb": "#4e382c",
+		"amb_e": 1.6, "fill_e": 0.4, "key": "#ffe2c4", "key_e": 5.0, "rim": "#ff9a58", "rim_e": 0.6, "exp": 1.15, "sat": 0.9, "con": 1.06},
+	"cathedral_steps": {"sky": "#1a100c", "horizon": "#5a2a16", "fog": "#2e1c14", "fog_d": 0.022, "sun": "#ffb47a", "sun_e": 1.25, "sun_rot": Vector3(-25, 170, 0),
+		"stone": "#5a4e44", "floor": "#4c423a", "fire": "#ff6a22", "layout": "facade", "particles": "ash+embers", "amb": "#4e382c",
+		"amb_e": 1.6, "fill_e": 0.4, "key": "#ffe2c4", "key_e": 5.0, "rim": "#ff9a58", "rim_e": 0.6, "exp": 1.15, "sat": 0.9, "con": 1.06},
+	"crypt": {"sky": "#081210", "horizon": "#12241f", "fog": "#122620", "fog_d": 0.024, "sun": "#7cc4b0", "sun_e": 0.9, "sun_rot": Vector3(-70, 90, 0),
+		"stone": "#3c4440", "floor": "#28342f", "fire": "#5fe0b8", "layout": "vault", "particles": "motes+mist", "amb": "#2a443a", "wet": true,
+		"amb_e": 1.7, "fill_e": 0.5, "key": "#d4f0e6", "key_e": 5.5, "rim": "#7ef0cc", "rim_e": 0.7, "exp": 1.2, "sat": 0.88, "con": 1.05},
+	"citadel": {"sky": "#101a2e", "horizon": "#6a84a0", "fog": "#4a5e74", "fog_d": 0.026, "sun": "#c8dcf4", "sun_e": 1.5, "sun_rot": Vector3(-35, 140, 0),
+		"stone": "#6a7480", "floor": "#8a96a2", "fire": "#7fd4ff", "layout": "hall", "particles": "snow", "amb": "#46586e",
+		"amb_e": 1.45, "fill_e": 0.3, "key": "#e8f2ff", "key_e": 4.0, "rim": "#a4dcff", "rim_e": 0.55, "exp": 1.1, "sat": 0.9, "con": 1.08},
+	"sanctuary": {"sky": "#0c0b0e", "horizon": "#1c1a1c", "fog": "#15120f", "fog_d": 0.04, "sun": "#c8b8a0", "sun_e": 0.6, "sun_rot": Vector3(-50, 160, 0),
+		"stone": "#5c564e", "floor": "#48423a", "fire": "#ffb45a", "layout": "chapel", "particles": "motes", "amb": "#3e342c",
+		"amb_e": 1.5, "fill_e": 0.25, "key": "#ffe8c8", "key_e": 4.5, "rim": "#ffc888", "rim_e": 0.5, "exp": 1.15, "sat": 0.9, "con": 1.06},
+	"throne": {"sky": "#0e0a0a", "horizon": "#2e1c12", "fog": "#1c140e", "fog_d": 0.014, "sun": "#ffdcaa", "sun_e": 1.15, "sun_rot": Vector3(-48, 180, 0),
+		"stone": "#4a443c", "floor": "#3a332e", "fire": "#ffc860", "layout": "throne", "particles": "motes", "amb": "#42342a",
+		"amb_e": 1.55, "fill_e": 0.35, "key": "#fff0d8", "key_e": 4.5, "rim": "#ffd080", "rim_e": 0.55, "exp": 1.12, "sat": 0.95, "con": 1.12},
 }
+const LIGHT_DEFAULTS := {"amb_e": 1.5, "fill_e": 0.3, "key": "#ffffff", "key_e": 4.5, "rim": "#ffffff", "rim_e": 0.5, "exp": 1.1, "sat": 0.9, "con": 1.06, "bri": 1.0}
+const PARTICLE_BUDGET := 150       # live ambient particles per arena, flames included
 
 var theme := {}
 var rng := RandomNumberGenerator.new()
@@ -35,6 +52,11 @@ var fires: Array = []
 var mat_stone: StandardMaterial3D
 var mat_dark: StandardMaterial3D
 var _clock := 0.0
+var _live := 0                # ambient particles allotted so far (see PARTICLE_BUDGET)
+
+## A theme's lighting value, falling back to LIGHT_DEFAULTS.
+func light(key: String) -> Variant:
+	return theme.get(key, LIGHT_DEFAULTS.get(key))
 
 static func theme_for(region_theme: String, arena: String = "") -> String:
 	if arena != "" and THEMES.has(arena):
@@ -72,21 +94,28 @@ func _environment() -> void:
 	env.sky = sky
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(theme.amb)
-	env.ambient_light_energy = 1.0 if theme.get("day", false) else 1.5
+	env.ambient_light_energy = float(light("amb_e"))
 	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	# restrained filmic curve with headroom: silver armour and fire keep detail instead of clipping
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_exposure = 1.0 if theme.get("day", false) else 1.15
+	env.tonemap_white = 3.0
+	env.tonemap_exposure = float(light("exp")) * 1.25
+	# fog gives depth; density is kept low enough that the far wall is still visible
 	env.fog_enabled = true
 	env.fog_light_color = Color(theme.fog)
 	env.fog_density = theme.fog_d
 	env.fog_sky_affect = 0.1 if theme.get("day", false) else 0.6
+	# mild bloom, emissive and fire only (nothing below the HDR threshold blooms)
 	env.glow_enabled = true
-	env.glow_intensity = 0.7
-	env.glow_bloom = 0.08
-	env.glow_hdr_threshold = 0.9
+	env.glow_intensity = 0.55
+	env.glow_strength = 0.9
+	env.glow_bloom = 0.0
+	env.glow_hdr_threshold = 1.05
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 0.85
-	env.adjustment_contrast = 1.08
+	env.adjustment_brightness = float(light("bri"))
+	env.adjustment_saturation = float(light("sat"))
+	env.adjustment_contrast = float(light("con"))
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -101,14 +130,26 @@ func _environment() -> void:
 	add_child(sun)
 	# a soft rim from behind the foe so silhouettes read against the fog
 	var rim := DirectionalLight3D.new()
-	rim.light_color = Color(theme.fire).lerp(Color.WHITE, 0.4)
-	rim.light_energy = 0.45
+	rim.light_color = Color(str(light("rim")))
+	rim.light_energy = float(light("rim_e"))
 	rim.rotation_degrees = Vector3(-20, 20, 0)
+	rim.light_specular = 0.3
 	add_child(rim)
+	# a shadowless fill from the camera's side: lifts the faces turned to the player in the dark regions
+	if float(light("fill_e")) > 0.0:
+		var fill := DirectionalLight3D.new()
+		fill.light_color = Color(theme.amb).lerp(Color.WHITE, 0.45)
+		fill.light_energy = float(light("fill_e"))
+		fill.light_specular = 0.0
+		fill.rotation_degrees = Vector3(-28, -155, 0)
+		add_child(fill)
 
 func _floor() -> void:
-	var m := Look.stone(Color(theme.floor), 0.22, 0.42 if theme.get("wet", false) else 0.74, "floor")
-	m.metallic = 0.25 if theme.get("wet", false) else 0.05
+	# damp stone, not a mirror: wet floors are only a little smoother than dry ones
+	var m := Look.stone(Color(theme.floor), 0.22, 0.6 if theme.get("wet", false) else 0.8, "floor")
+	m.metallic = 0.0
+	m.metallic_specular = 0.5 if theme.get("wet", false) else 0.35
+	m.normal_scale = 0.6 if theme.get("wet", false) else 0.9
 	var p := PlaneMesh.new()
 	p.size = Vector2(90, 90)
 	var mi := MeshInstance3D.new()
@@ -124,7 +165,7 @@ func _floor() -> void:
 	var r := MeshInstance3D.new()
 	r.mesh = ring
 	r.scale.y = 0.08
-	r.material_override = Look.flat(Color(theme.stone).darkened(0.35), 0.6, 0.3)
+	r.material_override = Look.flat(Color(theme.stone).darkened(0.35), 0.8, 0.0)
 	add_child(r)
 
 # ---------------------------------------------------------------- pieces
@@ -174,9 +215,12 @@ func fire(pos: Vector3, energy: float = 2.2, rng_range: float = 9.0, brazier: bo
 	l.position = pos + Vector3(0, 0.3, 0)
 	add_child(l)
 	fires.append([l, energy, rng.randf() * 10.0])
+	var n := _allot(10)
+	if n <= 0:
+		return
 	var p := CPUParticles3D.new()
 	p.position = pos
-	p.amount = 14
+	p.amount = n
 	p.lifetime = 0.9
 	p.mesh = _quad(0.34)
 	p.material_override = Look.particle(c)
@@ -309,12 +353,9 @@ func _grass(count: int, radius: float) -> void:
 		for k in 2:
 			mm.set_instance_transform(n, Transform3D(Basis(Vector3.UP, yaw + k * PI * 0.5).scaled(Vector3.ONE * s), p))
 			n += 1
-	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = Look.grass()
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
-	mat.alpha_scissor_threshold = 0.35
-	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
-	mat.roughness = 1.0
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://src/fx/grass_sway.gdshader")
+	mat.set_shader_parameter("albedo_tex", Look.grass())
 	var mi2 := MultiMeshInstance3D.new()
 	mi2.multimesh = mm
 	mi2.material_override = mat
@@ -626,7 +667,18 @@ func _fade(a: Color, b: Color) -> Gradient:
 	g.set_color(1, b)
 	return g
 
-func _particles(kind: String) -> void:
+## Takes `want` particles from the arena's budget (scaled by the particle setting); returns what is granted.
+func _allot(want: int) -> int:
+	var n: int = clampi(int(round(want * Fx.pscale())), 0, PARTICLE_BUDGET - _live)
+	_live += n
+	return n
+
+## Ambient life. `kinds` is one or more emitter names joined with "+".
+func _particles(kinds: String) -> void:
+	for kind: String in kinds.split("+"):
+		_ambient(kind)
+
+func _ambient(kind: String) -> void:
 	var p := CPUParticles3D.new()
 	p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
 	p.emission_box_extents = Vector3(12, 0.5, 12)
@@ -634,9 +686,11 @@ func _particles(kind: String) -> void:
 	p.lifetime = 7.0
 	p.preprocess = 7.0
 	p.local_coords = false
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var want := 40
 	match kind:
 		"embers":
-			p.amount = 70
+			want = 50
 			p.mesh = _quad(0.045)
 			p.material_override = Look.particle(Color(1.0, 0.5, 0.15))
 			p.gravity = Vector3(0.15, 0.5, 0.1)
@@ -646,36 +700,102 @@ func _particles(kind: String) -> void:
 			p.spread = 40.0
 			p.color_ramp = _fade(Color(1, 1, 1, 1), Color(1, 0.2, 0.0, 0.0))
 		"ash":
-			p.amount = 110
+			want = 60
 			p.position.y = 8.0
 			p.mesh = _quad(0.05)
 			p.material_override = Look.particle(Color(0.7, 0.66, 0.62, 0.8), false)
 			p.gravity = Vector3(0.1, -0.5, 0.0)
 			p.color_ramp = _fade(Color(1, 1, 1, 1), Color(1, 1, 1, 0.0))
 		"snow":
-			p.amount = 220
+			want = 110
 			p.position.y = 9.0
 			p.lifetime = 6.0
+			p.preprocess = 6.0
 			p.mesh = _quad(0.05)
 			p.material_override = Look.particle(Color(0.9, 0.95, 1.0, 0.9), false)
 			p.gravity = Vector3(-0.9, -1.4, 0.3)
 			p.color_ramp = _fade(Color(1, 1, 1, 1), Color(1, 1, 1, 0.3))
+		"spores":
+			# slow, large, faintly lit: the Deep breathes
+			want = 55
+			p.position.y = 1.2
+			p.emission_box_extents = Vector3(11, 1.4, 11)
+			p.lifetime = 9.0
+			p.preprocess = 9.0
+			p.mesh = _quad(0.07)
+			p.material_override = Look.particle(Color(theme.fire).lerp(Color(0.55, 0.9, 1.0), 0.35))
+			p.gravity = Vector3(0.02, 0.07, -0.02)
+			p.initial_velocity_min = 0.02
+			p.initial_velocity_max = 0.12
+			p.spread = 180.0
+			p.scale_amount_min = 0.4
+			p.scale_amount_max = 1.2
+			var g := Gradient.new()
+			g.set_color(0, Color(1, 1, 1, 0))
+			g.set_color(1, Color(1, 1, 1, 0))
+			g.add_point(0.3, Color(1, 1, 1, 0.75))
+			g.add_point(0.7, Color(1, 1, 1, 0.5))
+			p.color_ramp = g
+		"leaves":
+			want = 34
+			p.position.y = 7.0
+			p.emission_box_extents = Vector3(11, 1.0, 11)
+			p.lifetime = 8.0
+			p.preprocess = 8.0
+			p.mesh = _quad(0.13)
+			p.material_override = Look.leaf()
+			p.gravity = Vector3(0.25, -0.95, 0.1)
+			p.initial_velocity_min = 0.0
+			p.initial_velocity_max = 0.4
+			p.spread = 180.0
+			p.angle_min = 0.0
+			p.angle_max = 360.0
+			p.angular_velocity_min = -140.0
+			p.angular_velocity_max = 140.0
+			p.scale_amount_min = 0.6
+			p.scale_amount_max = 1.3
+			p.color = Color(0.42, 0.36, 0.2)
+			p.color_ramp = _fade(Color(1, 1, 1, 1), Color(0.8, 0.8, 0.8, 0.0))
+		"mist":
+			# low ground mist: a few big, very faint sheets drifting over the wet floor
+			want = 14
+			p.position.y = 0.25
+			p.emission_box_extents = Vector3(10, 0.1, 10)
+			p.lifetime = 10.0
+			p.preprocess = 10.0
+			p.mesh = _quad(3.2)
+			p.material_override = Look.particle(Color(theme.fog).lerp(Color(theme.fire), 0.25).lightened(0.3), false)
+			p.gravity = Vector3(0.05, 0.0, 0.03)
+			p.initial_velocity_min = 0.02
+			p.initial_velocity_max = 0.1
+			p.spread = 180.0
+			p.flatness = 1.0
+			var gm := Gradient.new()
+			gm.set_color(0, Color(1, 1, 1, 0))
+			gm.set_color(1, Color(1, 1, 1, 0))
+			gm.add_point(0.5, Color(1, 1, 1, 0.1))
+			p.color_ramp = gm
 		_:
-			p.amount = 50
+			want = 40
 			p.position.y = 1.5
 			p.emission_box_extents = Vector3(10, 1.5, 10)
 			p.mesh = _quad(0.035)
 			p.material_override = Look.particle(Color(theme.fire).lerp(Color.WHITE, 0.3))
 			p.gravity = Vector3(0.03, 0.04, 0)
 			p.color_ramp = _fade(Color(1, 1, 1, 0.7), Color(1, 1, 1, 0.0))
+	var n := _allot(want)
+	if n <= 0:
+		p.free()
+		return
+	p.amount = n
 	add_child(p)
 
 func _process(delta: float) -> void:
 	_clock += delta
 	for f in fires:
 		var l: OmniLight3D = f[0]
-		var t: float = _clock * 9.0 + f[2]
-		l.light_energy = f[1] * (0.85 + 0.1 * sin(t) + 0.08 * sin(t * 2.7 + 1.3))
+		var t: float = _clock * 7.0 + f[2]
+		l.light_energy = f[1] * (0.86 + 0.09 * sin(t) + 0.07 * sin(t * 2.7 + 1.3) + 0.05 * sin(t * 6.1 + f[2]))
 
 ## Phase changes can stain the whole arena (embers, frost, the white crown).
 func tint(c: Color, amount: float, time: float = 1.5) -> void:
@@ -697,6 +817,12 @@ func _glow(at: Vector3, color: Color, energy: float = 1.8, reach: float = 8.0) -
 	l.omni_attenuation = 1.3
 	l.position = at
 	add_child(l)
+	if color.is_equal_approx(Color(theme.fire)):
+		fires.append([l, energy, rng.randf() * 10.0])
+
+## A lit brazier from a kit: flickering light and a small flame over the bowl.
+func _brazier(at: Vector3, energy: float, reach: float) -> void:
+	fire(at, energy, reach, false)
 
 ## The Cathedral of Ash: a burned nave, pillars marching to the altar behind the foe.
 func _layout_nave() -> void:
@@ -764,7 +890,7 @@ func _layout_crag() -> void:
 	prop("ro_wreck", 4.8, Vector3(8.0, 0, 11.0), 150.0)
 	for b in [Vector3(-5.5, 0, -5.0), Vector3(5.8, 0, -4.4), Vector3(-6.5, 0, 9.5)]:
 		prop("ro_brazier", 2.6, b, rng.randf() * 360.0)
-		_glow(b + Vector3(0, 2.4, 0), Color(theme.fire), 2.0, 9.0)
+		_brazier(b + Vector3(0, 2.25, 0), 2.0, 9.0)
 	_glow(Vector3(-9.5, 1.5, 6.5), Color("#ff8a3a"), 1.4, 6.0)
 
 ## The Frozen Citadel: a king's hall under ice.
@@ -787,7 +913,7 @@ func _layout_hall() -> void:
 		_glow(Vector3(sh[0], 1.4, sh[1]), Color("#7fe0ff"), 1.0, 6.0)
 	for b in [Vector3(-4.6, 0, -5.5), Vector3(4.6, 0, -5.5), Vector3(-4.6, 0, 6.5), Vector3(4.6, 0, 6.5)]:
 		prop("ci_brazier", 3.6, b, 0.0)
-		_glow(b + Vector3(0, 3.2, 0), Color(theme.fire), 1.6, 8.0)
+		_brazier(b + Vector3(0, 3.1, 0), 1.6, 8.0)
 
 ## The Hollow Deep: the machine under the world, and what grows on it.
 func _layout_abyss() -> void:
@@ -835,4 +961,4 @@ func _layout_throne() -> void:
 	prop("th_ring", 2.6, Vector3(10.5, 0, -4.5), 160.0)
 	for b in [Vector3(-4.4, 0, -6.0), Vector3(4.4, 0, -6.0), Vector3(-4.4, 0, 5.0), Vector3(4.4, 0, 5.0)]:
 		prop("th_brazier", 2.4, b, 0.0)
-		_glow(b + Vector3(0, 2.4, 0), Color(theme.fire), 1.8, 8.5)
+		_brazier(b + Vector3(0, 2.1, 0), 1.8, 8.5)

@@ -110,10 +110,29 @@ static func _tint(root: Node3D, c: Color) -> void:
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
 		for s in mi.mesh.get_surface_count():
 			var mat = mi.get_active_material(s)
-			if mat is BaseMaterial3D:
+			if mat is ShaderMaterial:
+				var sd: ShaderMaterial = mat.duplicate()
+				sd.set_shader_parameter("tint", c)
+				mi.set_surface_override_material(s, sd)
+			elif mat is BaseMaterial3D:
 				var dup: BaseMaterial3D = mat.duplicate()
 				dup.albedo_color = c
 				mi.set_surface_override_material(s, dup)
+
+## Which material rules a scenery piece follows (Look.SURFACE), from its file name.
+const SCENERY_CLASS := {
+	"scenery_metal": ["brazier", "censer", "bell", "candelabra", "lantern", "conduit", "gibbet", "th_ring", "husk", "chest", "wreck", "obelisk"],
+	"regal": ["th_throne", "th_statue", "th_pillar", "th_stairs", "ca_altar", "ca_window"],
+	"ice": ["ci_shard", "de_crystal"],
+	"wood": ["tree", "log", "cart", "hut", "pew", "banner", "nest", "root", "fungus", "coffins", "bw_block"],
+}
+static func scenery_class(path: String) -> String:
+	var id := path.get_file()
+	for cls: String in SCENERY_CLASS:
+		for frag: String in SCENERY_CLASS[cls]:
+			if id.contains(frag):
+				return cls
+	return "stone"
 
 ## Adds the weapon under `parent`. Returns the usable blade length beyond the grip, or 0 on failure.
 static func weapon(parent: Node3D, path: String, cls: String, tint = null, length_scale: float = 1.0) -> float:
@@ -131,6 +150,7 @@ static func weapon(parent: Node3D, path: String, cls: String, tint = null, lengt
 	holder.add_child(root)
 	root.transform = Transform3D(f.basis.scaled(Vector3.ONE * k), -(centre * k))
 	root.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * k), -(centre * k)) * Transform3D(f.basis, Vector3.ZERO)
+	Look.sanitise(root, "weapon")
 	if tint != null:
 		_tint(root, Color(str(tint)))
 	return want * (1.0 - grip)
@@ -159,11 +179,13 @@ static func scenery(parent: Node3D, path: String, height: float, pos: Vector3, y
 	holder.rotation_degrees.y = yaw
 	holder.add_child(root)
 	root.scale = Vector3.ONE * k
+	Look.sanitise(root, scenery_class(path))
 	# scenery is background: drop to coarser detail levels early, and only large or near pieces cast shadows
 	var far := pos.length() > 16.0
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
 		(mi as MeshInstance3D).lod_bias = 0.3 if far else 0.55
-		if far and height < 3.0:
+		# small pieces away from the ring, and anything beyond the outer wall, are not worth a second (shadow) draw
+		if (far and height < 3.0) or pos.length() > 27.0:
 			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.position = -Vector3((lo2.x + hi2.x) * 0.5, lo2.y, (lo2.z + hi2.z) * 0.5) * k
 	return holder
@@ -177,4 +199,5 @@ static func shield(parent: Node3D, path: String, height: float = 0.82) -> bool:
 	var centre: Vector3 = (f.lo + f.hi) * 0.5
 	parent.add_child(root)
 	root.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * k), -(centre * k)) * Transform3D(f.basis, Vector3.ZERO)
+	Look.sanitise(root, "weapon")
 	return true

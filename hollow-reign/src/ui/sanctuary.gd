@@ -8,13 +8,6 @@ signal quit_to_title
 signal train
 
 const TABS := ["Journey", "Armory", "Blacksmith", "Character", "Journal", "Settings"]
-## The equipment rail, in the order of the design. Slots the data has no items for are shown locked.
-## The suit is what changes the knight's body: one whole model per suit. Helm, gauntlets and greaves are fittings that
-## change statistics only, and are labelled so; slots with no items at all are not shown.
-const RAIL := ["chest", "helm", "gauntlets", "legs", "weapon", "shield", "ring", "relic"]
-const RAIL_CAPTION := {"chest": "ARMOUR SUIT", "helm": "HELM · FITTING", "gauntlets": "GAUNTLETS · FITTING", "legs": "GREAVES · FITTING"}
-const RAIL_EXTRA := {"shoulders": "Shoulders", "boots": "Boots"}
-const SLOT_PLURAL := {"weapon": "Weapons", "shield": "Shields", "helm": "Helms", "chest": "Cuirasses", "gauntlets": "Gauntlets", "legs": "Greaves", "ring": "Rings", "relic": "Relics"}
 const GOOD := Color("#8fb37a")
 const BAD := Color("#c2574a")
 const CAM_POS := Vector3(2.5, 1.45, 3.4)
@@ -32,10 +25,11 @@ var sel_item := ""
 var smith_mode := "Upgrade"
 var frame: Control              # everything drawn over the backdrop; hidden while the forge works
 var stage: Control              # the open space beside the panel, where the knight stands
-var _previewing := ""           # item the backdrop knight is dressed in that is not actually worn
+var armory: ArmoryScreen        # the equipment screen (src/ui/armory/), alive only while its tab is open
+var _panel: Control             # the right-hand panel the other tabs fill; the armoury uses the whole width instead
+var _smith_focus := ""          # item the armoury sent to the forge: listed first there
 var _forging := false
 var _sell_confirm := ""
-var _armory_yaw := -PI + 0.2   # facing the camera, a little turned; dragging changes it
 var _dev := {}                  # capture harness: --item=<id> --mastery=<n> --smith=<mode> --forge=<id>
 
 func _ready() -> void:
@@ -96,6 +90,7 @@ func _ready() -> void:
 	var panel := UI.panel()
 	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	body.add_child(panel)
+	_panel = panel
 	content = VBoxContainer.new()
 	content.add_theme_constant_override("separation", 8)
 	panel.add_child(content)
@@ -120,25 +115,41 @@ func _greet() -> void:
 func _on_profile() -> void:
 	if _forging:
 		return       # the forge sequence is on screen; the tab is rebuilt when it ends
-	_previewing = ""
+	if tab == "Armory" and armory:
+		# the armoury keeps its place in the row: it refreshes itself rather than being rebuilt
+		_purse()
+		armory.on_profile()
+		return
 	backdrop.refresh_knight()
 	show_tab(tab)
+
+func _purse() -> void:
+	var p: Dictionary = Game.profile
+	purse.text = "LV %d      %d GOLD      %d SHARDS" % [p.level, p.gold, p.shards]
+
+## From the armoury's Upgrade: the forge, with that item at the head of the list.
+func open_forge(id: String) -> void:
+	smith_mode = "Upgrade"
+	_smith_focus = id
+	show_tab("Blacksmith")
 
 func show_tab(t: String) -> void:
 	tab = t
 	for k in tab_buttons:
 		tab_buttons[k].add_theme_color_override("font_color", UI.GOLD if k == t else UI.BONE)
+	if armory:
+		armory.leave()
+		armory = null
 	for holder: Control in [content, stage]:
 		for c in holder.get_children():
 			holder.remove_child(c)
 			c.queue_free()
-	backdrop.knight_yaw = _armory_yaw if t == "Armory" else PI * 0.92
+	_panel.visible = t != "Armory"
+	backdrop.knight_yaw = PI * 0.92
 	backdrop.turn_knight(0.0)
 	if t != "Armory":
-		_preview("")
 		backdrop.move_camera(CAM_POS, CAM_LOOK, bool(Game.settings.reduce_motion))
-	var p: Dictionary = Game.profile
-	purse.text = "LV %d      %d GOLD      %d SHARDS" % [p.level, p.gold, p.shards]
+	_purse()
 	call("_tab_" + t.to_lower())
 
 func _scroll() -> VBoxContainer:
@@ -266,184 +277,15 @@ func _sort_button() -> Button:
 		show_tab(tab))
 	return b
 
-## The knight's side of the equipment screen: the slot rail, a drag surface that turns the knight,
-## and a note when what is shown is a preview rather than what is worn.
-func _stage_armory() -> void:
-	var per: float = clampf(floorf((get_viewport().get_visible_rect().size.y - 118.0 - 9.0 * 3.0) / 10.0), 44.0, 54.0)
-	var rail := VBoxContainer.new()
-	rail.add_theme_constant_override("separation", 3)
-	rail.custom_minimum_size.x = 178
-	stage.add_child(rail)
-	for s: String in RAIL:
-		var exists: bool = Db.SLOTS.has(s)
-		var id = Game.profile.equipped.get(s) if exists else null
-		var it: Dictionary = Db.item(id) if id != null else {}
-		var b := Button.new()
-		b.custom_minimum_size = Vector2(178, per)
-		b.disabled = not exists
-		b.focus_mode = Control.FOCUS_NONE
-		var edge: Color = Db.rarity_color(it) if not it.is_empty() else Color(0.22, 0.21, 0.19)
-		for state in ["normal", "hover", "pressed", "disabled"]:
-			var sb := UI.box(Color(0.05, 0.05, 0.06, 0.6 if state == "disabled" else 0.88), UI.GOLD if s == sel_slot else Color(0.2, 0.19, 0.17), 1, 2, 4)
-			sb.border_width_left = 4
-			if s != sel_slot:
-				sb.border_color = edge
-			b.add_theme_stylebox_override(state, sb)
-		var lines := VBoxContainer.new()
-		lines.add_theme_constant_override("separation", -6)
-		lines.alignment = BoxContainer.ALIGNMENT_CENTER
-		lines.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		UI.full(lines)
-		lines.offset_left = 12
-		lines.offset_right = -6
-		b.add_child(lines)
-		var cap := UI.label(str(RAIL_CAPTION.get(s, str(Db.SLOT_NAME.get(s, RAIL_EXTRA.get(s, s))).to_upper())), 16 if not RAIL_CAPTION.has(s) or s == "chest" else 13, UI.GOLD if s == sel_slot else UI.DIM, "head")
-		lines.add_child(cap)
-		var worn := UI.label(str(it.name) if not it.is_empty() else ("Not yet found" if not exists else "Empty"), 16, Db.rarity_color(it) if not it.is_empty() else Color(0.42, 0.4, 0.37), "bold")
-		worn.clip_text = true
-		lines.add_child(worn)
-		if not exists:
-			var lock := InvGlyph.new("lock", Color(0.42, 0.4, 0.37), 0, 14.0)
-			lock.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-			lock.offset_left = -24
-			lock.offset_right = -10
-			lock.offset_top = -7
-			lock.offset_bottom = 7
-			b.add_child(lock)
-		b.pressed.connect(func():
-			Sfx.play("ui_tap", -6.0)
-			sel_slot = s
-			sel_item = ""
-			show_tab("Armory"))
-		rail.add_child(b)
-	var drag := Control.new()
-	UI.full(drag)
-	drag.offset_left = 186
-	drag.mouse_filter = Control.MOUSE_FILTER_STOP
-	drag.gui_input.connect(func(e: InputEvent):
-		if e is InputEventScreenDrag:
-			backdrop.turn_knight(e.relative.x * 0.012)
-			_armory_yaw = backdrop.knight_yaw)
-	stage.add_child(drag)
-	var notes := VBoxContainer.new()
-	notes.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	notes.add_theme_constant_override("separation", -2)
-	notes.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
-	notes.offset_left = 186
-	stage.add_child(notes)
-	if _previewing != "":
-		var it: Dictionary = Db.item(_previewing)
-		var n := UI.label("Preview: %s" % it.name, 17, UI.GOLD, "bold")
-		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		notes.add_child(n)
-		if it.slot in ["helm", "chest", "gauntlets", "legs"]:
-			var suit_model := "res://assets/models/knight_%s_%s.glb" % [str(Game.profile.get("body", "m")), str(it.id).trim_prefix("a_").trim_suffix("_chest")]
-			var n2 := UI.label("A full suit: changes the whole knight" if it.slot == "chest" and ResourceLoader.exists(suit_model) else ("Shown as plate colour" if it.slot == "chest" else "A fitting: changes statistics, not appearance"), 16, UI.DIM)
-			n2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			notes.add_child(n2)
-	var hint := UI.label("Drag to turn", 16, UI.DIM)
-	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
-	hint.offset_left = 186
-	stage.add_child(hint)
-
-## Frames the knight in the middle of the open space left of the panel, whatever the screen's shape.
-func _frame_knight() -> void:
-	var vs := get_viewport().get_visible_rect().size
-	var d := 3.7
-	var x: float = 0.40 * tan(deg_to_rad(25.0)) * (vs.x / vs.y) * d
-	backdrop.move_camera(Vector3(x, 1.3, d), Vector3(x, 1.02, 0), bool(Game.settings.reduce_motion))
-
-## Dresses the backdrop knight in the selected item (or back in what is worn).
-func _preview(id: String) -> void:
-	var it: Dictionary = Db.item(id)
-	if id != "" and (Game.is_equipped(id) or not Game.owns(id) or it.slot in ["ring", "relic"]):
-		id = ""
-	if id == _previewing:
-		return
-	_previewing = id
-	if id == "":
-		backdrop.refresh_knight()
-	else:
-		# the generated knight is one piece: armour other than the cuirass can only show its metal
-		backdrop.refresh_knight(Game.trial_profile(id), str(it.get("look", {}).get("metal", "")) if it.slot in ["helm", "gauntlets", "legs"] else "")
-
+## The equipment screen is its own scene (src/ui/armory/armory_screen.gd): a swipe carousel of the collection
+## and the live knight wearing a preview. It fills the whole body of the hub; the right-hand panel is hidden for it.
 func _tab_armory() -> void:
-	var owned: Array = Game.sorted_items([sel_slot])
-	var equipped = Game.profile.equipped[sel_slot]
+	var item := ""
 	if _dev.has("item"):
-		sel_item = str(_dev.item)
+		item = str(_dev.item)
 		_dev.erase("item")
-	if sel_item == "" or Db.item(sel_item).get("slot", "") != sel_slot or not Game.owns(sel_item):
-		sel_item = str(equipped) if equipped != null else (str(owned[0]) if not owned.is_empty() else "")
-	_preview(sel_item)
-	_frame_knight()
-	_stage_armory()
-	var head := _row()
-	content.add_child(head)
-	var t := UI.title(SLOT_PLURAL[sel_slot], 22)
-	head.add_child(t)
-	var cnt := UI.label("%d held" % owned.size(), 17, UI.DIM)
-	cnt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(cnt)
-	head.add_child(_sort_button())
-	var cols := _row()
-	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	content.add_child(cols)
-	var sc := ScrollContainer.new()
-	sc.custom_minimum_size.x = 286
-	sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	cols.add_child(sc)
-	var list := VBoxContainer.new()
-	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	list.add_theme_constant_override("separation", 4)
-	sc.add_child(list)
-	for id: String in owned:
-		var it: Dictionary = Db.item(id)
-		var b := _item_button(it, id == sel_item, "   ◆" if id == equipped else "")
-		b.pressed.connect(func():
-			sel_item = id
-			show_tab("Armory"))
-		list.add_child(b)
-	if owned.is_empty():
-		list.add_child(_wrap("Nothing of this kind yet. The road provides.", 18))
-	var side := VBoxContainer.new()
-	side.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	side.add_theme_constant_override("separation", 6)
-	cols.add_child(side)
-	if sel_item == "":
-		return
-	var dsc := ScrollContainer.new()
-	dsc.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	dsc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	side.add_child(dsc)
-	var pad := MarginContainer.new()
-	pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	pad.add_theme_constant_override("margin_right", 12)
-	dsc.add_child(pad)
-	var det := VBoxContainer.new()
-	det.add_theme_constant_override("separation", 4)
-	pad.add_child(det)
-	_item_detail(det, Db.item(sel_item), true)
-	var foot := _row()
-	side.add_child(foot)
-	if sel_item == equipped:
-		var un := UI.button("Remove" if sel_slot != "weapon" else "Equipped", 17, 0)
-		un.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		un.custom_minimum_size.y = 46
-		un.disabled = sel_slot == "weapon"
-		un.pressed.connect(func(): Game.unequip(sel_slot))
-		foot.add_child(un)
-	else:
-		var eq := UI.button("Equip", 19, 0)
-		eq.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		eq.custom_minimum_size.y = 46
-		eq.pressed.connect(func():
-			Sfx.play("ui_confirm", -4.0)
-			Game.equip(sel_item))
-		foot.add_child(eq)
-	foot.add_child(_fav_button(sel_item, 180))
+	armory = ArmoryScreen.new(self, backdrop, sel_slot, item)
+	stage.add_child(armory)
 
 func _fav_button(id: String, width: float) -> Button:
 	var on := Game.is_favourite(id)
@@ -463,108 +305,6 @@ func _fav_button(id: String, width: float) -> Button:
 		Game.toggle_favourite(id)
 		show_tab(tab))
 	return fav
-
-func _kv(parent: Control, k: String, v: String, size: int = 17, vcol: Color = UI.BONE) -> HBoxContainer:
-	var row := _row()
-	var kl := UI.label(k, size, UI.DIM)
-	kl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(kl)
-	row.add_child(UI.label(v, size, vcol, "bold"))
-	parent.add_child(row)
-	return row
-
-## Item card: the turning model (weapons and shields), what it is, what changes if it is put on,
-## how far its mastery has come and what the next mark gives, and its history.
-func _item_detail(det: VBoxContainer, it: Dictionary, compare: bool) -> void:
-	var lvl := Game.upgrade_level(it.id)
-	var col := Db.rarity_color(it)
-	if it.slot in ["weapon", "shield"]:
-		var case := UI.panel(Color(0.022, 0.022, 0.028, 1.0), Color(col, 0.55))
-		case.get_theme_stylebox("panel").set_content_margin_all(1)
-		var view := InvPreview.new(it.id, clampf(get_viewport().get_visible_rect().size.y * 0.25, 130.0, 190.0))
-		if view.ok:
-			case.add_child(view)
-			det.add_child(case)
-		else:
-			view.free()
-			case.free()
-	det.add_child(UI.title(it.name + (" +%d" % lvl if lvl > 0 else ""), 20, col))
-	var kind := _row()
-	kind.add_child(InvGlyph.new("pips", col, Game.rarity_pips(it), 12.0))
-	kind.add_child(UI.label("%s  ·  %s" % [Game.rarity_name(it), Db.classes[it.cls].name if it.slot == "weapon" else Db.SLOT_NAME[it.slot]], 17, col))
-	var upl := UI.label("Forged +%d of %d" % [lvl, Stats.MAX_UPGRADE] if it.slot not in ["ring", "relic"] else "", 16, UI.DIM)
-	upl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	upl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	kind.add_child(upl)
-	det.add_child(kind)
-	for line in Stats.item_lines(it, lvl, Db.classes):
-		_kv(det, str(line[0]) if not (it.slot == "weapon" and str(line[0]) == "Stamina") else "Stamina a swing", str(line[1]))
-	if it.slot == "weapon":
-		# every clean hit wears the same amount off a foe's guard, so quicker weapons press harder
-		_kv(det, "Guard damage", "4 a hit  ·  %.0f a second" % (4.0 / float(Db.classes[it.cls].swing)))
-		if it.get("element") == null:
-			_kv(det, "Element", "None")
-	det.add_child(UI.rule())
-	if compare and Game.owns(it.id):
-		if Game.is_equipped(it.id):
-			det.add_child(UI.label("Worn now.", 17, UI.GOLD))
-		else:
-			det.add_child(UI.label("IF EQUIPPED", 16, UI.DIM, "head"))
-			var any := false
-			for r in Game.compare(it.id):
-				if int(r.better) == 0 and r.now_text == r.then_text:
-					continue
-				any = true
-				var c: Color = GOOD if int(r.better) > 0 else (BAD if int(r.better) < 0 else UI.BONE)
-				var row := _kv(det, r.label, "%s  →  %s" % [r.now_text, r.then_text], 17, c)
-				if int(r.better) != 0:
-					# the arrow says better or worse; the signed number says which way the figure moved
-					row.add_child(InvGlyph.new("up" if int(r.better) > 0 else "down", c, 0, 12.0))
-					var d := UI.label(("+" if float(r.delta) > 0.0 else "−") + _delta_text(r), 17, c, "bold")
-					d.custom_minimum_size.x = 52
-					row.add_child(d)
-			if not any:
-				det.add_child(UI.label("No change to your numbers.", 17, UI.DIM))
-		det.add_child(UI.rule())
-	if Game.owns(it.id):
-		_mastery_block(det, it)
-	var hist := Game.item_history(it.id)
-	det.add_child(_wrap(hist[0], 18, UI.DIM))
-	if hist.size() > 1:
-		det.add_child(_wrap(hist[1], 18, UI.BONE))
-
-func _delta_text(r: Dictionary) -> String:
-	var mag := absf(float(r.delta))
-	match str(r.key):
-		"swing_time": return "%.2fs" % mag
-		"crit_mult": return "%.2f" % mag
-		"attack": return "%.1f" % mag
-		"block_eff": return "%.0f%%" % mag
-	return "%.0f" % mag
-
-func _mastery_block(det: VBoxContainer, it: Dictionary) -> void:
-	var need := Stats.mastery_needed(it)
-	var have := Game.mastery_points(it.id)
-	var tier := Game.mastery_tier(it.id)
-	var head := _row()
-	var ml := UI.label("MASTERY", 16, UI.GOLD if tier == 3 else UI.DIM, "head")
-	ml.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(ml)
-	head.add_child(UI.label("Mastered" if tier == 3 else "%d of %d fights" % [have, need], 16, UI.GOLD if tier == 3 else UI.BONE))
-	det.add_child(head)
-	var bar := UI.bar(UI.GOLD, 6)
-	bar.max_value = need
-	bar.value = have
-	det.add_child(bar)
-	for t: int in ([1, 2, 3] if it.slot == "weapon" else [3]):
-		var at := Game.mastery_threshold(it, t)
-		var done := tier >= t
-		var is_next: bool = not done and (t == tier + 1 or it.slot != "weapon")
-		var text := "%s  %s" % [["", "I", "II", "III"][t], Game.mastery_tier_text(it, t)]
-		if not done:
-			text += "  ·  %s%d more" % ["next: " if is_next else "", at - have]
-		det.add_child(_wrap(text, 16, UI.GOLD if done else (UI.BONE if is_next else UI.DIM)))
-	det.add_child(UI.rule())
 
 # ================================================================ Blacksmith
 ## Orren speaks the first time, then only now and then: at most once per two fights survived or lost.
@@ -604,11 +344,15 @@ func _tab_blacksmith() -> void:
 		modes.add_child(b)
 	var list := _scroll()
 	if smith_mode == "Upgrade":
-		for id: String in Game.sorted_items(["weapon", "shield", "helm", "chest", "gauntlets", "legs"]):
+		var upgradable: Array = Game.sorted_items(["weapon", "shield", "helm", "chest", "gauntlets", "legs"])
+		if upgradable.has(_smith_focus):
+			upgradable.erase(_smith_focus)
+			upgradable.push_front(_smith_focus)
+		for id: String in upgradable:
 			var it: Dictionary = Db.item(id)
 			var lvl := Game.upgrade_level(it.id)
 			var row := _row()
-			var b := _item_button(it, false, "   ◆" if Game.is_equipped(id) else "")
+			var b := _item_button(it, id == _smith_focus, "   ◆" if Game.is_equipped(id) else "")
 			b.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			row.add_child(b)
 			if lvl >= Stats.MAX_UPGRADE:

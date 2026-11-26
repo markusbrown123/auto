@@ -17,10 +17,24 @@ const SUITS := ["base", "garrison", "ash", "black", "vigil", "frost", "regal", "
 ## Suits whose listed slots cannot be worn apart from the rest of the suit without an obvious fault (docs/MODULAR_ARMOR.md).
 ## `set_only(body, suit)` is what an equipment screen should show as "complete set".
 const SET_ONLY := {}
-## Surface ranges per suit for the clamped-PBR shader (the generated ORM maps read as polished chrome almost
-## everywhere). rough_min raises the floor of roughness, metal_max caps metalness, tone multiplies the colour.
-const FINISH_DEFAULT := {"rough_min": 0.46, "rough_max": 1.0, "metal_max": 0.7, "spec": 0.3, "tone": Color(1, 1, 1)}
-const FINISH := {}
+## Surface correction per suit for src/fx/armor_part.gdshader (docs/MODULAR_ARMOR.md, material study). The generated
+## roughness maps sit in one narrow glossy band and paint the undersuit as glossy as the plate: roughness is spread
+## and lifted, metal capped, near-black albedo turned into matt cloth. `tone` multiplies the colour.
+const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.7, "rough_lift": 0.17, "metal_max": 0.72, "spec": 0.3,
+	"cloth": 1.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1)}
+const FINISH := {
+	"black": {"rough_pivot": 0.31, "rough_lift": 0.2, "metal_max": 0.5, "cloth_dark": 0.02},      # lacquer: satin, not wet
+	"garrison": {"rough_pivot": 0.34, "rough_lift": 0.2},
+	"frost": {"rough_pivot": 0.34, "rough_lift": 0.18, "cloth": 0.0, "tone": Color(0.86, 0.88, 0.92)},
+	"hollow": {"rough_pivot": 0.37, "rough_lift": 0.2, "metal_max": 0.6},
+	"vigil": {"rough_pivot": 0.5, "rough_lift": 0.08, "rough_gain": 1.2},
+	"wyrm": {"rough_pivot": 0.5, "rough_lift": 0.06, "rough_gain": 1.2},
+	"regal": {"rough_pivot": 0.44, "rough_lift": 0.12},
+	"ash": {"rough_pivot": 0.42, "rough_lift": 0.12},
+}
+## What the game uses today on whole-suit models (Look.SURFACE.character through pbr_clamp): for before/after captures.
+const FINISH_OLD := {"rough_min": 0.33, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.0, "rough_lift": 0.0, "metal_max": 0.85, "spec": 0.35,
+	"cloth": 0.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1)}
 
 static var dir := DIR                 # dev: another directory of parts (measurements use a set cut without overlap)
 static var _mesh := {}                # "m_frost_helm" -> ArrayMesh or null
@@ -127,15 +141,9 @@ func _own_material(suit: String) -> ShaderMaterial:
 		return _mats[suit]
 	var src := _material(body, suit)
 	var m: ShaderMaterial = src.duplicate() if src else ShaderMaterial.new()
-	if _finish:
-		var f := finish_of(suit)
-		for k: String in ["rough_min", "rough_max", "metal_max", "spec"]:
-			m.set_shader_parameter(k, f[k])
-		m.set_shader_parameter("tint", f.tone)
-	else:
-		var r: Dictionary = Look.SURFACE["character"]
-		for k2: String in r:
-			m.set_shader_parameter(k2, r[k2])
+	var f := finish_of(suit) if _finish else FINISH_OLD
+	for k: String in f:
+		m.set_shader_parameter("tint" if k == "tone" else k, f[k])
 	for k3: StringName in _params:
 		if k3 != &"tint":
 			m.set_shader_parameter(k3, _params[k3])
@@ -148,7 +156,8 @@ func set_param(param: StringName, value: Variant) -> void:
 	for suit: String in _mats:
 		var v: Variant = value
 		if param == &"tint" and _finish:
-			v = (value as Color) * (finish_of(suit).tone as Color)
+			var tone: Color = finish_of(suit).tone
+			v = Color(value.r * tone.r, value.g * tone.g, value.b * tone.b, value.a)
 		(_mats[suit] as ShaderMaterial).set_shader_parameter(param, v)
 
 ## Takes every part off and shows the skeleton's own mesh again.

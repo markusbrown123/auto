@@ -9,14 +9,14 @@
   "guard_span": 0.196,
   "hands": 1,
   "lo": [
-   -0.0996,
+   -0.0998,
    -0.107,
-   -0.0133
+   -0.0136
   ],
   "hi": [
-   0.0996,
+   0.0998,
    0.866,
-   0.0133
+   0.0136
   ],
   "materials": [
    "steel",
@@ -24,12 +24,13 @@
    "edge",
    "grip"
   ],
+  "rig_scale": 1.15,
   "tris": 1744,
   "verts": 1866,
-  "bytes": 74660,
+  "bytes": 74664,
   "tris_lod": 572,
   "verts_lod": 702,
-  "bytes_lod": 30364
+  "bytes_lod": 30372
  },
  "oathbreaker": {
   "class": "greatsword",
@@ -57,6 +58,7 @@
    "edge",
    "grip"
   ],
+  "rig_scale": 1.15,
   "tris": 1716,
   "verts": 1860,
   "bytes": 74300,
@@ -69,20 +71,20 @@
   "name": "Eternal Edge",
   "blade": 0.865,
   "tip": 0.931,
-  "pommel": 0.158,
+  "pommel": 0.154,
   "grip_clear": 0.162,
   "guard_span": 0.164,
   "hands": 1.5,
   "emissive": true,
   "lo": [
-   -0.0835,
-   -0.158,
-   -0.0153
+   -0.0817,
+   -0.154,
+   -0.0138
   ],
   "hi": [
-   0.0835,
+   0.0817,
    0.931,
-   0.0153
+   0.0138
   ],
   "materials": [
    "steel",
@@ -92,12 +94,13 @@
    "grip",
    "glow"
   ],
+  "rig_scale": 1.15,
   "tris": 1932,
   "verts": 2284,
-  "bytes": 91344,
+  "bytes": 91340,
   "tris_lod": 864,
   "verts_lod": 1185,
-  "bytes_lod": 49756
+  "bytes_lod": 49752
  },
  "shield_heater": {
   "class": "shield",
@@ -114,12 +117,12 @@
   "lo": [
    -0.35,
    -0.455,
-   -0.0639
+   -0.0632
   ],
   "hi": [
    0.14,
    0.217,
-   0.0381
+   0.0432
   ],
   "materials": [
    "steel",
@@ -128,6 +131,7 @@
    "grip",
    "leather"
   ],
+  "rig_scale": 1.15,
   "tris": 3524,
   "verts": 3471,
   "bytes": 138032,
@@ -156,7 +160,7 @@
   "hi": [
    0.157,
    0.255,
-   0.034
+   0.037
   ],
   "materials": [
    "steel",
@@ -167,9 +171,10 @@
    "leather",
    "glow"
   ],
-  "tris": 3932,
-  "verts": 4353,
-  "bytes": 170720,
+  "rig_scale": 1.15,
+  "tris": 4012,
+  "verts": 4433,
+  "bytes": 173764,
   "tris_lod": 1252,
   "verts_lod": 1593,
   "bytes_lod": 65300

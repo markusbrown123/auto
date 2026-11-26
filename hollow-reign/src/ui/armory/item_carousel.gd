@@ -58,7 +58,7 @@ func _init() -> void:
 	env.background_mode = Environment.BG_CLEAR_COLOR
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color("#4a4640")
-	env.ambient_light_energy = 0.6
+	env.ambient_light_energy = 1.0
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	var we := WorldEnvironment.new()
 	we.environment = env
@@ -69,7 +69,7 @@ func _init() -> void:
 	_vp.add_child(cam)
 	var key := DirectionalLight3D.new()
 	key.light_color = Color("#ffe2b8")
-	key.light_energy = 2.3
+	key.light_energy = 3.0
 	key.rotation_degrees = Vector3(-38, -32, 0)
 	_vp.add_child(key)
 	var rim := DirectionalLight3D.new()
@@ -141,7 +141,7 @@ func go_to(i: int) -> void:
 	_wake()
 
 func spacing() -> float:
-	return clampf(size.x * 0.37, 150.0, 300.0)
+	return clampf(size.x * 0.34, 150.0, 300.0)
 
 func _key(e: Dictionary) -> String:
 	return "%s|%s|%s" % [str(e.id), body, "d" if e.get("dark", false) else ""]
@@ -388,9 +388,10 @@ func _draw_over() -> void:
 			InvGlyph.paint(_over, "lock", c + Vector2(-h * 0.5, -size.y * 0.02 - h * 0.55), h, Color(0.82, 0.78, 0.7, a))
 		if near < 0.75:
 			# a neighbour carries its own name; the middle one's is written large below the row
-			var w := spacing() * 0.95
+			var w := minf(spacing() * 0.95, 2.0 * (size.x * 0.5 - absf(c.x - size.x * 0.5)) - 12.0)
 			var na := a * (1.0 - near / 0.75)
-			_over.draw_string(font, c + Vector2(-w * 0.5, size.y * 0.47), str(e.name), HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(e.color, na), TextServer.JUSTIFICATION_NONE, TextServer.DIRECTION_AUTO, TextServer.ORIENTATION_HORIZONTAL)
+			if w > 60.0:
+				_over.draw_string(font, c + Vector2(-w * 0.5, size.y * 0.47), _fit_text(font, str(e.name), w, 20), HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(e.color, na))
 		var top := c + Vector2(0, -size.y * 0.5 + 6.0 + 16.0 * (1.0 - s))
 		if e.get("equipped", false):
 			var tw := 118.0 * s
@@ -400,3 +401,10 @@ func _draw_over() -> void:
 		if e.get("fav", false):
 			var sh := 22.0 * s
 			InvGlyph.paint(_over, "star", c + Vector2(size.y * 0.3 * s, -size.y * 0.36 * s), sh, Color(UI.GOLD, a), 1)
+
+func _fit_text(font: Font, text: String, w: float, px: int) -> String:
+	if font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x <= w:
+		return text
+	while text.length() > 2 and font.get_string_size(text + "…", HORIZONTAL_ALIGNMENT_LEFT, -1, px).x > w:
+		text = text.left(text.length() - 1)
+	return text.strip_edges() + "…"

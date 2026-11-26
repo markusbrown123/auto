@@ -260,6 +260,8 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	var foe_look: Dictionary = foe.rig.duplicate()
 	# a generated model for this foe, or for its class, replaces the primitive body when present
 	for candidate in ["res://assets/models/%s.glb" % foe_id, "res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_")]:
+		if foe_rig is DragonRig and candidate.contains("/cls_"):
+			continue      # a dragon keeps its breed's own model; the class models are humanoid
 		if ResourceLoader.exists(candidate):
 			foe_look["skin"] = candidate
 			if not foe.boss:

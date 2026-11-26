@@ -28,7 +28,12 @@ static func attach(parent: Node3D, path: String) -> DragonSkin:
 		return null
 	d.skel = found[0]
 	d._analyse()
-	return d if d.ok else null
+	if not d.ok:
+		# not a dragon's skeleton: take the model away again (it used to be left standing inside the animal, unposed)
+		parent.remove_child(d.root)
+		d.root.queue_free()
+		return null
+	return d
 
 func _chain_up(i: int, n: int) -> Array:
 	var out: Array = []

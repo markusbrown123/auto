@@ -91,7 +91,9 @@ func dress_knight(preview: Dictionary = {}) -> String:
 	var hand_keys := ["weapon", "weapon_model", "weapon_tint", "blade", "glow", "curved", "shield"]
 	var a: Dictionary = look.duplicate()
 	var b: Dictionary = look_now.duplicate()
-	for k: String in hand_keys:
+	# keys that only shape the built-from-boxes body, which a knight wearing a model never shows
+	var unseen: Array = ["helm", "ember", "frost", "eye"] if rig.skin != null and look.has("skin") else []
+	for k: String in hand_keys + unseen:
 		a.erase(k)
 		b.erase(k)
 	if a != b:

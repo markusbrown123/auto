@@ -78,7 +78,7 @@ void fragment() {
 		float u = clamp((progress - 0.72) / 0.28, 0.0, 1.0);
 		float at = u * 1.2 - 0.1;
 		float d = (h - at) / 0.03;
-		pulse = exp(-d * d) * step(0.001, u) * (1.0 - smoothstep(0.9, 1.0, u)) * 0.8;
+		pulse = exp(-d * d) * step(0.001, u) * (1.0 - smoothstep(0.9, 1.0, u)) * 0.5;
 	}
-	EMISSION = emissive * texture(emissive_tex, UV).rgb * (1.0 - live * 0.0) + front_color * front_energy * (front + cool + pulse);
+	EMISSION = emissive * texture(emissive_tex, UV).rgb + front_color * front_energy * (front + cool + pulse);
 }

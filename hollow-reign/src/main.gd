@@ -466,6 +466,9 @@ func _dev_boot() -> void:
 			Game.start_run(_args.get("region", "courtyard"))
 			Game.run.stage = int(_args.get("stage", "1"))
 			show_stage()
+		"gearbench":
+			# dev viewer for the hand-modelled equipment (src/dev/gear_bench.gd lists its switches)
+			_swap(GearBench.new(_args))
 		"weapons":
 			# line-up of every weapon model as the game fits it: grip at the bottom, blade up
 			var stage := Node3D.new()

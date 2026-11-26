@@ -546,6 +546,14 @@ var _walk_amt := 0.0
 func _attach_skin(path: String) -> void:
 	skin = DragonSkin.attach(body, path)
 	if skin == null:
+		# The duel swaps in a class model for ordinary foes; for the lesser dragons (class Monstrosity) that is a
+		# humanoid body no dragon can wear, and the animal used to be shown as the bare primitive rig. Fall back to
+		# the dragon model of its own kind: the frost breed by its cold glow, otherwise the fire breed.
+		var glow := Color(str(cfg.get("glow", "#ff5a14")))
+		var own := "res://assets/models/dragon_skeldra.glb" if glow.b > glow.r else "res://assets/models/dragon_veyrath.glb"
+		if own != path:
+			skin = DragonSkin.attach(body, own)
+	if skin == null:
 		return
 	# the generated model replaces the primitive body; the old nodes stay as invisible handles for hit points and fire
 	for mi in body.find_children("*", "MeshInstance3D", true, false):

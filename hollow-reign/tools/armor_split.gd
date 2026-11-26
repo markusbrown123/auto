@@ -189,7 +189,7 @@ func _conform(s: Dictionary, h: Dictionary) -> Dictionary:
 	o.ex.resize(n)
 	var excl := PackedInt32Array()
 	for b2: String in s.names:
-		excl.append(1 if (driver(b2) in ["Head", "LeftHand", "RightHand"]) else 0)
+		excl.append(1 if (driver(b2) in ["Head", "LeftHand", "RightHand", "LeftFoot", "RightFoot"]) else 0)
 	o.pos.resize(n); o.nrm.resize(n); o.tan.resize(n * 4); o.bones.resize(n * 4); o.rw.resize(n * 6); o.top.resize(n)
 	var sp: PackedVector3Array = s.pos
 	var sn: PackedVector3Array = s.nrm
@@ -243,12 +243,16 @@ func _cell(m: Dictionary, h: Dictionary, v: int) -> Array:
 	var along := d.dot(axis)
 	var radial := d - axis * along
 	var sector := int(floor((atan2(radial.dot(e2), radial.dot(e1)) + PI) / TAU * HULL_SECTORS)) % HULL_SECTORS
-	return [Vector3i((names as Array).find(b), int(floor(along / HULL_BIN)), sector), radial.length(), j + axis * along, radial.normalized()]
+	return [Vector3i((names as Array).find(b), int(floor(along / HULL_BIN)), sector), radial.length(), j + axis * along, radial.normalized(), along, axis]
 
 func _hull_add(hull: Dictionary, m: Dictionary, h: Dictionary) -> void:
 	var cells := {}
+	var span := {}
 	for v in (m.pos as PackedVector3Array).size():
 		var c := _cell(m, h, v)
+		if not span.has(c[0].x):
+			span[c[0].x] = []
+		(span[c[0].x] as Array).append(c[4])
 		if not cells.has(c[0]):
 			cells[c[0]] = []
 		(cells[c[0]] as Array).append(c[1])
@@ -259,12 +263,26 @@ func _hull_add(hull: Dictionary, m: Dictionary, h: Dictionary) -> void:
 		rs.sort()
 		var r: float = rs[int(rs.size() * 0.35)]
 		hull[key] = minf(float(hull.get(key, 1e9)), r)
+	# how far along each bone this suit's share of the mesh reaches: the undersuit keeps to the shortest reach of all
+	for bi: int in span:
+		var a: Array = span[bi]
+		a.sort()
+		var lo_k := Vector3i(bi, 0, -1)
+		var hi_k := Vector3i(bi, 0, -2)
+		hull[lo_k] = maxf(float(hull.get(lo_k, -1e9)), float(a[int(a.size() * 0.03)]))
+		hull[hi_k] = minf(float(hull.get(hi_k, 1e9)), float(a[int(a.size() * 0.97)]))
 
 func _hull_apply(hull: Dictionary, m: Dictionary, h: Dictionary) -> int:
 	var moved := 0
 	for v in (m.pos as PackedVector3Array).size():
 		var c := _cell(m, h, v)
 		var key: Vector3i = c[0]
+		var lo: float = hull.get(Vector3i(key.x, 0, -1), -1e9)
+		var hi: float = hull.get(Vector3i(key.x, 0, -2), 1e9)
+		if float(c[4]) < lo or float(c[4]) > hi:
+			m.pos[v] += (c[5] as Vector3) * (clampf(float(c[4]), lo, hi) - float(c[4]))
+			c = _cell(m, h, v)
+			key = c[0]
 		# the limit here and in the cells round it, so the surface does not step from cell to cell
 		var lim := 0.0
 		var cnt := 0.0
@@ -277,7 +295,7 @@ func _hull_apply(hull: Dictionary, m: Dictionary, h: Dictionary) -> int:
 					cnt += w
 		if cnt == 0.0:
 			continue
-		lim = lim / cnt * 0.9
+		lim = lim / cnt * 0.85
 		if float(c[1]) > lim:
 			m.pos[v] = (c[2] as Vector3) + (c[3] as Vector3) * lim
 			moved += 1
@@ -285,23 +303,26 @@ func _hull_apply(hull: Dictionary, m: Dictionary, h: Dictionary) -> int:
 	return moved
 
 # ---------------------------------------------------------------- de-spike
-## Pulls thin protrusions back toward the limb they stand on. For every bone the distance of its vertices from the
-## bone's axis is measured in rings along the bone; a vertex standing further out than the ring's typical surface
-## (its median radius times `tol`) is moved in to that radius. Spikes, horns, fins and crest blades collapse onto
-## the plate under them; the plate itself, which IS the typical surface, does not move. Nothing is deleted, so there
-## are no holes to cap, but the texture of a collapsed spike stays where it was (a dark smear or a bright dot).
-const SPIKE_TOL := {"Head": 1.16, "Neck": 1.25, "Spine2": 1.22, "Spine1": 1.22, "Spine": 1.25, "Hips": 1.3, "Shoulder": 1.3, "Arm": 1.3, "ForeArm": 1.28, "Hand": 1.6, "UpLeg": 1.28, "Leg": 1.25, "Foot": 9.0}
+## Pulls thin protrusions back toward the body, without deleting anything (so there are no holes to cap).
+##  - limbs and trunk: for every bone the distance of its vertices from the bone's axis is measured in rings along the
+##    bone; a vertex standing further out than the ring's typical surface (a percentile of the radii times a tolerance)
+##    is moved in to that radius. Fins, blades and scales standing off a limb collapse onto the plate under them.
+##  - head and shoulder caps: measured as a ball instead (an ellipsoid fitted to the bulk of the part), because a crest
+##    or a pauldron horn points along the bone, not away from it.
+## The moved vertices are then relaxed toward their neighbours so the collapsed spike does not leave a crumpled patch.
+## The texture is not touched: a collapsed spike leaves its paint (a streak or a blotch) on the plate.
+const SPIKE_TOL := {"Head": 1.2, "Neck": 1.25, "Spine2": 1.22, "Spine1": 1.22, "Spine": 1.25, "Hips": 1.3, "Shoulder": 1.22, "Arm": 1.3, "ForeArm": 1.28, "Hand": 1.6, "UpLeg": 1.28, "Leg": 1.25, "Foot": 9.0}
 
 func _despike(m: Dictionary, h: Dictionary, strength: float) -> int:
 	var names: Array = h.names
+	var before: PackedVector3Array = (m.pos as PackedVector3Array).duplicate()
 	var groups := {}        # host bind index -> [vertex]
 	for v in (m.pos as PackedVector3Array).size():
-		var b: int = m.top[v]
-		var key := (names as Array).find(driver(names[b]))
+		var key := (names as Array).find(driver(names[m.top[v]]))
 		if not groups.has(key):
 			groups[key] = []
 		(groups[key] as Array).append(v)
-	var moved := 0
+	var moved := {}
 	for key: int in groups:
 		var b: String = names[key]
 		var tol := 0.0
@@ -312,21 +333,19 @@ func _despike(m: Dictionary, h: Dictionary, strength: float) -> int:
 		if tol == 0.0:
 			tol = SPIKE_TOL.get(b, 1.3)
 		tol = 1.0 + (tol - 1.0) / maxf(strength, 0.01)
+		var vs: Array = groups[key]
+		if b == "Head" or b.ends_with("Shoulder"):
+			_despike_ball(m, vs, tol, moved)
+			continue
 		var j: Vector3 = (h.rest[b] as Transform3D).origin
 		var axis := Vector3.UP
 		if CHILD.has(b):
 			axis = ((h.rest[CHILD[b]] as Transform3D).origin - j).normalized()
 		elif b.ends_with("Hand"):
 			axis = (j - (h.rest[b.replace("Hand", "ForeArm")] as Transform3D).origin).normalized()
-		var centre := j
-		if b == "Head":
-			# a helmet is measured from the middle of the skull, not from the neck joint
-			centre = j + Vector3.UP * ((h.rest["HeadTop_End"] as Transform3D).origin.y - j.y) * 0.45
-		var vs: Array = groups[key]
-		# rings along the axis (the head is one ball: every direction from its centre is its own "ring" by height)
 		var bins := {}
 		for v: int in vs:
-			var d: Vector3 = m.pos[v] - centre
+			var d: Vector3 = m.pos[v] - j
 			var along := d.dot(axis)
 			var bin := int(floor(along / 0.02))
 			if not bins.has(bin):
@@ -351,16 +370,87 @@ func _despike(m: Dictionary, h: Dictionary, strength: float) -> int:
 			for e2: Array in bins[bin]:
 				if float(e2[0]) > lim and lim > 0.004:
 					var v2: int = e2[1]
-					var d2: Vector3 = m.pos[v2] - centre
+					var d2: Vector3 = m.pos[v2] - j
 					var along2 := d2.dot(axis)
 					var radial := d2 - axis * along2
-					# pulled in to the limit, keeping a trace of the relief so plates do not go perfectly round
-					var want := lim + (float(e2[0]) - lim) * 0.08
-					m.pos[v2] = centre + axis * along2 + radial.normalized() * want
-					moved += 1
-	if moved > 0:
+					m.pos[v2] = j + axis * along2 + radial.normalized() * (lim + (float(e2[0]) - lim) * 0.06)
+					moved[v2] = true
+	if not moved.is_empty():
+		_relax(m, before, moved)
 		_renormal(m)
-	return moved
+	return moved.size()
+
+func _despike_ball(m: Dictionary, vs: Array, tol: float, moved: Dictionary) -> void:
+	var xs: Array = []
+	var ys: Array = []
+	var zs: Array = []
+	for v: int in vs:
+		var p: Vector3 = m.pos[v]
+		xs.append(p.x); ys.append(p.y); zs.append(p.z)
+	xs.sort(); ys.sort(); zs.sort()
+	var n := xs.size()
+	if n < 50:
+		return
+	var lo := Vector3(xs[int(n * 0.15)], ys[int(n * 0.15)], zs[int(n * 0.15)])
+	var hi := Vector3(xs[int(n * 0.85)], ys[int(n * 0.85)], zs[int(n * 0.85)])
+	var c := (lo + hi) * 0.5
+	var sc := ((hi - lo) * 0.5).max(Vector3.ONE * 0.003)
+	var rs: Array = []
+	for v2: int in vs:
+		rs.append((((m.pos[v2] as Vector3) - c) / sc).length())
+	var sorted := rs.duplicate()
+	sorted.sort()
+	var lim: float = float(sorted[int(n * 0.6)]) * tol
+	for i in vs.size():
+		if float(rs[i]) > lim:
+			var q: Vector3 = ((m.pos[vs[i]] as Vector3) - c) / sc
+			m.pos[vs[i]] = c + q.normalized() * (lim + (float(rs[i]) - lim) * 0.06) * sc
+			moved[vs[i]] = true
+
+## Moved vertices settle toward the average of their neighbours (never outward of where the clamp put them is not
+## enforced: three gentle passes only). Vertices doubled along UV seams move together.
+func _relax(m: Dictionary, before: PackedVector3Array, moved: Dictionary) -> void:
+	var gid := {}
+	var of := PackedInt32Array()
+	of.resize(before.size())
+	for v in before.size():
+		var k := Vector3i(before[v] * 20000.0)
+		if not gid.has(k):
+			gid[k] = gid.size()
+		of[v] = gid[k]
+	var gpos: Array = []
+	gpos.resize(gid.size())
+	var gmoved := {}
+	for v in before.size():
+		gpos[of[v]] = m.pos[v]
+		if moved.has(v):
+			gmoved[of[v]] = true
+	var nbr := {}
+	var idx: PackedInt32Array = m.idx
+	for t in range(0, idx.size(), 3):
+		for e in 3:
+			var a := of[idx[t + e]]
+			var b := of[idx[t + (e + 1) % 3]]
+			if gmoved.has(a):
+				if not nbr.has(a):
+					nbr[a] = {}
+				nbr[a][b] = true
+			if gmoved.has(b):
+				if not nbr.has(b):
+					nbr[b] = {}
+				nbr[b][a] = true
+	for pass_i in 3:
+		var next := {}
+		for g: int in nbr:
+			var avg := Vector3.ZERO
+			for o: int in nbr[g]:
+				avg += gpos[o]
+			next[g] = (gpos[g] as Vector3).lerp(avg / float((nbr[g] as Dictionary).size()), 0.5)
+		for g2: int in next:
+			gpos[g2] = next[g2]
+	for v in before.size():
+		if gmoved.has(of[v]):
+			m.pos[v] = gpos[of[v]]
 
 ## Normals again from the faces after vertices have moved (welded by position, so UV seams stay smooth).
 func _renormal(m: Dictionary) -> void:
@@ -503,8 +593,8 @@ func _cut(a: int, b: int) -> int:
 	if not _other.is_empty():
 		var seam: String = SLOTS[_other[b]]
 		if not _o.rings.has(seam):
-			_o.rings[seam] = PackedInt32Array()
-		(_o.rings[seam] as PackedInt32Array).append(i)
+			_o.rings[seam] = []
+		(_o.rings[seam] as Array).append(i)
 	return i
 
 # ---------------------------------------------------------------- writing
@@ -528,7 +618,10 @@ func _save(p: Dictionary, path: String, id: String) -> void:
 	var mesh := im.get_mesh()
 	mesh.set_meta("suit", id)
 	if p.has("rings"):
-		mesh.set_meta("rings", p.rings)
+		var rings := {}
+		for k: String in p.rings:
+			rings[k] = PackedInt32Array(p.rings[k])
+		mesh.set_meta("rings", rings)
 	var err := ResourceSaver.save(mesh, path, ResourceSaver.FLAG_COMPRESS)
 	if err != OK:
 		push_error("could not save %s (%d)" % [path, err])
@@ -537,7 +630,7 @@ func _save(p: Dictionary, path: String, id: String) -> void:
 func _save_material(s: Dictionary, path: String) -> void:
 	var bm: BaseMaterial3D = s.material
 	var sm := ShaderMaterial.new()
-	sm.shader = load("res://src/fx/pbr_clamp.gdshader")
+	sm.shader = load("res://src/fx/armor_part.gdshader")
 	sm.set_shader_parameter("albedo_tex", bm.albedo_texture)
 	sm.set_shader_parameter("normal_tex", bm.normal_texture)
 	sm.set_shader_parameter("normal_scale", bm.normal_scale)

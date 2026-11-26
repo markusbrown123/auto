@@ -147,13 +147,14 @@ def lathe(B, prof, mat, seg=12, rz_scale=1.0, hard=(), facet=False, uv="box", gr
     loft(B, rings, mats, gv=gv, smooth_u=not facet, uv=uv, grain=grain, urep=urep, vk=vk)
 
 
-def block(B, x0, x1, y0, y1, z0, z1, c, mat, grain=0):
-    """A box with every edge chamfered by c (built as a loft along Y of chamfered rectangles)."""
+def block(B, x0, x1, y0, y1, z0, z1, c, mat, grain=0, slope=0.0):
+    """A box with every edge chamfered by c (built as a loft along Y of chamfered rectangles).
+    `slope` shears it in Z along X so a plate can sit on a curved board."""
     hx, hz = (x1 - x0) / 2, (z1 - z0) / 2
     cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
     rings = []
     for y, inset in ((y0, c), (y0 + c, 0.0), (y1 - c, 0.0), (y1, c)):
-        rings.append([(cx + x, y, cz + z) for x, z in chamfer_rect(hx - inset, hz - inset, c * 0.8)])
+        rings.append([(cx + x, y, cz + z + slope * x) for x, z in chamfer_rect(hx - inset, hz - inset, c * 0.8)])
     B.part()
     loft(B, rings, mat, smooth_u=False, smooth_v=False, grain=grain)
     B.close()
@@ -271,7 +272,7 @@ def build_wayfarer(B, q):
     f_end = 0.60
 
     def prof(s):
-        w = taper(s, 0.0245, 0.0150, 0.84, 1.9)
+        w = taper(s, 0.0265, 0.0160, 0.84, 1.9)
         t = (0.0031 - 0.0015 * s) * tip_thin(s, 0.9)
         b = min(0.0042, w * 0.45)
         fu = max(0.0, 1 - (s / f_end) ** 6) ** 0.5 if s < f_end else 0.0
@@ -280,12 +281,12 @@ def build_wayfarer(B, q):
         return [(w, 0.0), (w - b, t * 0.52), (wf, t)] + fuller_pts(wf, t, d, nf)
 
     blade(B, y0, L, prof, ["edge", "steel"] + ["fuller"] * nf, ["bev", "flat"] + ["f*"] * nf, stations_for(q, (f_end - 0.03, f_end)))
-    guard_bar(B, 0.098, 0.059, 0.0062, 0.0085, "steel", end_scale=0.72, seg=4 if q >= 1 else 2, flare=0.16)
-    block(B, -0.019, 0.019, 0.050, 0.071, -0.0125, 0.0125, 0.0028, "steel")
-    grip(B, 0.050, -0.056, 0.0142, 0.0112, "grip", seg=seg, stations=7 if q >= 1 else 3)
+    guard_bar(B, 0.098, 0.059, 0.0070, 0.0095, "steel", end_scale=0.72, seg=4 if q >= 1 else 2, flare=0.16)
+    block(B, -0.021, 0.021, 0.050, 0.071, -0.0135, 0.0135, 0.0028, "steel")
+    grip(B, 0.050, -0.056, 0.0150, 0.0120, "grip", seg=seg, stations=7 if q >= 1 else 3)
     if q >= 1:
-        collar(B, 0.046, 0.051, 0.0158, 0.0128, "steel", seg)
-        collar(B, -0.058, -0.053, 0.0150, 0.0122, "steel", seg)
+        collar(B, 0.046, 0.051, 0.0166, 0.0136, "steel", seg)
+        collar(B, -0.058, -0.053, 0.0156, 0.0128, "steel", seg)
     # wheel pommel, axis along Z: flat faces, chamfered rim, shallow recessed centre
     B.part()
     pz, pr = 0.0125, 0.0235
@@ -352,7 +353,7 @@ def build_eternal_edge(B, q):
     c_end, ch0, ch_end = 0.70, 0.075, 0.60
 
     def prof(s):
-        w = taper(s, 0.0205, 0.0158, 0.78, 2.1)
+        w = taper(s, 0.0220, 0.0165, 0.78, 2.1)
         t = (0.0033 - 0.0016 * s) * tip_thin(s, 0.9)
         b = min(0.0036, w * 0.45)
         cf = max(0.0, 1 - (s / c_end) ** 3) if s < c_end else 0.0        # core closes to a point
@@ -373,13 +374,13 @@ def build_eternal_edge(B, q):
     else:
         blade(B, y0, L, prof, mats, groups, stations_for(q, (ch0 - 0.004, ch0, ch_end, ch_end + 0.004, c_end - 0.05, c_end), 0.78))
     # guard: slim graphite bar whose ends lean toward the blade, steel centre block, thin gold seam
-    guard_bar(B, 0.082, 0.059, 0.0058, 0.0090, "graphite", end_scale=0.55, sweep=0.020, sweep_pow=1.4, seg=5 if q >= 1 else 2, chamfer=0.32)
+    guard_bar(B, 0.080, 0.0595, 0.0066, 0.0095, "steel", end_scale=0.66, sweep=0.013, sweep_pow=1.0, seg=5 if q >= 1 else 2, chamfer=0.32)
     block(B, -0.0175, 0.0175, 0.0505, 0.070, -0.0118, 0.0118, 0.0026, "steel")
     block(B, -0.0185, 0.0185, 0.0585, 0.0615, -0.0124, 0.0124, 0.0008, "gold")
     # blade collar: a flat sleeve up the first 6 cm whose top edge is a chevron pointing down the blade
     B.part()
     rings = []
-    hw, hz = 0.0170, 0.0052
+    hw, hz = 0.0185, 0.0052
     for y, k, notch in ((0.068, 1.0, 0.0), (0.072, 1.06, 0.0), (0.118, 0.94, 0.030), (0.1195, 0.86, 0.030)):
         sec = chamfer_rect(hw * k, hz * (0.6 + 0.4 * k), 0.0022)
         rings.append([(x, y - notch * (1 - abs(x) / (hw * k)) * (1.0 if notch else 0.0), z) for x, z in sec])
@@ -390,10 +391,10 @@ def build_eternal_edge(B, q):
         collar(B, y - 0.0018, y + 0.0018, 0.0150 if y > 0 or y < -0.1 else 0.0146, 0.0127, "gold", seg, 0.0008)
     # long hexagonal cap
     B.part()
-    lathe(B, [(-0.114, 0.0135), (-0.120, 0.0160), (-0.146, 0.0178), (-0.156, 0.0128), (-0.158, 0.0050)],
+    lathe(B, [(-0.114, 0.0128), (-0.119, 0.0148), (-0.143, 0.0160), (-0.152, 0.0118), (-0.154, 0.0050)],
           "steel", seg=6, facet=True, hard=(1, 2, 3), phase=math.pi / 6, rz_scale=0.86)
     B.close()
-    return {"class": "sword", "name": "Eternal Edge", "blade": L, "tip": y0 + L, "pommel": 0.158,
+    return {"class": "sword", "name": "Eternal Edge", "blade": L, "tip": y0 + L, "pommel": 0.154,
             "grip_clear": 0.162, "guard_span": 0.164, "hands": 1.5, "emissive": True}
 
 
@@ -428,7 +429,14 @@ def inset(poly, d):
     ln = np.linalg.norm(bis, axis=1)[:, None]
     bis /= np.maximum(ln, 1e-9)
     cos_half = np.clip((bis * n1).sum(axis=1), 0.5, 1.0)[:, None]
-    return poly + bis * d / cos_half
+    out = poly + bis * d / cos_half
+    # at a sharp point (the foot of a heater) neighbours would cross the centre line: slide them back along
+    # their edge to it, so the inset outline closes in a clean mitre instead of folding over itself
+    tan = e1 + e2
+    for i in range(len(poly)):
+        if poly[i][0] * out[i][0] < 0 and abs(tan[i][0]) > 1e-6:
+            out[i] = out[i] - tan[i] * (out[i][0] / tan[i][0])
+    return out
 
 
 def board(B, outline, table, zf, centre, off, gu=None, col_dz=None, gu_bands=()):
@@ -466,7 +474,7 @@ def rivet(B, p, r, h, mat, seg=8):
     B.close()
 
 
-def arm_strap(B, x, half_w, y_span, z_back, rise, mat, thick=0.0035, n=10, plates=True):
+def arm_strap(B, x, half_w, y_span, z_back, rise, mat, thick=0.0035, n=10, plates=True, slope=0.0):
     """Leather loop the forearm passes through: an arch over X = x from the rear face, both ends on steel plates."""
     def at(a):
         return -y_span * math.cos(a), z_back + rise * math.sin(a) ** 0.8
@@ -481,17 +489,18 @@ def arm_strap(B, x, half_w, y_span, z_back, rise, mat, thick=0.0035, n=10, plate
         ln = math.hypot(ty, tz)
         ny, nz = -tz / ln, ty / ln
         o = thick / 2
-        rings.append([(x - half_w, y + ny * o, z + nz * o), (x + half_w, y + ny * o, z + nz * o),
-                      (x + half_w, y - ny * o, z - nz * o), (x - half_w, y - ny * o, z - nz * o)])
+        s0, s1 = -slope * half_w, slope * half_w
+        rings.append([(x - half_w, y + ny * o, z + nz * o + s0), (x + half_w, y + ny * o, z + nz * o + s1),
+                      (x + half_w, y - ny * o, z - nz * o + s1), (x - half_w, y - ny * o, z - nz * o + s0)])
     B.part()
     loft(B, rings, mat, smooth_u=False, uv="cyl", urep=2.0, vk=UVK)
     B.close()
     if plates:
         for sgn in (-1, 1):
-            block(B, x - half_w - 0.004, x + half_w + 0.004, sgn * y_span - 0.011, sgn * y_span + 0.011, z_back - 0.001, z_back + 0.0045, 0.0012, "steel")
+            block(B, x - half_w - 0.004, x + half_w + 0.004, sgn * y_span - 0.011, sgn * y_span + 0.011, z_back - 0.001, z_back + 0.0045, 0.0012, "steel", slope=slope)
 
 
-def hand_grip(B, half_len, z_back, mat_bar, q, r=0.0115):
+def hand_grip(B, half_len, z_back, mat_bar, q, r=0.0115, slope=0.0):
     """Rigid grip bar the fist closes round, centred on the origin along Y, carried on two steel posts."""
     seg = 10 if q >= 1 else 6
     B.part()
@@ -502,7 +511,7 @@ def hand_grip(B, half_len, z_back, mat_bar, q, r=0.0115):
         y = sgn * (half_len + 0.007)
         # post: from the bar down to the rear face
         block(B, -0.0085, 0.0085, y - 0.008, y + 0.008, z_back - 0.001, 0.0125, 0.002, "steel")
-        block(B, -0.016, 0.016, y - 0.013, y + 0.013, z_back - 0.001, z_back + 0.004, 0.0012, "steel")
+        block(B, -0.016, 0.016, y - 0.013, y + 0.013, z_back - 0.001, z_back + 0.004, 0.0012, "steel", slope=slope)
 
 
 def build_heater(B, q):
@@ -532,7 +541,7 @@ def build_heater(B, q):
     R = 0.47
 
     def zf(x, y):
-        return (R - math.sqrt(R * R - x * x)) - 0.006 * (1 - abs(x) / hw) + 0.07 * (y + 0.08) ** 2
+        return (R - math.sqrt(R * R - x * x)) - 0.006 * (1 - math.sqrt(x * x + 0.0009) / hw) + 0.07 * (y + 0.08) ** 2
 
     T = 0.008
     centre = np.array([0.0, -0.05])
@@ -557,9 +566,12 @@ def build_heater(B, q):
             x, y = rim_mid[j]
             rivet(B, (x + off[0], y + off[1], zf(x, y) - 0.0042 + off[2]), 0.0048, 0.0022, "steel")
     # rear: grip bar at the origin, arm strap toward the elbow, a pad for the forearm between them
-    hand_grip(B, 0.052, back_z(-off[0], -off[1]), "grip", q)
+    def slope(x):
+        return (back_z(x + 0.02 - off[0], -off[1]) - back_z(x - 0.02 - off[0], -off[1])) / 0.04
+
+    hand_grip(B, 0.052, back_z(-off[0], -off[1]), "grip", q, slope=slope(0.0))
     sx = -0.205
-    arm_strap(B, sx, 0.021, 0.062, back_z(sx - off[0], -off[1]), 0.078, "leather", n=10 if q >= 1 else 4)
+    arm_strap(B, sx, 0.021, 0.062, back_z(sx - off[0], -off[1]), 0.078, "leather", n=10 if q >= 1 else 4, slope=slope(sx))
     if q >= 1:
         rings = []
         for i in range(9):
@@ -647,14 +659,17 @@ def build_round(B, q):
         # rear hub: the housing the plates fold out from
         B.part()
         zb = back_z(0, 0)
-        lathe(B, [(zb - 0.002, 0.050), (zb + 0.008, 0.050), (zb + 0.011, 0.046), (zb + 0.011, 0.020), (zb + 0.007, 0.017), (zb + 0.007, 0.0001)],
-              ["graphite", "graphite", "steel", "graphite", "glow"], seg=20, hard=range(6), y_axis=2)
+        lathe(B, [(zb - 0.002, 0.050), (zb + 0.008, 0.050), (zb + 0.011, 0.046), (zb + 0.011, 0.020), (zb + 0.008, 0.020), (zb + 0.008, 0.017), (zb + 0.011, 0.017), (zb + 0.011, 0.0001)],
+              ["graphite", "graphite", "steel", "graphite", "glow", "graphite", "graphite"], seg=20, hard=range(8), y_axis=2)
         for i in range(B.start, len(B.P)):
             B.P[i] = tuple(p + np.array([off[0], off[1], 0.0]) for p in B.P[i])
         B.close()
-    hand_grip(B, 0.050, back_z(-off[0], -off[1]), "grip", q)
+    def slope(x):
+        return (back_z(x + 0.02 - off[0], -off[1]) - back_z(x - 0.02 - off[0], -off[1])) / 0.04
+
+    hand_grip(B, 0.050, back_z(-off[0], -off[1]), "grip", q, slope=slope(0.0))
     sx = -0.200
-    arm_strap(B, sx, 0.021, 0.060, back_z(sx - off[0], -off[1]), 0.076, "leather", n=10 if q >= 1 else 4)
+    arm_strap(B, sx, 0.021, 0.060, back_z(sx - off[0], -off[1]), 0.076, "leather", n=10 if q >= 1 else 4, slope=slope(sx))
     return {"class": "shield", "name": "Round", "width": 2 * Rr, "height": 2 * Rr,
             "board_centre": [off[0], off[1], off[2]], "strap_x": sx, "thickness": T, "emissive": True}
 
@@ -698,28 +713,28 @@ def textures():
     rng = np.random.default_rng(7)
     S = 256
     # --- brushed steel: long satin strokes along V, a few shorter hairlines
-    long_ = _norm01(_blur_wrap(rng.random((S, S)), 70, 0.7))
-    short = _norm01(_blur_wrap(rng.random((S, S)), 9, 0.5))
+    long_ = _norm01(_blur_wrap(rng.random((S, S)), 26, 0.6))
+    short = _norm01(_blur_wrap(rng.random((S, S)), 6, 0.5))
     h = _norm01(long_ * 0.7 + short * 0.3)
-    _save("steel_a", _rgb(0.70 + 0.07 * (h - 0.5), (0.975, 0.99, 1.0)))
-    _save("steel_n", _normal_from(h, 2.2))
-    _save("steel_orm", _orm(0.40 + 0.16 * (h - 0.5), 1.0))
+    _save("steel_a", _rgb(0.70 + 0.05 * (h - 0.5), (0.975, 0.99, 1.0)))
+    _save("steel_n", _normal_from(h, 1.0))
+    _save("steel_orm", _orm(0.52 + 0.10 * (h - 0.5), 1.0))
     # --- worn steel: the same brushing under a patina, pits and stray scratches
     pat = _norm01(_blur_wrap(rng.random((S, S)), 14, 14) + 0.5 * _blur_wrap(rng.random((S, S)), 4, 4))
     pat = np.clip((pat - 0.35) * 2.2, 0, 1)
-    pits = np.clip((_norm01(_blur_wrap(rng.random((S, S)), 1.1, 1.1)) - 0.72) * 5, 0, 1)
+    pits = np.clip((_norm01(_blur_wrap(rng.random((S, S)), 1.6, 1.6)) - 0.78) * 5, 0, 1)
     scr = np.clip((_norm01(_blur_wrap(rng.random((S, S)), 0.6, 30)) - 0.74) * 6, 0, 1) * 0.6
-    hw = h * 0.55 - pits * 0.6 - scr * 0.3 + pat * 0.1
-    val = 0.60 + 0.05 * (h - 0.5) - 0.13 * pat - 0.10 * pits + 0.06 * scr
+    hw = h * 0.8 - pits * 0.22 - scr * 0.2 + pat * 0.05
+    val = 0.62 + 0.05 * (h - 0.5) - 0.10 * pat - 0.03 * pits + 0.03 * scr
     warm = pat * 0.10
     _save("worn_a", (np.clip(np.stack([val * (0.99 + warm * 0.6), val * 0.985, val * (1.0 - warm)], axis=-1), 0, 1) * 255).astype(np.uint8))
-    _save("worn_n", _normal_from(_norm01(hw), 2.6))
-    _save("worn_orm", _orm(0.46 + 0.12 * (h - 0.5) + 0.22 * pat + 0.2 * pits - 0.08 * scr, 1.0 - 0.25 * pat))
+    _save("worn_n", _normal_from(_norm01(hw), 1.4))
+    _save("worn_orm", _orm(0.50 + 0.10 * (h - 0.5) + 0.16 * pat + 0.06 * pits - 0.05 * scr, 1.0 - 0.15 * pat))
     # --- fine bead-blast: carries graphite, enamel and leather through the colour factor
     f = _norm01(_blur_wrap(rng.random((S, S)), 1.3, 1.3))
     mott = _norm01(_blur_wrap(rng.random((S, S)), 20, 20))
     _save("fine_a", _rgb(0.90 + 0.06 * (mott - 0.5) + 0.04 * (f - 0.5)))
-    _save("fine_n", _normal_from(f, 1.1))
+    _save("fine_n", _normal_from(f, 0.5))
     _save("satin_orm", _orm(0.50 + 0.08 * (mott - 0.5) + 0.06 * (f - 0.5), 0.8))
     _save("matte_orm", _orm(0.84 + 0.08 * (f - 0.5), 0.0))
     # --- cord wrap under leather: 8 turns a tile, one turn of pitch across the tile so it tiles round the grip
@@ -736,15 +751,15 @@ TEX = ["steel_a", "steel_n", "steel_orm", "worn_a", "worn_n", "worn_orm", "fine_
 
 # name: (base colour factor, metallic, roughness, albedo, normal, orm, normal scale, emissive)
 MATERIALS = {
-    "steel": ((1, 1, 1), 1.0, 0.42, "steel_a", "steel_n", "steel_orm", 0.55, None),
-    "fuller": ((0.52, 0.53, 0.56), 1.0, 0.5, "steel_a", "steel_n", "steel_orm", 0.8, None),
+    "steel": ((1, 1, 1), 1.0, 0.42, "steel_a", "steel_n", "steel_orm", 0.22, None),
+    "fuller": ((0.62, 0.63, 0.66), 1.0, 0.5, "steel_a", "steel_n", "steel_orm", 0.5, None),
     "edge": ((0.80, 0.81, 0.83), 1.0, 0.30, None, None, None, 1.0, None),
-    "graphite": ((0.085, 0.09, 0.105), 0.8, 0.5, "fine_a", "fine_n", "satin_orm", 0.6, None),
+    "graphite": ((0.085, 0.09, 0.105), 0.8, 0.5, "fine_a", "fine_n", "satin_orm", 0.4, None),
     "enamel": ((0.075, 0.095, 0.135), 0.8, 0.5, "fine_a", "fine_n", "satin_orm", 0.5, None),
     "gold": ((0.95, 0.66, 0.27), 1.0, 0.45, "steel_a", "steel_n", "steel_orm", 0.5, None),
     "grip": ((0.20, 0.21, 0.24), 0.0, 0.85, "wrap_a", "wrap_n", "wrap_orm", 1.0, None),
     "leather": ((0.115, 0.095, 0.085), 0.0, 0.85, "fine_a", "fine_n", "matte_orm", 1.0, None),
-    "glow": ((0.03, 0.05, 0.06), 0.0, 0.6, None, None, None, 1.0, ((0.62, 0.9, 1.0), 1.5)),
+    "glow": ((0.03, 0.05, 0.06), 0.0, 0.6, None, None, None, 1.0, ((0.38, 0.8, 1.0), 1.0)),
 }
 # per-item substitutions: the weathered greatsword swaps the steel set and warms the leather
 VARIANT = {
@@ -887,6 +902,7 @@ def main():
                 entry["lo"] = [round(float(x), 4) for x in allp.min(axis=0)]
                 entry["hi"] = [round(float(x), 4) for x in allp.max(axis=0)]
                 entry["materials"] = [m for m in MATERIALS if m in surf]
+            entry["rig_scale"] = 1.15      # the knights are heroic figures: the rig draws gear 15% over life size
             entry["tris" + suffix] = tris
             entry["verts" + suffix] = verts
             entry["bytes" + suffix] = os.path.getsize(path)

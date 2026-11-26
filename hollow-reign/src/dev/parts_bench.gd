@@ -4,7 +4,7 @@ extends Node3D
 ##   knights    --body=m --helm=frost --chest=black --shoulders=black --arms=regal --legs=ash --boots=vigil
 ##              [--set=<suit> default for every slot] [--clip=<name>] [--yaws=0,180] [--cam=full|upper|neck|shoulder|elbow|waist|ankle]
 ##              [--nounder] [--oldfinish] [--noweapon] [--orig=<suit>: the unsplit suit model on the rig instead] [--tag=_ds]
-##   turnaround --turn=<suit> [--split: assembled from its six parts] [--tag=_ds] [--oldfinish]   front, side, back in the rest pose
+##   turnaround --turn=<suit> [--split: assembled from its six parts] [--tag=_ds] [--oldfinish] [--camx= --camy= --dist=]   front, side, back in the rest pose
 ##   measure    --measure --parts_dir=<dir of parts cut with --margin=0>   prints seam mismatch tables and quits
 var args := {}
 var rigs: Array = []
@@ -98,6 +98,8 @@ func _knights() -> void:
 	for i in yaws.size():
 		var rig := _rig(float(yaws[i]), (i - (yaws.size() - 1) * 0.5) * gap)
 		rigs.append(rig)
+		if rig.skin and args.has("orig"):
+			_refinish(rig.skin.root, str(args.orig))
 		if rig.skin and not args.has("orig"):
 			var p := _dress(rig.skin.skel, _loadout())
 			parts.append(p)
@@ -145,14 +147,21 @@ func _turnaround() -> void:
 			if i == 1:
 				print("partsbench turn=", suit, " cost=", p.cost())
 		else:
-			Look.sanitise(root, "character", true)
-			if not args.has("oldfinish"):
-				var f := ArmorParts.finish_of(suit)
-				for k: String in ["rough_min", "rough_max", "metal_max", "spec"]:
-					Look.set_param(root, StringName(k), f[k])
-				Look.set_param(root, &"tint", f.tone)
-	cam.position = Vector3(0, 0.98, float(args.get("dist", "5.6")))
-	cam.look_at(Vector3(0, 0.96, 0))
+			_refinish(root, suit)
+	var cx := float(args.get("camx", "0"))
+	var cy := float(args.get("camy", "0.98"))
+	cam.position = Vector3(cx, cy, float(args.get("dist", "5.6")))
+	cam.look_at(Vector3(cx, cy - 0.02, 0))
+
+## An unsplit suit model in the same surface treatment as the parts (or the game's present one with --oldfinish).
+func _refinish(root: Node, suit: String) -> void:
+	var src: ShaderMaterial = ArmorParts._material(str(args.get("body", "m")), suit)
+	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		var m: ShaderMaterial = src.duplicate()
+		var f: Dictionary = ArmorParts.FINISH_OLD if args.has("oldfinish") else ArmorParts.finish_of(suit)
+		for k: String in f:
+			m.set_shader_parameter("tint" if k == "tone" else k, f[k])
+		mi.set_surface_override_material(0, m)
 
 # ---------------------------------------------------------------- measuring
 var _arr := {}

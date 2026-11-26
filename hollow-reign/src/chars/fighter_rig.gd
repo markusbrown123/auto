@@ -73,6 +73,9 @@ var bulk := 1.0
 var _warn_overlay: StandardMaterial3D
 var _base_glow = null
 var skin: SkinDriver          # optional rigged model replacing the primitive body
+var parts: ArmorParts         # the armour worn over the skin, piece by piece (look "parts"); null: the skin's own mesh shows
+## Dev: `--oldlook` restores the whole-suit swap and the first generation of weapon models, for comparison.
+static var old_look: bool = OS.get_cmdline_user_args().has("--oldlook")
 var _ankle := {}
 var hunch := 0.0
 var arm_scale := 1.0
@@ -182,6 +185,8 @@ func build(config: Dictionary, as_foe: bool) -> void:
 			chest.visible = false
 			for k in seg:
 				seg[k].visible = false
+			if cfg.get("parts") is Dictionary and not old_look:
+				wear_parts(cfg.parts)
 			if cfg.has("skin_tint"):
 				skin.tint(Color(str(cfg.skin_tint)))
 	if cfg.get("cape", false) and skin == null:
@@ -195,6 +200,29 @@ func build(config: Dictionary, as_foe: bool) -> void:
 		head.add_child(eye_light)
 		eye_light.position = Vector3(0, 0, -0.25)
 	_solve(0.0)
+
+## Real armour: dresses the body from a loadout {body, helm, chest, shoulders, arms, legs, boots -> suit id}
+## (Duel.player_look builds it from what is equipped). The first call hides the skin's own mesh; later calls swap only
+## the pieces that changed (the Armory's previews). The floor contact, the blade's clearances and the volumes an
+## opponent's blade meets are measured again from what is worn. False when this skin cannot wear parts.
+func wear_parts(loadout: Dictionary) -> bool:
+	if skin == null or old_look:
+		return false
+	var b := str(loadout.get("body", "m"))
+	if str(cfg.get("skin", "")) != ArmorParts.host_path(b) or not ArmorParts.has_part(b, ArmorParts.host, "chest"):
+		return false          # the parts are bound to the base body's skeleton and to no other
+	var wear := ArmorParts.resolve(loadout)
+	if parts == null:
+		parts = ArmorParts.dress(skin.skel, b, wear)
+		for mi: MeshInstance3D in parts.nodes.values():
+			mi.lod_bias = 1.0
+	else:
+		parts.wear_all(wear)
+	skin.measure_parts(parts)
+	return true
+
+func has_parts() -> bool:
+	return parts != null
 
 func _materials() -> void:
 	var metal := Color(str(cfg.get("metal", "#6a6a6c")))
@@ -387,8 +415,28 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 		mat_blade.emission_energy_multiplier = 0.9
 	_warn_overlay = null
 	var model: String = str(look.get("weapon_model", ""))
+	_gear = str(look.get("gear", "")) if not old_look and kind != "claws" and GearModel.exists(str(look.get("gear", ""))) else ""
 	if kind == "claws" and look.has("skin"):
 		weapon_len = 0.45          # the model's own claws are the weapon
+	elif _gear != "":
+		# hand-modelled gear is already in the rig's conventions and in metres: placed by its manifest, never measured
+		var h := GearModel.hold(_gear)
+		var low := int(Game.settings.get("quality", 1)) == 0
+		for n: Node3D in ([weapon_r, weapon_l] if dual else [weapon_r]):
+			var g := GearModel.spawn(_gear, 9.0, low, look.get("gear_mod", {}))
+			var left := n == weapon_l
+			# a pair is one model and its mirror image; the knuckle side of every hilt is +X here
+			g.transform = Transform3D(Basis(Vector3.UP, float(h.turn)).scaled(Vector3(-float(h.scale) if left else float(h.scale), float(h.scale), float(h.scale))), Vector3.ZERO)
+			n.add_child(g)
+		weapon_len = float(h.len)
+		_warn_overlay = StandardMaterial3D.new()
+		_warn_overlay.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_warn_overlay.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_warn_overlay.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+		_warn_overlay.albedo_color = Color(1.0, 0.1, 0.03, 0.0)
+		for n2 in [weapon_r, weapon_l]:
+			for mi in n2.find_children("*", "MeshInstance3D", true, false):
+				mi.material_overlay = _warn_overlay
 	elif PropModel.exists(model):
 		var ls: float = float(look.get("weapon_scale", 1.0))
 		weapon_len = PropModel.weapon(weapon_r, model, kind, look.get("weapon_tint"), ls)
@@ -412,9 +460,17 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 	_pommel = weapon_len * g / (1.0 - g) if PropModel.exists(model) and kind != "claws" else 0.14
 	_off_grip = clampf(_pommel * 0.62, 0.1, 0.22)
 	_blade_half = 0.11 if kind in ["axe", "cleaver"] else (0.05 if kind in ["greatsword", "glaive"] else 0.025)
+	if _gear != "":
+		# the manifest's own measurements: where the pommel ends, where the second hand closes, how wide the blade is
+		var h2 := GearModel.hold(_gear)
+		_pommel = float(h2.pommel)
+		_off_grip = float(h2.off_hand) if two_handed else clampf(_pommel * 0.62, 0.08, 0.22)
+		_blade_half = float(h2.half)
+	_present_stop()
 	if dual or two_handed:
 		set_shield(null)
 
+var _gear := ""                # the hand-modelled piece in the sword hand (GearModel id), "" for a fitted or built weapon
 var _pommel := 0.14
 var _blade_half := 0.025      # half the width of the blade or axe head: what must also clear the body
 var _off_grip := 0.2
@@ -497,6 +553,22 @@ func set_shield(look) -> void:
 		return
 	shield = Node3D.new()
 	body.add_child(shield)
+	_sh_gear = ""
+	_sh_c = Vector3.ZERO
+	_sh_hw = 0.27
+	_sh_hh = 0.41
+	var sg := str(look.get("gear", ""))
+	if not old_look and GearModel.exists(sg):
+		# a hand-modelled shield: its origin is the grip bar, its face is -Z, the arm strap is toward -X
+		var h := GearModel.hold(sg)
+		var g := GearModel.spawn(sg, 9.0, int(Game.settings.get("quality", 1)) == 0)
+		g.scale = Vector3.ONE * float(h.scale)
+		shield.add_child(g)
+		_sh_gear = sg
+		_sh_c = h.centre
+		_sh_hw = float(h.hw)
+		_sh_hh = float(h.hh)
+		return
 	if PropModel.exists(str(look.get("model", ""))) and PropModel.shield(shield, str(look.model)):
 		return
 	var m := StandardMaterial3D.new()
@@ -506,7 +578,7 @@ func set_shield(look) -> void:
 	var face := _cyl(shield, 0.3, 0.3, 0.04, Vector3.ZERO, m, 6)
 	face.rotation.x = PI / 2
 	face.scale = Vector3(0.85, 1.25, 1.0)
-	var rim := _cyl(shield, 0.07, 0.07, 0.07, Vector3(0, 0, -0.02), mat_metal, 10)
+	var rim := _cyl(shield, 0.07, 0.07, 0.07, Vector3(0, 0, -0.03), mat_metal, 10)      # the boss, on the face (-Z)
 	rim.rotation.x = PI / 2
 
 func set_armor_color(metal: Color, cloth: Color) -> void:
@@ -718,7 +790,8 @@ func hit_caps() -> Array:
 		var hb: Array = skin.ball("Head")
 		var guard_caps: Array = []
 		if shield and (blocking or _brace_t > 0.0):
-			guard_caps.append([shield.global_position, shield.global_position, 0.3 * k])      # a raised shield is met first
+			var sc := shield.global_transform * _sh_c
+			guard_caps.append([sc, sc, maxf(0.3, minf(_sh_hw, _sh_hh) * 1.1) * k])      # a raised shield is met first
 		if _parry_t > 0.0:
 			# a blade thrown up in a parry is met before the body behind it
 			var wt := weapon_r.global_transform

@@ -177,88 +177,6 @@
    "side": true
   },
   {
-   "id": "orren_silver",
-   "name": "Silver for the Dead's Edge",
-   "giver": "Orren",
-   "text": "Grave Silver takes an edge nothing else will. Bring Orren five pieces and he will finish a blade he has had on the bench since before you woke.",
-   "need": {
-    "materials": {
-     "m_silver": 5
-    }
-   },
-   "reward": {
-    "gold": 100,
-    "shop": [
-     "w_crypt_great"
-    ]
-   },
-   "done_text": "\"There. It is not for sale to anybody. It is for sale to you.\" A long shape lies on the bench under a cloth.",
-   "side": true,
-   "after": {
-    "cleared": "blackwood"
-   }
-  },
-  {
-   "id": "orren_both_hands",
-   "name": "Both Hands, Once",
-   "giver": "Orren",
-   "text": "Orren says nobody understands a greatsword until it has nearly pulled them over. Win two fights with one.",
-   "need": {
-    "feats": {
-     "win_cls:greatsword": 2
-    }
-   },
-   "reward": {
-    "gold": 250,
-    "materials": {
-     "m_iron": 3
-    }
-   },
-   "done_text": "\"And now your shoulders know why I charge more for them.\"",
-   "side": true,
-   "after": {
-    "cleared": "courtyard"
-   }
-  },
-  {
-   "id": "orren_as_far",
-   "name": "As Far As It Goes",
-   "giver": "Orren",
-   "text": "Take one blade as far as the forge can take it: every blade tier, the full grip, and a cored ore. Orren wants to see it finished, once, in his lifetime.",
-   "need": {
-    "maxed": "weapon"
-   },
-   "reward": {
-    "gold": 500,
-    "title": "ti_orrens_proof"
-   },
-   "done_text": "He holds it to the light and then hands it back hilt first. \"My grandmother would have called that a prayer answered. I call it paid for.\"",
-   "side": true,
-   "after": {
-    "cleared": "cathedral"
-   }
-  },
-  {
-   "id": "lyra_carry_light",
-   "name": "Carry the Light",
-   "giver": "Lyra",
-   "text": "Somebody carried a sanctuary candle as far down as the unlit stair in the Deep. Lyra asks you to carry another there, so the first is not alone. Wear the Sanctuary Candle when you reach the Last Candle.",
-   "need": {
-    "feats": {
-     "carry:x_candle:deep:3": 1
-    }
-   },
-   "reward": {
-    "gold": 400,
-    "shards": 6
-   },
-   "done_text": "Two lights on the stair now. \"Thank you,\" Lyra says. \"I do not know why that mattered so much. I will think about why.\"",
-   "side": true,
-   "after": {
-    "cleared": "citadel"
-   }
-  },
-  {
    "id": "lyra_courtyard",
    "name": "What the Courtyard Hid",
    "giver": "Lyra",
@@ -279,10 +197,10 @@
    "id": "lyra_stand_still",
    "name": "Stand Still",
    "giver": "Lyra",
-   "text": "You walk through places as if they were only on the way. Lyra asks you, three times, somewhere on the road, simply to stay and listen until the place has finished speaking.",
+   "text": "You walk through places as if they were only on the way. Lyra asks you, twice, somewhere on the road, simply to stay and listen until the place has finished speaking.",
    "need": {
     "feats": {
-     "listened": 3
+     "listened": 2
     }
    },
    "reward": {
@@ -293,167 +211,21 @@
    "side": true
   },
   {
-   "id": "lyra_without_mark",
-   "name": "Without a Mark",
-   "giver": "Lyra",
-   "text": "Lyra watches every blow that lands on you and can do nothing about any of them. Win three fights without being struck, as a kindness to her.",
-   "need": {
-    "feats": {
-     "flawless_wins": 3
-    }
-   },
-   "reward": {
-    "gold": 300,
-    "shards": 4
-   },
-   "done_text": "\"Three times I did not have to look away. I had forgotten what that was like.\"",
-   "side": true
-  },
-  {
-   "id": "lyra_niches",
-   "name": "Count the Niches",
-   "giver": "Lyra",
-   "text": "There are more niches in the Sunken Crypt than the kingdom ever had dead. Recover every record the Crypt's road holds, so the count can be made properly.",
-   "need": {
-    "lore_in": {
-     "crypt": 7
-    }
-   },
-   "reward": {
-    "gold": 350,
-    "shards": 5
-   },
-   "done_text": "Lyra reads the count back to you, slowly. It is not a number of graves. It is a number of people.",
-   "side": true,
-   "after": {
-    "cleared": "cathedral"
-   }
-  },
-  {
    "id": "witness_record",
    "name": "For the Record",
    "giver": "The Witness",
-   "text": "The Witness wrote down what he was told to for a lifetime. Bring him ten things nobody told anyone to write down.",
+   "text": "The Witness wrote down what he was told to for a lifetime. Bring him six things nobody told anyone to write down.",
    "need": {
-    "secrets": 10
+    "secrets": 6
    },
    "reward": {
     "title": "ti_corrector",
     "gold": 300
    },
-   "done_text": "\"Ten corrections. The record is still a disgrace, but it is now a disgrace with footnotes.\"",
+   "done_text": "\"Six corrections. The record is still a disgrace, but it is now a disgrace with footnotes.\"",
    "side": true,
    "after": {
     "witness": true
-   }
-  },
-  {
-   "id": "witness_answer",
-   "name": "A Proper Answer",
-   "giver": "The Witness",
-   "text": "The Witness holds that a parry made at exactly the right moment is the only honest sentence in fencing. Make twenty-five of them.",
-   "need": {
-    "feats": {
-     "perfect_parries": 25
-    }
-   },
-   "reward": {
-    "gold": 250,
-    "shards": 4
-   },
-   "done_text": "\"Twenty-five. I counted. It is what I do.\"",
-   "side": true,
-   "after": {
-    "witness": true
-   }
-  },
-  {
-   "id": "witness_tellings",
-   "name": "Two Tellings",
-   "giver": "The Witness",
-   "text": "The Witness will not say what you should do with the Crown. He would like to see, for the record, two of the things that can be done with it.",
-   "need": {
-    "endings": 2
-   },
-   "reward": {
-    "finish": "f_ledger",
-    "shards": 6
-   },
-   "done_text": "\"I have now seen it end twice and neither was the one I was ordered to write. Good.\"",
-   "side": true,
-   "after": {
-    "witness": true,
-    "cleared": "throne"
-   }
-  },
-  {
-   "id": "found_unscored",
-   "name": "The Unscored Rows",
-   "giver": "A strip of hide",
-   "text": "Three rows on the Huntsman's tally were never scored through. Put down the knuckle-walker in the Blackwood, the crawler in the Crypt and the white beast of the Citadel's great stair. They are not always on the road: look for them.",
-   "need": {
-    "defeated": [
-     "maulbeast",
-     "crypt_crawler",
-     "hoarbeast"
-    ]
-   },
-   "reward": {
-    "gold": 400,
-    "materials": {
-     "m_scale": 2
-    }
-   },
-   "done_text": "You score the three rows through yourself. The knife is still sharp.",
-   "side": true,
-   "after": {
-    "secret": "bw_last_row"
-   }
-  },
-  {
-   "id": "found_muster",
-   "name": "Answer the Roll",
-   "giver": "The garrison roll",
-   "text": "The muster nailed in the guardhouse lists five kinds of soldier 'posted'. Meet each of them once on the Courtyard's roads, so that somebody has answered the roll.",
-   "need": {
-    "defeated": [
-     "hollow_soldier",
-     "banneret",
-     "rampart_brute",
-     "pike_sergeant",
-     "gate_colossus"
-    ]
-   },
-   "reward": {
-    "gold": 200,
-    "materials": {
-     "m_iron": 4
-    }
-   },
-   "done_text": "Five names answered. The ink of the sixth, the sergeant's, has not changed. It was never going to.",
-   "side": true,
-   "after": {
-    "lore": "garrison_roll"
-   }
-  },
-  {
-   "id": "found_handbell",
-   "name": "Ring It Where It Rang",
-   "giver": "A cracked handbell",
-   "text": "The handbell the Beast kept was the choir-master's. Carry it back up to the Choir Loft, where the hymn is still running without him.",
-   "need": {
-    "feats": {
-     "carry:x_bell:cathedral:4": 1
-    }
-   },
-   "reward": {
-    "gold": 300,
-    "shards": 4
-   },
-   "done_text": "You ring it once. The recording falters for half a beat, as if somebody had looked up.",
-   "side": true,
-   "after": {
-    "defeated": "cathedral_beast"
    }
   }
  ]

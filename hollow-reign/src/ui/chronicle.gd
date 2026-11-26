@@ -22,7 +22,7 @@ func _init(start_tab: String = "Records") -> void:
 	tab = start_tab
 
 func tabs() -> Array:
-	var out := ["Records", "Sequences", "Guardians", "Endings"]
+	var out := ["Records", "Sequences", "Guardians", "Endings", "Completion"]
 	if has_node("/root/Companion") and get_node("/root/Companion").has_method("archive"):
 		out.append("Stories")
 	return out
@@ -69,7 +69,7 @@ func show_tab(t: String) -> void:
 		_tabs.remove_child(c)
 		c.queue_free()
 	for name_: String in tabs():
-		var b := UI.button(name_, 17, 150)
+		var b := UI.button(name_, 17, 138)
 		b.custom_minimum_size.y = 44
 		if name_ == tab:
 			b.add_theme_color_override("font_color", UI.GOLD)
@@ -116,6 +116,10 @@ func _tab_records() -> void:
 		_head(str(r.name), "%d of %d" % [found.size(), all])
 		for l in found:
 			_entry(str(l.title), str(l.text), UI.BONE)
+		# records that only a secret of this road gives: listed once found, never counted as missing
+		for l in Secrets.hidden:
+			if str(l.region) == str(r.id) and Game.profile.get("secret_lore", []).has(l.id):
+				_entry(str(l.title) + "   ·   found off the road", str(l.text), UI.GOLD)
 		if found.size() < all:
 			var left := all - found.size()
 			_body.add_child(UI.label("%d record%s here still unread." % [left, "" if left == 1 else "s"], 18, UI.DIM))
@@ -193,3 +197,56 @@ func _story(s, fallback: String) -> void:
 		_entry(heading, str(text), UI.BONE)
 	else:
 		_entry(str(s) if fallback == "" else fallback, "" if fallback == "" else str(s))
+
+## How much of the kingdom has been seen (Game.completion()): the figure, what it is made of, each road with a
+## line or two about what is still there (never how to get it), and what the milestones give.
+func _tab_completion() -> void:
+	Secrets.data()
+	var c: Dictionary = Game.completion()
+	_head("The kingdom, seen", "%s%%" % _pct_text(float(c.pct)))
+	var who := Game.title()
+	if who != "":
+		_body.add_child(UI.label("You are known as %s." % who, 19, UI.GOLD))
+	_body.add_child(_meter(float(c.pct)))
+	var bits: Array = []
+	for cat: String in c.categories:
+		bits.append("%s  %d / %d" % [c.categories[cat].name, int(c.categories[cat].done), int(c.categories[cat].total)])
+	_body.add_child(UI.wrapped("   ·   ".join(bits), 18, UI.BONE, 820))
+	for line: String in c.remains:
+		_body.add_child(UI.wrapped("Something remains:  " + line, 18, UI.DIM.lightened(0.25), 820))
+	_body.add_child(UI.spacer(8))
+	_head("Milestones")
+	for m: Dictionary in c.milestones:
+		_entry("%d%%   ·   %s" % [int(m.at), "reached" if m.reached else "not yet"], "   ·   ".join(m.reward), UI.GOLD if m.reached else UI.DIM)
+	var held: Array = Game.profile.get("completion", {}).get("trophies", [])
+	if not held.is_empty():
+		_head("Kept in the sanctuary", "%d" % held.size())
+		for id: String in held:
+			_entry(Secrets.label_of("trophy", id), str(Secrets.data().trophies.get(id, {}).get("text", "")), UI.BONE)
+	_body.add_child(UI.spacer(8))
+	for r: Dictionary in c.regions:
+		if not r.unlocked:
+			continue
+		_head(str(r.name), "%s%%" % _pct_text(float(r.pct)))
+		_body.add_child(_meter(float(r.pct)))
+		var parts: Array = []
+		for cat: String in r.categories:
+			parts.append("%s  %d / %d" % [r.categories[cat].name, int(r.categories[cat].done), int(r.categories[cat].total)])
+		_body.add_child(UI.wrapped("   ·   ".join(parts), 17, UI.BONE, 820))
+		for line: String in r.remains:
+			_body.add_child(UI.wrapped("Something remains here:  " + line, 17, UI.DIM.lightened(0.25), 820))
+		_body.add_child(UI.spacer(8))
+	_body.add_child(UI.label("Roads not yet reached are not listed.", 18, UI.GOLD_DIM.lightened(0.3)))
+
+func _pct_text(v: float) -> String:
+	return "%d" % int(v) if is_equal_approx(v, roundf(v)) else "%.1f" % v
+
+func _meter(pct: float) -> Control:
+	var back := ColorRect.new()
+	back.color = Color(1, 1, 1, 0.07)
+	back.custom_minimum_size = Vector2(820, 8)
+	var fill := ColorRect.new()
+	fill.color = UI.GOLD
+	fill.size = Vector2(820.0 * clampf(pct, 0.0, 100.0) / 100.0, 8)
+	back.add_child(fill)
+	return back

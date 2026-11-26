@@ -8,22 +8,28 @@ extends Control
 ## chest piece (a whole suit model) change what is seen; helm, gauntlets, greaves, ring and relic change
 ## numbers only, and the screen says so. When armour parts become real, only that function has to learn them.
 
-const RAIL := ["chest", "helm", "gauntlets", "legs", "weapon", "shield", "ring", "relic"]
-const TITLE := {"weapon": "Weapons", "shield": "Shields", "helm": "Helms", "chest": "Armour Suits", "gauntlets": "Gauntlets", "legs": "Greaves", "ring": "Rings", "relic": "Relics"}
+## Every slot of Db.EQUIP_SLOTS that has items (the off hand has none yet and is left off the rail), armour from the head down.
+const RAIL := ["helm", "chest", "shoulders", "gauntlets", "legs", "boots", "weapon", "shield", "ring", "relic"]
+const TITLE := {"weapon": "Weapons", "shield": "Shields", "helm": "Helms", "chest": "Armour Suits", "shoulders": "Pauldrons", "gauntlets": "Gauntlets", "legs": "Greaves",
+	"boots": "Boots", "ring": "Rings", "relic": "Relics"}
 const GOOD := Color("#8fb37a")
 const BAD := Color("#c2574a")
 const FOV := 36.0
-const UPGRADABLE := ["weapon", "shield", "helm", "chest", "gauntlets", "legs"]
+const UPGRADABLE := ["weapon", "shield", "helm", "chest", "shoulders", "gauntlets", "legs", "boots"]
 ## Where the camera goes for each slot: [bone or "" for the whole body, metres above that point, distance, height on screen 0..1,
 ## the knight's facing (radians; PI faces the camera, more shows its right side), stance].
+## The feet stay in frame in every one of them: a slot's view is the whole knight, turned to show that part and a
+## little nearer than the full-body view, never a crop.
 const FOCUS := {
 	"": ["", 0.0, 4.25, 0.485, 0.0, ""],
-	"helm": ["Head", 0.0, 2.0, 0.45, 0.25, "rest"],
-	"chest": ["Spine2", -0.05, 2.9, 0.46, 0.2, "rest"],
-	"gauntlets": ["Spine", 0.0, 2.9, 0.46, 0.3, "rest"],
-	"legs": ["Hips", -0.5, 2.9, 0.5, 0.25, "rest"],
-	"weapon": ["Spine2", 0.0, 3.3, 0.47, 0.55, "arms"],
-	"shield": ["Spine2", -0.1, 3.0, 0.47, -0.8, "arms"],
+	"helm": ["Hips", 0.0, 3.6, 0.462, 0.25, "rest"],
+	"chest": ["Hips", 0.0, 3.6, 0.462, 0.2, "rest"],
+	"shoulders": ["Hips", 0.0, 3.6, 0.462, 0.45, "rest"],
+	"gauntlets": ["Hips", 0.0, 3.6, 0.462, 0.3, "rest"],
+	"legs": ["Hips", 0.0, 3.6, 0.462, 0.25, "rest"],
+	"boots": ["Hips", 0.0, 3.6, 0.462, 0.3, "rest"],
+	"weapon": ["Hips", 0.0, 3.75, 0.462, 0.55, "arms"],
+	"shield": ["Hips", 0.0, 3.6, 0.462, -0.8, "arms"],
 	"ring": ["", 0.0, 4.25, 0.485, 0.2, "rest"],
 	"relic": ["", 0.0, 4.25, 0.485, 0.2, "rest"],
 }
@@ -52,6 +58,7 @@ var _grid: Control
 var _name: Label
 var _meta: HBoxContainer
 var _note: Label
+var _extra: Label                 # set progress, an unmet requirement, a keen edge
 var _stats: GridContainer
 var _stats_head: Label
 var _equip: Button
@@ -167,17 +174,17 @@ func _build() -> void:
 	row.add_child(rail)
 	for s: String in RAIL:
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(66, 58)
+		b.custom_minimum_size = Vector2(66, 46)
 		b.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		b.focus_mode = Control.FOCUS_NONE
 		b.tooltip_text = str(TITLE[s])
-		var g := InvGlyph.new(s, UI.DIM, 0, 34.0)
+		var g := InvGlyph.new(s, UI.DIM, 0, 30.0)
 		g.name = "Glyph"
 		g.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-		g.offset_left = -17
-		g.offset_right = 17
-		g.offset_top = -17
-		g.offset_bottom = 17
+		g.offset_left = -15
+		g.offset_right = 15
+		g.offset_top = -15
+		g.offset_bottom = 15
 		b.add_child(g)
 		b.pressed.connect(func():
 			Sfx.play("ui_tap", -6.0)
@@ -189,17 +196,33 @@ func _build() -> void:
 		_rail[s] = b
 	# --- the collection
 	var left := VBoxContainer.new()
-	left.add_theme_constant_override("separation", 5)
+	left.add_theme_constant_override("separation", 3)
 	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	left.size_flags_stretch_ratio = 1.08
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(left)
+	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.82), Color(0.3, 0.27, 0.2))
+	case.get_theme_stylebox("panel").set_content_margin_all(1)
+	case.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	case.custom_minimum_size.y = 170
+	left.add_child(case)
+	carousel = ItemCarousel.new()
+	carousel.body = str(Game.profile.get("body", "m"))
+	case.add_child(carousel)
+	carousel.centred.connect(_on_centred)
+	carousel.settled.connect(_on_settled)
+	carousel.tapped.connect(func(_i: int): _open_inspect())
+	# the row's heading and its two buttons lie over the top of the case, so the case itself can be tall
+	var over := MarginContainer.new()
+	over.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	for side: String in ["left", "right", "top"]:
+		over.add_theme_constant_override("margin_" + side, 8)
+	case.add_child(over)
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 10)
-	left.add_child(head)
 	_title = UI.title("", 24)
 	head.add_child(_title)
-	_count = UI.label("", 20, UI.DIM)
+	_count = UI.label("", 22, UI.DIM)
 	_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_count.clip_text = true
 	_count.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -217,17 +240,9 @@ func _build() -> void:
 	_grid_btn.focus_mode = Control.FOCUS_NONE
 	_grid_btn.pressed.connect(func(): _show_grid(_grid == null))
 	head.add_child(_grid_btn)
-	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.82), Color(0.3, 0.27, 0.2))
-	case.get_theme_stylebox("panel").set_content_margin_all(1)
-	case.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	case.custom_minimum_size.y = 170
-	left.add_child(case)
-	carousel = ItemCarousel.new()
-	carousel.body = str(Game.profile.get("body", "m"))
-	case.add_child(carousel)
-	carousel.centred.connect(_on_centred)
-	carousel.settled.connect(_on_settled)
-	carousel.tapped.connect(func(_i: int): _open_inspect())
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	head.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	over.add_child(head)
 	UI.corners(case, UI.GOLD_DIM, 12.0)
 	_name = UI.title("", 26, UI.BONE)
 	_name.clip_text = true
@@ -235,18 +250,22 @@ func _build() -> void:
 	left.add_child(_name)
 	_meta = HBoxContainer.new()
 	_meta.add_theme_constant_override("separation", 10)
-	_meta.custom_minimum_size.y = 26
+	_meta.custom_minimum_size.y = 28
 	left.add_child(_meta)
-	_note = UI.label("", 20, UI.DIM)
+	_note = UI.label("", 22, UI.DIM)
 	_note.clip_text = true
 	_note.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	left.add_child(_note)
+	_extra = UI.label("", 22, UI.GOLD_DIM.lightened(0.25))
+	_extra.clip_text = true
+	_extra.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	left.add_child(_extra)
 	var plate := UI.panel(Color(0.03, 0.03, 0.036, 0.86), Color(0.22, 0.2, 0.16))
 	plate.get_theme_stylebox("panel").set_content_margin_all(8)
 	left.add_child(plate)
 	# a fixed height, so the row above never changes size from one item to the next; a long comparison scrolls
 	var psc := ScrollContainer.new()
-	psc.custom_minimum_size.y = 150
+	psc.custom_minimum_size.y = 108
 	psc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	plate.add_child(psc)
 	var pv := VBoxContainer.new()
@@ -258,7 +277,7 @@ func _build() -> void:
 	_stats = GridContainer.new()
 	_stats.columns = 2
 	_stats.add_theme_constant_override("h_separation", 22)
-	_stats.add_theme_constant_override("v_separation", -3)
+	_stats.add_theme_constant_override("v_separation", -5)
 	pv.add_child(_stats)
 	var acts := HBoxContainer.new()
 	acts.add_theme_constant_override("separation", 6)
@@ -309,7 +328,7 @@ func _build() -> void:
 	pill.grow_horizontal = Control.GROW_DIRECTION_BEGIN
 	pill.offset_top = 4
 	_pad.add_child(pill)
-	_tag = UI.label("", 20, UI.GOLD, "head")
+	_tag = UI.label("", 22, UI.GOLD, "head")
 	pill.add_child(_tag)
 	var foot := HBoxContainer.new()
 	_foot = foot
@@ -334,23 +353,28 @@ func _build() -> void:
 func _entry(id: String) -> Dictionary:
 	var it: Dictionary = Db.item(id)
 	var own := Game.owns(id)
-	var unknown: bool = not own and int(it.get("price", 0)) <= 0       # never seen: its name and surface are kept back
+	# never come across: a silhouette, no name, and the line that says where such a thing might be had
+	var unknown: bool = Game.item_state(id) == "undiscovered"
 	var kind: String = str(Db.classes[it.cls].name) if it.slot == "weapon" else str(Db.SLOT_NAME[it.slot])
 	return {"id": id, "slot": str(it.slot), "name": ("Unknown " + kind) if unknown else str(it.name),
 		"color": Db.rarity_color(it) if own else Db.rarity_color(it).lerp(Color(0.35, 0.35, 0.37), 0.55),
 		"metal": str(it.get("look", {}).get("metal", it.get("look", {}).get("color", "#b8b4aa"))),
 		"locked": not own, "dark": unknown, "equipped": Game.is_equipped(id), "fav": Game.is_favourite(id)}
 
-## What is held, in the chosen order, then what this journey has still to offer (not owned: shown locked).
+## What is held, in the chosen order, then what this journey has still to offer: the pieces already come across
+## (in Orren's stock, seen, heard of) by rank, then the ones never met, as silhouettes.
 func _build_entries() -> Array:
 	var out: Array = []
 	for id: String in Game.sorted_items([slot]):
 		out.append(_entry(id))
 	var rest: Array = []
 	for it in Db.item_list:
-		if it.slot == slot and not Game.owns(it.id) and int(it.get("ng_min", 0)) <= int(Game.profile.get("ng", 0)):
+		if it.slot == slot and not Game.owns(it.id) and (int(it.get("ng_min", 0)) <= int(Game.profile.get("ng", 0)) or Game.is_discovered(str(it.id))):
 			rest.append(it)
-	rest.sort_custom(func(a, b): return Db.rarity_rank(a) < Db.rarity_rank(b))
+	rest.sort_custom(func(a, b):
+		var da := Game.is_discovered(str(a.id))
+		var db := Game.is_discovered(str(b.id))
+		return da and not db if da != db else Db.rarity_rank(a) < Db.rarity_rank(b))
 	for it in rest:
 		out.append(_entry(str(it.id)))
 	return out
@@ -381,6 +405,7 @@ func _enter_slot(s: String, want_item: String = "") -> void:
 	entries = _build_entries()
 	# a whole suit is a five-megabyte skinned model with its own textures: keep only the three that can be on show
 	carousel.keep = 3 if slot == "chest" else 7
+	carousel.zoom = 1.1 if slot == "chest" else 1.25       # the middle piece is shown large
 	ItemModel.keep = 4 if slot == "chest" else 10
 	var at := 0
 	var equipped = Game.profile.equipped.get(slot)
@@ -511,7 +536,10 @@ func _fill_light() -> void:
 	_name.text = str(e.name).to_upper() + ("  +%d" % lvl if lvl > 0 else "")
 	_name.add_theme_color_override("font_color", e.color)
 	_meta.add_child(InvGlyph.new("pips", e.color, Game.rarity_pips(it), 15.0))
-	_meta.add_child(UI.label("%s · %s" % [Game.rarity_name(it), Db.classes[it.cls].name if it.slot == "weapon" else Db.SLOT_NAME[it.slot]], 20, e.color))
+	var kind: String = "%s · %s" % [Game.rarity_name(it), Db.classes[it.cls].name if it.slot == "weapon" else Db.SLOT_NAME[it.slot]]
+	if it.has("weight") and Db.equipment.weights.has(it.weight) and not e.dark:
+		kind += " · " + str(Db.equipment.weights[it.weight].name)
+	_meta.add_child(UI.label(kind if not e.dark else "Not yet found", 22, e.color))
 	var gap := Control.new()
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_meta.add_child(gap)
@@ -520,52 +548,92 @@ func _fill_light() -> void:
 		var marks := InvGlyph.new("marks", UI.GOLD, tier if it.slot == "weapon" else (1 if tier == 3 else 0), 16.0)
 		marks.total = 3 if it.slot == "weapon" else 1
 		marks.custom_minimum_size.x = 16.0 * (2.9 if it.slot == "weapon" else 1.0)
-		_meta.add_child(UI.label("Mastery", 20, UI.DIM))
+		_meta.add_child(UI.label("Mastery", 22, UI.DIM))
 		_meta.add_child(marks)
-		_meta.add_child(UI.label("%d/%d" % [Game.mastery_points(str(e.id)), Stats.mastery_needed(it)], 20, UI.GOLD if tier == 3 else UI.BONE))
+		_meta.add_child(UI.label("%d/%d" % [Game.mastery_points(str(e.id)), Stats.mastery_needed(it)], 22, UI.GOLD if tier == 3 else UI.BONE))
 		if slot in UPGRADABLE:
-			_meta.add_child(UI.label("·  Forged +%d/%d" % [lvl, Stats.MAX_UPGRADE], 20, UI.DIM))
+			_meta.add_child(UI.label("· +%d/%d" % [lvl, Stats.MAX_UPGRADE], 22, UI.DIM))
 	_note.text = note_for(it)
-	_note.add_theme_color_override("font_color", UI.GOLD_DIM if e.locked else UI.DIM)
+	_note.add_theme_color_override("font_color", UI.GOLD_DIM.lightened(0.2) if e.locked else UI.DIM)
+	var ex := extra_for(it)
+	_extra.text = str(ex[0])
+	_extra.add_theme_color_override("font_color", ex[1])
 
 ## One honest line about the item: how to come by it when it is not held, otherwise what putting it on really changes.
 func note_for(it: Dictionary) -> String:
 	if it.is_empty():
 		return ""
-	if not Game.owns(str(it.id)):
-		if str(it.get("hint", "")) != "":
-			return "Locked · " + str(it.hint)
-		if int(it.get("price", 0)) > 0:
-			return "Locked · Orren sells this for %d gold" % int(it.price)
-		return "Locked · Not yet found"
+	var id := str(it.id)
+	if not Game.owns(id):
+		match Game.item_state(id):
+			"undiscovered":
+				return "Unknown · " + (Game.item_hint(id) if Game.item_hint(id) != "" else "Not yet found")
+		var price := Game.buy_price(id)
+		if price > 0:
+			return "Locked · Orren sells this for %d gold" % price
+		if int(it.get("price", 0)) > 0 and str(it.get("unlock_text", "")) != "":
+			return "Locked · %d gold · %s" % [int(it.price), str(it.unlock_text)]
+		return "Locked · " + (Game.item_hint(id) if Game.item_hint(id) != "" else "Not yet found")
 	match str(it.slot):
 		"chest":
 			if ItemModel.is_full_suit(it, str(Game.profile.get("body", "m"))):
 				return "A complete armour suit: worn as one piece, it changes the whole knight"
 			return "This suit has no model of its own yet: shown as plate colour"
-		"helm", "gauntlets", "legs":
+		"helm", "gauntlets", "legs", "shoulders", "boots":
 			return "A fitting: changes statistics, not the knight's appearance"
 		"ring", "relic":
 			return "Worn unseen: changes statistics only"
-		"weapon":
-			if Duel.MODEL_ALIAS.has(str(it.id)):
+		"weapon", "shield":
+			if ItemModel.gear_id(it) != "":
+				return "Its new model is shown here; the knight still carries the older one"
+			if Duel.MODEL_ALIAS.has(id):
 				return "Shown with a borrowed blade until its own is forged"
 	return str(it.get("desc", ""))
+
+## A second line, when there is something to say: a requirement not met, a keen edge, how far a set has come.
+## Returns [text, colour].
+func extra_for(it: Dictionary) -> Array:
+	if it.is_empty() or Game.item_state(str(it.id)) == "undiscovered":
+		return ["", UI.DIM]
+	var id := str(it.id)
+	if Game.requirement_text(id) != "" and not Game.meets_requirements(id):
+		return ["Asks for %s · usable without, at a cost" % Game.requirement_text(id), BAD]
+	if it.slot == "weapon" and Game.owns(id):
+		var w := Game.weapon_mods(id)
+		var bits: Array = []
+		if int(w.edge) > 0:
+			bits.append("Keen edge: %d fight%s left" % [int(w.edge), "" if int(w.edge) == 1 else "s"])
+		if int(w.grip) > 0 or int(w.ore) > 0:
+			bits.append("Grip %s · %s" % [UI.roman(int(w.grip)) if int(w.grip) > 0 else "0", ["Iron", "Steel", str(Db.equipment.mods.ores.get(str(w.ore_id), {}).get("name", "Ore")), "Cored"][clampi(int(w.ore), 0, 3)]])
+		return [" · ".join(bits), GOOD if int(w.edge) > 0 else UI.DIM]
+	if Db.ARMOUR_SLOTS.has(str(it.slot)) and it.has("family") and it.get("set_piece", true):
+		# the set as it would stand with this piece on
+		for st: Dictionary in Game.set_status(Game.preview_profile(str(it.slot), id)):
+			if str(st.family) != str(it.family):
+				continue
+			var marks: Array = []
+			var next := ""
+			for t: Dictionary in st.tiers:
+				marks.append("%d %s" % [int(t.pieces), "✓" if t.active else "–"])
+				if not t.active and next == "":
+					next = "at %d: %s" % [int(t.pieces), str(t.text)]
+			return ["%s set %d of 6 with this  ·  %s%s" % [st.name, int(st.pieces), "  ".join(marks), ("  ·  " + next) if next != "" else ""], UI.GOLD_DIM.lightened(0.3)]
+	return ["", UI.DIM]
 
 func _stat_row(k: String, v: String, col: Color = UI.BONE, better: int = 0, delta: String = "") -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 6)
 	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	var kl := UI.label(k, 20, UI.DIM)
+	var kl := UI.label(k, 22, UI.DIM)
 	kl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	kl.clip_text = true
 	kl.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	row.add_child(kl)
-	row.add_child(UI.label(v, 20, col, "bold"))
+	row.add_child(UI.label(v, 22, col, "bold"))
 	if better != 0:
 		row.add_child(InvGlyph.new("up" if better > 0 else "down", col, 0, 13.0))
 	if delta != "":
-		row.add_child(UI.label(delta, 20, col, "bold"))
+		row.add_child(UI.label(delta, 22, col, "bold"))
 	_stats.add_child(row)
 
 func _delta_text(r: Dictionary) -> String:
@@ -620,7 +688,7 @@ func _fill_detail() -> void:
 	# --- what can be done with it
 	_equip.disabled = not own or (worn and slot == "weapon")
 	_equip.text = "LOCKED" if not own else (("EQUIPPED" if slot == "weapon" else "REMOVE") if worn else "EQUIP")
-	_upgrade.disabled = not own or slot not in UPGRADABLE or Game.upgrade_level(id) >= Stats.MAX_UPGRADE
+	_upgrade.disabled = not own or slot not in UPGRADABLE or (slot != "weapon" and Game.upgrade_level(id) >= Stats.MAX_UPGRADE)
 	_compare.disabled = worn
 	_inspect_btn.disabled = false
 	_fav.disabled = not own
@@ -711,11 +779,14 @@ func _paths_for(id: String) -> Array:
 		return []
 	var out: Array = []
 	var body := str(Game.profile.get("body", "m"))
+	# (what the knight is dressed from: the rig still draws the older hand-held models)
 	if it.slot == "chest" and ItemModel.is_full_suit(it, body):
 		out.append(ItemModel.suit_path(it, body))
-	elif it.slot in ["weapon", "shield"]:
-		out = ItemModel.paths(it, body)
-	return out
+	elif it.slot == "weapon":
+		out.append(str(Duel.weapon_model(str(it.id)).weapon_model))
+	elif it.slot == "shield":
+		out.append("res://assets/models/%s.glb" % str(it.id))
+	return out.filter(func(p): return ResourceLoader.exists(p))
 
 func _finish_preview() -> void:
 	var id := _preview_want

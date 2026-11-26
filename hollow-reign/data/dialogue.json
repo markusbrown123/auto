@@ -1075,6 +1075,84 @@
    "speaker": "witness",
    "text": "Choose. I will see it remembered correctly. It is the only gift I have left.",
    "dir": "quiet"
+  },
+  "sx_cy_loose_stone_01": {
+   "speaker": "lyra",
+   "text": "That one has been lifted before. Often, and carefully.",
+   "dir": "quiet",
+   "recorded": false
+  },
+  "sx_cy_second_candle_01": {
+   "speaker": "lyra",
+   "text": "I did not light that one. I want that understood.",
+   "dir": "uneasy",
+   "recorded": false
+  },
+  "sx_cy_charcoal_sketch_01": {
+   "speaker": "lyra",
+   "text": "A drawing. Not of here. Keep it. Somebody wanted a place found again.",
+   "dir": "curious",
+   "recorded": false
+  },
+  "sx_bw_dark_lantern_01": {
+   "speaker": "lyra",
+   "text": "It was only waiting to be asked. Everything here is still waiting to be asked.",
+   "dir": "low",
+   "recorded": false
+  },
+  "sx_bw_three_stones_01": {
+   "speaker": "lyra",
+   "text": "The middle one. Exactly as it was drawn. Somebody trusted a stranger to look closely.",
+   "dir": "pleased",
+   "recorded": false
+  },
+  "sx_bw_woodpile_posts_01": {
+   "speaker": "lyra",
+   "text": "The fourth one lit. They were never markers. They are the lamps for a road nobody finished.",
+   "dir": "wondering",
+   "recorded": false
+  },
+  "sx_ca_end_of_cylinder_01": {
+   "speaker": "lyra",
+   "text": "It stopped. And then it said a number. Hymns do not end with a number.",
+   "dir": "unsettled",
+   "recorded": false
+  },
+  "sx_cr_whispered_name_01": {
+   "speaker": "lyra",
+   "text": "It said a name. You turned your head. You turned before I had finished hearing it.",
+   "dir": "very quiet",
+   "recorded": false
+  },
+  "sx_ro_no_shield_01": {
+   "speaker": "lyra",
+   "text": "There are two footprints fused into the glass road below. Whoever made them carried no shield either. You walked down again.",
+   "dir": "level",
+   "recorded": false
+  },
+  "sx_ci_reflection_01": {
+   "speaker": "lyra",
+   "text": "That is a Recall surface. It is not showing you. It is playing you back.",
+   "dir": "tense",
+   "recorded": false
+  },
+  "sx_de_candle_bearer_01": {
+   "speaker": "witness",
+   "text": "I know that hand. She carried it down herself, when she could still carry. Lyra, you were told you had never left the sanctuary.",
+   "dir": "careful",
+   "recorded": false
+  },
+  "sx_th_parade_sword_01": {
+   "speaker": "witness",
+   "text": "I was present when it was presented. The applause was the bravest thing I ever saw at court.",
+   "dir": "very dry",
+   "recorded": false
+  },
+  "sx_cy_cycle_count_01": {
+   "speaker": "lyra",
+   "text": "That mark was not there the first time. Or it was, and you could not see it yet. I do not know which frightens me more.",
+   "dir": "unsteady",
+   "recorded": false
   }
  },
  "scenes": {
@@ -1980,6 +2058,110 @@
    "once": false,
    "title": "The Choice Ahead",
    "kind": "topic"
+  },
+  "sx_cy_loose_stone": {
+   "lines": [
+    "sx_cy_loose_stone_01"
+   ],
+   "once": false,
+   "title": "The Relief Order",
+   "kind": "secret"
+  },
+  "sx_cy_second_candle": {
+   "lines": [
+    "sx_cy_second_candle_01"
+   ],
+   "once": false,
+   "title": "The Second Candle",
+   "kind": "secret"
+  },
+  "sx_cy_charcoal_sketch": {
+   "lines": [
+    "sx_cy_charcoal_sketch_01"
+   ],
+   "once": false,
+   "title": "A Charcoal Sketch",
+   "kind": "secret"
+  },
+  "sx_bw_dark_lantern": {
+   "lines": [
+    "sx_bw_dark_lantern_01"
+   ],
+   "once": false,
+   "title": "The Lamplighter's Round",
+   "kind": "secret"
+  },
+  "sx_bw_three_stones": {
+   "lines": [
+    "sx_bw_three_stones_01"
+   ],
+   "once": false,
+   "title": "The Shaded Stone",
+   "kind": "secret"
+  },
+  "sx_bw_woodpile_posts": {
+   "lines": [
+    "sx_bw_woodpile_posts_01"
+   ],
+   "once": false,
+   "title": "The Trimmed Posts",
+   "kind": "secret"
+  },
+  "sx_ca_end_of_cylinder": {
+   "lines": [
+    "sx_ca_end_of_cylinder_01"
+   ],
+   "once": false,
+   "title": "End of the Cylinder",
+   "kind": "secret"
+  },
+  "sx_cr_whispered_name": {
+   "lines": [
+    "sx_cr_whispered_name_01"
+   ],
+   "once": false,
+   "title": "A Name You Answer To",
+   "kind": "secret"
+  },
+  "sx_ro_no_shield": {
+   "lines": [
+    "sx_ro_no_shield_01"
+   ],
+   "once": false,
+   "title": "Unshielded at the Summit",
+   "kind": "secret"
+  },
+  "sx_ci_reflection": {
+   "lines": [
+    "sx_ci_reflection_01"
+   ],
+   "once": false,
+   "title": "Twice Yourself",
+   "kind": "secret"
+  },
+  "sx_de_candle_bearer": {
+   "lines": [
+    "sx_de_candle_bearer_01"
+   ],
+   "once": false,
+   "title": "Who Carried It",
+   "kind": "secret"
+  },
+  "sx_th_parade_sword": {
+   "lines": [
+    "sx_th_parade_sword_01"
+   ],
+   "once": false,
+   "title": "The Parade Sword of the Ninth Jubilee",
+   "kind": "secret"
+  },
+  "sx_cy_cycle_count": {
+   "lines": [
+    "sx_cy_cycle_count_01"
+   ],
+   "once": false,
+   "title": "The Cycle Count",
+   "kind": "secret"
   }
  },
  "voices": {

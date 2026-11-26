@@ -45,7 +45,7 @@ func _ready() -> void:
 	Game.sync_mastery()
 	for a in OS.get_cmdline_user_args():
 		var kv: PackedStringArray = a.trim_prefix("--").split("=")
-		if kv[0] in ["item", "smith", "forge", "mastery", "shopmode", "gold", "mats", "edge", "mods", "shop_demo"] and kv.size() > 1:
+		if kv[0] in ["item", "smith", "forge", "mastery", "shopmode", "gold", "mats", "edge", "mods", "quiet"] and kv.size() > 1:
 			_dev[kv[0]] = kv[1]
 	if _dev.has("mastery") and _dev.has("item"):
 		Game.profile.mastery[str(_dev.item)] = int(_dev.mastery)
@@ -183,6 +183,10 @@ func open_forge(id: String) -> void:
 ## Capture harness: a known purse and bench.  --gold=<n>  --mats=<id>:<n>,...  --edge=<weapon id>:<fights>
 ##   --mods=<weapon id>:<track>[:<ore>],...   (forge work applied at once, paid for from a purse topped up for it)
 func _dev_state() -> void:
+	if _dev.has("quiet"):
+		Game.profile.flags["scene_orren_intro"] = true
+		Game.profile.flags["orren_spoke"] = 99999
+		Game.profile.flags["scene_sanctuary_return"] = true
 	if _dev.has("gold"):
 		Game.profile.gold = int(_dev.gold)
 	for kv: String in str(_dev.get("mats", "")).split(",", false):
@@ -580,8 +584,8 @@ func _tab_journal() -> void:
 	var qt := UI.title("Tasks", 22)
 	qt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	qhead.add_child(qt)
-	qhead.add_child(UI.label("%d of %d done" % [p.quests_done.size(), Db.quests.size()], 18, UI.DIM))
-	for q in Db.quests:
+	qhead.add_child(UI.label("%d of %d done" % [p.quests_done.size(), Game.journal_quests().size()], 18, UI.DIM))
+	for q in Game.journal_quests():
 		var done: bool = p.quests_done.has(q.id)
 		var qrow := _row()
 		v.add_child(qrow)
@@ -591,7 +595,7 @@ func _tab_journal() -> void:
 		qrow.add_child(qv)
 		var qtitle := _row()
 		qtitle.add_child(UI.label(str(q.name), 20, UI.DIM if done else UI.GOLD, "bold"))
-		qtitle.add_child(UI.label(str(q.giver).to_upper(), 13, UI.DIM))
+		qtitle.add_child(UI.label(str(q.giver).to_upper() + ("  ·  IN PASSING" if q.get("side", false) else ""), 13, UI.DIM))
 		qv.add_child(qtitle)
 		qv.add_child(_wrap(str(q.done_text if done else q.text), 15))
 		qv.add_child(UI.label(Game.quest_progress(q.id), 14, UI.BONE))

@@ -17,6 +17,7 @@ var skel: Skeleton3D
 var bone := {}                # short name -> index
 var rest := {}                # short name -> global rest Transform3D
 var ok := false
+var parts: ArmorParts         # the armour worn over this body (FighterRig dresses it); tint, flash and rim reach it too
 
 static func attach(parent: Node3D, path: String) -> SkinDriver:
 	if not ResourceLoader.exists(path):
@@ -77,16 +78,22 @@ func tint(c: Color, amount: float = 0.45) -> void:
 	var m: float = maxf(maxf(c.r, c.g), maxf(c.b, 0.01))
 	var t := Color.WHITE.lerp(Color(c.r / m, c.g / m, c.b / m), amount)
 	Look.set_param(root, &"tint", t)
+	if parts:
+		parts.set_param(&"tint", t)
 
 func flash(v: float) -> void:
 	if is_equal_approx(v, _flash_v):
 		return
 	_flash_v = v
 	Look.set_param(root, &"flash", Color(1, 0.9, 0.8) * (v * 0.22))
+	if parts:
+		parts.set_param(&"flash", Color(1, 0.9, 0.8) * (v * 0.22))
 
 ## A faint fresnel edge in the arena's light so the figure reads against a dark background.
 func rim(c: Color, strength: float = 1.0) -> void:
 	Look.set_param(root, &"rim_color", Color(c.r * strength, c.g * strength, c.b * strength))
+	if parts:
+		parts.set_param(&"rim_color", Color(c.r * strength, c.g * strength, c.b * strength))
 
 var _flash_v := 0.0
 
@@ -400,8 +407,46 @@ func grip(side: String, dir: Vector3) -> Vector3:
 	var t0: Vector3 = ax[0]
 	var f0: Vector3 = ax[1]
 	var rot := Basis(t1, f1, t1.cross(f1)) * Basis(t0, f0, t0.cross(f0)).inverse()
+	grip_fwd[side] = (_back.basis.orthonormalized() * f1).normalized()
 	skel.set_bone_global_pose(hi, Transform3D(rot * rb, h.origin))
 	return _back * (_palm(side, h.origin) + rot * (ax[2] as Vector3) * (float(ax[3]) * 0.3))
+
+var grip_fwd := {}        # side -> the way the knuckles of a hand closed by grip() face (rig body space): a held edge leads that way
+
+# ---------------------------------------------------------------- fingers
+## A hand closed round a handle or a shield's grip bar: every finger joint is turned toward the palm, the thumb
+## across it. `amount` 0 is the model's own open hand, 1 a fist round a grip about 3 cm thick.
+const FINGERS := ["Index", "Middle", "Ring", "Pinky"]
+const CURL := [1.25, 1.45, 0.9]      # radians at the knuckle, the middle joint and the last joint of a closed finger
+const CURL_THUMB := [0.55, 0.5, 0.7]
+var _curl := {}               # side -> amount last applied
+var _curl_axis := {}          # bone name -> the joint's bending axis in the bone's own rest frame
+
+func curl(side: String, amount: float) -> void:
+	amount = clampf(amount, 0.0, 1.0)
+	if is_equal_approx(float(_curl.get(side, 0.0)), amount):
+		return
+	var ax := _grip_rest(side)
+	if ax.is_empty():
+		return
+	_curl[side] = amount
+	var palm: Vector3 = ax[2]
+	for f: String in FINGERS + ["Thumb"]:
+		# what a closing joint moves its finger toward: into the palm; the thumb across the palm toward the little finger
+		var toward: Vector3 = palm if f != "Thumb" else (palm * 0.6 - (ax[0] as Vector3) * 0.5 + (ax[1] as Vector3) * 0.45).normalized()
+		for j in 3:
+			var bn := "%sHand%s%d" % [side, f, j + 1]
+			var cn := "%sHand%s%d" % [side, f, j + 2]
+			if not bone.has(bn):
+				continue
+			if not _curl_axis.has(bn):
+				var d: Vector3 = ((rest[cn] as Transform3D).origin - (rest[bn] as Transform3D).origin) if rest.has(cn) else (ax[1] as Vector3)
+				var axis := d.normalized().cross(toward)
+				axis = axis.normalized() if axis.length() > 0.05 else (ax[0] as Vector3)
+				_curl_axis[bn] = ((rest[bn] as Transform3D).basis.orthonormalized().inverse() * axis).normalized()
+			var ang: float = float((CURL_THUMB if f == "Thumb" else CURL)[j]) * amount
+			var i: int = bone[bn]
+			skel.set_bone_pose_rotation(i, skel.get_bone_rest(i).basis.get_rotation_quaternion() * Quaternion(_curl_axis[bn] as Vector3, ang))
 
 ## The way a handle held in this hand points (rig body space), from the hand's present pose: for whole-body clips,
 ## where the hand is carried by the clip and the weapon must go with it.
@@ -461,64 +506,115 @@ func _measure(path: String) -> void:
 	if _contact_cache.has(path):
 		_contact = _contact_cache[path]
 		return
-	var group := {}
-	for i in skel.get_bone_count():
-		var b := i
-		var nm := ""
-		while b >= 0:
-			var n := skel.get_bone_name(b)
-			nm = n.get_slice(":", n.get_slice_count(":") - 1).trim_prefix("mixamorig_").trim_prefix("mixamorig")
-			if CONTACT_BONES.has(nm):
-				break
-			nm = ""
-			b = skel.get_bone_parent(b)
-		group[i] = nm
-	var dirs: Array = []
-	for x: float in [-1.0, 0.0, 1.0]:
-		for y: float in [-1.0, 0.0, 1.0]:
-			for z: float in [-1.0, 0.0, 1.0]:
-				var d := Vector3(x, y, z)
-				if d.length() > 0.5 and (d.length() < 1.1 or d.length() > 1.6 or y < 0.0):
-					dirs.append(d.normalized())
+	var best := _best_new()
+	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
+		_scan(mi, best)
+	_contact_cache[path] = _best_points(best)
+	_contact = _contact_cache[path]
+
+## The armour parts worn over this skeleton become what touches the floor, what a blade must clear and what an
+## opponent's blade meets: the outermost points are measured on the worn part meshes instead of the hidden body.
+## Each part is measured once (cached by mesh); a change of one piece only merges the cached results again.
+func measure_parts(p: ArmorParts) -> void:
+	parts = p
+	if p == null:
+		return
+	var key := "parts|%s|%s" % [p.body, str(p.worn)]
+	if not _contact_cache.has(key):
+		var best := _best_new()
+		for slot: String in p.nodes:
+			var mi: MeshInstance3D = p.nodes[slot]
+			if not mi.visible or mi.mesh == null:
+				continue
+			var id := mi.mesh.get_instance_id()
+			if not _part_best.has(id):
+				var one := _best_new()
+				_scan(mi, one)
+				_part_best[id] = one
+			var got: Dictionary = _part_best[id]
+			for nm: String in got:
+				var into: Array = best[nm]
+				var from: Array = got[nm]
+				for di in into.size():
+					if float(from[di][0]) > float(into[di][0]):
+						into[di] = from[di]
+		_contact_cache[key] = _best_points(best)
+	_contact = _contact_cache[key]
+	_ball.clear()
+
+static var _part_best := {}      # part mesh instance id -> its own outermost points per bone
+static var _dirs: Array = []
+
+static func _measure_dirs() -> Array:
+	if _dirs.is_empty():
+		for x: float in [-1.0, 0.0, 1.0]:
+			for y: float in [-1.0, 0.0, 1.0]:
+				for z: float in [-1.0, 0.0, 1.0]:
+					var d := Vector3(x, y, z)
+					if d.length() > 0.5 and (d.length() < 1.1 or d.length() > 1.6 or y < 0.0):
+						_dirs.append(d.normalized())
+	return _dirs
+
+func _best_new() -> Dictionary:
 	var best := {}
 	for nm2: String in CONTACT_BONES:
 		var a: Array = []
-		for d2 in dirs:
+		for d2 in _measure_dirs():
 			a.append([-1e9, Vector3.ZERO])
 		best[nm2] = a
-	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):
-		if mi.skin == null or mi.mesh == null:
+	return best
+
+var _group := {}              # bone index -> the contact bone that carries it
+
+## Adds one skinned mesh's outermost points (skeleton space, rest pose) to `best`.
+func _scan(mi: MeshInstance3D, best: Dictionary) -> void:
+	if mi.skin == null or mi.mesh == null:
+		return
+	if _group.is_empty():
+		for i in skel.get_bone_count():
+			var b := i
+			var nm := ""
+			while b >= 0:
+				var n := skel.get_bone_name(b)
+				nm = n.get_slice(":", n.get_slice_count(":") - 1).trim_prefix("mixamorig_").trim_prefix("mixamorig")
+				if CONTACT_BONES.has(nm):
+					break
+				nm = ""
+				b = skel.get_bone_parent(b)
+			_group[i] = nm
+	var dirs := _measure_dirs()
+	var binds: Array = []
+	for b2 in mi.skin.get_bind_count():
+		var bi := mi.skin.get_bind_bone(b2)
+		if bi < 0:
+			bi = skel.find_bone(mi.skin.get_bind_name(b2))
+		binds.append([bi, (skel.get_bone_global_rest(bi) * mi.skin.get_bind_pose(b2)) if bi >= 0 else Transform3D.IDENTITY])
+	for s in mi.mesh.get_surface_count():
+		var arr := mi.mesh.surface_get_arrays(s)
+		var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var bones = arr[Mesh.ARRAY_BONES]
+		var weights = arr[Mesh.ARRAY_WEIGHTS]
+		if bones == null or weights == null or pos.is_empty():
 			continue
-		var binds: Array = []
-		for b2 in mi.skin.get_bind_count():
-			var bi := mi.skin.get_bind_bone(b2)
-			if bi < 0:
-				bi = skel.find_bone(mi.skin.get_bind_name(b2))
-			binds.append([bi, (skel.get_bone_global_rest(bi) * mi.skin.get_bind_pose(b2)) if bi >= 0 else Transform3D.IDENTITY])
-		for s in mi.mesh.get_surface_count():
-			var arr := mi.mesh.surface_get_arrays(s)
-			var pos: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
-			var bones = arr[Mesh.ARRAY_BONES]
-			var weights = arr[Mesh.ARRAY_WEIGHTS]
-			if bones == null or weights == null or pos.is_empty():
+		var nb: int = bones.size() / pos.size()
+		var step: int = maxi(1, pos.size() / 16000)
+		for i in range(0, pos.size(), step):
+			var top := 0
+			for k in range(1, nb):
+				if weights[i * nb + k] > weights[i * nb + top]:
+					top = k
+			var bind: Array = binds[bones[i * nb + top]]
+			var nm3: String = _group.get(int(bind[0]), "")
+			if nm3 == "":
 				continue
-			var nb: int = bones.size() / pos.size()
-			var step: int = maxi(1, pos.size() / 16000)
-			for i in range(0, pos.size(), step):
-				var top := 0
-				for k in range(1, nb):
-					if weights[i * nb + k] > weights[i * nb + top]:
-						top = k
-				var bind: Array = binds[bones[i * nb + top]]
-				var nm3: String = group.get(int(bind[0]), "")
-				if nm3 == "":
-					continue
-				var p: Vector3 = (bind[1] as Transform3D) * pos[i]      # skeleton space, rest pose
-				var slots: Array = best[nm3]
-				for di in dirs.size():
-					var sc: float = p.dot(dirs[di])
-					if sc > float(slots[di][0]):
-						slots[di] = [sc, p]
+			var p: Vector3 = (bind[1] as Transform3D) * pos[i]      # skeleton space, rest pose
+			var slots: Array = best[nm3]
+			for di in dirs.size():
+				var sc: float = p.dot(dirs[di])
+				if sc > float(slots[di][0]):
+					slots[di] = [sc, p]
+
+func _best_points(best: Dictionary) -> Dictionary:
 	var out := {}
 	for nm4: String in CONTACT_BONES:
 		var inv: Transform3D = (rest[nm4] as Transform3D).affine_inverse() if rest.has(nm4) else Transform3D.IDENTITY
@@ -529,8 +625,7 @@ func _measure(path: String) -> void:
 				if not pts.has(lp):
 					pts.append(lp)
 		out[nm4] = pts
-	_contact_cache[path] = out
-	_contact = out
+	return out
 
 ## Lowest point, in rig body space, of what the named bone carries in its present pose.
 func _low(name: String, back: Transform3D) -> float:

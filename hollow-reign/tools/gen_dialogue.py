@@ -352,6 +352,14 @@ topic("choice", "The Choice Ahead", after="citadel",
  (W, "I shall not tell you. I spent a lifetime telling the powerful that what they wished for was wise.", "level"),
  (W, "Choose. I will see it remembered correctly. It is the only gift I have left.", "quiet")])
 
+# ================================================================ secrets (docs/SECRETS_AND_COMPLETION.md)
+# One subtitle line for each secret, said as it is found. The text is authored in tools/gen_secrets.py and read from
+# data/secrets.json. Text only: none of these lines has been recorded (new=True), so no file is ever played for them.
+import os as _os
+if _os.path.exists("data/secrets.json"):
+    for _s in json.load(open("data/secrets.json"))["secrets"]:
+        scene("sx_" + _s["id"], (_s["say"]["speaker"], _s["say"]["text"], _s["say"].get("dir", "")), once=False, new=True, title=_s["name"], kind="secret")
+
 # ================================================================ who may speak
 # A: creatures. No human speech at all; every foe not listed here is A.
 # B: guardians that are barely people any more. A few short lines at most.

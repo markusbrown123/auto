@@ -110,7 +110,7 @@ static func _tint(root: Node3D, c: Color) -> void:
 	for mi in root.find_children("*", "MeshInstance3D", true, false):
 		for s in mi.mesh.get_surface_count():
 			var mat = mi.get_active_material(s)
-			if mat is ShaderMaterial:
+			if mat is ShaderMaterial and (mat as ShaderMaterial).shader != null:
 				var sd: ShaderMaterial = mat.duplicate()
 				sd.set_shader_parameter("tint", c)
 				mi.set_surface_override_material(s, sd)

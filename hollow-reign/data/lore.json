@@ -361,14 +361,6 @@
    "secret": "cy_loose_stone"
   },
   {
-   "id": "s_cy_winch_hum",
-   "title": "What the Drum Counts",
-   "text": "Stand long enough beside the winch and the grey drum can be heard keeping a tally: a tick for each time the gate has opened. The count is very long. The last four ticks are yours.",
-   "region": "courtyard",
-   "stage": -1,
-   "secret": "cy_winch_hum"
-  },
-  {
    "id": "s_cy_second_candle",
    "title": "The Second Candle",
    "text": "After the gate lost its keeper a second light appeared in the alcove. It was not carried there. The maintenance point registered one fewer body in service and, for the first time in three centuries, marked it.",
@@ -385,28 +377,12 @@
    "secret": "cy_charcoal_sketch"
   },
   {
-   "id": "s_cy_second_salute",
-   "title": "The Salute",
-   "text": "The duellists of the barbican were taught one rule before any stroke: the first cut is a question. Answer it with your blade and you are a guest. Step away from it and you are only an intruder. There were always two of them posted. The second was for guests.",
-   "region": "courtyard",
-   "stage": -1,
-   "secret": "cy_second_salute"
-  },
-  {
    "id": "s_bw_dark_lantern",
    "title": "The Lamplighter's Round",
    "text": "Bark, cut with a knife: 'My round, as my mother walked it. At the woodpile trim the posts in her order: the tall post, the split post, the leaning post, the short. Do it wrong and start again. Nobody is watching. Do it right anyway.'",
    "region": "blackwood",
    "stage": -1,
    "secret": "bw_dark_lantern"
-  },
-  {
-   "id": "s_bw_last_row",
-   "title": "The Last Row",
-   "text": "Three drawings with no line through them: a thing with a long neck and a chain on it, a thing that walks on its knuckles in the dark, and a thing drawn only as a white shape with a crown of ice. Under them, in a different hand: 'If I am not here, these are yours.'",
-   "region": "blackwood",
-   "stage": -1,
-   "secret": "bw_last_row"
   },
   {
    "id": "s_bw_woodpile_posts",
@@ -417,22 +393,6 @@
    "secret": "bw_woodpile_posts"
   },
   {
-   "id": "s_bw_ravine_answer",
-   "title": "Cold Lines",
-   "text": "Under the ravine runs a pipe as wide as a cart, sweating frost in summer. It comes from the direction of the Citadel and goes toward the Crypt. The forest above it has never once burned.",
-   "region": "blackwood",
-   "stage": -1,
-   "secret": "bw_ravine_answer"
-  },
-  {
-   "id": "s_ca_grate_light",
-   "title": "Under the Drain",
-   "text": "Through the grate: a corridor, swept, lit, and empty. A pipe runs along it, stamped at every joint with the order its vents open in: two, three, one. Above, the faithful lit their candles in whatever order they liked. It did not matter. It was never the candles.",
-   "region": "cathedral",
-   "stage": -1,
-   "secret": "ca_grate_light"
-  },
-  {
    "id": "s_ca_end_of_cylinder",
    "title": "End of the Cylinder",
    "text": "'Devotional cycle nine. Congregation batch forty-one. Play until relieved.' The voice is bored. It is the only voice in the cathedral that sounds like a person at work.",
@@ -441,76 +401,12 @@
    "secret": "ca_end_of_cylinder"
   },
   {
-   "id": "s_ca_six_cuts",
-   "title": "Six Cuts",
-   "text": "Six pairs of cuts in the cathedral door, one pair for each soldier she buried. A seventh pair is begun and not finished: one blade only, and shallow. She was counting someone who was not dead yet, and thought better of it.",
-   "region": "cathedral",
-   "stage": -1,
-   "secret": "ca_six_cuts"
-  },
-  {
-   "id": "s_cr_dry_lamp",
-   "title": "Lamp Without Water",
-   "text": "Not a lamp. A marker: each one stands over a row of the stored and shows, by its colour, how many in the row still answer. This one is amber. The stamp on its base gives the row: forty names. The light says eleven.",
-   "region": "crypt",
-   "stage": -1,
-   "secret": "cr_dry_lamp"
-  },
-  {
    "id": "s_cr_whispered_name",
    "title": "A Name You Answer To",
-   "text": "The lamp reads its row aloud when someone sits long enough: the long name of a soldier, the short name of a child, and a third name with a line struck through it. It reads them twice in that order. You know all three the way you know your own hands.",
+   "text": "The lamp reads its row aloud when someone sits long enough: a soldier's name, a child's, and a third with a line struck through it on the plate. You know all three the way you know your own hands. The lamp does not read a fourth, though there is room on the plate for one.",
    "region": "crypt",
    "stage": -1,
    "secret": "cr_whispered_name"
-  },
-  {
-   "id": "s_cr_first_winter",
-   "title": "First Winter",
-   "text": "The store kept him as he was the day he volunteered: upright, quick, certain of the thaw. The thing at the gate was what three hundred years made of the body. Nobody ever told either of them about the other.",
-   "region": "crypt",
-   "stage": -1,
-   "secret": "cr_first_winter"
-  },
-  {
-   "id": "s_cr_scratched_drawing",
-   "title": "Sketch: The Door",
-   "text": "Scratched with a nail: two tall doors standing open, and on the left one, above the lowest hinge, a small circle. Beside the circle the mason has drawn a hand, flat, the way you would press on a thing rather than pull it.",
-   "region": "crypt",
-   "stage": -1,
-   "secret": "cr_scratched_drawing"
-  },
-  {
-   "id": "s_ro_stood_ground",
-   "title": "One Who Stood",
-   "text": "Two footprints in glass and a sword left standing between them. Whoever it was faced the thing on the summit with a blade and nothing else, and held long enough for the stone to cool around their boots. There is no shield in the glass. There is no body either.",
-   "region": "roost",
-   "stage": -1,
-   "secret": "ro_stood_ground"
-  },
-  {
-   "id": "s_ro_answered_whistle",
-   "title": "The Answer",
-   "text": "The keepers called with two notes: come, and then stand down. Only the first was ever taught to the last falconer. The thing on the summit has been answering 'come' for three centuries and waiting, politely, to be told it may stop.",
-   "region": "roost",
-   "stage": -1,
-   "secret": "ro_answered_whistle"
-  },
-  {
-   "id": "s_ro_warm_stone",
-   "title": "Imprint",
-   "text": "The young were taught to know one keeper by a mark carried on the hand, and to bring that keeper the first thing they ever killed. The stone is where they left it. What the whelp has left here is very old, and was a rat.",
-   "region": "roost",
-   "stage": -1,
-   "secret": "ro_warm_stone"
-  },
-  {
-   "id": "s_ci_still_counting",
-   "title": "Still Counting",
-   "text": "The rank was ordered to hold the pass until the gates were opened from inside. The gates were frozen shut from inside the same hour. One of them has counted every change of the watch since, aloud, so the others would know they had not been forgotten.",
-   "region": "citadel",
-   "stage": -1,
-   "secret": "ci_still_counting"
   },
   {
    "id": "s_ci_reflection",
@@ -521,36 +417,12 @@
    "secret": "ci_reflection"
   },
   {
-   "id": "s_ci_queens_pane",
-   "title": "The Queen's Pane",
-   "text": "She refused the king's order to seal the gates, and was overruled. After that she cleared one pane each morning and watched the soldiers in the pass go white. The pane has stayed clear. Nothing in the Citadel explains why.",
-   "region": "citadel",
-   "stage": -1,
-   "secret": "ci_queens_pane"
-  },
-  {
-   "id": "s_de_three_plates",
-   "title": "The Seventh Plate",
-   "text": "Six donor plates in the Crypt, and here, where the Crown sent what it had no use for, a seventh: fixed to the wall, polished, and blank. The date on it is not three hundred years old. Somebody added a seventh giver to the Unbound on the morning the chamber opened, and left the name for later.",
-   "region": "deep",
-   "stage": -1,
-   "secret": "de_three_plates"
-  },
-  {
    "id": "s_de_candle_bearer",
    "title": "Who Carried It",
    "text": "The candle on the unlit stair is the sanctuary's, and the thumbprint in its wax is a living hand's. Lyra remembers no body and no stair. The Witness remembers a woman going down with a light, and coming up without it, and being asked to forget which.",
    "region": "deep",
    "stage": -1,
    "secret": "de_candle_bearer"
-  },
-  {
-   "id": "s_th_unfinished_statue",
-   "title": "The Unfinished Statue",
-   "text": "A reserved plinth at the end of the line of kings, with a blank head roughed out and no name cut. The dust on it is three hundred years deep, except for one clean hand-width on the shoulder, at the height of somebody who cannot reach very far.",
-   "region": "throne",
-   "stage": -1,
-   "secret": "th_unfinished_statue"
   },
   {
    "id": "s_th_parade_sword",
@@ -561,20 +433,12 @@
    "secret": "th_parade_sword"
   },
   {
-   "id": "s_th_hinge_plate",
-   "title": "The Hinge Plate",
-   "text": "Behind the plate the masons kept a count of everyone who walked through the throne doors and did not walk back: a scratch for each. There are a great many scratches. The last seventeen are in a neat row of their own, each one the same height as you.",
-   "region": "throne",
-   "stage": -1,
-   "secret": "th_hinge_plate"
-  },
-  {
-   "id": "s_th_cycle_count",
+   "id": "s_cy_cycle_count",
    "title": "The Cycle Count",
-   "text": "Somebody has been marking the wall by the King's door each time they reached it. The cuts are old at one end and bright at the other, and all of them were made by the same hand at the same height. The Gravewarden's record said you were the first the chamber permitted to leave. It did not say you were the first to arrive.",
-   "region": "throne",
+   "text": "Somebody has been marking the breach each time they walked out through it. The cuts are old at one end and bright at the other, and all of them were made by the same hand at the same height. The Gravewarden's record said you were the first the chamber permitted to leave. It did not say you were the first to wake.",
+   "region": "courtyard",
    "stage": -1,
-   "secret": "th_cycle_count"
+   "secret": "cy_cycle_count"
   }
  ]
 }

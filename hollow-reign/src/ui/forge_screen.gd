@@ -47,7 +47,7 @@ func _ready() -> void:
 	add_child(row)
 	var left := VBoxContainer.new()
 	left.add_theme_constant_override("separation", 6)
-	left.custom_minimum_size.x = 330
+	left.custom_minimum_size.x = 310
 	row.add_child(left)
 	_modes = HBoxContainer.new()
 	_modes.add_theme_constant_override("separation", 6)
@@ -69,7 +69,7 @@ func _ready() -> void:
 	p.add_child(_mid)
 	stage = ItemStage.new()
 	stage.body = str(Game.profile.get("body", "m"))
-	stage.dist = 2.5
+	stage.upright = true
 	stage.custom_minimum_size = Vector2(270, 250)
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_mid.add_child(stage)
@@ -80,7 +80,7 @@ func _ready() -> void:
 	row.add_child(tsc)
 	_tracks = VBoxContainer.new()
 	_tracks.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_tracks.add_theme_constant_override("separation", 6)
+	_tracks.add_theme_constant_override("separation", 4)
 	tsc.add_child(_tracks)
 	if not _demo_read:
 		_demo_read = true
@@ -129,14 +129,15 @@ func refresh() -> void:
 		var b := GearUI.item_row(it, id == sel and mode == "Work", false, str(it.name) + (" +%d" % lvl if lvl > 0 else ""))
 		(b.get_theme_stylebox("normal") as StyleBoxFlat).content_margin_right = 34
 		if Game.is_equipped(id):
-			var d := InvGlyph.new("pips", UI.GOLD, 1, 14.0)
-			d.custom_minimum_size.x = 14.0
-			d.clip_contents = true
+			# worn: a gold diamond at the row's end
+			var d := Control.new()
+			d.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			d.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-			d.offset_left = -26
+			d.offset_left = -28
 			d.offset_right = -12
-			d.offset_top = -7
-			d.offset_bottom = 7
+			d.offset_top = -8
+			d.offset_bottom = 8
+			d.draw.connect(func(): d.draw_colored_polygon(PackedVector2Array([Vector2(8, 1), Vector2(15, 8), Vector2(8, 15), Vector2(1, 8)]), UI.GOLD))
 			b.add_child(d)
 		b.pressed.connect(func():
 			mode = "Work"
@@ -196,7 +197,7 @@ func ore_name(w: Dictionary) -> String:
 ## One line of work: its name and where it stands, what the next step does, what it costs, and the button.
 func _strip(title: String, at: int, cap: int, top: int, tier_note: String, effects: Array, cost: Dictionary, block: String, verb: String, on_press: Callable, extra: Control = null) -> PanelContainer:
 	var p := UI.panel(Color(0.045, 0.045, 0.055, 0.94), Color(0.26, 0.24, 0.19))
-	p.get_theme_stylebox("panel").set_content_margin_all(10)
+	p.get_theme_stylebox("panel").set_content_margin_all(8)
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 12)
 	p.add_child(h)
@@ -222,8 +223,10 @@ func _strip(title: String, at: int, cap: int, top: int, tier_note: String, effec
 		if e is Control:
 			fx.add_child(e)
 		else:
-			var l := UI.wrapped(str(e), GearUI.TEXT, UI.BONE)
-			l.custom_minimum_size.x = 380
+			var l := UI.label(str(e), GearUI.TEXT, UI.BONE)
+			if str(e).length() > 34:
+				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+				l.custom_minimum_size.x = 340
 			fx.add_child(l)
 	v.add_child(fx)
 	if extra:
@@ -322,7 +325,12 @@ func _ore_picker(current: String) -> Control:
 	var ores: Dictionary = Db.equipment.mods.ores
 	for id: String in ores:
 		var have := Game.material_count(id)
-		var b := GearUI.chip(str(ores[id].name).get_slice(" ", str(ores[id].name).get_slice_count(" ") - 1), id == current, 0, 15)
+		var b := GearUI.chip(str(ores[id].name).get_slice(" ", str(ores[id].name).get_slice_count(" ") - 1).trim_suffix("steel"), id == current, 0, 15)
+		for state: String in ["normal", "hover", "pressed"]:
+			var sb: StyleBoxFlat = b.get_theme_stylebox(state).duplicate()
+			sb.content_margin_left = 4
+			sb.content_margin_right = 4
+			b.add_theme_stylebox_override(state, sb)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.custom_minimum_size.y = 46
 		if have <= 0 and id != current:

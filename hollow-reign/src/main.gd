@@ -264,6 +264,7 @@ func start_duel(o: Dictionary) -> void:
 		duel_opts["autoplay"] = true
 		duel_opts["bot_style"] = DuelBot.Style.SKILLED
 	d.setup(o.foe, duel_opts)
+	Secrets.watch(d.sim, o)
 	d.hud.pause_pressed.connect(func():
 		if d.stage == Duel.Stage.FIGHT:
 			Overlays.pause(d, func(): pass, func(): d.sim._damage_player(999999.0, true)))
@@ -289,11 +290,14 @@ func start_cine_duel(o: Dictionary) -> void:
 
 func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 	var foe: Dictionary = Db.foes[o.foe]
+	Secrets.duel_ended(o, won, sim)
 	if won:
 		var rewards := Game.on_victory(o.foe, sim.pl.hp)
 		rewards["new_combos"] = Game.profile.combos.filter(func(id): return not _combos_before.has(id))
 		Overlays.victory(d, foe, rewards, sim, func():
-			if o.get("optional", false) or o.type == "fight" or Game.run.stage < Game.run_region().stages.size() - 1:
+			if o.get("hidden", false):
+				_fade_then(show_stage)      # a hidden duel is off the road: back to the stop it was found at
+			elif o.get("optional", false) or o.type == "fight" or Game.run.stage < Game.run_region().stages.size() - 1:
 				_next_stage()
 			else:
 				_region_done())
@@ -455,6 +459,10 @@ func _dev_boot() -> void:
 			if _args.has("tab"):
 				current.sel_slot = _args.get("slot", "weapon")
 				current.show_tab(_args.tab)
+			if _args.has("scroll"):
+				await get_tree().create_timer(0.6).timeout
+				for sc in current.find_children("*", "ScrollContainer", true, false):
+					sc.scroll_vertical = int(_args.scroll)
 		"training":
 			start_training()
 		"lesson":
@@ -465,7 +473,12 @@ func _dev_boot() -> void:
 		"explore":
 			Game.start_run(_args.get("region", "courtyard"))
 			Game.run.stage = int(_args.get("stage", "1"))
+			Game.profile.ng = int(_args.get("ng", "0"))
+			for sid in str(_args.get("found", "")).split(",", false):
+				Game.profile.secrets[sid] = true
 			show_stage()
+			if _args.has("tap") and current is Explore:
+				current.dev_tap(str(_args.tap), float(_args.get("tapat", "4")))
 		"gearbench":
 			# dev viewer for the hand-modelled equipment (src/dev/gear_bench.gd lists its switches)
 			_swap(GearBench.new(_args))

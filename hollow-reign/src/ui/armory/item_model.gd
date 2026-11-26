@@ -17,6 +17,7 @@ static var _pending := {}        # path -> true
 const ORE_GEAR := {"steel": "steel", "m_iron": "graphite", "m_silver": "silver", "m_scale": "bronze", "m_rime": "frost"}
 const ORE_OWN := {"iron": Color(0.8, 0.78, 0.76), "m_glass": Color(0.8, 0.74, 1.12)}
 
+const SWAY := 1.05               # how far (radians) a blade on show turns to either side of its flat
 static var _env: Environment
 
 ## The light a piece is looked at in: a soft box all the way round for the metal to reflect (a polished flat with

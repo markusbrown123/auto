@@ -36,6 +36,54 @@ static func ids(kind: String = "") -> Array:
 			out.append(k)
 	return out
 
+## On the rig the gear is drawn a little over life size (the knight is 1.95 m): the manifest's `rig_scale`, except
+## where a piece looked wrong on the figure. The Tower shield at 1.15 stood 1.01 m, chin to shin: it is worn life size.
+const RIG_SCALE := {"shield_tower": 1.0}
+## Asymmetric hilts: the models whose knuckle side (the long guard arm) is on -X; the rig turns these half round so
+## every sword's knuckle side is +X, which FighterRig lays over the knuckles of the hand that holds it.
+const KNUCKLES_MINUS_X := ["veilcutter"]
+## Game.weapon_mods().visual names an ore as "iron", "steel", a region material id or "cored" (ore_id says which):
+## the manifest's palette where it has the metal, two colours of our own where it has not (as the Armory's carousel).
+const ORE_GEAR := {"steel": "steel", "m_iron": "graphite", "m_silver": "silver", "m_scale": "bronze", "m_rime": "frost"}
+const ORE_OWN := {"iron": Color(0.8, 0.78, 0.76), "m_glass": Color(0.8, 0.74, 1.12)}
+
+static func rig_scale(id: String) -> float:
+	return float(RIG_SCALE.get(id, info(id).get("rig_scale", 1.15)))
+
+## The forge state FighterRig hands to spawn(), from Game.weapon_mods(id).visual. Swords that are not built in parts
+## take only the ore and the edge.
+static func mod_from_visual(id: String, v: Dictionary) -> Dictionary:
+	var ore := str(v.get("ore", "steel"))
+	if ore == "cored" or ore == "":
+		ore = str(v.get("ore_id", "")) if str(v.get("ore_id", "")) != "" else "steel"
+	var out := {"sharpened": bool(v.get("keen", false))}
+	if ORE_OWN.has(ore):
+		out["tint"] = ORE_OWN[ore]
+	else:
+		out["ore"] = str(ORE_GEAR.get(ore, "steel"))
+	if ResourceLoader.exists("%s%s__blade0.glb" % [DIR, id]):
+		out["blade_tier"] = int(v.get("blade_tier", 0))
+		out["grip_tier"] = int(v.get("grip_tier", 0))
+	else:
+		out["sharpened"] = true       # the finished swords leave the smith keen
+	return out
+
+## What the rig needs to hold a piece, in metres on the rig (rig_scale applied).
+## swords: {scale, len (grip to tip), pommel (grip to pommel end), off_hand (grip to the second hand, two-handers),
+##          half (half the blade's width), pair, turn (radians about the blade to bring the knuckle side to +X)}
+## shields: {scale, centre (board centre from the grip), hw, hh (half width and height), strap (grip to the arm strap)}
+static func hold(id: String) -> Dictionary:
+	var i := info(id)
+	var k := rig_scale(id)
+	if str(i.get("class", "")) == "shield":
+		var c: Array = i.get("board_centre", [0, 0, 0])
+		return {"scale": k, "centre": Vector3(float(c[0]), float(c[1]), float(c[2])) * k, "hw": float(i.get("width", 0.5)) * 0.5 * k,
+			"hh": float(i.get("height", 0.7)) * 0.5 * k, "strap": absf(float(i.get("strap_x", -0.2))) * k}
+	var two := float(i.get("hands", 1)) >= 2.0
+	return {"scale": k, "len": float(i.get("tip", 1.0)) * k, "pommel": float(i.get("pommel", 0.12)) * k,
+		"off_hand": absf(float(i.get("off_hand", -0.16))) * k, "half": (0.034 if two else 0.03) * k,
+		"pair": bool(i.get("pair", false)), "turn": PI if KNUCKLES_MINUS_X.has(id) else 0.0}
+
 static func exists(id: String) -> bool:
 	return ResourceLoader.exists(DIR + id + ".glb")
 
@@ -96,6 +144,8 @@ static func apply_mod(root: Node3D, mod: Dictionary) -> void:
 	var ores: Dictionary = manifest().get("_mods", {}).get("ores", {})
 	var o: Array = ores.get(str(mod.get("ore", "steel")), [1.0, 1.0, 1.0])
 	var tint := Color(float(o[0]), float(o[1]), float(o[2]))
+	if mod.get("tint") is Color:
+		tint = mod.tint            # a metal the manifest's palette does not have
 	var sharp := bool(mod.get("sharpened", true))
 	for e: Array in _surfaces(root):
 		var mi: MeshInstance3D = e[0]

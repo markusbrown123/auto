@@ -90,7 +90,7 @@ func _ready() -> void:
 			mark.draw_arc(c, r * 0.88, 0, TAU, 64, Color(col, 0.3), 1.5, true)
 			var metal: Color = Color(str(entry.get("metal", "#b8b4aa"))).lerp(Color("#d8d2c4"), 0.45)
 			InvGlyph.paint(mark, "lock" if entry.get("dark", false) else str(entry.slot), c - Vector2(r, r) * 0.55, r * 1.1, metal))
-	var hint := UI.label("Drag to turn  ·  pinch to bring closer" if _piece else "No model of its own", 20, UI.DIM)
+	var hint := UI.label("Drag to turn  ·  pinch to bring closer" if _piece else "No model of its own", 22, UI.DIM)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	hint.grow_vertical = Control.GROW_DIRECTION_BEGIN
@@ -114,7 +114,7 @@ func _ready() -> void:
 	var kind := HBoxContainer.new()
 	kind.add_theme_constant_override("separation", 10)
 	kind.add_child(InvGlyph.new("pips", col, Game.rarity_pips(it), 15.0))
-	kind.add_child(UI.label("%s · %s" % [Game.rarity_name(it), Db.classes[it.cls].name if it.slot == "weapon" else Db.SLOT_NAME[it.slot]], 21, col))
+	kind.add_child(UI.label("%s · %s" % [Game.rarity_name(it), Db.classes[it.cls].name if it.slot == "weapon" else Db.SLOT_NAME[it.slot]], 22, col))
 	side.add_child(kind)
 	side.add_child(UI.rule())
 	var sc := ScrollContainer.new()
@@ -133,8 +133,31 @@ func _ready() -> void:
 			# every clean hit wears the same amount off a foe's guard, so quicker weapons press harder
 			_kv(v, "Guard damage", "4 a hit · %.0f a second" % (4.0 / float(Db.classes[it.cls].swing)))
 		v.add_child(UI.rule())
+	if own or not entry.get("dark", false):
+		var id := str(it.id)
+		if Game.requirement_text(id) != "":
+			var met := Game.meets_requirements(id)
+			v.add_child(UI.wrapped("Asks for %s%s" % [Game.requirement_text(id), "" if met else ": usable without, but it costs you (weapons hit softer and tire; armour slows your recovery)"], 22, UI.DIM if met else Color("#c2574a")))
+		if own and it.slot == "weapon" and it.has("mods"):
+			var w := Game.weapon_mods(id)
+			_kv(v, "Forge work", "Blade %d/%d · Grip %d/%d · %s" % [int(w.blade), int(w.max.blade), int(w.grip), int(w.max.grip),
+				["Iron", "Steel", str(Db.equipment.mods.ores.get(str(w.ore_id), {}).get("name", "Ore")), "Cored"][clampi(int(w.ore), 0, 3)]])
+			if int(w.edge) > 0:
+				_kv(v, "Keen edge", "%d fight%s left" % [int(w.edge), "" if int(w.edge) == 1 else "s"])
+		if it.has("weight") and Db.equipment.weights.has(it.weight):
+			v.add_child(UI.wrapped("%s. %s" % [Db.equipment.weights[it.weight].name, Db.equipment.weights[it.weight].text], 22, UI.DIM))
+		var fam: Dictionary = Db.family(it)
+		if Db.ARMOUR_SLOTS.has(str(it.slot)) and not fam.is_empty() and it.get("set_piece", true):
+			var worn := 0
+			for st: Dictionary in Game.set_status():
+				if str(st.family) == str(it.family):
+					worn = int(st.pieces)
+			_kv(v, "%s set" % str(fam.name), "%d of 6 worn" % worn)
+			for t: Dictionary in fam.set:
+				v.add_child(UI.wrapped("%d pieces  ·  %s" % [int(t.pieces), str(t.text)], 22, UI.GOLD if worn >= int(t.pieces) else UI.DIM))
+		v.add_child(UI.rule())
 	if note != "":
-		v.add_child(UI.wrapped(note, 21, UI.GOLD_DIM))
+		v.add_child(UI.wrapped(note, 22, UI.GOLD_DIM))
 	if own:
 		_mastery(v, it)
 		var hist := Game.item_history(str(it.id))
@@ -148,10 +171,10 @@ func _ready() -> void:
 
 func _kv(parent: Control, k: String, val: String) -> void:
 	var row := HBoxContainer.new()
-	var kl := UI.label(k, 21, UI.DIM)
+	var kl := UI.label(k, 22, UI.DIM)
 	kl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(kl)
-	row.add_child(UI.label(val, 21, UI.BONE, "bold"))
+	row.add_child(UI.label(val, 22, UI.BONE, "bold"))
 	parent.add_child(row)
 
 func _mastery(v: VBoxContainer, it: Dictionary) -> void:
@@ -169,7 +192,7 @@ func _mastery(v: VBoxContainer, it: Dictionary) -> void:
 		var text := "%s  %s" % [["", "I", "II", "III"][t], Game.mastery_tier_text(it, t)]
 		if not done:
 			text += "  ·  %d more" % (at - have)
-		v.add_child(UI.wrapped(text, 20, UI.GOLD if done else UI.DIM))
+		v.add_child(UI.wrapped(text, 22, UI.GOLD if done else UI.DIM))
 	v.add_child(UI.rule())
 
 func _stage_input(e: InputEvent) -> void:

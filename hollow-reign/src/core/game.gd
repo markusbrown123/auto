@@ -51,6 +51,8 @@ func default_profile() -> Dictionary:
 		"materials": {}, "discovered": {}, "seen": {}, "sold": [], "challenges_done": [],
 		"mods": {}, "edge": {},     # weapon mods {id: {grip, ore, ore_id}} (blade tier is `upgrades`) and sharpened edges {id: fights left}
 		"cosmetics": {}, "rewards": {"seed": 0, "pity": 0, "recent": [], "cores": {}},
+		# secrets, side missions and completion (src/core/secrets.gd). Additive: a save without them is credited by Secrets.backfill
+		"secrets": {}, "secret_lore": [], "feats": {}, "completion": Secrets.blank(),
 	}
 
 func has_save() -> bool:
@@ -165,6 +167,7 @@ func save() -> bool:
 	if profile.is_empty():
 		return false
 	profile["last_played"] = Time.get_unix_time_from_system()
+	Secrets.sync(profile)          # a completion milestone reached since the last save is paid here, once
 	var f := FileAccess.open(slot_file(slot, "tmp"), FileAccess.WRITE)
 	if f == null:
 		push_warning("save failed: %s" % FileAccess.get_open_error())
@@ -277,6 +280,8 @@ func _unpack(v: Dictionary) -> void:
 func _migrate(v: Dictionary) -> Dictionary:
 	var from: int = int(v.get("version", 0))
 	_unpack(v)
+	if not (v.get("completion") is Dictionary):
+		Secrets.backfill(v)        # a journey from before secrets and completion: credit the roads it has walked
 	var base := default_profile()
 	for k in base:
 		if not v.has(k):
@@ -352,6 +357,10 @@ func _migrate(v: Dictionary) -> Dictionary:
 		var look: String = str(v.cosmetics[slot_name].get("look_as", "")) if v.cosmetics[slot_name] is Dictionary else ""
 		if look != "" and (not v.inventory.has(look) or Db.item(look).get("slot", "") != slot_name):
 			v.cosmetics[slot_name].erase("look_as")
+	Secrets.tidy(v)
+	for foe_id in v.defeated:
+		if not Db.foes.has(foe_id):
+			Secrets.challenger(str(foe_id))      # a hidden challenger this journey has beaten: known again
 	v.version = SAVE_VERSION
 	return v
 
@@ -646,6 +655,8 @@ func shop_progress() -> int:
 ## Has the road been walked far enough for Orren to stock this (a guardian ended, or enough regions cleared)?
 func shop_unlocked(it: Dictionary) -> bool:
 	var u: Dictionary = it.get("unlock", {})
+	if profile.get("completion", {}).get("shop", []).has(it.get("id", "")):
+		return true                 # a side mission's reward: Orren stocks it whatever the road says
 	if u.has("boss"):
 		return profile.defeated.has(u.boss)
 	return int(u.get("cleared", 0)) <= shop_progress()
@@ -759,6 +770,7 @@ func _chest_flag(o: Dictionary) -> String:
 	return "chest_%s_%d_%s" % [run.region, run.stage, o.label]
 
 func advance_stage() -> bool:
+	Secrets.mark_stop(str(run.region), int(run.stage), profile)
 	run.stage += 1
 	return run.stage < run_region().stages.size()
 
@@ -892,6 +904,7 @@ func complete_region() -> bool:
 	var first: bool = not profile.cleared.has(id)
 	if first:
 		profile.cleared.append(id)
+	Secrets.mark_stop(id, int(run.get("stage", 0)), profile)
 	run = {}
 	save()
 	profile_changed.emit()
@@ -929,7 +942,7 @@ func find_lore(region_id: String, stage: int) -> Array:
 
 ## Each condition of a task as [have, need, noun].
 func _quest_parts(id: String) -> Array:
-	var need: Dictionary = Db.quest_by_id[id].need
+	var need: Dictionary = Secrets.quest_def(id).need
 	var parts: Array = []
 	if need.has("defeated"):
 		var n := 0
@@ -947,10 +960,11 @@ func _quest_parts(id: String) -> Array:
 		parts.append([mini(profile.lore.size(), int(need.lore)), int(need.lore), "records"])
 	if need.has("combos"):
 		parts.append([mini(profile.combos.size(), int(need.combos)), int(need.combos), "sequences"])
+	parts.append_array(Secrets.quest_parts(need, profile))      # what only side missions ask: materials, deeds, secrets
 	return parts
 
 func quest_ready(id: String) -> bool:
-	if not Db.quest_by_id.has(id):
+	if Secrets.quest_def(id).is_empty():
 		return false
 	for part in _quest_parts(id):
 		if part[0] < part[1]:
@@ -958,7 +972,7 @@ func quest_ready(id: String) -> bool:
 	return true
 
 func quest_progress(id: String) -> String:
-	if not Db.quest_by_id.has(id):
+	if Secrets.quest_def(id).is_empty():
 		return ""
 	if profile.quests_done.has(id):
 		return "Done"
@@ -971,7 +985,8 @@ func quest_progress(id: String) -> String:
 func claim_quest(id: String) -> bool:
 	if profile.quests_done.has(id) or not quest_ready(id):
 		return false
-	var reward: Dictionary = Db.quest_by_id[id].reward
+	var reward: Dictionary = Secrets.quest_def(id).reward
+	Secrets.settle_quest(Secrets.quest_def(id), profile)       # materials handed over; a finish, a title, a blade stocked
 	profile.gold += int(reward.get("gold", 0))
 	profile.shards += int(reward.get("shards", 0))
 	if reward.has("item") and not grant_item(str(reward.item)):
@@ -1640,7 +1655,7 @@ func _cosmetic_set(slot_name: String, key: String, value: String) -> void:
 	profile_changed.emit()
 
 func set_finish(slot_name: String, finish: String) -> bool:
-	if not Db.EQUIP_SLOTS.has(slot_name) or not Db.equipment.finishes.has(finish):
+	if not Db.EQUIP_SLOTS.has(slot_name) or not finishes_available().has(finish):
 		return false
 	_cosmetic_set(slot_name, "finish", finish)
 	return true
@@ -1676,3 +1691,39 @@ func appearance_loadout(p: Dictionary = profile) -> Dictionary:
 		var id := appearance(slot_name, p)
 		out[slot_name] = id if id != "" else null
 	return out
+
+# ================================================================ secrets, side missions, completion (rules in Secrets)
+## How much of the kingdom has been seen: {pct, categories, remains, regions [{id, name, pct, unlocked, categories,
+## remains}], milestones}. `remains` are spoiler-free lines about what is still missing there. Reads only.
+func completion() -> Dictionary:
+	return Secrets.completion(profile)
+
+## Finds a secret, once: {} if unknown or already found, else {id, name, found, lines}. Saved at once.
+func find_secret(id: String) -> Dictionary:
+	return Secrets.find(id)
+
+func secret_found(id: String) -> bool:
+	return Secrets.found(id, profile)
+
+## The Journal's tasks: the eight, then the side missions offered so far.
+func journal_quests() -> Array:
+	return Secrets.journal_quests(profile)
+
+## Every finish that can be chosen: the four everyone has, then those earned ({id: name}).
+func finishes_available() -> Dictionary:
+	var out: Dictionary = Db.equipment.finishes.duplicate()
+	for id: String in profile.get("completion", {}).get("finishes", []):
+		out[id] = Secrets.label_of("finish", id)
+	return out
+
+## The title the knight goes by ("" for none), and choosing among those earned.
+func title() -> String:
+	var id := str(profile.get("completion", {}).get("title", ""))
+	return Secrets.label_of("title", id) if id != "" else ""
+
+func set_title(id: String) -> bool:
+	if id != "" and not profile.get("completion", {}).get("titles", []).has(id):
+		return false
+	profile.completion.title = id
+	save()
+	return true

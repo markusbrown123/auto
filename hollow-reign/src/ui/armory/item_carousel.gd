@@ -45,6 +45,7 @@ var _nodes := {}                  # entry key -> Node3D (built piece)
 var _recent: Array = []           # keys, least recently used first
 var _placed := {}                 # key -> true for pieces in the world this frame
 var _was_settled := true
+var _sway_t := 0.6
 
 func _init() -> void:
 	clip_contents = true
@@ -232,6 +233,7 @@ func _process(delta: float) -> void:
 	_clock += delta
 	if not Game.settings.reduce_motion:
 		spin = wrapf(spin + delta * 0.55, -PI, PI)
+		_sway_t += delta * 0.8
 	if not _dragging and not _was_settled:
 		# a critically damped spring to the resting item: carries the flick's speed in, never overshoots twice
 		var k := 150.0
@@ -301,7 +303,8 @@ func _layout() -> void:
 		var pivot: Node3D = node.get_node("Tilt/Pivot")
 		# the middle piece turns; a neighbour rests at a three-quarter view and eases into the turn as it arrives
 		var near := clampf(1.0 - absf(o), 0.0, 1.0)
-		pivot.rotation.y = lerp_angle(0.5, spin, near * near)
+		# (a blade sways across its flat rather than going round: edge-on it is only a line)
+		pivot.rotation.y = lerp_angle(0.5, ItemModel.SWAY * sin(_sway_t) if str(e.slot) == "weapon" else spin, near * near)
 	for k: String in _placed:
 		if not seen.has(k):
 			_unplace(k)
@@ -387,7 +390,7 @@ func _draw_over() -> void:
 			var na := a * (1.0 - near / 0.75)
 			if w > 60.0:
 				_over.draw_string(font, c + Vector2(-w * 0.5, size.y * 0.47), _fit_text(font, str(e.name), w, 20), HORIZONTAL_ALIGNMENT_CENTER, w, 20, Color(e.color, na))
-		var top := c + Vector2(0, -size.y * 0.5 + 6.0 + 16.0 * (1.0 - s))
+		var top := c + Vector2(0, size.y * 0.5 - 34.0)       # (under the piece: the top of the row belongs to the screen's heading)
 		if e.get("equipped", false):
 			if near > 0.6:
 				var tw := 118.0

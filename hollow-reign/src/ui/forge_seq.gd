@@ -54,7 +54,7 @@ func _place(mod) -> void:
 	var g := ItemModel.gear_id(item)
 	if slot == "weapon" and g != "":
 		var info: Dictionary = GearModel.info(g)
-		var k: float = 0.8 * minf(1.0, 1.05 / (float(info.get("tip", 0.9)) + float(info.get("pommel", 0.1))))
+		var k: float = 0.9 * minf(1.0, 1.05 / (float(info.get("tip", 0.9)) + float(info.get("pommel", 0.1))))
 		var sword := ItemModel.gear_sword(g, mod if mod is Dictionary else ItemModel.gear_mod(item))
 		if sword:
 			# along the anvil's face, the flat of the blade up
@@ -132,7 +132,7 @@ func _ready() -> void:
 	_flash.position = Vector3(0.05, 0.35, 0.15)
 	top.add_child(_flash)
 	_cam = [backdrop.cam_pos, backdrop.cam_look]
-	backdrop.move_camera(SPOT + Vector3(0.5, 1.4, 1.3), SPOT + Vector3(0.25, 0.8, 0.0), bool(Game.settings.reduce_motion))
+	backdrop.move_camera(SPOT + Vector3(0.42, 1.42, 0.92), SPOT + Vector3(0.2, 0.86, 0.0), bool(Game.settings.reduce_motion))
 	var m2 := UI.margin(get_viewport(), 10)
 	add_child(m2)
 	_hint = UI.label("Tap to skip", 22, UI.DIM)

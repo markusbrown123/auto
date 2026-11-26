@@ -10,6 +10,7 @@ var dark := false
 var mod = null                    # a forge state to show instead of the profile's ({blade_tier, grip_tier, ore, keen})
 var dist := 2.3                   # camera distance; the piece is about 1.3 units long
 var spin_speed := 0.5
+var upright := false              # a tall, narrow stage: blades stand nearly on end and the camera steps back to fit them
 var has_piece := false
 var _vp: SubViewport
 var _view: TextureRect
@@ -20,6 +21,8 @@ var _touched := false
 var _want := false
 var _paths: Array = []
 var _built := ""
+var _sway := false                # blades turn to and fro across their flat instead of all the way round
+var _clock := 0.0
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
@@ -97,6 +100,9 @@ func _make() -> void:
 	if _piece:
 		_vp.add_child(_piece)
 		has_piece = true
+		_sway = str(Db.item(item_id).get("slot", "")) == "weapon"
+		if upright and _sway:
+			(_piece.get_node("Tilt") as Node3D).rotation.z *= 0.35
 	queue_redraw()
 
 func _gui_input(e: InputEvent) -> void:
@@ -111,9 +117,11 @@ func _process(delta: float) -> void:
 	if _piece == null:
 		return
 	if not _touched and not Game.settings.reduce_motion:
-		_yaw = wrapf(_yaw + delta * spin_speed, -PI, PI)
+		_clock += delta
+		# a blade seen edge-on is a line: it sways across its flat, where the engraving is; everything else goes round
+		_yaw = ItemModel.SWAY * sin(_clock * spin_speed * 1.6 + 0.6) if _sway else wrapf(_yaw + delta * spin_speed, -PI, PI)
 	(_piece.get_node("Tilt/Pivot") as Node3D).rotation.y = _yaw
-	_cam.position = Vector3(0, 0, dist)
+	_cam.position = Vector3(0, 0, dist * (1.2 if upright else 1.0))
 
 func _draw() -> void:
 	# a pool of light under the piece, in the item's rank colour; a medallion when there is nothing to turn

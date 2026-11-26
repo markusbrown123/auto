@@ -100,6 +100,8 @@ func start_training() -> void:
 	var d := Duel.new()
 	_swap(d)
 	d.setup("ashen_sentinel", {"training": true})
+	if _args.has("showcase"):
+		d.add_child(Showcase.new(d, _args.showcase))
 	d.hud.pause_pressed.connect(func():
 		Overlays.pause(d, func(): pass, func(): _fade_then(show_sanctuary)))
 
@@ -135,6 +137,15 @@ func start_duel(o: Dictionary) -> void:
 	if Game.settings.cine and str(o.foe) == "ashen_sentinel" and CineDuel.available():
 		start_cine_duel(o)
 		return
+	if not Game.profile.tutorial_done and not _args.has("bot"):
+		# first fight: learn by doing against a foe that cannot kill you, then the real thing
+		Game.profile.tutorial_done = true
+		Game.save()
+		var l := Duel.new()
+		_swap(l)
+		l.setup(o.foe, {"lesson": true, "skip_intro": true})
+		l.finished.connect(func(_w, _s): _fade_then(func(): start_duel(o)))
+		return
 	var d := Duel.new()
 	_swap(d)
 	var duel_opts := {"start_hp": Game.run.hp, "ng": Game.profile.ng}
@@ -146,16 +157,7 @@ func start_duel(o: Dictionary) -> void:
 		if d.stage == Duel.Stage.FIGHT:
 			Overlays.pause(d, func(): pass, func(): d.sim._damage_player(999999.0, true)))
 	d.finished.connect(func(won, sim): _duel_done(d, o, won, sim))
-	if not Game.profile.tutorial_done:
-		Game.profile.tutorial_done = true
-		d.set_process(false)
-		Overlays.message(d, "The Old Lessons", [
-			"Swipe to cut — but only when your foe is open. A raised guard turns every blow.",
-			"Swipe against an incoming strike to parry it. The ring closes as the blow lands.",
-			"The arrows step aside. The shield holds, while your stamina lasts.",
-			"When a foe is open, a bright seam shows in its guard. Cut along it. Three cuts in a pattern land a named blow.",
-			"The burst fills as you fight: tap it to break your foe open. The flame mends you when it is full.",
-			["A perfect parry breaks their guard. That is your moment.", UI.GOLD]], "Begin", func(): d.set_process(true))
+
 
 ## The experimental footage-driven duel. Rewards, saves and progression go through the same path as the real-time one.
 func start_cine_duel(o: Dictionary) -> void:
@@ -233,6 +235,9 @@ func _dev_boot() -> void:
 		_swap(d)
 		d.setup(_args.demo, {"autoplay": true, "seed": int(_args.get("seed", "3")), "skip_intro": _args.has("skip_intro"), "bot_style": int(_args.get("bot", "3"))})
 		d.finished.connect(func(won, _s): print("duel finished won=", won))
+		if _args.has("showcase"):
+			d.bot = null
+			d.add_child(Showcase.new(d, _args.showcase))
 		if _args.has("snap"):
 			# contact review: save a frame at each named moment (--snap=parried,blocked,hit,dodged,boss_hit --snapdir=dir)
 			var want: PackedStringArray = str(_args.snap).split(",")

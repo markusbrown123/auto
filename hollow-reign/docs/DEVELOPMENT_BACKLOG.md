@@ -21,15 +21,15 @@ Update this file in the same commit as the work.
 | A13 | Animation library research (`docs/ANIMATION_SOURCES.md`) | DONE — free CC0 Quaternius UAL downloaded to `art/anim_src/`; paid top-ups listed for the owner |
 | A14 | Import chosen library: bone map, bake, directional cuts, parries, blocks, rolls, reactions, stances | DOING — 41 clips baked skeleton-independently; body motion live for cuts, steps, rolls, hits, stagger, stance, walk, death. Sword arm still IK. Missing from free sets: 8 labelled directions, directional parries, high/low blocks, greatsword and dual sets |
 | A15 | Left/right dodge rolls (deeper than sidestep) | DONE — second tap on the same pad; tests; needs a capture |
-| A16 | Each of the 16 combos visually distinct | TODO |
-| A17 | Authored clips verified on female knight and each boss (`--screen=animtest --model=…`) | TODO |
+| A16 | Each of the 16 combos visually distinct | DOING — finishing cut uses a body clip per combo kind (overhead, lunge, shield dash, long swing); needs captures per combo |
+| A17 | Authored clips verified on female knight and each boss (`--screen=animtest --model=…`) | DOING — clean on knight_f, Sentinel, Executioner, Widow, Gravewarden; Beast, Frost King, Huntsman, Monarch, Devourer unchecked |
 | A18 | Sentinel: richer attack set, own movement style | DONE — 20 patterns, three phases, drill/thrust/give-ground identity; balance tests pass |
-| A19 | Subtle temporary sword trails; replace drawn parry arrow with blade glint | TODO |
+| A19 | Subtle temporary sword trails; replace drawn parry arrow with blade glint | DOING — trails exist; seam and parry prompts shrunk and dimmed; blade glint not done |
 | A20 | Camera redesign for the duel | DOING — camera now tracks the knight's real position and sits wider |
 | A21 | Courtyard art pass | TODO |
-| A22 | Visual regression test (golden captures, tolerance) | TODO |
-| A23 | Triangle reduction / LOD | TODO |
-| A24 | Onboarding as an interactive lesson | TODO |
+| A22 | Visual regression test (golden captures, tolerance) | DOING — `tools/visual_test.sh` written; golden images not yet captured |
+| A23 | Triangle reduction / LOD | DOING — duel frame 548k → 402k triangles via LOD threshold and scenery bias; characters (32k each) not yet reduced |
+| A24 | Onboarding as an interactive lesson | DONE — five do-it-once steps before the first fight; rule test; needs a capture |
 
 ## B. Audio
 | # | Task | Status |
@@ -61,7 +61,7 @@ Update this file in the same commit as the work.
 ## E. Delivery
 | # | Task | Status |
 |---|---|---|
-| E1 | 20 demonstration recordings | TODO |
+| E1 | 20 demonstration recordings | DOING — `tools/record.sh`, `--showcase=` driver; files land in `marketing/demos/` |
 | E2 | iOS export preparation | BLOCKED — needs a Mac with Xcode and an iPhone (owner) |
 | E3 | Device performance | BLOCKED — same |
 | E4 | Audio sign-off | BLOCKED — needs the owner to listen |

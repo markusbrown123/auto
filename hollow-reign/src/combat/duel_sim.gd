@@ -96,6 +96,8 @@ const SURGE_STUN := 2.6
 ## The combo library (data/combos.json), filtered to the weapon in hand. Set by setup().
 var combos: Array = []
 var training := false
+var lesson_fights := true    # in a lesson: false holds the foe open (cutting practice), true lets it attack
+var lesson := false          # onboarding: the foe attacks plainly and nothing can die
 var _last_cut_t := 0.0
 var opening_from := ""        # what earned the current opening: "parry", "perfect", "dodge", "break", "surge", ""
 var p_block_since := -9.0     # when the shield went up, for timed blocks
@@ -126,7 +128,10 @@ func setup(player: Dictionary, boss: Dictionary, seed_value: int = 0, opts: Dict
 	for c in opts.get("combos", []):
 		if c.cls.is_empty() or c.cls.has(str(pl.get("weapon_cls", "sword"))):
 			combos.append(c)
-	if opts.get("training", false):
+	if opts.get("lesson", false):
+		lesson = true
+		lesson_fights = false
+	if opts.get("training", false) or lesson:
 		# practice: the foe stands open and cannot be killed
 		b_state = B.RECOVER
 		b_t = 1.0e9
@@ -224,7 +229,15 @@ func input_swipe(dir: String) -> void:
 	_spend(pl.swing_cost)
 	p_swing = {"dir": dir, "contact": pl.swing_time * 0.6, "landed": false}
 	_set_p(P.SWING, pl.swing_time)
-	_emit(&"player_swing", {"dir": dir, "time": pl.swing_time})
+	# if this cut would complete a combo, say which kind, so the body can throw its signature finish
+	var finish := ""
+	if boss_open():
+		var want: Array = p_hist + [dir]
+		for c in combos:
+			var seq: Array = c.seq
+			if want.size() >= seq.size() and want.slice(want.size() - seq.size()) == seq:
+				finish = str(c.kind)
+	_emit(&"player_swing", {"dir": dir, "time": pl.swing_time, "finish": finish})
 
 func _gain_surge(v: float) -> void:
 	var was := surge
@@ -501,7 +514,7 @@ func _tick_boss(dt: float) -> void:
 			if b_t <= 0.0:
 				_resolve_strike()
 		B.RECOVER, B.STAGGER:
-			if training:
+			if training and (not lesson or not lesson_fights):
 				b_t = 1.0e9
 				if not p_hist.is_empty() and time - _last_cut_t > 1.5:
 					p_hist.clear()      # a pause starts the sequence over
@@ -541,6 +554,11 @@ func combo_weight(c: Dictionary) -> float:
 	return w
 
 func _choose_combo() -> Dictionary:
+	if lesson:
+		# the lesson foe throws one plain, slow cut, over and over
+		for c in phase().combos:
+			if c.attacks.size() == 1 and not c.attacks[0].unblockable and c.get("range", "near") != "far":
+				return c
 	for h in habits:
 		habits[h] *= 0.85
 	var want := "far" if b_far else "near"
@@ -714,6 +732,8 @@ func _apply_element(a: Dictionary, scale: float) -> void:
 
 func _damage_player(raw: float, quiet: bool = false) -> void:
 	var dmg: float = raw if quiet else raw * (1.0 - float(pl.mitigation))
+	if lesson:
+		dmg = minf(dmg, maxf(0.0, pl.hp - 1.0)) * 0.0      # nobody is hurt while learning
 	pl.hp = maxf(0.0, pl.hp - dmg)
 	stats.taken += dmg
 	if not quiet:

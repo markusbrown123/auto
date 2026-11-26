@@ -47,6 +47,35 @@ var p_back_t := 0.0
 var p_side := 0.0             # sideways distance the knight is off the line, mid-sidestep
 var p_side_owed := 0.0        # sidestep still to be taken
 var training := false
+## Onboarding: learn by doing. Each step waits for the thing itself to be done once.
+var _lesson := -1
+var _lesson_count := 0
+const LESSONS := [
+	"Swipe across your foe to cut. Any direction. Land three.",
+	"Now left, then right, without a pause. Some patterns end in a harder blow.",
+	"It will cut at you. Swipe INTO the blow as it lands to parry it.",
+	"Tap an arrow to step aside. Tap it twice to roll.",
+	"Hold the shield to block. Raise it at the last instant and it costs nothing.",
+]
+func _lesson_done(step: int) -> void:
+	if _lesson != step:
+		return
+	_lesson += 1
+	_lesson_count = 0
+	Sfx.play("loot", -6.0, 1.2)
+	if _lesson >= LESSONS.size():
+		_lesson = -1
+		hud.lesson_text("")
+		hud.toast("THE OLD LESSONS HOLD", UI.GOLD, 1.4)
+		await get_tree().create_timer(1.8).timeout
+		_result_sent = true
+		stage = Stage.DONE
+		finished.emit(true, sim)      # no death, no last words: the real fight follows
+		return
+	if _lesson == 2:
+		sim.lesson_fights = true
+		sim.b_t = 0.8
+	hud.lesson_text(LESSONS[_lesson])
 var foot := {"circle": 0.08, "keep": 0.7}
 var _can_step := true
 var _voice_key := ""
@@ -122,7 +151,8 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	var o := opts.duplicate()
 	o["assist"] = 1.3 if Game.settings.assist else 1.0
 	o["combos"] = Db.combos
-	training = bool(opts.get("training", false))
+	training = bool(opts.get("training", false)) or bool(opts.get("lesson", false))
+	_lesson = 0 if opts.get("lesson", false) else -1
 	sim.setup(Game.stats(), foe, int(opts.get("seed", 0)), o)
 	sim.ev.connect(_on_ev)
 	if opts.get("autoplay", false):
@@ -134,7 +164,11 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	player_rig.footsteps = true
 	if foe_rig is FighterRig:
 		foe_rig.footsteps = true
-	if training:
+	if _lesson >= 0:
+		hud.show_training()
+		hud.lesson_text(LESSONS[0])
+		foe_rig.recover()
+	elif training:
 		hud.show_training()
 		foe_rig.recover()
 
@@ -516,7 +550,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		&"player_swing":
 			# step in until the blade will reach the body
 			p_back_t = clampf(player_rig.reach() + 0.18 * float(foe.rig.scale) - gap - f_back, -1.1, 0.3)
-			player_rig.swing(DuelSim.dir_vec(d.dir), d.time)
+			player_rig.swing(DuelSim.dir_vec(d.dir), d.time, str(d.get("finish", "")))
 			Sfx.play("swing", -4.0, 1.25 - float(d.time) * 0.8)
 		&"player_parry_swing":
 			player_rig.parry(DuelSim.dir_vec(d.dir))
@@ -574,6 +608,12 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			shake(0.22 if crit else 0.12)
 			Game.haptic(18 if crit else 10, 0.5)
 			hud.combo(int(d.get("combo", 1)))
+			if _lesson == 0:
+				_lesson_count += 1
+				if _lesson_count >= 3:
+					_lesson_done(0)
+			elif _lesson == 1 and str(d.get("named", "")) != "":
+				_lesson_done(1)
 			if training:
 				hud.training_cuts(sim.p_hist.slice(maxi(0, sim.p_hist.size() - 5)), str(d.get("named", "")))
 			if str(d.get("named", "")) != "":
@@ -663,6 +703,8 @@ func _on_strike(d: Dictionary) -> void:
 		var a0: Vector3 = foe_rig.weapon_r.global_position
 		var a1: Vector3 = foe_rig.blade_tip()
 		meet = a0.lerp(a1, 0.72)
+	if _lesson >= 2:
+		_lesson_done({"parried": 2, "dodged": 3, "blocked": 4}.get(str(d.result), -9))
 	match d.result:
 		"parried":
 			player_rig.guard()

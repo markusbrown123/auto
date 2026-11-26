@@ -449,6 +449,16 @@ func t_meters_combos() -> void:
 	s = mk("ashen_sentinel")
 	s.input_dodge(1); run_for(s, 0.1); s.input_dodge(-1)
 	ok(not s.p_roll, "the other side does not roll")
+	# the first lesson: open until told to fight, then one plain cut, and nobody is hurt
+	s = mk("ashen_sentinel", 7, {}, {"lesson": true})
+	run_for(s, 5.0)
+	ok(s.b_state == DuelSim.B.RECOVER, "the lesson foe starts open")
+	s.lesson_fights = true
+	s.b_t = 0.5
+	var seen := {}
+	s.ev.connect(func(n, d): if n == &"boss_combo": seen[d.id] = true)
+	run_for(s, 25.0)
+	ok(seen.size() == 1 and s.pl.hp == s.pl.max_hp and not s.over, "then it throws one plain cut and nobody is hurt")
 	# training ground
 	s = mk("ashen_sentinel", 7, {}, {"training": true})
 	hits.clear()

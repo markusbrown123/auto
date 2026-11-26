@@ -513,7 +513,12 @@ func telegraph(dir: Vector2, windup: float, swing: float, kind: String = "slash"
 	_root_target = Vector3(0, 0, 0.18)
 
 ## Player attack: a short rise then the cut. Contact is at 60% of `time`.
-func swing(dir: Vector2, time: float) -> void:
+## `finish` names the kind of combo this cut completes ("" for an ordinary cut): each kind has its own body.
+var _finish := ""
+const FINISH_CLIP := {"Heavy": "sword_attack", "Guard-breaking": "shield_dash", "Counter": "lunge", "Armour-piercing": "lunge",
+	"Critical": "cut_c", "Finisher": "cut_c", "Fast": ""}
+func swing(dir: Vector2, time: float, finish: String = "") -> void:
+	_finish = finish
 	_arc_dir = Vector3(dir.x * mirror, dir.y, 0).normalized()
 	_swing = time * 0.5
 	_go(Mode.WINDUP, time * 0.6)
@@ -522,6 +527,7 @@ func swing(dir: Vector2, time: float) -> void:
 func parry(dir: Vector2) -> void:
 	_arc_dir = Vector3(dir.x * mirror, dir.y, 0).normalized()
 	_swing = 0.16
+	_finish = ""
 	_go(Mode.STRIKE, 0.16)
 	_theta = -0.9
 
@@ -977,9 +983,12 @@ func _pick_clip() -> void:
 				skin.clip_travel = 0.0      # the duel moves the body; the clip only shapes it
 			Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW:
 				n = "sword_attack" if _arc_dir.y < -0.7 else ("cut_a" if _arc_dir.x < 0.0 else "cut_b")
+				var sig: String = FINISH_CLIP.get(_finish, "")
+				if sig != "" and SkinDriver.has_clip(sig):
+					n = sig          # a combo's last cut is thrown with its own, larger body movement
 				var u := clampf(_t / maxf(_dur, 0.01), 0.0, 1.0)
 				var p := u * 0.4 if mode == Mode.WINDUP else (0.4 + u * 0.25 if mode == Mode.STRIKE else 0.65 + u * 0.35)
-				t = p * SkinDriver.clip_length(n); w = 0.8
+				t = p * SkinDriver.clip_length(n); w = 0.65
 			Mode.GUARD:
 				if _walk_amount > 0.01 and not combat_steps:
 					n = "walk"; t = _walk_phase / TAU * SkinDriver.clip_length("walk") / WALK_CYCLES; w = _walk_amount

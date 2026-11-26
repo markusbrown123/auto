@@ -121,11 +121,11 @@ class Cue extends Control:
 		var col := Color("#d23a2a") if danger else UI.GOLD
 		var u := clampf(left / maxf(total, 0.01), 0.0, 1.0)
 		var near := left < 0.3
-		var a := 0.55 if not near else 1.0
+		var a := 0.4 if not near else 0.95
 		col.a = a
-		var r0 := 34.0
+		var r0 := 24.0
 		draw_arc(c, r0, 0, TAU, 40, Color(col.r, col.g, col.b, a * 0.5), 2.0, true)
-		draw_arc(c, r0 + 70.0 * u, 0, TAU, 48, col, 2.5 if not near else 4.0, true)
+		draw_arc(c, r0 + 46.0 * u, 0, TAU, 48, col, 2.5 if not near else 4.0, true)
 		if kind == "parry":
 			var d := Vector2(vec.x, -vec.y)
 			var tip := c + d * 22.0
@@ -167,15 +167,15 @@ class Rift extends Control:
 		var d := Vector2(vec.x, -vec.y)
 		var n := Vector2(-d.y, d.x)
 		var grow := minf(_pulse / 0.12, 1.0)
-		var len := 92.0 * grow + _burst * 30.0
+		var len := 58.0 * grow + _burst * 24.0      # a seam of light in the guard, not a signpost
 		var a := 0.75 + 0.25 * sin(_pulse * 9.0)
 		var col := Color(1.0, 0.86, 0.5, a)
-		draw_line(c - d * len, c + d * len, Color(1.0, 0.6, 0.2, a * 0.25), 16.0, true)
-		draw_line(c - d * len, c + d * len, col, 4.0, true)
+		draw_line(c - d * len, c + d * len, Color(1.0, 0.6, 0.2, a * 0.18), 9.0, true)
+		draw_line(c - d * len, c + d * len, col, 2.0, true)
 		draw_line(c - d * len, c + d * len, Color(1, 1, 1, a), 1.5, true)
 		var tip := c + d * (len + 6.0)
-		draw_polyline(PackedVector2Array([tip - d * 20.0 + n * 14.0, tip, tip - d * 20.0 - n * 14.0]), col, 4.0, true)
-		draw_circle(c - d * len, 5.0, col)
+		draw_polyline(PackedVector2Array([tip - d * 11.0 + n * 7.0, tip, tip - d * 11.0 - n * 7.0]), col, 2.0, true)
+		draw_circle(c - d * len, 2.5, col)
 
 var root: Control
 var rift: Rift
@@ -417,6 +417,7 @@ func update_bars(sim: DuelSim, dt: float) -> void:
 ## Training ground: the cuts made so far, and the name of whatever they completed.
 var _train_seq: SeqView
 var _train_name: Label
+var _train_head: Label
 func show_training() -> void:
 	var v := VBoxContainer.new()
 	v.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -429,12 +430,19 @@ func show_training() -> void:
 	var head := UI.label("TRAINING GROUND  ·  cut freely, pause to leave", 15, UI.DIM)
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)
+	_train_head = head
 	_train_seq = SeqView.new([], 34.0, UI.BONE)
 	_train_seq.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	v.add_child(_train_seq)
 	_train_name = UI.label("", 18, UI.GOLD, "bold")
 	_train_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(_train_name)
+
+func lesson_text(t: String) -> void:
+	if _train_head:
+		_train_head.text = t
+		_train_head.add_theme_font_size_override("font_size", 22)
+		_train_head.add_theme_color_override("font_color", UI.BONE)
 
 func training_cuts(cuts: Array, named: String) -> void:
 	if _train_seq:

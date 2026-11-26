@@ -159,6 +159,12 @@ static func scenery(parent: Node3D, path: String, height: float, pos: Vector3, y
 	holder.rotation_degrees.y = yaw
 	holder.add_child(root)
 	root.scale = Vector3.ONE * k
+	# scenery is background: drop to coarser detail levels early, and only large or near pieces cast shadows
+	var far := pos.length() > 16.0
+	for mi in root.find_children("*", "MeshInstance3D", true, false):
+		(mi as MeshInstance3D).lod_bias = 0.3 if far else 0.55
+		if far and height < 3.0:
+			(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.position = -Vector3((lo2.x + hi2.x) * 0.5, lo2.y, (lo2.z + hi2.z) * 0.5) * k
 	return holder
 

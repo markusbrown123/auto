@@ -45,6 +45,17 @@ Scope is the first encounter only (Fallen Courtyard, Ashen Sentinel), per the ov
 - **Tests.** 2,654 rule checks, 83 cinematic checks, integration and touch suites pass. The cinematic playback suite was not re-run to completion in this pass.
 - **Not done from the brief:** directional sword-cut clips (none owned), blade-to-blade parry contact, boss rework, voice recasting, sound and music overhaul, six-bus mix, camera redesign, courtyard art pass, onboarding, LODs, the demonstration recordings.
 
+## Continuous pass 2026-11-26 (after the "finish the game" brief)
+Backlog with per-item status: `docs/DEVELOPMENT_BACKLOG.md`. Resume instructions: `CLAUDE.md`.
+- **Animation.** Free CC0/MIT libraries (Quaternius UAL 1+2, Explosive free sample) researched, downloaded and baked into one skeleton-independent library of 41 clips (0.8 MB). Body motion for cuts, sidesteps, rolls, hit reactions, stagger, combat stance, walk and death now comes from authored clips on both knights and the bosses checked so far; the sword arm stays on IK so each cut follows the swiped direction. Free sets do not contain eight labelled cut directions, directional parries, high/low shield blocks, or real greatsword and dual-blade sets (`docs/ANIMATION_SOURCES.md` lists paid options and prices).
+- **Contact.** Fighters step to striking distance before each blow; a parried or blocked blade stops at the contact point; the knight's blade is pinned across it; the shield goes to where the blow lands. Seen in `--snap=` captures for parries and hits.
+- **Combat.** Dodge rolls (second tap), Sentinel third phase and drill patterns (20 patterns), a rule trait for each other guardian, combo finishers with their own body movement, interactive first-fight lesson.
+- **Review.** An independent code review found twelve defects (combo re-cashing, free timed blocks, roll invulnerability, stuck blade pins, discarded clip legs and others); all fixed, with regression tests for the exploits. See `docs/BUG_REGISTER.md` 22–32.
+- **Audio.** Six mix buses with trims, master limiter, dialogue ducking, footfalls on foot plants. Voice bible, measured catalogue of 114 voices, and a three-candidate audition reel for ten roles (`marketing/audition/casting/`). Nobody has listened to any of it.
+- **Scale.** Duel frame 548k → 402k triangles. Concept art for six region kits generated (42 images); their 3D models are being generated; kit layouts for all six regions are written and fall back to the old geometry until the models arrive.
+- **Tests.** 2,727 rule checks. All five suites passed before the review fixes; only the rule suite has been re-run since. Visual regression script written, golden images not yet captured.
+- **Recordings.** `marketing/demos/` (rendered offline in software).
+
 ## Experiment 2026-11-26: cinematic presentation
 A complete, playable test of prerecorded footage with live rules (the Ashen Sentinel in the Fallen Courtyard), plus a short hotspot-and-travel exploration example. Off by default; switch on in Settings. The real-time duel is unchanged. Full write-up, measurements and recommendation: `docs/CINEMATIC_COMBAT.md`. Short version: it works and is verified on desktop; it suits travel, intros, finishers and story scenes; the real-time duel remains the better choice for the fighting itself. Asset manifest: `docs/ASSET_MANIFEST.json` (`tools/asset_manifest.py`). Audition reels for the unheard voices and music: `marketing/audition/`.
 

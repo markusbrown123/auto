@@ -425,7 +425,7 @@ func _layout_forest_basic() -> void:
 		box(Vector3(0.02, 6.0, 0.02), p2 + Vector3(0, 3.1, 0), Look.flat(Color.BLACK))
 		fire(p2, 1.6, 7.0, false)
 
-func _layout_nave() -> void:
+func _layout_nave_basic() -> void:
 	for i in 7:
 		var z := 6.0 - i * 5.0
 		for sx: float in [-1.0, 1.0]:
@@ -460,7 +460,7 @@ func _layout_facade() -> void:
 		for k in 3:
 			window_glow(Vector3(sx * (6.0 + k * 2.2), 9.0, -17.95), Vector2(1.0, 5.0))
 
-func _layout_vault() -> void:
+func _layout_vault_basic() -> void:
 	for i in 6:
 		var z := 5.0 - i * 5.0
 		for sx: float in [-1.0, 1.0]:
@@ -478,7 +478,7 @@ func _layout_vault() -> void:
 	box(Vector3(2.5, 0.25, 4.3), Vector3(0, 1.1, -15), Look.stone(Color("#5a6660")), Vector3(0, 6, 0))
 	rubble(Vector3(-4, 0, -10), 6, 1.5)
 
-func _layout_hall() -> void:
+func _layout_hall_basic() -> void:
 	var ice := Look.flat(Color("#a8d0e8"), 0.12, 0.3)
 	for i in 7:
 		var z := 6.0 - i * 5.0
@@ -502,7 +502,7 @@ func _layout_hall() -> void:
 		sp.rotation_degrees.z = -sx * 14.0
 		fire(Vector3(sx * 4.5, 1.3, -6.0), 2.2)
 
-func _layout_throne() -> void:
+func _layout_throne_basic() -> void:
 	var gold := Look.flat(Color("#8a6e34"), 0.38, 0.9)
 	for i in 8:
 		var z := 8.0 - i * 5.0
@@ -526,7 +526,7 @@ func _layout_throne() -> void:
 	# a long, rotted carpet
 	box(Vector3(3.0, 0.02, 40.0), Vector3(0, 0.012, -8.0), Look.flat(Color("#2a0808"), 1.0))
 
-func _layout_crag() -> void:
+func _layout_crag_basic() -> void:
 	# a cliff-top eyrie: rock teeth, a nest of timber and bone, the sky all round
 	var bone := Look.flat(Color("#d8cfb8"), 0.7)
 	var rock := Look.stone(Color(theme.stone).darkened(0.15), 0.25, 0.9, "rock")
@@ -561,7 +561,7 @@ func _layout_crag() -> void:
 		var m := cyl(0.0, rng.randf_range(14, 26), rng.randf_range(20, 44), Vector3(rng.randf_range(-90, 90), 2.0, rng.randf_range(-110, -60)), Look.flat(Color(theme.horizon).darkened(0.45)), 5)
 		m.position.y = m.mesh.height * 0.5 - 14.0
 
-func _layout_abyss() -> void:
+func _layout_abyss_basic() -> void:
 	# the bottom of the kingdom: leaning name-stones, and a dark with shapes in it
 	var glowm := Look.glow(Color(theme.fire).darkened(0.2), 1.4)
 	for i in 14:
@@ -682,3 +682,157 @@ func tint(c: Color, amount: float, time: float = 1.5) -> void:
 	var tw := create_tween().set_parallel(true)
 	tw.tween_property(env, "fog_light_color", Color(theme.fog).lerp(c, amount), time)
 	tw.tween_property(env, "ambient_light_color", Color(theme.amb).lerp(c, amount * 0.6), time)
+
+
+# ================================================================ generated kits for the later regions
+## Each falls back to the primitive layout until its kit has been generated.
+func _kit(pre: String, first: String) -> bool:
+	return PropModel.exists("res://assets/models/env_%s_%s.glb" % [pre, first])
+
+func _glow(at: Vector3, color: Color, energy: float = 1.8, reach: float = 8.0) -> void:
+	var l := OmniLight3D.new()
+	l.light_color = color
+	l.light_energy = energy
+	l.omni_range = reach
+	l.omni_attenuation = 1.3
+	l.position = at
+	add_child(l)
+
+## The Cathedral of Ash: a burned nave, pillars marching to the altar behind the foe.
+func _layout_nave() -> void:
+	if not _kit("ca", "pillar"):
+		_layout_nave_basic()
+		return
+	sun.directional_shadow_max_distance = 55.0
+	for i in 6:
+		for sx: float in [-1.0, 1.0]:
+			prop("ca_pillar", 15.0, Vector3(sx * 8.5, 0, 10.0 - i * 6.5), 90.0 * i)
+			if i % 2 == 0:
+				prop("ca_window", 11.0, Vector3(sx * 14.5, 0, 8.0 - i * 6.5), 90.0 * sx)
+	prop("ca_altar", 6.5, Vector3(0, 0, -17.0), 0.0)
+	prop("ca_statue", 7.5, Vector3(-5.5, 0, -14.5), 15.0)
+	prop("ca_statue", 7.5, Vector3(5.5, 0, -14.5), -15.0)
+	prop("ca_bell", 4.2, Vector3(-5.8, 0, -3.5), 30.0)
+	prop("ca_censer", 4.6, Vector3(5.2, 0, -5.5), 0.0)
+	prop("ca_censer", 4.6, Vector3(-4.8, 0, 6.5), 0.0)
+	for i in 4:
+		prop("ca_pew", 1.5, Vector3(-5.2 + rng.randf_range(-0.4, 0.4), 0, 9.0 + i * 2.6), 180.0 + rng.randf_range(-12.0, 12.0))
+		prop("ca_pew", 1.5, Vector3(5.2 + rng.randf_range(-0.4, 0.4), 0, 9.0 + i * 2.6), 180.0 + rng.randf_range(-12.0, 12.0))
+	_glow(Vector3(0, 3.5, -15.5), Color(theme.fire), 2.4, 12.0)
+	_glow(Vector3(5.2, 2.6, -5.5), Color(theme.fire), 1.5, 7.0)
+	_glow(Vector3(-4.8, 2.6, 6.5), Color(theme.fire), 1.5, 7.0)
+
+## The Sunken Crypt: a flooded vault of tombs and corpse-light.
+func _layout_vault() -> void:
+	if not _kit("cr", "sarcophagus"):
+		_layout_vault_basic()
+		return
+	sun.directional_shadow_max_distance = 40.0
+	prop("cr_gate", 8.5, Vector3(0, 0, -15.0), 0.0)
+	for i in 5:
+		for sx: float in [-1.0, 1.0]:
+			prop("cr_pillar", 6.5, Vector3(sx * 7.5, 0, 9.0 - i * 6.0), 45.0 * i)
+			_glow(Vector3(sx * 7.2, 2.6, 9.0 - i * 6.0), Color(theme.fire), 0.9, 5.5)
+	prop("cr_arch", 7.5, Vector3(-12.0, 0, -6.0), 90.0)
+	prop("cr_arch", 7.5, Vector3(12.0, 0, -6.0), -90.0)
+	prop("cr_arch", 7.5, Vector3(0, 0, 16.0), 180.0)
+	for t in [[-4.8, -6.5, 20.0], [4.6, -7.5, -15.0], [-10.5, 2.0, 80.0], [10.5, 3.5, -75.0], [-4.0, 9.5, 10.0], [5.0, 10.5, 170.0]]:
+		prop("cr_sarcophagus", 2.3, Vector3(t[0], 0, t[1]), t[2])
+	prop("cr_coffins", 2.6, Vector3(-9.5, 0, -10.5), 30.0)
+	prop("cr_coffins", 2.6, Vector3(9.0, 0, 9.0), 200.0)
+	prop("cr_urns", 1.9, Vector3(6.2, 0, -3.0), 0.0)
+	prop("cr_urns", 1.9, Vector3(-6.5, 0, 4.5), 140.0)
+	for c in [Vector3(-3.6, 0, -5.0), Vector3(3.8, 0, -5.6), Vector3(-6.5, 0, 0.0), Vector3(6.6, 0, 6.0)]:
+		prop("cr_candelabra", 3.2, c, rng.randf() * 360.0)
+		_glow(c + Vector3(0, 2.8, 0), Color(theme.fire), 1.2, 6.0)
+
+## The Wyrm's Roost: a volcanic eyrie among the bones of older dragons.
+func _layout_crag() -> void:
+	if not _kit("ro", "spire"):
+		_layout_crag_basic()
+		return
+	sun.directional_shadow_max_distance = 70.0
+	for i in 14:
+		var a := TAU * i / 14.0 + 0.3
+		var d := rng.randf_range(17.0, 30.0)
+		prop("ro_spire", rng.randf_range(12.0, 26.0), Vector3(cos(a) * d, -0.5, sin(a) * d - 3.0), rng.randf() * 360.0)
+	prop("ro_skull", 7.0, Vector3(0.5, 0, -14.0), 0.0)
+	prop("ro_ribs", 8.0, Vector3(-11.0, 0, -6.0), 60.0)
+	prop("ro_ribs", 6.5, Vector3(12.0, 0, 4.0), -110.0)
+	prop("ro_arch", 9.0, Vector3(11.5, 0, -9.5), -40.0)
+	prop("ro_nest", 4.2, Vector3(-9.5, 0, 6.5), 0.0)
+	prop("ro_wreck", 4.8, Vector3(8.0, 0, 11.0), 150.0)
+	for b in [Vector3(-5.5, 0, -5.0), Vector3(5.8, 0, -4.4), Vector3(-6.5, 0, 9.5)]:
+		prop("ro_brazier", 2.6, b, rng.randf() * 360.0)
+		_glow(b + Vector3(0, 2.4, 0), Color(theme.fire), 2.0, 9.0)
+	_glow(Vector3(-9.5, 1.5, 6.5), Color("#ff8a3a"), 1.4, 6.0)
+
+## The Frozen Citadel: a king's hall under ice.
+func _layout_hall() -> void:
+	if not _kit("ci", "pillar"):
+		_layout_hall_basic()
+		return
+	sun.directional_shadow_max_distance = 55.0
+	prop("ci_throne", 6.5, Vector3(0, 0, -15.5), 0.0)
+	prop("ci_gate", 10.0, Vector3(0, 0, 18.0), 180.0)
+	for i in 5:
+		for sx: float in [-1.0, 1.0]:
+			prop("ci_pillar", 12.0, Vector3(sx * 8.0, 0, 10.0 - i * 6.2), 0.0)
+	for sx2: float in [-1.0, 1.0]:
+		prop("ci_wall", 7.5, Vector3(sx2 * 16.5, 0, -4.0), 90.0 * sx2)
+		prop("ci_wall", 7.5, Vector3(sx2 * 16.5, 0, 9.0), 90.0 * sx2)
+		prop("ci_statue", 7.0, Vector3(sx2 * 5.0, 0, -12.5), -20.0 * sx2)
+	for sh in [[-10.5, -9.0, 4.5], [11.0, 2.0, 3.6], [-9.5, 8.0, 3.0], [6.0, -8.5, 2.6]]:
+		prop("ci_shard", sh[2], Vector3(sh[0], 0, sh[1]), rng.randf() * 360.0)
+		_glow(Vector3(sh[0], 1.4, sh[1]), Color("#7fe0ff"), 1.0, 6.0)
+	for b in [Vector3(-4.6, 0, -5.5), Vector3(4.6, 0, -5.5), Vector3(-4.6, 0, 6.5), Vector3(4.6, 0, 6.5)]:
+		prop("ci_brazier", 3.6, b, 0.0)
+		_glow(b + Vector3(0, 3.2, 0), Color(theme.fire), 1.6, 8.0)
+
+## The Hollow Deep: the machine under the world, and what grows on it.
+func _layout_abyss() -> void:
+	if not _kit("de", "pillar"):
+		_layout_abyss_basic()
+		return
+	sun.directional_shadow_max_distance = 45.0
+	for i in 10:
+		var a := TAU * i / 10.0 + 0.15
+		var d := rng.randf_range(14.0, 24.0)
+		prop("de_pillar", rng.randf_range(16.0, 28.0), Vector3(cos(a) * d, -1.0, sin(a) * d - 2.0), rng.randf() * 360.0)
+	prop("de_conduit", 6.0, Vector3(-11.0, 0, -9.0), 35.0)
+	prop("de_conduit", 5.0, Vector3(12.0, 0, 6.0), 200.0)
+	prop("de_bridge", 5.5, Vector3(0.5, 0, -15.0), 0.0)
+	prop("de_husk", 3.2, Vector3(5.6, 0, -6.2), -30.0)
+	prop("de_husk", 3.2, Vector3(-6.0, 0, 7.0), 150.0)
+	for c in [[-5.0, -5.5, 3.8], [8.5, -2.0, 3.0], [-9.0, 2.5, 4.4], [4.5, 9.0, 3.2]]:
+		prop("de_crystal", c[2], Vector3(c[0], 0, c[1]), rng.randf() * 360.0)
+		_glow(Vector3(c[0], 1.6, c[1]), Color(theme.fire), 1.3, 6.5)
+	for f in [[6.5, 3.5, 3.4], [-4.0, 11.0, 4.2], [-11.5, -2.5, 3.0], [10.0, -9.0, 4.8]]:
+		prop("de_fungus", f[2], Vector3(f[0], 0, f[1]), rng.randf() * 360.0)
+		_glow(Vector3(f[0], 2.0, f[1]), Color("#9ab8ff"), 1.0, 6.0)
+	for i in 7:
+		var a2 := TAU * i / 7.0
+		prop("de_rock", rng.randf_range(1.6, 3.4), Vector3(cos(a2) * 8.8, 0, sin(a2) * 8.8), rng.randf() * 360.0)
+
+## The Hollow Throne: the last hall, and the crown-machine at the end of it.
+func _layout_throne() -> void:
+	if not _kit("th", "pillar"):
+		_layout_throne_basic()
+		return
+	sun.directional_shadow_max_distance = 60.0
+	prop("th_stairs", 2.6, Vector3(0, 0, -12.5), 0.0)
+	prop("th_throne", 12.0, Vector3(0, 0.6, -18.0), 0.0)
+	_glow(Vector3(0, 7.0, -15.5), Color(theme.fire), 3.0, 16.0)
+	for i in 6:
+		for sx: float in [-1.0, 1.0]:
+			prop("th_pillar", 14.0, Vector3(sx * 8.5, 0, 12.0 - i * 6.0), 0.0)
+			if i % 2 == 1:
+				prop("th_banner", 8.5, Vector3(sx * 6.4, 0, 12.0 - i * 6.0), 90.0 * sx)
+	for sx2: float in [-1.0, 1.0]:
+		prop("th_statue", 8.0, Vector3(sx2 * 5.2, 0, -10.0), -25.0 * sx2)
+		prop("th_statue", 8.0, Vector3(sx2 * 13.0, 0, 3.0), -90.0 * sx2)
+	prop("th_ring", 3.4, Vector3(-9.5, 0, 8.5), 40.0)
+	prop("th_ring", 2.6, Vector3(10.5, 0, -4.5), 160.0)
+	for b in [Vector3(-4.4, 0, -6.0), Vector3(4.4, 0, -6.0), Vector3(-4.4, 0, 5.0), Vector3(4.4, 0, 5.0)]:
+		prop("th_brazier", 2.4, b, 0.0)
+		_glow(b + Vector3(0, 2.4, 0), Color(theme.fire), 1.8, 8.5)

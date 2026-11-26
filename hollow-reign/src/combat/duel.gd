@@ -586,7 +586,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		&"player_roll":
 			p_side_owed += float(d.side) * 1.3      # the roll carries on past where the sidestep would have stopped
 			player_rig.roll(float(d.side))
-			Sfx.play("dodge", -1.0, 0.8)
+			Sfx.play("roll", -2.0)
 		&"marks":
 			if int(d.n) >= int(d.of):
 				hud.toast("SENTENCED", Color("#d23a2a"), 1.2)
@@ -756,7 +756,8 @@ func _on_strike(d: Dictionary) -> void:
 			player_rig.brace(meet, 0.34 if heavy else 0.26)
 			sparks(meet, Vector3(0, 0.5, 1), 8, Color(1, 0.8, 0.6), 3.5)
 			p_back_t = 0.75 if heavy else 0.4          # the blow shoves the player back across the stones
-			Sfx.play("block", 0.0)
+			Sfx.play("shield_heavy" if heavy else "block", 0.0)
+			get_tree().create_timer(0.09).timeout.connect(func(): Sfx.play("shield_scrape", -9.0))      # the blade sliding off
 			shake(0.3 if heavy else 0.18)
 			hitstop(0.04)
 			Game.haptic(22, 0.6)

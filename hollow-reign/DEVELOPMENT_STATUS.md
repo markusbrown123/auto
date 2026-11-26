@@ -40,6 +40,8 @@ A complete, playable test of prerecorded footage with live rules (the Ashen Sent
 
 Since then: the whole Fallen Courtyard can be played as cinematic exploration (filmed walks and views with hotspots, real-time duels), also off by default; the knight has a procedural walk cycle; and the real-time duel gained a surge meter (stuns the foe when full), a healing relic, and four named three-cut combos.
 
+The Blackwood has also been rebuilt from a 12-piece generated kit (giant trees, root arches, a shrine, lanterns, the executioner's blocks, a gibbet, a standing stone with machinery inside). Two of eight regions now have real environments. Scene cost is high: about 750 thousand triangles per frame in a Blackwood duel, so level-of-detail work is needed before testing on older phones.
+
 Also fixed: weapon models could be fitted upside down (the Sentinel's greatsword was). The fitter now finds the handle by cross-section shape, and `-- --screen=weapons` shows every weapon as fitted.
 
 ## Milestone 2026-11-26: the first region, voiced

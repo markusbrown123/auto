@@ -84,15 +84,32 @@ E = {
  "env_chest": "An ornate closed treasure chest of dark wood with sleek silver metal banding and a glowing blue seam under the lid.",
 }
 C.update(E)
+# ---- the Blackwood kit (ids are prefixed bw_, files become env_bw_*)
+BSTYLE = "Environment set piece for a sci-fantasy action game: an ancient black-barked forest swallowing old ruins, dark wet bark, deep green moss, pale fungus, subtle hints of forgotten advanced technology. "
+B = {
+ "env_bw_giant_tree": "A colossal ancient tree: an enormously thick twisted black trunk with huge buttress roots and a few heavy bare lower branches, moss on the roots.",
+ "env_bw_tree": "A tall dead black tree with a straight scarred trunk and a crown of crooked leafless branches, moss at its base.",
+ "env_bw_root_arch": "A natural archway formed by two enormous black tree roots meeting overhead, hung with moss and pale hanging lichen.",
+ "env_bw_shrine": "A small ruined forest shrine of dark mossy stone: three broken pillars and a cracked lintel around a low altar, overgrown with roots and ferns.",
+ "env_bw_lantern": "A tall crooked iron lantern post wound with dead vines, an old glass lantern hanging from its hook glowing pale yellow-green.",
+ "env_bw_block": "A wide tree stump used as an executioner's block, its top scarred with deep axe cuts, an iron ring bolted to its side, dark stains.",
+ "env_bw_gibbet": "A dead leaning tree with an iron gibbet cage hanging from one branch on a chain, the cage empty and rusted.",
+ "env_bw_log": "A huge fallen tree trunk lying on its side, hollow at one end, covered in thick moss, shelf fungus and ferns.",
+ "env_bw_stone": "A tall leaning standing stone of black rock carved with worn lines, a crack down its face showing smooth dark metal and thin glowing green circuit lines inside.",
+ "env_bw_cart": "An abandoned broken wooden cart with one wheel missing, sunk into the ground, covered in moss, with a rusted iron-bound chest in its bed.",
+ "env_bw_boulder": "A large rounded mossy boulder with ferns and small pale mushrooms growing around its base.",
+ "env_bw_hut": "A small ruined charcoal burner's hut: sagging dark timber walls, a collapsed mossy thatch roof, a crooked stone chimney.",
+}
+C.update(B)
 
 def gen(cid):
     out = "art/concept/%s_v1.png" % cid
     if os.path.exists(out):
         return cid, "exists"
-    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else ((ESTYLE + C[cid] + EFRAME) if cid in E else (STYLE + C[cid] + FRAME))
+    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else ((ESTYLE + C[cid] + EFRAME) if cid in E else ((BSTYLE + C[cid] + EFRAME) if cid in B else (STYLE + C[cid] + FRAME)))
     r = subprocess.run(["higgsfield", "generate", "create", "gpt_image_2_6", "--prompt", prompt,
-                        "--aspect_ratio", "9:16" if cid in W and not cid.startswith("s_") else ("1:1" if cid in E else "3:4"),
-                        "--resolution", "1k" if (cid in W or cid in E) else "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True, stdin=subprocess.DEVNULL)
+                        "--aspect_ratio", "9:16" if cid in W and not cid.startswith("s_") else ("1:1" if (cid in E or cid in B) else "3:4"),
+                        "--resolution", "1k" if (cid in W or cid in E or cid in B) else "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True, stdin=subprocess.DEVNULL)
     url = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
     if not url.startswith("http"):
         return cid, "FAILED: " + (r.stderr or r.stdout)[-200:]
@@ -103,6 +120,8 @@ if ids == ["weapons"]:
     ids = list(W)
 if ids == ["env"]:
     ids = list(E)
+if ids == ["blackwood"]:
+    ids = list(B)
 with cf.ThreadPoolExecutor(4) as ex:
     for cid, status in ex.map(gen, ids):
         print(cid, status, flush=True)

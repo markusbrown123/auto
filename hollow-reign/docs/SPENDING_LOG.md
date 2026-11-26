@@ -16,8 +16,11 @@ Cap: $100 total across Higgsfield and Tripo, including everything below. Tripo c
 | 2026-11-26 | Higgsfield | 4 music cues, 75 to 95 seconds each (ElevenLabs Music v2.5) | about 50 cr | $2.05 |
 | 2026-11-26 | Higgsfield | 1 video clip (Seedance 2.5, 5 s, 720p): the Courtyard memory scene | 35 cr | $1.45 |
 | 2026-11-26 | (none) | Cinematic duel footage: 18 clips rendered from the game's own scene | 0 | $0.00 |
+| 2026-11-26 | Higgsfield | 12 Blackwood environment concepts (1k) | 9 cr | $0.35 |
+| 2026-11-26 | Tripo | 12 Blackwood set pieces at 30 cr | 360 cr | $3.60 |
+| 2026-11-26 | (none) | Courtyard road footage: 7 clips rendered from the game's own scene | 0 | $0.00 |
 
-**Totals to date (reconciled 2026-11-26 against both accounts):** Tripo $34.70 spent. Higgsfield 205 credits (about $8.45) spent, 1,007 credits left. Combined about $43 of the $100 cap.
+**Totals to date (reconciled 2026-11-26 against both accounts):** Tripo $38.30 spent. Higgsfield about 214 credits (about $8.80) spent, about 998 credits left. Combined about $47 of the $100 cap.
 
 **Balances:** the owner topped up Tripo on 2026-11-26; the API wallet now shows $115.30. The $100 cap has not been changed, so spending still stops at $100 combined unless told otherwise. There are also 6,200 Tripo Studio credits that can only be spent by hand in the Studio web app.
 

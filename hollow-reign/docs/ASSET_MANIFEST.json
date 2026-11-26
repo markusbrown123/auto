@@ -1,11 +1,11 @@
 {
  "generated": "see tools/asset_manifest.py",
- "count": 287,
+ "count": 311,
  "bytes_by_kind": {
   "character model": 97737192,
-  "scenery model": 66227716,
+  "scenery model": 123945488,
   "weapon or shield model": 90728464,
-  "concept image": 138001224,
+  "concept image": 159011790,
   "combat/travel footage": 72157454,
   "view still": 692525,
   "voice line": 3783033,
@@ -141,6 +141,126 @@
    "bytes": 4718380,
    "source": "Tripo API",
    "method": "image-to-3D from art/concept/env_brazier_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_block.glb",
+   "kind": "scenery model",
+   "bytes": 5350556,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_block_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_boulder.glb",
+   "kind": "scenery model",
+   "bytes": 5316956,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_boulder_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_cart.glb",
+   "kind": "scenery model",
+   "bytes": 4120452,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_cart_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_giant_tree.glb",
+   "kind": "scenery model",
+   "bytes": 5129936,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_giant_tree_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_gibbet.glb",
+   "kind": "scenery model",
+   "bytes": 5429940,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_gibbet_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_hut.glb",
+   "kind": "scenery model",
+   "bytes": 3674660,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_hut_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_lantern.glb",
+   "kind": "scenery model",
+   "bytes": 4642112,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_lantern_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_log.glb",
+   "kind": "scenery model",
+   "bytes": 4458684,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_log_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_root_arch.glb",
+   "kind": "scenery model",
+   "bytes": 4327740,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_root_arch_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_shrine.glb",
+   "kind": "scenery model",
+   "bytes": 5307832,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_shrine_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_stone.glb",
+   "kind": "scenery model",
+   "bytes": 4844376,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_stone_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_tree.glb",
+   "kind": "scenery model",
+   "bytes": 5114528,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_tree_v1.png",
    "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
    "cost_usd": 0.3,
    "status": "in game"
@@ -669,6 +789,126 @@
    "path": "art/concept/env_brazier_v1.png",
    "kind": "concept image",
    "bytes": 1150427,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_block_v1.png",
+   "kind": "concept image",
+   "bytes": 1914510,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_boulder_v1.png",
+   "kind": "concept image",
+   "bytes": 1950961,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_cart_v1.png",
+   "kind": "concept image",
+   "bytes": 1788434,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_giant_tree_v1.png",
+   "kind": "concept image",
+   "bytes": 1841446,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_gibbet_v1.png",
+   "kind": "concept image",
+   "bytes": 1814644,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_hut_v1.png",
+   "kind": "concept image",
+   "bytes": 1936721,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_lantern_v1.png",
+   "kind": "concept image",
+   "bytes": 1165154,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_log_v1.png",
+   "kind": "concept image",
+   "bytes": 1596115,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_root_arch_v1.png",
+   "kind": "concept image",
+   "bytes": 1809927,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_shrine_v1.png",
+   "kind": "concept image",
+   "bytes": 1986229,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_stone_v1.png",
+   "kind": "concept image",
+   "bytes": 1537665,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_tree_v1.png",
+   "kind": "concept image",
+   "bytes": 1668760,
    "source": "Higgsfield (GPT Image 2.6)",
    "method": "text-to-image, prompts in tools/concepts.py",
    "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",

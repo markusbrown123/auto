@@ -11,7 +11,7 @@ const THEMES := {
 		"stone": "#7a6858", "floor": "#6a5848", "fire": "#ff7a2a", "layout": "crag", "particles": "embers", "amb": "#8a7068", "day": true},
 	"deep": {"sky": "#020104", "horizon": "#1c0c2e", "fog": "#10081c", "fog_d": 0.05, "sun": "#9a7ad8", "sun_e": 0.55, "sun_rot": Vector3(-60, 170, 0),
 		"stone": "#342c3c", "floor": "#16121c", "fire": "#b07aff", "layout": "abyss", "particles": "motes", "amb": "#241a34", "wet": true},
-	"blackwood": {"sky": "#070a09", "horizon": "#1a241c", "fog": "#131b15", "fog_d": 0.06, "sun": "#7f9a86", "sun_e": 0.7, "sun_rot": Vector3(-55, 120, 0),
+	"blackwood": {"sky": "#0a100e", "horizon": "#26362a", "fog": "#1a261e", "fog_d": 0.035, "sun": "#a8c4ae", "sun_e": 1.1, "sun_rot": Vector3(-55, 120, 0),
 		"stone": "#3a3a32", "floor": "#2c2e25", "fire": "#c8d86a", "layout": "forest", "particles": "motes", "amb": "#1c2a20"},
 	"cathedral": {"sky": "#120b08", "horizon": "#4a2414", "fog": "#2a1810", "fog_d": 0.04, "sun": "#ffb070", "sun_e": 0.9, "sun_rot": Vector3(-30, 200, 0),
 		"stone": "#5a4e44", "floor": "#4c423a", "fire": "#ff6a22", "layout": "nave", "particles": "ash", "amb": "#3a2418"},
@@ -347,7 +347,58 @@ func _layout_ruin_basic() -> void:
 	# chains and a fallen portcullis bar give the gate some story
 	box(Vector3(0.12, 0.12, 5.0), Vector3(-1.2, 0.3, -9.0), Look.flat(Color("#1a1816"), 0.5, 0.8), Vector3(0, 25, 4))
 
+## The Blackwood, from its generated kit: a clearing ringed by colossal trunks, a drowned shrine, lanterns still lit.
 func _layout_forest() -> void:
+	if not PropModel.exists("res://assets/models/env_bw_giant_tree.glb"):
+		_layout_forest_basic()
+		return
+	sun.directional_shadow_max_distance = 55.0
+	# the great trees: a wall of trunks all round, taller behind the foe
+	var ring := [[-13.0, -15.0, 26.0, 20.0], [0.5, -20.0, 30.0, 140.0], [14.0, -14.0, 24.0, 250.0], [-21.0, -3.0, 22.0, 80.0], [21.0, -1.0, 25.0, 310.0],
+		[-17.0, 12.0, 23.0, 200.0], [16.0, 14.0, 22.0, 30.0], [0.0, 22.0, 24.0, 100.0], [-30.0, -22.0, 34.0, 0.0], [30.0, -24.0, 36.0, 180.0], [-34.0, 8.0, 30.0, 60.0], [34.0, 10.0, 32.0, 240.0]]
+	for t in ring:
+		prop("bw_giant_tree", t[2], Vector3(t[0], -0.6, t[1]), t[3])
+	for i in 16:
+		var a := TAU * i / 16.0 + 0.2
+		var d := rng.randf_range(11.0, 26.0)
+		var p := Vector3(cos(a) * d, 0, sin(a) * d - 2.0)
+		if p.length() < 9.0:
+			continue
+		prop("bw_tree", rng.randf_range(11.0, 18.0), p, rng.randf() * 360.0)
+	prop("bw_shrine", 4.6, Vector3(0.5, 0, -11.5), 0.0)
+	prop("bw_root_arch", 7.5, Vector3(-9.0, 0, -8.0), 40.0)
+	prop("bw_gibbet", 8.5, Vector3(9.5, 0, -8.5), -50.0)
+	prop("bw_stone", 4.6, Vector3(-6.8, 0, -3.6), 20.0)
+	prop("bw_log", 2.6, Vector3(8.5, 0, 1.5), 70.0)
+	prop("bw_cart", 2.2, Vector3(-9.5, 0, 4.5), 130.0)
+	prop("bw_hut", 5.0, Vector3(13.0, 0, 8.5), 215.0)
+	prop("bw_boulder", 2.4, Vector3(-5.5, 0, 8.0), 0.0)
+	prop("bw_boulder", 3.2, Vector3(12.0, 0, -3.0), 140.0)
+	prop("bw_root_arch", 6.5, Vector3(6.0, 0, 15.0), 200.0)
+	# the executioner's blocks, round the clearing's edge
+	for i in 6:
+		var a2 := TAU * i / 6.0 + 0.5
+		prop("bw_block", rng.randf_range(0.9, 1.3), Vector3(cos(a2) * 6.2, 0, sin(a2) * 6.2 - 1.0), rng.randf() * 360.0)
+	for l in [Vector3(-4.2, 0, -6.6), Vector3(4.4, 0, -6.2), Vector3(-7.5, 0, 1.5), Vector3(6.8, 0, 6.0), Vector3(-2.5, 0, 12.0)]:
+		var post := prop("bw_lantern", 4.2, l, rng.randf() * 360.0)
+		if post:
+			var glow := OmniLight3D.new()
+			glow.light_color = Color(theme.fire)
+			glow.light_energy = 1.9
+			glow.omni_range = 8.0
+			glow.omni_attenuation = 1.3
+			glow.position = Vector3(0, 3.3, 0)
+			post.add_child(glow)
+	# the standing stone is not stone all the way through
+	var hum := OmniLight3D.new()
+	hum.light_color = Color("#7dffb0")
+	hum.light_energy = 1.2
+	hum.omni_range = 5.0
+	hum.position = Vector3(-6.4, 2.2, -3.0)
+	add_child(hum)
+	_grass(380, 22.0)
+
+func _layout_forest_basic() -> void:
 	var bark := Look.stone(Color("#2a241e"), 0.5, 0.95, "bark")
 	for i in 46:
 		var a := rng.randf() * TAU

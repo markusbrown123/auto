@@ -504,6 +504,8 @@ func guard() -> void:
 ## Wind up an attack that will land `windup` seconds from now, travelling in
 ## screen direction `dir` (x right, y up). `swing` is how long the blow itself takes.
 func telegraph(dir: Vector2, windup: float, swing: float, kind: String = "slash") -> void:
+	_pin_t = 0.0
+	_finish = ""
 	_arc_dir = Vector3(dir.x * mirror, dir.y, 0).normalized()
 	_swing = swing
 	if kind == "thrust" or kind == "lunge":
@@ -519,6 +521,8 @@ const FINISH_CLIP := {"Heavy": "sword_attack", "Guard-breaking": "shield_dash", 
 	"Critical": "cut_c", "Finisher": "cut_c", "Fast": ""}
 func swing(dir: Vector2, time: float, finish: String = "") -> void:
 	_finish = finish
+	_pin_t = 0.0
+	_brace_t = 0.0
 	_arc_dir = Vector3(dir.x * mirror, dir.y, 0).normalized()
 	_swing = time * 0.5
 	_go(Mode.WINDUP, time * 0.6)
@@ -537,11 +541,14 @@ func recover() -> void:
 		_root_target = Vector3(0, 0, -0.1)
 
 func stagger() -> void:
+	_pin_t = 0.0
 	if mode != Mode.DEAD:
 		_go(Mode.STAGGER)
 		_root_target = Vector3(0, 0, 0.45)
 
 func hurt() -> void:
+	_pin_t = 0.0
+	_brace_t = 0.0
 	if mode != Mode.DEAD:
 		_go(Mode.HURT, 0.4)
 		_root_target = Vector3(0, 0, 0.3)
@@ -612,6 +619,8 @@ func roar() -> void:
 	_root_target = Vector3.ZERO
 
 func die(dir: float = 1.0) -> void:
+	_pin_t = 0.0
+	_brace_t = 0.0
 	_death_dir = dir
 	_go(Mode.DEAD, 1.6)
 
@@ -675,7 +684,7 @@ func _process(delta: float) -> void:
 	var step_i := int(floor(_walk_phase / PI))
 	if step_i != _step_i:
 		_step_i = step_i
-		if footsteps and _walk_amount > 0.35:
+		if footsteps and _walk_amount > 0.35 and mode != Mode.DODGE and moved < 0.12:
 			Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
 	_walk_amount = lerpf(_walk_amount, 1.0 if (walking and moved > 0.0005) else 0.0, 1.0 - exp(-dt * 7.0))
 	_solve(dt)
@@ -961,6 +970,7 @@ func _pick_clip() -> void:
 	var w := 0.0
 	var full := false
 	var dtt := get_process_delta_time() * time_scale
+	skin.clip_travel = 1.0
 	if test_clip != "":
 		n = test_clip; t = _clock; w = 1.0; full = true
 	elif not use_clips:

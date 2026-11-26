@@ -139,14 +139,14 @@ func drive(j: Dictionary) -> Dictionary:
 	var head_rot: Basis = chest_rot * conv.call(j.head_rot)
 	_pose_bone("Neck", Basis(cq.slerp(head_rot.get_rotation_quaternion(), 0.5)) * rest["Neck"].basis, _fk_origin("Neck"))
 	_pose_bone("Head", head_rot * rest["Head"].basis, _fk_origin("Head"))
-	_overlay(false)
-	# arms: elbows fall outward and down
-	var hr := _limb("RightArm", "RightForeArm", "RightHand", to_skel * j.hand_r, q * Vector3(0.7, -0.8, 0.35))
-	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", to_skel * j.hand_l, q * Vector3(-0.7, -0.8, 0.35))
 	# legs: knees forward, feet flat
 	for side in [["Right", "r", 0.15], ["Left", "l", -0.15]]:
 		var ankle := _limb(side[0] + "UpLeg", side[0] + "Leg", side[0] + "Foot", to_skel * j["ankle_" + side[1]], q * Vector3(side[2], 0.1, -1))
 		_pose_bone(side[0] + "Foot", rest[side[0] + "Foot"].basis, ankle)
+	_overlay(false)
+	# arms: elbows fall outward and down
+	var hr := _limb("RightArm", "RightForeArm", "RightHand", to_skel * j.hand_r, q * Vector3(0.7, -0.8, 0.35))
+	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", to_skel * j.hand_l, q * Vector3(-0.7, -0.8, 0.35))
 	var back := to_skel.affine_inverse()
 	if clip_full and clip_w > 0.0:
 		# whole-body clips (falling, dying) carry the arms too; the weapons follow the real hands

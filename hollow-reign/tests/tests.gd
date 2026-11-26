@@ -474,6 +474,28 @@ func t_meters_combos() -> void:
 	var sp0: float = s.speed()
 	s.b_hp = s.b_hp_max * 0.4
 	ok(s.speed() > sp0 * 1.1, "the Beast quickens as it bleeds")
+	# exploits found in review
+	s = mk("ashen_sentinel"); hits.clear()
+	s.ev.connect(func(n, d): if n == &"boss_hit": hits.append(d))
+	s.b_state = DuelSim.B.RECOVER; s.b_t = 30.0
+	for d in ["L", "R", "L", "R"]:
+		s.input_swipe(d); run_for(s, 0.4)
+	ok(hits.size() == 4 and hits[1].named == "Double Slash" and hits[2].named == "" and hits[3].named == "Double Slash", "a finished combo cannot be cashed in again from the same cuts")
+	ok(hits[3].dmg / hits[2].dmg < (hits[1].dmg / hits[0].dmg) * 0.95, "the same combo twice running loses most of its weight")
+	s = _find("ashen_sentinel", func(a): return not a.unblockable)
+	to_impact(s, 0.3)
+	s.input_block(true); run_for(s, 0.05); s.input_block(false); run_for(s, 0.1)
+	s.input_block(true)
+	run_for(s, 0.3)
+	ok(int(s.stats.get("perfect_blocks", 0)) == 0 and s.stats.blocks == 1, "fluttering the shield does not earn a timed block")
+	s = mk("ashen_sentinel")
+	s.input_dodge(1); run_for(s, 0.05); s.input_dodge(1)
+	var st_roll: float = s.pl.stamina
+	s.input_dodge(1); s.input_dodge(-1)
+	run_for(s, 0.84)
+	ok(s.pl.stamina >= st_roll and s.p_state == DuelSim.P.DODGE, "nothing chains or buffers out of a roll")
+	run_for(s, 0.3)
+	ok(s.p_state == DuelSim.P.FREE, "the roll ends with the knight free and exposed")
 	# training ground
 	s = mk("ashen_sentinel", 7, {}, {"training": true})
 	hits.clear()

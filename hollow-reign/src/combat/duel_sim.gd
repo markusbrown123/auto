@@ -100,6 +100,9 @@ var lesson_fights := true    # in a lesson: false holds the foe open (cutting pr
 var lesson := false          # onboarding: the foe attacks plainly and nothing can die
 var _last_cut_t := 0.0
 var opening_from := ""        # what earned the current opening: "parry", "perfect", "dodge", "break", "surge", ""
+var _last_combo_id := ""
+var p_block_dropped := -9.0
+var p_block_fresh := true
 var p_block_since := -9.0     # when the shield went up, for timed blocks
 const PERFECT_BLOCK := 0.22
 var p_hist: Array = []
@@ -187,7 +190,11 @@ static func parry_dir_for(attack_dir: String) -> String:
 # ============================================================ input
 func input_block(down: bool) -> void:
 	if down and not p_block:
+		# only a raise from rest can be a timed block: fluttering the shield earns nothing
+		p_block_fresh = time - p_block_dropped >= 0.4
 		p_block_since = time
+	elif not down and p_block:
+		p_block_dropped = time
 	p_block = down
 
 ## Would adding `dir` to the cuts so far still be the start of a known combo?
@@ -198,6 +205,17 @@ func _continues_combo(dir: String) -> bool:
 		for start in range(maxi(0, want.size() - seq.size()), want.size() - 1):
 			var tail: Array = want.slice(start)
 			if tail.size() <= seq.size() and seq.slice(0, tail.size()) == tail:
+				return true
+	return false
+
+## After `done` has landed, is some longer combo still reachable from the cuts so far?
+func _could_extend(done: Dictionary) -> bool:
+	for c in combos:
+		var seq: Array = c.seq
+		if seq.size() <= done.seq.size():
+			continue
+		for k in range(2, mini(p_hist.size(), seq.size() - 1) + 1):
+			if p_hist.slice(p_hist.size() - k) == seq.slice(0, k):
 				return true
 	return false
 
@@ -239,11 +257,9 @@ func input_swipe(dir: String) -> void:
 	# if this cut would complete a combo, say which kind, so the body can throw its signature finish
 	var finish := ""
 	if boss_open():
-		var want: Array = p_hist + [dir]
-		for c in combos:
-			var seq: Array = c.seq
-			if want.size() >= seq.size() and want.slice(want.size() - seq.size()) == seq:
-				finish = str(c.kind)
+		p_hist.append(dir)
+		finish = str(_completed_combo().get("kind", ""))
+		p_hist.pop_back()
 	_emit(&"player_swing", {"dir": dir, "time": pl.swing_time, "finish": finish})
 
 func _gain_surge(v: float) -> void:
@@ -278,7 +294,9 @@ func input_relic() -> bool:
 func input_dodge(side: int) -> void:
 	if over:
 		return
-	if p_state == P.DODGE and side == p_dodge_side and not p_roll and p_elapsed <= ROLL_WINDOW and pl.stamina >= 1.0:
+	if p_state == P.DODGE and p_roll:
+		return                        # nothing chains out of a roll: it has to end first
+	if p_state == P.DODGE and side == p_dodge_side and not p_roll and p_elapsed <= ROLL_WINDOW and pl.stamina >= ROLL_EXTRA_COST:
 		p_roll = true
 		p_t += ROLL_EXTRA_TIME
 		_spend(ROLL_EXTRA_COST)
@@ -399,10 +417,15 @@ func _resolve_player_hit(dir: String) -> void:
 		var pierce := false
 		var extra_posture := 0.0
 		var done := _completed_combo()
+		if not done.is_empty() and pl.stamina < float(done.get("stamina_cost", 0)):
+			done = {}                 # too spent to throw it: it lands as an ordinary cut
 		if not done.is_empty():
 			named = done.name
 			combo_id = done.id
-			mult *= float(done.mult)
+			var again: bool = combo_id == _last_combo_id
+			_last_combo_id = combo_id
+			# the same combo twice running in one opening is read: most of its extra weight is lost
+			mult *= (1.0 + (float(done.mult) - 1.0) * 0.35) if again else float(done.mult)
 			if opening_from == "dodge":
 				mult *= float(done.get("after_dodge", 1.0))
 			if opening_from in ["parry", "perfect"]:
@@ -411,8 +434,10 @@ func _resolve_player_hit(dir: String) -> void:
 				mult *= float(done.get("on_stagger", 1.0)) * float(done.get("crit_bonus", 1.0))
 			pierce = bool(done.get("pierce", false))
 			extra_posture = float(done.get("posture", 0))
-			pl.stamina = clampf(pl.stamina + float(done.get("stamina_back", 0)) - float(done.get("stamina_cost", 0)), 0.0, pl.max_stamina)
+			pl.stamina = clampf(pl.stamina + (0.0 if again else float(done.get("stamina_back", 0))) - float(done.get("stamina_cost", 0)), 0.0, pl.max_stamina)
 			stats.named += 1
+			if not _could_extend(done):
+				p_hist.clear()        # finished: the same tail cannot be cashed in again
 		var on_rift := rift_dir != "" and dir == rift_dir
 		if on_rift:
 			mult *= RIFT_MULT
@@ -501,6 +526,7 @@ func _end_opening() -> void:
 		rift_dir = ""
 		_emit(&"rift", {"dir": ""})
 	p_hist.clear()
+	_last_combo_id = ""
 	opening_from = ""
 	p_combo = 0
 	p_last_dir = ""
@@ -525,9 +551,14 @@ func _tick_boss(dt: float) -> void:
 				b_t = 1.0e9
 				if not p_hist.is_empty() and time - _last_cut_t > 1.5:
 					p_hist.clear()      # a pause starts the sequence over
+					p_combo = 0
+					p_last_dir = ""
+					opening_from = ""
 					_emit(&"combo_reset")
 				if b_state == B.STAGGER:
 					b_state = B.RECOVER
+					b_opening_crit = false
+					_emit(&"boss_recover")
 			if b_t <= 0.0:
 				_end_opening()
 				_go_idle()
@@ -618,7 +649,7 @@ func _resolve_strike() -> void:
 	var result := "hit"
 	var perfect := false
 	# --- dodge
-	if p_state == P.DODGE and p_elapsed >= DODGE_IFRAME_START and p_elapsed <= (DODGE_IFRAME_END + (ROLL_EXTRA_TIME if p_roll else 0.0)) * assist:
+	if p_state == P.DODGE and p_elapsed >= DODGE_IFRAME_START and p_elapsed <= minf(DODGE_IFRAME_END * assist, DODGE_TIME - 0.1) + (ROLL_EXTRA_TIME - 0.08 if p_roll else 0.0):
 		var need: String = a.dodge
 		var side := "L" if p_dodge_side < 0 else "R"
 		if need == "any" or need == side:
@@ -657,13 +688,13 @@ func _resolve_strike() -> void:
 			habits.block += 1.0
 			stats.blocks += 1
 			# a block raised at the last instant turns the blow for free and rattles the attacker
-			var timed: bool = time - p_block_since <= PERFECT_BLOCK * assist
+			var timed: bool = p_block_fresh and time - p_block_since <= PERFECT_BLOCK * assist
 			var cost: float = 0.0 if timed else float(a.guard) * (1.0 - float(pl.block_eff)) * maxf(1.0, trait_v("block_tax"))
 			if timed:
 				perfect = true
 				stats["perfect_blocks"] = int(stats.get("perfect_blocks", 0)) + 1
 				_gain_surge(8.0)
-			var broke: bool = pl.stamina - cost <= 0.0
+			var broke: bool = not timed and pl.stamina - cost <= 0.0
 			_spend(cost)
 			_apply_element(a, 0.5)
 			if a.get("drain", false):
@@ -719,6 +750,8 @@ func _resolve_strike() -> void:
 		_emit(&"marks", {"n": 0, "of": int(trait_v("marks"))})
 	if result == "blocked" and perfect:
 		_add_posture(12.0)
+		if b_state == B.STAGGER:
+			return                    # that broke its posture: keep the break
 	opening_from = "dodge" if result == "dodged" else ("parry" if result == "parried" else "")
 	if b_combo.get("retreat", false):
 		b_far = true

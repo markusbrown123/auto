@@ -101,12 +101,69 @@ B = {
  "env_bw_hut": "A small ruined charcoal burner's hut: sagging dark timber walls, a collapsed mossy thatch roof, a crooked stone chimney.",
 }
 C.update(B)
+# ---- kits for the other six regions: {prefix: (style, {id: description})}; files become env_<prefix>_*
+KITS = {
+ "ca": ("Environment set piece for a sci-fantasy action game: a vast burned cathedral, soot-black stone, grey ash drifts, cracked gold leaf, faint embers, sleek forgotten machinery beneath the masonry. ", {
+  "pillar": "A towering clustered gothic cathedral pillar of soot-black stone, its base buried in grey ash, cracked gold bands near the top.",
+  "altar": "A broad stone high altar scorched black, covered in melted candle stubs and ash, a cracked golden sun disc mounted behind it.",
+  "window": "A tall free-standing gothic lancet window frame of blackened stone holding shattered stained glass in amber and deep red.",
+  "pew": "A row of heavy carved wooden church pews, charred and half collapsed, dusted with ash.",
+  "censer": "A huge ornate bronze censer on a tall iron stand with hanging chains, thin smoke and a dull orange glow inside.",
+  "bell": "A giant fallen bronze church bell lying tilted and cracked on broken flagstones, half buried in ash.",
+  "statue": "A tall robed stone saint statue with a smooth featureless mask for a face and hands folded, scorched, one arm broken off."}),
+ "cr": ("Environment set piece for a sci-fantasy action game: a flooded ancient crypt, wet green-black stone, pale blue corpse-light, verdigris bronze, still dark water, sleek forgotten machinery in the walls. ", {
+  "sarcophagus": "A massive stone sarcophagus with a smooth armoured knight effigy carved on the lid, green with damp, a thin pale blue glow leaking from the seam.",
+  "arch": "A heavy low crypt archway of wet black stone blocks with a carved keystone, dripping moss.",
+  "urns": "A cluster of tall cracked funeral urns of dark glazed clay with verdigris bronze lids, one toppled.",
+  "candelabra": "A tall wrought-iron standing candelabra with many arms and pale blue flames, wax dripping down it.",
+  "coffins": "A stack of rotting wooden coffins bound with rusted iron bands, one lid ajar.",
+  "pillar": "A squat thick crypt pillar of wet stone with niches holding small skull-shaped lamps glowing pale blue.",
+  "gate": "A tall rusted iron portcullis gate set in a stone frame, half raised, hung with chains."}),
+ "ro": ("Environment set piece for a sci-fantasy action game: a volcanic mountain eyrie where dragons nest, black basalt, glowing orange lava cracks, scorched bone, sleek ancient metal fused into the rock. ", {
+  "spire": "A tall jagged black basalt rock spire with glowing orange lava cracks running up it.",
+  "ribs": "An enormous dragon ribcage half buried in ash, scorched black bone arcs rising high.",
+  "skull": "A colossal horned dragon skull resting on black rock, jaw open, scorched and cracked.",
+  "nest": "A huge nest built of charred tree trunks, bones and fused slag, with three large dark scaled eggs glowing faintly orange.",
+  "arch": "A natural basalt rock arch with hexagonal columns, lava glow beneath it.",
+  "brazier": "A giant ancient iron fire bowl on three clawed legs, filled with glowing coals.",
+  "wreck": "The wreck of a sleek ancient metal war machine half melted into black rock, panels peeled open, faint orange light inside."}),
+ "ci": ("Environment set piece for a sci-fantasy action game: a frozen royal citadel, pale blue ice over white stone, frost, silver metal, cold cyan light from forgotten machinery. ", {
+  "pillar": "A tall fluted palace pillar of white stone sheathed in thick blue ice with long icicles.",
+  "throne": "A high-backed royal stone throne encased in clear ice, frost flowers growing over it.",
+  "statue": "A tall statue of an armoured king in sleek plate, frozen over, sword point resting on the ground, icicles hanging from the arms.",
+  "brazier": "A tall silver brazier on a slender stand burning with a cold blue flame, rimmed with frost.",
+  "gate": "A grand double doorway of silver-banded pale wood frozen half open, snow drifted against it.",
+  "wall": "A section of white stone battlement wall with crenellations, crusted in ice and snow.",
+  "shard": "A cluster of huge jagged blue ice crystals erupting from cracked flagstones, a cyan glow deep inside."}),
+ "de": ("Environment set piece for a sci-fantasy action game: a bottomless cavern beneath the world, dark violet rock, pale bioluminescent fungus, black glass, exposed colossal ancient machinery with dim violet light. ", {
+  "pillar": "A colossal cracked support column of dark metal and stone with dim violet light lines, cables hanging from it.",
+  "fungus": "A cluster of tall pale bioluminescent mushrooms with wide caps glowing soft blue-violet, growing from dark rock.",
+  "conduit": "A huge broken ancient machine conduit, a ribbed dark metal pipe as thick as a tree, torn open and leaking violet light.",
+  "crystal": "A cluster of black glass crystal shards with violet light pulsing inside, jutting from the ground.",
+  "husk": "A kneeling hollow suit of sleek ancient armour fused to the rock, empty, overgrown with pale fungus.",
+  "bridge": "A short broken span of an ancient dark metal walkway with railings, ending in twisted torn beams.",
+  "rock": "A large jagged dark violet boulder veined with thin glowing lines."}),
+ "th": ("Environment set piece for a sci-fantasy action game: the last throne hall of a dead empire, black marble, tarnished gold, deep crimson, a great crown-machine of sleek dark metal with white-gold light. ", {
+  "pillar": "A tall square black marble pillar with tarnished gold capital and a thin white-gold light line running up each face.",
+  "throne": "A towering throne of black metal and gold with a huge ring-shaped machine halo rising behind it, glowing white-gold.",
+  "banner": "A very tall hanging royal banner of faded crimson cloth on a gold pole stand, embroidered with a simple crown ring emblem, torn at the bottom.",
+  "statue": "A tall statue of a crowned monarch in sleek armour, black marble with gold inlay, head bowed, hands resting on a sword.",
+  "brazier": "A wide gold fire bowl on a black marble pedestal burning with a white-gold flame.",
+  "stairs": "A broad short flight of black marble steps with gold edging and low balustrades.",
+  "ring": "A giant fallen ring-shaped machine part of dark metal with gold filigree, lying tilted on cracked marble, faint white-gold light in its channels."}),
+}
+KIT_OF = {}
+for _pre, (_style, _items) in KITS.items():
+    for _k, _v in _items.items():
+        C["env_%s_%s" % (_pre, _k)] = _v
+        B["env_%s_%s" % (_pre, _k)] = _v       # same framing and size as the Blackwood kit
+        KIT_OF["env_%s_%s" % (_pre, _k)] = _style
 
 def gen(cid):
     out = "art/concept/%s_v1.png" % cid
     if os.path.exists(out):
         return cid, "exists"
-    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else ((ESTYLE + C[cid] + EFRAME) if cid in E else ((BSTYLE + C[cid] + EFRAME) if cid in B else (STYLE + C[cid] + FRAME)))
+    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else ((ESTYLE + C[cid] + EFRAME) if cid in E else ((KIT_OF.get(cid, BSTYLE) + C[cid] + EFRAME) if cid in B else (STYLE + C[cid] + FRAME)))
     r = subprocess.run(["higgsfield", "generate", "create", "gpt_image_2_6", "--prompt", prompt,
                         "--aspect_ratio", "9:16" if cid in W and not cid.startswith("s_") else ("1:1" if (cid in E or cid in B) else "3:4"),
                         "--resolution", "1k" if (cid in W or cid in E or cid in B) else "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True, stdin=subprocess.DEVNULL)
@@ -121,7 +178,9 @@ if ids == ["weapons"]:
 if ids == ["env"]:
     ids = list(E)
 if ids == ["blackwood"]:
-    ids = list(B)
+    ids = [i for i in B if i.startswith("env_bw_")]
+if ids == ["kits"]:
+    ids = list(KIT_OF)
 with cf.ThreadPoolExecutor(4) as ex:
     for cid, status in ex.map(gen, ids):
         print(cid, status, flush=True)

@@ -20,6 +20,24 @@ Severity: **A** breaks the fantasy or the fight · **B** clearly visible · **C*
 | 8 | B | Shield stayed upright in mid-air after death | Die with a shield | Shield kept its guard rotation | Shield rotates flat and is clamped to the ground during the fall | animtest capture |
 | 9 | B | Repeating a cut was penalised even inside a combo that needs it | U-D-D | Same-direction rule ran before combo check | Penalty waived when the cut continues a known sequence of two or more | Test "a combo may repeat a cut" |
 
+## Fixed in the continuous pass (found by an independent code review)
+
+| # | Sev | Issue | Reproduce | Root cause | Fix | Verified by |
+|---|---|---|---|---|---|---|
+| 22 | A | Combos could be cashed in repeatedly from overlapping cuts (greatsword D,D,D,D = Colossus every cut) | Spam a 2-cut combo in one opening | Cut history never cleared on completion | History cleared unless a longer combo is still reachable; same combo twice running keeps only 35% of its bonus | Test "a finished combo cannot be cashed in again" |
+| 23 | A | Timed block was free every time by tapping the shield | Flutter the shield through an attack | Timer reset on every press | Only a raise after 0.4 s at rest can be timed | Test "fluttering the shield…" |
+| 24 | B | A posture break caused by a timed block was lost | Timed-block with posture nearly full | Recovery code overwrote the stagger | Early return when staggered | Code read |
+| 25 | B | A timed block at zero stamina was a guard break | Timed-block when exhausted | `cost 0 <= 0` | Break only when not timed | Code read |
+| 26 | A | Rolls gave near-permanent invulnerability and chained without a gap | Roll repeatedly, assist on | I-frames scaled past the lock; dodge buffered out of a roll; 1-point stamina gate | I-frames end before the roll does, no buffering out of a roll, real cost gate | Test "nothing chains or buffers out of a roll" |
+| 27 | B | Blade stayed frozen at the clash point into the next action | Parry then cut at once | Pin never cleared | Pins cleared on swing, telegraph, stagger, hurt, death | Code read |
+| 28 | B | Authored leg motion was computed then thrown away | Any body clip | Leg IK ran after the clip layer | Leg IK first, clip over it | Code read; needs a fresh capture |
+| 29 | B | After the first sidestep, deaths and hit reactions had no hip travel | Dodge, then die | Travel flag never restored | Reset every frame | Code read |
+| 30 | C | Training turned every later cut into a critical after one posture break | Break posture in training | Stagger converted without clearing the flag | Flag cleared, recover event sent | Code read |
+| 31 | C | Heavy combos were free at zero stamina | Falling Crown when exhausted | Cost clamped, not required | Combo needs its stamina or lands as a plain cut | Code read |
+| 32 | C | Burst of footstep sounds during rolls and shoves | Roll | Footfalls driven by distance alone | None during dodges or fast displacement | Code read |
+
+Review items not yet acted on: one-frame pose pop on some clip changes; roll animation can end 0.15 s before the rules free the player; sidestep line maths leaves a small slide back; skeleton layer does about 44 bone reads/writes per rig per frame (unmeasured on mobile); toe-out differences between skeletons become a small constant yaw.
+
 ## Open
 
 | # | Sev | Issue | Reproduce | Suspected cause | Plan |

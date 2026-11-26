@@ -738,6 +738,12 @@ func _arc_point(theta: float, lag: float) -> Array:
 	p.y += 0.22 * (1.0 - absf(d.y)) * clampf(-theta / ARC_MAX, 0.0, 1.0)
 	# keep the arm in front of the body
 	p.z = minf(p.z, 0.1)
+	# and the hand out of the wielder's own head: an overhead wind-up passes above and in front of the helm, not through it
+	var helm := Vector3(0, 1.74 - hunch * 0.3, 0.04)
+	var off := p - helm
+	if off.length() < 0.34:
+		off.z = minf(off.z, -0.02)
+		p = helm + off.normalized() * 0.34
 	var b := (f * cos(theta + lag) + d * sin(theta + lag)).normalized()
 	return [p, b]
 

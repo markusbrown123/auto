@@ -52,6 +52,7 @@ var body: Node3D
 var chest: Node3D
 var head: Node3D
 var pelvis: Node3D
+var _relic: Node3D
 var seg := {}                 # name -> Node3D limb segment
 var weapon_r: Node3D
 var weapon_l: Node3D
@@ -91,8 +92,10 @@ func build(config: Dictionary, as_foe: bool) -> void:
 	pelvis = Node3D.new()
 	body.add_child(pelvis)
 	if cfg.get("witness", false):
-		# the Witness rides at the left hip, face outward
-		var relic := PropModel.scenery(pelvis, "res://assets/models/witness_relic.glb", 0.26, Vector3(-0.2, -0.06, -0.04), 100.0)
+		# the Witness rides behind the right hip, face outward
+		# (a child of the body, not of the pelvis node: the primitive pelvis is hidden when a generated model is worn)
+		var relic := PropModel.scenery(body, "res://assets/models/witness_relic.glb", 0.32, Vector3(0.2, 0.9, 0.1), 215.0)
+		_relic = relic
 		if relic:
 			var eye := OmniLight3D.new()
 			eye.light_color = Color("#ffb347")
@@ -954,6 +957,8 @@ func _pose() -> void:
 	if skin:
 		# authored motion where it exists: the walk cycle out of combat, and the fall when killed
 		_pick_clip()
+		if _relic:
+			_relic.position = pel + Vector3(0.19, -0.03, 0.11)      # behind the sword-side hip, where the duel camera sees it; moves with the hips
 		var hands: Dictionary = skin.drive({"pelvis": pel + Vector3(0, 0.06, 0), "pelvis_rot": Basis.from_euler(pelvis.rotation), "chest_rot": cb,
 			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l})
 		# weapons ride the model's real hands

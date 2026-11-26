@@ -300,6 +300,8 @@ func _dev_boot() -> void:
 		for id in ["w_knight_sword", "w_ashen_great", "w_headsman", "w_twin_fangs", "w_censer_sword", "s_garrison", "s_tower", "a_ash_chest", "a_black_helm", "a_vigil_chest", "a_garrison_legs", "r_ember", "x_bell"]:
 			Game.profile.inventory.append(id)
 	Game.profile.body = _args.get("body", "m")
+	if _args.has("witness"):
+		Game.profile.flags["witness_found"] = true
 	for id in str(_args.get("gear", "")).split(",", false):
 		if not Game.owns(id):
 			Game.profile.inventory.append(id)
@@ -476,6 +478,8 @@ func _dev_front(which: String) -> void:
 		Game.delete_slot(n)
 	Game.profile = Game.default_profile()
 	Game.profile.body = _args.get("body", "m")
+	if _args.has("witness"):
+		Game.profile.flags["witness_found"] = true
 	if _args.has("rich"):
 		Game.profile.merge({"gold": 4200, "shards": 30, "level": 14, "playtime": 11520.0, "name": "Maren",
 			"cleared": ["courtyard", "blackwood", "cathedral"], "flags": {"courtyard_gate": true},

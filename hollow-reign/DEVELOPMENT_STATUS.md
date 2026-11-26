@@ -56,6 +56,18 @@ Backlog with per-item status: `docs/DEVELOPMENT_BACKLOG.md`. Resume instructions
 - **Tests.** 2,727 rule checks. All five suites passed before the review fixes; only the rule suite has been re-run since. Visual regression script written, golden images not yet captured.
 - **Recordings.** `marketing/demos/` (rendered offline in software).
 
+## Final production brief pass 2026-11-26
+Scope and per-item status: section G of `docs/DEVELOPMENT_BACKLOG.md`.
+- **The Witness.** New companion: original relic design (model in game, worn at the hip once found), 95 lines in 69 scenes, a `Companion` system (once per save, cooldown, silent in fights, chatter setting), conversations in the Journal, stories in the Chronicle.
+- **Who speaks.** Creatures and dragons are silent and use a synthesised creature library (30 sounds); the Sentinel, Executioner and Gravewarden keep two to four lines; the Devourer speaks in fragments.
+- **Voices.** Four audition reels. The owner chose from reel 4: Witness = Hamish, male knight = Malcolm, narrator = Graham, pre-battle human challenge = Mortimer. Those roles are being re-recorded with a light room echo and no pitch shifting. Every other role is still the provisional cast. Nobody in the build environment has heard any of it.
+- **Front end.** Shared theme, launch, animated main menu, three save slots, character selection, loading screens, world map, chronicle, credits, victory and defeat screens. Captures: `marketing/ui_pass/`.
+- **Equipment and settings.** Armory with a live turning knight, preview before equipping, stat deltas, 3D weapon preview, rarity, sorting, favourites; forge sequence; mastery tiers; grouped settings with three real graphics presets and five audio sliders.
+- **Graphics.** Ribbon sword trails, pooled contact effects at the true contact point, material clamp shader, fill and rim lighting per region, restrained post, ambient particles within budget. Before/after: `marketing/gfx_pass/`. Numbers: `docs/PERFORMANCE_REPORT.md` (software renderer, not a device).
+- **Dragons.** Jaw, four-legged gait and breathing added to the bone driver; not yet reviewed in a capture.
+- **Not done from this brief:** real armour geometry, individually animated combos and directional sword clips (need a paid library), generated cinematics (opening, endings, boss introductions, memories), scripted quests, the ninth guardian, remaining soundtrack, end-to-end flow test, demonstration package, iOS export on a Mac.
+- **Budget.** The extra $100 the owner reported has not appeared on either account; spending is still inside the original cap (see `docs/SPENDING_LOG.md`).
+
 ## Campaign roll-out 2026-11-26 (same pass, later)
 - **Regions.** All six regions that were primitive geometry are now built from generated kits (42 models, $12.60): Cathedral, Crypt, Roost, Citadel, Deep, Throne. Captures: `marketing/region_*_kit.png`. Duel frames are 231k–298k triangles in them.
 - **Dragons.** Veyrath, Skeldra and the new optional Azhurion are generated, quadruped-rigged models driven in fights (neck, claws, tail, wings). Mouths do not open and legs do not step: the auto-rig has no jaw and no walk is authored.

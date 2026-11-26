@@ -53,7 +53,7 @@ func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
 			Game.profile = preview
 		look = Duel.player_look()
 		Game.profile = real
-		if tint != "":
+		if tint != "" and look.has("skin_tint"):      # a suit with its own model keeps its own colours
 			look["metal"] = tint
 			look["skin_tint"] = tint
 	rig.build(look, false)

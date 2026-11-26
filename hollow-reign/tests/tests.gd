@@ -834,10 +834,11 @@ func t_companion() -> void:
 			exist = exist and d.lines.has(lid)
 			if str(d.lines[lid].speaker) == "witness":
 				witness_lines += 1
-				unrecorded = unrecorded and d.lines[lid].get("recorded", true) == false
+				# a Witness line is either marked text-only or has a take on disk: never a claimed take that is missing
+				unrecorded = unrecorded and (d.lines[lid].get("recorded", true) == false or FileAccess.file_exists("res://assets/audio/vo/%s.ogg" % lid))
 	ok(exist, "every scene and line the Companion refers to exists")
 	ok(placed, "companion scenes sit at real stages and real guardians")
-	ok(unrecorded and witness_lines >= 60, "the Witness's lines are all marked not recorded (%d)" % witness_lines)
+	ok(unrecorded and witness_lines >= 60, "every Witness line is either recorded on disk or marked text-only (%d)" % witness_lines)
 	for r in Db.regions:
 		var b: Dictionary = c.boss.get(str(r.stages[6].options[0].foe), {})
 		ok(c.stage.has(r.id) and c.stage[r.id].size() >= 3 and not b.get("approach", []).is_empty() and not b.get("victory", []).is_empty(), "%s has Witness remarks, a boss approach and a victory line" % r.id)

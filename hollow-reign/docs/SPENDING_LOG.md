@@ -92,3 +92,10 @@ Running total: Tripo ≈ $56.15, Higgsfield ≈ $17.22, combined ≈ **$73.37 of
 The Tripo account has received $150 in total: $50 on 25 Nov and $100 on 26 Nov 00:16. The $100 is the "added graphics allocation" in the final brief; it was already in the wallet when that brief arrived, which is why no new top-up appeared. The owner has now authorised it as a dedicated graphics allocation on top of the original cap.
 - Original cap: $100 across both services. Spent so far ≈ $73.37, plus the voice recording now running (about $12 when complete) and 9 ground textures (about $0.40).
 - Graphics allocation: up to $100, on Tripo only (3D models, rigs). Tripo wallet shows $93.85. It cannot pay for Higgsfield images, video or speech.
+
+| Owner-approved cast recorded (Witness, male knight, narrator, Sentinel/Executioner): 144 takes on the Inworld model; one line refused by the content filter and left as a subtitle | Higgsfield speech | about 288 | about $11.80 |
+| 17 armour-set concepts (2k, from the knight references) + 9 ground textures | Higgsfield images | about 28 | about $1.15 |
+
+Higgsfield balance read after: 472.68 credits.
+**Original $100 cap:** Tripo $56.15 + Higgsfield ≈ $30.20 = about **$86.35**. About $13.65 left; Higgsfield (images, video, speech, music) can only be paid from this.
+**Graphics allocation ($100, Tripo only):** 16 armour-suit models in progress, $21.60 when complete.

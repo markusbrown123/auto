@@ -229,6 +229,12 @@ static func player_look() -> Dictionary:
 		"witness": bool(Game.profile.flags.get("witness", false)) or bool(Game.profile.flags.get("witness_found", false)),
 		"skin_tint": chest.get("look", {}).get("metal", "#aeb2b8"),
 	}
+	# real armour: a chest piece that has its own full suit model changes the knight's geometry, not just its colour
+	var suit := str(eq.chest).trim_prefix("a_").trim_suffix("_chest") if eq.chest != null else ""
+	var suit_path := "res://assets/models/knight_%s_%s.glb" % [str(Game.profile.get("body", "m")), suit]
+	if suit != "" and ResourceLoader.exists(suit_path):
+		look["skin"] = suit_path
+		look.erase("skin_tint")
 	var set_id: String = helm.get("look", {}).get("set", "")
 	if eq.helm == null:
 		look.helm = "hood"

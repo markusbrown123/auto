@@ -377,8 +377,7 @@
   "devourer_death_02": {
    "speaker": "player",
    "text": "Yes.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "devourer_death_03": {
    "speaker": "devourer",
@@ -389,8 +388,7 @@
   "devourer_death_04": {
    "speaker": "player",
    "text": "I don't know them. I'm sorry.",
-   "dir": "low",
-   "recorded": false
+   "dir": "low"
   },
   "monarch_intro_01": {
    "speaker": "monarch",
@@ -446,38 +444,32 @@
   "witness_discovery_02": {
    "speaker": "witness",
    "text": "Ah. At last. I had begun to suspect the dead were better company.",
-   "dir": "dry, unhurried, from the dark",
-   "recorded": false
+   "dir": "dry, unhurried, from the dark"
   },
   "witness_discovery_03": {
    "speaker": "player",
    "text": "What are you?",
-   "dir": "guarded",
-   "recorded": false
+   "dir": "guarded"
   },
   "witness_discovery_04": {
    "speaker": "witness",
    "text": "A witness to rather more than I would care to remember.",
-   "dir": "wry",
-   "recorded": false
+   "dir": "wry"
   },
   "witness_discovery_05": {
    "speaker": "witness",
    "text": "And to rather less than I ought. They took a good deal out of me before they shut that door.",
-   "dir": "lighter than it should be",
-   "recorded": false
+   "dir": "lighter than it should be"
   },
   "witness_discovery_06": {
    "speaker": "player",
    "text": "Who did?",
-   "dir": "direct",
-   "recorded": false
+   "dir": "direct"
   },
   "witness_discovery_07": {
    "speaker": "witness",
    "text": "If I knew that, I should be a happier ornament. Lift me down. I weigh very little, and I know this road.",
-   "dir": "brisk",
-   "recorded": false
+   "dir": "brisk"
   },
   "witness_discovery_08": {
    "speaker": "lyra",
@@ -488,206 +480,172 @@
   "witness_discovery_09": {
    "speaker": "witness",
    "text": "The voice in the walls disapproves of me. Good. We shall get on.",
-   "dir": "amused",
-   "recorded": false
+   "dir": "amused"
   },
   "w_courtyard_approach_01": {
    "speaker": "witness",
    "text": "So this is what became of the outer court. It had a grander name when it stood. I forget it. Mercifully.",
-   "dir": "surveying",
-   "recorded": false
+   "dir": "surveying"
   },
   "w_courtyard_gate_01": {
    "speaker": "witness",
    "text": "That gate once bore the banners of thirteen kings. Now look at it. Eternity has a peculiar sense of humour.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_courtyard_passage_01": {
    "speaker": "witness",
    "text": "They built the passage narrow so that one man could hold it. Nobody asked which man.",
-   "dir": "flat",
-   "recorded": false
+   "dir": "flat"
   },
   "w_courtyard_candle_01": {
    "speaker": "witness",
    "text": "A candle three hundred years alight. In my day we called that a miracle. We were paid to.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_sentinel_approach_01": {
    "speaker": "witness",
    "text": "He will ask your allegiance. There is no right answer. There never was one.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_sentinel_approach_02": {
    "speaker": "player",
    "text": "Then he will have the true one.",
-   "dir": "steady",
-   "recorded": false
+   "dir": "steady"
   },
   "w_sentinel_victory_01": {
    "speaker": "witness",
    "text": "One winter, they told him. I believe I wrote that order down. I hope I argued.",
-   "dir": "troubled, a memory returning",
-   "recorded": false
+   "dir": "troubled, a memory returning"
   },
   "w_blackwood_approach_01": {
    "speaker": "witness",
    "text": "The Blackwood. The lanterns are still lit. Somebody is paying the lamplighter, and I should like to know in what coin.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_blackwood_briars_01": {
    "speaker": "witness",
    "text": "Woven. Thorn does not plait itself. Somebody here still keeps a boundary.",
-   "dir": "noticing",
-   "recorded": false
+   "dir": "noticing"
   },
   "w_blackwood_bridge_01": {
    "speaker": "witness",
    "text": "There was a toll on this crossing, and a clerk. He counted heads going in. He did not count them coming out.",
-   "dir": "a memory, unwelcome",
-   "recorded": false
+   "dir": "a memory, unwelcome"
   },
   "w_blackwood_gibbet_01": {
    "speaker": "witness",
    "text": "A gallows over the drinking water. There is the old kingdom entire, in one view.",
-   "dir": "sour",
-   "recorded": false
+   "dir": "sour"
   },
   "w_huntsman_approach_01": {
    "speaker": "witness",
    "text": "Someone has kept pace with us these three trees. A mortal, by the breathing. Be civil. He has earned his opinions.",
-   "dir": "low",
-   "recorded": false
+   "dir": "low"
   },
   "w_huntsman_victory_01": {
    "speaker": "witness",
    "text": "He was not wrong to fear what we were. Only late.",
-   "dir": "tired",
-   "recorded": false
+   "dir": "tired"
   },
   "w_executioner_approach_01": {
    "speaker": "witness",
    "text": "Every stump a block. He has not stopped working. He has only run short of the condemned.",
-   "dir": "grim",
-   "recorded": false
+   "dir": "grim"
   },
   "w_executioner_approach_02": {
    "speaker": "player",
    "text": "And now?",
-   "dir": "flat",
-   "recorded": false
+   "dir": "flat"
   },
   "w_executioner_approach_03": {
    "speaker": "witness",
    "text": "Now he has you. Do try to be a disappointment to him.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_executioner_victory_01": {
    "speaker": "witness",
    "text": "The court that passed those sentences was dissolved before your grandmother's grandmother. Nobody told the axe.",
-   "dir": "dry, sad",
-   "recorded": false
+   "dir": "dry, sad"
   },
   "w_cathedral_approach_01": {
    "speaker": "witness",
    "text": "I climbed these steps once, in a procession. I remember the incense. I do not remember what we were asking for.",
-   "dir": "a memory, half there",
-   "recorded": false
+   "dir": "a memory, half there"
   },
   "w_cathedral_censer_01": {
    "speaker": "witness",
    "text": "A censer that size is not for perfume. It is for covering the smell of something else.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_widow_approach_01": {
    "speaker": "witness",
    "text": "I know that bearing. Rebels stand straighter than kings. They have to.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_widow_approach_02": {
    "speaker": "player",
    "text": "She is waiting for me.",
-   "dir": "wary",
-   "recorded": false
+   "dir": "wary"
   },
   "w_widow_approach_03": {
    "speaker": "witness",
    "text": "She is waiting for someone. Find out whom before you draw.",
-   "dir": "pointed",
-   "recorded": false
+   "dir": "pointed"
   },
   "w_widow_victory_01": {
    "speaker": "witness",
    "text": "She yielded. In my day that took more courage than dying. It still does.",
-   "dir": "respect",
-   "recorded": false
+   "dir": "respect"
   },
   "w_cathedral_nave_01": {
    "speaker": "witness",
    "text": "The roof came down in the Rising. I was here. No. I was told I was here. The two are not the same, and I can no longer tell them apart.",
-   "dir": "a memory, uncertain",
-   "recorded": false
+   "dir": "a memory, uncertain"
   },
   "w_cathedral_choir_01": {
    "speaker": "witness",
    "text": "Still singing. That hymn has forty verses. I should not stay for the last.",
-   "dir": "uneasy",
-   "recorded": false
+   "dir": "uneasy"
   },
   "w_beast_approach_01": {
    "speaker": "witness",
    "text": "Stop. Listen. What breathes under that bronze was built in a laboratory.",
-   "dir": "low, certain",
-   "recorded": false
+   "dir": "low, certain"
   },
   "w_beast_approach_02": {
    "speaker": "player",
    "text": "What was it built for?",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_beast_approach_03": {
    "speaker": "witness",
    "text": "Nothing merciful.",
-   "dir": "flat",
-   "recorded": false
+   "dir": "flat"
   },
   "w_beast_victory_01": {
    "speaker": "witness",
    "text": "A workshop under an altar. I should like to say I am surprised. I think I signed for the candles.",
-   "dir": "dry, shaken",
-   "recorded": false
+   "dir": "dry, shaken"
   },
   "w_crypt_approach_01": {
    "speaker": "witness",
    "text": "Lamps under the water, and burning yet. Do you know, I helped consecrate this place. I cannot recall to whom.",
-   "dir": "a memory, dry",
-   "recorded": false
+   "dir": "a memory, dry"
   },
   "w_crypt_ossuary_01": {
    "speaker": "witness",
    "text": "Those are for show. The dead that mattered are kept lower down, and a great deal more carefully.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_crypt_sluice_01": {
    "speaker": "witness",
    "text": "Drain it, by all means. But they flooded the lower halls on purpose. One ought always to wonder why.",
-   "dir": "warning",
-   "recorded": false
+   "dir": "warning"
   },
   "w_crypt_door_01": {
    "speaker": "witness",
    "text": "That door. I have stood before it with a ledger. Names down one column. I cannot see the heading of the other.",
-   "dir": "a memory, troubled",
-   "recorded": false
+   "dir": "a memory, troubled"
   },
   "w_gravewarden_approach_01": {
    "speaker": "witness",
@@ -698,158 +656,132 @@
   "w_gravewarden_approach_02": {
    "speaker": "player",
    "text": "What does he keep?",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_gravewarden_approach_03": {
    "speaker": "witness",
    "text": "Ask him. He has waited long enough to be asked.",
-   "dir": "gentle",
-   "recorded": false
+   "dir": "gentle"
   },
   "w_gravewarden_victory_01": {
    "speaker": "witness",
    "text": "He remembered their names. Every one. I was paid to remember, and I cannot manage my own.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_roost_approach_01": {
    "speaker": "witness",
    "text": "Glazed stone. I have seen a wall run like wax before. Never from the outside.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_roost_mews_01": {
    "speaker": "witness",
    "text": "They called this the Mews. One learns a great deal about a court from the things it calls small.",
-   "dir": "wry",
-   "recorded": false
+   "dir": "wry"
   },
   "w_roost_chain_01": {
    "speaker": "witness",
    "text": "A feeding lift. The cage was for cattle. Mostly.",
-   "dir": "flat",
-   "recorded": false
+   "dir": "flat"
   },
   "w_roost_shells_01": {
    "speaker": "witness",
    "text": "Numbered shells. Somebody kept a tally. Somebody always does. It was usually me.",
-   "dir": "a memory, rueful",
-   "recorded": false
+   "dir": "a memory, rueful"
   },
   "w_wyrm_approach_01": {
    "speaker": "witness",
    "text": "There she is. Veyrath. They made her to end sieges, and then they ran out of walls.",
-   "dir": "hushed",
-   "recorded": false
+   "dir": "hushed"
   },
   "w_wyrm_approach_02": {
    "speaker": "player",
    "text": "Can it be killed?",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "w_wyrm_approach_03": {
    "speaker": "witness",
    "text": "Everything can be killed. Convincing it of that is the difficult part.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_wyrm_victory_01": {
    "speaker": "witness",
    "text": "She never once took an order. I envied her that. I believe I still do.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_citadel_approach_01": {
    "speaker": "witness",
    "text": "Dressed by the right, and frozen so. Weather has no sense of drill. Somebody gave a last command here.",
-   "dir": "grim",
-   "recorded": false
+   "dir": "grim"
   },
   "w_citadel_wall_01": {
    "speaker": "witness",
    "text": "This wall was never taken. It was closed, from within, and left.",
-   "dir": "plain",
-   "recorded": false
+   "dir": "plain"
   },
   "w_rimewyrm_approach_01": {
    "speaker": "witness",
    "text": "Something on a chain, down there. A chained thing in a king's cellar is never a pet.",
-   "dir": "low",
-   "recorded": false
+   "dir": "low"
   },
   "w_rimewyrm_approach_02": {
    "speaker": "player",
    "text": "Then what is it?",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "w_rimewyrm_approach_03": {
    "speaker": "witness",
    "text": "A decision he could not bring himself to make.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_rimewyrm_victory_01": {
    "speaker": "witness",
    "text": "It could have left at any hour. So could most of us.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_citadel_lift_01": {
    "speaker": "witness",
    "text": "This cold is made, not fallen. Somewhere beneath us a great deal of effort is spent keeping one man from thawing.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_citadel_solar_01": {
    "speaker": "witness",
    "text": "A queen sat at that window. I struck her name from the rolls with my own hand. I was ordered to. I think that is where I began to refuse.",
-   "dir": "a memory, hard-won",
-   "recorded": false
+   "dir": "a memory, hard-won"
   },
   "w_frostking_approach_01": {
    "speaker": "witness",
    "text": "I knew him. He is the only one of them who ever asked to stop.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_frostking_approach_02": {
    "speaker": "player",
    "text": "Did they let him?",
-   "dir": "direct",
-   "recorded": false
+   "dir": "direct"
   },
   "w_frostking_approach_03": {
    "speaker": "witness",
    "text": "Look at the door. He had to let himself.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_frostking_victory_01": {
    "speaker": "witness",
    "text": "Do better than we did, he says. He always set the mark where a man might reach it.",
-   "dir": "fond, tired",
-   "recorded": false
+   "dir": "fond, tired"
   },
   "w_deep_approach_01": {
    "speaker": "witness",
    "text": "No. I do not know this stair. I knew every stair they built. Either this was dug afterwards, or it was taken out of me.",
-   "dir": "unsettled",
-   "recorded": false
+   "dir": "unsettled"
   },
   "w_deep_names_01": {
    "speaker": "witness",
    "text": "Names, floor to roof. I cut the first of these. That was my office: to set down who a person was, before.",
-   "dir": "a memory, plain at last",
-   "recorded": false
+   "dir": "a memory, plain at last"
   },
   "w_deep_stair_01": {
    "speaker": "witness",
    "text": "Candle smoke. So this lay under your sanctuary the whole while. Your voice in the walls might have mentioned it.",
-   "dir": "pointed",
-   "recorded": false
+   "dir": "pointed"
   },
   "w_deep_stair_02": {
    "speaker": "lyra",
@@ -860,152 +792,127 @@
   "w_deep_stair_03": {
    "speaker": "witness",
    "text": "No. I do not suppose you were permitted to.",
-   "dir": "gentler",
-   "recorded": false
+   "dir": "gentler"
   },
   "w_deep_oaths_01": {
    "speaker": "witness",
    "text": "They swore here to keep the stored safe. I administered the oath. It was a good oath. It deserved better men.",
-   "dir": "a memory, bitter",
-   "recorded": false
+   "dir": "a memory, bitter"
   },
   "w_devourer_approach_01": {
    "speaker": "witness",
    "text": "Do not answer it, whatever it asks. It is not one voice, and not one of them is lying.",
-   "dir": "low, urgent",
-   "recorded": false
+   "dir": "low, urgent"
   },
   "w_devourer_approach_02": {
    "speaker": "player",
    "text": "Who were they?",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_devourer_approach_03": {
    "speaker": "witness",
    "text": "The ones we lost count of. I begin to think I kept the count.",
-   "dir": "ashamed",
-   "recorded": false
+   "dir": "ashamed"
   },
   "w_devourer_victory_01": {
    "speaker": "witness",
    "text": "Say what names you have. I will hold the rest, now that I remember how.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_throne_approach_01": {
    "speaker": "witness",
    "text": "The royal mile. Every face struck off. I approve the sentiment and regret the workmanship.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_throne_hooks_01": {
    "speaker": "witness",
    "text": "Thirteen banners hung in this room also. Count the hooks, if you doubt me.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_throne_crown_01": {
    "speaker": "witness",
    "text": "There. Now I have it. They did not shut me away for what I knew. They shut me away because I would not unwrite it.",
-   "dir": "a memory, whole",
-   "recorded": false
+   "dir": "a memory, whole"
   },
   "w_throne_guard_01": {
    "speaker": "witness",
    "text": "Unrelieved. Like the first one you met. It is the same order, you know. Only the handwriting differs.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_azhurion_approach_01": {
    "speaker": "witness",
    "text": "That is the first of them. The Last Wing. Nobody wrote down how to stop it. I looked.",
-   "dir": "hushed",
-   "recorded": false
+   "dir": "hushed"
   },
   "w_azhurion_approach_02": {
    "speaker": "player",
    "text": "Then how?",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "w_azhurion_approach_03": {
    "speaker": "witness",
    "text": "The usual way. Slowly, and at great personal cost.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_azhurion_victory_01": {
    "speaker": "witness",
    "text": "The oldest thing they built, and it ends in a doorway. There is a moral in that. I decline to draw it.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_monarch_approach_01": {
    "speaker": "witness",
    "text": "He will be reasonable. That is the danger of him. I served reasonable men all my life.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_monarch_approach_02": {
    "speaker": "player",
    "text": "And?",
-   "dir": "flat",
-   "recorded": false
+   "dir": "flat"
   },
   "w_monarch_approach_03": {
    "speaker": "witness",
    "text": "And here I hang at your belt. What is decided in there is yours to decide. I shall only witness it.",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "w_monarch_victory_01": {
    "speaker": "witness",
    "text": "Whatever you do next, I will set it down as it happened. That much I can still swear to.",
-   "dir": "steady",
-   "recorded": false
+   "dir": "steady"
   },
   "w_talk_mask_01": {
    "speaker": "player",
    "text": "The mask. Was it your face?",
-   "dir": "curious",
-   "recorded": false
+   "dir": "curious"
   },
   "w_talk_mask_02": {
    "speaker": "witness",
    "text": "It was my office. One wore it to set down a judgment, so that the record had no face to bribe.",
-   "dir": "plain",
-   "recorded": false
+   "dir": "plain"
   },
   "w_talk_mask_03": {
    "speaker": "witness",
    "text": "It amused them, I think, to leave me in it.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_sword_01": {
    "speaker": "player",
    "text": "This sword. They say it is enchanted.",
-   "dir": "doubtful",
-   "recorded": false
+   "dir": "doubtful"
   },
   "w_talk_sword_02": {
    "speaker": "witness",
    "text": "It is a tool nobody remembers how to make. That is all an enchantment has ever been.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_sword_03": {
    "speaker": "witness",
    "text": "Keep it clean. It will outlast us both, and it knows it.",
-   "dir": "wry",
-   "recorded": false
+   "dir": "wry"
   },
   "w_talk_lyra_01": {
    "speaker": "witness",
    "text": "Your Lyra says she has waited a very long time. Ask her how she knows how long.",
-   "dir": "needling",
-   "recorded": false
+   "dir": "needling"
   },
   "w_talk_lyra_02": {
    "speaker": "lyra",
@@ -1016,8 +923,7 @@
   "w_talk_lyra_03": {
    "speaker": "witness",
    "text": "From inside? One cannot count from inside. I tried.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_lyra_04": {
    "speaker": "lyra",
@@ -1028,62 +934,52 @@
   "w_talk_return_01": {
    "speaker": "player",
    "text": "I die, and I wake here. What does that make me?",
-   "dir": "low",
-   "recorded": false
+   "dir": "low"
   },
   "w_talk_return_02": {
    "speaker": "witness",
    "text": "Persistent. I would not look for a grander word just yet.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_return_03": {
    "speaker": "witness",
    "text": "I watched men buy that trick with whole kingdoms. You seem to have it on loan. Mind the lender.",
-   "dir": "serious",
-   "recorded": false
+   "dir": "serious"
   },
   "w_talk_smith_01": {
    "speaker": "player",
    "text": "Orren does not trust you.",
-   "dir": "even",
-   "recorded": false
+   "dir": "even"
   },
   "w_talk_smith_02": {
    "speaker": "witness",
    "text": "Sensible. His line kept the old craft alive by trusting nobody in a mask.",
-   "dir": "approving",
-   "recorded": false
+   "dir": "approving"
   },
   "w_talk_smith_03": {
    "speaker": "witness",
    "text": "I should like him, if he would stop looking at my rivets.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_kings_01": {
    "speaker": "player",
    "text": "Thirteen kings. Did you know them?",
-   "dir": "curious",
-   "recorded": false
+   "dir": "curious"
   },
   "w_talk_kings_02": {
    "speaker": "witness",
    "text": "I knew eleven. One died too early to matter. One I have been made to forget.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_kings_03": {
    "speaker": "player",
    "text": "Which one?",
-   "dir": "direct",
-   "recorded": false
+   "dir": "direct"
   },
   "w_talk_kings_04": {
    "speaker": "witness",
    "text": "If I could tell you that, they would have done poor work.",
-   "dir": "wry",
-   "recorded": false
+   "dir": "wry"
   },
   "w_talk_people_01": {
    "speaker": "lyra",
@@ -1094,8 +990,7 @@
   "w_talk_people_02": {
    "speaker": "witness",
    "text": "They were volunteers. That is worse, and she knows it.",
-   "dir": "flat",
-   "recorded": false
+   "dir": "flat"
   },
   "w_talk_people_03": {
    "speaker": "lyra",
@@ -1106,8 +1001,7 @@
   "w_talk_people_04": {
    "speaker": "witness",
    "text": "They were. By persons like me, in rooms like this. I merely wrote it down neatly.",
-   "dir": "unsparing",
-   "recorded": false
+   "dir": "unsparing"
   },
   "w_talk_silence_01": {
    "speaker": "lyra",
@@ -1118,8 +1012,7 @@
   "w_talk_silence_02": {
    "speaker": "witness",
    "text": "Nothing that size comes without warning. Somebody was warned. Somebody always is, and thanked, and filed.",
-   "dir": "certain",
-   "recorded": false
+   "dir": "certain"
   },
   "w_talk_silence_03": {
    "speaker": "lyra",
@@ -1130,20 +1023,17 @@
   "w_talk_silence_04": {
    "speaker": "witness",
    "text": "No. That is rather my point about records.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_prayer_01": {
    "speaker": "player",
    "text": "You prayed in that cathedral.",
-   "dir": "probing",
-   "recorded": false
+   "dir": "probing"
   },
   "w_talk_prayer_02": {
    "speaker": "witness",
    "text": "I attended. It is not the same. The gods sat in the front pew, taking note of who knelt.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "w_talk_stored_01": {
    "speaker": "lyra",
@@ -1154,8 +1044,7 @@
   "w_talk_stored_02": {
    "speaker": "witness",
    "text": "Believe it, then. I have read the ledgers. Some of those minds were filed already broken.",
-   "dir": "gentle, unyielding",
-   "recorded": false
+   "dir": "gentle, unyielding"
   },
   "w_talk_stored_03": {
    "speaker": "lyra",
@@ -1166,44 +1055,37 @@
   "w_talk_stored_04": {
    "speaker": "witness",
    "text": "No. On that, at least, we agree.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_talk_refusal_01": {
    "speaker": "witness",
    "text": "It has come back, a little. There was a list. Places, and what was done in them.",
-   "dir": "slow",
-   "recorded": false
+   "dir": "slow"
   },
   "w_talk_refusal_02": {
    "speaker": "player",
    "text": "And you were told to erase it.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "w_talk_refusal_03": {
    "speaker": "witness",
    "text": "Seventeen times they tidied the past, and I held the pen. The eighteenth I would not.",
-   "dir": "plain",
-   "recorded": false
+   "dir": "plain"
   },
   "w_talk_choice_01": {
    "speaker": "player",
    "text": "When we reach the capital. What would you do?",
-   "dir": "direct",
-   "recorded": false
+   "dir": "direct"
   },
   "w_talk_choice_02": {
    "speaker": "witness",
    "text": "I shall not tell you. I spent a lifetime telling the powerful that what they wished for was wise.",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "w_talk_choice_03": {
    "speaker": "witness",
    "text": "Choose. I will see it remembered correctly. It is the only gift I have left.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   }
  },
  "scenes": {

@@ -92,8 +92,8 @@ Next actions, in order:
 | G7 | Sixteen combos individually animated | TODO — limited by owned clips; see ANIMATION_SOURCES |
 | G8 | Dragons: jaw, walk, wing fold/flap, death | TODO |
 | G9 | Creature sound libraries; layered combat effects; interface sounds | TODO |
-| G10 | Voice: third reel cast by character (Witness first), no blanket pitch shift; then rewrite and record | TODO — reel, then BLOCKED on owner |
-| G11 | Real modular armour geometry (8 named sets × 2 bodies) | BLOCKED on budget: generated whole-body sets cost about $1.35 each ($21.60 for all) and the added allocation is not yet visible |
+| G10 | Voice: third reel cast by character (Witness first), no blanket pitch shift; then rewrite and record | DOING — owner chose from reel 4: Witness = Hamish, male knight = Malcolm, narrator = Graham, pre-battle human = Mortimer; those 144 lines are recorded (one refused by the content filter). Still provisional and awaiting the owner: Lyra, female knight, Orren, Monarch, Widow, Frostbound King, Huntsman, Gravewarden, Archivist, Devourer |
+| G11 | Real modular armour geometry (8 named sets × 2 bodies) | DOING — allocation confirmed on Tripo; 16 concepts made from the knight references, 16 suit models generating (`tools/armor_sets.py`); the game swaps the knight model by equipped chest piece. Per-slot pieces (helm, gauntlets, legs separately) are not modular: a suit is one model |
 | G12 | Directed endings, opening, awakening, memories, technology revelation, boss intros and defeats | TODO — in-engine first; generated footage needs the added allocation |
 | G13 | Scripted quests | TODO |
 | G14 | Ninth guardian design | TODO |

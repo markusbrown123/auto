@@ -190,7 +190,10 @@ static func scenery(parent: Node3D, path: String, height: float, pos: Vector3, y
 	root.position = -Vector3((lo2.x + hi2.x) * 0.5, lo2.y, (lo2.z + hi2.z) * 0.5) * k
 	return holder
 
-static func shield(parent: Node3D, path: String, height: float = 0.82) -> bool:
+## The fitted model's decorated face is toward +Z (toward a viewer in front of an unturned piece: the item viewers).
+## `face_out` turns it to -Z, the side a shield's face is on everywhere on a fighter: away from the bearer, as the
+## hand-modelled shields are built (GearModel).
+static func shield(parent: Node3D, path: String, height: float = 0.82, face_out: bool = false) -> bool:
 	var root := _instance(path)
 	if root == null:
 		return false
@@ -199,5 +202,7 @@ static func shield(parent: Node3D, path: String, height: float = 0.82) -> bool:
 	var centre: Vector3 = (f.lo + f.hi) * 0.5
 	parent.add_child(root)
 	root.transform = Transform3D(Basis.IDENTITY.scaled(Vector3.ONE * k), -(centre * k)) * Transform3D(f.basis, Vector3.ZERO)
+	if face_out:
+		root.transform = Transform3D(Basis(Vector3.UP, PI), Vector3.ZERO) * root.transform
 	Look.sanitise(root, "weapon")
 	return true

@@ -569,7 +569,7 @@ func set_shield(look) -> void:
 		_sh_hw = float(h.hw)
 		_sh_hh = float(h.hh)
 		return
-	if PropModel.exists(str(look.get("model", ""))) and PropModel.shield(shield, str(look.model)):
+	if PropModel.exists(str(look.get("model", ""))) and PropModel.shield(shield, str(look.model), 0.82, not old_look):
 		return
 	var m := StandardMaterial3D.new()
 	m.albedo_color = Color(str(look.get("color", "#4a3a2a")))
@@ -899,6 +899,7 @@ func _process(delta: float) -> void:
 	_t += dt
 	_parry_t = maxf(0.0, _parry_t - dt)
 	_au_tick(dt)
+	_present_tick(dt)
 	# stride phase advances with ground actually covered, so feet never slide
 	var moved := global_position.distance_to(_last_world) / maxf(scale.x, 0.01)
 	_last_world = global_position
@@ -1281,7 +1282,19 @@ func _fit_props(hands: Dictionary) -> void:
 	if shield:
 		var fore := skin.frame("LeftForeArm")
 		var held := Transform3D(shield.transform.basis, hands.l + Vector3(-0.02, 0, -0.07))
-		if _whole_w < 0.01:
+		var strap := _sh_gear != ""
+		var grip_at := Vector3.ZERO
+		if strap:
+			# A shield with a grip and a strap is worn, not floated: the hand closes on the bar, the forearm lies in the
+			# strap, so the board follows the forearm exactly (its own +X runs from the elbow to the hand) and stays as
+			# upright as that allows. Its face (-Z) is then the outside of the forearm, away from the bearer.
+			var x := (skin.point("LeftHand") - fore.origin).normalized()
+			var up := Vector3.UP + Vector3(0, 0, 1) * x.y      # an arm let hang carries the board on its side, face outward
+			up = up - x * up.dot(x)
+			up = up.normalized() if up.length() > 0.05 else Vector3(0, 0, -1)
+			grip_at = skin.grip("Left", up)
+			held = Transform3D(Basis(x, up, x.cross(up)), grip_at)
+		elif _whole_w < 0.01:
 			_shield_local = fore.affine_inverse() * held
 		else:
 			# strapped to the forearm: where a whole-body clip takes the arm, the shield goes
@@ -1300,22 +1313,35 @@ func _fit_props(hands: Dictionary) -> void:
 					strapped = Transform3D(Basis(up.cross(-out).normalized(), up, -out), mid + out * 0.07)
 			held = held.interpolate_with(strapped, _whole_w)
 		# the board is kept off the head and trunk: moved away from them by however far its nearest point is inside
+		var board := Transform3D(held.basis, held * _sh_c)
+		var board0 := board.origin
 		for c2: Array in _arm_caps("Right") + [caps[2], caps[4], caps[0], caps[1]]:
-			var q2: Vector3 = Geometry3D.get_closest_point_to_segment(held.origin, c2[0], c2[1])
-			var l2 := held.affine_inverse() * q2
-			var e2 := l2.x * l2.x / 0.078 + l2.y * l2.y / 0.176
-			var on_board := held * (Vector3(l2.x, l2.y, 0) / maxf(1.0, sqrt(e2)))
+			var q2: Vector3 = Geometry3D.get_closest_point_to_segment(board.origin, c2[0], c2[1])
+			var l2 := board.affine_inverse() * q2
+			var e2 := l2.x * l2.x / (_sh_hw * _sh_hw + 0.005) + l2.y * l2.y / (_sh_hh * _sh_hh + 0.008)
+			var on_board := board * (Vector3(l2.x, l2.y, 0) / maxf(1.0, sqrt(e2)))
 			var r2: float = float(c2[2]) + 0.02
 			var v2 := on_board - q2
 			if v2.length() < r2:
-				var away := v2.normalized() if v2.length() > 0.005 else -held.basis.z.normalized()
-				held.origin += away * (r2 - v2.length())
+				var away := v2.normalized() if v2.length() > 0.005 else -board.basis.z.normalized()
+				board.origin += away * (r2 - v2.length())
 		# no part of the rim under the floor
 		var low := 1e9
 		for c: Vector3 in SHIELD_RIM:
-			low = minf(low, (held * c).y)
+			low = minf(low, (board * Vector3(c.x * _sh_hw / 0.27, c.y * _sh_hh / 0.41, 0)).y)
 		if low < 0.015:
-			held.origin.y += 0.015 - low
+			board.origin.y += 0.015 - low
+		var shift := board.origin - board0
+		if strap and shift.length() > 0.003:
+			# the arm goes with the board it is strapped to (the hand never leaves the bar)
+			shift = shift.limit_length(0.16)
+			skin.reach_hand("Left", skin.point("LeftHand") + shift + (grip_at - skin.point("LeftHand")) * 0.0)
+			var x2 := (skin.point("LeftHand") - skin.point("LeftForeArm")).normalized()
+			var up2 := held.basis.y - x2 * held.basis.y.dot(x2)
+			up2 = up2.normalized() if up2.length() > 0.05 else held.basis.y
+			held = Transform3D(Basis(x2, up2, x2.cross(up2)), skin.grip("Left", up2))
+		else:
+			held.origin += shift
 		shield.transform = held
 	# --- right hand
 	var dir: Vector3 = weapon_r.transform.basis.y
@@ -1339,7 +1365,7 @@ func _fit_props(hands: Dictionary) -> void:
 	if not dir2.is_equal_approx(dir):
 		dir = dir2
 		pr = skin.grip("Right", dir)
-	weapon_r.transform = Transform3D(_basis_y(dir, Vector3(0, 0, -1) if absf(dir.z) < 0.9 else Vector3.RIGHT), pr)
+	weapon_r.transform = Transform3D(_held_basis("Right", dir), pr)
 	_last_dir_r = dir
 	# --- left hand
 	if two_handed:
@@ -1364,10 +1390,51 @@ func _fit_props(hands: Dictionary) -> void:
 		if not dl2.is_equal_approx(dl):
 			dl = dl2
 			pl = skin.grip("Left", dl)
-		weapon_l.transform = Transform3D(_basis_y(dl, Vector3(0, 0, -1) if absf(dl.z) < 0.9 else Vector3.RIGHT), pl)
+		weapon_l.transform = Transform3D(_held_basis("Left", dl), pl)
 	else:
 		weapon_l.position = hands.l
 	_fit_sheath()
+	_fit_fingers()
+
+## How a held weapon is turned about its own length. Hand-modelled gear has a true edge and a knuckle side (+X):
+## it lies over the knuckles of the hand that holds it, so a cut leads with the edge and a knuckle bow guards the
+## fingers. (A mirrored left-hand blade has its knuckle side on -X.) Fitted and built weapons keep the old rule.
+func _held_basis(side: String, dir: Vector3) -> Basis:
+	if _gear != "" and skin.grip_fwd.has(side):
+		var f: Vector3 = skin.grip_fwd[side]
+		var x := f - dir * f.dot(dir)
+		if x.length() > 0.1:
+			x = x.normalized() * (-1.0 if side == "Left" else 1.0)
+			return Basis(x, dir, x.cross(dir))
+	return _basis_y(dir, Vector3(0, 0, -1) if absf(dir.z) < 0.9 else Vector3.RIGHT)
+
+## Hands close on what they hold (only on a fighter carrying the new equipment: other models keep their own hands).
+var _curl_r := 1.0
+var _curl_l := 1.0
+func _fit_fingers() -> void:
+	if parts == null and _gear == "" and _sh_gear == "":
+		return
+	if str(cfg.get("weapon", "")) == "claws":
+		return
+	var away := _sheath_w >= 1.0 and _draw_dir == 0
+	var grab := 1.0
+	if _draw_dir != 0:
+		var u := clampf(_draw_t / AU_DRAW_TIME, 0.0, 1.0)
+		grab = smoothstep(DRAW_GRAB - 0.14, DRAW_GRAB, u if _draw_dir > 0 else 1.0 - u)
+	var want_r := (0.22 if away else lerpf(0.22, 1.0, grab)) * (1.0 - 0.85 * _present_open())
+	var want_l := want_r if (dual or two_handed) else (1.0 if shield else 0.22)
+	if shield and _present == "recall" and _present_shield:
+		want_l = 1.0 - 0.85 * _present_open()
+	_curl_r = lerpf(_curl_r, want_r, 0.4)
+	_curl_l = lerpf(_curl_l, want_l, 0.4)
+	skin.curl("Right", _curl_r)
+	skin.curl("Left", _curl_l)
+
+## The shield's board in its own space: where its centre is from the grip, and half its width and height.
+var _sh_gear := ""
+var _sh_c := Vector3.ZERO
+var _sh_hw := 0.27
+var _sh_hh := 0.41
 
 const SHIELD_RIM := [Vector3(0.27, 0.41, 0), Vector3(-0.27, 0.41, 0), Vector3(0.27, -0.41, 0), Vector3(-0.27, -0.41, 0), Vector3(0, -0.41, 0), Vector3(0, 0.41, 0)]
 
@@ -1424,7 +1491,7 @@ func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Ve
 
 ## A blade does not pass through the wielder's own shield: its point stays on the side of the board the hand is on.
 func _clear_shield(hand: Vector3, dir: Vector3, length: float) -> Vector3:
-	var st := shield.transform
+	var st := Transform3D(shield.transform.basis, shield.transform * _sh_c)
 	var n := st.basis.z.normalized()
 	var tip := hand + dir * length
 	var dh := (hand - st.origin).dot(n)
@@ -1432,7 +1499,7 @@ func _clear_shield(hand: Vector3, dir: Vector3, length: float) -> Vector3:
 	if absf(dh) < 0.02 or dh * dt > 0.0:
 		return dir
 	var cross := st.affine_inverse() * hand.lerp(tip, dh / (dh - dt))
-	if cross.x * cross.x / 0.09 + cross.y * cross.y / 0.2 > 1.0:
+	if cross.x * cross.x / (_sh_hw * _sh_hw + 0.017) + cross.y * cross.y / (_sh_hh * _sh_hh + 0.032) > 1.0:
 		return dir
 	return (tip + n * (signf(dh) * 0.03 - dt) - hand).normalized()
 
@@ -2005,6 +2072,12 @@ func is_sheathed() -> bool:
 ## Put the weapon away: at the left hip for one-handed swords, across the back for long blades. The hand carries it
 ## there and only then lets go. Returns the seconds it takes. `instant` for setting a scene.
 func sheath(instant: bool = false) -> float:
+	if _recalls() and not instant and _sheath_w < 1.0 and _dismiss_t <= 0.0 and is_inside_tree():
+		# a Recall weapon is not carried: it is taken apart in the hand
+		_present_stop()
+		for n: Node3D in _held_nodes(false):
+			_dismiss_t = maxf(_dismiss_t, Recall.dismiss(n, {"short": true}).length())
+		return _dismiss_t
 	if skin == null or not skin.ok or instant or not authored:
 		_sheath_w = 1.0
 		_draw_dir = 0
@@ -2017,6 +2090,13 @@ func sheath(instant: bool = false) -> float:
 
 ## Take the weapon in hand: the hand goes to the grip first; the weapon does not move until the hand is on it.
 func draw(instant: bool = false) -> float:
+	if _recalls() and not instant and (_sheath_w > 0.0 or _dismiss_t > 0.0) and is_inside_tree():
+		return present_weapon("recall_short")
+	if _dismiss_t > 0.0 or not weapon_r.visible:
+		_dismiss_t = 0.0
+		for n: Node3D in _held_nodes(false):
+			Recall.cancel(n)
+			n.visible = true
 	if skin == null or not skin.ok or instant or not authored:
 		_sheath_w = 0.0
 		_draw_dir = 0
@@ -2026,6 +2106,118 @@ func draw(instant: bool = false) -> float:
 	_draw_dir = 1
 	_draw_t = 0.0
 	return AU_DRAW_TIME
+
+# --- presenting the weapon: Recall for the advanced pieces, a draw from the hip or back for the rest
+var _present := ""            # "recall" while a weapon or shield is materialising in the hand
+var _present_t := 0.0
+var _present_dur := 0.0
+var _present_shield := false
+var _dismiss_t := 0.0         # seconds left of a Recall weapon being taken apart in the hand
+static var _presented := {}   # opts.key -> true once shown in this session (a foe met again gets the short form)
+const PRESENT_OPEN := 0.3     # share of a Recall during which the receiving hand is open; it closes as the hilt forms
+const PRESENT_CLOSE := 0.48
+
+func _recalls() -> bool:
+	return bool(cfg.get("advanced", false)) and not old_look
+
+func _held_nodes(with_shield: bool) -> Array:
+	var out: Array = [weapon_r]
+	if dual:
+		out.append(weapon_l)
+	if with_shield and shield:
+		out.append(shield)
+	return out
+
+## 0..1: how far the receiving hand is open at this moment of a Recall.
+func _present_open() -> float:
+	if _present != "recall" or _present_dur <= 0.0 or bool(Game.settings.get("reduce_motion", false)):
+		return 0.0
+	return 1.0 - smoothstep(PRESENT_OPEN, PRESENT_CLOSE, _present_t / _present_dur)
+
+func _present_stop() -> void:
+	if _present == "recall":
+		for n: Node3D in _held_nodes(true):
+			Recall.cancel(n)
+			_awaken(n)
+	_present = ""
+
+func _awaken(n: Node3D) -> void:
+	if _recalls() and n != shield:
+		for c in n.get_children():
+			if c is Node3D and not (c is Recall):
+				GearModel.awaken(c, true)
+
+## Brings the weapon to the hand the right way for what it is and returns the seconds it takes (never blocks: a cut
+## thrown meanwhile simply finishes it).
+##   "auto"          Recall for an advanced weapon, a draw for an ordinary one. opts.key (a foe id): the full Recall the
+##                   first time that key is seen in a session, the short one after. opts.quick (no intro to fit in):
+##                   the short Recall, and nothing at all for an ordinary weapon, which is simply in the hand.
+##   "recall" / "recall_short"   the piece is rebuilt in the open hand, hilt first; the hand closes as the hilt forms
+##   "draw"          from the hip or the back (FighterRig.draw)        "none"   in the hand at once
+## opts.slot "shield": present the shield instead (the Armory). An advanced shield is summoned along with the weapon.
+## Recall itself takes its shorter, plainer form on the Performance preset and with reduce_motion (Recall.reduced).
+func present_weapon(style: String = "auto", opts: Dictionary = {}) -> float:
+	_present_stop()
+	var only_shield := str(opts.get("slot", "weapon")) == "shield"
+	var sh_adv: bool = shield != null and cfg.get("shield") is Dictionary and bool(cfg.shield.get("advanced", false)) and not old_look
+	if style == "auto":
+		var key := str(opts.get("key", ""))
+		var seen := key != "" and _presented.has(key)
+		if key != "":
+			_presented[key] = true
+		var quick := bool(opts.get("quick", false))
+		if _recalls() or (only_shield and sh_adv):
+			style = "recall_short" if (seen or quick) else "recall"
+		elif sh_adv:
+			style = "draw_recall_shield" if not quick else "recall_shield"
+		else:
+			style = "none" if quick else "draw"
+	if not is_inside_tree() or skin == null or not skin.ok:
+		style = "none"
+	_dismiss_t = 0.0
+	var nodes: Array = []
+	var dur := 0.0
+	match style:
+		"draw", "draw_recall_shield":
+			for n: Node3D in _held_nodes(false):
+				Recall.cancel(n)
+				n.visible = true
+			_sheath_w = 1.0
+			_draw_dir = 0
+			dur = draw()
+			if style == "draw_recall_shield":
+				nodes = [shield]
+		"recall_shield":
+			draw(true)
+			nodes = [shield]
+		"recall", "recall_short":
+			draw(true)
+			nodes = [shield] if only_shield else _held_nodes(sh_adv)
+		_:
+			draw(true)
+			return 0.0
+	for n: Node3D in nodes:
+		if n == null:
+			continue
+		var r := Recall.summon(n, {"short": style != "recall"})
+		_present = "recall"
+		_present_t = 0.0
+		_present_dur = maxf(_present_dur if n != nodes[0] else 0.0, r.length())
+		_present_shield = nodes.has(shield)
+	return maxf(dur, _present_dur if _present == "recall" else 0.0)
+
+func _present_tick(dt: float) -> void:
+	if _present == "recall":
+		_present_t += dt
+		if _present_t >= _present_dur + 0.05:
+			for n: Node3D in _held_nodes(true):
+				_awaken(n)
+			_present = ""
+	if _dismiss_t > 0.0:
+		_dismiss_t -= dt
+		if _dismiss_t <= 0.0:
+			_sheath_w = 1.0
+			_draw_dir = 0
 
 ## One cut for a screen that shows the fighter off (the Armory): `dir` a swipe name. Returns the seconds until the
 ## fighter is back in guard.

@@ -72,6 +72,30 @@ static func has_part(b: String, suit: String, slot: String) -> bool:
 static func needs(suit: String, slot: String) -> Array:
 	return LINKED.get(suit.get_slice("_", 0), {}).get(slot, [])
 
+## What a linked piece does when its companion slot holds another suit: "bring" puts the companion on as well (the
+## Vigil hood comes with its mantle), "yield" gives way to the companion's suit (Garrison pauldrons carry the top of
+## the Garrison breastplate, so on another cuirass that cuirass's own pauldrons are worn).
+const LINK_POLICY := {"vigil": "bring", "garrison": "yield"}
+
+## A loadout as it can really be worn: empty slots take the base body's own piece (there is no bare head, hand or
+## foot), a piece whose mesh does not exist falls back to it, and linked pieces are settled by LINK_POLICY.
+static func resolve(loadout: Dictionary) -> Dictionary:
+	var b := str(loadout.get("body", "m"))
+	var out := {}
+	for slot: String in SLOTS:
+		var suit := str(loadout.get(slot, ""))
+		out[slot] = suit if suit != "" and has_part(b, suit, slot) else host
+	for slot: String in SLOTS:
+		var suit: String = out[slot]
+		for other: String in needs(suit, slot):
+			if out[other] == suit:
+				continue
+			if str(LINK_POLICY.get(suit.get_slice("_", 0), "bring")) == "bring" and has_part(b, suit, other):
+				out[other] = suit
+			else:
+				out[slot] = out[other] if has_part(b, out[other], slot) else host
+	return out
+
 ## True when every worn piece has the companions it needs.
 func is_clean() -> bool:
 	for slot: String in worn:

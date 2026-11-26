@@ -52,3 +52,14 @@ Status as of 2026-11-25. The Godot 4.6 docs page could not be fetched (docs.godo
 - The `privacy/*_access_reasons` values are left at 0 (none selected). Godot itself touches file timestamps, disk space, system boot time and user defaults, so tick the matching reasons in the Export dialog (it shows them as checkboxes) before uploading, or App Store Connect will flag the missing privacy manifest entries.
 - `project.godot` sets landscape orientation, the Mobile renderer and ETC2/ASTC texture compression.
 - No iOS build has been produced. That needs a Mac with Xcode and an Apple Developer account.
+
+## Quick start: first build on your own iPhone, before the developer account is approved (added 2026-11-26)
+A free Apple ID "Personal Team" in Xcode can install to your own phone (the app expires after 7 days; TestFlight and the App Store need the paid programme). Not yet tried by anyone on this project.
+1. Mac: `sudo xcodebuild -license accept` (done 2026-11-26), open Xcode once, install the iOS platform, Xcode > Settings > Accounts > add your Apple ID.
+2. iPhone: connect by cable, Trust, then Settings > Privacy & Security > Developer Mode > on, restart.
+3. Install Godot 4.6 (standard) and its export templates (Editor > Manage Export Templates).
+4. `git clone -b claude/hollow-reign-game-dev-srhrwr https://github.com/markusbrown123/auto.git`, open `auto/hollow-reign/project.godot` in Godot and let it import (several minutes the first time).
+5. The purchased animation source files are not needed to build: the baked library `assets/anim/humanoid.res` is in the repository.
+6. Project > Export > iOS: set a bundle identifier unique to you (a Personal Team cannot use one already registered), leave Team ID empty for now, Export Project to an empty folder with no spaces.
+7. Open the exported `.xcodeproj` in Xcode, target > Signing & Capabilities > Team: your Personal Team, Automatically manage signing. Select the iPhone, Run. On the phone: Settings > General > VPN & Device Management > trust the developer profile.
+8. Build only from a commit this project's status file marks as passing all suites.

@@ -29,6 +29,8 @@ var _detail: VBoxContainer
 var _info: VBoxContainer
 var _right: Control
 var _buttons := {}
+var _demo: Array = []
+var _clock := 0.0
 
 func _init(sanctuary: Node, start_mode: String = "Wares", start_item: String = "") -> void:
 	host = sanctuary
@@ -87,6 +89,12 @@ func _ready() -> void:
 	_detail.add_child(_info)
 	UI.corners(p, UI.GOLD_DIM, 12.0)
 	refresh()
+	for a in OS.get_cmdline_user_args():
+		if a.begins_with("--shop_demo="):
+			for st: String in a.trim_prefix("--shop_demo=").split(",", false):
+				var f := st.split(":")
+				if f.size() >= 2:
+					_demo.append([float(f[0]), f[1], f[2] if f.size() > 2 else ""])
 
 func leave() -> void:
 	if inspect and is_instance_valid(inspect):
@@ -433,3 +441,31 @@ func ask_sell(id: String) -> void:
 	dialog = UI.confirm(host.get("layer"), "Sell " + str(Db.item(id).name), "Orren gives %d gold. Its forge work goes with it." % Game.sell_price(id), "Sell", func():
 		if Game.sell(id):
 			Sfx.play("loot", -3.0))
+
+# ================================================================ scripted input for captures
+## --shop_demo=<t>:<action>[:<a>],...   sel:<id>  mode:<Wares|Materials|Sell>  filter:<n>  buy (as the button)  yes / no (the question)
+##   sell  equip  inspect  close  mat:<id> (one unit)  scroll:<pixels>
+func _process(delta: float) -> void:
+	_clock += delta
+	while not _demo.is_empty() and _clock >= float(_demo[0][0]):
+		var st: Array = _demo.pop_front()
+		var a := str(st[2])
+		match str(st[1]):
+			"sel": select(a)
+			"mode": set_mode(a)
+			"filter":
+				filter = int(a)
+				refresh()
+			"buy": ask_buy(sel)
+			"sell": ask_sell(sel)
+			"yes", "no":
+				if dialog and is_instance_valid(dialog):
+					var btns := dialog.find_children("*", "Button", true, false)
+					(btns[1 if str(st[1]) == "yes" else 0] as Button).pressed.emit()
+			"equip": Game.equip(sel)
+			"inspect": open_inspect()
+			"close":
+				if inspect and is_instance_valid(inspect):
+					inspect.queue_free()
+			"mat": Game.buy_material(a, 1)
+			"scroll": _scroll.scroll_vertical = int(a)

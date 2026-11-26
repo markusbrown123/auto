@@ -7,7 +7,9 @@ signal set_out(region_id: String, use_shortcut: bool)
 signal quit_to_title
 signal train
 
-const TABS := ["Journey", "Armory", "Blacksmith", "Character", "Journal", "Settings"]
+const TABS := ["Journey", "Armory", "Shop", "Blacksmith", "Character", "Journal", "Settings"]
+const TAB_LABEL := {"Blacksmith": "Forge"}     # the tab keeps its name for callers; the bar shows the shorter word
+const WIDE := ["Armory", "Shop", "Blacksmith"]  # tabs that use the whole width instead of the right-hand panel
 const GOOD := Color("#8fb37a")
 const BAD := Color("#c2574a")
 const CAM_POS := Vector3(2.5, 1.45, 3.4)
@@ -17,6 +19,10 @@ var backdrop: Backdrop
 var layer: CanvasLayer
 var content: Control
 var purse: Label
+var screen: Control             # the shop or the forge (src/ui/shop_screen.gd, forge_screen.gd), alive only while its tab is open
+var shop_mode := "Wares"
+var _gold_shown := -1.0         # the figure the purse is showing while it counts to the real one
+var _gold_tw: Tween
 var tab := "Journey"
 var tab_buttons := {}
 var sel_region := ""
@@ -29,7 +35,6 @@ var armory: ArmoryScreen        # the equipment screen (src/ui/armory/), alive o
 var _panel: Control             # the right-hand panel the other tabs fill; the armoury uses the whole width instead
 var _smith_focus := ""          # item the armoury sent to the forge: listed first there
 var _forging := false
-var _sell_confirm := ""
 var _dev := {}                  # capture harness: --item=<id> --mastery=<n> --smith=<mode> --forge=<id>
 
 func _ready() -> void:
@@ -40,12 +45,14 @@ func _ready() -> void:
 	Game.sync_mastery()
 	for a in OS.get_cmdline_user_args():
 		var kv: PackedStringArray = a.trim_prefix("--").split("=")
-		if kv[0] in ["item", "smith", "forge", "mastery"] and kv.size() > 1:
+		if kv[0] in ["item", "smith", "forge", "mastery", "shopmode", "gold", "mats", "edge", "mods", "shop_demo"] and kv.size() > 1:
 			_dev[kv[0]] = kv[1]
 	if _dev.has("mastery") and _dev.has("item"):
 		Game.profile.mastery[str(_dev.item)] = int(_dev.mastery)
 		Game.sync_mastery()
 	smith_mode = str(_dev.get("smith", smith_mode))
+	shop_mode = str(_dev.get("shopmode", shop_mode))
+	_dev_state()
 	if _dev.has("forge"):
 		get_tree().create_timer(1.2).timeout.connect(func(): _forge(str(_dev.forge)))
 	Sfx.music_for("hub", "sanctuary")
@@ -64,7 +71,7 @@ func _ready() -> void:
 	nav.add_theme_constant_override("separation", 6)
 	v.add_child(nav)
 	for t in TABS:
-		var b := UI.button(t, 17, 150)
+		var b := UI.button(str(TAB_LABEL.get(t, t)), 17, 122)
 		b.custom_minimum_size.y = 44
 		b.pressed.connect(func(): show_tab(t))
 		nav.add_child(b)
@@ -73,7 +80,7 @@ func _ready() -> void:
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	nav.add_child(gap)
-	purse = UI.label("", 19, UI.GOLD, "bold")
+	purse = UI.label("", 22, UI.GOLD, "bold")
 	purse.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	nav.add_child(purse)
 	# --- body: the knight stands on the left, the panel is on the right
@@ -120,18 +127,62 @@ func _on_profile() -> void:
 		_purse()
 		armory.on_profile()
 		return
+	if tab in ["Shop", "Blacksmith"] and screen:
+		# the shop and the forge keep their place too
+		_purse()
+		backdrop.refresh_knight()
+		screen.call("on_profile")
+		return
 	backdrop.refresh_knight()
 	show_tab(tab)
 
+## The purse counts to its new figure when gold is earned or spent, and warms for a moment.
 func _purse() -> void:
 	var p: Dictionary = Game.profile
-	purse.text = "LV %d      %d GOLD      %d SHARDS" % [p.level, p.gold, p.shards]
+	var gold := float(int(p.gold))
+	if _gold_shown < 0.0 or bool(Game.settings.reduce_motion) or is_equal_approx(gold, _gold_shown):
+		if _gold_tw:
+			_gold_tw.kill()
+		_gold_shown = gold
+		_purse_text(gold)
+		return
+	if _gold_tw:
+		_gold_tw.kill()
+	purse.add_theme_color_override("font_color", Color("#f2dfa8") if gold > _gold_shown else Color("#d9a58a"))
+	_gold_tw = create_tween()
+	_gold_tw.tween_method(_purse_text, _gold_shown, gold, clampf(absf(gold - _gold_shown) / 400.0, 0.35, 0.9)).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_gold_tw.tween_callback(func(): purse.add_theme_color_override("font_color", UI.GOLD))
+
+func _purse_text(gold: float) -> void:
+	_gold_shown = gold
+	purse.text = "%d GOLD      %d SHARDS" % [int(roundf(gold)), int(Game.profile.shards)]
 
 ## From the armoury's Upgrade: the forge, with that item at the head of the list.
 func open_forge(id: String) -> void:
 	smith_mode = "Upgrade"
 	_smith_focus = id
 	show_tab("Blacksmith")
+
+## Capture harness: a known purse and bench.  --gold=<n>  --mats=<id>:<n>,...  --edge=<weapon id>:<fights>
+##   --mods=<weapon id>:<track>[:<ore>],...   (forge work applied at once, paid for from a purse topped up for it)
+func _dev_state() -> void:
+	if _dev.has("gold"):
+		Game.profile.gold = int(_dev.gold)
+	for kv: String in str(_dev.get("mats", "")).split(",", false):
+		Game.add_material(kv.get_slice(":", 0), int(kv.get_slice(":", 1)))
+	for step: String in str(_dev.get("mods", "")).split(",", false):
+		var f := step.split(":")
+		var keep: Array = [Game.profile.gold, Game.profile.shards, Game.profile.materials.duplicate()]
+		Game.profile.gold = 99999
+		Game.profile.shards = 99
+		for m: String in Db.materials:
+			Game.profile.materials[m] = 99
+		Game.mod(f[0], f[1], f[2] if f.size() > 2 else "")
+		Game.profile.gold = keep[0]
+		Game.profile.shards = keep[1]
+		Game.profile.materials = keep[2]
+	if _dev.has("edge"):
+		Game.profile.edge[str(_dev.edge).get_slice(":", 0)] = int(str(_dev.edge).get_slice(":", 1))
 
 func show_tab(t: String) -> void:
 	tab = t
@@ -140,11 +191,14 @@ func show_tab(t: String) -> void:
 	if armory:
 		armory.leave()
 		armory = null
+	if screen:
+		screen.call("leave")
+		screen = null
 	for holder: Control in [content, stage]:
 		for c in holder.get_children():
 			holder.remove_child(c)
 			c.queue_free()
-	_panel.visible = t != "Armory"
+	_panel.visible = not WIDE.has(t)
 	backdrop.knight_yaw = PI * 0.92
 	backdrop.turn_knight(0.0)
 	if t != "Armory":
@@ -237,46 +291,6 @@ func _tab_journey() -> void:
 		det.add_child(sc)
 
 # ================================================================ Armory
-func _item_button(it: Dictionary, selected: bool, suffix: String = "") -> Button:
-	var lvl := Game.upgrade_level(it.id)
-	var name_text: String = it.name + (" +%d" % lvl if lvl > 0 else "")
-	var b := UI.button(name_text + suffix, 15, 0)
-	b.text = name_text + suffix
-	b.add_theme_font_override("font", UI.font("bold"))
-	b.add_theme_font_size_override("font_size", 18)
-	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
-	b.custom_minimum_size.y = 42
-	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.clip_text = true
-	var col := Db.rarity_color(it)
-	b.add_theme_color_override("font_color", col)
-	var sb := UI.box(Color(0.06, 0.06, 0.07, 0.85), UI.GOLD if selected else Color(0.2, 0.19, 0.17), 1, 2, 10)
-	sb.border_width_left = 4
-	sb.border_color = col if not selected else UI.GOLD
-	sb.content_margin_right = 78
-	b.add_theme_stylebox_override("normal", sb)
-	# rarity as a count of marks, and the favourite star: neither depends on colour alone
-	var marks := HBoxContainer.new()
-	marks.add_theme_constant_override("separation", 4)
-	marks.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	marks.set_anchors_and_offsets_preset(Control.PRESET_CENTER_RIGHT)
-	marks.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	marks.offset_right = -8
-	if Game.is_favourite(it.id):
-		marks.add_child(InvGlyph.new("star", UI.GOLD, 1, 13.0))
-	marks.add_child(InvGlyph.new("pips", col, Game.rarity_pips(it), 11.0))
-	b.add_child(marks)
-	return b
-
-func _sort_button() -> Button:
-	var mode := str(Game.profile.get("inv_sort", "equipped"))
-	var b := UI.button("Sort: " + Game.SORT_NAME[mode], 14, 230)
-	b.custom_minimum_size.y = 38
-	b.pressed.connect(func():
-		Game.set_sort(Game.SORTS[(Game.SORTS.find(mode) + 1) % Game.SORTS.size()])
-		show_tab(tab))
-	return b
-
 ## The equipment screen is its own scene (src/ui/armory/armory_screen.gd): a swipe carousel of the collection
 ## and the live knight wearing a preview. It fills the whole body of the hub; the right-hand panel is hidden for it.
 func _tab_armory() -> void:
@@ -286,25 +300,6 @@ func _tab_armory() -> void:
 		_dev.erase("item")
 	armory = ArmoryScreen.new(self, backdrop, sel_slot, item)
 	stage.add_child(armory)
-
-func _fav_button(id: String, width: float) -> Button:
-	var on := Game.is_favourite(id)
-	var fav := UI.button("    Favourite" if width > 100 else "", 14, width)
-	fav.custom_minimum_size.y = 46
-	fav.tooltip_text = "A favourite cannot be sold"
-	if on:
-		fav.add_theme_color_override("font_color", UI.GOLD)
-	var star := InvGlyph.new("star", UI.GOLD if on else UI.DIM, 1 if on else 0, 16.0)
-	star.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT if width > 100 else Control.PRESET_CENTER)
-	star.offset_left = 14 if width > 100 else -8
-	star.offset_right = star.offset_left + 16
-	star.offset_top = -8
-	star.offset_bottom = 8
-	fav.add_child(star)
-	fav.pressed.connect(func():
-		Game.toggle_favourite(id)
-		show_tab(tab))
-	return fav
 
 # ================================================================ Blacksmith
 ## Orren speaks the first time, then only now and then: at most once per two fights survived or lost.
@@ -323,99 +318,22 @@ func _orren_remark() -> void:
 
 func _tab_blacksmith() -> void:
 	_orren_remark()
-	var head := _row()
-	content.add_child(head)
-	var ttl := UI.title("Orren's Forge", 22)
-	ttl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	head.add_child(ttl)
-	if smith_mode != "Wares":
-		head.add_child(_sort_button())
-	var modes := _row()
-	content.add_child(modes)
-	for mname in ["Upgrade", "Wares", "Sell"]:
-		var b := UI.button(mname, 15, 150)
-		b.custom_minimum_size.y = 40
-		if mname == smith_mode:
-			b.add_theme_color_override("font_color", UI.GOLD)
-		b.pressed.connect(func():
-			smith_mode = mname
-			_sell_confirm = ""
-			show_tab("Blacksmith"))
-		modes.add_child(b)
-	var list := _scroll()
-	if smith_mode == "Upgrade":
-		var upgradable: Array = Game.sorted_items(["weapon", "shield", "helm", "chest", "gauntlets", "legs"])
-		if upgradable.has(_smith_focus):
-			upgradable.erase(_smith_focus)
-			upgradable.push_front(_smith_focus)
-		for id: String in upgradable:
-			var it: Dictionary = Db.item(id)
-			var lvl := Game.upgrade_level(it.id)
-			var row := _row()
-			var b := _item_button(it, id == _smith_focus, "   ◆" if Game.is_equipped(id) else "")
-			b.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			row.add_child(b)
-			if lvl >= Stats.MAX_UPGRADE:
-				var mx := UI.label("PERFECTED", 15, UI.GOLD, "bold")
-				mx.custom_minimum_size.x = 210
-				mx.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				row.add_child(mx)
-			else:
-				var c := Stats.upgrade_cost(it, lvl)
-				var up := UI.button("%d g  ·  %d sh" % [c.gold, c.shards], 14, 210)
-				up.custom_minimum_size.y = 42
-				up.disabled = not Game.can_upgrade(it.id)
-				up.pressed.connect(func(): _forge(id))
-				row.add_child(up)
-			list.add_child(row)
-	elif smith_mode == "Wares":
-		var stock := Game.shop_stock()
-		if stock.is_empty():
-			list.add_child(_wrap("The smith has nothing left to sell you. What remains must be taken.", 19))
-		for it in stock:
-			var row := _row()
-			var b := _item_button(it, false, "   %s" % Db.SLOT_NAME[it.slot].to_lower())
-			b.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			row.add_child(b)
-			var buy := UI.button("%d g" % it.price, 14, 140)
-			buy.custom_minimum_size.y = 42
-			buy.disabled = Game.profile.gold < int(it.price)
-			buy.pressed.connect(func():
-				Sfx.play("loot", -3.0)
-				Game.buy(it.id))
-			row.add_child(buy)
-			list.add_child(row)
-	else:
-		list.add_child(_wrap("Orren buys what you will not carry. He will not take what you wear, or anything you have marked as a favourite.", 17))
-		for id: String in Game.sorted_items():
-			var it: Dictionary = Db.item(id)
-			var row := _row()
-			var b := _item_button(it, false, "   ◆" if Game.is_equipped(id) else "")
-			b.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			row.add_child(b)
-			row.add_child(_fav_button(id, 46))
-			var why := Game.sell_block(id)
-			if why != "":
-				var kept := UI.label(why.to_upper(), 15, UI.GOLD_DIM, "bold")
-				kept.custom_minimum_size.x = 170
-				kept.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				row.add_child(kept)
-			else:
-				var asking := _sell_confirm == id
-				var sell := UI.button("Sure?  %d g" % Game.sell_price(id) if asking else "Sell  %d g" % Game.sell_price(id), 14, 170)
-				sell.custom_minimum_size.y = 42
-				if asking:
-					sell.add_theme_color_override("font_color", BAD)
-				sell.pressed.connect(func():
-					if _sell_confirm == id:
-						_sell_confirm = ""
-						Sfx.play("loot", -3.0)
-						Game.sell(id)
-					else:
-						_sell_confirm = id
-						show_tab("Blacksmith"))
-				row.add_child(sell)
-			list.add_child(row)
+	var fs := ForgeScreen.new(self, _smith_focus)
+	if smith_mode == "Patterns":
+		fs.mode = "Patterns"
+	screen = fs
+	stage.add_child(fs)
+
+## Orren's counter: wares (with what is still locked), the materials stall, and what he buys.
+func _tab_shop() -> void:
+	_orren_remark()
+	var item := ""
+	if _dev.has("item"):
+		item = str(_dev.item)
+		_dev.erase("item")
+	var sh := ShopScreen.new(self, shop_mode, item)
+	screen = sh
+	stage.add_child(sh)
 
 ## What the upgrade changed, as [label, before, after, +delta] rows for the forge's reveal.
 func _upgrade_rows(it: Dictionary, lvl: int, before: Dictionary, after: Dictionary) -> Array:
@@ -428,6 +346,8 @@ func _upgrade_rows(it: Dictionary, lvl: int, before: Dictionary, after: Dictiona
 		rows.append(["Defence", "%.1f" % (float(it.defense) * a), "%.1f" % (float(it.defense) * b), "+%.1f" % (float(it.defense) * 0.1)])
 	if it.slot == "shield":
 		rows.append(["Guard", "%.0f%%" % ((float(it.block) + 0.03 * lvl) * 100.0), "%.0f%%" % ((float(it.block) + 0.03 * (lvl + 1)) * 100.0), "+3%"])
+		if it.has("blocks") and (lvl + 1) / 2 > lvl / 2:
+			rows.append(["Blocks", str(int(it.blocks) + lvl / 2), str(int(it.blocks) + (lvl + 1) / 2), "+1"])
 	if Game.is_equipped(it.id):
 		if it.slot == "weapon":
 			rows.append(["Your attack", "%.1f" % before.attack, "%.1f" % after.attack, "+%.1f" % (float(after.attack) - float(before.attack))])
@@ -435,17 +355,56 @@ func _upgrade_rows(it: Dictionary, lvl: int, before: Dictionary, after: Dictiona
 			rows.append(["Damage guarded", "%.1f%%" % (float(before.mitigation) * 100.0), "%.1f%%" % (float(after.mitigation) * 100.0), "+%.1f%%" % ((float(after.mitigation) - float(before.mitigation)) * 100.0)])
 	return rows
 
+## The old one-button upgrade (a weapon's next blade tier, taking the ore step with it when it must).
 func _forge(id: String) -> void:
 	if _forging or not Game.can_upgrade(id):
 		return
 	var it: Dictionary = Db.item(id)
 	var lvl := Game.upgrade_level(id)
 	var before := Game.stats()
+	var mod_before = ItemModel.gear_mod(it) if it.slot == "weapon" else {}
 	_forging = true
+	_smith_focus = id
 	Game.upgrade(id)        # paid for and saved now; the sequence is only the telling of it
 	var rows := _upgrade_rows(it, lvl, before, Game.stats())
+	await _play_forge(ForgeSeq.new(backdrop, id, lvl + 1, rows, mod_before))
+
+## One step of forge work, asked for by the forge screen: `track` is "blade", "grip", "ore" or "sharpen" for a
+## weapon, "" for the level of a shield or an armour piece. Paid for and saved before the sequence plays.
+func forge_work(id: String, track: String = "", ore_id: String = "") -> bool:
+	if track == "":
+		if _forging or not Game.can_upgrade(id):
+			return false
+		_forge(id)
+		return true
+	if _forging or not Game.can_mod(id, track, ore_id):
+		return false
+	var it: Dictionary = Db.item(id)
+	var rule: Dictionary = Db.equipment.mods[track]
+	var rows: Array = Game.mod_preview(id, track, ore_id)
+	var mod_before = ItemModel.gear_mod(it)
+	_forging = true
+	_smith_focus = id
+	Game.mod(id, track, ore_id)
+	var w := Game.weapon_mods(id)
+	var what := ""
+	var line := ""
+	match track:
+		"blade", "grip": what = "%s %s" % [rule.name, UI.roman(int(w[track]))]
+		"ore":
+			what = "Plain iron" if int(w.ore) == 0 else ("Steel" if int(w.ore) == 1 else str(Db.equipment.mods.ores.get(str(w.ore_id), {}).get("name", "Ore")) + (", cored" if int(w.ore) == 3 else ""))
+			if int(w.ore) == 2:
+				line = str(Db.equipment.mods.ores.get(str(w.ore_id), {}).get("text", ""))
+		"sharpen":
+			what = "A keen edge"
+			line = "For the next %d fights, win or lose." % int(w.edge)
+	if rows.is_empty() and line == "":
+		line = str(rule.text)
+	await _play_forge(ForgeSeq.new(backdrop, id, "%s · %s" % [it.name, what], rows.slice(0, 4), mod_before, line))
+	return true
+
+func _play_forge(seq: ForgeSeq) -> void:
 	frame.visible = false
-	var seq := ForgeSeq.new(backdrop, id, lvl + 1, rows)
 	layer.add_child(seq)
 	await seq.finished
 	_forging = false

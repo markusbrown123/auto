@@ -129,7 +129,6 @@ func refresh() -> void:
 		var b := GearUI.item_row(it, id == sel and mode == "Work", false, str(it.name) + (" +%d" % lvl if lvl > 0 else ""))
 		(b.get_theme_stylebox("normal") as StyleBoxFlat).content_margin_right = 34
 		if Game.is_equipped(id):
-			GearUI.right(b, "", UI.GOLD, "pips_one")
 			var d := InvGlyph.new("pips", UI.GOLD, 1, 14.0)
 			d.custom_minimum_size.x = 14.0
 			d.clip_contents = true
@@ -215,7 +214,7 @@ func _strip(title: String, at: int, cap: int, top: int, tier_note: String, effec
 		marks.custom_minimum_size.x = 16.0 * 0.95 * top
 		head.add_child(marks)
 	if tier_note != "":
-		head.add_child(UI.label(tier_note, GearUI.TEXT, UI.BONE if cap >= top or at < cap else GearUI.BAD.lerp(UI.BONE, 0.3)))
+		head.add_child(UI.label(tier_note, GearUI.TEXT, UI.BONE))
 	var fx := HFlowContainer.new()
 	fx.add_theme_constant_override("h_separation", 18)
 	fx.add_theme_constant_override("v_separation", -3)
@@ -297,7 +296,7 @@ func _track(t: String) -> PanelContainer:
 			fx.append("Allows blade %s and grip %s." % [UI.roman(int(rule.blade_cap[1])), UI.roman(int(rule.grip_cap[1]))])
 		elif t == "ore" and at >= 1 and at < top:
 			fx.append("Allows blade %s and grip %s." % [UI.roman(int(rule.blade_cap[at + 1])), UI.roman(int(rule.grip_cap[at + 1]))])
-	var strip := _strip(str(rule.name), at, cap, top if t != "sharpen" and t != "ore" else (top if t == "ore" else 0), tier_note, fx, Game.mod_cost(sel, t, ore), block, str(VERB[t]),
+	var strip := _strip(str(rule.name), at, cap, top, tier_note, fx, Game.mod_cost(sel, t, ore), block, str(VERB[t]),
 		func(): host.call("forge_work", sel, t, ore), extra)
 	track_btn[t] = strip.get_child(0).get_child(1)
 	return strip

@@ -36,7 +36,7 @@ func _ready() -> void:
 	for tab in Sanctuary.TABS:
 		s.show_tab(tab)
 		await get_tree().process_frame
-		ok(s.content.get_child_count() > 0 or (tab == "Armory" and s.armory != null), "sanctuary tab %s" % tab)
+		ok(s.content.get_child_count() > 0 or (tab == "Armory" and s.armory != null) or (tab in ["Shop", "Blacksmith"] and s.screen != null), "sanctuary tab %s" % tab)
 	for slot in Db.SLOTS:
 		s.sel_slot = slot
 		s.sel_item = ""

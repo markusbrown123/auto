@@ -109,3 +109,6 @@ The owner bought the Game Dev Hero bundle ($59.97, paid directly by the owner, o
 
 ## Benchmark knights v3 (2026-11-26)
 Two sleek starter-knight concepts (`art/concept/knight_{m,f}_v3.png`, about 2.5 Higgsfield credits) and two rigged models (`assets/models/knight_{m,f}_v3.glb`, 135 Tripo credits each = **$2.70**) from the Tripo graphics allocation. Graphics allocation spent so far: $21.60 + $2.70 = **$24.30**.
+
+## Opening road props (2026-11-26)
+Two concept images (about 2.5 Higgsfield credits) and two prop models, `env_road_gatehouse` and `env_road_dead_tree` (30 Tripo credits each = **$0.60**), from the Tripo graphics allocation. Allocation spent so far: **$24.90** of $100.

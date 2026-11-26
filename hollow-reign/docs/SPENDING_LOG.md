@@ -99,3 +99,7 @@ The Tripo account has received $150 in total: $50 on 25 Nov and $100 on 26 Nov 0
 Higgsfield balance read after: 472.68 credits.
 **Original $100 cap:** Tripo $56.15 + Higgsfield ≈ $30.20 = about **$86.35**. About $13.65 left; Higgsfield (images, video, speech, music) can only be paid from this.
 **Graphics allocation ($100, Tripo only):** 16 armour-suit models in progress, $21.60 when complete.
+
+## Higgsfield top-up authorised (owner, 2026-11-26)
+The Higgsfield balance rose by exactly 1,000 credits (472.68 → 1,472.68). The owner confirmed it is "meant to be used for better graphics, fixing bugs, clipping, characters in the floor, swords going through": a clean, professional result. It is spendable on Higgsfield work that serves that (images, textures, footage, speech), still logged item by item, and still not to be burned on things the existing tools can do.
+Most of what the owner listed (clipping, floor penetration, weapons passing through) is code and animation work that costs nothing to fix.

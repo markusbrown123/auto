@@ -586,5 +586,10 @@ for f in B:
     if "cls" not in f:
         f["cls"] = "Wyrm" if f["rig"].get("kind") == "dragon" else ("Soul-Eater" if f["rig"].get("wraith") else "Guardian")
     f["hp"] = round(f["hp"] * (3.5 if f["boss"] else 2.0))
+# generated dragon models, where they exist (the rig falls back to its built-in body otherwise)
+DRAGON_SKIN = {"cinder_wyrm": "dragon_veyrath", "cinder_whelp": "dragon_veyrath", "rimewyrm": "dragon_skeldra", "frost_drake": "dragon_skeldra", "azhurion": "dragon_azhurion"}
+for f in B:
+    if f["id"] in DRAGON_SKIN and os.path.exists("assets/models/%s.glb" % DRAGON_SKIN[f["id"]]):
+        f["rig"]["skin"] = "res://assets/models/%s.glb" % DRAGON_SKIN[f["id"]]
 json.dump({"bosses": B}, open("data/bosses.json","w"), indent=1)
 print(len(B), "foes")

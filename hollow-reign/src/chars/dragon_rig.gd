@@ -204,6 +204,8 @@ func build(config: Dictionary, _as_foe: bool) -> void:
 		if i % 2 == 0:
 			_cyl(tn, 0.0, 0.07, 0.3, Vector3(0, r2 + 0.06, 0), mat_hide, 4)
 		tail.append(tn)
+	if cfg.has("skin"):
+		_attach_skin(str(cfg.skin))
 	_solve(0.0)
 
 func _mi(parent: Node3D, mesh: Mesh, pos: Vector3, mat: Material) -> MeshInstance3D:
@@ -503,6 +505,16 @@ func _basis_y(y: Vector3) -> Basis:
 	x = x.normalized()
 	return Basis(x, y, x.cross(y))
 
+var skin: DragonSkin
+func _attach_skin(path: String) -> void:
+	skin = DragonSkin.attach(body, path)
+	if skin == null:
+		return
+	# the generated model replaces the primitive body; the old nodes stay as invisible handles for hit points and fire
+	for mi in body.find_children("*", "MeshInstance3D", true, false):
+		if not skin.root.is_ancestor_of(mi):
+			(mi as MeshInstance3D).visible = false
+
 func _pose() -> void:
 	body.position = _root + Vector3(0, _lift - _sink * 0.55 + sin(_clock * 1.3) * 0.04, 0)
 	body.rotation.x = _lift * 0.12
@@ -545,6 +557,10 @@ func _pose() -> void:
 		var sway := sin(_clock * 1.4 + u2 * 3.0) * 0.9 * u2
 		tail[i].position = Vector3(sway, 1.35 - u2 * 1.0 + sin(u2 * PI) * 0.3, 3.9 + i * 0.75)
 		tail[i].rotation.y = cos(_clock * 1.4 + u2 * 3.0) * 0.4 * u2
+	if skin:
+		var flap2 := sin(_clock * (7.0 if _far > 0.3 else 1.1)) * (0.4 if _far > 0.3 else 0.04)
+		skin.drive({"aim": _aim.normalized(), "reach": clampf((-_head.z - 1.2) / 1.5, -1.0, 1.0), "claw": _claw, "claw_side": _claw_side, "claw_x": _claw_x,
+			"spread": _spread, "flap": flap2, "clock": _clock, "sink": _sink})
 
 func _ik(a: Vector3, b: Vector3, la: float, lb: float, pole: Vector3) -> Vector3:
 	var d := b - a

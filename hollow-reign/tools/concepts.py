@@ -159,13 +159,25 @@ for _pre, (_style, _items) in KITS.items():
         B["env_%s_%s" % (_pre, _k)] = _v       # same framing and size as the Blackwood kit
         KIT_OF["env_%s_%s" % (_pre, _k)] = _style
 
+# ---- dragons: framed for a four-legged rig (all four feet down, wings folded back clear of the legs, neck and tail straight)
+DFRAME = (" The whole creature standing square on all four legs in a neutral pose, seen from the side and slightly in front, head level and looking forward, mouth closed, "
+          "neck stretched forward, tail held straight out behind, wings half folded and swept back above the body so the legs are clearly separate. "
+          "Even soft studio lighting, plain light grey background, entire creature in frame, realistic materials, high detail. No text, no logos, no rider.")
+DSTYLE = "Original creature design for a sci-fantasy action game: an engineered war dragon, sleek and powerful, part living animal and part ancient machine. "
+D = {
+ "dragon_veyrath": "A siege dragon with dark red and charcoal scales, heavy armoured forequarters, a blunt horned battering head, glowing orange seams between the scales as if lit from inside, scorched wing membranes.",
+ "dragon_skeldra": "A lean pale dragon with white and ice-blue scales rimed with frost, a long narrow head with swept-back horns, a broken length of heavy chain on an iron collar round its neck, torn translucent wing membranes, cold cyan eyes.",
+ "dragon_azhurion": "The oldest of them: a huge dragon more machine than animal, dark gunmetal armour plates bolted over black hide, tarnished gold filigree, exposed mechanical joints, wing frames of metal spars with dark membrane, white-gold light in its eyes and chest.",
+}
+C.update(D)
+
 def gen(cid):
     out = "art/concept/%s_v1.png" % cid
     if os.path.exists(out):
         return cid, "exists"
-    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else ((ESTYLE + C[cid] + EFRAME) if cid in E else ((KIT_OF.get(cid, BSTYLE) + C[cid] + EFRAME) if cid in B else (STYLE + C[cid] + FRAME)))
+    prompt = (DSTYLE + C[cid] + DFRAME) if cid in D else (WSTYLE + C[cid] + WFRAME) if cid in W else ((ESTYLE + C[cid] + EFRAME) if cid in E else ((KIT_OF.get(cid, BSTYLE) + C[cid] + EFRAME) if cid in B else (STYLE + C[cid] + FRAME)))
     r = subprocess.run(["higgsfield", "generate", "create", "gpt_image_2_6", "--prompt", prompt,
-                        "--aspect_ratio", "9:16" if cid in W and not cid.startswith("s_") else ("1:1" if (cid in E or cid in B) else "3:4"),
+                        "--aspect_ratio", "16:9" if cid in D else "9:16" if cid in W and not cid.startswith("s_") else ("1:1" if (cid in E or cid in B) else "3:4"),
                         "--resolution", "1k" if (cid in W or cid in E or cid in B) else "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True, stdin=subprocess.DEVNULL)
     url = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
     if not url.startswith("http"):

@@ -51,3 +51,16 @@ Account balance read after both: 931.25 credits (was about 998). One catalogue t
 Animation libraries added in this pass were free (CC0 / MIT); nothing was bought.
 
 Running total: Tripo ≈ $39.20, Higgsfield ≈ $11.55, combined ≈ **$50.75 of the $100 cap**.
+
+## Region kits and dragons (continuous pass, 2026-11-26)
+
+| Item | Service | Credits | Cost |
+|---|---|---|---|
+| 42 environment concepts for six regions + 3 dragon concepts | Higgsfield images | 35.25 | about $1.45 |
+| 42 static scenery models (cathedral, crypt, roost, citadel, deep, throne; 7 each) | Tripo, standard model, 6k faces | 1,260 | $12.60 |
+| Veyrath: low-poly model (rig charged on completion) | Tripo P model + quadruped rig | 110 + 25 | $1.35 |
+
+Balances read after: Tripo 9,685 credits with 25 held; Higgsfield 896 credits. No failed tasks, nothing regenerated.
+
+Running total: Tripo ≈ $53.15, Higgsfield ≈ $13.00, combined ≈ **$66.15 of the $100 cap**.
+Planned and not yet spent: two more dragons (Skeldra, Azhurion) at $1.35 each, only if the first one rigs and animates acceptably.

@@ -64,7 +64,12 @@ def main():
     c = wait(chk["task_id"])
     log["rig_check"] = {"credits": c.get("credits_consumed"), "output": c.get("output")}
     print("rig check:", log["rig_check"], flush=True)
-    rig = call("POST", "/animations/rig", {"input": gen["task_id"], "model": "v3.0-20260909", "rig_type": "biped", "spec": "mixamo", "out_format": "glb"})
+    json.dump(log, open("art/models/%s.json" % name, "w"), indent=1)      # keep the task ids even if a later step fails
+    rig_type = os.environ.get("RIG_TYPE", "biped")
+    body = {"input": gen["task_id"], "model": "v3.0-20260909", "rig_type": "biped", "spec": "mixamo", "out_format": "glb"}
+    if rig_type != "biped":
+        body = {"input": gen["task_id"], "model": "v2.5-20260210", "rig_type": rig_type, "out_format": "glb"}
+    rig = call("POST", "/animations/rig", body)
     r = wait(rig["task_id"])
     log["rig"] = {"task_id": rig["task_id"], "credits": r.get("credits_consumed")}
     url = r["output"].get("model_url") or next(v for v in r["output"].values() if isinstance(v, str) and v.startswith("http"))

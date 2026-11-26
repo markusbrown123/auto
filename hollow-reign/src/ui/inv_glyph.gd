@@ -96,3 +96,15 @@ static func paint(ci: CanvasItem, k: String, at: Vector2, h: float, color: Color
 			_poly(ci, at, h, [Vector2(0.5, 0.05), Vector2(0.84, 0.4), Vector2(0.5, 0.95), Vector2(0.16, 0.4)], color, w)
 			_poly(ci, at, h, [Vector2(0.16, 0.4), Vector2(0.5, 0.52), Vector2(0.84, 0.4)], Color(color, 0.6), w * 0.7, false)
 			ci.draw_line(at + Vector2(0.5, 0.52) * h, at + Vector2(0.5, 0.95) * h, Color(color, 0.6), w * 0.7, true)
+		"shoulders":
+			ci.draw_arc(at + Vector2(0.5, 0.62) * h, h * 0.42, PI, TAU, 16, color, w, true)
+			ci.draw_arc(at + Vector2(0.5, 0.62) * h, h * 0.26, PI, TAU, 12, Color(color, 0.6), w * 0.7, true)
+			_poly(ci, at, h, [Vector2(0.08, 0.62), Vector2(0.14, 0.9), Vector2(0.86, 0.9), Vector2(0.92, 0.62)], color, w, false)
+		"boots":
+			_poly(ci, at, h, [Vector2(0.3, 0.06), Vector2(0.62, 0.06), Vector2(0.6, 0.58), Vector2(0.92, 0.76), Vector2(0.92, 0.94), Vector2(0.26, 0.94)], color, w)
+			ci.draw_line(at + Vector2(0.26, 0.8) * h, at + Vector2(0.92, 0.8) * h, Color(color, 0.6), w * 0.7, true)
+		"keen":
+			# a whetted edge: a blade's point with a glint off it
+			_poly(ci, at, h, [Vector2(0.12, 0.92), Vector2(0.3, 0.4), Vector2(0.78, 0.08), Vector2(0.5, 0.62)], color, w)
+			ci.draw_line(at + Vector2(0.66, 0.5) * h, at + Vector2(0.94, 0.5) * h, color, w, true)
+			ci.draw_line(at + Vector2(0.8, 0.36) * h, at + Vector2(0.8, 0.64) * h, color, w, true)

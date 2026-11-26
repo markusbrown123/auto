@@ -22,9 +22,20 @@ var _turn := {"m": 0.0, "f": 0.0}
 var _v: VBoxContainer
 var _name: LineEdit
 var _typed := ""
+## The blade the knight wakes holding: one of Db.equipment.basic_swords. Read by whoever starts the journey
+## (Game.new_game's third argument) after `confirmed`.
+static var start_weapon := "w_rusted_sword"
+var weapon := "w_rusted_sword"
+var step := 0                     # 0: body, name, cloak · 1: the blade
+var carousel: ItemCarousel
+var _blade := {}                  # the labels and bars of step 1, refilled as the row moves
+var _sword_stats := {}
+var _demo: Array = []
+var _clock := 0.0
 
 func setup(b: Backdrop) -> void:
 	backdrop = b
+	start_weapon = "w_rusted_sword"
 	if backdrop.rig:
 		backdrop.rig.visible = false
 	for row: Array in BODIES:
@@ -73,12 +84,27 @@ func _ready() -> void:
 	hint.size_flags_vertical = Control.SIZE_SHRINK_END
 	m.add_child(hint)
 	_fill()
+	# capture harness: --step=blade [--sword=<id>] [--cs_demo=<t>:<sword id>,...]
+	for a in OS.get_cmdline_user_args():
+		var kv: PackedStringArray = a.trim_prefix("--").split("=")
+		if kv[0] == "sword" and kv.size() > 1 and Db.equipment.basic_swords.has(Db.canon(kv[1])):
+			weapon = Db.canon(kv[1])
+		elif kv[0] == "step" and kv.size() > 1 and kv[1] == "blade":
+			step = 1
+		elif kv[0] == "cs_demo" and kv.size() > 1:
+			for st: String in kv[1].split(",", false):
+				_demo.append([float(st.get_slice(":", 0)), st.get_slice(":", 1)])
+	if step == 1:
+		_fill()
 
 func _on_drag(e: InputEvent) -> void:
 	if e is InputEventScreenDrag and rigs.has(body):
 		_turn[body] = float(_turn[body]) + e.relative.x * 0.012
 
 func _process(delta: float) -> void:
+	_clock += delta
+	while not _demo.is_empty() and _clock >= float(_demo[0][0]) and carousel:
+		carousel.go_to(Db.equipment.basic_swords.find(Db.canon(str(_demo.pop_front()[1]))))
 	for b: String in rigs:
 		var rig: FighterRig = rigs[b]
 		if is_instance_valid(rig):
@@ -88,6 +114,11 @@ func _fill() -> void:
 	for c in _v.get_children():
 		_v.remove_child(c)
 		c.queue_free()
+	carousel = null
+	_v.custom_minimum_size.x = 440 if step == 0 else 600
+	if step == 1:
+		_fill_blade()
+		return
 	_v.add_child(UI.title("Who Wakes", 32))
 	_v.add_child(UI.ornament(440))
 	var forms := HBoxContainer.new()
@@ -153,11 +184,131 @@ func _fill() -> void:
 	var back := UI.button("Back", 18, 140)
 	back.pressed.connect(func(): closed.emit())
 	btns.add_child(back)
-	var go := UI.button("Rise", 22, 290)
+	var go := UI.button("Choose a Blade", 22, 290)
+	go.pressed.connect(func():
+		step = 1
+		_fill())
+	btns.add_child(go)
+
+# ================================================================ the blade
+## The duel's own numbers for a newly woken knight holding this sword.
+func _stats_for(id: String) -> Dictionary:
+	if not _sword_stats.has(id):
+		var p := Game.default_profile()
+		p.equipped.weapon = id
+		_sword_stats[id] = Stats.compute(p, Db.items, Db.classes)
+	return _sword_stats[id]
+
+func _fill_blade() -> void:
+	var swords: Array = Db.equipment.basic_swords
+	_v.add_child(UI.title("The Blade You Wake Holding", 28))
+	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.8), Color(0.3, 0.27, 0.2))
+	case.get_theme_stylebox("panel").set_content_margin_all(1)
+	case.custom_minimum_size = Vector2(600, 280)
+	_v.add_child(case)
+	carousel = ItemCarousel.new()
+	carousel.zoom = 1.3
+	var entries: Array = []
+	for id: String in swords:
+		var it: Dictionary = Db.item(id)
+		entries.append({"id": id, "slot": "weapon", "name": str(it.name), "color": Db.rarity_color(it).lerp(UI.BONE, 0.35), "metal": "#b8b4aa",
+			"locked": false, "dark": false, "equipped": false, "fav": false, "mod": {"blade_tier": 0, "grip_tier": 0, "ore": "iron", "keen": false}})
+	case.add_child(carousel)
+	carousel.set_entries(entries, maxi(swords.find(weapon), 0))
+	carousel.centred.connect(func(_i: int): _blade_detail())
+	carousel.settled.connect(func(_i: int): _blade_detail())
+	UI.corners(case, UI.GOLD_DIM, 12.0)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 12)
+	_v.add_child(head)
+	var nm := UI.title("", 26, UI.BONE)
+	nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(nm)
+	var role := UI.label("", 22, UI.GOLD, "head")
+	head.add_child(role)
+	var text := UI.wrapped("", 22, UI.BONE, 600)
+	text.custom_minimum_size.y = 58
+	_v.add_child(text)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 24)
+	grid.add_theme_constant_override("v_separation", 6)
+	_v.add_child(grid)
+	var bars := {}
+	for k: Array in [["attack", "Damage"], ["swing_time", "Speed"], ["swing_cost", "Economy"], ["crit_mult", "Stagger"]]:
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 0)
+		cell.custom_minimum_size.x = 288
+		var top := HBoxContainer.new()
+		var kl := UI.label(str(k[1]).to_upper(), 22, UI.DIM, "head")
+		kl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		top.add_child(kl)
+		var val := UI.label("", 22, UI.BONE, "bold")
+		top.add_child(val)
+		cell.add_child(top)
+		var bar := UI.bar(UI.GOLD_DIM.lerp(UI.GOLD, 0.5), 8)
+		bar.max_value = 1.0
+		cell.add_child(bar)
+		grid.add_child(cell)
+		bars[k[0]] = [bar, val]
+	var extra := UI.label("", 22, UI.GOLD_DIM.lightened(0.25))
+	_v.add_child(extra)
+	var btns := HBoxContainer.new()
+	btns.add_theme_constant_override("separation", 10)
+	_v.add_child(btns)
+	var back := UI.button("Back", 18, 140)
+	back.pressed.connect(func():
+		step = 0
+		_fill())
+	btns.add_child(back)
+	var go := UI.button("Rise", 22, 300)
 	go.pressed.connect(func():
 		Sfx.play("ui_confirm", -3.0)
+		start_weapon = weapon
 		confirmed.emit(heraldry, body, _typed.strip_edges()))
 	btns.add_child(go)
+	_blade = {"name": nm, "role": role, "text": text, "bars": bars, "extra": extra}
+	_blade_detail()
+
+## The bars are each sword against the best of the four, fuller always the better: every figure is one the duel reads.
+func _blade_detail() -> void:
+	if carousel == null or _blade.is_empty():
+		return
+	var swords: Array = Db.equipment.basic_swords
+	weapon = str(swords[clampi(carousel.index, 0, swords.size() - 1)])
+	var it: Dictionary = Db.item(weapon)
+	var st := _stats_for(weapon)
+	(_blade.name as Label).text = str(it.name).to_upper()
+	(_blade.role as Label).text = str(it.get("role", "")).to_upper()
+	var rt := str(it.get("role_text", it.get("desc", "")))
+	(_blade.text as Label).text = rt.get_slice(": ", 1).capitalize().left(1) + rt.get_slice(": ", 1).substr(1) if rt.contains(": ") else rt
+	var price_lo := 1 << 30
+	var price_hi := 0
+	for id: String in swords:
+		if id != weapon:
+			price_lo = mini(price_lo, int(Db.item(id).price))
+			price_hi = maxi(price_hi, int(Db.item(id).price))
+	for key: String in _blade.bars:
+		var best := 0.0
+		var lower: bool = key in ["swing_time", "swing_cost"]
+		for id: String in swords:
+			var v: float = float(_stats_for(id)[key])
+			best = maxf(best, 1.0 / v if lower else v)
+		var mine: float = float(st[key])
+		var bar: ProgressBar = _blade.bars[key][0]
+		var frac: float = (1.0 / mine if lower else mine) / best
+		if Game.settings.reduce_motion:
+			bar.value = frac
+		else:
+			create_tween().tween_property(bar, "value", frac, 0.25).set_trans(Tween.TRANS_SINE)
+		(_blade.bars[key][1] as Label).text = {"attack": "%.1f" % mine, "swing_time": "%.2fs a cut" % mine, "swing_cost": "%.1f stamina" % mine, "crit_mult": "×%.2f" % mine}[key]
+	var bits: Array = []
+	if float(st.guard_dmg) != 1.0:
+		bits.append("Guard damage ×%.1f" % float(st.guard_dmg))
+	if st.element != null:
+		bits.append("%s edge" % str(st.element).capitalize())
+	bits.append("Orren sells the other three: %d to %d gold" % [price_lo, price_hi])
+	(_blade.extra as Label).text = "  ·  ".join(bits)
 
 ## Takes the two knights away again and gives the scene back.
 func leave() -> void:

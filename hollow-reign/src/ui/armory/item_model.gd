@@ -11,8 +11,76 @@ static var _held := {}           # path -> PackedScene
 static var _order: Array = []    # least recently used first
 static var _pending := {}        # path -> true
 
+## Ore colours for the hand-modelled swords. Game.weapon_mods().visual names an ore as "iron", "steel", a material id
+## or "cored"; GearModel's own palette (gear_manifest "_mods".ores) is used where it has the metal, and two are added
+## here (plain iron, Hollow Glass) because the manifest has no entry for them.
+const ORE_GEAR := {"steel": "steel", "m_iron": "graphite", "m_silver": "silver", "m_scale": "bronze", "m_rime": "frost"}
+const ORE_OWN := {"iron": Color(0.8, 0.78, 0.76), "m_glass": Color(0.8, 0.74, 1.12)}
+
+## The name the item's hand-modelled piece is built under in assets/models/gear/, "" when it has none.
+static func gear_id(it: Dictionary) -> String:
+	var g := str(it.get("gear_id", ""))
+	return g if g != "" and bool(it.get("gear_ready", false)) and GearModel.exists(g) else ""
+
+static func _has_parts(g: String) -> bool:
+	return ResourceLoader.exists("%s%s__blade0.glb" % [GearModel.DIR, g])
+
+## The forge state of a weapon as the model wants it: {blade_tier, grip_tier, ore, keen}. From the profile given
+## (the player's by default); an item not held is shown as it leaves the smith: unworked.
+static func gear_mod(it: Dictionary, p: Dictionary = Game.profile) -> Dictionary:
+	if str(it.get("slot", "")) != "weapon" or gear_id(it) == "":
+		return {}
+	var v: Dictionary = Game.weapon_mods(str(it.id), p).visual
+	var ore := str(v.ore)
+	if ore == "cored" or ore == "":
+		ore = str(v.ore_id) if str(v.ore_id) != "" else "steel"
+	return {"blade_tier": int(v.blade_tier), "grip_tier": int(v.grip_tier), "ore": ore, "keen": bool(v.keen)}
+
+## A short text that changes whenever the item would be drawn differently (cache keys).
+static func sig(it: Dictionary, mod = null) -> String:
+	var m: Dictionary = mod if mod is Dictionary else gear_mod(it)
+	return "" if m.is_empty() else "%d%d%s%s" % [int(m.get("blade_tier", 0)), int(m.get("grip_tier", 0)), str(m.get("ore", "")), "k" if m.get("keen", false) else ""]
+
+static func ore_color(ore: String) -> Color:
+	if ORE_OWN.has(ore):
+		return ORE_OWN[ore]
+	var o: Array = GearModel.manifest().get("_mods", {}).get("ores", {}).get(str(ORE_GEAR.get(ore, "steel")), [1.0, 1.0, 1.0])
+	return Color(float(o[0]), float(o[1]), float(o[2]))
+
+## The hand-modelled sword in a forge state, in the model's own conventions (metres, +Y to the tip).
+static func gear_sword(g: String, mod: Dictionary) -> Node3D:
+	var gm := {"sharpened": bool(mod.get("keen", false)) or not _has_parts(g), "ore": "steel"}
+	if _has_parts(g):
+		gm["blade_tier"] = int(mod.get("blade_tier", 0))
+		gm["grip_tier"] = int(mod.get("grip_tier", 0))
+	var node := GearModel.spawn(g, 0.0, false, gm)
+	var tint := ore_color(str(mod.get("ore", "steel")))
+	if node and tint != Color.WHITE:
+		# the same surfaces GearModel.apply_mod tints, in a colour of our own
+		for mi: MeshInstance3D in node.find_children("*", "MeshInstance3D", true, false):
+			for s in (mi.mesh.get_surface_count() if mi.mesh else 0):
+				var src: Material = mi.mesh.surface_get_material(s)
+				var mname: String = src.resource_name if src else ""
+				var cur: Material = mi.get_active_material(s)
+				if cur is ShaderMaterial and (mname == "blade" or mname == "blade_groove" or mname.begins_with("engrave_")):
+					var sm: ShaderMaterial = cur.duplicate()
+					var base: Color = sm.get_shader_parameter("tint")
+					sm.set_shader_parameter("tint", Color(base.r * tint.r, base.g * tint.g, base.b * tint.b, 1.0))
+					mi.set_surface_override_material(s, sm)
+				elif cur is BaseMaterial3D and mname == "edge":
+					var d: BaseMaterial3D = cur.duplicate()
+					d.albedo_color = Color(d.albedo_color.r * tint.r, d.albedo_color.g * tint.g, d.albedo_color.b * tint.b)
+					mi.set_surface_override_material(s, d)
+	return node
+
 ## The model files this item is drawn from ([] when it has none).
-static func paths(it: Dictionary, body: String = "m") -> Array:
+static func paths(it: Dictionary, body: String = "m", mod = null) -> Array:
+	var g := gear_id(it)
+	if g != "" and str(it.get("slot", "")) in ["weapon", "shield"]:
+		if str(it.slot) == "weapon" and _has_parts(g):
+			var m: Dictionary = mod if mod is Dictionary else gear_mod(it)
+			return ["%s%s__blade%d.glb" % [GearModel.DIR, g, clampi(int(m.get("blade_tier", 0)), 0, 3)], "%s%s__hilt%d.glb" % [GearModel.DIR, g, clampi(int(m.get("grip_tier", 0)), 0, 3)]]
+		return [GearModel.DIR + g + ".glb"]
 	match str(it.get("slot", "")):
 		"weapon":
 			var p: String = Duel.weapon_model(str(it.id)).weapon_model
@@ -83,8 +151,8 @@ static func loading() -> int:
 
 ## The piece, about one unit across and centred, under a node named "Pivot" that the caller may turn.
 ## Returns null when the item has no model. `dark` gives the unlit shape only, for things not yet found.
-static func build(it: Dictionary, body: String = "m", dark: bool = false) -> Node3D:
-	var list := paths(it, body)
+static func build(it: Dictionary, body: String = "m", dark: bool = false, mod = null) -> Node3D:
+	var list := paths(it, body, mod)
 	if list.is_empty():
 		return null
 	var root := Node3D.new()
@@ -95,24 +163,38 @@ static func build(it: Dictionary, body: String = "m", dark: bool = false) -> Nod
 	pivot.name = "Pivot"
 	tilt.add_child(pivot)
 	var ok := false
-	match str(it.slot):
-		"weapon":
-			var cls: String = it.cls
-			var m: Dictionary = Duel.weapon_model(str(it.id))
-			var grip: float = float(PropModel.GRIP.get(cls, 0.11))
-			var k: float = 1.3 / float(PropModel.LENGTH.get(cls, 1.1))
-			var n: int = 2 if cls == "dual" else 1
+	var g := gear_id(it)
+	match str(it.slot) if g == "" or str(it.slot) == "chest" else "gear_" + str(it.slot):
+		"gear_weapon":
+			# life size, +Y to the tip, origin in the hand: one-handed blades keep their sizes against each other
+			var info: Dictionary = GearModel.info(g)
+			var tip: float = float(info.get("tip", 0.9))
+			var pom: float = float(info.get("pommel", 0.1))
+			var k: float = 1.3 / maxf(tip + pom, 1.1)
+			var m: Dictionary = mod if mod is Dictionary else gear_mod(it)
+			var n: int = 2 if bool(info.get("pair", false)) else 1
 			for i in n:
 				var arm := Node3D.new()
 				pivot.add_child(arm)
-				arm.rotation.z = 0.0 if n == 1 else (0.2 if i == 0 else -0.2)
-				var holder := Node3D.new()
-				arm.add_child(holder)
-				holder.position = Vector3(0.0 if n == 1 else (0.12 if i == 0 else -0.12), -1.3 * (0.5 - grip), 0.04 * i)
-				ok = PropModel.weapon(holder, m.weapon_model, cls, m.get("weapon_tint"), k) > 0.0
-			tilt.rotation.z = -PI * (0.26 if n == 1 else 0.0)      # point up and to the right, as on a rack
-		"shield":
-			ok = PropModel.shield(pivot, list[0], 0.98)
+				arm.rotation.z = 0.0 if n == 1 else (0.22 if i == 0 else -0.22)
+				var sword := gear_sword(g, m)
+				if sword == null:
+					break
+				arm.add_child(sword)
+				sword.scale = Vector3(-k if i == 1 and bool(info.get("mirror_left", false)) else k, k, k)
+				sword.position = Vector3(0.0 if n == 1 else (0.12 if i == 0 else -0.12), -(tip - pom) * 0.5 * k, 0.04 * i)
+				ok = true
+			tilt.rotation.z = -PI * (0.26 if n == 1 else 0.0)
+		"gear_shield":
+			var info2: Dictionary = GearModel.info(g)
+			var sh := GearModel.spawn(g, 0.0)
+			if sh:
+				var k2: float = 0.98 / maxf(maxf(float(info2.get("width", 0.5)), float(info2.get("height", 0.5))), 0.3)
+				var bc: Array = info2.get("board_centre", [0.0, 0.0, 0.0])
+				var face := Basis(Vector3.UP, PI)          # the model's front is -Z; the viewer stands at +Z
+				sh.transform = Transform3D(face.scaled(Vector3.ONE * k2), -(face * Vector3(float(bc[0]), float(bc[1]), float(bc[2]))) * k2)
+				pivot.add_child(sh)
+				ok = true
 		"chest":
 			ok = _suit(pivot, list[0], it, body)
 	if not ok:

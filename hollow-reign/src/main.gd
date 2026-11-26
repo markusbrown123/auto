@@ -95,7 +95,7 @@ func show_title(open: String = "", arg: String = "") -> void:
 
 ## A new knight: straight into the story. Opening (the first time) → the chamber → the walk out → the road.
 func _new_journey(heraldry: String, body: String, knight_name: String = "") -> void:
-	Game.new_game(heraldry, body)
+	Game.new_game(heraldry, body, CharacterSelect.start_weapon)
 	if knight_name != "":
 		Game.profile.name = knight_name
 		Game.save()

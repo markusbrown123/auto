@@ -28,6 +28,7 @@ var index := 0                    # the item nearest the middle
 var spin := 0.6                   # the middle piece's turn, radians
 var res_scale := 1.0              # viewport pixels per screen pixel (lowered on the Performance preset)
 var moving := false
+var zoom := 1.0                   # size of the middle piece (the armoury shows it large)
 
 var _target := 0.0
 var _touch := -1
@@ -144,7 +145,7 @@ func spacing() -> float:
 	return clampf(size.x * 0.34, 150.0, 300.0)
 
 func _key(e: Dictionary) -> String:
-	return "%s|%s|%s" % [str(e.id), body, "d" if e.get("dark", false) else ""]
+	return "%s|%s|%s|%s" % [str(e.id), body, "d" if e.get("dark", false) else "", ItemModel.sig(Db.item(str(e.id)), e.get("mod"))]
 
 # ---------------------------------------------------------------- touch
 func _gui_input(e: InputEvent) -> void:
@@ -260,7 +261,7 @@ func _process(delta: float) -> void:
 
 func _scale_at(o: float) -> float:
 	var a := absf(o)
-	return lerpf(1.0, 0.6, minf(a, 1.0)) - 0.1 * clampf(a - 1.0, 0.0, 1.0)
+	return lerpf(zoom, 0.6, minf(a, 1.0)) - 0.1 * clampf(a - 1.0, 0.0, 1.0)
 
 func _alpha_at(o: float) -> float:
 	return clampf(1.0 - 0.5 * minf(absf(o), 1.0) - 0.35 * clampf(absf(o) - 1.0, 0.0, 1.0), 0.0, 1.0)
@@ -278,14 +279,14 @@ func _layout() -> void:
 	for i in range(maxi(lo, 0), mini(lo + 6, entries.size())):
 		var e: Dictionary = entries[i]
 		var o := float(i) - pos
-		var paths: Array = ItemModel.paths(Db.item(str(e.id)), body)
+		var paths: Array = ItemModel.paths(Db.item(str(e.id)), body, e.get("mod"))
 		if paths.is_empty() or absf(o) > 2.2:
 			continue
 		var k := _key(e)
 		if not _nodes.has(k):
 			# load only what is near, and no more than two files at a time, so a long flick does not queue the whole collection
 			if absf(o) <= 1.6 and (ItemModel.known(paths) or ItemModel.loading() < 2) and ItemModel.ready(paths):
-				var n := ItemModel.build(Db.item(str(e.id)), body, bool(e.get("dark", false)))
+				var n := ItemModel.build(Db.item(str(e.id)), body, bool(e.get("dark", false)), e.get("mod"))
 				if n:
 					_nodes[k] = n
 			if not _nodes.has(k):

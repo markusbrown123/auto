@@ -14422,6 +14422,261 @@
        "gap": 0.15
       }
      ]
+    },
+    {
+     "at": 0.5,
+     "speed": 1.1,
+     "roar": "He wipes the axe on his sleeve and steps back among the trees. You lose him for a moment.",
+     "combos": [
+      {
+       "id": "stalk",
+       "w": 4,
+       "attacks": [
+        {
+         "dir": "U",
+         "windup": 0.85,
+         "dmg": 28,
+         "swing": 0.3,
+         "guard": 36,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "lunge",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.1,
+       "tags": [
+        "basic"
+       ],
+       "range": "far",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "run_down",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "DL",
+         "windup": 0.9,
+         "dmg": 24,
+         "swing": 0.3,
+         "guard": 31,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "lunge",
+         "dodge": "L"
+        },
+        {
+         "dir": "DR",
+         "windup": 0.6,
+         "dmg": 24,
+         "swing": 0.3,
+         "guard": 31,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slash",
+         "dodge": "R"
+        }
+       ],
+       "recover": 1.4,
+       "tags": [
+        "anti_dodge"
+       ],
+       "range": "far",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "fade",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "L",
+         "windup": 0.65,
+         "dmg": 20,
+         "swing": 0.3,
+         "guard": 26,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slash",
+         "dodge": "L"
+        }
+       ],
+       "recover": 0.4,
+       "tags": [
+        "basic"
+       ],
+       "range": "near",
+       "retreat": true,
+       "gap": 0.15
+      },
+      {
+       "id": "fade_r",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "R",
+         "windup": 0.65,
+         "dmg": 20,
+         "swing": 0.3,
+         "guard": 26,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slash",
+         "dodge": "R"
+        }
+       ],
+       "recover": 0.4,
+       "tags": [
+        "basic"
+       ],
+       "range": "near",
+       "retreat": true,
+       "gap": 0.15
+      },
+      {
+       "id": "hew3",
+       "w": 3,
+       "attacks": [
+        {
+         "dir": "DL",
+         "windup": 0.75,
+         "dmg": 20,
+         "swing": 0.3,
+         "guard": 26,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slash",
+         "dodge": "L"
+        },
+        {
+         "dir": "DR",
+         "windup": 0.55,
+         "dmg": 20,
+         "swing": 0.3,
+         "guard": 26,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slash",
+         "dodge": "R"
+        },
+        {
+         "dir": "D",
+         "windup": 0.7,
+         "dmg": 26,
+         "swing": 0.3,
+         "guard": 34,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slam",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.5,
+       "tags": [
+        "anti_dodge"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "wait",
+       "w": 2,
+       "attacks": [
+        {
+         "dir": "D",
+         "windup": 2.0,
+         "dmg": 36,
+         "swing": 0.22,
+         "guard": 47,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slam",
+         "dodge": "any"
+        }
+       ],
+       "recover": 1.5,
+       "tags": [
+        "anti_parry"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "snare",
+       "w": 2,
+       "attacks": [
+        {
+         "dir": "U",
+         "windup": 0.85,
+         "dmg": 18,
+         "swing": 0.3,
+         "guard": 90,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "thrust",
+         "dodge": "any"
+        },
+        {
+         "dir": "DL",
+         "windup": 0.65,
+         "dmg": 24,
+         "swing": 0.3,
+         "guard": 31,
+         "parry": true,
+         "unblockable": false,
+         "element": null,
+         "kind": "slash",
+         "dodge": "L"
+        }
+       ],
+       "recover": 1.4,
+       "tags": [
+        "anti_block"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      },
+      {
+       "id": "gralloch",
+       "w": 1,
+       "attacks": [
+        {
+         "dir": "UL",
+         "windup": 1.4,
+         "dmg": 34,
+         "swing": 0.3,
+         "guard": 44,
+         "parry": true,
+         "unblockable": true,
+         "element": null,
+         "kind": "sweep",
+         "dodge": "L"
+        }
+       ],
+       "recover": 1.7,
+       "tags": [
+        "anti_block"
+       ],
+       "range": "near",
+       "retreat": false,
+       "gap": 0.15
+      }
+     ]
     }
    ],
    "traits": {

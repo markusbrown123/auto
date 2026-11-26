@@ -398,6 +398,17 @@ B.append(dict(id="pale_huntsman", name="The Pale Huntsman", title="He Who Follow
    C("wait",2,[A("D",1.9,32,swing=0.22,kind="slam")],1.5,tags=("anti_parry",)),
    C("snare",2,[A("U",0.9,16,guard=80,kind="thrust"),A("DL",0.7,22)],1.4,tags=("anti_block",)),
    C("hew3",2,[A("DL",0.8,18),A("DR",0.6,18),A("DL",0.6,20)],1.5,tags=("anti_dodge",)),
+ ]),
+ # wounded, he stops testing and starts hunting: always leaving, always coming back from range
+ dict(at=0.5, speed=1.1, roar="He wipes the axe on his sleeve and steps back among the trees. You lose him for a moment.", combos=[
+   C("stalk",4,[A("U",0.85,28,kind="lunge")],1.1,range="far"),
+   C("run_down",3,[A("DL",0.9,24,kind="lunge"),A("DR",0.6,24)],1.4,range="far",tags=("anti_dodge",)),
+   C("fade",3,[A("L",0.65,20)],0.4,retreat=True),
+   C("fade_r",3,[A("R",0.65,20)],0.4,retreat=True),
+   C("hew3",3,[A("DL",0.75,20),A("DR",0.55,20),A("D",0.7,26,kind="slam")],1.5,tags=("anti_dodge",)),
+   C("wait",2,[A("D",2.0,36,swing=0.22,kind="slam")],1.5,tags=("anti_parry",)),
+   C("snare",2,[A("U",0.85,18,guard=90,kind="thrust"),A("DL",0.65,24)],1.4,tags=("anti_block",)),
+   C("gralloch",1,[A("UL",1.4,34,unblockable=True,kind="sweep")],1.7,tags=("anti_block",)),
  ])]))
 os.makedirs("data", exist_ok=True)
 # ---------------------------------------------------------------- Vharn, the Cinder Wyrm

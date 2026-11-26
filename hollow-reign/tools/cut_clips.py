@@ -20,6 +20,13 @@ for a, branch in ATT.items():
         if os.path.exists("art/takes/%s_%s.avi" % (a, o)):
             cut("%s_%s" % (a, o), branch, 6.0 - branch, "%s_%s" % (a, o)); done["%s_%s" % (a, o)] = round(6.0 - branch, 3)
 # the Courtyard road: one travel clip and one still per stop, plus the hotspot positions filmed with them
+# (the female knight's road is filmed separately as f_road_N; it shares the male film's hotspots)
+for i in range(7):
+    if os.path.exists("art/takes/f_road_%d.avi" % i):
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", "art/takes/f_road_%d.avi" % i, "-vf", "trim=start_frame=%d:end_frame=%d,setpts=PTS-STARTPTS" % (round(PRE * FPS), round((PRE + 6.0) * FPS)),
+                        "-an", "-r", str(FPS), "-c:v", "libtheora", "-q:v", "6", "-g", "15", "assets/video/courtyard_f_road_%d.ogv" % i], check=True)
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", "art/takes/f_road_%d.avi" % i, "-vf", "select=eq(n\\,%d)" % (round((PRE + 6.0) * FPS) - 1), "-vframes", "1", "-q:v", "3", "assets/video/stills/courtyard_f_stop_%d.jpg" % i], check=True)
+
 road = {"region": "courtyard", "clip_len": 6.0, "stops": []}
 os.makedirs("assets/video/stills", exist_ok=True)
 for i in range(7):

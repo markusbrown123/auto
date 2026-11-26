@@ -51,6 +51,9 @@ func _ready() -> void:
 		if a.begins_with("--take="):
 			take = a.trim_prefix("--take=")
 	Game.profile = Game.default_profile()
+	for a2 in OS.get_cmdline_user_args():
+		if a2.begins_with("--body="):
+			Game.profile.body = a2.trim_prefix("--body=")
 	for id in ["w_knight_sword", "s_garrison"]:
 		Game.profile.inventory.append(id)
 		Game.profile.equipped[Db.item(id).slot] = id

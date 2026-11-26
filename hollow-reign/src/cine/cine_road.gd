@@ -41,6 +41,14 @@ func _ready() -> void:
 	data = JSON.parse_string(FileAccess.get_file_as_string(DATA % region.id))
 	stop = data.stops[int(Game.run.stage)]
 	layer = CanvasLayer.new()
+	# footage exists per body: show the knight the player actually chose, when that film has been made
+	var body := str(Game.profile.get("body", "m"))
+	var alt_clip := "%s_%s" % [body, str(stop.clip)]
+	var alt_still := str(stop.still).replace("_stop_", "_%s_stop_" % body)
+	if body != "m" and FileAccess.file_exists("res://assets/video/%s_%s.ogv" % [region.id, alt_clip]) and ResourceLoader.exists(STILLS + alt_still):
+		stop = stop.duplicate()
+		stop.clip = alt_clip
+		stop.still = alt_still
 	add_child(layer)
 	var bg := UI.full(ColorRect.new())
 	bg.color = Color.BLACK

@@ -80,6 +80,25 @@ Next actions, in order:
 | F5 | Memory clip is 5 s under about 20 s of speech; `sentinel_travel` clip missing; all footage shows the male knight | TODO (see C1) |
 | F6 | Phase music layer is hard-coded to one cue and may not fit generated boss tracks; one roar set for every boss; `menu` cue still used as exploration music in seven regions | TODO — see `SOUNDTRACK_PLAN.md` |
 
+## G. Final production brief (2026-11-26)
+| # | Task | Status |
+|---|---|---|
+| G1 | The Witness: bible entries, dialogue (travel, landmarks, boss approaches, victories, sanctuary talks), cooldowns, no repeats after death, archive | DOING (agent) |
+| G2 | Enemy speech categories: creatures silent, guardians sparse, Devourer whispers | DOING (agent, with G1) |
+| G3 | Witness relic model on the knight's belt; discovery scene | TODO |
+| G4 | UI theme; launch; animated main menu; save slots; character selection; loading screens with lore; world map | DOING (agent) |
+| G5 | Equipment screen with live rotatable knight, comparison, weapon collection with 3D preview, rarity, sorting, favourites; forge; settings (graphics presets, five audio sliders, accessibility); victory/defeat screens | DOING (agent) |
+| G6 | Graphics: materials audit, lighting per region, post-processing, thin sword trails, contact sparks, dust, elemental and environmental effects, budgets; GRAPHICS_BIBLE, SHADER_LIBRARY, VFX_BIBLE, PERFORMANCE_REPORT | DOING (agent) |
+| G7 | Sixteen combos individually animated | TODO — limited by owned clips; see ANIMATION_SOURCES |
+| G8 | Dragons: jaw, walk, wing fold/flap, death | TODO |
+| G9 | Creature sound libraries; layered combat effects; interface sounds | TODO |
+| G10 | Voice: third reel cast by character (Witness first), no blanket pitch shift; then rewrite and record | TODO — reel, then BLOCKED on owner |
+| G11 | Real modular armour geometry (8 named sets × 2 bodies) | BLOCKED on budget: generated whole-body sets cost about $1.35 each ($21.60 for all) and the added allocation is not yet visible |
+| G12 | Directed endings, opening, awakening, memories, technology revelation, boss intros and defeats | TODO — in-engine first; generated footage needs the added allocation |
+| G13 | Scripted quests | TODO |
+| G14 | Ninth guardian design | TODO |
+| G15 | End-to-end flow test; demonstration package; iOS export preparation | TODO |
+
 ## Decisions waiting on the owner (do not block other work)
 - Paid animation library, if the free ones leave gaps (see A13).
 - Title: "Hollow Reign" in use; trademark search not done.

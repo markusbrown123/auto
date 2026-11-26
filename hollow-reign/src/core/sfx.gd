@@ -2,7 +2,7 @@ extends Node
 ## Sound effects, ambience and crossfading music, mixed on six buses. All audio is original:
 ## effects are synthesised by tools/gen_audio.py; four music cues and all speech are generated.
 
-const VARIANTS := {"swing": 3, "clash": 3, "hit_armor": 2, "hit_flesh": 2, "block": 2, "roar": 3, "footstep": 2}
+const VARIANTS := {"swing": 3, "clash": 3, "hit_armor": 2, "hit_flesh": 2, "block": 2, "roar": 3, "footstep": 4, "armor": 3}
 ## Mix buses and the setting that scales each, with a fixed trim so the layers sit in order:
 ## dialogue on top, then combat, interface, music, ambience underneath.
 const BUSES := ["Music", "Dialogue", "Combat", "Ambience", "Interface", "Cinematics"]

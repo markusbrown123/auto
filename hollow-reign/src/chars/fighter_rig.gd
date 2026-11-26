@@ -686,6 +686,7 @@ func _process(delta: float) -> void:
 		_step_i = step_i
 		if footsteps and _walk_amount > 0.35 and mode != Mode.DODGE and moved < 0.12:
 			Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
+			Sfx.play("armor", -17.0 + 4.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x), 0.12)      # plates shift with every step
 	_walk_amount = lerpf(_walk_amount, 1.0 if (walking and moved > 0.0005) else 0.0, 1.0 - exp(-dt * 7.0))
 	_solve(dt)
 

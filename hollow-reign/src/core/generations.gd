@@ -14,7 +14,7 @@ extends RefCounted
 ## read back is the save that was written.
 
 const ECHO_BLOWS := 0.115         # share of the kept one's own health a plain cut of the echo takes, after armour
-const ECHO_SECONDS := 135.0        # how long the kept one's own blade would need, cutting without pause
+const ECHO_SECONDS := 90.0        # how long the kept one's own blade would need, cutting without pause
 
 static func data() -> Dictionary:
 	return Encounters.data()

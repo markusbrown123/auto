@@ -5,8 +5,8 @@ Beat-by-beat campaign, written 2026-11-26 from `STORY_BIBLE.md`, `WORLD_HISTORY.
 ## How to read this
 - **Scene id** means a key under `scenes` in `data/dialogue.json`. Every id cited without a marker exists today (83 lines, 41 scenes, 97 voice files; the voice files are provisional and unheard).
 - **PROPOSED (not recorded)** means the line or scene does not exist in `data/dialogue.json`, has no audio, and is a suggestion only.
-- Stage remarks are played by `src/ui/explore.gd` and `src/cine/cine_road.gd` as scene `<region id>_<stage index>`. Only `courtyard_0` to `courtyard_6` exist. The proposed remarks below use that same id pattern so they would play with no code change once added.
-- Boss scenes are played by `src/combat/duel.gd` as `<key>_intro` (first meeting), `<key>_retry` (later attempts), `<key>_death` and `<key>_memory` (after a win). Keys: sentinel, executioner, huntsman, widow, beast, gravewarden, frostking, wyrm, devourer, monarch. Skeldra (`rimewyrm`) has no key.
+- Stage remarks are chosen by `src/core/companion.gd` (`Companion.on_stage`, called from `src/ui/explore.gd` and `src/cine/cine_road.gd`): Lyra's scene `<region id>_<stage index>` where one exists, then the Witness's remark for that stop. Of Lyra's, only `courtyard_0` to `courtyard_6` exist. The proposed Lyra remarks below use that same id pattern so they would play with no code change once added. The Witness's remarks exist and are listed in "The Witness and who speaks" near the end.
+- Boss scenes are played by `src/combat/duel.gd` as `<key>_intro` (first meeting), `<key>_retry` (later attempts), `<key>_death` and `<key>_memory` (after a win). Keys (`foe_voice` in `data/dialogue.json`): sentinel, executioner, huntsman, widow, gravewarden, frostking, devourer, monarch. Creatures (the Beast, the dragons) have no key and never speak; `beast_intro`, `beast_death` and `wyrm_intro` are Lyra's and are now played by the Companion. Since 2026-11-26 the file holds 214 lines in 109 scenes; the "83 lines, 41 scenes" in the first bullet predates the Witness.
 - Lore discoveries: the story bible lists "the 50 lore discoveries" as not built. All 50 named here are PROPOSED. Treasure contents (items, gold, shards) are real data.
 
 ## Source disagreements that affect the script
@@ -44,7 +44,7 @@ Ambience `wind`. Music `explore_courtyard` (exists), boss `boss_ashen_sentinel` 
 | 6 | The Inner Ward — boss `ashen_sentinel` | See below. | `courtyard_6`, then boss scenes | Memory: `sentinel_memory` (exists) |
 
 **Boss: The Ashen Sentinel.** Three phases (at 50% "The Sentinel's armour splits. Embers pour from the seams."; at 22% "He plants the blade and speaks the oath of the gate one last time."). Weak to frost. Loot: Sentinel's Burden (always), Sentinel Bulwark, Ashen Cuirass, Ember Signet.
-- First meeting: `sentinel_intro` ("State your allegiance." / "I serve no crown." / "Then you have no passage."). Later attempts: `sentinel_retry`.
+- First meeting: `sentinel_intro` ("State your allegiance." / "I serve no crown." / "Then you have no passage."). Later attempts: none (`sentinel_retry` was cut under the speech rules).
 - Death: `sentinel_death` ("Is the war... over?" … "Then why did no one return for me?").
 - Memory: `sentinel_memory` (Archivist record, then Lyra: "They were people. All of them.").
 - Story meaning: the first guardian is a man who was told his duty would last one winter. The fight should feel like discipline, not malice, and the win should not feel like a victory.
@@ -278,6 +278,107 @@ None of these exist in data or code. Each is tied to an existing character and t
 
 ## New Game Plus
 The master requirements list New Game Plus. Items marked "Only offered to those who return" exist (Oathbreaker, Embertwin, Hollow Heart). PROPOSED: on a second cycle the opening is replaced by a single Lyra line (not recorded): "You came back by the long way this time." and the Archivist's "seventeen times" becomes "eighteen".
+
+## The Witness and who speaks (added 2026-11-26)
+The Witness is the second companion (`STORY_BIBLE.md`, "The Witness"). All of the lines below exist in `data/dialogue.json` as text only: none is recorded, and the game shows them as subtitles. `src/core/companion.gd` (autoload `Companion`) decides what plays: each scene once per save, never again after a death; a 20 second gap between unprompted remarks; at most two remarks at a stop (Lyra's first); nothing during a fight; nothing from the Witness before it is found; with the `chatter` setting off, only the scenes marked essential.
+
+**Discovery.** Chapter I, the Fallen Courtyard, stage 1 (the stop after The Breach, where the path divides). The monument of the thirteen kings has fallen; under the plinth is a walled chamber, and the mask hangs in it. Scene `witness_discovery` (essential) plays on arrival, before the choices appear:
+
+- Lyra: "Wait. Under the fallen plinth. There is a door there that is on no plan I hold."
+- The Witness: "Ah. At last. I had begun to suspect the dead were better company."
+- Player: "What are you?"
+- The Witness: "A witness to rather more than I would care to remember."
+- The Witness: "And to rather less than I ought. They took a good deal out of me before they shut that door."
+- Player: "Who did?"
+- The Witness: "If I knew that, I should be a happier ornament. Lift me down. I weigh very little, and I know this road."
+- Lyra: "I do not know what that is. I do not like not knowing."
+- The Witness: "The voice in the walls disapproves of me. Good. We shall get on."
+
+Lyra's `courtyard_1` remark is held over to the next visit to that stop. A save already past stage 1 plays the discovery at the next stop reached, in any region.
+
+**Speech categories** (`speech` in `data/dialogue.json`; unlisted foes are A):
+
+| Category | Foes | What the duel does |
+|---|---|---|
+| A, no human speech | `cathedral_beast`, `cinder_wyrm`, `rimewyrm`, `azhurion`, all lesser foes | No voice key, so no `_intro`, `_retry`, `_death`. The Witness sets the scene before the fight (essential scenes `w_beast_approach`, `w_wyrm_approach`, `w_rimewyrm_approach`, `w_azhurion_approach`); if the Witness cannot speak, Lyra's older `beast_intro` / `wyrm_intro` play instead. `beast_death` (Lyra, "A laboratory.") now plays as the first victory scene. |
+| B, a few short lines | `ashen_sentinel` (4 lines), `hollow_executioner` (2), `gravewarden` (2) | Unchanged scenes, except `sentinel_retry` was cut. The generator refuses more than four lines for a B foe. |
+| C, directed dialogue | `forgotten_monarch`, `crimson_widow`, `frostbound_king`, `pale_huntsman` | Unchanged. |
+| D, fragments | `devourer` | `devourer_intro` rewritten as whispers ("...a daughter... I had..." / "...the sea... the sea..." / "...my name... what was... my name..."); new `devourer_death` in the same manner. Its three recorded takes no longer match and are not played. |
+
+Order at a guardian: Witness approach scene, then the guardian's own `_intro`, the fight, `_death`, `_memory`, then the victory scenes.
+
+**The Witness on the road.** Stage numbers are the indices in `data/regions.json`. "memory" marks a returning memory.
+
+| Region | Stage | Scene | Line |
+|---|---|---|---|
+| The Fallen Courtyard | 2 | `w_courtyard_approach` (approach) | "So this is what became of the outer court. It had a grander name when it stood. I forget it. Mercifully." |
+| The Fallen Courtyard | 3 | `w_courtyard_gate` | "That gate once bore the banners of thirteen kings. Now look at it. Eternity has a peculiar sense of humour." |
+| The Fallen Courtyard | 4 | `w_courtyard_passage` | "They built the passage narrow so that one man could hold it. Nobody asked which man." |
+| The Fallen Courtyard | 5 | `w_courtyard_candle` | "A candle three hundred years alight. In my day we called that a miracle. We were paid to." |
+| The Blackwood | 0 | `w_blackwood_approach` (approach) | "The Blackwood. The lanterns are still lit. Somebody is paying the lamplighter, and I should like to know in what coin." |
+| The Blackwood | 2 | `w_blackwood_briars` | "Woven. Thorn does not plait itself. Somebody here still keeps a boundary." |
+| The Blackwood | 3 | `w_blackwood_bridge` (memory) | "There was a toll on this crossing, and a clerk. He counted heads going in. He did not count them coming out." |
+| The Blackwood | 5 | `w_blackwood_gibbet` | "A gallows over the drinking water. There is the old kingdom entire, in one view." |
+| The Cathedral of Ash | 0 | `w_cathedral_approach` (approach) | "I climbed these steps once, in a procession. I remember the incense. I do not remember what we were asking for." |
+| The Cathedral of Ash | 1 | `w_cathedral_censer` | "A censer that size is not for perfume. It is for covering the smell of something else." |
+| The Cathedral of Ash | 3 | `w_cathedral_nave` (memory) | "The roof came down in the Rising. I was here. No. I was told I was here. The two are not the same, and I can no longer tell them apart." |
+| The Cathedral of Ash | 4 | `w_cathedral_choir` | "Still singing. That hymn has forty verses. I should not stay for the last." |
+| The Sunken Crypt | 0 | `w_crypt_approach` (approach) | "Lamps under the water, and burning yet. Do you know, I helped consecrate this place. I cannot recall to whom." |
+| The Sunken Crypt | 1 | `w_crypt_ossuary` | "Those are for show. The dead that mattered are kept lower down, and a great deal more carefully." |
+| The Sunken Crypt | 3 | `w_crypt_sluice` | "Drain it, by all means. But they flooded the lower halls on purpose. One ought always to wonder why." |
+| The Sunken Crypt | 4 | `w_crypt_door` (memory) | "That door. I have stood before it with a ledger. Names down one column. I cannot see the heading of the other." |
+| The Wyrm's Roost | 0 | `w_roost_approach` (approach) | "Glazed stone. I have seen a wall run like wax before. Never from the outside." |
+| The Wyrm's Roost | 1 | `w_roost_mews` | "They called this the Mews. One learns a great deal about a court from the things it calls small." |
+| The Wyrm's Roost | 3 | `w_roost_chain` | "A feeding lift. The cage was for cattle. Mostly." |
+| The Wyrm's Roost | 4 | `w_roost_shells` (memory) | "Numbered shells. Somebody kept a tally. Somebody always does. It was usually me." |
+| The Frozen Citadel | 0 | `w_citadel_approach` (approach) | "Dressed by the right, and frozen so. Weather has no sense of drill. Somebody gave a last command here." |
+| The Frozen Citadel | 1 | `w_citadel_wall` | "This wall was never taken. It was closed, from within, and left." |
+| The Frozen Citadel | 3 | `w_citadel_lift` | "This cold is made, not fallen. Somewhere beneath us a great deal of effort is spent keeping one man from thawing." |
+| The Frozen Citadel | 5 | `w_citadel_solar` (memory) | "A queen sat at that window. I struck her name from the rolls with my own hand. I was ordered to. I think that is where I began to refuse." |
+| The Hollow Deep | 0 | `w_deep_approach` (approach) | "No. I do not know this stair. I knew every stair they built. Either this was dug afterwards, or it was taken out of me." |
+| The Hollow Deep | 1 | `w_deep_names` (memory) | "Names, floor to roof. I cut the first of these. That was my office: to set down who a person was, before." |
+| The Hollow Deep | 3 | `w_deep_stair` | "Candle smoke. So this lay under your sanctuary the whole while. Your voice in the walls might have mentioned it." / Lyra: "I did not know." / "No. I do not suppose you were permitted to." |
+| The Hollow Deep | 4 | `w_deep_oaths` (memory) | "They swore here to keep the stored safe. I administered the oath. It was a good oath. It deserved better men." |
+| The Hollow Throne | 0 | `w_throne_approach` (approach) | "The royal mile. Every face struck off. I approve the sentiment and regret the workmanship." |
+| The Hollow Throne | 1 | `w_throne_hooks` | "Thirteen banners hung in this room also. Count the hooks, if you doubt me." |
+| The Hollow Throne | 2 | `w_throne_crown` (memory) | "There. Now I have it. They did not shut me away for what I knew. They shut me away because I would not unwrite it." |
+| The Hollow Throne | 4 | `w_throne_guard` | "Unrelieved. Like the first one you met. It is the same order, you know. Only the handwriting differs." |
+
+**Before and after the guardians.**
+
+| Foe | Before (`approach`) | After (`victory`) |
+|---|---|---|
+| `ashen_sentinel` | `w_sentinel_approach` The Witness: "He will ask your allegiance. There is no right answer. There never was one." / Player: "Then he will have the true one." | `w_sentinel_victory` The Witness: "One winter, they told him. I believe I wrote that order down. I hope I argued." |
+| `pale_huntsman` | `w_huntsman_approach` The Witness: "Someone has kept pace with us these three trees. A mortal, by the breathing. Be civil. He has earned his opinions." | `w_huntsman_victory` The Witness: "He was not wrong to fear what we were. Only late." |
+| `hollow_executioner` | `w_executioner_approach` The Witness: "Every stump a block. He has not stopped working. He has only run short of the condemned." / Player: "And now?" / The Witness: "Now he has you. Do try to be a disappointment to him." | `w_executioner_victory` The Witness: "The court that passed those sentences was dissolved before your grandmother's grandmother. Nobody told the axe." |
+| `crimson_widow` | `w_widow_approach` The Witness: "I know that bearing. Rebels stand straighter than kings. They have to." / Player: "She is waiting for me." / The Witness: "She is waiting for someone. Find out whom before you draw." | `w_widow_victory` The Witness: "She yielded. In my day that took more courage than dying. It still does." |
+| `cathedral_beast` | `w_beast_approach` The Witness: "Stop. Listen. What breathes under that bronze was built in a laboratory." / Player: "What was it built for?" / The Witness: "Nothing merciful." | `w_beast_victory` The Witness: "A workshop under an altar. I should like to say I am surprised. I think I signed for the candles." |
+| `gravewarden` | `w_gravewarden_approach` The Witness: "The keeper. He is the gentlest thing down here, and he will kill you for a careless word." / Player: "What does he keep?" / The Witness: "Ask him. He has waited long enough to be asked." | `w_gravewarden_victory` The Witness: "He remembered their names. Every one. I was paid to remember, and I cannot manage my own." |
+| `cinder_wyrm` | `w_wyrm_approach` The Witness: "There she is. Veyrath. They made her to end sieges, and then they ran out of walls." / Player: "Can it be killed?" / The Witness: "Everything can be killed. Convincing it of that is the difficult part." | `w_wyrm_victory` The Witness: "She never once took an order. I envied her that. I believe I still do." |
+| `rimewyrm` | `w_rimewyrm_approach` The Witness: "Something on a chain, down there. A chained thing in a king's cellar is never a pet." / Player: "Then what is it?" / The Witness: "A decision he could not bring himself to make." | `w_rimewyrm_victory` The Witness: "It could have left at any hour. So could most of us." |
+| `frostbound_king` | `w_frostking_approach` The Witness: "I knew him. He is the only one of them who ever asked to stop." / Player: "Did they let him?" / The Witness: "Look at the door. He had to let himself." | `w_frostking_victory` The Witness: "Do better than we did, he says. He always set the mark where a man might reach it." |
+| `devourer` | `w_devourer_approach` The Witness: "Do not answer it, whatever it asks. It is not one voice, and not one of them is lying." / Player: "Who were they?" / The Witness: "The ones we lost count of. I begin to think I kept the count." | `w_devourer_victory` The Witness: "Say what names you have. I will hold the rest, now that I remember how." |
+| `azhurion` | `w_azhurion_approach` The Witness: "That is the first of them. The Last Wing. Nobody wrote down how to stop it. I looked." / Player: "Then how?" / The Witness: "The usual way. Slowly, and at great personal cost." | `w_azhurion_victory` The Witness: "The oldest thing they built, and it ends in a doorway. There is a moral in that. I decline to draw it." |
+| `forgotten_monarch` | `w_monarch_approach` The Witness: "He will be reasonable. That is the danger of him. I served reasonable men all my life." / Player: "And?" / The Witness: "And here I hang at your belt. What is decided in there is yours to decide. I shall only witness it." | `w_monarch_victory` The Witness: "Whatever you do next, I will set it down as it happened. That much I can still swear to." |
+
+**Sanctuary conversations** (optional, from `Companion.sanctuary_topics()`; no screen lists them yet).
+
+| Scene | Title | Opens | Speakers | First line |
+|---|---|---|---|---|
+| `w_talk_mask` | The Mask | once the Witness is found | Player, The Witness | "The mask. Was it your face?" |
+| `w_talk_sword` | On Old Weapons | once the Witness is found | Player, The Witness | "This sword. They say it is enchanted." |
+| `w_talk_lyra` | The Voice in the Walls | once the Witness is found | The Witness, Lyra | "Your Lyra says she has waited a very long time. Ask her how she knows how long." |
+| `w_talk_return` | Coming Back | once the Witness is found | Player, The Witness | "I die, and I wake here. What does that make me?" |
+| `w_talk_smith` | The Smith | once the Witness is found | Player, The Witness | "Orren does not trust you." |
+| `w_talk_kings` | Thirteen Kings | after The Fallen Courtyard | Player, The Witness | "Thirteen kings. Did you know them?" |
+| `w_talk_people` | They Were People | after The Fallen Courtyard | Lyra, The Witness | "They were people. Every one you have cut down." |
+| `w_talk_silence` | The Great Silence | after The Blackwood | Lyra, The Witness | "The Silence came without warning. One night the far towns simply stopped answering." |
+| `w_talk_prayer` | What We Prayed To | after The Cathedral of Ash | Player, The Witness | "You prayed in that cathedral." |
+| `w_talk_stored` | The Stored | after The Sunken Crypt | Lyra, The Witness | "The stored can be saved. All of them. I have to believe that." |
+| `w_talk_refusal` | The Eighteenth Time | after The Frozen Citadel | The Witness, Player | "It has come back, a little. There was a list. Places, and what was done in them." |
+| `w_talk_choice` | The Choice Ahead | after The Frozen Citadel | Player, The Witness | "When we reach the capital. What would you do?" |
+
+**Not from the brief verbatim.** The brief's example exchanges were available only as the fragments quoted in the work order and the casting reel: the discovery lines, the thirteen kings line, "built in a laboratory" / "What was it built for?" / "Nothing merciful.", and "Can it be killed?" / "Everything can be killed. Convincing it of that is the difficult part." are used as given. The Frostbound King exchange and the old-weapon exchange were written fresh; if the brief's wording differs, replace them in `tools/gen_dialogue.py`.
 
 ## Open contradictions
 1. **Two narratives in shipping text.** Region blurbs and boss intro cards (`data/regions.json`, `data/bosses.json`) describe a player who once served this kingdom ("The gate you once rode out of", "You knelt to this crown once", "You have been here before. You are always here before.", "the name you had before"), a Widow "promised a wedding", a Beast that "the congregation became", a Gravewarden who "buried every king". The story bible describes a newly made person and guardians with different histories. Item text also carries the older reading ("The sword you were buried with", "Your Name — You do not remember it").

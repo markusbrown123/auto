@@ -506,6 +506,9 @@ func _basis_y(y: Vector3) -> Basis:
 	return Basis(x, y, x.cross(y))
 
 var skin: DragonSkin
+var _walk_last := Vector3.ZERO
+var _walk_phase := 0.0
+var _walk_amt := 0.0
 func _attach_skin(path: String) -> void:
 	skin = DragonSkin.attach(body, path)
 	if skin == null:
@@ -559,7 +562,13 @@ func _pose() -> void:
 		tail[i].rotation.y = cos(_clock * 1.4 + u2 * 3.0) * 0.4 * u2
 	if skin:
 		var flap2 := sin(_clock * (7.0 if _far > 0.3 else 1.1)) * (0.4 if _far > 0.3 else 0.04)
-		skin.drive({"aim": _aim.normalized(), "reach": clampf((-_head.z - 1.2) / 1.5, -1.0, 1.0), "claw": _claw, "claw_side": _claw_side, "claw_x": _claw_x,
+		# stride follows ground actually covered, so the feet step when the body moves and rest when it does not
+		var moved := global_position.distance_to(_walk_last)
+		_walk_last = global_position
+		if moved < 1.0:
+			_walk_phase += moved / (1.1 * maxf(scale.x, 0.1)) * PI
+		_walk_amt = lerpf(_walk_amt, 1.0 if moved > 0.002 else 0.0, 0.12)
+		skin.drive({"jaw": _jaw, "walk": _walk_phase, "walk_amt": _walk_amt, "aim": _aim.normalized(), "reach": clampf((-_head.z - 1.2) / 1.5, -1.0, 1.0), "claw": _claw, "claw_side": _claw_side, "claw_x": _claw_x,
 			"spread": _spread, "flap": flap2, "clock": _clock, "sink": _sink})
 
 func _ik(a: Vector3, b: Vector3, la: float, lb: float, pole: Vector3) -> Vector3:

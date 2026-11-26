@@ -6,7 +6,9 @@ const VARIANTS := {"swing": 3, "clash": 3, "hit_armor": 2, "hit_flesh": 2, "bloc
 ## Mix buses and the setting that scales each, with a fixed trim so the layers sit in order:
 ## dialogue on top, then combat, interface, music, ambience underneath.
 const BUSES := ["Music", "Dialogue", "Combat", "Ambience", "Interface", "Cinematics"]
-const BUS_SETTING := {"Music": "music", "Dialogue": "voice", "Combat": "sfx", "Ambience": "sfx", "Interface": "sfx", "Cinematics": "sfx"}
+## Five sliders over six buses: Interface follows Combat effects; Cinematics follows only the Master
+## slider, which sits on the Master bus itself (see Game.apply_settings / Game.bus_level).
+const BUS_SETTING := {"Music": "music", "Dialogue": "dialogue", "Combat": "combat", "Ambience": "ambience", "Interface": "combat", "Cinematics": "master"}
 const BUS_TRIM := {"Music": -3.0, "Dialogue": 0.0, "Combat": -1.0, "Ambience": -7.0, "Interface": -5.0, "Cinematics": -2.0}
 const INTERFACE_SOUNDS := ["loot", "levelup", "ui_tap", "ui_back", "ui_confirm"]
 const AMBIENT_SOUNDS := ["bell"]

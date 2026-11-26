@@ -10,6 +10,28 @@ Male or female knight, same role, separate voice. Wakes in a damaged resurrectio
 
 The truth, revealed in the Sunken Crypt: mortal researchers built the Unbound to end the Crown. Their mind is assembled from memories donated by soldiers, engineers, civilians and survivors. They are a new person carrying the old world's experience. Because no single consciousness record owns them, they can enter Crown facilities without being controlled. They are not a returning god; they are humanity's attempt to move past gods.
 
+## The Witness
+The second companion, added by the final production brief of 2026-11-26. Full character entry in `CHARACTER_BIBLE.md`.
+
+- **What it is.** A human mind, very old, held in a damaged ceremonial mask: blackened metal, faded gold, amber eyes, inscriptions round the rim, a light inside that gutters when it thinks. It is a mask and nothing else: not a head, not a skull, no body. The knight carries it at the belt.
+- **Who it was.** The recorder of the Everbound courts of Vaelora. The mask was the office: it was worn to set down judgments, so that the record had no face to bribe. Seventeen times in the Age of Crowns the past was tidied and the recorder held the pen (the Archivist's "history has been rewritten seventeen times" is the same count, seen from the machine's side). The eighteenth order, near the end of the War of Broken Thrones, was to erase the record of what was done to put down the rising. The recorder refused. The Everbound could not destroy a mind the record depended on, so they cut out what they could of its memory, shut the mind in its own mask, and walled it under the monument of the thirteen kings in what is now the Fallen Courtyard. It has been there for more than three hundred years. It slept through the Great Silence.
+- **Where it is found.** Chapter I, the Fallen Courtyard, second stop (stage 1, beyond the rubble, where the path divides): the monument has fallen, and under its plinth is a chamber that is on none of Lyra's plans. Scene `witness_discovery`. A save that is already past that stop finds it at the next stop it reaches.
+- **What it wants.** For the record to be true, including the parts that condemn it. It does not ask to be freed, restored or forgiven.
+- **How it speaks.** Cynical, dry, exact; conversational old-world English, never mock-archaic. It talks before important places, at landmarks, before most guardians and after them, and in the sanctuary when asked. It does not talk in a fight and never says the same thing twice.
+- **Its memory.** Deliberately cut, and returning at places that touch it. The order of return is the order of the road: the Sentinel's posting order (Courtyard), the toll clerk (Blackwood), the procession and the Rising (Cathedral), the ledger at the lower door (Crypt), the tally of shells (Roost), the queen struck from the rolls and the first refusal (Citadel), its office and the oath (Deep), and at last why it was shut away (Throne). It never recovers its own name, and one of the thirteen kings stays cut out of it. Both are left open on purpose.
+- **The Witness and Lyra.** They do not trust each other at first and they remember differently. Lyra speaks from inside the Crown and from its records; the Witness from outside and from before, with holes. Where they disagree the game does not say who is right: whether the guardians were "people" or "volunteers", whether the Great Silence came without warning, how anyone can count time from inside, whether every stored mind can be saved. Lyra stays the emotional centre and the authority on origins, consciousness and the ethics of immortality. The Witness is the authority on the courts, the kings and what was done.
+- **What it must not do.** It does not reveal the chapter mysteries ahead of their chapters: it names a laboratory only at the Cathedral Beast's door, knows nothing of the Unbound's origin until the Crypt has shown it, and does not know what the Crown is eating. It never makes the final choice or recommends one ("What is decided in there is yours to decide. I shall only witness it."). It is present in all three endings as the one who will set down what happened.
+
+## Who speaks
+Fixed by the final brief and encoded in `data/dialogue.json` under `speech` (any foe not listed is category A). `src/core/companion.gd` and `src/combat/duel.gd` enforce it.
+
+| Category | Who | Rule |
+|---|---|---|
+| A | Cathedral Beast, Veyrath, Skeldra, Azhurion, every lesser foe | No human speech. Before the fight the Witness (or Lyra, if the Witness cannot) says what the thing is. |
+| B | Ashen Sentinel, Hollow Executioner, Gravewarden | At most four short lines each. The Sentinel keeps its challenge and its last words. |
+| C | Forgotten Monarch, Crimson Widow, Frostbound King, Pale Huntsman | Directed dialogue. |
+| D | The Devourer of Names | Layered fragments and whispers only, never a sentence addressed to the player. |
+
 ## Central conflict
 The Eternal Crown, the old immortality network, has woken and is consuming stored human minds to keep itself running. Destroy it and everyone stored inside is lost. Leave it and it keeps feeding. The Forgotten Monarch believes sacrificing some to keep civilization's machines alive is the lesser evil, and he is not simply wrong.
 
@@ -42,4 +64,6 @@ Post-credits, whichever ending: a far fortress under an unfamiliar sky, a machin
 
 ## Implementation status (2026-11-26)
 - In the game: opening narration, awakening with Lyra, a Lyra remark at each Courtyard stop, the Sentinel's challenge, last words and memory record, Orren at the forge, resurrection lines, and first-meeting and death exchanges for the other guardians. All subtitled; voiced where audio exists.
+- In the game as text only (subtitles, nothing recorded): the Witness. Discovery scene, a remark on approaching each region, three landmark remarks per region, an exchange before and a remark after every guardian and dragon, twelve optional sanctuary conversations (four of them arguments with Lyra), and the returning memories. Chosen and rationed by the `Companion` autoload. The sanctuary conversation list and the archive screen have an API (`Companion.sanctuary_topics()`, `play_topic()`, `archive()`) but no screen yet; the mask has no model on the knight and the discovery has no filmed scene.
+- Speech categories are enforced: the Sentinel's retry line was cut, the Devourer's lines were rewritten as fragments (so its three recorded takes are no longer used), and silent foes get companion context instead of an intro.
 - Not yet built: the Widow's yield-or-fight choice, the Huntsman's peaceful resolution, memory-flashback chapters, the three endings and their choice, the post-credits scene, the 50 lore discoveries, the Monarch's regeneration phase.

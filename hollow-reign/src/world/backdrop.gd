@@ -13,6 +13,8 @@ var _pos := Vector3.ZERO
 var _look := Vector3.ZERO
 var _clock := 0.0
 var props: Node3D
+var knight_yaw := PI * 0.92       # kept across rebuilds; the equipment screen turns it by drag
+var forge: Node3D                 # Orren's anvil, built the first time the forge is used
 
 func build(theme: String, with_knight: bool = true) -> void:
 	arena = Arena.new()
@@ -37,13 +39,56 @@ func build(theme: String, with_knight: bool = true) -> void:
 	if with_knight:
 		refresh_knight()
 
-func refresh_knight() -> void:
+## Rebuilds the knight from what is equipped. `preview` is a profile to dress it from instead
+## (the equipment screen's "what if"), and `tint` overrides the plate colour for that preview.
+func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
 	if rig:
 		rig.queue_free()
 	rig = FighterRig.new()
 	add_child(rig)
-	rig.build(Duel.player_look() if not Game.profile.is_empty() else {"metal": "#4a4038", "cloth": "#3d0f0f", "cape": true, "weapon": "sword", "helm": "kettle", "eye": "#000000", "shield": {"color": "#4a3a2a"}}, false)
-	rig.rotation.y = PI * 0.92
+	var look := {"metal": "#4a4038", "cloth": "#3d0f0f", "cape": true, "weapon": "sword", "helm": "kettle", "eye": "#000000", "shield": {"color": "#4a3a2a"}}
+	if not Game.profile.is_empty():
+		var real: Dictionary = Game.profile
+		if not preview.is_empty():
+			Game.profile = preview
+		look = Duel.player_look()
+		Game.profile = real
+		if tint != "":
+			look["metal"] = tint
+			look["skin_tint"] = tint
+	rig.build(look, false)
+	rig.rotation.y = knight_yaw
+
+func turn_knight(by: float) -> void:
+	knight_yaw = wrapf(knight_yaw + by, -PI, PI)
+	if rig:
+		rig.rotation.y = knight_yaw
+
+## Orren's anvil and a work light, placed once. Returns the node; its "Top" child is where the piece lies.
+func forge_spot(at: Vector3) -> Node3D:
+	if forge:
+		return forge
+	forge = Node3D.new()
+	add_child(forge)
+	forge.position = at
+	var iron := Look.flat(Color("#2b2a2c"), 0.55, 0.85)
+	_box(forge, Vector3(0.5, 0.5, 0.4), Vector3(0, 0.25, 0), Look.flat(Color("#3a2a1c"), 0.9))
+	_box(forge, Vector3(0.34, 0.1, 0.24), Vector3(0, 0.55, 0), iron)
+	_box(forge, Vector3(0.22, 0.14, 0.18), Vector3(0, 0.67, 0), iron)
+	_box(forge, Vector3(0.74, 0.12, 0.26), Vector3(0.04, 0.8, 0), iron)
+	_box(forge, Vector3(0.2, 0.07, 0.16), Vector3(0.5, 0.8, 0), iron)
+	var top := Node3D.new()
+	top.name = "Top"
+	top.position = Vector3(0, 0.875, 0)
+	forge.add_child(top)
+	var glow := OmniLight3D.new()
+	glow.name = "Glow"
+	glow.light_color = Color("#ffb060")
+	glow.light_energy = 1.2
+	glow.omni_range = 4.0
+	glow.position = Vector3(0.2, 1.5, 0.9)
+	forge.add_child(glow)
+	return forge
 
 func move_camera(pos: Vector3, look: Vector3, snap: bool = false) -> void:
 	cam_pos = pos
@@ -145,5 +190,7 @@ func _process(delta: float) -> void:
 	_pos = _pos.lerp(cam_pos, k)
 	_look = _look.lerp(cam_look, k)
 	var drift := Vector3(sin(_clock * 0.23) * 0.12, sin(_clock * 0.31) * 0.05, cos(_clock * 0.19) * 0.1)
+	if Game.settings.reduce_motion:
+		drift = Vector3.ZERO
 	cam.position = _pos + drift
 	cam.look_at(_look)

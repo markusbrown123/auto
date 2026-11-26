@@ -116,10 +116,9 @@ func _arrive() -> void:
 		c.queue_free()
 	var region := Game.run_region()
 	var stage: int = Game.run.stage
-	var remark := "%s_%d" % [region.id, stage]
-	if Story.pending(remark):
+	if not Companion.pick_stage(str(region.id), stage).is_empty():
 		await get_tree().create_timer(0.4).timeout
-		await Story.play(remark)
+		await Companion.on_stage(str(region.id), stage)
 		if not is_inside_tree():
 			return
 	_build_ui()

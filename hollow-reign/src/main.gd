@@ -8,6 +8,7 @@ var _shots: Array = []
 var _shot_dir := ""
 var _t := 0.0
 var _args := {}
+var _combos_before: Array = []     # sequences known when a duel began, to name the ones found in it
 
 func _ready() -> void:
 	for a in OS.get_cmdline_user_args():
@@ -20,6 +21,7 @@ func _ready() -> void:
 	_fader.color = Color(0.01, 0.01, 0.012, 1.0)
 	_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fl.add_child(_fader)
+	get_tree().root.theme = UI.theme()
 	if _args.has("shots"):
 		# capture harness: --shots=dir --at=1.0,2.5 [--demo=foe | --screen=name]
 		_shot_dir = _args.shots
@@ -29,7 +31,7 @@ func _ready() -> void:
 	if _args.has("demo") or _args.has("screen"):
 		_dev_boot()
 	else:
-		show_title()
+		show_launch()
 
 func _notification(what: int) -> void:
 	# never lose progress when iOS backgrounds or kills the app
@@ -55,15 +57,40 @@ func _fade_then(f: Callable) -> void:
 	tw.tween_callback(f)
 
 # ================================================================ screens
-func show_title() -> void:
+## Studio card and the game's mark, then the menu. Short, and any tap ends it.
+func show_launch() -> void:
+	var l := Launch.new()
+	l.finished.connect(show_title)
+	_swap(l)
+
+## The main menu. `open` names a front-end screen to show over it at once (dev captures use this).
+func show_title(open: String = "", arg: String = "") -> void:
 	var t := TitleScreen.new()
 	t.continue_game.connect(func():
-		if Game.load_game():
+		if not Game.profile.is_empty() or Game.load_slot(Game.latest_slot()):
 			_fade_then(show_sanctuary))
 	t.new_game.connect(func(h, b):
 		Game.new_game(h, b)
+		if t.knight_name != "":
+			Game.profile.name = t.knight_name
+			Game.save()
 		_fade_then(_opening))
+	t.open_screen.connect(_menu_open)
+	t.set_out.connect(_set_out)
 	_swap(t)
+	if open != "":
+		t.open(open, arg)
+
+func _menu_open(which: String) -> void:
+	match which:
+		"character": _fade_then(func(): show_sanctuary("Character"))
+		"equipment": _fade_then(func(): show_sanctuary("Armory"))
+		"training": _fade_then(start_training)
+
+## Leaves for a region behind a loading screen: building the road is one of the waits that is real.
+func _set_out(region: String, shortcut: bool) -> void:
+	Game.start_run(region, shortcut)
+	LoadingScreen.show(region, show_stage)
 
 func _opening() -> void:
 	# darkness and the narrator; then the chamber, and a voice in the walls
@@ -86,14 +113,14 @@ func _opening() -> void:
 		s.layer.visible = true
 		Sfx.music_for("hub", "sanctuary")
 
-func show_sanctuary() -> void:
+func show_sanctuary(tab: String = "") -> void:
 	var s := Sanctuary.new()
-	s.set_out.connect(func(region, shortcut):
-		Game.start_run(region, shortcut)
-		_fade_then(show_stage))
+	s.set_out.connect(_set_out)
 	s.quit_to_title.connect(func(): _fade_then(show_title))
 	s.train.connect(func(): _fade_then(start_training))
 	_swap(s)
+	if tab != "" and Sanctuary.TABS.has(tab):
+		s.show_tab(tab)
 
 ## Orren's yard: a foe that only stands open, for finding and practising combos. Nothing is won or lost.
 func start_training() -> void:
@@ -107,7 +134,7 @@ func start_training() -> void:
 
 func show_cine_road() -> void:
 	var c := CineRoad.new()
-	c.fight.connect(func(o): _fade_then(func(): start_duel(o)))
+	c.fight.connect(_enter_duel)
 	c.moved_on.connect(_next_stage)
 	c.turned_back.connect(func():
 		Game.run = {}
@@ -120,7 +147,7 @@ func show_stage() -> void:
 		show_cine_road()
 		return
 	var e := Explore.new()
-	e.fight.connect(func(o): _fade_then(func(): start_duel(o)))
+	e.fight.connect(_enter_duel)
 	e.moved_on.connect(_next_stage)
 	e.turned_back.connect(func():
 		Game.run = {}
@@ -133,7 +160,17 @@ func _next_stage() -> void:
 	else:
 		_region_done()
 
+## Into a duel behind a loading screen. The foe's model is read on a thread first, so the picture keeps moving
+## for that part; building the arena and the two fighters is the part that holds it still.
+func _enter_duel(o: Dictionary) -> void:
+	var warm: Array = ["res://assets/models/knight_%s.glb" % str(Game.profile.get("body", "m"))]
+	var foe: Dictionary = Db.foes.get(str(o.foe), {})
+	warm.append("res://assets/models/%s.glb" % str(o.foe))
+	warm.append("res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_"))
+	LoadingScreen.show(str(Game.run.get("region", "")), func(): start_duel(o), warm)
+
 func start_duel(o: Dictionary) -> void:
+	_combos_before = Game.profile.combos.duplicate()
 	if Game.settings.cine and str(o.foe) == "ashen_sentinel" and CineDuel.available():
 		start_cine_duel(o)
 		return
@@ -180,6 +217,7 @@ func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 	var foe: Dictionary = Db.foes[o.foe]
 	if won:
 		var rewards := Game.on_victory(o.foe, sim.pl.hp)
+		rewards["new_combos"] = Game.profile.combos.filter(func(id): return not _combos_before.has(id))
 		Overlays.victory(d, foe, rewards, sim, func():
 			if o.get("optional", false) or o.type == "fight" or Game.run.stage < Game.run_region().stages.size() - 1:
 				_next_stage()
@@ -187,7 +225,12 @@ func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 				_region_done())
 	else:
 		var summary := Game.on_death()
-		Overlays.death(d, foe, summary, func(): _fade_then(show_sanctuary))
+		var region := str(summary.get("region", ""))
+		var actions := {"equipment": func(): _fade_then(func(): show_sanctuary("Armory"))}
+		if Db.region_by_id.has(region):
+			# the route resets on death, as it always has: this sets out on the same road again, by the short way if it is open
+			actions["retry"] = func(): _set_out(region, true)
+		Overlays.death(d, foe, summary, func(): _fade_then(show_sanctuary), actions)
 
 func _region_done() -> void:
 	var region := Game.run_region()
@@ -286,6 +329,9 @@ func _dev_boot() -> void:
 					await RenderingServer.frame_post_draw
 				get_viewport().get_texture().get_image().save_png("%s/%s_%d.png" % [dir, kind, idx])
 				print("snap ", kind, " ", idx))
+		return
+	if _args.screen in ["menu", "slots", "charselect", "loading", "map", "chronicle", "credits", "launch"]:
+		_dev_front(_args.screen)
 		return
 	match _args.screen:
 		"ending":
@@ -422,6 +468,57 @@ func _dev_boot() -> void:
 			d3.setup("ashen_sentinel", {"skip_intro": true})
 			d3.sim._damage_player(99999.0, true)
 			Overlays.death(d3, Db.foes.ashen_sentinel, {"xp": 120, "gold": 80, "found": ["r_iron"]}, func(): pass)
+
+## The front-end screens, in a known state, for captures:
+##   --screen=menu|slots|charselect|loading|map|chronicle|credits|launch  [--rich] [--fresh] [--mode=new] [--region=id] [--tab=Name] [--licences]
+func _dev_front(which: String) -> void:
+	for n in range(1, Game.SLOT_COUNT + 1):
+		Game.delete_slot(n)
+	Game.profile = Game.default_profile()
+	Game.profile.body = _args.get("body", "m")
+	if _args.has("rich"):
+		Game.profile.merge({"gold": 4200, "shards": 30, "level": 14, "playtime": 11520.0, "name": "Maren",
+			"cleared": ["courtyard", "blackwood", "cathedral"], "flags": {"courtyard_gate": true},
+			"defeated": {"ashen_sentinel": 2, "hollow_executioner": 1, "cathedral_beast": 1, "pale_huntsman": 1},
+			"combos": ["double_slash"], "endings": []}, true)
+		for c in Db.combos.slice(0, 6):
+			if not Game.profile.combos.has(c.id):
+				Game.profile.combos.append(c.id)
+		for l in Db.lore.slice(0, 14):
+			Game.profile.lore.append(l.id)
+		for id in ["w_knight_sword", "w_ashen_great", "s_garrison", "a_ash_chest", "a_black_helm"]:
+			Game.profile.inventory.append(id)
+		Game.profile.equipped.weapon = "w_knight_sword"
+		Game.profile.equipped.shield = "s_garrison"
+	if not _args.has("fresh"):
+		Game.slot = 1
+		Game.save()
+	if which == "slots" and not _args.has("fresh"):
+		# a second, younger journey so the list shows more than one kind of card
+		var keep: Dictionary = Game.profile
+		Game.slot = 3
+		Game.profile = Game.default_profile()
+		Game.profile.merge({"body": "f", "level": 3, "playtime": 1500.0, "heraldry": "#16332c", "cleared": ["courtyard"], "ng": 1}, true)
+		Game.save()
+		Game.profile = keep
+		Game.slot = 1
+		Game.save()
+	if _args.has("fresh"):
+		Game.profile = {}
+	match which:
+		"launch":
+			if _args.has("fresh"):
+				DirAccess.remove_absolute(Game._p(Launch.SEEN_FILE))
+			show_launch()
+		"menu": show_title()
+		"slots": show_title("slots", _args.get("mode", "load"))
+		"charselect": show_title("charselect")
+		"map": show_title("map", _args.get("region", ""))
+		"chronicle": show_title("chronicle", _args.get("tab", "Records"))
+		"credits": show_title("credits", "licences" if _args.has("licences") else "")
+		"loading":
+			show_title()
+			LoadingScreen.show(_args.get("region", "blackwood"), func(): await get_tree().create_timer(600.0).timeout)
 
 ## Walks the cinematic road by itself, for recordings: takes the first choice at each stop and lets a bot fight.
 func _journey_bot() -> void:

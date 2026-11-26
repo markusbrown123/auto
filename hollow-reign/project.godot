@@ -16,6 +16,7 @@ Db="*res://src/core/db.gd"
 Game="*res://src/core/game.gd"
 Sfx="*res://src/core/sfx.gd"
 Story="*res://src/core/story.gd"
+Companion="*res://src/core/companion.gd"
 
 [display]
 window/size/viewport_width=1280

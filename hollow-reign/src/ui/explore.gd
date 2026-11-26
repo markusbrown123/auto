@@ -83,12 +83,11 @@ func _ready() -> void:
 		markers.append(at)
 		row.add_child(_card(opts[i], i))
 	_scatter_pouches(frame, int(Game.run_stage().get("pouches", 1)))
-	var remark := "%s_%d" % [region.id, stage]
 	layer.get_child(0).modulate.a = 0.0
-	if Story.pending(remark):
+	if not Companion.pick_stage(str(region.id), stage).is_empty():
 		# let the place and the voice land first; the choices appear once the line is done
 		await get_tree().create_timer(1.4).timeout
-		await Story.play(remark)
+		await Companion.on_stage(str(region.id), stage)
 		if not is_inside_tree():
 			return
 	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.3)

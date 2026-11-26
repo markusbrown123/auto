@@ -11,6 +11,8 @@ var _neck: Array = []       # bone indices, base to head
 var _tail: Array = []
 var _fore := {}             # "r"/"l" -> limb root bone
 var _wings: Array = []      # [bone, side]
+var _hind := {}             # "r"/"l" -> hind limb root bone
+var _jaw := -1              # the bone that carries the lower jaw, if the rig has one
 var _to_skel := Basis.IDENTITY     # rig body space -> skeleton space
 var _fwd := Vector3.FORWARD        # the model's own forward, in skeleton space
 
@@ -85,7 +87,21 @@ func _analyse() -> void:
 	limb_roots.sort_custom(func(a, b): return ((_g[a] as Transform3D).origin - centre).dot(_fwd) > ((_g[b] as Transform3D).origin - centre).dot(_fwd))
 	for i in [limb_roots[0], limb_roots[1]]:
 		_fore["r" if ((_g[i] as Transform3D).origin - centre).dot(right) > 0.0 else "l"] = i
+	for i in [limb_roots[2], limb_roots[3]]:
+		_hind["r" if ((_g[i] as Transform3D).origin - centre).dot(right) > 0.0 else "l"] = i
 	_neck = _chain_up(head_tip, 5)
+	# jaw: a side branch off the head chain that hangs below it and reaches forward
+	var best_jaw := 0.0
+	for hb in _neck.slice(maxi(0, _neck.size() - 3)):
+		for kid in skel.get_bone_children(hb):
+			if _neck.has(kid):
+				continue
+			var tipj: Vector3 = (_g[_tip_of(kid)] as Transform3D).origin
+			var basej: Vector3 = (_g[hb] as Transform3D).origin
+			var score := (basej.y - tipj.y) * 2.0 + (tipj - basej).dot(_fwd)
+			if tipj.y < basej.y and score > best_jaw:
+				best_jaw = score
+				_jaw = kid
 	# tail: the chain whose tip is furthest back; wings: chains whose tips are highest and off-centre
 	var best_back := 0.0
 	var tail_tip := -1
@@ -140,6 +156,21 @@ func drive(c: Dictionary) -> void:
 	var nn := float(_neck.size())
 	for i in _neck:
 		_turn(i, Basis(Vector3.UP, yaw / nn) * Basis(Vector3.RIGHT, (pitch + float(c.reach) * 0.25) / nn))
+	if _jaw >= 0 and float(c.get("jaw", 0.0)) > 0.01:
+		_turn(_jaw, Basis(Vector3.RIGHT, -0.7 * float(c.jaw)))      # the mouth opens for bites, roars and breath
+	# walking: a diagonal gait, each leg swinging from its root as the body covers ground
+	var wa: float = c.get("walk_amt", 0.0)
+	if wa > 0.01:
+		var ph: float = c.get("walk", 0.0)
+		for side: String in _fore:
+			var sgn := 1.0 if side == "r" else -1.0
+			if not (sgn == float(c.claw_side) and float(c.claw) > 0.01):
+				_turn(_fore[side], Basis(Vector3.RIGHT, sin(ph) * sgn * 0.32 * wa))
+		for side2: String in _hind:
+			_turn(_hind[side2], Basis(Vector3.RIGHT, -sin(ph) * (1.0 if side2 == "r" else -1.0) * 0.28 * wa))
+	# breathing: the whole chest rises a little
+	if not _neck.is_empty():
+		_turn(_neck[0], Basis(Vector3.RIGHT, sin(float(c.clock) * 1.3) * 0.025))
 	for side: String in _fore:
 		var sx := 1.0 if side == "r" else -1.0
 		if sx == float(c.claw_side) and float(c.claw) > 0.01:

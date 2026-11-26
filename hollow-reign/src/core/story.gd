@@ -60,7 +60,7 @@ func _ready() -> void:
 	_name = UI.title("", 15, UI.GOLD)
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(_name)
-	_text = UI.label("", 25, UI.BONE)
+	_text = UI.label("", Game.subtitle_size(), UI.BONE)
 	_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	v.add_child(_text)
@@ -126,7 +126,8 @@ func play(id: String, force: bool = false) -> void:
 		create_tween().tween_property(_text, "modulate:a", 1.0, 0.25)
 		var hold: float = 1.4 + float(str(line.text).length()) / 15.0
 		var path := audio_path(lid)
-		if ResourceLoader.exists(path):
+		# a line marked "recorded": false is text only: never play a stale take left under the same id
+		if bool(line.get("recorded", true)) and ResourceLoader.exists(path):
 			var s: AudioStream = load(path)
 			_player.stream = s
 			_player.play()

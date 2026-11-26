@@ -90,6 +90,16 @@ func build(config: Dictionary, as_foe: bool) -> void:
 	add_child(body)
 	pelvis = Node3D.new()
 	body.add_child(pelvis)
+	if cfg.get("witness", false):
+		# the Witness rides at the left hip, face outward
+		var relic := PropModel.scenery(pelvis, "res://assets/models/witness_relic.glb", 0.26, Vector3(-0.2, -0.06, -0.04), 100.0)
+		if relic:
+			var eye := OmniLight3D.new()
+			eye.light_color = Color("#ffb347")
+			eye.light_energy = 0.35
+			eye.omni_range = 0.7
+			eye.position = Vector3(0, 0.16, 0)
+			relic.add_child(eye)
 	_box(pelvis, Vector3(0.36 * bulk, 0.18, 0.24 * bulk), Vector3(0, 0.02, 0), mat_metal)
 	_fauld()
 	chest = Node3D.new()
@@ -472,13 +482,8 @@ func _build_trail() -> void:
 	trail.mesh = trail_mesh
 	trail.top_level = true
 	trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.vertex_color_use_as_albedo = true
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	m.cull_mode = BaseMaterial3D.CULL_DISABLED
-	trail.material_override = m
+	trail.extra_cull_margin = 4.0
+	trail.material_override = Fx.ribbon_material()
 	add_child(trail)
 
 func _build_cape() -> void:
@@ -1054,31 +1059,61 @@ func _leg(side: String, hip: Vector3, foot: Vector3) -> void:
 	seg["foot_" + side].position = Vector3(ankle.x, foot.y, ankle.z)
 	seg["foot_" + side].rotation.y = 0.25 if side == "r" else -0.25
 
+## A thin camera-facing ribbon along the path of the blade's tip (and a fainter one at 70% of its
+## length), built from the last TRAIL_LIFE seconds of samples. Only fed while a cut or thrust is live;
+## what is left ages out, so nothing remains ~0.12 s after the swing ends.
+const TRAIL_LIFE := 0.12
 func _update_trail() -> void:
 	if trail_mesh == null:
 		return
-	var on := is_striking()
-	if on:
+	if is_striking():
 		var gt := weapon_r.global_transform
-		_trail_pts.push_front([gt * Vector3(0, weapon_len * 0.35, 0), gt * Vector3(0, weapon_len, 0)])
-	elif not _trail_pts.is_empty():
-		_trail_pts.pop_back()
-		if not _trail_pts.is_empty():
-			_trail_pts.pop_back()
-	while _trail_pts.size() > 14:
+		_trail_pts.push_front([_clock, gt * Vector3(0, weapon_len, 0), gt * Vector3(0, weapon_len * 0.7, 0)])
+	while not _trail_pts.is_empty() and (_clock - float(_trail_pts[-1][0]) > TRAIL_LIFE or _trail_pts.size() > 24):
 		_trail_pts.pop_back()
 	trail_mesh.clear_surfaces()
-	if _trail_pts.size() < 2:
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if _trail_pts.size() < 2 or cam == null:
 		return
-	var col: Color = mat_blade.emission if mat_blade.emission_enabled else Color(0.85, 0.82, 0.75)
-	trail_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
-	for i in _trail_pts.size():
-		var a := 0.5 * (1.0 - float(i) / _trail_pts.size())
-		trail_mesh.surface_set_color(Color(col.r, col.g, col.b, a * 0.25))
-		trail_mesh.surface_add_vertex(_trail_pts[i][0])
-		trail_mesh.surface_set_color(Color(col.r, col.g, col.b, a))
-		trail_mesh.surface_add_vertex(_trail_pts[i][1])
-	trail_mesh.surface_end()
+	var heavy := two_handed or scale.x > 1.3
+	var col := Color(0.82, 0.87, 0.94)
+	if mat_blade.emission_enabled:
+		col = col.lerp(mat_blade.emission, 0.6)
+	var width := (0.07 if heavy else 0.045) * scale.x
+	var strength := 0.6 if heavy else 0.42
+	var eye := cam.global_position
+	var n := _trail_pts.size()
+	for lane in 2:      # 0: the tip, 1: the 70% point (thinner and fainter)
+		var w0 := width * (1.0 if lane == 0 else 0.5)
+		var a0 := strength * (1.0 if lane == 0 else 0.4)
+		trail_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+		var prev: Vector3 = _trail_pts[0][1 + lane]
+		var side := Vector3.ZERO
+		for i in n - 1:
+			var p0: Vector3 = _trail_pts[maxi(i - 1, 0)][1 + lane]
+			var p1: Vector3 = _trail_pts[i][1 + lane]
+			var p2: Vector3 = _trail_pts[i + 1][1 + lane]
+			var p3: Vector3 = _trail_pts[mini(i + 2, n - 1)][1 + lane]
+			var t1: float = _trail_pts[i][0]
+			var t2: float = _trail_pts[i + 1][0]
+			for k in (4 if i == n - 2 else 3):
+				var f := k / 3.0
+				# Catmull-Rom between samples, so a 30 fps arc is still a curve
+				var p := 0.5 * ((2.0 * p1) + (p2 - p0) * f + (2.0 * p0 - 5.0 * p1 + 4.0 * p2 - p3) * f * f + (3.0 * p1 - p0 - 3.0 * p2 + p3) * f * f * f)
+				var u := clampf((_clock - lerpf(t1, t2, f)) / TRAIL_LIFE, 0.0, 1.0)
+				var tan := p - prev if (i > 0 or k > 0) else p2 - p1
+				var s := tan.cross(eye - p)
+				if s.length_squared() > 1e-10:
+					side = s.normalized()
+				var w := w0 * (1.0 - u) * 0.5
+				var a := a0 * (1.0 - u) * (1.0 - u)
+				trail_mesh.surface_set_color(Color(col.r, col.g, col.b, a))
+				trail_mesh.surface_set_uv(Vector2(0, u))
+				trail_mesh.surface_add_vertex(p - side * w)
+				trail_mesh.surface_set_uv(Vector2(1, u))
+				trail_mesh.surface_add_vertex(p + side * w)
+				prev = p
+		trail_mesh.surface_end()
 
 func _update_cape(dt: float) -> void:
 	if cape_mesh == null:

@@ -1,50 +1,96 @@
 class_name TitleScreen
 extends Node
-## Main menu over a live view of the fallen courtyard.
+## The main menu: the player's own knight, breathing, in the fallen courtyard, with the camera drifting.
+## The other front-end screens (journeys, who wakes, the map, the chronicle, credits, settings) open over
+## the same scene, so nothing is rebuilt to move between them.
 
 signal continue_game
 signal new_game(heraldry: String, body: String)
+signal open_screen(which: String)          # "character", "equipment", "training": the router's screens
+signal set_out(region_id: String, use_shortcut: bool)
 
-const HERALDRY := [["Oxblood", "#3d0f0f"], ["Ash", "#34322e"], ["Verdigris", "#16332c"], ["Dusk", "#1c2240"], ["Bone", "#8a8270"]]
+const HERALDRY := CharacterSelect.HERALDRY
+const CAM_POS := Vector3(-0.6, 1.0, 4.4)
+const CAM_LOOK := Vector3(0.2, 1.75, -3.0)
+
 var backdrop: Backdrop
 var layer: CanvasLayer
 var menu: VBoxContainer
 var heraldry := "#3d0f0f"
 var body := "m"
+var knight_name := ""
+var _menu_root: Control
+var _panel: Control                # the screen open over the menu, if any
+var _shade: TextureRect
+var _target_slot := 1              # where a new journey will be written, once it is confirmed
 
 func _ready() -> void:
+	UI.apply(self)
+	# the knight on the menu is the player's own: the most recent journey, as equipped
+	if Game.profile.is_empty() and Game.has_save():
+		Game.load_slot(Game.latest_slot())
 	backdrop = Backdrop.new()
 	add_child(backdrop)
 	backdrop.build("courtyard")
-	backdrop.rig.rotation.y = PI * 0.15
-	backdrop.rig.position = Vector3(1.4, 0, 0)
-	backdrop.move_camera(Vector3(-0.6, 1.0, 4.4), Vector3(0.2, 1.75, -3.0), true)
+	_pose_knight()
+	backdrop.move_camera(CAM_POS, CAM_LOOK, true)
+	_motes()
 	Sfx.music_for("theme", "menu")
 	Sfx.ambience("wind")
 	layer = CanvasLayer.new()
 	add_child(layer)
-	var shade := UI.full(TextureRect.new())
-	var g := Gradient.new()
-	g.set_color(0, Color(0, 0, 0, 0.78))
-	g.set_color(1, Color(0, 0, 0, 0.0))
-	var gt := GradientTexture2D.new()
-	gt.gradient = g
-	gt.fill_to = Vector2(0.62, 0)
-	shade.texture = gt
-	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layer.add_child(shade)
-	var m := UI.margin(get_viewport(), 36)
-	layer.add_child(m)
+	_shade = UI.shade(0.88, 0.66)
+	layer.add_child(_shade)
+	_menu_root = UI.margin(get_viewport(), 36)
+	layer.add_child(_menu_root)
 	menu = VBoxContainer.new()
 	menu.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	menu.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	menu.add_theme_constant_override("separation", 10)
-	m.add_child(menu)
+	menu.add_theme_constant_override("separation", 0)
+	_menu_root.add_child(menu)
 	var ver := UI.label("v" + str(ProjectSettings.get_setting("application/config/version")), 14, Color(1, 1, 1, 0.3))
 	ver.size_flags_horizontal = Control.SIZE_SHRINK_END
 	ver.size_flags_vertical = Control.SIZE_SHRINK_END
-	m.add_child(ver)
+	_menu_root.add_child(ver)
 	_main()
+	UI.slide_in(_menu_root, Vector2(-30, 0), 0.7, 0.25)
+
+func _pose_knight() -> void:
+	if backdrop.rig:
+		backdrop.rig.rotation.y = PI * 0.15
+		backdrop.rig.position = Vector3(1.4, 0, 0)
+
+## Dust in the light and a few embers off the braziers, close to the camera.
+func _motes() -> void:
+	for kind: int in 2:
+		var p := CPUParticles3D.new()
+		p.amount = 36 if kind == 0 else 10
+		p.lifetime = 9.0 if kind == 0 else 5.0
+		p.preprocess = 9.0
+		p.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+		p.emission_box_extents = Vector3(4.0, 1.4, 2.5)
+		p.position = Vector3(0.6, 1.5, 1.0)
+		p.direction = Vector3(0.4, 1.0 if kind == 1 else 0.15, 0.1)
+		p.spread = 50.0
+		p.gravity = Vector3.ZERO
+		p.initial_velocity_min = 0.03 if kind == 0 else 0.2
+		p.initial_velocity_max = 0.12 if kind == 0 else 0.45
+		var q := QuadMesh.new()
+		q.size = Vector2.ONE * (0.022 if kind == 0 else 0.03)
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.vertex_color_use_as_albedo = true
+		mat.albedo_color = Color(1.0, 0.95, 0.82) if kind == 0 else Color(1.0, 0.55, 0.2)
+		q.material = mat
+		p.mesh = q
+		var g := Gradient.new()
+		g.colors = PackedColorArray([Color(1, 1, 1, 0), Color(1, 1, 1, 0.55 if kind == 0 else 0.9), Color(1, 1, 1, 0)])
+		g.offsets = PackedFloat32Array([0.0, 0.4, 1.0])
+		p.color_ramp = g
+		p.speed_scale = UI.motion() * 0.9 + 0.1
+		backdrop.add_child(p)
 
 func _clear() -> void:
 	for c in menu.get_children():
@@ -52,94 +98,176 @@ func _clear() -> void:
 		c.queue_free()
 
 func _logo() -> void:
-	var t := UI.label("HOLLOW REIGN", 68, UI.BONE, "title")
+	var t := UI.label("HOLLOW REIGN", 64, UI.BONE, "title")
 	t.add_theme_constant_override("outline_size", 0)
 	menu.add_child(t)
-	var sub := UI.title("Three hundred years of silence", 17, UI.GOLD)
-	menu.add_child(sub)
-	menu.add_child(UI.spacer(26))
+	menu.add_child(UI.ornament(470, UI.GOLD_DIM.lightened(0.15)))
+	menu.add_child(UI.title("Three hundred years of silence", 16, UI.GOLD))
+
+## The small line under the logo: who is waiting, and where they had got to.
+func status_line() -> String:
+	if Game.profile.is_empty() or not Game.has_save():
+		return ""
+	var r := Game.furthest_region()
+	var n := 0
+	for x in Db.regions:
+		if not x.get("optional", false):
+			n += 1
+		if x.id == r.id:
+			break
+	var who: String = str(Game.profile.get("name", ""))
+	var chapter: String = "a side road" if r.get("optional", false) else "Chapter %s" % UI.roman(n)
+	return "%sLevel %d   ·   %s, %s" % [(who + "   ·   ") if who != "" else "", int(Game.profile.level), chapter, r.name]
+
+## The entries that make sense right now, as [label, action].
+func entries() -> Array:
+	var saved := Game.has_save() and not Game.profile.is_empty()
+	var out: Array = []
+	if saved:
+		out.append(["Continue", func(): continue_game.emit()])
+	out.append(["New Journey", _new])
+	if saved:
+		out.append(["Journeys", func(): _slots("load")])
+		out.append(["Character", func(): open_screen.emit("character")])
+		out.append(["Equipment", func(): open_screen.emit("equipment")])
+		out.append(["World Map", func(): open("map")])
+		out.append(["Chronicle", func(): open("chronicle")])
+		out.append(["Training", func(): open_screen.emit("training")])
+	out.append(["Settings", _settings])
+	out.append(["Credits", func(): open("credits")])
+	return out
 
 func _main() -> void:
+	_close_panel()
+	if Game.profile.is_empty() and Game.has_save():
+		Game.load_slot(Game.latest_slot())
+		backdrop.refresh_knight()
+		_pose_knight()
 	_clear()
 	_logo()
-	if Game.has_save():
-		var c := UI.button("Continue", 22, 300)
-		c.pressed.connect(func(): continue_game.emit())
-		menu.add_child(c)
-	var n := UI.button("New Game", 22, 300)
-	n.pressed.connect(_new)
-	menu.add_child(n)
-	var s := UI.button("Settings", 22, 300)
-	s.pressed.connect(_settings)
-	menu.add_child(s)
+	var line := status_line()
+	menu.add_child(UI.spacer(10))
+	if line != "":
+		menu.add_child(UI.label(line, 18, UI.SILVER))
+	menu.add_child(UI.spacer(14))
+	var list := entries()
+	for i in list.size():
+		var e: Array = list[i]
+		var b := UI.menu_item(e[0], 25 if i == 0 else 20, 330)
+		b.custom_minimum_size.y = 50 if i == 0 else 44
+		if i == 0:
+			b.add_theme_color_override("font_color", UI.GOLD.lightened(0.2))
+		b.pressed.connect(e[1])
+		menu.add_child(b)
 
+# ---------------------------------------------------------------- screens over the menu
+## Opens one of the front-end screens by name. Used by the menu and by the dev `--screen=` switch.
+func open(which: String, arg: String = "") -> void:
+	match which:
+		"slots": _slots(arg if arg != "" else "load")
+		"charselect": _charselect()
+		"map":
+			var w := WorldMap.new()
+			w.set_out.connect(func(region: String, shortcut: bool): set_out.emit(region, shortcut))
+			_host(w)
+			if arg != "" and Db.region_by_id.has(arg) and Game.region_unlocked(arg):
+				w.select(arg)
+		"chronicle": _host(Chronicle.new(arg if arg != "" else "Records"))
+		"credits":
+			var c := Credits.new()
+			_host(c)
+			if arg == "licences":
+				c.show_licences()
+		"settings": _settings()
+
+func _host(c: Control) -> void:
+	_close_panel()
+	_menu_root.visible = false
+	_panel = c
+	layer.add_child(c)
+	if c.has_signal("closed"):
+		c.connect("closed", _main)
+	UI.fade_in(c, 0.3)
+
+func _close_panel() -> void:
+	if _panel and is_instance_valid(_panel):
+		if _panel is CharacterSelect:
+			_panel.leave()
+			backdrop.move_camera(CAM_POS, CAM_LOOK)
+		_panel.queue_free()
+	_panel = null
+	_shade.visible = true
+	if not _menu_root.visible:
+		_menu_root.visible = true
+		UI.fade_in(_menu_root, 0.3)
+
+func _slots(mode: String) -> void:
+	var s := SaveSlots.new(mode)
+	s.chosen.connect(func(n: int):
+		if mode == "load":
+			if Game.load_slot(n):
+				continue_game.emit()
+		else:
+			_target_slot = n
+			_charselect())
+	_host(s)
+
+## New Journey: with a free place it goes straight to who wakes; with none the player picks what to overwrite.
 func _new() -> void:
-	_clear()
-	menu.add_child(UI.title("Who Wakes", 30))
-	var forms := HBoxContainer.new()
-	forms.add_theme_constant_override("separation", 8)
-	menu.add_child(forms)
-	for f in [["m", "The Knight"], ["f", "The Blade"]]:
-		var fb := UI.button(f[1], 18, 190)
-		if f[0] == body:
-			fb.add_theme_color_override("font_color", UI.GOLD)
-		fb.pressed.connect(func():
-			body = f[0]
-			_show_body()
-			_new())
-		forms.add_child(fb)
-	menu.add_child(UI.title("Your Colours", 22))
-	var note := UI.label("The cloak you were buried in. It is the only thing you remember choosing.", 20, UI.DIM)
-	note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	note.custom_minimum_size.x = 460
-	menu.add_child(note)
-	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	menu.add_child(row)
-	for h in HERALDRY:
-		var b := Button.new()
-		b.custom_minimum_size = Vector2(84, 84)
-		b.add_theme_stylebox_override("normal", UI.box(Color(h[1]), UI.GOLD if h[1] == heraldry else UI.GOLD_DIM, 3 if h[1] == heraldry else 1))
-		b.add_theme_stylebox_override("hover", UI.box(Color(h[1]).lightened(0.1), UI.GOLD, 2))
-		b.add_theme_stylebox_override("pressed", UI.box(Color(h[1]), UI.GOLD, 3))
-		b.tooltip_text = h[0]
-		b.pressed.connect(func():
-			heraldry = h[1]
-			backdrop.rig.mat_cloth.albedo_color = Color(heraldry)
-			Sfx.play("ui_tap", -6.0)
-			_new())
-		row.add_child(b)
-	if Game.has_save():
-		menu.add_child(UI.label("Beginning anew replaces your existing journey.", 17, UI.BLOOD.lightened(0.25)))
-	menu.add_child(UI.spacer(12))
-	var go := UI.button("Rise", 22, 300)
-	go.pressed.connect(func():
-		Sfx.play("ui_confirm", -3.0)
-		new_game.emit(heraldry, body))
-	menu.add_child(go)
-	var back := UI.button("Back", 18, 300)
-	back.pressed.connect(_main)
-	menu.add_child(back)
+	var free := Game.free_slot()
+	if free == 0:
+		_slots("new")
+		return
+	_target_slot = free
+	_charselect()
 
-func _show_body() -> void:
-	Game.profile = Game.default_profile() if Game.profile.is_empty() else Game.profile
-	var keep: String = Game.profile.get("body", "m")
-	Game.profile.body = body
-	backdrop.refresh_knight()
-	backdrop.rig.rotation.y = PI * 0.15
-	backdrop.rig.position = Vector3(1.4, 0, 0)
-	Game.profile.body = keep
+func _charselect() -> void:
+	var cs := CharacterSelect.new()
+	cs.heraldry = heraldry
+	cs.body = body
+	_host(cs)
+	_shade.visible = false
+	cs.setup(backdrop)
+	cs.confirmed.connect(func(h: String, b: String, who: String):
+		heraldry = h
+		body = b
+		knight_name = who
+		# an overwritten journey leaves nothing behind, not even its backup
+		Game.delete_slot(_target_slot)
+		Game.slot = _target_slot
+		new_game.emit(h, b))
 
 func _settings() -> void:
-	_clear()
-	menu.add_child(UI.title("Settings", 30))
+	var root: Control = UI.full(Control.new())
+	root.add_user_signal("closed")
+	var dim: ColorRect = UI.full(ColorRect.new())
+	dim.color = Color(0.01, 0.01, 0.015, 0.8)
+	root.add_child(dim)
+	var m := UI.margin(get_viewport(), 26)
+	root.add_child(m)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 12)
+	col.custom_minimum_size.x = 820
+	col.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	m.add_child(col)
+	col.add_child(UI.header("Settings", _main))
 	var p := UI.panel()
-	p.custom_minimum_size.x = 640
-	menu.add_child(p)
+	p.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	col.add_child(p)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	p.add_child(scroll)
 	var v := VBoxContainer.new()
+	v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	v.add_theme_constant_override("separation", 5)
-	p.add_child(v)
-	SettingsPanel.fill(v, _settings)
-	var back := UI.button("Back", 18, 300)
-	back.pressed.connect(_main)
-	menu.add_child(back)
+	scroll.add_child(v)
+	_refill_settings(v)
+	_host(root)
+
+## A changed row redraws the list in place, so the reader stays where they were.
+func _refill_settings(v: VBoxContainer) -> void:
+	SettingsPanel.fill(v, func():
+		for c in v.get_children():
+			v.remove_child(c)
+			c.queue_free()
+		_refill_settings(v))

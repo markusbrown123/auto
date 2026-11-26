@@ -80,8 +80,6 @@ func _lesson_done(step: int) -> void:
 var foot := {"circle": 0.08, "keep": 0.7}
 var _can_step := true
 var _voice_key := ""
-const VOICE_KEYS := {"ashen_sentinel": "sentinel", "hollow_executioner": "executioner", "pale_huntsman": "huntsman", "crimson_widow": "widow",
-	"cathedral_beast": "beast", "gravewarden": "gravewarden", "frostbound_king": "frostking", "cinder_wyrm": "wyrm", "devourer": "devourer", "forgotten_monarch": "monarch"}
 var _intro_talk := false
 
 
@@ -202,6 +200,7 @@ static func player_look() -> Dictionary:
 		"helm": "great",
 		"weapon": weapon.cls,
 		"skin": "res://assets/models/knight_%s.glb" % str(Game.profile.get("body", "m")),
+		"witness": bool(Game.profile.flags.get("witness", false)) or bool(Game.profile.flags.get("witness_found", false)),
 		"skin_tint": chest.get("look", {}).get("metal", "#aeb2b8"),
 	}
 	var set_id: String = helm.get("look", {}).get("set", "")
@@ -232,8 +231,9 @@ func _begin_intro(skip: bool) -> void:
 		_begin_fight()
 		return
 	Sfx.play("bell", -4.0)
-	_voice_key = VOICE_KEYS.get(str(foe.id), "")
-	if Story.pending(_voice_key + "_intro"):
+	# who may speak is data (dialogue.json "speech"): creatures have no voice key, and the companions set the scene instead
+	_voice_key = Companion.voice_key(str(foe.id))
+	if Story.pending(_voice_key + "_intro") or not Companion.pick_boss_approach(str(foe.id)).is_empty():
 		# first meeting: they speak before steel is drawn, and the fight waits for them
 		_intro_talk = true
 		foe_rig.guard()
@@ -270,15 +270,16 @@ func _begin_intro(skip: bool) -> void:
 	tw.tween_interval(0.5)
 	tw.tween_property(_intro_card, "modulate:a", 1.0, 0.9)
 	foe_rig.roar()
-	get_tree().create_timer(0.9).timeout.connect(func(): Sfx.play("roar", -2.0, 0.9 / maxf(float(foe.rig.scale) * 0.75, 0.8)))
+	get_tree().create_timer(0.9).timeout.connect(func(): _creature("roar", -2.0))
 
 func _speak_then_fight() -> void:
 	await get_tree().create_timer(1.2).timeout
+	await Companion.on_boss_approach(str(foe.id))
 	await Story.play(_voice_key + "_intro")
 	if not is_inside_tree():
 		return
 	foe_rig.roar()
-	Sfx.play("roar", -2.0, 0.9 / maxf(float(foe.rig.scale) * 0.75, 0.8))
+	_creature("roar", -2.0)
 	hud.toast(str(foe.name).to_upper(), UI.BONE, 1.6)
 	await get_tree().create_timer(1.7).timeout
 	_intro_talk = false
@@ -289,6 +290,7 @@ func _begin_fight() -> void:
 		return
 	stage = Stage.FIGHT
 	_stage_t = 0.0
+	Companion.enter_combat(self)
 	if _intro_card:
 		var card := _intro_card
 		_intro_card = null
@@ -426,10 +428,13 @@ func _finish(won: bool) -> void:
 		return
 	_result_sent = true
 	stage = Stage.DONE
-	if won and _voice_key != "":
-		# last words, and what the dead leave behind
-		await Story.play(_voice_key + "_death")
-		await Story.play(_voice_key + "_memory")
+	Companion.leave_combat()
+	if won:
+		# last words, what the dead leave behind, and then what the companions make of it
+		if _voice_key != "":
+			await Story.play(_voice_key + "_death")
+			await Story.play(_voice_key + "_memory")
+		await Companion.on_victory(str(foe.id))
 		if not is_inside_tree():
 			return
 	finished.emit(won, sim)
@@ -564,8 +569,10 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			if a.unblockable:
 				Sfx.play("telegraph_unblockable", -3.0)
 				Game.haptic(30, 0.4)
-			elif d.index == 0 and a.kind == "slam" and foe.boss:
-				Sfx.play("roar", -9.0, 1.1)
+			elif a.kind == "breath":
+				Sfx.play("dragon_frost" if str(a.get("element", "")) == "frost" else "dragon_fire", -1.0)      # the gout itself
+			elif d.index == 0:
+				_creature("effort" if a.kind != "slam" else "growl", -8.0, 1.2)      # it commits with its voice as well as its body
 		&"boss_strike":
 			_on_strike(d)
 		&"boss_combo":
@@ -623,6 +630,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			player_rig.flash(0.6)
 		&"boss_hit":
 			f_back_t = minf(f_back_t + 0.16, 1.5)      # each blow drives it back a pace
+			if d.get("crit", false) or str(d.get("named", "")) != "":
+				_creature("pain", -5.0, 0.9)
 			f_back += 0.05
 			var at: Vector3 = foe_rig.chest_point() + Vector3(randf_range(-0.2, 0.2), randf_range(-0.2, 0.3), 0.35)
 			var crit: bool = d.get("crit", false) or d.get("rift", false)
@@ -691,7 +700,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			foe_rig.roar()
 			hud.cue.clear()
 			_set_foe_blade_warning(false)
-			Sfx.play("roar", 0.0, 0.8)
+			_creature("roar", 0.0)
 			Sfx.play("bell", -6.0)
 			if Sfx.current_music() == "combat_a":
 				Sfx.set_layer("combat_b")      # the layer was written against this cue only
@@ -716,9 +725,39 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			else:
 				Sfx.play("ember_burst", -8.0)
 		&"boss_dead":
+			_creature("death", 0.0)
 			_begin_finisher(d)
 		&"player_dead":
 			_begin_death()
+
+## What this foe sounds like when it is not a person: "dragon", "beast", "guardian" or "" (plain roar set).
+func _voice_kind() -> String:
+	if str(foe.rig.get("kind", "")) == "dragon":
+		return "dragon"
+	if str(foe.id) == "cathedral_beast" or str(foe.get("cls", "")) in ["Monstrosity", "Soul-Eater"]:
+		return "beast"
+	if str(foe.id) in ["ashen_sentinel", "hollow_executioner", "gravewarden"] or str(foe.get("cls", "")) in ["Heavy", "Giant", "Guardian"]:
+		return "guardian"
+	return ""
+
+## A creature sound, pitched to the creature's size. `what`: roar, growl, pain, death, effort, breath.
+var _voice_quiet_until := 0.0
+func _creature(what: String, vol: float = 0.0, gap: float = 0.0) -> void:
+	if _clock < _voice_quiet_until:
+		return
+	_voice_quiet_until = _clock + gap
+	var kind := _voice_kind()
+	var pitch := 0.95 / maxf(float(foe.rig.scale) * 0.6, 0.8)
+	var table := {
+		"dragon": {"roar": ["dragon_roar_1", "dragon_roar_2"], "growl": ["dragon_growl_1", "dragon_growl_2"], "pain": ["dragon_pain_1", "dragon_pain_2"], "death": ["dragon_death"], "effort": ["dragon_growl_1"], "breath": ["dragon_breath"]},
+		"beast": {"roar": ["beast_threat"], "growl": ["beast_growl_1", "beast_growl_2"], "pain": ["beast_pain"], "death": ["beast_death"], "effort": ["beast_lunge"], "breath": ["beast_breath"]},
+		"guardian": {"roar": ["guardian_effort_2"], "growl": ["guardian_breath"], "pain": ["guardian_pain"], "death": ["guardian_death"], "effort": ["guardian_effort_1", "guardian_effort_2"], "breath": ["guardian_breath"]},
+	}
+	if table.has(kind) and table[kind].has(what):
+		var set: Array = table[kind][what]
+		Sfx.play(str(set[randi() % set.size()]), vol, pitch if kind != "guardian" else 1.0)
+	elif what in ["roar", "death"]:
+		Sfx.play("roar", vol, 0.9 / maxf(float(foe.rig.scale) * 0.75, 0.8))
 
 func _on_strike(d: Dictionary) -> void:
 	var a: Dictionary = d.attack

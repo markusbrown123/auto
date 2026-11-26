@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -799,3 +799,292 @@ func t_lore_quests() -> void:
 	ok(not Game.can_divide_crown(), "twenty-nine records cannot divide the Crown")
 	Game.profile.lore.append(Db.lore[29].id)
 	ok(Game.can_divide_crown(), "thirty records can")
+
+# ------------------------------------------------------------------ companions and who may speak
+func t_companion() -> void:
+	var saved_profile: Dictionary = Game.profile
+	var had_chatter: bool = Game.settings.has("chatter")
+	var old_chatter = Game.settings.get("chatter", true)
+	Game.settings["chatter"] = true
+	Game.profile = Game.default_profile()
+	Companion.leave_combat()
+	Companion.reset_cooldown()
+	var d: Dictionary = Story.data
+	var c: Dictionary = d.companion
+	# every id the Companion can ask for exists, is text only, and belongs to a real place or foe
+	var ids: Array = [Companion.discovery_id()]
+	var placed := true
+	for r: String in c.stage:
+		placed = placed and Db.region_by_id.has(r)
+		for st: String in c.stage[r]:
+			placed = placed and int(st) >= 0 and int(st) < 7
+			ids.append_array(c.stage[r][st])
+	for f: String in c.boss:
+		placed = placed and Db.foes.has(f) and bool(Db.foes[f].boss)
+		for k: String in ["approach", "fallback", "victory"]:
+			ids.append_array(c.boss[f][k])
+	for t: Dictionary in c.topics:
+		ids.append(t.id)
+	var exist := true
+	var unrecorded := true
+	var witness_lines := 0
+	for id: String in ids:
+		exist = exist and Story.has_scene(id)
+		for lid: String in d.scenes.get(id, {}).get("lines", []):
+			exist = exist and d.lines.has(lid)
+			if str(d.lines[lid].speaker) == "witness":
+				witness_lines += 1
+				unrecorded = unrecorded and d.lines[lid].get("recorded", true) == false
+	ok(exist, "every scene and line the Companion refers to exists")
+	ok(placed, "companion scenes sit at real stages and real guardians")
+	ok(unrecorded and witness_lines >= 60, "the Witness's lines are all marked not recorded (%d)" % witness_lines)
+	for r in Db.regions:
+		var b: Dictionary = c.boss.get(str(r.stages[6].options[0].foe), {})
+		ok(c.stage.has(r.id) and c.stage[r.id].size() >= 3 and not b.get("approach", []).is_empty() and not b.get("victory", []).is_empty(), "%s has Witness remarks, a boss approach and a victory line" % r.id)
+	ok(c.topics.size() >= 10, "at least ten sanctuary conversations")
+	# who may speak
+	var silent := true
+	var few := true
+	for f: String in Db.foes:
+		var cat := Companion.speech(f)
+		var key := str(d.foe_voice.get(f, f))
+		var n := 0
+		for lid: String in d.lines:
+			if str(d.lines[lid].speaker) in [f, key]:
+				n += 1
+		if cat == "A":
+			silent = silent and n == 0 and Companion.voice_key(f) == "" and not d.foe_voice.has(f)
+		elif cat == "B":
+			few = few and n <= 4
+	ok(silent, "no creature (speech category A) has a line or a voice key")
+	ok(few, "category B guardians have at most four lines")
+	ok(Companion.speech("cathedral_beast") == "A" and Companion.speech("cinder_wyrm") == "A" and Companion.speech("hollow_soldier") == "A", "beasts, dragons and lesser foes are creatures")
+	ok(Companion.speech("ashen_sentinel") == "B" and Companion.speech("forgotten_monarch") == "C" and Companion.speech("devourer") == "D", "guardian categories")
+	ok(not Story.has_scene("sentinel_retry") and Story.has_scene("sentinel_intro") and Story.has_scene("sentinel_death"), "the Sentinel keeps only its challenge and last words")
+	# silent until found
+	var quiet := true
+	for id: String in Companion.pick_stage("courtyard", 0) + Companion.pick_boss_approach("ashen_sentinel") + Companion.pick_victory("ashen_sentinel") + Companion.pick_boss_approach("cathedral_beast"):
+		quiet = quiet and not Companion.speakers(id).has("witness")
+	ok(quiet and not Companion.witness_found(), "the Witness says nothing before it is found")
+	ok(Companion.pick_stage("courtyard", 0) == ["courtyard_0"], "Lyra still speaks at the first stop")
+	ok(Companion.pick_boss_approach("cathedral_beast") == ["beast_intro"], "without the Witness, Lyra sets the scene for a silent foe")
+	ok(Companion.sanctuary_topics().is_empty(), "no Witness conversations before it is found")
+	ok(Companion.pick_stage("courtyard", 1) == [Companion.discovery_id()], "the Witness is found at the second Courtyard stop")
+	ok(Companion.pick_stage("crypt", 3) == [Companion.discovery_id()], "an older save finds it at the next stop")
+	Companion.mark_heard(Companion.discovery_id())
+	ok(Companion.witness_found() and Companion.pick_stage("courtyard", 1) == ["courtyard_1"], "found once; the stop then has only Lyra's remark")
+	# nothing repeats
+	var first := Companion.pick_stage("blackwood", 0)
+	ok(first == ["w_blackwood_approach"], "the Witness remarks on the Blackwood")
+	for id: String in first:
+		Companion.mark_heard(id)
+	Game.profile.deaths += 1
+	ok(Companion.pick_stage("blackwood", 0).is_empty(), "a heard remark is not replayed, death or no death")
+	var before := Companion.pick_boss_approach("cathedral_beast")
+	ok(before == ["w_beast_approach"], "the Witness sets the scene before the Beast")
+	Companion.mark_heard(before[0])
+	ok(Companion.pick_boss_approach("cathedral_beast").is_empty(), "the boss approach is heard once, with no fallback after it")
+	ok(Companion.pick_victory("cathedral_beast") == ["beast_death", "w_beast_victory"], "after the Beast: Lyra's discovery, then the Witness")
+	# cooldown: unprompted remarks wait, prompted and essential ones do not
+	Companion.note_spoken()
+	ok(Companion.pick_stage("blackwood", 2).is_empty() and not Companion.pick_victory("ashen_sentinel").is_empty(), "the cooldown holds unprompted remarks only")
+	Companion.reset_cooldown()
+	ok(Companion.pick_stage("blackwood", 2) == ["w_blackwood_briars"], "after the cooldown the landmark remark is offered")
+	# chatter off: only essential lines remain
+	Game.settings["chatter"] = false
+	ok(Companion.pick_stage("blackwood", 2).is_empty() and Companion.pick_victory("ashen_sentinel").is_empty() and Companion.pick_boss_approach("ashen_sentinel").is_empty(), "chatter off silences remarks, approaches and victory lines")
+	ok(Companion.pick_boss_approach("cinder_wyrm") == ["w_wyrm_approach"] and Companion.pick_victory("cathedral_beast") == ["beast_death"], "chatter off keeps essential scenes")
+	Game.profile.flags.erase(Companion.FOUND_FLAG)
+	Game.profile.heard.erase(Companion.discovery_id())
+	ok(Companion.pick_stage("courtyard", 1) == [Companion.discovery_id()], "chatter off does not hide the discovery")
+	Companion.mark_heard(Companion.discovery_id())
+	Game.settings["chatter"] = true
+	# never during a fight
+	Companion.enter_combat(self)
+	ok(Companion.pick_stage("blackwood", 2).is_empty() and Companion.pick_boss_approach("cinder_wyrm").is_empty() and Companion.pick_victory("ashen_sentinel").is_empty(), "nothing is said during combat")
+	Companion.leave_combat()
+	# sanctuary topics and the archive
+	var topics := Companion.sanctuary_topics()
+	ok(topics.size() >= 4 and topics.size() < c.topics.size() and not topics[0].heard, "early topics are open; later ones wait for their region")
+	Companion.mark_heard(str(topics[0].id))
+	var again := Companion.sanctuary_topics()
+	ok(again.size() == topics.size() and again[-1].id == topics[0].id and again[-1].heard, "a heard topic stays available, after the unheard ones")
+	Game.profile.cleared = ["courtyard", "blackwood", "cathedral", "crypt", "roost", "citadel", "deep"]
+	ok(Companion.sanctuary_topics().size() == c.topics.size(), "every topic opens by the end")
+	var arc := Companion.archive()
+	var titled := true
+	for e: Dictionary in arc:
+		titled = titled and str(e.title) != "" and not e.lines.is_empty()
+	ok(arc.size() == Game.profile.heard.size() and arc.size() >= 4 and titled and arc[0].id == "w_blackwood_approach", "the archive lists everything heard, titled, in order")
+	ok(Game.default_profile().has("heard"), "new profiles track what has been heard")
+	Game.profile = saved_profile
+	if had_chatter:
+		Game.settings["chatter"] = old_chatter
+	else:
+		Game.settings.erase("chatter")
+
+# ------------------------------------------------------------------ inventory, mastery, settings
+func t_inventory_settings() -> void:
+	var saved_profile: Dictionary = Game.profile
+	var saved_settings: Dictionary = Game.settings.duplicate(true)
+	Game.new_game("#123456")
+	for id in ["w_knight_sword", "w_ashen_great", "w_headsman", "w_twin_fangs", "s_tower", "a_ash_chest", "a_black_helm", "r_ember"]:
+		Game.grant_item(id)
+	# --- rarity: every item maps onto one of the five shown ranks, in order
+	var names := {}
+	for it in Db.item_list:
+		ok(Game.RARITY_TIERS.has(it.rarity), "%s has a known rarity" % it.id)
+		names[Game.rarity_name(it)] = Game.rarity_pips(it)
+		ok(Game.rarity_pips(it) == Db.rarity_rank(it) + 1, "%s pips follow its rank" % it.id)
+	ok(names == {"Common": 1, "Uncommon": 2, "Rare": 3, "Legendary": 4, "Relic": 5}, "five named ranks cover the data (%s)" % str(names))
+	# --- comparison: every delta is exactly Stats.compute on a copy with the item on
+	var before := JSON.stringify(Game.profile)
+	for id: String in Game.profile.inventory:
+		var it: Dictionary = Db.item(id)
+		var trial: Dictionary = Game.profile.duplicate(true)
+		trial.equipped[it.slot] = id
+		if it.slot == "weapon" and Db.classes[it.cls].two_handed:
+			trial.equipped.shield = null
+		var now := Game.stats()
+		var then := Stats.compute(trial, Db.items, Db.classes)
+		var good := true
+		for r in Game.compare(id):
+			if r.key == "element":
+				good = good and r.then_text == (str(then.element).capitalize() if then.element != null else "None")
+				continue
+			var k: float = 100.0 if r.key == "block_eff" else 1.0
+			var d: float = (float(then[r.key]) - float(now[r.key])) * k
+			var lower_better: bool = r.key in ["swing_time", "swing_cost"]
+			var want := 0 if is_zero_approx(d) else (1 if (d > 0.0) != lower_better else -1)
+			good = good and is_equal_approx(float(r.delta), d) and int(r.better) == want
+		ok(good, "comparison for %s matches Stats.compute" % id)
+	ok(JSON.stringify(Game.profile) == before, "comparing changes nothing")
+	var rows := Game.compare("w_ashen_great")
+	ok(rows[0].key == "attack" and int(rows[0].better) == 1 and float(rows[0].delta) > 0.0, "a stronger blade shows damage up")
+	var swing: Dictionary = rows.filter(func(r): return r.key == "swing_time")[0]
+	ok(int(swing.better) == -1 and float(swing.delta) > 0.0, "a slower swing is marked worse though the number rises")
+	ok(rows[-1].then_text == "Fire" and rows[-1].now_text == "None", "element is shown")
+	# --- favourites and selling
+	ok(Game.sell_block("w_rusted_sword") == "Equipped" and not Game.sell("w_rusted_sword"), "equipped items cannot be sold")
+	ok(Game.toggle_favourite("w_headsman") and Game.is_favourite("w_headsman"), "favourite set")
+	var gold: int = Game.profile.gold
+	ok(Game.sell_block("w_headsman") == "Favourite" and not Game.sell("w_headsman") and Game.owns("w_headsman") and Game.profile.gold == gold, "a favourite cannot be sold")
+	ok(not Game.toggle_favourite("w_headsman") and Game.sell_block("w_headsman") == "", "unmarking frees it")
+	Game.profile.upgrades["w_headsman"] = 2
+	ok(Game.sell("w_headsman") and not Game.owns("w_headsman") and Game.profile.gold == gold + Game.sell_price("w_headsman") and not Game.profile.upgrades.has("w_headsman"), "selling pays and removes")
+	ok(Game.sell_price("w_knight_sword") > 0 and Game.sell_price("w_knight_sword") < int(Db.item("w_knight_sword").price), "sells for less than it costs")
+	ok(not Game.sell("w_nothing"), "cannot sell what is not held")
+	Game.equip("w_ashen_great")
+	Game.sell("w_knight_sword")
+	ok(Game.sell_block("w_rusted_sword") != "" and not Game.sell("w_rusted_sword"), "the last one-handed blade is kept")
+	Game.equip("w_rusted_sword")
+	Game.save()
+	Game.toggle_favourite("s_tower")
+	Game.set_sort("rarity")
+	Game.profile = {}
+	ok(Game.load_game() and Game.is_favourite("s_tower") and Game.profile.inv_sort == "rarity", "favourites and sort order are kept in the profile")
+	# --- sorting
+	Game.grant_item("w_knight_sword")
+	Game.grant_item("w_dawnline")           # same rarity as the longsword: ties keep acquisition order
+	Game.profile.mastery["w_twin_fangs"] = 5
+	var weapons := ["weapon"]
+	ok(Game.sorted_items(weapons, "damage")[0] == "w_ashen_great" and Game.sorted_items(weapons, "damage")[-1] == "w_rusted_sword", "damage order")
+	var by_r: Array = Game.sorted_items(weapons, "rarity")
+	ok(by_r[0] == "w_twin_fangs" and by_r.find("w_knight_sword") < by_r.find("w_dawnline") and by_r[-1] == "w_rusted_sword", "rarity order, ties stable (%s)" % str(by_r))
+	ok(Game.sorted_items(weapons, "recent")[0] == "w_dawnline" and Game.sorted_items(weapons, "recent")[-1] == "w_rusted_sword", "newest first")
+	ok(Game.sorted_items(weapons, "mastery")[0] == "w_twin_fangs", "mastery order")
+	ok(Game.sorted_items(weapons, "equipped")[0] == "w_rusted_sword", "equipped first")
+	ok(Game.sorted_items(["chest"], "defence")[0] == "a_ash_chest", "defence order")
+	for mode: String in Game.SORTS:
+		var a: Array = Game.sorted_items([], mode)
+		var sorted_copy: Array = a.duplicate()
+		sorted_copy.sort()
+		var inv: Array = Game.profile.inventory.duplicate()
+		inv.sort()
+		ok(a == Game.sorted_items([], mode) and sorted_copy == inv, "%s sort is repeatable and loses nothing" % mode)
+	ok(Game.sorted_items() == Game.sorted_items([], "rarity"), "the stored sort is the default")
+	# --- mastery marks
+	Game.new_game("#123456")
+	var sword: Dictionary = Db.item("w_rusted_sword")
+	ok(Game.mastery_threshold(sword, 1) < Game.mastery_threshold(sword, 2) and Game.mastery_threshold(sword, 2) < Game.mastery_threshold(sword, 3) and Game.mastery_threshold(sword, 3) == Stats.mastery_needed(sword), "three rising marks ending at mastery")
+	for it in Db.item_list:
+		ok(Game.mastery_threshold(it, 1) >= 1 and Game.mastery_threshold(it, 3) <= 11, "%s mastery stays modest" % it.id)
+	ok(Game.mastery_tier("w_rusted_sword") == 0 and Game.item_history("w_rusted_sword").size() == 1, "no marks at first")
+	var uses: int = Game.profile.combo_uses.size()
+	Game.on_victory("ashen_sentinel", 50.0)        # a guardian counts double: two of three
+	ok(Game.mastery_tier("w_rusted_sword") == 2 and Game.item_history("w_rusted_sword").size() == 2, "mark I reveals more history")
+	var taught: String = Game.profile.mastery_taught.get("w_rusted_sword", "")
+	ok(taught == "riposte" and Game.profile.combos.has("riposte") and Game.profile.combo_uses.size() == uses and Game.technique_source("riposte") == "w_rusted_sword", "mark II teaches a sword technique without counting a use (%s)" % taught)
+	var known: int = Game.profile.combos.size()
+	Game.on_victory("ashen_sentinel", 50.0)
+	ok(Game.mastery_tier("w_rusted_sword") == 3 and Game.profile.mastered.has("w_rusted_sword") and Game.profile.combos.size() == known, "mark III is mastery; nothing is taught twice")
+	Game.new_game("#123456")
+	for w in Db.item_list:
+		if w.slot == "weapon":
+			ok(Game.item_history(w.id).size() == 1, "%s keeps its further history back" % w.id)
+			Game.profile.mastered.append(w.id)
+			ok(Game.item_history(w.id).size() == 2 and str(Game.item_history(w.id)[1]).length() > 20, "%s has further history" % w.id)
+	# --- settings: defaults, round trip, migration
+	for k in ["master", "music", "dialogue", "combat", "ambience", "swipe_sens", "haptic_strength", "sub_size", "sub_bg", "reduce_motion", "chatter", "pad_opacity", "hints", "shake", "reduce_flash", "assist", "quality", "fps"]:
+		ok(Game.settings.has(k), "setting %s exists" % k)
+	for b: String in Sfx.BUSES:
+		ok(Game.settings.has(Sfx.BUS_SETTING[b]), "bus %s follows a setting" % b)
+	var custom := {"quality": 0, "fps": 30, "master": 0.6, "music": 0.25, "dialogue": 0.9, "combat": 0.35, "ambience": 0.15, "swipe_sens": 1.4,
+		"haptic_strength": 0.5, "sub_size": 2, "sub_bg": false, "reduce_motion": true, "chatter": false, "pad_opacity": 0.55, "hints": false, "shake": 0.3, "reduce_flash": true, "assist": true}
+	for k in custom:
+		Game.settings[k] = custom[k]
+	Game.save_settings()
+	Game.settings = saved_settings.duplicate(true)
+	Game.load_settings()
+	var same := true
+	for k in custom:
+		same = same and typeof(Game.settings[k]) == typeof(custom[k]) and (is_equal_approx(float(Game.settings[k]), float(custom[k])) if custom[k] is float else Game.settings[k] == custom[k])
+	ok(same, "every setting survives save and load")
+	Game.apply_settings()
+	var bus := AudioServer.get_bus_index("Interface")
+	ok(is_equal_approx(AudioServer.get_bus_volume_db(0), linear_to_db(0.6)), "master slider sets the Master bus")
+	ok(is_equal_approx(AudioServer.get_bus_volume_db(bus), linear_to_db(0.35) + float(Sfx.BUS_TRIM["Interface"])), "interface follows combat effects")
+	ok(is_equal_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Cinematics")), float(Sfx.BUS_TRIM["Cinematics"])), "cinematics follow the master only")
+	ok(is_equal_approx(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Ambience")), linear_to_db(0.15) + float(Sfx.BUS_TRIM["Ambience"])), "ambience has its own slider")
+	ok(is_equal_approx(Game.haptic_amount(0.8), 0.4) and Game.subtitle_size() == Game.SUB_SIZES[2] and Engine.max_fps == 30, "haptic strength scales; subtitle size and frame cap apply")
+	Game.settings.haptic_strength = 0.0
+	ok(Game.haptic_amount(1.0) == 0.0, "zero haptic strength is off")
+	# the old three-slider file
+	Game.settings = saved_settings.duplicate(true)
+	var f := FileAccess.open(Game.save_dir_override + "/settings.json", FileAccess.WRITE)
+	f.store_string(JSON.stringify({"quality": 2, "fps": 120, "music": 0.4, "sfx": 0.7, "voice": 0.2, "haptics": false, "shake": 0.5, "assist": true, "hints": false, "reduce_flash": true, "cine": false, "cine_road": false, "pad_opacity": 0.35}))
+	f.close()
+	Game.load_settings()
+	var st: Dictionary = Game.settings
+	ok(is_equal_approx(st.music, 0.4) and is_equal_approx(st.combat, 0.7) and is_equal_approx(st.ambience, 0.7) and is_equal_approx(st.dialogue, 0.2), "old sound and voice sliders carry over")
+	ok(is_equal_approx(st.haptic_strength, 0.0) and Game.haptic_amount(1.0) == 0.0, "old haptics-off carries over")
+	ok(st.quality == 2 and st.fps == 120 and st.assist and not st.hints and st.reduce_flash and is_equal_approx(st.shake, 0.5) and is_equal_approx(st.pad_opacity, 0.35), "the rest of an old file still loads")
+	ok(is_equal_approx(st.master, 1.0) and st.sub_size == 1 and st.sub_bg and st.chatter and not st.reduce_motion and is_equal_approx(st.swipe_sens, 1.0), "new settings take their defaults")
+	# --- graphics presets do what they say
+	var seen := {"scale": {}, "particles": {}, "lod": {}, "shadow": {}}
+	var sun := DirectionalLight3D.new()
+	sun.directional_shadow_max_distance = 60.0
+	add_child(sun)
+	for q in 3:
+		Game.settings.quality = q
+		Game.apply_settings()
+		var g: Dictionary = Game.GRAPHICS[q]
+		var vp := get_viewport()
+		ok(is_equal_approx(vp.scaling_3d_scale, g.scale) and vp.msaa_3d == g.msaa and vp.positional_shadow_atlas_size == g.shadow_atlas and is_equal_approx(vp.mesh_lod_threshold, g.lod) and is_equal_approx(Game.particle_scale(), g.particles), "%s preset is applied" % g.name)
+		ok(is_equal_approx(sun.directional_shadow_max_distance, minf(60.0, g.shadow_dist)), "%s preset caps sun shadow distance" % g.name)
+		seen.scale[vp.scaling_3d_scale] = true
+		seen.particles[Game.particle_scale()] = true
+		seen.lod[vp.mesh_lod_threshold] = true
+		seen.shadow[vp.positional_shadow_atlas_size] = true
+	ok(seen.scale.size() == 3 and seen.particles.size() == 3 and seen.lod.size() == 3 and seen.shadow.size() == 3, "the three presets differ in every value")
+	ok(Game.GRAPHICS[0].shadow_atlas == 0, "performance turns spot and point shadows off")
+	sun.queue_free()
+	# every row in the settings screen edits a real setting of the right kind
+	for r in SettingsPanel.ROWS:
+		if str(r[0]) != "#":
+			ok(Game.settings.has(r[0]), "settings row %s is real" % r[0])
+	ok(SettingsPanel.legal("privacy").length() > 200 and SettingsPanel.legal("credits").length() > 200, "legal text is present")
+	Game.settings = saved_settings
+	Game.apply_settings()
+	DirAccess.remove_absolute(Game.save_dir_override + "/settings.json")
+	Game.profile = saved_profile

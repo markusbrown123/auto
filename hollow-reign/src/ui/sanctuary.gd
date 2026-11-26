@@ -9,7 +9,10 @@ signal train
 
 const TABS := ["Journey", "Armory", "Blacksmith", "Character", "Journal", "Settings"]
 ## The equipment rail, in the order of the design. Slots the data has no items for are shown locked.
-const RAIL := ["helm", "shoulders", "chest", "gauntlets", "legs", "boots", "weapon", "shield", "ring", "relic"]
+## The suit is what changes the knight's body: one whole model per suit. Helm, gauntlets and greaves are fittings that
+## change statistics only, and are labelled so; slots with no items at all are not shown.
+const RAIL := ["chest", "helm", "gauntlets", "legs", "weapon", "shield", "ring", "relic"]
+const RAIL_CAPTION := {"chest": "ARMOUR SUIT", "helm": "HELM · FITTING", "gauntlets": "GAUNTLETS · FITTING", "legs": "GREAVES · FITTING"}
 const RAIL_EXTRA := {"shoulders": "Shoulders", "boots": "Boots"}
 const SLOT_PLURAL := {"weapon": "Weapons", "shield": "Shields", "helm": "Helms", "chest": "Cuirasses", "gauntlets": "Gauntlets", "legs": "Greaves", "ring": "Rings", "relic": "Relics"}
 const GOOD := Color("#8fb37a")
@@ -294,7 +297,7 @@ func _stage_armory() -> void:
 		lines.offset_left = 12
 		lines.offset_right = -6
 		b.add_child(lines)
-		var cap := UI.label(str(Db.SLOT_NAME.get(s, RAIL_EXTRA.get(s, s))).to_upper(), 16, UI.GOLD if s == sel_slot else UI.DIM, "head")
+		var cap := UI.label(str(RAIL_CAPTION.get(s, str(Db.SLOT_NAME.get(s, RAIL_EXTRA.get(s, s))).to_upper())), 16 if not RAIL_CAPTION.has(s) or s == "chest" else 13, UI.GOLD if s == sel_slot else UI.DIM, "head")
 		lines.add_child(cap)
 		var worn := UI.label(str(it.name) if not it.is_empty() else ("Not yet found" if not exists else "Empty"), 16, Db.rarity_color(it) if not it.is_empty() else Color(0.42, 0.4, 0.37), "bold")
 		worn.clip_text = true
@@ -334,7 +337,8 @@ func _stage_armory() -> void:
 		n.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		notes.add_child(n)
 		if it.slot in ["helm", "chest", "gauntlets", "legs"]:
-			var n2 := UI.label("Shown as plate colour only", 16, UI.DIM)
+			var suit_model := "res://assets/models/knight_%s_%s.glb" % [str(Game.profile.get("body", "m")), str(it.id).trim_prefix("a_").trim_suffix("_chest")]
+			var n2 := UI.label("A full suit: changes the whole knight" if it.slot == "chest" and ResourceLoader.exists(suit_model) else ("Shown as plate colour" if it.slot == "chest" else "A fitting: changes statistics, not appearance"), 16, UI.DIM)
 			n2.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			notes.add_child(n2)
 	var hint := UI.label("Drag to turn", 16, UI.DIM)

@@ -23,10 +23,7 @@ var _slow := 0.0
 var _trauma := 0.0
 var _clock := 0.0
 var _stage_t := 0.0
-var _cam_side := 0.0
-var _cam_zoom := 0.0
-var _cam_pos := Vector3.ZERO
-var _cam_look := Vector3.ZERO
+var director: CamDirector     # owns the camera pose (src/combat/cam_director.gd, docs/CAMERA_BIBLE.md)
 var _whoosh_at := -1.0
 var _whoosh_heavy := false
 var _blade_base_emission := Color.BLACK
@@ -164,6 +161,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	cam.far = 120.0
 	add_child(cam)
 	cam.make_current()
+	director = CamDirector.new(self, cam)
 
 	hud = DuelHud.new()
 	add_child(hud)
@@ -310,6 +308,7 @@ func _speak_then_fight() -> void:
 	await Story.play(_voice_key + "_intro")
 	if not is_inside_tree():
 		return
+	director.cue("reveal", {"t": 1.7})
 	foe_rig.roar()
 	_creature("roar", -2.0)
 	hud.toast(str(foe.name).to_upper(), UI.BONE, 1.6)
@@ -472,64 +471,7 @@ func _finish(won: bool) -> void:
 	finished.emit(won, sim)
 
 func _camera(delta: float) -> void:
-	var pz := gap * 0.5
-	var foe_h := 1.4 * float(foe.rig.scale) * (1.0 - float(foe.rig.get("hunch", 0.0)) * 0.3)
-	var pos: Vector3
-	var look: Vector3
-	var fov := 58.0
-	var rate := 6.0
-	match stage:
-		Stage.INTRO:
-			# low orbit around the foe: let the silhouette land
-			# sweeps from the foe's flank round to the knight's shoulder
-			var a := 1.3 - minf(_stage_t, 4.6) * 0.19
-			var r := 2.4 + float(foe.rig.scale) * 1.6
-			pos = Vector3(sin(a) * r, 0.5 + minf(_stage_t, 4.6) * 0.2, -pz + cos(a) * r)
-			look = Vector3(0, foe_h * 0.85, -pz)
-			fov = 42.0
-			rate = 30.0
-		Stage.FINISHER:
-			var a2 := 1.15 - _stage_t * 0.12
-			pos = Vector3(sin(a2) * 3.6, 1.1, cos(a2) * 3.6 * 0.6)
-			look = Vector3(0, 1.1, -pz * 0.5)
-			fov = 46.0
-			rate = 5.0
-		Stage.DEATH, Stage.DONE:
-			pos = Vector3(1.6, 3.4 + _stage_t * 0.25, pz + 3.2)
-			look = Vector3(0, 0.6, pz)
-			fov = 50.0
-			rate = 1.6
-		_:
-			# over the right shoulder; drifts with dodges, leans in on openings
-			var side_t := player_rig._root.x * 0.6
-			_cam_side = lerpf(_cam_side, side_t, 1.0 - exp(-delta * 5.0))
-			var zoom_t := 0.0
-			if sim.boss_open():
-				zoom_t = 0.5
-			elif sim.b_state == DuelSim.B.WINDUP and sim.b_attack.get("kind", "") in ["slam", "sweep"]:
-				zoom_t = -0.35
-			if sim.b_far:
-				zoom_t -= 0.3
-			_cam_zoom = lerpf(_cam_zoom, zoom_t, 1.0 - exp(-delta * 2.5))
-			# stays behind and to the side of wherever the knight actually stands, so the knight never hides the foe
-			# low at the knight's flank and looking up: the knight sits in the lower corner, the foe towers over the frame
-			var tall := clampf(foe_h / 1.6, 1.0, 2.2)
-			pos = Vector3(1.45 + _cam_side + p_side * 0.6, 0.42 + 0.06 * tall, pz + p_back + 1.3 - _cam_zoom * 0.35)
-			look = Vector3(-0.25 + _cam_side * 0.4, foe_h * (0.98 + 0.04 * tall), -pz - f_back * 0.6)
-			fov = 64.0 - _cam_zoom * 5.0
-	var k := 1.0 - exp(-delta * rate)
-	if _cam_pos == Vector3.ZERO:
-		k = 1.0
-	cam.fov = lerpf(cam.fov, fov, k)
-	# the camera rides the fight's turning axis, a little behind it
-	var turn := Basis(Vector3.UP, ring_cam)
-	_cam_pos = _cam_pos.lerp(turn * pos, k)
-	_cam_look = _cam_look.lerp(turn * look, k)
-	var shake := _trauma * _trauma * float(Game.settings.shake)
-	var off := Vector3(_noise.get_noise_2d(_clock * 60.0, 0.0), _noise.get_noise_2d(0.0, _clock * 60.0), 0) * 0.16 * shake
-	cam.position = _cam_pos + off
-	cam.look_at(_cam_look + off * 0.5)
-	cam.rotation.z += _noise.get_noise_2d(_clock * 50.0, 9.0) * 0.035 * shake
+	director.update(delta, _trauma, _clock)
 
 func shake(amount: float) -> void:
 	_trauma = minf(1.0, _trauma + amount)
@@ -603,11 +545,13 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			player_rig.parry(DuelSim.dir_vec(d.dir))
 			Sfx.play("swing", -9.0, 1.3)
 		&"player_dodge":
+			director.cue("reposition", {"t": 0.7})
 			p_side_owed += float(d.side) * 1.25     # a real step across the ground, not a lean
 			player_rig.dodge(float(d.side))
 			fx.dust(_feet(player_rig), 5, null, 0.8)
 			Sfx.play("dodge", -3.0)
 		&"player_roll":
+			director.cue("reposition", {"t": 1.0})
 			p_side_owed += float(d.side) * 1.3      # the roll carries on past where the sidestep would have stopped
 			player_rig.roll(float(d.side))
 			fx.dust(_feet(player_rig), 8)
@@ -647,6 +591,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			sparks(player_rig.chest_point(), Vector3.UP, 30, Color(0.5, 0.85, 1.0), 3.0)
 			player_rig.flash(0.6)
 		&"boss_hit":
+			director.cue("exchange")
 			f_back_t = minf(f_back_t + 0.16, 1.5)      # each blow drives it back a pace
 			if d.get("crit", false) or str(d.get("named", "")) != "":
 				_creature("pain", -5.0, 0.9)
@@ -724,6 +669,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			if not _can_step:
 				foe_rig.set_far(false)
 		&"phase_change":
+			director.cue("phase")
 			foe_rig.roar()
 			hud.cue.clear()
 			_set_foe_blade_warning(false)
@@ -809,6 +755,7 @@ func _on_strike(d: Dictionary) -> void:
 		fx.element(str(a.element), meet if str(d.result) != "hit" else player_rig.chest_point(), _deflect_dir(a))
 	match d.result:
 		"parried":
+			director.cue("clash", {"at": meet, "perfect": d.perfect})
 			player_rig.guard()
 			player_rig.clash(meet, 0.3 if d.perfect else 0.22)
 			sparks(meet, _deflect_dir(a), Fx.BUDGET.perfect if d.perfect else Fx.BUDGET.parry, Color(1.0, 0.82, 0.5), 6.5 if d.perfect else 5.0)
@@ -825,6 +772,7 @@ func _on_strike(d: Dictionary) -> void:
 				_slow = 0.28
 				Game.haptic(15, 0.4)
 		"blocked":
+			director.cue("exchange")
 			player_rig.brace(meet, 0.34 if heavy else 0.26)
 			sparks(meet, _deflect_dir(a), 10 if heavy else 7, Color(1, 0.8, 0.55), 3.5)
 			fx.dust(_feet(player_rig), 7 if heavy else 4, null, 1.0 if heavy else 0.7)
@@ -847,6 +795,7 @@ func _on_strike(d: Dictionary) -> void:
 			hitstop(0.09)
 			Game.haptic(70, 1.0)
 		"hit":
+			director.cue("exchange")
 			sparks(player_rig.chest_point(), _deflect_dir(a), 12, Color(0.8, 0.12, 0.08), 3.5)
 			fx.dust(_feet(player_rig), 7 if heavy else 4)
 			p_back_t = 0.95 if heavy else 0.55

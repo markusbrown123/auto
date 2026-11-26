@@ -94,15 +94,38 @@ func build(config: Dictionary, as_foe: bool) -> void:
 	if cfg.get("witness", false):
 		# the Witness rides behind the right hip, face outward
 		# (a child of the body, not of the pelvis node: the primitive pelvis is hidden when a generated model is worn)
-		var relic := PropModel.scenery(body, "res://assets/models/witness_relic.glb", 0.32, Vector3(0.2, 0.9, 0.1), 215.0)
+		var relic := PropModel.scenery(body, "res://assets/models/witness_relic.glb", 0.4, Vector3(0.2, 0.9, 0.1), 215.0)
 		_relic = relic
 		if relic:
 			var eye := OmniLight3D.new()
 			eye.light_color = Color("#ffb347")
-			eye.light_energy = 0.35
-			eye.omni_range = 0.7
-			eye.position = Vector3(0, 0.16, 0)
+			eye.light_energy = 0.4
+			eye.omni_range = 0.9
+			eye.position = Vector3(0, 0.2, 0.0)
 			relic.add_child(eye)
+			# the mask itself is lifted out of shadow and its eyes burn amber: an artefact, not a dark lump
+			for mi in relic.find_children("*", "MeshInstance3D", true, false):
+				var ov := StandardMaterial3D.new()
+				ov.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+				ov.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				ov.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+				ov.albedo_color = Color(1.0, 0.72, 0.35, 0.035)
+				(mi as MeshInstance3D).material_overlay = ov
+			for ex: float in [-0.028, 0.028]:
+				var e := MeshInstance3D.new()
+				var sm := SphereMesh.new()
+				sm.radius = 0.011
+				sm.height = 0.022
+				e.mesh = sm
+				var em := StandardMaterial3D.new()
+				em.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+				em.albedo_color = Color(1.0, 0.75, 0.3)
+				em.emission_enabled = true
+				em.emission = Color(1.0, 0.7, 0.25)
+				em.emission_energy_multiplier = 3.0
+				e.material_override = em
+				e.position = Vector3(ex, 0.235, 0.075)
+				relic.add_child(e)
 	_box(pelvis, Vector3(0.36 * bulk, 0.18, 0.24 * bulk), Vector3(0, 0.02, 0), mat_metal)
 	_fauld()
 	chest = Node3D.new()

@@ -40,6 +40,10 @@ const THEMES := {
 	"throne": {"sky": "#0e0a0a", "horizon": "#2e1c12", "fog": "#1c140e", "fog_d": 0.014, "sun": "#ffdcaa", "sun_e": 1.15, "sun_rot": Vector3(-48, 180, 0),
 		"stone": "#4a443c", "floor": "#3a332e", "fire": "#ffc860", "layout": "throne", "particles": "motes", "amb": "#42342a",
 		"amb_e": 1.55, "fill_e": 0.35, "key": "#fff4e6", "key_e": 3.6, "rim": "#ffd080", "rim_e": 0.55, "exp": 1.12, "sat": 0.95, "con": 1.12},
+	# the resurrection chamber under the fortress: a closed round room, lit only by what its machines still give off
+	"chamber": {"sky": "#050607", "horizon": "#0a0c0e", "fog": "#0e1414", "fog_d": 0.03, "sun": "#8fb0b0", "sun_e": 0.0, "sun_rot": Vector3(-80, 160, 0),
+		"stone": "#5a5750", "floor": "#45433e", "fire": "#ffb45a", "layout": "chamber", "particles": "motes", "amb": "#2c3836",
+		"amb_e": 0.75, "fill_e": 0.0, "key": "#ffe9c8", "key_e": 3.0, "rim": "#6fd8c8", "rim_e": 0.0, "exp": 1.1, "sat": 0.92, "con": 1.08},
 }
 const LIGHT_DEFAULTS := {"amb_e": 1.5, "fill_e": 0.3, "key": "#ffffff", "key_e": 3.6, "rim": "#ffffff", "rim_e": 0.5, "exp": 1.1, "sat": 0.9, "con": 1.06, "bri": 1.0}
 const PARTICLE_BUDGET := 150       # live ambient particles per arena, flames included
@@ -981,3 +985,93 @@ func _layout_throne() -> void:
 	for b in [Vector3(-4.4, 0, -6.0), Vector3(4.4, 0, -6.0), Vector3(-4.4, 0, 5.0), Vector3(4.4, 0, 5.0)]:
 		prop("th_brazier", 2.4, b, 0.0)
 		_brazier(b + Vector3(0, 2.1, 0), 1.8, 8.5)
+
+## The resurrection chamber: a round stone-and-metal room with the cradle in the middle, machine pylons round the
+## wall, a block the sword was left in, and one door (at -Z) that the story scene opens. Named nodes for that scene:
+## "Door" (the panel), "DoorGlow" (the light beyond it), "Rack" (where the sword stands), "Lyra" (the light she speaks through).
+const CHAMBER_R := 6.2
+func _layout_chamber() -> void:
+	var metal := Look.flat(Color("#2a2c2e"), 0.45, 0.85)
+	var amber := Look.glow(Color(theme.fire), 2.2)
+	var teal := Look.glow(Color("#5fe0c8"), 2.0)
+	var n := 22
+	for i in n:
+		var a := TAU * (i + 0.5) / n
+		var dir := Vector3(sin(a), 0, cos(a))
+		if absf(wrapf(a - PI, -PI, PI)) < TAU / n * 0.8:
+			continue          # the doorway
+		var w := box(Vector3(TAU * CHAMBER_R / n + 0.12, 5.4, 0.7), dir * CHAMBER_R + Vector3(0, 2.7, 0), null, Vector3(0, rad_to_deg(a), 0))
+		w.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# a metal band at head height, and every third panel carries a strip of machine light
+		box(Vector3(TAU * CHAMBER_R / n + 0.14, 0.22, 0.1), dir * (CHAMBER_R - 0.38) + Vector3(0, 2.6, 0), metal, Vector3(0, rad_to_deg(a), 0))
+		if i % 3 == 1:
+			box(Vector3(0.09, 1.5, 0.05), dir * (CHAMBER_R - 0.37) + Vector3(0, 1.5, 0), teal if i % 6 == 1 else amber, Vector3(0, rad_to_deg(a), 0))
+	# ceiling and its ring of dead lamps
+	cyl(CHAMBER_R + 0.6, CHAMBER_R + 0.6, 0.4, Vector3(0, 5.5, 0), mat_dark, 22)
+	cyl(2.4, 2.6, 0.25, Vector3(0, 5.25, 0), metal, 16)
+	# door frame, the panel that slides up, and the daylight waiting behind it
+	var dz := -CHAMBER_R
+	box(Vector3(0.5, 3.4, 0.9), Vector3(-1.25, 1.7, dz), metal)
+	box(Vector3(0.5, 3.4, 0.9), Vector3(1.25, 1.7, dz), metal)
+	box(Vector3(3.0, 0.5, 0.9), Vector3(0, 3.55, dz), metal)
+	box(Vector3(3.0, 1.6, 0.7), Vector3(0, 4.6, dz), null)
+	var door := box(Vector3(2.0, 3.3, 0.22), Vector3(0, 1.65, dz), Look.flat(Color("#3a3c3e"), 0.5, 0.8))
+	door.name = "Door"
+	box(Vector3(0.06, 3.0, 0.24), Vector3(0, 1.65, dz), amber).reparent(door)
+	# the passage beyond: short, and white with daylight at the end
+	for sx: float in [-1.0, 1.0]:
+		box(Vector3(0.6, 4.0, 6.0), Vector3(sx * 1.6, 2.0, dz - 3.4), null)
+	box(Vector3(3.8, 0.5, 6.0), Vector3(0, 4.0, dz - 3.4), null)
+	var day := box(Vector3(3.0, 4.0, 0.1), Vector3(0, 2.0, dz - 6.3), Look.glow(Color("#fff4e0"), 5.0))
+	day.name = "Daylight"
+	var dg := OmniLight3D.new()
+	dg.name = "DoorGlow"
+	dg.light_color = Color("#fff0d8")
+	dg.light_energy = 0.0
+	dg.omni_range = 16.0
+	dg.omni_attenuation = 0.9
+	dg.shadow_enabled = true
+	dg.position = Vector3(0, 2.2, dz - 2.2)
+	add_child(dg)
+	# the cradle: a stone bed in a metal frame, its cover long since slid off
+	box(Vector3(1.3, 0.5, 2.6), Vector3(0, 0.25, 0), null)
+	box(Vector3(1.5, 0.12, 2.8), Vector3(0, 0.52, 0), metal)
+	box(Vector3(1.1, 0.06, 2.4), Vector3(0, 0.6, 0), Look.flat(Color("#1c1e20"), 0.7, 0.3))
+	box(Vector3(1.4, 0.1, 2.7), Vector3(1.45, 0.3, 0.5), metal, Vector3(0, 14, -68))
+	for sz: float in [-1.0, 1.0]:
+		box(Vector3(0.05, 0.05, 0.9), Vector3(-0.76, 0.5, sz * 0.7), teal)
+		box(Vector3(0.05, 0.05, 0.9), Vector3(0.76, 0.5, sz * 0.7), teal)
+	cyl(0.07, 0.07, 4.7, Vector3(0, 2.95, -1.25), metal, 6)
+	cyl(0.5, 0.2, 0.3, Vector3(0, 5.1, -1.25), metal, 8)
+	# machine pylons between the wall panels, with conduits where the kit has them
+	for i in 6:
+		var a2 := TAU * (i + 0.5) / 6.0 + 0.2
+		var at := Vector3(sin(a2), 0, cos(a2)) * (CHAMBER_R - 1.0)
+		if absf(wrapf(a2 - PI, -PI, PI)) < 0.5:
+			continue
+		if _kit("de", "conduit") and i % 2 == 0:
+			prop("de_conduit", 3.4, at, rad_to_deg(a2) + 180.0)
+		else:
+			box(Vector3(0.7, 3.0, 0.7), at + Vector3(0, 1.5, 0), metal, Vector3(0, rad_to_deg(a2), 0))
+			box(Vector3(0.74, 0.08, 0.74), at + Vector3(0, 2.2, 0), amber, Vector3(0, rad_to_deg(a2), 0))
+			box(Vector3(0.74, 0.05, 0.74), at + Vector3(0, 1.1, 0), amber, Vector3(0, rad_to_deg(a2), 0))
+		_glow(at * 0.86 + Vector3(0, 1.8, 0), Color(theme.fire) if i % 2 == 1 else Color("#5fe0c8"), 0.55, 4.5)
+	# the voice in the walls: a grille over the cradle's head with a light behind it
+	var ly := OmniLight3D.new()
+	ly.name = "Lyra"
+	ly.light_color = Color("#7fe6d8")
+	ly.light_energy = 0.0
+	ly.omni_range = 7.0
+	ly.position = Vector3(-2.6, 2.6, -4.2)
+	add_child(ly)
+	box(Vector3(0.9, 0.9, 0.12), Vector3(-3.05, 2.6, -5.0), metal, Vector3(0, 31, 0))
+	box(Vector3(0.6, 0.6, 0.14), Vector3(-3.04, 2.6, -4.98), teal, Vector3(0, 31, 0))
+	# the block the sword was left standing in
+	var rack := Node3D.new()
+	rack.name = "Rack"
+	rack.position = Vector3(3.1, 0, -1.4)
+	add_child(rack)
+	box(Vector3(0.8, 0.5, 0.8), rack.position + Vector3(0, 0.25, 0), null, Vector3(0, 20, 0))
+	box(Vector3(1.2, 0.14, 1.2), rack.position + Vector3(0, 0.07, 0), metal, Vector3(0, 20, 0))
+	rubble(Vector3(-3.6, 0, 2.6), 5, 1.0)
+	rubble(Vector3(3.4, 0, 3.4), 4, 0.8)

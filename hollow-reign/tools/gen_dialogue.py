@@ -372,9 +372,11 @@ COMPANION = {"discovery": {"scene": "witness_discovery", "region": "courtyard", 
 VOICES = {
  "witness": "inworld:Hamish (en)", "player_m": "inworld:Malcolm (en)", "narrator": "inworld:Graham (en)",
  "sentinel": "inworld:Mortimer (en)", "executioner": "inworld:Mortimer (en)",
- "lyra": "Vesper", "player_f": "Imogen", "orren": "Gideon", "archivist": "Onyx",
+ # cast by the developer from reel 4's measurements at the owner's instruction to finish these roles; NOT yet heard or approved:
+ "lyra": "inworld:Claire (en)", "player_f": "inworld:Elizabeth (en)", "orren": "inworld:Callum (en)", "monarch": "inworld:Hades (en)",
+ "archivist": "Onyx",
  "huntsman": "Brooks", "widow": "Sloane", "gravewarden": "Bram", "frostking": "Alistair",
- "monarch": "Caspian", "devourer": "Luna"}
+ "devourer": "Luna"}
 # A line written after its speaker was last recorded is text-only until tools/voices.py records it: that tool keeps
 # assets/audio/vo/takes.json (file -> hash of the text it was recorded from). A new line counts as recorded when a
 # take of exactly its current text exists (for the knight's lines, the male take).

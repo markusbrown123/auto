@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_regal_f_v1.png",
+ "model": {
+  "task_id": "3c4ea7a3-cae4-409b-a613-d93e8080892b",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "7f85e50b-f05e-456d-bf6a-ab97dc8374ba",
+  "credits": 25.0
+ }
+}

@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_ash_f_v1.png",
+ "model": {
+  "task_id": "80917b2e-ce19-4007-80e5-3bb4b5ee960b",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "44aaaa98-7daf-40a6-8edd-9a0bd2b4c4a9",
+  "credits": 25.0
+ }
+}

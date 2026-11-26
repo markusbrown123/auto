@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/dragon_veyrath_v1.png",
+ "model": {
+  "task_id": "5f05be03-908f-4214-aee1-3cc986d6cec1",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "others"
+  }
+ },
+ "rig": {
+  "task_id": "d11fba09-958e-43bf-87d0-5e6fe37613ad",
+  "credits": 25.0
+ }
+}

@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_wyrm_f_v1.png",
+ "model": {
+  "task_id": "38b8a97d-0abd-47ec-ba7b-c16163214466",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "e03ba4a5-e5e2-4dd2-bb34-e36deb4e4239",
+  "credits": 25.0
+ }
+}

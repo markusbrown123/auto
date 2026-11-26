@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_vigil_f_v1.png",
+ "model": {
+  "task_id": "5226aa87-d029-44a3-8365-23c710197363",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "a63defdf-47ff-4e83-801d-23312b74013d",
+  "credits": 25.0
+ }
+}

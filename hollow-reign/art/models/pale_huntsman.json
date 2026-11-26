@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/pale_huntsman_v1.png",
+ "model": {
+  "task_id": "d2e92dd6-42ca-4e39-8dd9-c080b548108e",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "7a57cfe2-ffc0-4ff5-b727-aec5b32c1019",
+  "credits": 25.0
+ }
+}

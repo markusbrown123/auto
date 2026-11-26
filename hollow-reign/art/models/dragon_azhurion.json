@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/dragon_azhurion_v1.png",
+ "model": {
+  "task_id": "69ab9a07-800d-485a-b48c-2e823887bd86",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "others"
+  }
+ },
+ "rig": {
+  "task_id": "5374d8f3-3c80-4d5f-9a6e-aa11d3552faa",
+  "credits": 25.0
+ }
+}

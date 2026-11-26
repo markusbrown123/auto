@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/forgotten_monarch_v1.png",
+ "model": {
+  "task_id": "23dfe05c-2f5f-4d00-985e-117718719288",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "68fab8b2-5b3f-4dba-a379-a612c254686b",
+  "credits": 25.0
+ }
+}

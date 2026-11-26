@@ -1,0 +1,870 @@
+{
+ "_mods": {
+  "ores": {
+   "steel": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "silver": [
+    1.2,
+    1.21,
+    1.22
+   ],
+   "graphite": [
+    0.34,
+    0.35,
+    0.38
+   ],
+   "bronze": [
+    1.05,
+    0.78,
+    0.46
+   ],
+   "frost": [
+    0.8,
+    0.92,
+    1.08
+   ]
+  },
+  "blade_tiers": 4,
+  "grip_tiers": 4,
+  "naming": "<id>.glb is the sword at default_mod. Basic swords also have <id>__blade<0-3>.glb and <id>__hilt<0-3>.glb (each with _lod): GearModel.spawn(id, lod_at, false, {blade_tier, grip_tier, ore, sharpened}) joins one of each. ore and sharpened are material-only and need no files."
+ },
+ "wayfarer": {
+  "class": "sword",
+  "name": "Wayfarer",
+  "role": "balanced",
+  "rarity": "common",
+  "basic": true,
+  "blade": 0.8,
+  "tip": 0.8700000000000001,
+  "pommel": 0.104,
+  "grip_clear": 0.106,
+  "guard_span": 0.196,
+  "hands": 1,
+  "lo": [
+   -0.098,
+   -0.104,
+   -0.013
+  ],
+  "hi": [
+   0.098,
+   0.87,
+   0.013
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "blade_groove",
+   "edge",
+   "gold",
+   "grip",
+   "engrave_rule"
+  ],
+  "tris": 2148,
+  "verts": 2560,
+  "bytes": 102404,
+  "tris_lod": 596,
+  "verts_lod": 694,
+  "bytes_lod": 31384,
+  "default_mod": {
+   "blade_tier": 1,
+   "grip_tier": 1,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "parts": {
+   "blade0": {
+    "tris": 1024,
+    "verts": 1041,
+    "bytes": 42832,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 17072
+   },
+   "hilt0": {
+    "tris": 932,
+    "verts": 1243,
+    "bytes": 48992,
+    "tris_lod": 212,
+    "verts_lod": 307,
+    "bytes_lod": 13740
+   },
+   "blade1": {
+    "tris": 1024,
+    "verts": 1041,
+    "bytes": 43976,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 18200
+   },
+   "hilt1": {
+    "tris": 1124,
+    "verts": 1519,
+    "bytes": 58980,
+    "tris_lod": 212,
+    "verts_lod": 307,
+    "bytes_lod": 13740
+   },
+   "blade2": {
+    "tris": 1312,
+    "verts": 1409,
+    "bytes": 58464,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 18200
+   },
+   "hilt2": {
+    "tris": 1220,
+    "verts": 1641,
+    "bytes": 63468,
+    "tris_lod": 212,
+    "verts_lod": 307,
+    "bytes_lod": 13748
+   },
+   "blade3": {
+    "tris": 1312,
+    "verts": 1409,
+    "bytes": 57472,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 18200
+   },
+   "hilt3": {
+    "tris": 1660,
+    "verts": 1968,
+    "bytes": 75440,
+    "tris_lod": 272,
+    "verts_lod": 344,
+    "bytes_lod": 14168
+   }
+  },
+  "rig_scale": 1.15
+ },
+ "silver_vow": {
+  "class": "sword",
+  "name": "Silver Vow",
+  "role": "light",
+  "rarity": "common",
+  "basic": true,
+  "blade": 0.78,
+  "tip": 0.8460000000000001,
+  "pommel": 0.075,
+  "grip_clear": 0.095,
+  "guard_span": 0.109,
+  "hands": 1,
+  "lo": [
+   -0.0551,
+   -0.075,
+   -0.0135
+  ],
+  "hi": [
+   0.0551,
+   0.846,
+   0.0135
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "blade_groove",
+   "edge",
+   "gold",
+   "grip",
+   "engrave_lattice"
+  ],
+  "tris": 2318,
+  "verts": 2682,
+  "bytes": 107336,
+  "tris_lod": 664,
+  "verts_lod": 790,
+  "bytes_lod": 34888,
+  "default_mod": {
+   "blade_tier": 1,
+   "grip_tier": 1,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "parts": {
+   "blade0": {
+    "tris": 1056,
+    "verts": 1071,
+    "bytes": 43980,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 18164
+   },
+   "hilt0": {
+    "tris": 1070,
+    "verts": 1335,
+    "bytes": 52772,
+    "tris_lod": 248,
+    "verts_lod": 375,
+    "bytes_lod": 16144
+   },
+   "blade1": {
+    "tris": 1056,
+    "verts": 1071,
+    "bytes": 45132,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19308
+   },
+   "hilt1": {
+    "tris": 1262,
+    "verts": 1611,
+    "bytes": 62760,
+    "tris_lod": 248,
+    "verts_lod": 375,
+    "bytes_lod": 16144
+   },
+   "blade2": {
+    "tris": 1344,
+    "verts": 1439,
+    "bytes": 59616,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19308
+   },
+   "hilt2": {
+    "tris": 1358,
+    "verts": 1733,
+    "bytes": 67244,
+    "tris_lod": 248,
+    "verts_lod": 375,
+    "bytes_lod": 16152
+   },
+   "blade3": {
+    "tris": 1344,
+    "verts": 1439,
+    "bytes": 58628,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19308
+   },
+   "hilt3": {
+    "tris": 1734,
+    "verts": 2026,
+    "bytes": 77744,
+    "tris_lod": 292,
+    "verts_lod": 403,
+    "bytes_lod": 16184
+   }
+  },
+  "rig_scale": 1.15
+ },
+ "ashbrand": {
+  "class": "sword",
+  "name": "Ashbrand",
+  "role": "heavy",
+  "rarity": "common",
+  "basic": true,
+  "blade": 0.8,
+  "tip": 0.884,
+  "pommel": 0.143,
+  "grip_clear": 0.148,
+  "guard_span": 0.176,
+  "hands": 1.5,
+  "lo": [
+   -0.088,
+   -0.143,
+   -0.0141
+  ],
+  "hi": [
+   0.088,
+   0.884,
+   0.0141
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "blade_groove",
+   "edge",
+   "graphite",
+   "gold",
+   "grip",
+   "engrave_chevron"
+  ],
+  "tris": 2204,
+  "verts": 2692,
+  "bytes": 108120,
+  "tris_lod": 644,
+  "verts_lod": 756,
+  "bytes_lod": 34816,
+  "default_mod": {
+   "blade_tier": 1,
+   "grip_tier": 1,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "parts": {
+   "blade0": {
+    "tris": 1024,
+    "verts": 1041,
+    "bytes": 42828,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 18168
+   },
+   "hilt0": {
+    "tris": 988,
+    "verts": 1375,
+    "bytes": 54692,
+    "tris_lod": 228,
+    "verts_lod": 341,
+    "bytes_lod": 16056
+   },
+   "blade1": {
+    "tris": 1024,
+    "verts": 1041,
+    "bytes": 43984,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19308
+   },
+   "hilt1": {
+    "tris": 1180,
+    "verts": 1651,
+    "bytes": 64680,
+    "tris_lod": 228,
+    "verts_lod": 341,
+    "bytes_lod": 16056
+   },
+   "blade2": {
+    "tris": 1312,
+    "verts": 1409,
+    "bytes": 58468,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19308
+   },
+   "hilt2": {
+    "tris": 1276,
+    "verts": 1789,
+    "bytes": 69676,
+    "tris_lod": 228,
+    "verts_lod": 341,
+    "bytes_lod": 16064
+   },
+   "blade3": {
+    "tris": 1312,
+    "verts": 1409,
+    "bytes": 57476,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19308
+   },
+   "hilt3": {
+    "tris": 1908,
+    "verts": 2218,
+    "bytes": 86060,
+    "tris_lod": 320,
+    "verts_lod": 396,
+    "bytes_lod": 17248
+   }
+  },
+  "rig_scale": 1.15
+ },
+ "veilcutter": {
+  "class": "sword",
+  "name": "Veilcutter",
+  "role": "precision",
+  "rarity": "common",
+  "basic": true,
+  "blade": 0.92,
+  "tip": 0.986,
+  "pommel": 0.111,
+  "grip_clear": 0.113,
+  "guard_span": 0.119,
+  "hands": 1,
+  "lo": [
+   -0.072,
+   -0.111,
+   -0.0129
+  ],
+  "hi": [
+   0.0537,
+   0.986,
+   0.0129
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "blade_groove",
+   "edge",
+   "gold",
+   "grip",
+   "engrave_feather"
+  ],
+  "tris": 3120,
+  "verts": 3424,
+  "bytes": 135916,
+  "tris_lod": 660,
+  "verts_lod": 740,
+  "bytes_lod": 33264,
+  "default_mod": {
+   "blade_tier": 1,
+   "grip_tier": 1,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "parts": {
+   "blade0": {
+    "tris": 1752,
+    "verts": 1835,
+    "bytes": 72612,
+    "tris_lod": 408,
+    "verts_lod": 409,
+    "bytes_lod": 17928
+   },
+   "hilt0": {
+    "tris": 1176,
+    "verts": 1321,
+    "bytes": 52960,
+    "tris_lod": 252,
+    "verts_lod": 331,
+    "bytes_lod": 14752
+   },
+   "blade1": {
+    "tris": 1752,
+    "verts": 1835,
+    "bytes": 73768,
+    "tris_lod": 408,
+    "verts_lod": 409,
+    "bytes_lod": 19072
+   },
+   "hilt1": {
+    "tris": 1368,
+    "verts": 1589,
+    "bytes": 62692,
+    "tris_lod": 252,
+    "verts_lod": 331,
+    "bytes_lod": 14752
+   },
+   "blade2": {
+    "tris": 2040,
+    "verts": 2203,
+    "bytes": 88252,
+    "tris_lod": 408,
+    "verts_lod": 409,
+    "bytes_lod": 19072
+   },
+   "hilt2": {
+    "tris": 1464,
+    "verts": 1727,
+    "bytes": 67692,
+    "tris_lod": 252,
+    "verts_lod": 331,
+    "bytes_lod": 14760
+   },
+   "blade3": {
+    "tris": 2040,
+    "verts": 2203,
+    "bytes": 87260,
+    "tris_lod": 408,
+    "verts_lod": 409,
+    "bytes_lod": 19072
+   },
+   "hilt3": {
+    "tris": 1936,
+    "verts": 2055,
+    "bytes": 79888,
+    "tris_lod": 312,
+    "verts_lod": 368,
+    "bytes_lod": 15180
+   }
+  },
+  "rig_scale": 1.15
+ },
+ "oathbreaker": {
+  "class": "greatsword",
+  "name": "Oathbreaker",
+  "role": "heavy",
+  "rarity": "rare",
+  "blade": 1.2,
+  "tip": 1.298,
+  "pommel": 0.322,
+  "grip_clear": 0.3,
+  "guard_span": 0.3,
+  "hands": 2,
+  "off_hand": -0.165,
+  "lo": [
+   -0.15,
+   -0.322,
+   -0.0143
+  ],
+  "hi": [
+   0.15,
+   1.298,
+   0.0143
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "blade_groove",
+   "edge",
+   "graphite",
+   "gold",
+   "grip",
+   "engrave_circuit"
+  ],
+  "tris": 3172,
+  "verts": 3925,
+  "bytes": 153392,
+  "tris_lod": 776,
+  "verts_lod": 931,
+  "bytes_lod": 41200,
+  "default_mod": {
+   "blade_tier": 2,
+   "grip_tier": 1,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
+ },
+ "eternal_edge": {
+  "class": "sword",
+  "name": "Eternal Edge",
+  "role": "balanced",
+  "rarity": "legendary",
+  "blade": 0.88,
+  "tip": 0.95,
+  "pommel": 0.1525,
+  "grip_clear": 0.161,
+  "guard_span": 0.094,
+  "hands": 1.5,
+  "emissive": true,
+  "lo": [
+   -0.047,
+   -0.1499,
+   -0.0127
+  ],
+  "hi": [
+   0.047,
+   0.95,
+   0.0127
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "edge",
+   "graphite",
+   "gold",
+   "grip_fine",
+   "glow",
+   "engrave_wave"
+  ],
+  "tris": 2628,
+  "verts": 3136,
+  "bytes": 124924,
+  "tris_lod": 632,
+  "verts_lod": 726,
+  "bytes_lod": 33792,
+  "default_mod": {
+   "blade_tier": 2,
+   "grip_tier": 2,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
+ },
+ "kings_remnant": {
+  "class": "sword",
+  "name": "King's Remnant",
+  "role": "balanced",
+  "rarity": "rare",
+  "blade": 0.86,
+  "tip": 0.948,
+  "pommel": 0.1295,
+  "grip_clear": 0.135,
+  "guard_span": 0.192,
+  "hands": 1.5,
+  "lo": [
+   -0.096,
+   -0.1295,
+   -0.0132
+  ],
+  "hi": [
+   0.096,
+   0.948,
+   0.0132
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "edge",
+   "gold",
+   "grip_fine",
+   "engrave_meander"
+  ],
+  "tris": 3052,
+  "verts": 3710,
+  "bytes": 143676,
+  "tris_lod": 672,
+  "verts_lod": 796,
+  "bytes_lod": 35144,
+  "default_mod": {
+   "blade_tier": 3,
+   "grip_tier": 2,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
+ },
+ "cold_resolve": {
+  "class": "sword",
+  "name": "Cold Resolve",
+  "role": "light",
+  "rarity": "rare",
+  "blade": 0.86,
+  "tip": 0.9299999999999999,
+  "pommel": 0.113,
+  "grip_clear": 0.118,
+  "guard_span": 0.112,
+  "hands": 1,
+  "emissive": true,
+  "lo": [
+   -0.056,
+   -0.113,
+   -0.0123
+  ],
+  "hi": [
+   0.056,
+   0.93,
+   0.0123
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "edge",
+   "gold",
+   "grip_fine",
+   "glow",
+   "engrave_hexcell"
+  ],
+  "tris": 1916,
+  "verts": 2210,
+  "bytes": 89876,
+  "tris_lod": 552,
+  "verts_lod": 606,
+  "bytes_lod": 28336,
+  "default_mod": {
+   "blade_tier": 1,
+   "grip_tier": 2,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
+ },
+ "nightward": {
+  "class": "sword",
+  "name": "Nightward",
+  "role": "heavy",
+  "rarity": "uncommon",
+  "blade": 0.76,
+  "tip": 0.838,
+  "pommel": 0.099,
+  "grip_clear": 0.111,
+  "guard_span": 0.112,
+  "hands": 1,
+  "single_edged": true,
+  "lo": [
+   -0.026,
+   -0.099,
+   -0.0132
+  ],
+  "hi": [
+   0.086,
+   0.838,
+   0.0132
+  ],
+  "materials": [
+   "steel",
+   "edge",
+   "graphite",
+   "gold",
+   "grip",
+   "engrave_feather"
+  ],
+  "tris": 1778,
+  "verts": 2240,
+  "bytes": 89128,
+  "tris_lod": 600,
+  "verts_lod": 754,
+  "bytes_lod": 33512,
+  "default_mod": {
+   "blade_tier": 1,
+   "grip_tier": 1,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
+ },
+ "twin_relics": {
+  "class": "dual",
+  "name": "Twin Relics",
+  "role": "precision",
+  "rarity": "relic",
+  "blade": 0.6,
+  "tip": 0.6619999999999999,
+  "pommel": 0.119,
+  "grip_clear": 0.146,
+  "guard_span": 0.092,
+  "hands": 1,
+  "emissive": true,
+  "pair": true,
+  "mirror_left": true,
+  "lo": [
+   -0.03,
+   -0.119,
+   -0.0142
+  ],
+  "hi": [
+   0.062,
+   0.662,
+   0.0142
+  ],
+  "materials": [
+   "steel",
+   "blade",
+   "edge",
+   "gold",
+   "grip_fine",
+   "glow",
+   "engrave_hexcell"
+  ],
+  "tris": 2224,
+  "verts": 2608,
+  "bytes": 104464,
+  "tris_lod": 572,
+  "verts_lod": 656,
+  "bytes_lod": 30052,
+  "default_mod": {
+   "blade_tier": 2,
+   "grip_tier": 2,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
+ },
+ "shield_round": {
+  "class": "shield",
+  "name": "Round",
+  "role": "light",
+  "width": 0.47,
+  "height": 0.47,
+  "board_centre": [
+   -0.098,
+   0.0,
+   -0.06
+  ],
+  "strap_x": -0.195,
+  "thickness": 0.008,
+  "emissive": true,
+  "lo": [
+   -0.333,
+   -0.235,
+   -0.072
+  ],
+  "hi": [
+   0.137,
+   0.235,
+   0.0329
+  ],
+  "materials": [
+   "steel",
+   "graphite",
+   "enamel",
+   "gold",
+   "grip",
+   "leather",
+   "glow"
+  ],
+  "tris": 4908,
+  "verts": 5502,
+  "bytes": 213348,
+  "tris_lod": 1372,
+  "verts_lod": 1790,
+  "bytes_lod": 72328,
+  "rig_scale": 1.15
+ },
+ "shield_heater": {
+  "class": "shield",
+  "width": 0.49,
+  "height": 0.6719999999999999,
+  "role": "balanced",
+  "board_centre": [
+   -0.105,
+   -0.12499999999999999,
+   -0.058
+  ],
+  "strap_x": -0.205,
+  "thickness": 0.008,
+  "name": "Heater",
+  "lo": [
+   -0.35,
+   -0.455,
+   -0.0702
+  ],
+  "hi": [
+   0.14,
+   0.217,
+   0.0432
+  ],
+  "materials": [
+   "steel",
+   "graphite",
+   "enamel",
+   "gold",
+   "grip",
+   "leather",
+   "engrave_circuit"
+  ],
+  "tris": 4212,
+  "verts": 4261,
+  "bytes": 169584,
+  "tris_lod": 1212,
+  "verts_lod": 1557,
+  "bytes_lod": 65012,
+  "rig_scale": 1.15
+ },
+ "shield_tower": {
+  "class": "shield",
+  "width": 0.52,
+  "height": 0.88,
+  "role": "heavy",
+  "board_centre": [
+   -0.105,
+   -0.12000000000000001,
+   -0.066
+  ],
+  "strap_x": -0.205,
+  "thickness": 0.011,
+  "name": "Tower",
+  "lo": [
+   -0.365,
+   -0.56,
+   -0.0773
+  ],
+  "hi": [
+   0.155,
+   0.32,
+   0.0415
+  ],
+  "materials": [
+   "steel",
+   "graphite",
+   "gold",
+   "grip",
+   "leather",
+   "engrave_circuit"
+  ],
+  "tris": 5448,
+  "verts": 5525,
+  "bytes": 216456,
+  "tris_lod": 1276,
+  "verts_lod": 1645,
+  "bytes_lod": 67232,
+  "rig_scale": 1.15
+ }
+}

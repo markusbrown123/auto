@@ -1,0 +1,3129 @@
+{
+ "generated": "see tools/asset_manifest.py",
+ "count": 311,
+ "bytes_by_kind": {
+  "character model": 97737192,
+  "scenery model": 123945488,
+  "weapon or shield model": 90728464,
+  "concept image": 159011790,
+  "combat/travel footage": 72157454,
+  "view still": 692525,
+  "voice line": 3783033,
+  "music": 9105900,
+  "sound effect": 2734950,
+  "ambience": 2036869,
+  "font": 78480
+ },
+ "assets": [
+  {
+   "path": "assets/models/ashen_sentinel.glb",
+   "kind": "character model",
+   "bytes": 5193260,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/ashen_sentinel_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cathedral_beast.glb",
+   "kind": "character model",
+   "bytes": 6154224,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cathedral_beast_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cls_double_weapon.glb",
+   "kind": "character model",
+   "bytes": 5135784,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cls_double_weapon_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cls_giant.glb",
+   "kind": "character model",
+   "bytes": 5090680,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cls_giant_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cls_heavy.glb",
+   "kind": "character model",
+   "bytes": 5490468,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cls_heavy_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cls_humanoid.glb",
+   "kind": "character model",
+   "bytes": 5482684,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cls_humanoid_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cls_monstrosity.glb",
+   "kind": "character model",
+   "bytes": 5960692,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cls_monstrosity_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cls_soul_eater.glb",
+   "kind": "character model",
+   "bytes": 4742024,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cls_soul_eater_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/cls_twin_bladed.glb",
+   "kind": "character model",
+   "bytes": 5260676,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/cls_twin_bladed_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/crimson_widow.glb",
+   "kind": "character model",
+   "bytes": 4876552,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/crimson_widow_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/devourer.glb",
+   "kind": "character model",
+   "bytes": 5128496,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/devourer_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_banner.glb",
+   "kind": "scenery model",
+   "bytes": 4836524,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_banner_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_brazier.glb",
+   "kind": "scenery model",
+   "bytes": 4718380,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_brazier_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_block.glb",
+   "kind": "scenery model",
+   "bytes": 5350556,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_block_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_boulder.glb",
+   "kind": "scenery model",
+   "bytes": 5316956,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_boulder_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_cart.glb",
+   "kind": "scenery model",
+   "bytes": 4120452,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_cart_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_giant_tree.glb",
+   "kind": "scenery model",
+   "bytes": 5129936,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_giant_tree_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_gibbet.glb",
+   "kind": "scenery model",
+   "bytes": 5429940,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_gibbet_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_hut.glb",
+   "kind": "scenery model",
+   "bytes": 3674660,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_hut_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_lantern.glb",
+   "kind": "scenery model",
+   "bytes": 4642112,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_lantern_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_log.glb",
+   "kind": "scenery model",
+   "bytes": 4458684,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_log_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_root_arch.glb",
+   "kind": "scenery model",
+   "bytes": 4327740,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_root_arch_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_shrine.glb",
+   "kind": "scenery model",
+   "bytes": 5307832,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_shrine_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_stone.glb",
+   "kind": "scenery model",
+   "bytes": 4844376,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_stone_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_bw_tree.glb",
+   "kind": "scenery model",
+   "bytes": 5114528,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_bw_tree_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_chest.glb",
+   "kind": "scenery model",
+   "bytes": 5284652,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_chest_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_gate.glb",
+   "kind": "scenery model",
+   "bytes": 5065020,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_gate_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_obelisk.glb",
+   "kind": "scenery model",
+   "bytes": 5063876,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_obelisk_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_peak.glb",
+   "kind": "scenery model",
+   "bytes": 5448284,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_peak_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_pillar.glb",
+   "kind": "scenery model",
+   "bytes": 4593968,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_pillar_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_rubble.glb",
+   "kind": "scenery model",
+   "bytes": 6206116,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_rubble_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_statue.glb",
+   "kind": "scenery model",
+   "bytes": 4783612,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_statue_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_statue_head.glb",
+   "kind": "scenery model",
+   "bytes": 4478292,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_statue_head_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_tower.glb",
+   "kind": "scenery model",
+   "bytes": 5046000,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_tower_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_tree.glb",
+   "kind": "scenery model",
+   "bytes": 5380096,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_tree_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/env_wall.glb",
+   "kind": "scenery model",
+   "bytes": 5322896,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/env_wall_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/forgotten_monarch.glb",
+   "kind": "character model",
+   "bytes": 5512952,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/forgotten_monarch_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/frostbound_king.glb",
+   "kind": "character model",
+   "bytes": 5765936,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/frostbound_king_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/gravewarden.glb",
+   "kind": "character model",
+   "bytes": 6188592,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/gravewarden_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/hollow_executioner.glb",
+   "kind": "character model",
+   "bytes": 4996388,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/hollow_executioner_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/knight_f.glb",
+   "kind": "character model",
+   "bytes": 5432632,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/knight_f_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/knight_m.glb",
+   "kind": "character model",
+   "bytes": 5663676,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/knight_m_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/pale_huntsman.glb",
+   "kind": "character model",
+   "bytes": 5661476,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/pale_huntsman_v1.png, auto-rigged (Mixamo names)",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.35,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/s_garrison.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3010492,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/s_garrison_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/s_plank.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3475276,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/s_plank_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/s_reliquary.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4578132,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/s_reliquary_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/s_rime.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4351568,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/s_rime_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/s_scale.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3422960,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/s_scale_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/s_tower.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3348348,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/s_tower_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_ashen_great.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4047664,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_ashen_great_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_crypt_great.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4618756,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_crypt_great_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_dawnline.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4263276,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_dawnline_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_ember_fangs.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3903076,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_ember_fangs_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_frost_great.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4343904,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_frost_great_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_headsman.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3317984,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_headsman_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_hunger.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3761140,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_hunger_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_knight_sword.glb",
+   "kind": "weapon or shield model",
+   "bytes": 9735576,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_knight_sword_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 1.25,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_pilgrim_blades.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3035564,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_pilgrim_blades_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_rime_sword.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4089432,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_rime_sword_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_rusted_sword.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3625804,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_rusted_sword_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_starfall.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4495244,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_starfall_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_throneshard.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4058380,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_throneshard_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_twin_fangs.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3538952,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_twin_fangs_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_vigil_edge.glb",
+   "kind": "weapon or shield model",
+   "bytes": 4098384,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_vigil_edge_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "assets/models/w_wyrmfang.glb",
+   "kind": "weapon or shield model",
+   "bytes": 3608552,
+   "source": "Tripo API",
+   "method": "image-to-3D from art/concept/w_wyrmfang_v1.png",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.3,
+   "status": "in game"
+  },
+  {
+   "path": "art/concept/ashen_sentinel_v1.png",
+   "kind": "concept image",
+   "bytes": 5492513,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cathedral_beast_v1.png",
+   "kind": "concept image",
+   "bytes": 5277560,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cls_double_weapon_v1.png",
+   "kind": "concept image",
+   "bytes": 4865972,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cls_giant_v1.png",
+   "kind": "concept image",
+   "bytes": 4696911,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cls_heavy_v1.png",
+   "kind": "concept image",
+   "bytes": 5447404,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cls_humanoid_v1.png",
+   "kind": "concept image",
+   "bytes": 4535477,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cls_monstrosity_v1.png",
+   "kind": "concept image",
+   "bytes": 5259221,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cls_soul_eater_v1.png",
+   "kind": "concept image",
+   "bytes": 4641457,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/cls_twin_bladed_v1.png",
+   "kind": "concept image",
+   "bytes": 4556168,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/crimson_widow_v1.png",
+   "kind": "concept image",
+   "bytes": 4122948,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/devourer_v1.png",
+   "kind": "concept image",
+   "bytes": 4205092,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_banner_v1.png",
+   "kind": "concept image",
+   "bytes": 1167387,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_brazier_v1.png",
+   "kind": "concept image",
+   "bytes": 1150427,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_block_v1.png",
+   "kind": "concept image",
+   "bytes": 1914510,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_boulder_v1.png",
+   "kind": "concept image",
+   "bytes": 1950961,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_cart_v1.png",
+   "kind": "concept image",
+   "bytes": 1788434,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_giant_tree_v1.png",
+   "kind": "concept image",
+   "bytes": 1841446,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_gibbet_v1.png",
+   "kind": "concept image",
+   "bytes": 1814644,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_hut_v1.png",
+   "kind": "concept image",
+   "bytes": 1936721,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_lantern_v1.png",
+   "kind": "concept image",
+   "bytes": 1165154,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_log_v1.png",
+   "kind": "concept image",
+   "bytes": 1596115,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_root_arch_v1.png",
+   "kind": "concept image",
+   "bytes": 1809927,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_shrine_v1.png",
+   "kind": "concept image",
+   "bytes": 1986229,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_stone_v1.png",
+   "kind": "concept image",
+   "bytes": 1537665,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_bw_tree_v1.png",
+   "kind": "concept image",
+   "bytes": 1668760,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_chest_v1.png",
+   "kind": "concept image",
+   "bytes": 1920277,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_gate_v1.png",
+   "kind": "concept image",
+   "bytes": 2115216,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_obelisk_v1.png",
+   "kind": "concept image",
+   "bytes": 1322686,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_peak_v1.png",
+   "kind": "concept image",
+   "bytes": 2021726,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_pillar_v1.png",
+   "kind": "concept image",
+   "bytes": 1630326,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_rubble_v1.png",
+   "kind": "concept image",
+   "bytes": 1882336,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_statue_head_v1.png",
+   "kind": "concept image",
+   "bytes": 1852667,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_statue_v1.png",
+   "kind": "concept image",
+   "bytes": 1491569,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_tower_v1.png",
+   "kind": "concept image",
+   "bytes": 1884071,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_tree_v1.png",
+   "kind": "concept image",
+   "bytes": 1992711,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/env_wall_v1.png",
+   "kind": "concept image",
+   "bytes": 1705413,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/forgotten_monarch_v1.png",
+   "kind": "concept image",
+   "bytes": 4825476,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/frostbound_king_v1.png",
+   "kind": "concept image",
+   "bytes": 4936206,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/gravewarden_v1.png",
+   "kind": "concept image",
+   "bytes": 5368175,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/hollow_executioner_v1.png",
+   "kind": "concept image",
+   "bytes": 4982163,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/knight_f_v2.png",
+   "kind": "concept image",
+   "bytes": 4738381,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/knight_m_v2.png",
+   "kind": "concept image",
+   "bytes": 4698597,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/knight_v1.png",
+   "kind": "concept image",
+   "bytes": 5331426,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/pale_huntsman_v1.png",
+   "kind": "concept image",
+   "bytes": 4704795,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/s_garrison_v1.png",
+   "kind": "concept image",
+   "bytes": 1056543,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/s_plank_v1.png",
+   "kind": "concept image",
+   "bytes": 1496715,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/s_reliquary_v1.png",
+   "kind": "concept image",
+   "bytes": 1520847,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/s_rime_v1.png",
+   "kind": "concept image",
+   "bytes": 1564914,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/s_scale_v1.png",
+   "kind": "concept image",
+   "bytes": 1513195,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/s_tower_v1.png",
+   "kind": "concept image",
+   "bytes": 1372544,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_ashen_great_v1.png",
+   "kind": "concept image",
+   "bytes": 1015131,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_crypt_great_v1.png",
+   "kind": "concept image",
+   "bytes": 912430,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_dawnline_v1.png",
+   "kind": "concept image",
+   "bytes": 816347,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_ember_fangs_v1.png",
+   "kind": "concept image",
+   "bytes": 951954,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_frost_great_v1.png",
+   "kind": "concept image",
+   "bytes": 965757,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_headsman_v1.png",
+   "kind": "concept image",
+   "bytes": 1095580,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_hunger_v1.png",
+   "kind": "concept image",
+   "bytes": 921500,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_knight_sword_v1.png",
+   "kind": "concept image",
+   "bytes": 830838,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.05,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_pilgrim_blades_v1.png",
+   "kind": "concept image",
+   "bytes": 855793,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_rime_sword_v1.png",
+   "kind": "concept image",
+   "bytes": 893423,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_rusted_sword_v1.png",
+   "kind": "concept image",
+   "bytes": 853661,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_starfall_v1.png",
+   "kind": "concept image",
+   "bytes": 908072,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_throneshard_v1.png",
+   "kind": "concept image",
+   "bytes": 884603,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_twin_fangs_v1.png",
+   "kind": "concept image",
+   "bytes": 899270,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_vigil_edge_v1.png",
+   "kind": "concept image",
+   "bytes": 905399,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "art/concept/w_wyrmfang_v1.png",
+   "kind": "concept image",
+   "bytes": 943954,
+   "source": "Higgsfield (GPT Image 2.6)",
+   "method": "text-to-image, prompts in tools/concepts.py",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.03,
+   "status": "reference only, not shipped"
+  },
+  {
+   "path": "assets/video/courtyard_road_0.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 4567462,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_1.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 4508819,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_2.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 3862742,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_3.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 5510416,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_4.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 5315383,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_5.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 4279660,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/courtyard_road_6.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 5614290,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_a_block.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1538349,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_a_dodge.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1574392,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_a_hit.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1618057,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_a_parry.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1375975,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_a_tele.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 570604,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_b_block.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1646459,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_b_dodge.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1736188,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_b_hit.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1717629,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_b_parry.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1461601,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_b_tele.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 471984,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_counter.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 1161791,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_defeat.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 5345153,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_idle.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 666282,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_intro.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 6070481,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_memory.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 2959916,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_open.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 712774,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_recover.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 788316,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/sentinel_victory.ogv",
+   "kind": "combat/travel footage",
+   "bytes": 7082731,
+   "source": "This project",
+   "method": "rendered from the game's own scene by src/cine/clip_stage.gd (Godot movie writer), encoded Ogg Theora 720p30 q7",
+   "rights": "Original (derived from the generated models above)",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_0.jpg",
+   "kind": "view still",
+   "bytes": 102140,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_1.jpg",
+   "kind": "view still",
+   "bytes": 97353,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_2.jpg",
+   "kind": "view still",
+   "bytes": 89990,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_3.jpg",
+   "kind": "view still",
+   "bytes": 100677,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_4.jpg",
+   "kind": "view still",
+   "bytes": 99987,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_5.jpg",
+   "kind": "view still",
+   "bytes": 89018,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/video/stills/courtyard_stop_6.jpg",
+   "kind": "view still",
+   "bytes": 113360,
+   "source": "This project",
+   "method": "frame taken from the rendered takes",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game (cinematic test)"
+  },
+  {
+   "path": "assets/audio/vo/awakening_01.ogg",
+   "kind": "voice line",
+   "bytes": 16822,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 14669,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 13596,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_03.ogg",
+   "kind": "voice line",
+   "bytes": 40802,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_04_f.ogg",
+   "kind": "voice line",
+   "bytes": 17233,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_04_m.ogg",
+   "kind": "voice line",
+   "bytes": 17940,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_05.ogg",
+   "kind": "voice line",
+   "bytes": 34338,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_06_f.ogg",
+   "kind": "voice line",
+   "bytes": 29560,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_06_m.ogg",
+   "kind": "voice line",
+   "bytes": 28426,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/awakening_07.ogg",
+   "kind": "voice line",
+   "bytes": 23073,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_01.ogg",
+   "kind": "voice line",
+   "bytes": 22446,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 24755,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 21394,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_03.ogg",
+   "kind": "voice line",
+   "bytes": 18745,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/beast_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 62284,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_0_01.ogg",
+   "kind": "voice line",
+   "bytes": 66622,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_1_01.ogg",
+   "kind": "voice line",
+   "bytes": 66240,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_2_01.ogg",
+   "kind": "voice line",
+   "bytes": 69763,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_3_01.ogg",
+   "kind": "voice line",
+   "bytes": 66794,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_4_01.ogg",
+   "kind": "voice line",
+   "bytes": 65671,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_5_01.ogg",
+   "kind": "voice line",
+   "bytes": 61654,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_6_01.ogg",
+   "kind": "voice line",
+   "bytes": 67039,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/devourer_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 20206,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/devourer_intro_02.ogg",
+   "kind": "voice line",
+   "bytes": 26408,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/devourer_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 31156,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/executioner_death_01.ogg",
+   "kind": "voice line",
+   "bytes": 75743,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 30430,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 28818,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 30016,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 30790,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/first_road_01.ogg",
+   "kind": "voice line",
+   "bytes": 92166,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/first_road_02.ogg",
+   "kind": "voice line",
+   "bytes": 75000,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/frostking_death_01.ogg",
+   "kind": "voice line",
+   "bytes": 48658,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 56460,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 26175,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 26253,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 27333,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/frostking_retry_01.ogg",
+   "kind": "voice line",
+   "bytes": 36293,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_death_01.ogg",
+   "kind": "voice line",
+   "bytes": 59877,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_death_02.ogg",
+   "kind": "voice line",
+   "bytes": 53401,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 21513,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 14819,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 13083,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 29218,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 47453,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 20322,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 24226,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 17367,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_01.ogg",
+   "kind": "voice line",
+   "bytes": 54641,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_02.ogg",
+   "kind": "voice line",
+   "bytes": 26604,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_03_f.ogg",
+   "kind": "voice line",
+   "bytes": 18668,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_03_m.ogg",
+   "kind": "voice line",
+   "bytes": 16806,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 28239,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 35399,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 38580,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 45702,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_04_f.ogg",
+   "kind": "voice line",
+   "bytes": 28539,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_04_m.ogg",
+   "kind": "voice line",
+   "bytes": 27576,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_05.ogg",
+   "kind": "voice line",
+   "bytes": 42103,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/monarch_retry_01.ogg",
+   "kind": "voice line",
+   "bytes": 33485,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/opening_01.ogg",
+   "kind": "voice line",
+   "bytes": 45396,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/opening_02.ogg",
+   "kind": "voice line",
+   "bytes": 28192,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/opening_03.ogg",
+   "kind": "voice line",
+   "bytes": 92031,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/opening_04.ogg",
+   "kind": "voice line",
+   "bytes": 48390,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/opening_05.ogg",
+   "kind": "voice line",
+   "bytes": 84132,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/opening_06.ogg",
+   "kind": "voice line",
+   "bytes": 18231,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/orren_idle_01.ogg",
+   "kind": "voice line",
+   "bytes": 76981,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/orren_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 39076,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/orren_intro_02.ogg",
+   "kind": "voice line",
+   "bytes": 57023,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/orren_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 66533,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_0_01.ogg",
+   "kind": "voice line",
+   "bytes": 30547,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_1_01.ogg",
+   "kind": "voice line",
+   "bytes": 51833,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_2_01.ogg",
+   "kind": "voice line",
+   "bytes": 35681,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_3_01.ogg",
+   "kind": "voice line",
+   "bytes": 30991,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_4_01.ogg",
+   "kind": "voice line",
+   "bytes": 37235,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_5_01.ogg",
+   "kind": "voice line",
+   "bytes": 53792,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sanctuary_return_01.ogg",
+   "kind": "voice line",
+   "bytes": 42565,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sanctuary_return_02.ogg",
+   "kind": "voice line",
+   "bytes": 77456,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_01.ogg",
+   "kind": "voice line",
+   "bytes": 22442,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 24060,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 25907,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_03.ogg",
+   "kind": "voice line",
+   "bytes": 22793,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 16842,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 20525,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 22120,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 20594,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_memory_01.ogg",
+   "kind": "voice line",
+   "bytes": 50715,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_memory_02.ogg",
+   "kind": "voice line",
+   "bytes": 78754,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_memory_03.ogg",
+   "kind": "voice line",
+   "bytes": 70505,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_retry_01.ogg",
+   "kind": "voice line",
+   "bytes": 26912,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/widow_death_01.ogg",
+   "kind": "voice line",
+   "bytes": 42567,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/widow_death_02.ogg",
+   "kind": "voice line",
+   "bytes": 29519,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 37273,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_02_f.ogg",
+   "kind": "voice line",
+   "bytes": 19749,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_02_m.ogg",
+   "kind": "voice line",
+   "bytes": 20221,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_03.ogg",
+   "kind": "voice line",
+   "bytes": 31580,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/vo/wyrm_intro_01.ogg",
+   "kind": "voice line",
+   "bytes": 74478,
+   "source": "Higgsfield (ElevenLabs v4)",
+   "method": "text-to-speech, cast and text in tools/gen_dialogue.py; effects by ffmpeg",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.02,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/boss_ashen_sentinel.ogg",
+   "kind": "music",
+   "bytes": 1656341,
+   "source": "Higgsfield (ElevenLabs Music v2.5)",
+   "method": "text-to-music, prompts in tools/music.py; loop made by ffmpeg crossfade",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.5,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/combat_a.ogg",
+   "kind": "music",
+   "bytes": 504219,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/combat_b.ogg",
+   "kind": "music",
+   "bytes": 544656,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/explore_courtyard.ogg",
+   "kind": "music",
+   "bytes": 1521759,
+   "source": "Higgsfield (ElevenLabs Music v2.5)",
+   "method": "text-to-music, prompts in tools/music.py; loop made by ffmpeg crossfade",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.5,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/final.ogg",
+   "kind": "music",
+   "bytes": 683034,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/hub.ogg",
+   "kind": "music",
+   "bytes": 1240221,
+   "source": "Higgsfield (ElevenLabs Music v2.5)",
+   "method": "text-to-music, prompts in tools/music.py; loop made by ffmpeg crossfade",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.5,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/menu.ogg",
+   "kind": "music",
+   "bytes": 675517,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/sanctuary.ogg",
+   "kind": "music",
+   "bytes": 710705,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/music/theme.ogg",
+   "kind": "music",
+   "bytes": 1569448,
+   "source": "Higgsfield (ElevenLabs Music v2.5)",
+   "method": "text-to-music, prompts in tools/music.py; loop made by ffmpeg crossfade",
+   "rights": "Generated for this project; commercial use depends on the account's plan terms (to be confirmed)",
+   "cost_usd": 0.5,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/bell.wav",
+   "kind": "sound effect",
+   "bytes": 352844,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/block_1.wav",
+   "kind": "sound effect",
+   "bytes": 35324,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/block_2.wav",
+   "kind": "sound effect",
+   "bytes": 35322,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/clash_1.wav",
+   "kind": "sound effect",
+   "bytes": 70604,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/clash_2.wav",
+   "kind": "sound effect",
+   "bytes": 61782,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/clash_3.wav",
+   "kind": "sound effect",
+   "bytes": 79424,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/death.wav",
+   "kind": "sound effect",
+   "bytes": 220540,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/dodge.wav",
+   "kind": "sound effect",
+   "bytes": 25698,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/ember_burst.wav",
+   "kind": "sound effect",
+   "bytes": 79416,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/finisher.wav",
+   "kind": "sound effect",
+   "bytes": 120794,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/footstep_1.wav",
+   "kind": "sound effect",
+   "bytes": 22092,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/footstep_2.wav",
+   "kind": "sound effect",
+   "bytes": 22094,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/frost.wav",
+   "kind": "sound effect",
+   "bytes": 97064,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/guard_break.wav",
+   "kind": "sound effect",
+   "bytes": 97064,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/hit_armor_1.wav",
+   "kind": "sound effect",
+   "bytes": 39732,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/hit_armor_2.wav",
+   "kind": "sound effect",
+   "bytes": 39734,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/hit_flesh_1.wav",
+   "kind": "sound effect",
+   "bytes": 30906,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/hit_flesh_2.wav",
+   "kind": "sound effect",
+   "bytes": 30910,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/levelup.wav",
+   "kind": "sound effect",
+   "bytes": 127946,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/loot.wav",
+   "kind": "sound effect",
+   "bytes": 52964,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/parry_perfect.wav",
+   "kind": "sound effect",
+   "bytes": 105884,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/roar_1.wav",
+   "kind": "sound effect",
+   "bytes": 113744,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/roar_2.wav",
+   "kind": "sound effect",
+   "bytes": 140306,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/roar_3.wav",
+   "kind": "sound effect",
+   "bytes": 157896,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/stagger.wav",
+   "kind": "sound effect",
+   "bytes": 61780,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/swing_1.wav",
+   "kind": "sound effect",
+   "bytes": 27772,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/swing_2.wav",
+   "kind": "sound effect",
+   "bytes": 29976,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/swing_3.wav",
+   "kind": "sound effect",
+   "bytes": 25300,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/swing_heavy.wav",
+   "kind": "sound effect",
+   "bytes": 54978,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/telegraph_unblockable.wav",
+   "kind": "sound effect",
+   "bytes": 44140,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/ui_back.wav",
+   "kind": "sound effect",
+   "bytes": 24738,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/ui_confirm.wav",
+   "kind": "sound effect",
+   "bytes": 30910,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/ui_tap.wav",
+   "kind": "sound effect",
+   "bytes": 10628,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/sfx/victory.wav",
+   "kind": "sound effect",
+   "bytes": 264644,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/amb/crypt.ogg",
+   "kind": "ambience",
+   "bytes": 318163,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/amb/fire.ogg",
+   "kind": "ambience",
+   "bytes": 633107,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/amb/rain.ogg",
+   "kind": "ambience",
+   "bytes": 557760,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/audio/amb/wind.ogg",
+   "kind": "ambience",
+   "bytes": 527839,
+   "source": "This project",
+   "method": "synthesized by tools/gen_audio.py",
+   "rights": "Original",
+   "cost_usd": 0.0,
+   "status": "in game; not yet auditioned by ear"
+  },
+  {
+   "path": "assets/fonts/cinzel-latin-400-normal.woff2",
+   "kind": "font",
+   "bytes": 14128,
+   "source": "Fontsource (Cinzel / EB Garamond)",
+   "method": "downloaded",
+   "rights": "SIL Open Font License 1.1",
+   "cost_usd": 0.0,
+   "status": "in game"
+  },
+  {
+   "path": "assets/fonts/cinzel-latin-700-normal.woff2",
+   "kind": "font",
+   "bytes": 15184,
+   "source": "Fontsource (Cinzel / EB Garamond)",
+   "method": "downloaded",
+   "rights": "SIL Open Font License 1.1",
+   "cost_usd": 0.0,
+   "status": "in game"
+  },
+  {
+   "path": "assets/fonts/eb-garamond-latin-400-normal.woff2",
+   "kind": "font",
+   "bytes": 23820,
+   "source": "Fontsource (Cinzel / EB Garamond)",
+   "method": "downloaded",
+   "rights": "SIL Open Font License 1.1",
+   "cost_usd": 0.0,
+   "status": "in game"
+  },
+  {
+   "path": "assets/fonts/eb-garamond-latin-600-normal.woff2",
+   "kind": "font",
+   "bytes": 25348,
+   "source": "Fontsource (Cinzel / EB Garamond)",
+   "method": "downloaded",
+   "rights": "SIL Open Font License 1.1",
+   "cost_usd": 0.0,
+   "status": "in game"
+  }
+ ]
+}

@@ -1,0 +1,4742 @@
+{
+ "clips": {
+  "dw_a2": {
+   "contact": 1.4,
+   "frames": 93,
+   "hip_travel": 0.16,
+   "hits": [
+    {
+     "at": [
+      0.94,
+      1.34,
+      0.83
+     ],
+     "contact": 1.4,
+     "dir": [
+      -0.87,
+      -0.48,
+      -0.06
+     ],
+     "end": 1.97,
+     "front": [
+      1.4,
+      1.5
+     ],
+     "hand_peak": 2.03,
+     "start": 0.83,
+     "swipe": "DL",
+     "tip_speed": 23.68
+    },
+    {
+     "at": [
+      0.07,
+      1.02,
+      1.5
+     ],
+     "contact": 2.0,
+     "dir": [
+      0.82,
+      0.16,
+      -0.55
+     ],
+     "end": 2.17,
+     "front": [
+      1.97,
+      2.03
+     ],
+     "hand_peak": 2.03,
+     "start": 1.97,
+     "swipe": "R",
+     "tip_speed": 31.55
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      0.49,
+      0.85,
+      1.07
+     ],
+     "contact": 0.93,
+     "dir": [
+      0.11,
+      -0.6,
+      0.79
+     ],
+     "end": 1.0,
+     "front": [
+      0.93,
+      1.0
+     ],
+     "hand_peak": 0.93,
+     "start": 0.47,
+     "swipe": "thrust",
+     "tip_speed": 5.64
+    },
+    {
+     "at": [
+      -0.25,
+      0.93,
+      0.73
+     ],
+     "contact": 1.3,
+     "dir": [
+      0.15,
+      -0.15,
+      -0.98
+     ],
+     "end": 1.63,
+     "front": [
+      1.27,
+      1.3
+     ],
+     "hand_peak": 1.43,
+     "start": 1.23,
+     "swipe": "DR",
+     "tip_speed": 22.01
+    },
+    {
+     "at": [
+      -0.84,
+      1.35,
+      1.27
+     ],
+     "contact": 2.07,
+     "dir": [
+      0.82,
+      -0.51,
+      -0.27
+     ],
+     "end": 2.33,
+     "front": [
+      2.07,
+      2.2
+     ],
+     "hand_peak": 2.07,
+     "start": 1.8,
+     "swipe": "DR",
+     "tip_speed": 25.62
+    }
+   ],
+   "kind": "attack",
+   "length": 3.1,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.93,
+   "root_motion": false,
+   "source": "AS_DualSwordAnimV1_Attack2_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.83
+  },
+  "dw_a5": {
+   "contact": 0.47,
+   "frames": 71,
+   "hip_travel": 0.2,
+   "hits": [
+    {
+     "at": [
+      0.12,
+      1.32,
+      1.47
+     ],
+     "contact": 0.47,
+     "dir": [
+      -0.41,
+      0.33,
+      0.85
+     ],
+     "end": 0.5,
+     "front": [
+      0.47,
+      0.5
+     ],
+     "hand_peak": 0.47,
+     "start": 0.0,
+     "swipe": "thrust",
+     "tip_speed": 5.51
+    },
+    {
+     "at": [
+      0.71,
+      0.57,
+      0.8
+     ],
+     "contact": 0.83,
+     "dir": [
+      0.61,
+      -0.33,
+      -0.72
+     ],
+     "end": 1.37,
+     "front": [
+      0.77,
+      0.83
+     ],
+     "hand_peak": 1.33,
+     "start": 0.7,
+     "swipe": "DR",
+     "tip_speed": 14.96
+    },
+    {
+     "at": [
+      -0.74,
+      1.27,
+      1.24
+     ],
+     "contact": 1.37,
+     "dir": [
+      0.95,
+      0.1,
+      -0.29
+     ],
+     "end": 1.6,
+     "front": [
+      1.37,
+      1.47
+     ],
+     "hand_peak": 1.33,
+     "start": 1.37,
+     "swipe": "R",
+     "tip_speed": 23.73
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.43,
+      1.48,
+      0.64
+     ],
+     "contact": 0.4,
+     "dir": [
+      0.26,
+      0.5,
+      -0.83
+     ],
+     "end": 0.57,
+     "front": [
+      0.37,
+      0.4
+     ],
+     "hand_peak": 0.43,
+     "start": 0.27,
+     "swipe": "UR",
+     "tip_speed": 13.66
+    },
+    {
+     "at": [
+      -0.29,
+      0.68,
+      1.4
+     ],
+     "contact": 0.93,
+     "dir": [
+      0.91,
+      -0.28,
+      -0.3
+     ],
+     "end": 1.3,
+     "front": [
+      0.9,
+      1.0
+     ],
+     "hand_peak": 0.93,
+     "start": 0.73,
+     "swipe": "R",
+     "tip_speed": 25.23
+    },
+    {
+     "at": [
+      0.1,
+      1.09,
+      1.25
+     ],
+     "contact": 1.9,
+     "dir": [
+      -0.4,
+      -0.07,
+      0.92
+     ],
+     "end": 1.93,
+     "front": [
+      1.9,
+      1.93
+     ],
+     "hand_peak": 1.9,
+     "start": 1.63,
+     "swipe": "thrust",
+     "tip_speed": 3.86
+    }
+   ],
+   "kind": "attack",
+   "length": 2.37,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.77,
+   "root_motion": false,
+   "source": "AS_DualSwordAnimV1_Attack5_IP.FBX",
+   "swipe": "thrust",
+   "windup": 0.0
+  },
+  "dw_cross": {
+   "contact": 1.27,
+   "frames": 75,
+   "hip_travel": 0.15,
+   "hits": [
+    {
+     "at": [
+      -0.99,
+      0.79,
+      0.9
+     ],
+     "contact": 1.27,
+     "dir": [
+      -0.96,
+      -0.21,
+      -0.19
+     ],
+     "end": 1.67,
+     "front": [
+      1.17,
+      1.27
+     ],
+     "hand_peak": 1.13,
+     "start": 1.0,
+     "swipe": "L",
+     "tip_speed": 24.04
+    },
+    {
+     "at": [
+      0.37,
+      0.52,
+      1.31
+     ],
+     "contact": 1.73,
+     "dir": [
+      -0.75,
+      0.39,
+      -0.53
+     ],
+     "end": 2.13,
+     "front": [
+      1.67,
+      1.93
+     ],
+     "hand_peak": 1.13,
+     "start": 1.67,
+     "swipe": "UL",
+     "tip_speed": 16.08
+    },
+    {
+     "at": [
+      0.1,
+      1.39,
+      1.14
+     ],
+     "contact": 2.2,
+     "dir": [
+      0.77,
+      -0.63,
+      0.04
+     ],
+     "end": 2.47,
+     "front": [
+      2.13,
+      2.3
+     ],
+     "hand_peak": 1.13,
+     "start": 2.13,
+     "swipe": "DR",
+     "tip_speed": 11.86
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.16,
+      1.11,
+      1.47
+     ],
+     "contact": 0.73,
+     "dir": [
+      0.37,
+      0.53,
+      0.77
+     ],
+     "end": 0.77,
+     "front": [
+      0.73,
+      0.77
+     ],
+     "hand_peak": 0.73,
+     "start": 0.47,
+     "swipe": "thrust",
+     "tip_speed": 4.22
+    },
+    {
+     "at": [
+      -0.44,
+      0.68,
+      0.84
+     ],
+     "contact": 1.07,
+     "dir": [
+      -0.81,
+      -0.15,
+      -0.57
+     ],
+     "end": 1.47,
+     "front": [
+      1.03,
+      1.07
+     ],
+     "hand_peak": 1.3,
+     "start": 0.87,
+     "swipe": "L",
+     "tip_speed": 12.05
+    },
+    {
+     "at": [
+      -0.5,
+      1.09,
+      1.22
+     ],
+     "contact": 1.53,
+     "dir": [
+      -0.92,
+      -0.13,
+      -0.37
+     ],
+     "end": 1.77,
+     "front": [
+      1.47,
+      1.57
+     ],
+     "hand_peak": 1.3,
+     "start": 1.47,
+     "swipe": "L",
+     "tip_speed": 21.02
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.5,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.03,
+   "root_motion": false,
+   "source": "AS_DualSwordAnimV1_Attack1_IP.FBX",
+   "swipe": "L",
+   "windup": 1.0
+  },
+  "dw_cut_dl": {
+   "contact": 0.57,
+   "frames": 54,
+   "hip_travel": 0.21,
+   "hits": [
+    {
+     "at": [
+      0.66,
+      1.29,
+      1.31
+     ],
+     "contact": 0.57,
+     "dir": [
+      -0.92,
+      -0.4,
+      -0.04
+     ],
+     "end": 0.87,
+     "front": [
+      0.53,
+      0.67
+     ],
+     "hand_peak": 0.6,
+     "start": 0.33,
+     "swipe": "DL",
+     "tip_speed": 23.94
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.84,
+      1.0,
+      0.62
+     ],
+     "contact": 0.5,
+     "dir": [
+      -0.8,
+      0.22,
+      -0.56
+     ],
+     "end": 0.77,
+     "front": [
+      0.33,
+      0.5
+     ],
+     "hand_peak": 0.43,
+     "start": 0.23,
+     "swipe": "L",
+     "tip_speed": 13.75
+    },
+    {
+     "at": [
+      0.47,
+      1.01,
+      1.18
+     ],
+     "contact": 1.17,
+     "dir": [
+      -0.88,
+      0.28,
+      -0.39
+     ],
+     "end": 1.37,
+     "front": [
+      1.17,
+      1.27
+     ],
+     "hand_peak": 1.13,
+     "start": 0.9,
+     "swipe": "L",
+     "tip_speed": 20.45
+    }
+   ],
+   "kind": "attack",
+   "length": 1.8,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.93,
+   "root_motion": false,
+   "seen": "ok: right blade from overhead down to the left",
+   "source": "AS_DualSwordAnimV1_Attack8_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.33
+  },
+  "dw_cut_dr": {
+   "contact": 0.67,
+   "frames": 40,
+   "hip_travel": 0.13,
+   "hits": [
+    {
+     "at": [
+      1.23,
+      1.38,
+      0.6
+     ],
+     "contact": 0.67,
+     "dir": [
+      0.11,
+      -0.21,
+      -0.97
+     ],
+     "end": 0.83,
+     "front": [
+      0.27,
+      0.67
+     ],
+     "hand_peak": 0.67,
+     "start": 0.0,
+     "swipe": "DR",
+     "tip_speed": 24.23
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.91,
+      0.89,
+      0.73
+     ],
+     "contact": 0.23,
+     "dir": [
+      -0.61,
+      0.28,
+      -0.74
+     ],
+     "end": 0.57,
+     "front": [
+      0.2,
+      0.23
+     ],
+     "hand_peak": 0.67,
+     "start": 0.1,
+     "swipe": "UL",
+     "tip_speed": 11.8
+    },
+    {
+     "at": [
+      0.46,
+      0.69,
+      1.4
+     ],
+     "contact": 0.67,
+     "dir": [
+      0.96,
+      0.01,
+      -0.29
+     ],
+     "end": 0.8,
+     "front": [
+      0.57,
+      0.7
+     ],
+     "hand_peak": 0.67,
+     "start": 0.57,
+     "swipe": "R",
+     "tip_speed": 22.69
+    }
+   ],
+   "kind": "attack",
+   "length": 1.33,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.5,
+   "root_motion": false,
+   "seen": "ok: right blade high left to right",
+   "source": "AS_DualSwordAnimV1_Attack10_Stage1_Complete_IP.FBX",
+   "swipe": "DR",
+   "windup": 0.0
+  },
+  "dw_cut_l": {
+   "contact": 0.2,
+   "frames": 46,
+   "hip_travel": 0.23,
+   "hits": [
+    {
+     "at": [
+      -0.51,
+      1.04,
+      0.83
+     ],
+     "contact": 0.2,
+     "dir": [
+      -0.97,
+      -0.01,
+      -0.24
+     ],
+     "end": 0.8,
+     "front": [
+      0.13,
+      0.2
+     ],
+     "hand_peak": 0.2,
+     "start": 0.0,
+     "swipe": "L",
+     "tip_speed": 14.22
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      0.89,
+      1.55,
+      0.8
+     ],
+     "contact": 0.77,
+     "dir": [
+      -0.97,
+      -0.24,
+      -0.08
+     ],
+     "end": 1.03,
+     "front": [
+      0.77,
+      0.9
+     ],
+     "hand_peak": 0.77,
+     "start": 0.6,
+     "swipe": "L",
+     "tip_speed": 24.76
+    }
+   ],
+   "kind": "attack",
+   "length": 1.53,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.73,
+   "root_motion": false,
+   "seen": "poor: the measured cut at 0.20 s is the blades crossing; the visible action is a spin later in the clip",
+   "source": "AS_DualSwordAnimV1_Attack4_Stage2_Complete_IP.FBX",
+   "swipe": "L",
+   "use_for": "",
+   "windup": 0.0
+  },
+  "dw_cut_r": {
+   "contact": 0.7,
+   "frames": 40,
+   "hip_travel": 0.11,
+   "hits": [
+    {
+     "at": [
+      0.52,
+      1.33,
+      1.05
+     ],
+     "contact": 0.7,
+     "dir": [
+      0.93,
+      -0.28,
+      -0.24
+     ],
+     "end": 0.83,
+     "front": [
+      0.67,
+      0.7
+     ],
+     "hand_peak": 0.7,
+     "start": 0.53,
+     "swipe": "R",
+     "tip_speed": 27.24
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      0.75,
+      1.09,
+      0.74
+     ],
+     "contact": 0.77,
+     "dir": [
+      0.71,
+      0.29,
+      -0.64
+     ],
+     "end": 0.93,
+     "front": [
+      0.7,
+      0.77
+     ],
+     "hand_peak": 0.73,
+     "start": 0.63,
+     "swipe": "R",
+     "tip_speed": 12.91
+    }
+   ],
+   "kind": "attack",
+   "length": 1.33,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.5,
+   "root_motion": false,
+   "seen": "ok: right blade left to right",
+   "source": "AS_DualSwordAnimV1_Attack3_Stage2_Complete_IP.FBX",
+   "swipe": "R",
+   "windup": 0.53
+  },
+  "dw_cut_r2": {
+   "contact": 0.6,
+   "frames": 46,
+   "hip_travel": 0.17,
+   "hits": [
+    {
+     "at": [
+      1.07,
+      1.07,
+      0.96
+     ],
+     "contact": 0.6,
+     "dir": [
+      0.74,
+      -0.09,
+      -0.66
+     ],
+     "end": 0.73,
+     "front": [
+      0.53,
+      0.6
+     ],
+     "hand_peak": 0.6,
+     "start": 0.43,
+     "swipe": "R",
+     "tip_speed": 28.59
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.07,
+      1.53,
+      0.76
+     ],
+     "contact": 0.17,
+     "dir": [
+      -0.52,
+      0.74,
+      -0.42
+     ],
+     "end": 0.33,
+     "front": [
+      0.13,
+      0.17
+     ],
+     "hand_peak": 0.37,
+     "start": 0.03,
+     "swipe": "UL",
+     "tip_speed": 12.54
+    },
+    {
+     "at": [
+      -0.32,
+      0.58,
+      1.41
+     ],
+     "contact": 0.37,
+     "dir": [
+      0.91,
+      -0.42,
+      -0.05
+     ],
+     "end": 0.57,
+     "front": [
+      0.33,
+      0.47
+     ],
+     "hand_peak": 0.37,
+     "start": 0.33,
+     "swipe": "DR",
+     "tip_speed": 22.87
+    },
+    {
+     "at": [
+      0.82,
+      0.77,
+      0.61
+     ],
+     "contact": 1.23,
+     "dir": [
+      -0.68,
+      -0.06,
+      0.73
+     ],
+     "end": 1.4,
+     "front": [
+      1.23,
+      1.3
+     ],
+     "hand_peak": 1.23,
+     "start": 1.07,
+     "swipe": "L",
+     "tip_speed": 10.45
+    }
+   ],
+   "kind": "attack",
+   "length": 1.53,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.8,
+   "root_motion": false,
+   "source": "AS_DualSwordAnimV1_Attack10_Stage3_Complete_IP.FBX",
+   "swipe": "R",
+   "windup": 0.43
+  },
+  "dw_death_b": {
+   "frames": 15,
+   "hip_travel": 2.81,
+   "kind": "death",
+   "length": 0.5,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "seen": "ok: pitches forward to the floor (named Bw in the pack)",
+   "source": "AS_DualSwordAnimV1_Death_Bw_RM.FBX"
+  },
+  "dw_death_f": {
+   "frames": 15,
+   "hip_travel": 1.7,
+   "kind": "death",
+   "length": 0.5,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "source": "AS_DualSwordAnimV1_Death_Fw_RM.FBX"
+  },
+  "dw_dodge_b": {
+   "frames": 15,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.5,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "source": "AS_DualSwordAnimV1_Dodge_Bw_RM.FBX"
+  },
+  "dw_dodge_l": {
+   "frames": 15,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.5,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "seen": "ok: hop to the fighter's left",
+   "source": "AS_DualSwordAnimV1_Dodge_L_RM.FBX"
+  },
+  "dw_dodge_r": {
+   "frames": 15,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.5,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "source": "AS_DualSwordAnimV1_Dodge_R_RM.FBX"
+  },
+  "dw_double": {
+   "contact": 0.2,
+   "frames": 61,
+   "hip_travel": 0.23,
+   "hits": [
+    {
+     "at": [
+      0.32,
+      1.49,
+      0.77
+     ],
+     "contact": 0.2,
+     "dir": [
+      -0.96,
+      0.25,
+      -0.12
+     ],
+     "end": 0.37,
+     "front": [
+      0.17,
+      0.23
+     ],
+     "hand_peak": 0.23,
+     "start": 0.03,
+     "swipe": "L",
+     "tip_speed": 13.54
+    },
+    {
+     "at": [
+      0.16,
+      1.0,
+      1.27
+     ],
+     "contact": 0.73,
+     "dir": [
+      -0.84,
+      -0.53,
+      -0.13
+     ],
+     "end": 1.27,
+     "front": [
+      0.7,
+      0.8
+     ],
+     "hand_peak": 0.73,
+     "start": 0.47,
+     "swipe": "DL",
+     "tip_speed": 22.65
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      0.89,
+      1.55,
+      0.8
+     ],
+     "contact": 1.27,
+     "dir": [
+      -0.97,
+      -0.24,
+      -0.08
+     ],
+     "end": 1.53,
+     "front": [
+      1.27,
+      1.4
+     ],
+     "hand_peak": 1.27,
+     "start": 1.1,
+     "swipe": "L",
+     "tip_speed": 24.78
+    }
+   ],
+   "kind": "attack",
+   "length": 2.03,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.76,
+   "root_motion": false,
+   "source": "AS_DualSwordAnimV1_Attack4_IP.FBX",
+   "swipe": "L",
+   "windup": 0.03
+  },
+  "dw_flurry": {
+   "contact": 0.3,
+   "frames": 92,
+   "hip_travel": 0.19,
+   "hits": [
+    {
+     "at": [
+      0.24,
+      1.07,
+      1.42
+     ],
+     "contact": 0.3,
+     "dir": [
+      -0.4,
+      0.19,
+      0.9
+     ],
+     "end": 0.4,
+     "front": [
+      0.3,
+      0.4
+     ],
+     "hand_peak": 0.3,
+     "start": 0.0,
+     "swipe": "thrust",
+     "tip_speed": 2.83
+    },
+    {
+     "at": [
+      0.94,
+      1.02,
+      1.05
+     ],
+     "contact": 1.33,
+     "dir": [
+      -0.97,
+      -0.19,
+      -0.16
+     ],
+     "end": 1.93,
+     "front": [
+      1.33,
+      1.5
+     ],
+     "hand_peak": 2.43,
+     "start": 1.13,
+     "swipe": "L",
+     "tip_speed": 16.23
+    },
+    {
+     "at": [
+      1.1,
+      1.39,
+      0.81
+     ],
+     "contact": 1.93,
+     "dir": [
+      -0.85,
+      -0.53,
+      -0.02
+     ],
+     "end": 2.3,
+     "front": [
+      1.93,
+      2.03
+     ],
+     "hand_peak": 1.87,
+     "start": 1.93,
+     "swipe": "DL",
+     "tip_speed": 25.06
+    },
+    {
+     "at": [
+      -0.38,
+      1.33,
+      1.28
+     ],
+     "contact": 2.43,
+     "dir": [
+      0.88,
+      0.07,
+      -0.46
+     ],
+     "end": 2.7,
+     "front": [
+      2.43,
+      2.47
+     ],
+     "hand_peak": 2.43,
+     "start": 2.3,
+     "swipe": "R",
+     "tip_speed": 28.01
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      0.55,
+      1.28,
+      0.77
+     ],
+     "contact": 0.1,
+     "dir": [
+      0.49,
+      0.65,
+      -0.59
+     ],
+     "end": 0.23,
+     "front": [
+      0.03,
+      0.1
+     ],
+     "hand_peak": 0.2,
+     "start": 0.0,
+     "swipe": "UR",
+     "tip_speed": 11.5
+    },
+    {
+     "at": [
+      -1.0,
+      1.05,
+      1.04
+     ],
+     "contact": 0.63,
+     "dir": [
+      0.95,
+      -0.3,
+      -0.01
+     ],
+     "end": 1.27,
+     "front": [
+      0.63,
+      0.8
+     ],
+     "hand_peak": 1.87,
+     "start": 0.47,
+     "swipe": "R",
+     "tip_speed": 21.91
+    },
+    {
+     "at": [
+      -0.74,
+      1.42,
+      1.1
+     ],
+     "contact": 1.33,
+     "dir": [
+      -0.96,
+      -0.01,
+      -0.28
+     ],
+     "end": 1.73,
+     "front": [
+      1.27,
+      1.33
+     ],
+     "hand_peak": 1.87,
+     "start": 1.27,
+     "swipe": "L",
+     "tip_speed": 20.91
+    },
+    {
+     "at": [
+      -0.76,
+      1.2,
+      1.26
+     ],
+     "contact": 1.87,
+     "dir": [
+      -0.87,
+      -0.28,
+      -0.41
+     ],
+     "end": 2.17,
+     "front": [
+      1.73,
+      1.87
+     ],
+     "hand_peak": 1.87,
+     "start": 1.73,
+     "swipe": "L",
+     "tip_speed": 24.09
+    },
+    {
+     "at": [
+      -0.78,
+      0.63,
+      1.22
+     ],
+     "contact": 2.47,
+     "dir": [
+      0.96,
+      0.07,
+      -0.27
+     ],
+     "end": 2.7,
+     "front": [
+      2.47,
+      2.6
+     ],
+     "hand_peak": 2.4,
+     "start": 2.2,
+     "swipe": "R",
+     "tip_speed": 24.11
+    },
+    {
+     "at": [
+      0.79,
+      0.88,
+      0.6
+     ],
+     "contact": 2.93,
+     "dir": [
+      -0.84,
+      -0.26,
+      0.47
+     ],
+     "end": 3.07,
+     "front": [
+      2.93,
+      3.0
+     ],
+     "hand_peak": 1.87,
+     "start": 2.7,
+     "swipe": "L",
+     "tip_speed": 10.88
+    }
+   ],
+   "kind": "finisher",
+   "length": 3.07,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.37,
+   "root_motion": false,
+   "seen": "ok (side view): lunge with both blades, more cuts follow",
+   "source": "AS_DualSwordAnimV1_Attack9_IP.FBX",
+   "swipe": "thrust",
+   "windup": 0.0
+  },
+  "dw_hit_b": {
+   "frames": 22,
+   "hip_travel": 0.19,
+   "kind": "hit",
+   "length": 0.73,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "source": "AS_DualSwordAnimV1_Hit_Bw_RM.FBX"
+  },
+  "dw_hit_f": {
+   "frames": 22,
+   "hip_travel": 1.46,
+   "kind": "hit",
+   "length": 0.73,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "seen": "ok: knocked back",
+   "source": "AS_DualSwordAnimV1_Hit_Fw_RM.FBX"
+  },
+  "dw_hit_l": {
+   "frames": 22,
+   "hip_travel": 1.88,
+   "kind": "hit",
+   "length": 0.73,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "source": "AS_DualSwordAnimV1_Hit_L_RM.FBX"
+  },
+  "dw_hit_r": {
+   "frames": 22,
+   "hip_travel": 1.77,
+   "kind": "hit",
+   "length": 0.73,
+   "loop": false,
+   "pack": "dw",
+   "root_motion": true,
+   "source": "AS_DualSwordAnimV1_Hit_R_RM.FBX"
+  },
+  "dw_idle": {
+   "frames": 40,
+   "hip_travel": 0.0,
+   "kind": "idle",
+   "length": 1.33,
+   "loop": true,
+   "pack": "dw",
+   "root_motion": false,
+   "seen": "ok, but only the right-hand sword is visible in the capture",
+   "source": "AS_DualSwordAnimV1_Idle1_IP.FBX"
+  },
+  "dw_idle2": {
+   "frames": 30,
+   "hip_travel": 0.0,
+   "kind": "idle",
+   "length": 1.0,
+   "loop": true,
+   "pack": "dw",
+   "root_motion": false,
+   "source": "AS_DualSwordAnimV1_Idle2_IP.FBX"
+  },
+  "dw_lunge": {
+   "contact": 0.5,
+   "frames": 67,
+   "hip_travel": 0.2,
+   "hits": [
+    {
+     "at": [
+      0.96,
+      1.62,
+      0.87
+     ],
+     "contact": 0.5,
+     "dir": [
+      -0.82,
+      -0.57,
+      -0.05
+     ],
+     "end": 0.87,
+     "front": [
+      0.5,
+      0.63
+     ],
+     "hand_peak": 0.53,
+     "start": 0.1,
+     "swipe": "DL",
+     "tip_speed": 22.88
+    },
+    {
+     "at": [
+      -0.22,
+      1.11,
+      1.1
+     ],
+     "contact": 1.2,
+     "dir": [
+      0.47,
+      -0.4,
+      0.79
+     ],
+     "end": 1.23,
+     "front": [
+      1.2,
+      1.23
+     ],
+     "hand_peak": 1.2,
+     "start": 1.1,
+     "swipe": "thrust",
+     "tip_speed": 5.24
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.94,
+      0.83,
+      1.01
+     ],
+     "contact": 1.23,
+     "dir": [
+      -0.82,
+      -0.44,
+      -0.37
+     ],
+     "end": 1.4,
+     "front": [
+      1.17,
+      1.23
+     ],
+     "hand_peak": 1.23,
+     "start": 0.87,
+     "swipe": "DL",
+     "tip_speed": 24.2
+    }
+   ],
+   "kind": "attack",
+   "length": 2.23,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 1.0,
+   "root_motion": false,
+   "seen": "ok: right blade down-left, then a jumping turn",
+   "source": "AS_DualSwordAnimV1_Attack7_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.1
+  },
+  "dw_spin": {
+   "contact": 0.63,
+   "frames": 79,
+   "hip_travel": 0.17,
+   "hits": [
+    {
+     "at": [
+      0.54,
+      1.37,
+      1.27
+     ],
+     "contact": 0.63,
+     "dir": [
+      0.26,
+      -0.63,
+      -0.73
+     ],
+     "end": 1.13,
+     "front": [
+      0.27,
+      0.63
+     ],
+     "hand_peak": 0.67,
+     "start": 0.0,
+     "swipe": "D",
+     "tip_speed": 23.24
+    },
+    {
+     "at": [
+      1.07,
+      1.07,
+      0.96
+     ],
+     "contact": 1.7,
+     "dir": [
+      0.74,
+      -0.09,
+      -0.66
+     ],
+     "end": 1.83,
+     "front": [
+      1.63,
+      1.7
+     ],
+     "hand_peak": 1.7,
+     "start": 1.53,
+     "swipe": "R",
+     "tip_speed": 28.59
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.91,
+      0.89,
+      0.73
+     ],
+     "contact": 0.23,
+     "dir": [
+      -0.61,
+      0.28,
+      -0.74
+     ],
+     "end": 0.57,
+     "front": [
+      0.2,
+      0.23
+     ],
+     "hand_peak": 0.67,
+     "start": 0.1,
+     "swipe": "UL",
+     "tip_speed": 11.81
+    },
+    {
+     "at": [
+      0.45,
+      0.68,
+      1.4
+     ],
+     "contact": 0.67,
+     "dir": [
+      0.96,
+      0.01,
+      -0.29
+     ],
+     "end": 0.8,
+     "front": [
+      0.57,
+      0.7
+     ],
+     "hand_peak": 0.67,
+     "start": 0.57,
+     "swipe": "R",
+     "tip_speed": 22.62
+    },
+    {
+     "at": [
+      -1.14,
+      0.99,
+      0.9
+     ],
+     "contact": 1.43,
+     "dir": [
+      0.96,
+      -0.29,
+      -0.01
+     ],
+     "end": 1.67,
+     "front": [
+      1.43,
+      1.57
+     ],
+     "hand_peak": 1.47,
+     "start": 1.23,
+     "swipe": "R",
+     "tip_speed": 23.48
+    },
+    {
+     "at": [
+      0.41,
+      0.72,
+      1.03
+     ],
+     "contact": 2.4,
+     "dir": [
+      -0.13,
+      -0.36,
+      0.92
+     ],
+     "end": 2.47,
+     "front": [
+      2.4,
+      2.47
+     ],
+     "hand_peak": 2.4,
+     "start": 2.17,
+     "swipe": "thrust",
+     "tip_speed": 6.01
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.63,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.8,
+   "root_motion": false,
+   "seen": "ok (side view): low spinning cuts",
+   "source": "AS_DualSwordAnimV1_Attack10_IP.FBX",
+   "swipe": "D",
+   "windup": 0.0
+  },
+  "dw_thrust": {
+   "contact": 0.33,
+   "frames": 30,
+   "hip_travel": 0.14,
+   "hits": [
+    {
+     "at": [
+      0.44,
+      1.16,
+      1.21
+     ],
+     "contact": 0.33,
+     "dir": [
+      -0.37,
+      0.3,
+      0.88
+     ],
+     "end": 0.4,
+     "front": [
+      0.33,
+      0.4
+     ],
+     "hand_peak": 0.33,
+     "start": 0.07,
+     "swipe": "thrust",
+     "tip_speed": 4.89
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      0.46,
+      0.53,
+      0.77
+     ],
+     "contact": 0.1,
+     "dir": [
+      0.48,
+      0.7,
+      -0.53
+     ],
+     "end": 0.23,
+     "front": [
+      0.07,
+      0.1
+     ],
+     "hand_peak": 0.1,
+     "start": 0.03,
+     "swipe": "UR",
+     "tip_speed": 17.79
+    },
+    {
+     "at": [
+      0.29,
+      1.74,
+      0.64
+     ],
+     "contact": 0.6,
+     "dir": [
+      0.15,
+      -0.81,
+      0.56
+     ],
+     "end": 0.73,
+     "front": [
+      0.6,
+      0.67
+     ],
+     "hand_peak": 0.57,
+     "start": 0.3,
+     "swipe": "D",
+     "tip_speed": 10.01
+    }
+   ],
+   "kind": "attack",
+   "length": 1.0,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.6,
+   "root_motion": false,
+   "seen": "plausible: both blades drawn in then driven forward; hard to read from the front",
+   "source": "AS_DualSwordAnimV1_Attack10_Stage2_Complete_IP.FBX",
+   "swipe": "thrust",
+   "windup": 0.07
+  },
+  "dw_walk_f": {
+   "frames": 28,
+   "hip_travel": 0.02,
+   "kind": "move",
+   "length": 0.93,
+   "loop": true,
+   "pack": "dw",
+   "root_motion": false,
+   "seen": "ok: walks forward with both blades",
+   "source": "AS_DualSwordAnimV1_Walk_Fw_Loopable_IP.FBX"
+  },
+  "dw_x": {
+   "contact": 1.1,
+   "frames": 69,
+   "hip_travel": 0.16,
+   "hits": [
+    {
+     "at": [
+      -0.24,
+      1.02,
+      1.39
+     ],
+     "contact": 1.1,
+     "dir": [
+      -0.71,
+      -0.68,
+      -0.18
+     ],
+     "end": 1.23,
+     "front": [
+      1.03,
+      1.13
+     ],
+     "hand_peak": 1.1,
+     "start": 0.63,
+     "swipe": "DL",
+     "tip_speed": 21.63
+    },
+    {
+     "at": [
+      0.4,
+      1.71,
+      1.13
+     ],
+     "contact": 1.77,
+     "dir": [
+      0.72,
+      0.68,
+      -0.13
+     ],
+     "end": 2.0,
+     "front": [
+      1.57,
+      1.77
+     ],
+     "hand_peak": 1.1,
+     "start": 1.23,
+     "swipe": "UR",
+     "tip_speed": 11.93
+    },
+    {
+     "at": [
+      0.37,
+      1.57,
+      0.83
+     ],
+     "contact": 2.03,
+     "dir": [
+      0.6,
+      -0.77,
+      -0.19
+     ],
+     "end": 2.27,
+     "front": [
+      2.0,
+      2.1
+     ],
+     "hand_peak": 1.1,
+     "start": 2.0,
+     "swipe": "DR",
+     "tip_speed": 10.03
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.3,
+   "loop": false,
+   "pack": "dw",
+   "recovery": 0.03,
+   "root_motion": false,
+   "seen": "ok: turn with the back to the viewer, then crossing cuts",
+   "source": "AS_DualSwordAnimV1_Attack6_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.63
+  },
+  "ss_block": {
+   "frames": 23,
+   "hip_travel": 0.04,
+   "kind": "block",
+   "length": 0.77,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "seen": "ok: shield raised in front of chest and face, then lowered",
+   "source": "A_SwordSwordAnimV3_Block1_IP.FBX"
+  },
+  "ss_block2": {
+   "frames": 23,
+   "hip_travel": 0.01,
+   "kind": "block",
+   "length": 0.77,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "seen": "ok: looks the same height as ss_block from front and side; no visible high/mid difference",
+   "source": "A_SwordSwordAnimV3_Block2_IP.FBX"
+  },
+  "ss_block2_hit": {
+   "frames": 18,
+   "hip_travel": 0.26,
+   "kind": "block_hit",
+   "length": 0.6,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Block2_Hit_RM.FBX"
+  },
+  "ss_block2_idle": {
+   "frames": 30,
+   "hip_travel": 0.0,
+   "kind": "block",
+   "length": 1.0,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Block2_Idle_IP.FBX"
+  },
+  "ss_block_hit": {
+   "frames": 18,
+   "hip_travel": 0.28,
+   "kind": "block_hit",
+   "length": 0.6,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "ok: shield held, body rocks back",
+   "source": "A_SwordSwordAnimV3_Block1_Hit_RM.FBX"
+  },
+  "ss_block_idle": {
+   "frames": 30,
+   "hip_travel": 0.0,
+   "kind": "block",
+   "length": 1.0,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Block1_Idle_IP.FBX"
+  },
+  "ss_c1_1": {
+   "chain": "ss_c1",
+   "contact": 0.73,
+   "frames": 68,
+   "hip_travel": 0.24,
+   "hits": [
+    {
+     "at": [
+      0.72,
+      1.7,
+      1.05
+     ],
+     "contact": 0.73,
+     "dir": [
+      -0.94,
+      -0.17,
+      -0.31
+     ],
+     "end": 1.1,
+     "front": [
+      0.73,
+      0.83
+     ],
+     "hand_peak": 0.8,
+     "start": 0.53,
+     "swipe": "L",
+     "tip_speed": 26.47
+    },
+    {
+     "at": [
+      0.37,
+      1.6,
+      1.18
+     ],
+     "contact": 1.4,
+     "dir": [
+      -0.71,
+      -0.64,
+      -0.3
+     ],
+     "end": 1.73,
+     "front": [
+      1.4,
+      1.47
+     ],
+     "hand_peak": 1.37,
+     "start": 1.2,
+     "swipe": "DL",
+     "tip_speed": 28.22
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.57,
+      1.1,
+      0.87
+     ],
+     "contact": 0.7,
+     "dir": [
+      -0.91,
+      -0.3,
+      -0.29
+     ],
+     "end": 1.8,
+     "front": [
+      0.6,
+      0.7
+     ],
+     "hand_peak": 0.8,
+     "start": 0.43,
+     "swipe": "L",
+     "tip_speed": 12.91
+    },
+    {
+     "at": [
+      -0.59,
+      1.67,
+      0.99
+     ],
+     "contact": 2.0,
+     "dir": [
+      -0.48,
+      -0.31,
+      -0.82
+     ],
+     "end": 2.27,
+     "front": [
+      2.0,
+      2.03
+     ],
+     "hand_peak": 2.03,
+     "start": 1.87,
+     "swipe": "DL",
+     "tip_speed": 13.72
+    }
+   ],
+   "kind": "combo",
+   "length": 2.27,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.54,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack1_Stage1_IP.FBX",
+   "stage": 1.0,
+   "swipe": "L",
+   "windup": 0.53
+  },
+  "ss_c1_2": {
+   "chain": "ss_c1",
+   "frames": 21,
+   "hip_travel": 0.32,
+   "hits_left": [
+    {
+     "at": [
+      -0.67,
+      1.37,
+      0.6
+     ],
+     "contact": 0.43,
+     "dir": [
+      0.82,
+      0.56,
+      0.14
+     ],
+     "end": 0.57,
+     "front": [
+      0.43,
+      0.5
+     ],
+     "hand_peak": 0.43,
+     "start": 0.17,
+     "swipe": "UR",
+     "tip_speed": 15.21
+    }
+   ],
+   "kind": "combo",
+   "length": 0.7,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack1_Stage2_IP.FBX",
+   "stage": 2.0
+  },
+  "ss_c1_3": {
+   "chain": "ss_c1",
+   "contact": 0.7,
+   "frames": 43,
+   "hip_travel": 0.2,
+   "hits": [
+    {
+     "at": [
+      0.79,
+      1.7,
+      0.66
+     ],
+     "contact": 0.7,
+     "dir": [
+      0.78,
+      -0.02,
+      -0.62
+     ],
+     "end": 0.87,
+     "front": [
+      0.67,
+      0.7
+     ],
+     "hand_peak": 0.7,
+     "start": 0.5,
+     "swipe": "R",
+     "tip_speed": 23.34
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.66,
+      1.35,
+      0.69
+     ],
+     "contact": 0.63,
+     "dir": [
+      0.74,
+      0.64,
+      0.18
+     ],
+     "end": 0.83,
+     "front": [
+      0.63,
+      0.7
+     ],
+     "hand_peak": 0.67,
+     "start": 0.03,
+     "swipe": "UR",
+     "tip_speed": 10.78
+    }
+   ],
+   "kind": "combo",
+   "length": 1.43,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.56,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack1_Stage3_IP.FBX",
+   "stage": 3.0,
+   "swipe": "R",
+   "windup": 0.5
+  },
+  "ss_c4_1": {
+   "chain": "ss_c4",
+   "contact": 0.43,
+   "frames": 18,
+   "hip_travel": 0.14,
+   "hits": [
+    {
+     "at": [
+      0.9,
+      1.62,
+      0.89
+     ],
+     "contact": 0.43,
+     "dir": [
+      -0.66,
+      -0.75,
+      -0.01
+     ],
+     "end": 0.6,
+     "front": [
+      0.43,
+      0.57
+     ],
+     "hand_peak": 0.47,
+     "start": 0.43,
+     "swipe": "DL",
+     "tip_speed": 21.75
+    }
+   ],
+   "kind": "combo",
+   "length": 0.6,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.0,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack4_Stage1_IP.FBX",
+   "stage": 1.0,
+   "swipe": "DL",
+   "windup": 0.43
+  },
+  "ss_c4_2": {
+   "chain": "ss_c4",
+   "contact": 0.4,
+   "frames": 35,
+   "hip_travel": 0.32,
+   "hits": [
+    {
+     "at": [
+      1.34,
+      1.29,
+      0.6
+     ],
+     "contact": 0.4,
+     "dir": [
+      0.81,
+      -0.14,
+      -0.56
+     ],
+     "end": 0.53,
+     "front": [
+      0.3,
+      0.4
+     ],
+     "hand_peak": 0.43,
+     "start": 0.3,
+     "swipe": "R",
+     "tip_speed": 19.84
+    },
+    {
+     "at": [
+      -0.05,
+      1.47,
+      1.24
+     ],
+     "contact": 1.1,
+     "dir": [
+      0.79,
+      -0.39,
+      -0.48
+     ],
+     "end": 1.17,
+     "front": [
+      1.1,
+      1.13
+     ],
+     "hand_peak": 1.1,
+     "start": 0.9,
+     "swipe": "DR",
+     "tip_speed": 27.26
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      0.03,
+      1.51,
+      0.94
+     ],
+     "contact": 0.33,
+     "dir": [
+      0.95,
+      0.27,
+      -0.16
+     ],
+     "end": 0.7,
+     "front": [
+      0.3,
+      0.37
+     ],
+     "hand_peak": 0.33,
+     "start": 0.2,
+     "swipe": "R",
+     "tip_speed": 12.11
+    }
+   ],
+   "kind": "combo",
+   "length": 1.17,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.0,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack4_Stage2_IP.FBX",
+   "stage": 2.0,
+   "swipe": "R",
+   "windup": 0.3
+  },
+  "ss_c4_3": {
+   "chain": "ss_c4",
+   "frames": 20,
+   "hip_travel": 0.24,
+   "hits_left": [
+    {
+     "at": [
+      0.93,
+      1.43,
+      0.7
+     ],
+     "contact": 0.5,
+     "dir": [
+      -0.93,
+      0.37,
+      -0.08
+     ],
+     "end": 0.67,
+     "front": [
+      0.5,
+      0.53
+     ],
+     "hand_peak": 0.53,
+     "start": 0.4,
+     "swipe": "L",
+     "tip_speed": 21.81
+    }
+   ],
+   "kind": "combo",
+   "length": 0.67,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack4_Stage3_IP.FBX",
+   "stage": 3.0
+  },
+  "ss_c4_4": {
+   "chain": "ss_c4",
+   "contact": 0.67,
+   "frames": 70,
+   "hip_travel": 0.17,
+   "hits": [
+    {
+     "at": [
+      0.09,
+      1.1,
+      1.45
+     ],
+     "contact": 0.67,
+     "dir": [
+      -0.26,
+      0.27,
+      0.93
+     ],
+     "end": 0.8,
+     "front": [
+      0.67,
+      0.8
+     ],
+     "hand_peak": 0.67,
+     "start": 0.4,
+     "swipe": "thrust",
+     "tip_speed": 4.28
+    }
+   ],
+   "kind": "combo",
+   "length": 2.33,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.53,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack4_Stage4_IP.FBX",
+   "stage": 4.0,
+   "swipe": "thrust",
+   "windup": 0.4
+  },
+  "ss_c7_1": {
+   "chain": "ss_c7",
+   "contact": 1.17,
+   "frames": 45,
+   "hip_travel": 0.24,
+   "hits": [
+    {
+     "at": [
+      -0.29,
+      1.61,
+      1.37
+     ],
+     "contact": 1.17,
+     "dir": [
+      0.78,
+      -0.4,
+      -0.49
+     ],
+     "end": 1.33,
+     "front": [
+      1.17,
+      1.23
+     ],
+     "hand_peak": 1.17,
+     "start": 1.0,
+     "swipe": "DR",
+     "tip_speed": 25.04
+    }
+   ],
+   "kind": "combo",
+   "length": 1.5,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.17,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack7_Stage1_IP.FBX",
+   "stage": 1.0,
+   "swipe": "DR",
+   "windup": 1.0
+  },
+  "ss_c7_2": {
+   "chain": "ss_c7",
+   "frames": 14,
+   "hip_travel": 0.12,
+   "kind": "combo",
+   "length": 0.47,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack7_Stage2_IP.FBX",
+   "stage": 2.0
+  },
+  "ss_c7_3": {
+   "chain": "ss_c7",
+   "contact": 0.3,
+   "frames": 70,
+   "hip_travel": 0.28,
+   "hits": [
+    {
+     "at": [
+      0.17,
+      1.37,
+      0.67
+     ],
+     "contact": 0.3,
+     "dir": [
+      -0.52,
+      -0.84,
+      0.14
+     ],
+     "end": 0.43,
+     "front": [
+      0.3,
+      0.37
+     ],
+     "hand_peak": 0.3,
+     "start": 0.0,
+     "swipe": "DL",
+     "tip_speed": 14.03
+    }
+   ],
+   "kind": "combo",
+   "length": 2.33,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.9,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack7_Stage3_IP.FBX",
+   "stage": 3.0,
+   "swipe": "DL",
+   "windup": 0.0
+  },
+  "ss_c8_1": {
+   "chain": "ss_c8",
+   "contact": 0.87,
+   "frames": 40,
+   "hip_travel": 0.13,
+   "hits": [
+    {
+     "at": [
+      0.8,
+      1.51,
+      0.89
+     ],
+     "contact": 0.87,
+     "dir": [
+      -0.93,
+      0.3,
+      -0.21
+     ],
+     "end": 1.13,
+     "front": [
+      0.87,
+      0.97
+     ],
+     "hand_peak": 1.2,
+     "start": 0.47,
+     "swipe": "L",
+     "tip_speed": 19.72
+    },
+    {
+     "at": [
+      0.33,
+      1.39,
+      1.28
+     ],
+     "contact": 1.17,
+     "dir": [
+      -0.84,
+      -0.52,
+      -0.14
+     ],
+     "end": 1.33,
+     "front": [
+      1.13,
+      1.23
+     ],
+     "hand_peak": 1.2,
+     "start": 1.13,
+     "swipe": "DL",
+     "tip_speed": 21.33
+    }
+   ],
+   "kind": "combo",
+   "length": 1.33,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.0,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack8_Stage1_IP.FBX",
+   "stage": 1.0,
+   "swipe": "L",
+   "windup": 0.47
+  },
+  "ss_c8_2": {
+   "chain": "ss_c8",
+   "contact": 0.53,
+   "frames": 21,
+   "hip_travel": 0.23,
+   "hits": [
+    {
+     "at": [
+      1.2,
+      0.94,
+      0.77
+     ],
+     "contact": 0.53,
+     "dir": [
+      0.85,
+      -0.25,
+      -0.46
+     ],
+     "end": 0.7,
+     "front": [
+      0.4,
+      0.53
+     ],
+     "hand_peak": 0.53,
+     "start": 0.23,
+     "swipe": "R",
+     "tip_speed": 17.64
+    }
+   ],
+   "kind": "combo",
+   "length": 0.7,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.0,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack8_Stage2_IP.FBX",
+   "stage": 2.0,
+   "swipe": "R",
+   "windup": 0.23
+  },
+  "ss_c8_3": {
+   "chain": "ss_c8",
+   "contact": 0.5,
+   "frames": 57,
+   "hip_travel": 0.26,
+   "hits": [
+    {
+     "at": [
+      0.12,
+      1.19,
+      1.43
+     ],
+     "contact": 0.5,
+     "dir": [
+      -0.8,
+      -0.59,
+      -0.13
+     ],
+     "end": 0.7,
+     "front": [
+      0.43,
+      0.57
+     ],
+     "hand_peak": 0.5,
+     "start": 0.13,
+     "swipe": "DL",
+     "tip_speed": 19.78
+    }
+   ],
+   "kind": "combo",
+   "length": 1.9,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.2,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack8_Stage3_IP.FBX",
+   "stage": 3.0,
+   "swipe": "DL",
+   "windup": 0.13
+  },
+  "ss_cut_d": {
+   "contact": 0.37,
+   "frames": 29,
+   "hip_travel": 0.13,
+   "hits": [
+    {
+     "at": [
+      0.64,
+      0.96,
+      1.27
+     ],
+     "contact": 0.37,
+     "dir": [
+      -0.57,
+      -0.82,
+      0.01
+     ],
+     "end": 0.5,
+     "front": [
+      0.1,
+      0.47
+     ],
+     "hand_peak": 0.37,
+     "start": 0.0,
+     "swipe": "DL",
+     "tip_speed": 24.48
+    }
+   ],
+   "kind": "attack",
+   "length": 0.97,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.47,
+   "root_motion": false,
+   "seen": "ok: overhead chop ending low on the left; the best 'down' in the pack",
+   "source": "A_SwordSwordAnimV3_Attack4_Stage1_Complete_IP.FBX",
+   "swipe": "DL",
+   "use_for": "D",
+   "windup": 0.0
+  },
+  "ss_cut_dl": {
+   "contact": 0.83,
+   "frames": 67,
+   "hip_travel": 0.17,
+   "hits": [
+    {
+     "at": [
+      0.22,
+      1.19,
+      1.44
+     ],
+     "contact": 0.83,
+     "dir": [
+      -0.8,
+      -0.59,
+      -0.13
+     ],
+     "end": 1.03,
+     "front": [
+      0.77,
+      0.9
+     ],
+     "hand_peak": 0.83,
+     "start": 0.47,
+     "swipe": "DL",
+     "tip_speed": 19.78
+    }
+   ],
+   "kind": "attack",
+   "length": 2.23,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.2,
+   "root_motion": false,
+   "seen": "ok: from the right shoulder down to the left; starts from a mid-chain pose",
+   "source": "A_SwordSwordAnimV3_Attack8_Stage3_Complete_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.47
+  },
+  "ss_cut_dr": {
+   "contact": 1.17,
+   "frames": 53,
+   "hip_travel": 0.24,
+   "hits": [
+    {
+     "at": [
+      -0.29,
+      1.61,
+      1.37
+     ],
+     "contact": 1.17,
+     "dir": [
+      0.78,
+      -0.4,
+      -0.49
+     ],
+     "end": 1.33,
+     "front": [
+      1.17,
+      1.23
+     ],
+     "hand_peak": 1.17,
+     "start": 1.0,
+     "swipe": "DR",
+     "tip_speed": 25.03
+    }
+   ],
+   "kind": "attack",
+   "length": 1.77,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.44,
+   "root_motion": false,
+   "seen": "ok: back turned in the wind-up, then high left to low right",
+   "source": "A_SwordSwordAnimV3_Attack7_Stage1_Complete_IP.FBX",
+   "swipe": "DR",
+   "windup": 1.0
+  },
+  "ss_cut_dr2": {
+   "contact": 0.7,
+   "frames": 45,
+   "hip_travel": 0.12,
+   "hits": [
+    {
+     "at": [
+      -0.66,
+      1.63,
+      0.97
+     ],
+     "contact": 0.7,
+     "dir": [
+      0.86,
+      -0.37,
+      -0.34
+     ],
+     "end": 1.03,
+     "front": [
+      0.7,
+      0.83
+     ],
+     "hand_peak": 0.8,
+     "start": 0.5,
+     "swipe": "DR",
+     "tip_speed": 16.09
+    }
+   ],
+   "kind": "attack",
+   "length": 1.5,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.47,
+   "root_motion": false,
+   "seen": "ok: high left to low right; starts from a mid-chain pose",
+   "source": "A_SwordSwordAnimV3_Attack8_Stage2_Complete_IP.FBX",
+   "swipe": "DR",
+   "windup": 0.5
+  },
+  "ss_cut_l": {
+   "contact": 0.53,
+   "frames": 76,
+   "hip_travel": 0.16,
+   "hits": [
+    {
+     "at": [
+      1.12,
+      0.89,
+      0.8
+     ],
+     "contact": 0.53,
+     "dir": [
+      -0.25,
+      -0.03,
+      -0.97
+     ],
+     "end": 0.87,
+     "front": [
+      0.53,
+      0.87
+     ],
+     "hand_peak": 0.53,
+     "start": 0.17,
+     "swipe": "L",
+     "tip_speed": 25.37
+    },
+    {
+     "at": [
+      0.24,
+      1.21,
+      1.27
+     ],
+     "contact": 1.33,
+     "dir": [
+      0.16,
+      -0.15,
+      0.98
+     ],
+     "end": 1.43,
+     "front": [
+      1.33,
+      1.43
+     ],
+     "hand_peak": 1.33,
+     "start": 1.03,
+     "swipe": "thrust",
+     "tip_speed": 4.65
+    }
+   ],
+   "kind": "attack",
+   "length": 2.53,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.1,
+   "root_motion": false,
+   "seen": "ok: cut right to left, dropping from shoulder to hip height",
+   "source": "A_SwordSwordAnimV3_Attack9_IP.FBX",
+   "swipe": "L",
+   "windup": 0.17
+  },
+  "ss_cut_r": {
+   "contact": 0.6,
+   "frames": 49,
+   "hip_travel": 0.23,
+   "hits": [
+    {
+     "at": [
+      -0.81,
+      1.46,
+      1.07
+     ],
+     "contact": 0.6,
+     "dir": [
+      0.93,
+      -0.04,
+      -0.36
+     ],
+     "end": 0.73,
+     "front": [
+      0.6,
+      0.67
+     ],
+     "hand_peak": 0.63,
+     "start": 0.43,
+     "swipe": "R",
+     "tip_speed": 28.53
+    }
+   ],
+   "kind": "attack",
+   "length": 1.63,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.9,
+   "root_motion": false,
+   "seen": "ok: spin with the back turned in the wind-up, then a level cut left to right",
+   "source": "A_SwordSwordAnimV3_Attack2_Stage2_Complete_IP.FBX",
+   "swipe": "R",
+   "windup": 0.43
+  },
+  "ss_cut_r2": {
+   "contact": 1.07,
+   "frames": 70,
+   "hip_travel": 0.14,
+   "hits": [
+    {
+     "at": [
+      0.76,
+      1.22,
+      0.99
+     ],
+     "contact": 1.07,
+     "dir": [
+      0.94,
+      -0.27,
+      -0.23
+     ],
+     "end": 1.3,
+     "front": [
+      1.0,
+      1.07
+     ],
+     "hand_peak": 1.17,
+     "start": 0.87,
+     "swipe": "R",
+     "tip_speed": 20.44
+    }
+   ],
+   "kind": "attack",
+   "length": 2.33,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.03,
+   "root_motion": false,
+   "seen": "ok: level cut left to right, then a turn behind the shield",
+   "source": "A_SwordSwordAnimV3_Attack5_IP.FBX",
+   "swipe": "R",
+   "windup": 0.87
+  },
+  "ss_cut_r_high": {
+   "contact": 0.83,
+   "frames": 47,
+   "hip_travel": 0.14,
+   "hits": [
+    {
+     "at": [
+      0.89,
+      1.7,
+      0.75
+     ],
+     "contact": 0.83,
+     "dir": [
+      0.78,
+      -0.02,
+      -0.62
+     ],
+     "end": 1.0,
+     "front": [
+      0.8,
+      0.83
+     ],
+     "hand_peak": 0.83,
+     "start": 0.63,
+     "swipe": "R",
+     "tip_speed": 23.33
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.76,
+      1.08,
+      0.63
+     ],
+     "contact": 0.73,
+     "dir": [
+      0.68,
+      0.69,
+      0.25
+     ],
+     "end": 0.97,
+     "front": [
+      0.73,
+      0.83
+     ],
+     "hand_peak": 0.8,
+     "start": 0.3,
+     "swipe": "UR",
+     "tip_speed": 10.89
+    }
+   ],
+   "kind": "attack",
+   "length": 1.57,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.57,
+   "root_motion": false,
+   "seen": "ok: high cut left to right",
+   "source": "A_SwordSwordAnimV3_Attack1_Stage3_Complete_IP.FBX",
+   "swipe": "R",
+   "windup": 0.63
+  },
+  "ss_dash_b": {
+   "frames": 25,
+   "hip_travel": 4.17,
+   "kind": "dodge",
+   "length": 0.83,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Dash_Bw_RM.FBX"
+  },
+  "ss_dash_l": {
+   "frames": 25,
+   "hip_travel": 3.9,
+   "kind": "dodge",
+   "length": 0.83,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Dash_L_RM.FBX"
+  },
+  "ss_dash_r": {
+   "frames": 25,
+   "hip_travel": 4.82,
+   "kind": "dodge",
+   "length": 0.83,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "seen only leaving the frame to the right",
+   "source": "A_SwordSwordAnimV3_Dash_R_RM.FBX"
+  },
+  "ss_death_b": {
+   "frames": 27,
+   "hip_travel": 3.87,
+   "kind": "death",
+   "length": 0.9,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "seen only leaving the frame backward",
+   "source": "A_SwordSwordAnimV3_Death_Bw_RM.FBX"
+  },
+  "ss_death_f": {
+   "frames": 25,
+   "hip_travel": 2.19,
+   "kind": "death",
+   "length": 0.83,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "ok: pitches forward to the floor",
+   "source": "A_SwordSwordAnimV3_Death_Fw_RM.FBX"
+  },
+  "ss_death_l": {
+   "frames": 23,
+   "hip_travel": 2.26,
+   "kind": "death",
+   "length": 0.77,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Death_L_RM.FBX"
+  },
+  "ss_death_r": {
+   "frames": 18,
+   "hip_travel": 0.65,
+   "kind": "death",
+   "length": 0.6,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Death_R_RM.FBX"
+  },
+  "ss_dodge_b": {
+   "frames": 18,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.6,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "ok: hop back",
+   "source": "A_SwordSwordAnimV3_Dodge_Bw_RM.FBX"
+  },
+  "ss_dodge_l": {
+   "frames": 18,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.6,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "ok: hop to the fighter's left",
+   "source": "A_SwordSwordAnimV3_Dodge_L_RM.FBX"
+  },
+  "ss_dodge_r": {
+   "frames": 18,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.6,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Dodge_R_RM.FBX"
+  },
+  "ss_fin_cleave": {
+   "contact": 0.47,
+   "frames": 75,
+   "hip_travel": 0.21,
+   "hits": [
+    {
+     "at": [
+      0.26,
+      1.37,
+      0.76
+     ],
+     "contact": 0.47,
+     "dir": [
+      -0.52,
+      -0.84,
+      0.14
+     ],
+     "end": 0.6,
+     "front": [
+      0.47,
+      0.53
+     ],
+     "hand_peak": 0.47,
+     "start": 0.07,
+     "swipe": "DL",
+     "tip_speed": 13.91
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.5,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.9,
+   "root_motion": false,
+   "seen": "ok: chop from high right down to the front",
+   "source": "A_SwordSwordAnimV3_Attack7_Stage3_Complete_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.07
+  },
+  "ss_fin_double": {
+   "contact": 0.57,
+   "frames": 58,
+   "hip_travel": 0.22,
+   "hits": [
+    {
+     "at": [
+      1.27,
+      1.29,
+      0.7
+     ],
+     "contact": 0.57,
+     "dir": [
+      0.9,
+      -0.08,
+      -0.43
+     ],
+     "end": 0.7,
+     "front": [
+      0.43,
+      0.57
+     ],
+     "hand_peak": 0.6,
+     "start": 0.43,
+     "swipe": "R",
+     "tip_speed": 19.95
+    },
+    {
+     "at": [
+      -0.31,
+      1.53,
+      1.28
+     ],
+     "contact": 1.27,
+     "dir": [
+      0.88,
+      -0.46,
+      -0.08
+     ],
+     "end": 1.43,
+     "front": [
+      1.23,
+      1.3
+     ],
+     "hand_peak": 1.27,
+     "start": 1.07,
+     "swipe": "DR",
+     "tip_speed": 25.95
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.03,
+      1.51,
+      1.03
+     ],
+     "contact": 0.5,
+     "dir": [
+      0.97,
+      0.22,
+      -0.07
+     ],
+     "end": 0.87,
+     "front": [
+      0.43,
+      0.57
+     ],
+     "hand_peak": 0.5,
+     "start": 0.37,
+     "swipe": "R",
+     "tip_speed": 12.07
+    }
+   ],
+   "kind": "finisher",
+   "length": 1.93,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.5,
+   "root_motion": false,
+   "seen": "ok: level cut left to right, a turn, then a second cut",
+   "source": "A_SwordSwordAnimV3_Attack4_Stage2_Complete_IP.FBX",
+   "swipe": "R",
+   "windup": 0.43
+  },
+  "ss_fin_lunge": {
+   "contact": 0.67,
+   "frames": 69,
+   "hip_travel": 0.19,
+   "hits": [
+    {
+     "at": [
+      0.15,
+      1.1,
+      1.49
+     ],
+     "contact": 0.67,
+     "dir": [
+      -0.25,
+      0.26,
+      0.93
+     ],
+     "end": 0.8,
+     "front": [
+      0.67,
+      0.8
+     ],
+     "hand_peak": 0.67,
+     "start": 0.43,
+     "swipe": "thrust",
+     "tip_speed": 4.29
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.3,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.5,
+   "root_motion": false,
+   "seen": "plausible: shield in front, then the point driven low at the viewer",
+   "source": "A_SwordSwordAnimV3_Attack4_Stage4_Complete_IP.FBX",
+   "swipe": "thrust",
+   "windup": 0.43
+  },
+  "ss_fin_spin": {
+   "contact": 1.47,
+   "frames": 75,
+   "hip_travel": 0.23,
+   "hits": [
+    {
+     "at": [
+      -0.81,
+      1.46,
+      1.07
+     ],
+     "contact": 1.47,
+     "dir": [
+      0.93,
+      -0.04,
+      -0.36
+     ],
+     "end": 1.6,
+     "front": [
+      1.47,
+      1.53
+     ],
+     "hand_peak": 1.5,
+     "start": 1.3,
+     "swipe": "R",
+     "tip_speed": 28.52
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.5,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.9,
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack2_IP.FBX",
+   "swipe": "R",
+   "windup": 1.3
+  },
+  "ss_hit_b": {
+   "frames": 40,
+   "hip_travel": 1.77,
+   "kind": "hit",
+   "length": 1.33,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Hit_Bw_RM.FBX"
+  },
+  "ss_hit_f": {
+   "frames": 40,
+   "hip_travel": 1.72,
+   "kind": "hit",
+   "length": 1.33,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "ok: knocked back; travels about 1.8 m if the clip's travel is applied",
+   "source": "A_SwordSwordAnimV3_Hit_Fw_RM.FBX"
+  },
+  "ss_hit_l": {
+   "frames": 40,
+   "hip_travel": 1.78,
+   "kind": "hit",
+   "length": 1.33,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "ok: knocked to the fighter's right",
+   "source": "A_SwordSwordAnimV3_Hit_L_RM.FBX"
+  },
+  "ss_hit_r": {
+   "frames": 40,
+   "hip_travel": 1.77,
+   "kind": "hit",
+   "length": 1.33,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "source": "A_SwordSwordAnimV3_Hit_R_RM.FBX"
+  },
+  "ss_idle": {
+   "frames": 40,
+   "hip_travel": 0.01,
+   "kind": "idle",
+   "length": 1.33,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Idle1_IP.FBX"
+  },
+  "ss_idle2": {
+   "frames": 30,
+   "hip_travel": 0.0,
+   "kind": "idle",
+   "length": 1.0,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Idle2_IP.FBX"
+  },
+  "ss_parry": {
+   "frames": 24,
+   "hip_travel": 0.01,
+   "kind": "parry",
+   "length": 0.8,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": true,
+   "seen": "ok: shield swept out to the fighter's left, opening the guard",
+   "source": "A_SwordSwordAnimV3_Block1_Parry_RM.FBX"
+  },
+  "ss_run_f": {
+   "frames": 19,
+   "hip_travel": 0.05,
+   "kind": "move",
+   "length": 0.63,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Run_Fw_Loopable_IP.FBX"
+  },
+  "ss_sheath": {
+   "frames": 28,
+   "hip_travel": 0.01,
+   "kind": "equip",
+   "length": 0.93,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Sheath_IP.FBX"
+  },
+  "ss_shield_bash": {
+   "frames": 41,
+   "hip_travel": 0.17,
+   "hits_left": [
+    {
+     "at": [
+      -0.89,
+      1.37,
+      0.7
+     ],
+     "contact": 0.57,
+     "dir": [
+      0.82,
+      0.55,
+      0.14
+     ],
+     "end": 0.7,
+     "front": [
+      0.57,
+      0.63
+     ],
+     "hand_peak": 0.57,
+     "start": 0.1,
+     "swipe": "UR",
+     "tip_speed": 15.43
+    }
+   ],
+   "kind": "shield_attack",
+   "length": 1.37,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack1_Stage2_Complete_IP.FBX"
+  },
+  "ss_shield_bash2": {
+   "contact": 0.63,
+   "frames": 64,
+   "hip_travel": 0.2,
+   "hits": [
+    {
+     "at": [
+      0.35,
+      1.24,
+      0.64
+     ],
+     "contact": 0.63,
+     "dir": [
+      0.78,
+      0.21,
+      -0.59
+     ],
+     "end": 1.03,
+     "front": [
+      0.57,
+      0.63
+     ],
+     "hand_peak": 0.6,
+     "start": 0.07,
+     "swipe": "R",
+     "tip_speed": 13.66
+    }
+   ],
+   "kind": "shield_attack",
+   "length": 2.13,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.1,
+   "root_motion": false,
+   "seen": "unclear: reads as a shove with the shield plus a small sword movement (seen in an early capture only)",
+   "source": "A_SwordSwordAnimV3_Attack10_IP.FBX",
+   "swipe": "R",
+   "windup": 0.07
+  },
+  "ss_shield_swipe": {
+   "frames": 53,
+   "hip_travel": 0.15,
+   "hits_left": [
+    {
+     "at": [
+      0.07,
+      1.88,
+      1.05
+     ],
+     "contact": 1.07,
+     "dir": [
+      -0.9,
+      -0.37,
+      -0.23
+     ],
+     "end": 1.2,
+     "front": [
+      1.07,
+      1.13
+     ],
+     "hand_peak": 1.1,
+     "start": 0.9,
+     "swipe": "L",
+     "tip_speed": 12.27
+    }
+   ],
+   "kind": "shield_attack",
+   "length": 1.77,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Attack3_Stage1_Complete_IP.FBX"
+  },
+  "ss_spin_l": {
+   "contact": 0.73,
+   "frames": 34,
+   "hip_travel": 0.19,
+   "hits": [
+    {
+     "at": [
+      0.72,
+      1.7,
+      1.05
+     ],
+     "contact": 0.73,
+     "dir": [
+      -0.94,
+      -0.17,
+      -0.31
+     ],
+     "end": 1.1,
+     "front": [
+      0.73,
+      0.83
+     ],
+     "hand_peak": 0.8,
+     "start": 0.53,
+     "swipe": "L",
+     "tip_speed": 26.47
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.57,
+      1.1,
+      0.87
+     ],
+     "contact": 0.7,
+     "dir": [
+      -0.91,
+      -0.3,
+      -0.29
+     ],
+     "end": 1.15,
+     "front": [
+      0.6,
+      0.7
+     ],
+     "hand_peak": 0.8,
+     "start": 0.43,
+     "swipe": "L",
+     "tip_speed": 12.91
+    }
+   ],
+   "kind": "attack",
+   "length": 1.15,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.05,
+   "root_motion": false,
+   "seen": "ok but showy: spin, then a cut from high right to low left; ends mid-chain with the back turned (trimmed clip)",
+   "source": "A_SwordSwordAnimV3_Attack1_Stage1_IP.FBX",
+   "source_range": [
+    0.0,
+    1.15
+   ],
+   "swipe": "L",
+   "windup": 0.53
+  },
+  "ss_thrust": {
+   "contact": 0.33,
+   "frames": 70,
+   "hip_travel": 0.17,
+   "hits": [
+    {
+     "at": [
+      0.32,
+      0.97,
+      1.42
+     ],
+     "contact": 0.33,
+     "dir": [
+      -0.37,
+      0.28,
+      0.89
+     ],
+     "end": 0.43,
+     "front": [
+      0.33,
+      0.43
+     ],
+     "hand_peak": 0.33,
+     "start": 0.0,
+     "swipe": "thrust",
+     "tip_speed": 4.06
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.22,
+      1.08,
+      0.93
+     ],
+     "contact": 0.27,
+     "dir": [
+      -0.89,
+      -0.05,
+      -0.45
+     ],
+     "end": 0.47,
+     "front": [
+      0.23,
+      0.3
+     ],
+     "hand_peak": 0.27,
+     "start": 0.17,
+     "swipe": "L",
+     "tip_speed": 10.98
+    }
+   ],
+   "kind": "attack",
+   "length": 2.33,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 1.9,
+   "root_motion": false,
+   "seen": "plausible: crouching lunge with the point toward the viewer; hard to read from the front",
+   "source": "A_SwordSwordAnimV3_Attack6_Stage3_Complete_IP.FBX",
+   "swipe": "thrust",
+   "windup": 0.0
+  },
+  "ss_thrust2": {
+   "contact": 0.37,
+   "frames": 34,
+   "hip_travel": 0.14,
+   "hits": [
+    {
+     "at": [
+      0.0,
+      1.04,
+      1.3
+     ],
+     "contact": 0.37,
+     "dir": [
+      -0.53,
+      0.41,
+      0.74
+     ],
+     "end": 0.57,
+     "front": [
+      0.37,
+      0.57
+     ],
+     "hand_peak": 0.37,
+     "start": 0.0,
+     "swipe": "thrust",
+     "tip_speed": 4.57
+    }
+   ],
+   "hits_left": [
+    {
+     "at": [
+      -0.34,
+      1.36,
+      0.99
+     ],
+     "contact": 0.3,
+     "dir": [
+      -0.81,
+      -0.31,
+      -0.5
+     ],
+     "end": 0.53,
+     "front": [
+      0.27,
+      0.37
+     ],
+     "hand_peak": 0.3,
+     "start": 0.03,
+     "swipe": "L",
+     "tip_speed": 10.13
+    }
+   ],
+   "kind": "attack",
+   "length": 1.13,
+   "loop": false,
+   "pack": "ss",
+   "recovery": 0.56,
+   "root_motion": false,
+   "seen": "plausible: low crouching thrust, shield lifted; small and hard to read from the front",
+   "source": "A_SwordSwordAnimV3_Attack3_Stage2_Complete_IP.FBX",
+   "swipe": "thrust",
+   "windup": 0.0
+  },
+  "ss_unsheath": {
+   "frames": 28,
+   "hip_travel": 0.01,
+   "kind": "equip",
+   "length": 0.93,
+   "loop": false,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Unsheath_IP.FBX"
+  },
+  "ss_walk_b": {
+   "frames": 37,
+   "hip_travel": 0.04,
+   "kind": "move",
+   "length": 1.23,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Walk_Bw_Loopable_IP.FBX"
+  },
+  "ss_walk_f": {
+   "frames": 37,
+   "hip_travel": 0.05,
+   "kind": "move",
+   "length": 1.23,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "seen": "ok: walks forward, feet on the floor",
+   "source": "A_SwordSwordAnimV3_Walk_Fw_Loopable_IP.FBX"
+  },
+  "ss_walk_l": {
+   "frames": 37,
+   "hip_travel": 0.04,
+   "kind": "move",
+   "length": 1.23,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Walk_L_Loopable_IP.FBX"
+  },
+  "ss_walk_r": {
+   "frames": 37,
+   "hip_travel": 0.04,
+   "kind": "move",
+   "length": 1.23,
+   "loop": true,
+   "pack": "ss",
+   "root_motion": false,
+   "source": "A_SwordSwordAnimV3_Walk_R_Loopable_IP.FBX"
+  },
+  "th_block": {
+   "frames": 16,
+   "hip_travel": 0.03,
+   "kind": "block",
+   "length": 0.53,
+   "loop": false,
+   "pack": "th",
+   "root_motion": false,
+   "seen": "ok: blade brought up to guard and back",
+   "source": "AS_TwoHandedSwordAnimV3_Defense_IP.FBX"
+  },
+  "th_block_hit_b": {
+   "frames": 18,
+   "hip_travel": 2.4,
+   "kind": "block_hit",
+   "length": 0.6,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Defense_Hit_Bw_RM.FBX"
+  },
+  "th_block_hit_f": {
+   "frames": 20,
+   "hip_travel": 0.81,
+   "kind": "block_hit",
+   "length": 0.67,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "seen": "ok: guard held, shoved back",
+   "source": "AS_TwoHandedSwordAnimV3_Defense_Hit_Fw_RM.FBX"
+  },
+  "th_block_hit_l": {
+   "frames": 16,
+   "hip_travel": 0.17,
+   "kind": "block_hit",
+   "length": 0.53,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Defense_Hit_L_RM.FBX"
+  },
+  "th_block_hit_r": {
+   "frames": 18,
+   "hip_travel": 1.25,
+   "kind": "block_hit",
+   "length": 0.6,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Defense_Hit_R_RM.FBX"
+  },
+  "th_block_in": {
+   "frames": 7,
+   "hip_travel": 0.03,
+   "kind": "block",
+   "length": 0.23,
+   "loop": false,
+   "pack": "th",
+   "root_motion": false,
+   "source": "AS_TwoHandedSwordAnimV3_Defense_Start_IP.FBX"
+  },
+  "th_block_out": {
+   "frames": 8,
+   "hip_travel": 0.03,
+   "kind": "block",
+   "length": 0.27,
+   "loop": false,
+   "pack": "th",
+   "root_motion": false,
+   "source": "AS_TwoHandedSwordAnimV3_Defense_Back_IP.FBX"
+  },
+  "th_combo4": {
+   "contact": 0.6,
+   "frames": 78,
+   "hip_travel": 0.25,
+   "hits": [
+    {
+     "at": [
+      -0.48,
+      1.39,
+      1.06
+     ],
+     "contact": 0.6,
+     "dir": [
+      0.81,
+      -0.4,
+      -0.43
+     ],
+     "end": 1.0,
+     "front": [
+      0.6,
+      0.67
+     ],
+     "hand_peak": 0.6,
+     "start": 0.43,
+     "swipe": "DR",
+     "tip_speed": 23.28
+    },
+    {
+     "at": [
+      0.1,
+      1.27,
+      1.4
+     ],
+     "contact": 1.03,
+     "dir": [
+      -0.81,
+      -0.55,
+      -0.22
+     ],
+     "end": 1.27,
+     "front": [
+      1.0,
+      1.07
+     ],
+     "hand_peak": 0.6,
+     "start": 1.0,
+     "swipe": "DL",
+     "tip_speed": 26.93
+    },
+    {
+     "at": [
+      0.65,
+      0.78,
+      0.93
+     ],
+     "contact": 1.53,
+     "dir": [
+      -0.93,
+      -0.21,
+      -0.31
+     ],
+     "end": 2.1,
+     "front": [
+      1.53,
+      1.63
+     ],
+     "hand_peak": 2.07,
+     "start": 1.27,
+     "swipe": "L",
+     "tip_speed": 19.66
+    },
+    {
+     "at": [
+      -0.29,
+      1.25,
+      1.24
+     ],
+     "contact": 2.1,
+     "dir": [
+      0.77,
+      -0.35,
+      -0.54
+     ],
+     "end": 2.4,
+     "front": [
+      2.1,
+      2.17
+     ],
+     "hand_peak": 2.07,
+     "start": 2.1,
+     "swipe": "DR",
+     "tip_speed": 24.86
+    }
+   ],
+   "kind": "combo",
+   "length": 2.6,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.2,
+   "root_motion": false,
+   "source": "AS_TwoHandedSwordAnimV3_Attack10_IP.FBX",
+   "swipe": "DR",
+   "windup": 0.43
+  },
+  "th_combo_thrust": {
+   "contact": 0.33,
+   "frames": 55,
+   "hip_travel": 0.25,
+   "hits": [
+    {
+     "at": [
+      0.24,
+      1.77,
+      1.08
+     ],
+     "contact": 0.33,
+     "dir": [
+      -0.85,
+      -0.43,
+      -0.29
+     ],
+     "end": 0.83,
+     "front": [
+      0.33,
+      0.5
+     ],
+     "hand_peak": 0.8,
+     "start": 0.13,
+     "swipe": "DL",
+     "tip_speed": 23.65
+    },
+    {
+     "at": [
+      0.2,
+      1.11,
+      1.42
+     ],
+     "contact": 0.83,
+     "dir": [
+      -0.09,
+      -0.99,
+      -0.1
+     ],
+     "end": 0.93,
+     "front": [
+      0.83,
+      0.9
+     ],
+     "hand_peak": 0.8,
+     "start": 0.83,
+     "swipe": "D",
+     "tip_speed": 22.57
+    },
+    {
+     "at": [
+      0.19,
+      0.95,
+      1.52
+     ],
+     "contact": 1.3,
+     "dir": [
+      -0.06,
+      0.08,
+      0.99
+     ],
+     "end": 1.4,
+     "front": [
+      1.3,
+      1.4
+     ],
+     "hand_peak": 1.3,
+     "start": 1.13,
+     "swipe": "thrust",
+     "tip_speed": 2.32
+    }
+   ],
+   "kind": "combo",
+   "length": 1.83,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.43,
+   "root_motion": false,
+   "seen": "ok: chop, chop, then a thrust",
+   "source": "AS_TwoHandedSwordAnimV3_Attack1_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.13
+  },
+  "th_cut_d": {
+   "contact": 0.33,
+   "frames": 22,
+   "hip_travel": 0.15,
+   "hits": [
+    {
+     "at": [
+      0.2,
+      1.63,
+      1.16
+     ],
+     "contact": 0.33,
+     "dir": [
+      0.27,
+      -0.93,
+      -0.25
+     ],
+     "end": 0.7,
+     "front": [
+      0.33,
+      0.5
+     ],
+     "hand_peak": 0.33,
+     "start": 0.03,
+     "swipe": "D",
+     "tip_speed": 22.54
+    }
+   ],
+   "kind": "attack",
+   "length": 0.73,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.03,
+   "root_motion": false,
+   "seen": "ok: overhead chop; the tip is fastest a few frames after the marked contact",
+   "source": "AS_TwoHandedSwordAnimV3_Attack4_Stage1_Complete_IP.FBX",
+   "swipe": "D",
+   "windup": 0.03
+  },
+  "th_cut_d2": {
+   "contact": 0.33,
+   "frames": 28,
+   "hip_travel": 0.25,
+   "hits": [
+    {
+     "at": [
+      0.24,
+      1.76,
+      1.08
+     ],
+     "contact": 0.33,
+     "dir": [
+      -0.19,
+      -0.98,
+      0.05
+     ],
+     "end": 0.5,
+     "front": [
+      0.33,
+      0.43
+     ],
+     "hand_peak": 0.33,
+     "start": 0.13,
+     "swipe": "D",
+     "tip_speed": 23.59
+    }
+   ],
+   "kind": "attack",
+   "length": 0.93,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.43,
+   "root_motion": false,
+   "seen": "ok: overhead chop driven into the ground in front",
+   "source": "AS_TwoHandedSwordAnimV3_Attack1_Stage1_Complete_IP.FBX",
+   "swipe": "D",
+   "windup": 0.13
+  },
+  "th_cut_dl": {
+   "contact": 0.73,
+   "frames": 50,
+   "hip_travel": 0.26,
+   "hits": [
+    {
+     "at": [
+      0.84,
+      1.43,
+      1.01
+     ],
+     "contact": 0.73,
+     "dir": [
+      -0.83,
+      -0.49,
+      -0.27
+     ],
+     "end": 0.9,
+     "front": [
+      0.73,
+      0.8
+     ],
+     "hand_peak": 0.73,
+     "start": 0.47,
+     "swipe": "DL",
+     "tip_speed": 30.1
+    }
+   ],
+   "kind": "attack",
+   "length": 1.67,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.77,
+   "root_motion": false,
+   "seen": "ok: leaping cut from high right to low left (both feet leave the floor)",
+   "source": "AS_TwoHandedSwordAnimV3_Attack11_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.47
+  },
+  "th_cut_dl2": {
+   "contact": 0.47,
+   "frames": 32,
+   "hip_travel": 0.25,
+   "hits": [
+    {
+     "at": [
+      0.41,
+      1.26,
+      1.19
+     ],
+     "contact": 0.47,
+     "dir": [
+      -0.77,
+      -0.51,
+      -0.39
+     ],
+     "end": 0.63,
+     "front": [
+      0.47,
+      0.53
+     ],
+     "hand_peak": 0.43,
+     "start": 0.33,
+     "swipe": "DL",
+     "tip_speed": 29.17
+    }
+   ],
+   "kind": "attack",
+   "length": 1.07,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.44,
+   "root_motion": false,
+   "seen": "ok: high right to low left",
+   "source": "AS_TwoHandedSwordAnimV3_Attack9_Stage1_Complete_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.33
+  },
+  "th_cut_dr": {
+   "contact": 0.6,
+   "frames": 35,
+   "hip_travel": 0.25,
+   "hits": [
+    {
+     "at": [
+      -0.45,
+      1.39,
+      1.06
+     ],
+     "contact": 0.6,
+     "dir": [
+      0.81,
+      -0.41,
+      -0.43
+     ],
+     "end": 1.07,
+     "front": [
+      0.6,
+      0.67
+     ],
+     "hand_peak": 0.6,
+     "start": 0.43,
+     "swipe": "DR",
+     "tip_speed": 23.14
+    }
+   ],
+   "kind": "attack",
+   "length": 1.17,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.1,
+   "root_motion": false,
+   "seen": "ok: high left to low right",
+   "source": "AS_TwoHandedSwordAnimV3_Attack7_Stage1_Complete_IP.FBX",
+   "swipe": "DR",
+   "windup": 0.43
+  },
+  "th_cut_l": {
+   "contact": 0.4,
+   "frames": 27,
+   "hip_travel": 0.25,
+   "hits": [
+    {
+     "at": [
+      0.45,
+      0.82,
+      1.21
+     ],
+     "contact": 0.4,
+     "dir": [
+      -0.95,
+      -0.3,
+      0.05
+     ],
+     "end": 0.53,
+     "front": [
+      0.37,
+      0.47
+     ],
+     "hand_peak": 0.37,
+     "start": 0.07,
+     "swipe": "L",
+     "tip_speed": 24.86
+    },
+    {
+     "at": [
+      0.28,
+      0.26,
+      0.71
+     ],
+     "contact": 0.7,
+     "dir": [
+      0.96,
+      0.0,
+      -0.28
+     ],
+     "end": 0.9,
+     "front": [
+      0.6,
+      0.7
+     ],
+     "hand_peak": 0.37,
+     "start": 0.53,
+     "swipe": "R",
+     "tip_speed": 13.56
+    }
+   ],
+   "kind": "attack",
+   "length": 0.9,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.0,
+   "root_motion": false,
+   "seen": "ok: cut right to left, then a return cut",
+   "source": "AS_TwoHandedSwordAnimV3_Attack5_Stage2_Complete_IP.FBX",
+   "swipe": "L",
+   "windup": 0.07
+  },
+  "th_cut_r": {
+   "contact": 0.73,
+   "frames": 37,
+   "hip_travel": 0.24,
+   "hits": [
+    {
+     "at": [
+      -0.56,
+      1.22,
+      1.09
+     ],
+     "contact": 0.73,
+     "dir": [
+      0.87,
+      -0.14,
+      -0.47
+     ],
+     "end": 1.13,
+     "front": [
+      0.73,
+      0.8
+     ],
+     "hand_peak": 0.77,
+     "start": 0.53,
+     "swipe": "R",
+     "tip_speed": 22.59
+    }
+   ],
+   "kind": "attack",
+   "length": 1.23,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.1,
+   "root_motion": false,
+   "seen": "ok: level cut left to right",
+   "source": "AS_TwoHandedSwordAnimV3_Attack3_Stage1_Complete_IP.FBX",
+   "swipe": "R",
+   "windup": 0.53
+  },
+  "th_cut_r2": {
+   "contact": 0.43,
+   "frames": 31,
+   "hip_travel": 0.22,
+   "hits": [
+    {
+     "at": [
+      -0.34,
+      1.35,
+      1.28
+     ],
+     "contact": 0.43,
+     "dir": [
+      0.8,
+      -0.09,
+      -0.59
+     ],
+     "end": 0.67,
+     "front": [
+      0.43,
+      0.5
+     ],
+     "hand_peak": 0.47,
+     "start": 0.3,
+     "swipe": "R",
+     "tip_speed": 22.3
+    }
+   ],
+   "kind": "attack",
+   "length": 1.03,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.36,
+   "root_motion": false,
+   "seen": "ok: level cut left to right from a mid-chain pose",
+   "source": "AS_TwoHandedSwordAnimV3_Attack5_Stage3_Complete_IP.FBX",
+   "swipe": "R",
+   "windup": 0.3
+  },
+  "th_cut_u": {
+   "contact": 0.33,
+   "frames": 24,
+   "hip_travel": 0.18,
+   "hits": [
+    {
+     "at": [
+      0.31,
+      1.0,
+      1.02
+     ],
+     "contact": 0.33,
+     "dir": [
+      -0.16,
+      0.94,
+      -0.31
+     ],
+     "end": 0.8,
+     "front": [
+      0.33,
+      0.53
+     ],
+     "hand_peak": 0.3,
+     "start": 0.13,
+     "swipe": "U",
+     "tip_speed": 16.64
+    }
+   ],
+   "kind": "attack",
+   "length": 0.8,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.0,
+   "root_motion": false,
+   "seen": "ok: rising cut on the right side, low to overhead",
+   "source": "AS_TwoHandedSwordAnimV3_Attack2_Stage1_Complete_IP.FBX",
+   "swipe": "U",
+   "windup": 0.13
+  },
+  "th_cut_ur": {
+   "contact": 0.67,
+   "frames": 28,
+   "hip_travel": 0.23,
+   "hits": [
+    {
+     "at": [
+      0.59,
+      1.24,
+      0.62
+     ],
+     "contact": 0.67,
+     "dir": [
+      0.32,
+      0.38,
+      -0.87
+     ],
+     "end": 0.93,
+     "front": [
+      0.6,
+      0.67
+     ],
+     "hand_peak": 0.57,
+     "start": 0.5,
+     "swipe": "UR",
+     "tip_speed": 10.18
+    }
+   ],
+   "kind": "attack",
+   "length": 0.93,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.0,
+   "root_motion": false,
+   "seen": "ok: rising cut from low left to high right",
+   "source": "AS_TwoHandedSwordAnimV3_Attack1_Stage3_Complete_IP.FBX",
+   "swipe": "UR",
+   "windup": 0.5
+  },
+  "th_dash_attack": {
+   "contact": 0.47,
+   "frames": 28,
+   "hip_travel": 5.03,
+   "hits": [
+    {
+     "at": [
+      0.57,
+      0.35,
+      1.1
+     ],
+     "contact": 0.47,
+     "dir": [
+      -0.99,
+      -0.02,
+      -0.11
+     ],
+     "end": 0.6,
+     "front": [
+      0.47,
+      0.53
+     ],
+     "hand_peak": 0.43,
+     "start": 0.1,
+     "swipe": "L",
+     "tip_speed": 28.27
+    },
+    {
+     "at": [
+      -0.3,
+      0.6,
+      1.08
+     ],
+     "contact": 0.73,
+     "dir": [
+      0.99,
+      0.11,
+      0.13
+     ],
+     "end": 0.93,
+     "front": [
+      0.67,
+      0.77
+     ],
+     "hand_peak": 0.43,
+     "start": 0.6,
+     "swipe": "R",
+     "tip_speed": 15.96
+    }
+   ],
+   "kind": "attack",
+   "length": 0.93,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.0,
+   "root_motion": true,
+   "seen": "seen only leaving the frame toward the viewer",
+   "source": "AS_TwoHandedSwordAnimV3_DashAttack_RM.FBX",
+   "swipe": "L",
+   "windup": 0.1
+  },
+  "th_death_b": {
+   "frames": 12,
+   "hip_travel": 2.13,
+   "kind": "death",
+   "length": 0.4,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Death_Bw_RM.FBX"
+  },
+  "th_death_f": {
+   "frames": 12,
+   "hip_travel": 3.05,
+   "kind": "death",
+   "length": 0.4,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "seen": "seen only leaving the frame backward",
+   "source": "AS_TwoHandedSwordAnimV3_Death_Fw_RM.FBX"
+  },
+  "th_dodge_b": {
+   "frames": 11,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.37,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Dodge_Bw_RM.FBX"
+  },
+  "th_dodge_l": {
+   "frames": 11,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.37,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Dodge_L_RM.FBX"
+  },
+  "th_dodge_r": {
+   "frames": 11,
+   "hip_travel": 2.09,
+   "kind": "dodge",
+   "length": 0.37,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Dodge_R_RM.FBX"
+  },
+  "th_guard": {
+   "frames": 44,
+   "hip_travel": 0.01,
+   "kind": "block",
+   "length": 1.47,
+   "loop": true,
+   "pack": "th",
+   "root_motion": false,
+   "seen": "ok: blade held up across the front; the left hand is open, off the handle",
+   "source": "AS_TwoHandedSwordAnimV3_Defense_Idle_IP.FBX"
+  },
+  "th_hit_b": {
+   "frames": 17,
+   "hip_travel": 0.71,
+   "kind": "hit",
+   "length": 0.57,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Hit_Bw_RM.FBX"
+  },
+  "th_hit_f": {
+   "frames": 18,
+   "hip_travel": 0.21,
+   "kind": "hit",
+   "length": 0.6,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "seen": "ok: small flinch",
+   "source": "AS_TwoHandedSwordAnimV3_Hit_Fw_RM.FBX"
+  },
+  "th_hit_l": {
+   "frames": 17,
+   "hip_travel": 0.25,
+   "kind": "hit",
+   "length": 0.57,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Hit_L_RM.FBX"
+  },
+  "th_hit_r": {
+   "frames": 16,
+   "hip_travel": 0.33,
+   "kind": "hit",
+   "length": 0.53,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Hit_R_RM.FBX"
+  },
+  "th_idle": {
+   "frames": 40,
+   "hip_travel": 0.0,
+   "kind": "idle",
+   "length": 1.33,
+   "loop": true,
+   "pack": "th",
+   "root_motion": false,
+   "seen": "ok: low guard, blade trailing behind",
+   "source": "AS_TwoHandedSwordAnimV3_Idle1_IP.FBX"
+  },
+  "th_idle2": {
+   "frames": 39,
+   "hip_travel": 0.0,
+   "kind": "idle",
+   "length": 1.3,
+   "loop": true,
+   "pack": "th",
+   "root_motion": false,
+   "source": "AS_TwoHandedSwordAnimV3_Idle2_IP.FBX"
+  },
+  "th_jump_attack": {
+   "contact": 0.47,
+   "frames": 25,
+   "hip_travel": 5.85,
+   "hits": [
+    {
+     "at": [
+      0.2,
+      1.19,
+      1.39
+     ],
+     "contact": 0.47,
+     "dir": [
+      0.36,
+      -0.93,
+      0.03
+     ],
+     "end": 0.57,
+     "front": [
+      0.47,
+      0.67
+     ],
+     "hand_peak": 0.4,
+     "start": 0.0,
+     "swipe": "D",
+     "tip_speed": 23.42
+    }
+   ],
+   "kind": "finisher",
+   "length": 0.83,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.26,
+   "root_motion": true,
+   "seen": "seen only leaving the frame toward the viewer (5.9 hip heights of travel)",
+   "source": "AS_TwoHandedSwordAnimV3_JumpAttack_RM.FBX",
+   "swipe": "D",
+   "windup": 0.0
+  },
+  "th_overhead": {
+   "contact": 0.23,
+   "frames": 42,
+   "hip_travel": 0.28,
+   "hits": [
+    {
+     "at": [
+      0.17,
+      1.76,
+      1.1
+     ],
+     "contact": 0.23,
+     "dir": [
+      -0.7,
+      -0.6,
+      -0.39
+     ],
+     "end": 0.73,
+     "front": [
+      0.23,
+      0.37
+     ],
+     "hand_peak": 0.73,
+     "start": 0.0,
+     "swipe": "DL",
+     "tip_speed": 22.65
+    },
+    {
+     "at": [
+      -0.02,
+      1.69,
+      0.93
+     ],
+     "contact": 0.73,
+     "dir": [
+      -0.05,
+      -1.0,
+      0.0
+     ],
+     "end": 0.83,
+     "front": [
+      0.73,
+      0.8
+     ],
+     "hand_peak": 0.73,
+     "start": 0.73,
+     "swipe": "D",
+     "tip_speed": 24.01
+    },
+    {
+     "at": [
+      -0.34,
+      0.93,
+      0.95
+     ],
+     "contact": 1.0,
+     "dir": [
+      -0.12,
+      0.96,
+      -0.24
+     ],
+     "end": 1.4,
+     "front": [
+      0.93,
+      1.07
+     ],
+     "hand_peak": 1.0,
+     "start": 0.87,
+     "swipe": "U",
+     "tip_speed": 12.91
+    }
+   ],
+   "kind": "finisher",
+   "length": 1.4,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.0,
+   "root_motion": false,
+   "seen": "ok: two overhead chops",
+   "source": "AS_TwoHandedSwordAnimV3_Attack8_IP.FBX",
+   "swipe": "DL",
+   "windup": 0.0
+  },
+  "th_parry": {
+   "frames": 10,
+   "hip_travel": 0.06,
+   "kind": "parry",
+   "length": 0.33,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "seen": "ok: blade snapped up overhead",
+   "source": "AS_TwoHandedSwordAnimV3_Parry_Complete_RM.FBX"
+  },
+  "th_parry_attack": {
+   "frames": 24,
+   "hip_travel": 0.26,
+   "kind": "attack",
+   "length": 0.8,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_ParryAttack_RM.FBX"
+  },
+  "th_roll_l": {
+   "frames": 22,
+   "hip_travel": 5.2,
+   "kind": "dodge",
+   "length": 0.73,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Roll_L_RM.FBX"
+  },
+  "th_roll_r": {
+   "frames": 22,
+   "hip_travel": 5.46,
+   "kind": "dodge",
+   "length": 0.73,
+   "loop": false,
+   "pack": "th",
+   "root_motion": true,
+   "source": "AS_TwoHandedSwordAnimV3_Roll_R_RM.FBX"
+  },
+  "th_spin": {
+   "contact": 0.6,
+   "frames": 73,
+   "hip_travel": 0.25,
+   "hits": [
+    {
+     "at": [
+      -0.47,
+      1.39,
+      1.06
+     ],
+     "contact": 0.6,
+     "dir": [
+      0.81,
+      -0.4,
+      -0.43
+     ],
+     "end": 0.97,
+     "front": [
+      0.6,
+      0.67
+     ],
+     "hand_peak": 1.83,
+     "start": 0.43,
+     "swipe": "DR",
+     "tip_speed": 23.28
+    },
+    {
+     "at": [
+      -0.9,
+      1.36,
+      0.61
+     ],
+     "contact": 1.2,
+     "dir": [
+      -0.87,
+      0.15,
+      -0.48
+     ],
+     "end": 1.37,
+     "front": [
+      0.97,
+      1.2
+     ],
+     "hand_peak": 1.83,
+     "start": 0.97,
+     "swipe": "L",
+     "tip_speed": 20.84
+    },
+    {
+     "at": [
+      0.29,
+      1.19,
+      1.08
+     ],
+     "contact": 1.4,
+     "dir": [
+      0.75,
+      -0.2,
+      -0.63
+     ],
+     "end": 1.77,
+     "front": [
+      1.37,
+      1.53
+     ],
+     "hand_peak": 1.83,
+     "start": 1.37,
+     "swipe": "R",
+     "tip_speed": 23.64
+    },
+    {
+     "at": [
+      0.89,
+      0.91,
+      0.7
+     ],
+     "contact": 1.83,
+     "dir": [
+      0.8,
+      -0.31,
+      -0.51
+     ],
+     "end": 1.97,
+     "front": [
+      1.77,
+      1.83
+     ],
+     "hand_peak": 1.83,
+     "start": 1.77,
+     "swipe": "R",
+     "tip_speed": 24.91
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.43,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.46,
+   "root_motion": false,
+   "source": "AS_TwoHandedSwordAnimV3_Attack7_IP.FBX",
+   "swipe": "DR",
+   "windup": 0.43
+  },
+  "th_sweep": {
+   "contact": 0.73,
+   "frames": 77,
+   "hip_travel": 0.28,
+   "hits": [
+    {
+     "at": [
+      -0.55,
+      1.2,
+      1.09
+     ],
+     "contact": 0.73,
+     "dir": [
+      0.87,
+      -0.13,
+      -0.47
+     ],
+     "end": 1.03,
+     "front": [
+      0.73,
+      0.8
+     ],
+     "hand_peak": 1.07,
+     "start": 0.53,
+     "swipe": "R",
+     "tip_speed": 22.52
+    },
+    {
+     "at": [
+      0.7,
+      1.48,
+      1.1
+     ],
+     "contact": 1.03,
+     "dir": [
+      -0.81,
+      -0.47,
+      -0.34
+     ],
+     "end": 1.27,
+     "front": [
+      1.03,
+      1.1
+     ],
+     "hand_peak": 1.07,
+     "start": 1.03,
+     "swipe": "DL",
+     "tip_speed": 29.19
+    },
+    {
+     "at": [
+      0.08,
+      0.78,
+      1.37
+     ],
+     "contact": 1.6,
+     "dir": [
+      -0.89,
+      -0.4,
+      -0.23
+     ],
+     "end": 1.73,
+     "front": [
+      1.57,
+      1.63
+     ],
+     "hand_peak": 1.57,
+     "start": 1.3,
+     "swipe": "DL",
+     "tip_speed": 28.92
+    },
+    {
+     "at": [
+      -0.73,
+      0.61,
+      1.0
+     ],
+     "contact": 1.87,
+     "dir": [
+      0.9,
+      0.39,
+      -0.18
+     ],
+     "end": 2.33,
+     "front": [
+      1.87,
+      2.0
+     ],
+     "hand_peak": 1.57,
+     "start": 1.73,
+     "swipe": "UR",
+     "tip_speed": 15.77
+    }
+   ],
+   "kind": "finisher",
+   "length": 2.57,
+   "loop": false,
+   "pack": "th",
+   "recovery": 0.24,
+   "root_motion": false,
+   "source": "AS_TwoHandedSwordAnimV3_Attack3_IP.FBX",
+   "swipe": "R",
+   "windup": 0.53
+  },
+  "th_walk_f": {
+   "frames": 24,
+   "hip_travel": 0.05,
+   "kind": "move",
+   "length": 0.8,
+   "loop": true,
+   "pack": "th",
+   "root_motion": false,
+   "source": "AS_TwoHandedSwordAnimV3_Walk_Fw_Loopable_IP.FBX"
+  }
+ },
+ "fps": 30.0,
+ "frame": "dir = [to the fighter's own right, up, toward the opponent]; times in seconds from the clip's start"
+}

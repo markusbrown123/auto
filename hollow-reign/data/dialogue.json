@@ -1,0 +1,2684 @@
+{
+ "lines": {
+  "opening_01": {
+   "speaker": "narrator",
+   "text": "Once, men begged the gods to spare them from death.",
+   "dir": "slow, grave"
+  },
+  "opening_02": {
+   "speaker": "narrator",
+   "text": "Then men became gods.",
+   "dir": "quiet awe"
+  },
+  "opening_03": {
+   "speaker": "narrator",
+   "text": "They built bodies that could not grow old. Thrones that could not be inherited. Kingdoms that could not escape them.",
+   "dir": "measured"
+  },
+  "opening_04": {
+   "speaker": "narrator",
+   "text": "But even eternity could not protect them from the people they ruled.",
+   "dir": "harder"
+  },
+  "opening_05": {
+   "speaker": "narrator",
+   "text": "The crowns shattered. Their kingdoms fell. And for three hundred years, humanity believed itself free.",
+   "dir": "elegiac"
+  },
+  "opening_06": {
+   "speaker": "narrator",
+   "text": "We were wrong.",
+   "dir": "near whisper"
+  },
+  "awakening_01": {
+   "speaker": "lyra",
+   "text": "Can you hear me?",
+   "dir": "tentative, through old machinery"
+  },
+  "awakening_02": {
+   "speaker": "player",
+   "text": "Who are you?",
+   "dir": "hoarse, just woken"
+  },
+  "awakening_03": {
+   "speaker": "lyra",
+   "text": "Someone who has been waiting a very long time.",
+   "dir": "relief held back"
+  },
+  "awakening_04": {
+   "speaker": "player",
+   "text": "What happened here?",
+   "dir": "wary"
+  },
+  "awakening_05": {
+   "speaker": "lyra",
+   "text": "That depends. What do you remember?",
+   "dir": "careful"
+  },
+  "awakening_06": {
+   "speaker": "player",
+   "text": "Things I couldn't possibly have seen.",
+   "dir": "unsettled"
+  },
+  "awakening_07": {
+   "speaker": "lyra",
+   "text": "Then it worked.",
+   "dir": "quiet wonder"
+  },
+  "first_road_01": {
+   "speaker": "lyra",
+   "text": "The doors above you open onto what was a fortress. Walk. Your body remembers how, even if you don't.",
+   "dir": "gentle"
+  },
+  "first_road_02": {
+   "speaker": "lyra",
+   "text": "Tap where you want to go. If something stands in the way, it has been standing there a long time.",
+   "dir": "dry"
+  },
+  "courtyard_0_01": {
+   "speaker": "lyra",
+   "text": "Those statues were kings once. People prayed to them. Some of them answered.",
+   "dir": "low"
+  },
+  "courtyard_1_01": {
+   "speaker": "lyra",
+   "text": "Look at its armour. Under the plate there is light. That is not rust moving it.",
+   "dir": "uneasy"
+  },
+  "courtyard_2_01": {
+   "speaker": "lyra",
+   "text": "It salutes before it strikes. Someone taught it manners, three hundred years ago.",
+   "dir": "wry"
+  },
+  "courtyard_3_01": {
+   "speaker": "lyra",
+   "text": "That winch will hold. Most things they built still do. That is rather the problem.",
+   "dir": "dry"
+  },
+  "courtyard_4_01": {
+   "speaker": "lyra",
+   "text": "Careful. The big ones were made for breaking gates. You are much smaller than a gate.",
+   "dir": "light"
+  },
+  "courtyard_5_01": {
+   "speaker": "lyra",
+   "text": "Rest. That candle is not a candle, but it will not hurt you.",
+   "dir": "soft"
+  },
+  "courtyard_6_01": {
+   "speaker": "lyra",
+   "text": "He is still at his post. He has not been told that there is nothing left behind him.",
+   "dir": "sad"
+  },
+  "sentinel_intro_01": {
+   "speaker": "sentinel",
+   "text": "State your allegiance.",
+   "dir": "flat, immense, helmeted"
+  },
+  "sentinel_intro_02": {
+   "speaker": "player",
+   "text": "I serve no crown.",
+   "dir": "steady"
+  },
+  "sentinel_intro_03": {
+   "speaker": "sentinel",
+   "text": "Then you have no passage.",
+   "dir": "final"
+  },
+  "gen1_open_01": {
+   "speaker": "narrator",
+   "text": "For centuries the bells of Vaelora rang beneath the same sovereign.",
+   "dir": "slow, grave",
+   "recorded": false
+  },
+  "gen1_open_02": {
+   "speaker": "narrator",
+   "text": "Harvests failed and were mended. Villages fell silent and were forgotten. Upon the throne, nothing changed.",
+   "dir": "measured",
+   "recorded": false
+  },
+  "gen1_open_03": {
+   "speaker": "narrator",
+   "text": "One warden of the low road dared to ask what such permanence had cost.",
+   "dir": "quieter",
+   "recorded": false
+  },
+  "gen1_throne_01": {
+   "speaker": "forebear",
+   "text": "Three villages have fallen silent. Their names are struck from your records.",
+   "dir": "level, not afraid",
+   "recorded": false
+  },
+  "gen1_throne_02": {
+   "speaker": "monarch",
+   "text": "Their silence has bought another winter for thousands.",
+   "dir": "regal, unhurried",
+   "recorded": false
+  },
+  "gen1_throne_03": {
+   "speaker": "forebear",
+   "text": "You speak of people as though they were coin.",
+   "dir": "hard",
+   "recorded": false
+  },
+  "gen1_throne_04": {
+   "speaker": "monarch",
+   "text": "A ruler must count what others refuse to count.",
+   "dir": "patient",
+   "recorded": false
+  },
+  "gen1_guard_01": {
+   "speaker": "monarch",
+   "text": "Show the warden to the gate.",
+   "dir": "bored, final",
+   "recorded": false
+  },
+  "gen1_records_01": {
+   "speaker": "forebear",
+   "text": "The count is behind that seal. I did not climb this far to be told the sum.",
+   "dir": "moving already",
+   "recorded": false
+  },
+  "gen1_records_02": {
+   "speaker": "monarch",
+   "text": "Then you climbed for nothing.",
+   "dir": "rising",
+   "recorded": false
+  },
+  "gen1_seal_01": {
+   "speaker": "monarch",
+   "text": "Enough. Seal the hall.",
+   "dir": "cold",
+   "recorded": false
+  },
+  "gen1_seal_02": {
+   "speaker": "monarch",
+   "text": "You have done nothing but leave this burden to another.",
+   "dir": "almost pity",
+   "recorded": false
+  },
+  "gen1_seal_03": {
+   "speaker": "forebear",
+   "text": "Then another will come better prepared.",
+   "dir": "failing, certain",
+   "recorded": false
+  },
+  "gen1_close_m_01": {
+   "speaker": "narrator",
+   "text": "His name disappeared from the royal histories.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "gen1_close_m_02": {
+   "speaker": "narrator",
+   "text": "But not from those of his house.",
+   "dir": "near whisper",
+   "recorded": false
+  },
+  "gen1_close_f_01": {
+   "speaker": "narrator",
+   "text": "Her name disappeared from the royal histories.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "gen1_close_f_02": {
+   "speaker": "narrator",
+   "text": "But not from those of her house.",
+   "dir": "near whisper",
+   "recorded": false
+  },
+  "gen2_arrive_m_01": {
+   "speaker": "player",
+   "text": "I know where you died, Father. I would know why.",
+   "dir": "low, to the gate",
+   "recorded": false
+  },
+  "gen2_arrive_f_01": {
+   "speaker": "player",
+   "text": "I know where you died, Mother. I would know why.",
+   "dir": "low, to the gate",
+   "recorded": false
+  },
+  "sentinel_death_01": {
+   "speaker": "sentinel",
+   "text": "Is the war... over?",
+   "dir": "failing, suddenly human"
+  },
+  "sentinel_death_02": {
+   "speaker": "player",
+   "text": "It ended centuries ago.",
+   "dir": "gentle"
+  },
+  "sentinel_death_03": {
+   "speaker": "sentinel",
+   "text": "Then why did no one return for me?",
+   "dir": "a child's question"
+  },
+  "sentinel_memory_01": {
+   "speaker": "archivist",
+   "text": "Record incomplete. Witness deceased. Memory retained.",
+   "dir": "calm, broken cadence"
+  },
+  "sentinel_memory_02": {
+   "speaker": "archivist",
+   "text": "Subject: gate sergeant, forty-one years of service. Volunteered. He was told it would be for one winter.",
+   "dir": "even"
+  },
+  "sentinel_memory_03": {
+   "speaker": "lyra",
+   "text": "They were people. All of them. Remember that when the next one raises its sword.",
+   "dir": "quiet"
+  },
+  "sanctuary_return_01": {
+   "speaker": "lyra",
+   "text": "You came back by the door this time. I prefer it.",
+   "dir": "warm"
+  },
+  "sanctuary_return_02": {
+   "speaker": "lyra",
+   "text": "There is a smith here. He does not trust you. He is very good. Let him look at that sword.",
+   "dir": "amused"
+  },
+  "orren_intro_01": {
+   "speaker": "orren",
+   "text": "So you're what she woke up. Hm.",
+   "dir": "gravel, unimpressed"
+  },
+  "orren_intro_02": {
+   "speaker": "orren",
+   "text": "That sword is older than my entire bloodline. Try not to drop it.",
+   "dir": "dry"
+  },
+  "orren_intro_03": {
+   "speaker": "orren",
+   "text": "Bring me shards and coin. Your armour remembers its shape. I just remind it.",
+   "dir": "matter of fact"
+  },
+  "orren_idle_01": {
+   "speaker": "orren",
+   "text": "People spend their lives searching for legendary weapons. Most of them wouldn't know what to do with one.",
+   "dir": "dry"
+  },
+  "rebirth_0_01": {
+   "speaker": "lyra",
+   "text": "You returned sooner than I expected.",
+   "dir": "close, intimate"
+  },
+  "rebirth_1_01": {
+   "speaker": "lyra",
+   "text": "Your body has recovered. Your memories are another matter.",
+   "dir": "close, intimate"
+  },
+  "rebirth_2_01": {
+   "speaker": "lyra",
+   "text": "You remembered something this time, didn't you?",
+   "dir": "close, intimate"
+  },
+  "rebirth_3_01": {
+   "speaker": "lyra",
+   "text": "The system is learning from you.",
+   "dir": "close, intimate"
+  },
+  "rebirth_4_01": {
+   "speaker": "lyra",
+   "text": "You're becoming someone it cannot predict.",
+   "dir": "close, intimate"
+  },
+  "rebirth_5_01": {
+   "speaker": "lyra",
+   "text": "Those memories aren't orders. You don't owe the dead your future.",
+   "dir": "close, intimate"
+  },
+  "executioner_intro_01": {
+   "speaker": "executioner",
+   "text": "Your identity is unregistered.",
+   "dir": "toneless"
+  },
+  "executioner_intro_02": {
+   "speaker": "player",
+   "text": "Your kingdom no longer exists.",
+   "dir": "flat"
+  },
+  "executioner_intro_03": {
+   "speaker": "executioner",
+   "text": "The law does not require a kingdom.",
+   "dir": "certain"
+  },
+  "executioner_death_01": {
+   "speaker": "lyra",
+   "text": "That prison was switched back on from somewhere else. Someone is waking them. On purpose.",
+   "dir": "alarmed, controlled"
+  },
+  "huntsman_intro_01": {
+   "speaker": "huntsman",
+   "text": "I have hunted what the old kings bred. I know one of their things when I see it.",
+   "dir": "cold"
+  },
+  "huntsman_intro_02": {
+   "speaker": "player",
+   "text": "I am not theirs.",
+   "dir": "even"
+  },
+  "huntsman_intro_03": {
+   "speaker": "huntsman",
+   "text": "They all said that.",
+   "dir": "tired"
+  },
+  "widow_intro_01": {
+   "speaker": "widow",
+   "text": "That stance. I knew the soldier who taught it.",
+   "dir": "sharp, shaken"
+  },
+  "widow_intro_02": {
+   "speaker": "player",
+   "text": "I've never met you.",
+   "dir": "guarded"
+  },
+  "widow_intro_03": {
+   "speaker": "widow",
+   "text": "No. But someone inside you has.",
+   "dir": "bitter"
+  },
+  "widow_death_01": {
+   "speaker": "widow",
+   "text": "You fight like six people I buried. And none of them.",
+   "dir": "breathless"
+  },
+  "widow_death_02": {
+   "speaker": "lyra",
+   "text": "She is yielding. Let her.",
+   "dir": "urgent, soft"
+  },
+  "beast_intro_01": {
+   "speaker": "lyra",
+   "text": "That was grown, not born. Do not look for a man inside it.",
+   "dir": "tight"
+  },
+  "beast_death_01": {
+   "speaker": "lyra",
+   "text": "They didn't pray here.",
+   "dir": "hushed"
+  },
+  "beast_death_02": {
+   "speaker": "player",
+   "text": "Then what was this place?",
+   "dir": "low"
+  },
+  "beast_death_03": {
+   "speaker": "lyra",
+   "text": "A laboratory.",
+   "dir": "plain"
+  },
+  "gravewarden_intro_01": {
+   "speaker": "gravewarden",
+   "text": "These are not tombs.",
+   "dir": "old, patient"
+  },
+  "gravewarden_intro_02": {
+   "speaker": "player",
+   "text": "What are they?",
+   "dir": "quiet"
+  },
+  "gravewarden_intro_03": {
+   "speaker": "gravewarden",
+   "text": "People waiting for someone to remember their names.",
+   "dir": "tender"
+  },
+  "gravewarden_death_01": {
+   "speaker": "archivist",
+   "text": "You are not the first to enter this chamber. You are merely the first it has permitted to leave.",
+   "dir": "calm"
+  },
+  "gravewarden_death_02": {
+   "speaker": "archivist",
+   "text": "History has been rewritten seventeen times. Would you prefer the surviving version?",
+   "dir": "almost wry"
+  },
+  "frostking_intro_01": {
+   "speaker": "frostking",
+   "text": "I watched men become gods. Then I watched gods become machines.",
+   "dir": "ancient, weary"
+  },
+  "frostking_intro_02": {
+   "speaker": "player",
+   "text": "Why didn't you destroy the Crown?",
+   "dir": "direct"
+  },
+  "frostking_intro_03": {
+   "speaker": "frostking",
+   "text": "Because there were still people inside it.",
+   "dir": "simple"
+  },
+  "frostking_retry_01": {
+   "speaker": "frostking",
+   "text": "Every resurrection makes the chains harder to break.",
+   "dir": "warning"
+  },
+  "frostking_death_01": {
+   "speaker": "frostking",
+   "text": "Go to the capital. Do better than we did. It will not be difficult.",
+   "dir": "fading, dry"
+  },
+  "wyrm_intro_01": {
+   "speaker": "lyra",
+   "text": "They built her to break sieges. She has had centuries to decide what else she is.",
+   "dir": "awed"
+  },
+  "devourer_intro_01": {
+   "speaker": "devourer",
+   "text": "...a daughter... I had...",
+   "dir": "a man, lost, under other voices",
+   "recorded": false
+  },
+  "devourer_intro_02": {
+   "speaker": "devourer",
+   "text": "...the sea... the sea...",
+   "dir": "a woman, far away",
+   "recorded": false
+  },
+  "devourer_intro_03": {
+   "speaker": "devourer",
+   "text": "...my name... what was... my name...",
+   "dir": "a child, whispering",
+   "recorded": false
+  },
+  "devourer_death_01": {
+   "speaker": "devourer",
+   "text": "...someone... there...?",
+   "dir": "a woman, very small",
+   "recorded": false
+  },
+  "devourer_death_02": {
+   "speaker": "player",
+   "text": "Yes.",
+   "dir": "quiet"
+  },
+  "devourer_death_03": {
+   "speaker": "devourer",
+   "text": "...say us... any of us... once...",
+   "dir": "many, fading",
+   "recorded": false
+  },
+  "devourer_death_04": {
+   "speaker": "player",
+   "text": "I don't know them. I'm sorry.",
+   "dir": "low"
+  },
+  "monarch_intro_01": {
+   "speaker": "monarch",
+   "text": "Look upon what remains of our civilization.",
+   "dir": "regal, controlled"
+  },
+  "monarch_intro_02": {
+   "speaker": "player",
+   "text": "I see a kingdom that should have been allowed to die.",
+   "dir": "hard"
+  },
+  "monarch_intro_03": {
+   "speaker": "monarch",
+   "text": "And I see children who will never wake if these machines fall silent.",
+   "dir": "patient"
+  },
+  "monarch_intro_04": {
+   "speaker": "player",
+   "text": "How many people have you sacrificed?",
+   "dir": "cold"
+  },
+  "monarch_intro_05": {
+   "speaker": "monarch",
+   "text": "Enough to ensure there are still people left to ask that question.",
+   "dir": "unflinching"
+  },
+  "monarch_retry_01": {
+   "speaker": "monarch",
+   "text": "You still believe death cannot teach you surrender.",
+   "dir": "almost fond"
+  },
+  "monarch_death_01": {
+   "speaker": "monarch",
+   "text": "I have counted every life this machine has taken. Have you counted the lives it has saved?",
+   "dir": "failing"
+  },
+  "monarch_death_02": {
+   "speaker": "lyra",
+   "text": "I think I remember the rain.",
+   "dir": "distant"
+  },
+  "monarch_death_03": {
+   "speaker": "player",
+   "text": "Tell me about it.",
+   "dir": "soft"
+  },
+  "witness_discovery_01": {
+   "speaker": "lyra",
+   "text": "Wait. Under the fallen plinth. There is a door there that is on no plan I hold.",
+   "dir": "puzzled, wary"
+  },
+  "witness_discovery_02": {
+   "speaker": "witness",
+   "text": "Ah. At last. I had begun to suspect the dead were better company.",
+   "dir": "dry, unhurried, from the dark"
+  },
+  "witness_discovery_03": {
+   "speaker": "player",
+   "text": "What are you?",
+   "dir": "guarded"
+  },
+  "witness_discovery_04": {
+   "speaker": "witness",
+   "text": "A witness to rather more than I would care to remember.",
+   "dir": "wry"
+  },
+  "witness_discovery_05": {
+   "speaker": "witness",
+   "text": "And to rather less than I ought. They took a good deal out of me before they shut that door.",
+   "dir": "lighter than it should be"
+  },
+  "witness_discovery_06": {
+   "speaker": "player",
+   "text": "Who did?",
+   "dir": "direct"
+  },
+  "witness_discovery_07": {
+   "speaker": "witness",
+   "text": "If I knew that, I should be a happier ornament. Lift me down. I weigh very little, and I know this road.",
+   "dir": "brisk"
+  },
+  "witness_discovery_08": {
+   "speaker": "lyra",
+   "text": "I do not know what that is. I do not like not knowing.",
+   "dir": "low, to the player"
+  },
+  "witness_discovery_09": {
+   "speaker": "witness",
+   "text": "The voice in the walls disapproves of me. Good. We shall get on.",
+   "dir": "amused"
+  },
+  "w_courtyard_approach_01": {
+   "speaker": "witness",
+   "text": "So this is what became of the outer court. It had a grander name when it stood. I forget it. Mercifully.",
+   "dir": "surveying"
+  },
+  "w_courtyard_gate_01": {
+   "speaker": "witness",
+   "text": "That gate once bore the banners of thirteen kings. Now look at it. Eternity has a peculiar sense of humour.",
+   "dir": "dry"
+  },
+  "w_courtyard_passage_01": {
+   "speaker": "witness",
+   "text": "They built the passage narrow so that one man could hold it. Nobody asked which man.",
+   "dir": "flat"
+  },
+  "w_courtyard_candle_01": {
+   "speaker": "witness",
+   "text": "A candle three hundred years alight. In my day we called that a miracle. We were paid to.",
+   "dir": "dry"
+  },
+  "w_sentinel_approach_01": {
+   "speaker": "witness",
+   "text": "He will ask your allegiance. There is no right answer. There never was one.",
+   "dir": "quiet"
+  },
+  "w_sentinel_approach_02": {
+   "speaker": "player",
+   "text": "Then he will have the true one.",
+   "dir": "steady"
+  },
+  "w_sentinel_victory_01": {
+   "speaker": "witness",
+   "text": "One winter, they told him. I believe I wrote that order down. I hope I argued.",
+   "dir": "troubled, a memory returning"
+  },
+  "w_blackwood_approach_01": {
+   "speaker": "witness",
+   "text": "The Blackwood. The lanterns are still lit. Somebody is paying the lamplighter, and I should like to know in what coin.",
+   "dir": "dry"
+  },
+  "w_blackwood_briars_01": {
+   "speaker": "witness",
+   "text": "Woven. Thorn does not plait itself. Somebody here still keeps a boundary.",
+   "dir": "noticing"
+  },
+  "w_blackwood_bridge_01": {
+   "speaker": "witness",
+   "text": "There was a toll on this crossing, and a clerk. He counted heads going in. He did not count them coming out.",
+   "dir": "a memory, unwelcome"
+  },
+  "w_blackwood_gibbet_01": {
+   "speaker": "witness",
+   "text": "A gallows over the drinking water. There is the old kingdom entire, in one view.",
+   "dir": "sour"
+  },
+  "w_huntsman_approach_01": {
+   "speaker": "witness",
+   "text": "Someone has kept pace with us these three trees. A mortal, by the breathing. Be civil. He has earned his opinions.",
+   "dir": "low"
+  },
+  "w_huntsman_victory_01": {
+   "speaker": "witness",
+   "text": "He was not wrong to fear what we were. Only late.",
+   "dir": "tired"
+  },
+  "w_executioner_approach_01": {
+   "speaker": "witness",
+   "text": "Every stump a block. He has not stopped working. He has only run short of the condemned.",
+   "dir": "grim"
+  },
+  "w_executioner_approach_02": {
+   "speaker": "player",
+   "text": "And now?",
+   "dir": "flat"
+  },
+  "w_executioner_approach_03": {
+   "speaker": "witness",
+   "text": "Now he has you. Do try to be a disappointment to him.",
+   "dir": "dry"
+  },
+  "w_executioner_victory_01": {
+   "speaker": "witness",
+   "text": "The court that passed those sentences was dissolved before your grandmother's grandmother. Nobody told the axe.",
+   "dir": "dry, sad"
+  },
+  "w_cathedral_approach_01": {
+   "speaker": "witness",
+   "text": "I climbed these steps once, in a procession. I remember the incense. I do not remember what we were asking for.",
+   "dir": "a memory, half there"
+  },
+  "w_cathedral_censer_01": {
+   "speaker": "witness",
+   "text": "A censer that size is not for perfume. It is for covering the smell of something else.",
+   "dir": "dry"
+  },
+  "w_widow_approach_01": {
+   "speaker": "witness",
+   "text": "I know that bearing. Rebels stand straighter than kings. They have to.",
+   "dir": "quiet"
+  },
+  "w_widow_approach_02": {
+   "speaker": "player",
+   "text": "She is waiting for me.",
+   "dir": "wary"
+  },
+  "w_widow_approach_03": {
+   "speaker": "witness",
+   "text": "She is waiting for someone. Find out whom before you draw.",
+   "dir": "pointed"
+  },
+  "w_widow_victory_01": {
+   "speaker": "witness",
+   "text": "She yielded. In my day that took more courage than dying. It still does.",
+   "dir": "respect"
+  },
+  "w_cathedral_nave_01": {
+   "speaker": "witness",
+   "text": "The roof came down in the Rising. I was here. No. I was told I was here. The two are not the same, and I can no longer tell them apart.",
+   "dir": "a memory, uncertain"
+  },
+  "w_cathedral_choir_01": {
+   "speaker": "witness",
+   "text": "Still singing. That hymn has forty verses. I should not stay for the last.",
+   "dir": "uneasy"
+  },
+  "w_beast_approach_01": {
+   "speaker": "witness",
+   "text": "Stop. Listen. What breathes under that bronze was built in a laboratory.",
+   "dir": "low, certain"
+  },
+  "w_beast_approach_02": {
+   "speaker": "player",
+   "text": "What was it built for?",
+   "dir": "quiet"
+  },
+  "w_beast_approach_03": {
+   "speaker": "witness",
+   "text": "Nothing merciful.",
+   "dir": "flat"
+  },
+  "w_beast_victory_01": {
+   "speaker": "witness",
+   "text": "A workshop under an altar. I should like to say I am surprised. I think I signed for the candles.",
+   "dir": "dry, shaken"
+  },
+  "w_crypt_approach_01": {
+   "speaker": "witness",
+   "text": "Lamps under the water, and burning yet. Do you know, I helped consecrate this place. I cannot recall to whom.",
+   "dir": "a memory, dry"
+  },
+  "w_crypt_ossuary_01": {
+   "speaker": "witness",
+   "text": "Those are for show. The dead that mattered are kept lower down, and a great deal more carefully.",
+   "dir": "dry"
+  },
+  "w_crypt_sluice_01": {
+   "speaker": "witness",
+   "text": "Drain it, by all means. But they flooded the lower halls on purpose. One ought always to wonder why.",
+   "dir": "warning"
+  },
+  "w_crypt_door_01": {
+   "speaker": "witness",
+   "text": "That door. I have stood before it with a ledger. Names down one column. I cannot see the heading of the other.",
+   "dir": "a memory, troubled"
+  },
+  "w_gravewarden_approach_01": {
+   "speaker": "witness",
+   "text": "The keeper. He is the gentlest thing down here, and he will kill you for a careless word.",
+   "dir": "low",
+   "recorded": false
+  },
+  "w_gravewarden_approach_02": {
+   "speaker": "player",
+   "text": "What does he keep?",
+   "dir": "quiet"
+  },
+  "w_gravewarden_approach_03": {
+   "speaker": "witness",
+   "text": "Ask him. He has waited long enough to be asked.",
+   "dir": "gentle"
+  },
+  "w_gravewarden_victory_01": {
+   "speaker": "witness",
+   "text": "He remembered their names. Every one. I was paid to remember, and I cannot manage my own.",
+   "dir": "quiet"
+  },
+  "w_roost_approach_01": {
+   "speaker": "witness",
+   "text": "Glazed stone. I have seen a wall run like wax before. Never from the outside.",
+   "dir": "dry"
+  },
+  "w_roost_mews_01": {
+   "speaker": "witness",
+   "text": "They called this the Mews. One learns a great deal about a court from the things it calls small.",
+   "dir": "wry"
+  },
+  "w_roost_chain_01": {
+   "speaker": "witness",
+   "text": "A feeding lift. The cage was for cattle. Mostly.",
+   "dir": "flat"
+  },
+  "w_roost_shells_01": {
+   "speaker": "witness",
+   "text": "Numbered shells. Somebody kept a tally. Somebody always does. It was usually me.",
+   "dir": "a memory, rueful"
+  },
+  "w_wyrm_approach_01": {
+   "speaker": "witness",
+   "text": "There she is. Veyrath. They made her to end sieges, and then they ran out of walls.",
+   "dir": "hushed"
+  },
+  "w_wyrm_approach_02": {
+   "speaker": "player",
+   "text": "Can it be killed?",
+   "dir": "level"
+  },
+  "w_wyrm_approach_03": {
+   "speaker": "witness",
+   "text": "Everything can be killed. Convincing it of that is the difficult part.",
+   "dir": "dry"
+  },
+  "w_wyrm_victory_01": {
+   "speaker": "witness",
+   "text": "She never once took an order. I envied her that. I believe I still do.",
+   "dir": "quiet"
+  },
+  "w_citadel_approach_01": {
+   "speaker": "witness",
+   "text": "Dressed by the right, and frozen so. Weather has no sense of drill. Somebody gave a last command here.",
+   "dir": "grim"
+  },
+  "w_citadel_wall_01": {
+   "speaker": "witness",
+   "text": "This wall was never taken. It was closed, from within, and left.",
+   "dir": "plain"
+  },
+  "w_rimewyrm_approach_01": {
+   "speaker": "witness",
+   "text": "Something on a chain, down there. A chained thing in a king's cellar is never a pet.",
+   "dir": "low"
+  },
+  "w_rimewyrm_approach_02": {
+   "speaker": "player",
+   "text": "Then what is it?",
+   "dir": "level"
+  },
+  "w_rimewyrm_approach_03": {
+   "speaker": "witness",
+   "text": "A decision he could not bring himself to make.",
+   "dir": "dry"
+  },
+  "w_rimewyrm_victory_01": {
+   "speaker": "witness",
+   "text": "It could have left at any hour. So could most of us.",
+   "dir": "quiet"
+  },
+  "w_citadel_lift_01": {
+   "speaker": "witness",
+   "text": "This cold is made, not fallen. Somewhere beneath us a great deal of effort is spent keeping one man from thawing.",
+   "dir": "dry"
+  },
+  "w_citadel_solar_01": {
+   "speaker": "witness",
+   "text": "A queen sat at that window. I struck her name from the rolls with my own hand. I was ordered to. I think that is where I began to refuse.",
+   "dir": "a memory, hard-won"
+  },
+  "w_frostking_approach_01": {
+   "speaker": "witness",
+   "text": "I knew him. He is the only one of them who ever asked to stop.",
+   "dir": "quiet"
+  },
+  "w_frostking_approach_02": {
+   "speaker": "player",
+   "text": "Did they let him?",
+   "dir": "direct"
+  },
+  "w_frostking_approach_03": {
+   "speaker": "witness",
+   "text": "Look at the door. He had to let himself.",
+   "dir": "dry"
+  },
+  "w_frostking_victory_01": {
+   "speaker": "witness",
+   "text": "Do better than we did, he says. He always set the mark where a man might reach it.",
+   "dir": "fond, tired"
+  },
+  "w_deep_approach_01": {
+   "speaker": "witness",
+   "text": "No. I do not know this stair. I knew every stair they built. Either this was dug afterwards, or it was taken out of me.",
+   "dir": "unsettled"
+  },
+  "w_deep_names_01": {
+   "speaker": "witness",
+   "text": "Names, floor to roof. I cut the first of these. That was my office: to set down who a person was, before.",
+   "dir": "a memory, plain at last"
+  },
+  "w_deep_stair_01": {
+   "speaker": "witness",
+   "text": "Candle smoke. So this lay under your sanctuary the whole while. Your voice in the walls might have mentioned it.",
+   "dir": "pointed"
+  },
+  "w_deep_stair_02": {
+   "speaker": "lyra",
+   "text": "I did not know.",
+   "dir": "stung"
+  },
+  "w_deep_stair_03": {
+   "speaker": "witness",
+   "text": "No. I do not suppose you were permitted to.",
+   "dir": "gentler"
+  },
+  "w_deep_oaths_01": {
+   "speaker": "witness",
+   "text": "They swore here to keep the stored safe. I administered the oath. It was a good oath. It deserved better men.",
+   "dir": "a memory, bitter"
+  },
+  "w_devourer_approach_01": {
+   "speaker": "witness",
+   "text": "Do not answer it, whatever it asks. It is not one voice, and not one of them is lying.",
+   "dir": "low, urgent"
+  },
+  "w_devourer_approach_02": {
+   "speaker": "player",
+   "text": "Who were they?",
+   "dir": "quiet"
+  },
+  "w_devourer_approach_03": {
+   "speaker": "witness",
+   "text": "The ones we lost count of. I begin to think I kept the count.",
+   "dir": "ashamed"
+  },
+  "w_devourer_victory_01": {
+   "speaker": "witness",
+   "text": "Say what names you have. I will hold the rest, now that I remember how.",
+   "dir": "quiet"
+  },
+  "w_throne_approach_01": {
+   "speaker": "witness",
+   "text": "The royal mile. Every face struck off. I approve the sentiment and regret the workmanship.",
+   "dir": "dry"
+  },
+  "w_throne_hooks_01": {
+   "speaker": "witness",
+   "text": "Thirteen banners hung in this room also. Count the hooks, if you doubt me.",
+   "dir": "dry"
+  },
+  "w_throne_crown_01": {
+   "speaker": "witness",
+   "text": "There. Now I have it. They did not shut me away for what I knew. They shut me away because I would not unwrite it.",
+   "dir": "a memory, whole"
+  },
+  "w_throne_guard_01": {
+   "speaker": "witness",
+   "text": "Unrelieved. Like the first one you met. It is the same order, you know. Only the handwriting differs.",
+   "dir": "quiet"
+  },
+  "w_azhurion_approach_01": {
+   "speaker": "witness",
+   "text": "That is the first of them. The Last Wing. Nobody wrote down how to stop it. I looked.",
+   "dir": "hushed"
+  },
+  "w_azhurion_approach_02": {
+   "speaker": "player",
+   "text": "Then how?",
+   "dir": "level"
+  },
+  "w_azhurion_approach_03": {
+   "speaker": "witness",
+   "text": "The usual way. Slowly, and at great personal cost.",
+   "dir": "dry"
+  },
+  "w_azhurion_victory_01": {
+   "speaker": "witness",
+   "text": "The oldest thing they built, and it ends in a doorway. There is a moral in that. I decline to draw it.",
+   "dir": "dry"
+  },
+  "w_monarch_approach_01": {
+   "speaker": "witness",
+   "text": "He will be reasonable. That is the danger of him. I served reasonable men all my life.",
+   "dir": "quiet"
+  },
+  "w_monarch_approach_02": {
+   "speaker": "player",
+   "text": "And?",
+   "dir": "flat"
+  },
+  "w_monarch_approach_03": {
+   "speaker": "witness",
+   "text": "And here I hang at your belt. What is decided in there is yours to decide. I shall only witness it.",
+   "dir": "level"
+  },
+  "w_monarch_victory_01": {
+   "speaker": "witness",
+   "text": "Whatever you do next, I will set it down as it happened. That much I can still swear to.",
+   "dir": "steady"
+  },
+  "w_talk_mask_01": {
+   "speaker": "player",
+   "text": "The mask. Was it your face?",
+   "dir": "curious"
+  },
+  "w_talk_mask_02": {
+   "speaker": "witness",
+   "text": "It was my office. One wore it to set down a judgment, so that the record had no face to bribe.",
+   "dir": "plain"
+  },
+  "w_talk_mask_03": {
+   "speaker": "witness",
+   "text": "It amused them, I think, to leave me in it.",
+   "dir": "dry"
+  },
+  "w_talk_sword_01": {
+   "speaker": "player",
+   "text": "This sword. They say it is enchanted.",
+   "dir": "doubtful"
+  },
+  "w_talk_sword_02": {
+   "speaker": "witness",
+   "text": "It is a tool nobody remembers how to make. That is all an enchantment has ever been.",
+   "dir": "dry"
+  },
+  "w_talk_sword_03": {
+   "speaker": "witness",
+   "text": "Keep it clean. It will outlast us both, and it knows it.",
+   "dir": "wry"
+  },
+  "w_talk_lyra_01": {
+   "speaker": "witness",
+   "text": "Your Lyra says she has waited a very long time. Ask her how she knows how long.",
+   "dir": "needling"
+  },
+  "w_talk_lyra_02": {
+   "speaker": "lyra",
+   "text": "I counted.",
+   "dir": "cool"
+  },
+  "w_talk_lyra_03": {
+   "speaker": "witness",
+   "text": "From inside? One cannot count from inside. I tried.",
+   "dir": "dry"
+  },
+  "w_talk_lyra_04": {
+   "speaker": "lyra",
+   "text": "Then we counted differently. I had something to wait for.",
+   "dir": "quiet, firm"
+  },
+  "w_talk_return_01": {
+   "speaker": "player",
+   "text": "I die, and I wake here. What does that make me?",
+   "dir": "low"
+  },
+  "w_talk_return_02": {
+   "speaker": "witness",
+   "text": "Persistent. I would not look for a grander word just yet.",
+   "dir": "dry"
+  },
+  "w_talk_return_03": {
+   "speaker": "witness",
+   "text": "I watched men buy that trick with whole kingdoms. You seem to have it on loan. Mind the lender.",
+   "dir": "serious"
+  },
+  "w_talk_smith_01": {
+   "speaker": "player",
+   "text": "Orren does not trust you.",
+   "dir": "even"
+  },
+  "w_talk_smith_02": {
+   "speaker": "witness",
+   "text": "Sensible. His line kept the old craft alive by trusting nobody in a mask.",
+   "dir": "approving"
+  },
+  "w_talk_smith_03": {
+   "speaker": "witness",
+   "text": "I should like him, if he would stop looking at my rivets.",
+   "dir": "dry"
+  },
+  "w_talk_kings_01": {
+   "speaker": "player",
+   "text": "Thirteen kings. Did you know them?",
+   "dir": "curious"
+  },
+  "w_talk_kings_02": {
+   "speaker": "witness",
+   "text": "I knew eleven. One died too early to matter. One I have been made to forget.",
+   "dir": "dry"
+  },
+  "w_talk_kings_03": {
+   "speaker": "player",
+   "text": "Which one?",
+   "dir": "direct"
+  },
+  "w_talk_kings_04": {
+   "speaker": "witness",
+   "text": "If I could tell you that, they would have done poor work.",
+   "dir": "wry"
+  },
+  "w_talk_people_01": {
+   "speaker": "lyra",
+   "text": "They were people. Every one you have cut down.",
+   "dir": "quiet"
+  },
+  "w_talk_people_02": {
+   "speaker": "witness",
+   "text": "They were volunteers. That is worse, and she knows it.",
+   "dir": "flat"
+  },
+  "w_talk_people_03": {
+   "speaker": "lyra",
+   "text": "They were lied to.",
+   "dir": "sharp"
+  },
+  "w_talk_people_04": {
+   "speaker": "witness",
+   "text": "They were. By persons like me, in rooms like this. I merely wrote it down neatly.",
+   "dir": "unsparing"
+  },
+  "w_talk_silence_01": {
+   "speaker": "lyra",
+   "text": "The Silence came without warning. One night the far towns simply stopped answering.",
+   "dir": "remembering"
+  },
+  "w_talk_silence_02": {
+   "speaker": "witness",
+   "text": "Nothing that size comes without warning. Somebody was warned. Somebody always is, and thanked, and filed.",
+   "dir": "certain"
+  },
+  "w_talk_silence_03": {
+   "speaker": "lyra",
+   "text": "There is no record of a warning.",
+   "dir": "firm"
+  },
+  "w_talk_silence_04": {
+   "speaker": "witness",
+   "text": "No. That is rather my point about records.",
+   "dir": "dry"
+  },
+  "w_talk_prayer_01": {
+   "speaker": "player",
+   "text": "You prayed in that cathedral.",
+   "dir": "probing"
+  },
+  "w_talk_prayer_02": {
+   "speaker": "witness",
+   "text": "I attended. It is not the same. The gods sat in the front pew, taking note of who knelt.",
+   "dir": "dry"
+  },
+  "w_talk_stored_01": {
+   "speaker": "lyra",
+   "text": "The stored can be saved. All of them. I have to believe that.",
+   "dir": "raw"
+  },
+  "w_talk_stored_02": {
+   "speaker": "witness",
+   "text": "Believe it, then. I have read the ledgers. Some of those minds were filed already broken.",
+   "dir": "gentle, unyielding"
+  },
+  "w_talk_stored_03": {
+   "speaker": "lyra",
+   "text": "Broken is not gone.",
+   "dir": "fierce"
+  },
+  "w_talk_stored_04": {
+   "speaker": "witness",
+   "text": "No. On that, at least, we agree.",
+   "dir": "quiet"
+  },
+  "w_talk_refusal_01": {
+   "speaker": "witness",
+   "text": "It has come back, a little. There was a list. Places, and what was done in them.",
+   "dir": "slow"
+  },
+  "w_talk_refusal_02": {
+   "speaker": "player",
+   "text": "And you were told to erase it.",
+   "dir": "quiet"
+  },
+  "w_talk_refusal_03": {
+   "speaker": "witness",
+   "text": "Seventeen times they tidied the past, and I held the pen. The eighteenth I would not.",
+   "dir": "plain"
+  },
+  "w_talk_choice_01": {
+   "speaker": "player",
+   "text": "When we reach the capital. What would you do?",
+   "dir": "direct"
+  },
+  "w_talk_choice_02": {
+   "speaker": "witness",
+   "text": "I shall not tell you. I spent a lifetime telling the powerful that what they wished for was wise.",
+   "dir": "level"
+  },
+  "w_talk_choice_03": {
+   "speaker": "witness",
+   "text": "Choose. I will see it remembered correctly. It is the only gift I have left.",
+   "dir": "quiet"
+  },
+  "sx_cy_loose_stone_01": {
+   "speaker": "lyra",
+   "text": "That one has been lifted before. Often, and carefully.",
+   "dir": "quiet",
+   "recorded": false
+  },
+  "sx_cy_second_candle_01": {
+   "speaker": "lyra",
+   "text": "I did not light that one. I want that understood.",
+   "dir": "uneasy",
+   "recorded": false
+  },
+  "sx_cy_charcoal_sketch_01": {
+   "speaker": "lyra",
+   "text": "A drawing. Not of here. Keep it. Somebody wanted a place found again.",
+   "dir": "curious",
+   "recorded": false
+  },
+  "sx_bw_dark_lantern_01": {
+   "speaker": "lyra",
+   "text": "It was only waiting to be asked. Everything here is still waiting to be asked.",
+   "dir": "low",
+   "recorded": false
+  },
+  "sx_bw_three_stones_01": {
+   "speaker": "lyra",
+   "text": "The middle one. Exactly as it was drawn. Somebody trusted a stranger to look closely.",
+   "dir": "pleased",
+   "recorded": false
+  },
+  "sx_bw_woodpile_posts_01": {
+   "speaker": "lyra",
+   "text": "The fourth one lit. They were never markers. They are the lamps for a road nobody finished.",
+   "dir": "wondering",
+   "recorded": false
+  },
+  "sx_ca_end_of_cylinder_01": {
+   "speaker": "lyra",
+   "text": "It stopped. And then it said a number. Hymns do not end with a number.",
+   "dir": "unsettled",
+   "recorded": false
+  },
+  "sx_cr_whispered_name_01": {
+   "speaker": "lyra",
+   "text": "It said a name. You turned your head. You turned before I had finished hearing it.",
+   "dir": "very quiet",
+   "recorded": false
+  },
+  "sx_ro_no_shield_01": {
+   "speaker": "lyra",
+   "text": "There are two footprints fused into the glass road below. Whoever made them carried no shield either. You walked down again.",
+   "dir": "level",
+   "recorded": false
+  },
+  "sx_ci_reflection_01": {
+   "speaker": "lyra",
+   "text": "That is a Recall surface. It is not showing you. It is playing you back.",
+   "dir": "tense",
+   "recorded": false
+  },
+  "sx_de_candle_bearer_01": {
+   "speaker": "witness",
+   "text": "I know that hand. She carried it down herself, when she could still carry. Lyra, you were told you had never left the sanctuary.",
+   "dir": "careful",
+   "recorded": false
+  },
+  "sx_th_parade_sword_01": {
+   "speaker": "witness",
+   "text": "I was present when it was presented. The applause was the bravest thing I ever saw at court.",
+   "dir": "very dry",
+   "recorded": false
+  },
+  "sx_cy_cycle_count_01": {
+   "speaker": "lyra",
+   "text": "That mark was not there the first time. Or it was, and you could not see it yet. I do not know which frightens me more.",
+   "dir": "unsteady",
+   "recorded": false
+  }
+ },
+ "scenes": {
+  "opening": {
+   "lines": [
+    "opening_01",
+    "opening_02",
+    "opening_03",
+    "opening_04",
+    "opening_05",
+    "opening_06"
+   ],
+   "once": true
+  },
+  "awakening": {
+   "lines": [
+    "awakening_01",
+    "awakening_02",
+    "awakening_03",
+    "awakening_04",
+    "awakening_05",
+    "awakening_06",
+    "awakening_07"
+   ],
+   "once": true
+  },
+  "first_road": {
+   "lines": [
+    "first_road_01",
+    "first_road_02"
+   ],
+   "once": true
+  },
+  "courtyard_0": {
+   "lines": [
+    "courtyard_0_01"
+   ],
+   "once": true
+  },
+  "courtyard_1": {
+   "lines": [
+    "courtyard_1_01"
+   ],
+   "once": true
+  },
+  "courtyard_2": {
+   "lines": [
+    "courtyard_2_01"
+   ],
+   "once": true
+  },
+  "courtyard_3": {
+   "lines": [
+    "courtyard_3_01"
+   ],
+   "once": true
+  },
+  "courtyard_4": {
+   "lines": [
+    "courtyard_4_01"
+   ],
+   "once": true
+  },
+  "courtyard_5": {
+   "lines": [
+    "courtyard_5_01"
+   ],
+   "once": true
+  },
+  "courtyard_6": {
+   "lines": [
+    "courtyard_6_01"
+   ],
+   "once": true
+  },
+  "sentinel_intro": {
+   "lines": [
+    "sentinel_intro_01",
+    "sentinel_intro_02",
+    "sentinel_intro_03"
+   ],
+   "once": true
+  },
+  "gen1_open": {
+   "lines": [
+    "gen1_open_01",
+    "gen1_open_02",
+    "gen1_open_03"
+   ],
+   "once": false
+  },
+  "gen1_throne": {
+   "lines": [
+    "gen1_throne_01",
+    "gen1_throne_02",
+    "gen1_throne_03",
+    "gen1_throne_04"
+   ],
+   "once": false
+  },
+  "gen1_guard": {
+   "lines": [
+    "gen1_guard_01"
+   ],
+   "once": false
+  },
+  "gen1_records": {
+   "lines": [
+    "gen1_records_01",
+    "gen1_records_02"
+   ],
+   "once": false
+  },
+  "gen1_seal": {
+   "lines": [
+    "gen1_seal_01",
+    "gen1_seal_02",
+    "gen1_seal_03"
+   ],
+   "once": false
+  },
+  "gen1_close_m": {
+   "lines": [
+    "gen1_close_m_01",
+    "gen1_close_m_02"
+   ],
+   "once": false
+  },
+  "gen1_close_f": {
+   "lines": [
+    "gen1_close_f_01",
+    "gen1_close_f_02"
+   ],
+   "once": false
+  },
+  "gen2_arrive_m": {
+   "lines": [
+    "gen2_arrive_m_01"
+   ],
+   "once": false
+  },
+  "gen2_arrive_f": {
+   "lines": [
+    "gen2_arrive_f_01"
+   ],
+   "once": false
+  },
+  "sentinel_death": {
+   "lines": [
+    "sentinel_death_01",
+    "sentinel_death_02",
+    "sentinel_death_03"
+   ],
+   "once": true
+  },
+  "sentinel_memory": {
+   "lines": [
+    "sentinel_memory_01",
+    "sentinel_memory_02",
+    "sentinel_memory_03"
+   ],
+   "once": true
+  },
+  "sanctuary_return": {
+   "lines": [
+    "sanctuary_return_01",
+    "sanctuary_return_02"
+   ],
+   "once": true
+  },
+  "orren_intro": {
+   "lines": [
+    "orren_intro_01",
+    "orren_intro_02",
+    "orren_intro_03"
+   ],
+   "once": true
+  },
+  "orren_idle": {
+   "lines": [
+    "orren_idle_01"
+   ],
+   "once": false
+  },
+  "rebirth_0": {
+   "lines": [
+    "rebirth_0_01"
+   ],
+   "once": false
+  },
+  "rebirth_1": {
+   "lines": [
+    "rebirth_1_01"
+   ],
+   "once": false
+  },
+  "rebirth_2": {
+   "lines": [
+    "rebirth_2_01"
+   ],
+   "once": false
+  },
+  "rebirth_3": {
+   "lines": [
+    "rebirth_3_01"
+   ],
+   "once": false
+  },
+  "rebirth_4": {
+   "lines": [
+    "rebirth_4_01"
+   ],
+   "once": false
+  },
+  "rebirth_5": {
+   "lines": [
+    "rebirth_5_01"
+   ],
+   "once": false
+  },
+  "executioner_intro": {
+   "lines": [
+    "executioner_intro_01",
+    "executioner_intro_02",
+    "executioner_intro_03"
+   ],
+   "once": true
+  },
+  "executioner_death": {
+   "lines": [
+    "executioner_death_01"
+   ],
+   "once": true
+  },
+  "huntsman_intro": {
+   "lines": [
+    "huntsman_intro_01",
+    "huntsman_intro_02",
+    "huntsman_intro_03"
+   ],
+   "once": true
+  },
+  "widow_intro": {
+   "lines": [
+    "widow_intro_01",
+    "widow_intro_02",
+    "widow_intro_03"
+   ],
+   "once": true
+  },
+  "widow_death": {
+   "lines": [
+    "widow_death_01",
+    "widow_death_02"
+   ],
+   "once": true
+  },
+  "beast_intro": {
+   "lines": [
+    "beast_intro_01"
+   ],
+   "once": true
+  },
+  "beast_death": {
+   "lines": [
+    "beast_death_01",
+    "beast_death_02",
+    "beast_death_03"
+   ],
+   "once": true,
+   "essential": true
+  },
+  "gravewarden_intro": {
+   "lines": [
+    "gravewarden_intro_01",
+    "gravewarden_intro_02",
+    "gravewarden_intro_03"
+   ],
+   "once": true
+  },
+  "gravewarden_death": {
+   "lines": [
+    "gravewarden_death_01",
+    "gravewarden_death_02"
+   ],
+   "once": true
+  },
+  "frostking_intro": {
+   "lines": [
+    "frostking_intro_01",
+    "frostking_intro_02",
+    "frostking_intro_03"
+   ],
+   "once": true
+  },
+  "frostking_retry": {
+   "lines": [
+    "frostking_retry_01"
+   ],
+   "once": false
+  },
+  "frostking_death": {
+   "lines": [
+    "frostking_death_01"
+   ],
+   "once": true
+  },
+  "wyrm_intro": {
+   "lines": [
+    "wyrm_intro_01"
+   ],
+   "once": true
+  },
+  "devourer_intro": {
+   "lines": [
+    "devourer_intro_01",
+    "devourer_intro_02",
+    "devourer_intro_03"
+   ],
+   "once": true
+  },
+  "devourer_death": {
+   "lines": [
+    "devourer_death_01",
+    "devourer_death_02",
+    "devourer_death_03",
+    "devourer_death_04"
+   ],
+   "once": true
+  },
+  "monarch_intro": {
+   "lines": [
+    "monarch_intro_01",
+    "monarch_intro_02",
+    "monarch_intro_03",
+    "monarch_intro_04",
+    "monarch_intro_05"
+   ],
+   "once": true
+  },
+  "monarch_retry": {
+   "lines": [
+    "monarch_retry_01"
+   ],
+   "once": false
+  },
+  "monarch_death": {
+   "lines": [
+    "monarch_death_01",
+    "monarch_death_02",
+    "monarch_death_03"
+   ],
+   "once": true
+  },
+  "witness_discovery": {
+   "lines": [
+    "witness_discovery_01",
+    "witness_discovery_02",
+    "witness_discovery_03",
+    "witness_discovery_04",
+    "witness_discovery_05",
+    "witness_discovery_06",
+    "witness_discovery_07",
+    "witness_discovery_08",
+    "witness_discovery_09"
+   ],
+   "once": false,
+   "title": "The Witness",
+   "kind": "discovery",
+   "essential": true
+  },
+  "w_courtyard_approach": {
+   "lines": [
+    "w_courtyard_approach_01"
+   ],
+   "once": false,
+   "title": "The Fallen Courtyard",
+   "kind": "approach"
+  },
+  "w_courtyard_gate": {
+   "lines": [
+    "w_courtyard_gate_01"
+   ],
+   "once": false,
+   "title": "Thirteen Banners",
+   "kind": "landmark"
+  },
+  "w_courtyard_passage": {
+   "lines": [
+    "w_courtyard_passage_01"
+   ],
+   "once": false,
+   "title": "The Narrow Way",
+   "kind": "landmark"
+  },
+  "w_courtyard_candle": {
+   "lines": [
+    "w_courtyard_candle_01"
+   ],
+   "once": false,
+   "title": "The Candle",
+   "kind": "landmark"
+  },
+  "w_sentinel_approach": {
+   "lines": [
+    "w_sentinel_approach_01",
+    "w_sentinel_approach_02"
+   ],
+   "once": false,
+   "title": "Before the Sentinel",
+   "kind": "boss"
+  },
+  "w_sentinel_victory": {
+   "lines": [
+    "w_sentinel_victory_01"
+   ],
+   "once": false,
+   "title": "One Winter",
+   "kind": "victory"
+  },
+  "w_blackwood_approach": {
+   "lines": [
+    "w_blackwood_approach_01"
+   ],
+   "once": false,
+   "title": "The Blackwood",
+   "kind": "approach"
+  },
+  "w_blackwood_briars": {
+   "lines": [
+    "w_blackwood_briars_01"
+   ],
+   "once": false,
+   "title": "A Kept Boundary",
+   "kind": "landmark"
+  },
+  "w_blackwood_bridge": {
+   "lines": [
+    "w_blackwood_bridge_01"
+   ],
+   "once": false,
+   "title": "The Toll Bridge",
+   "kind": "memory"
+  },
+  "w_blackwood_gibbet": {
+   "lines": [
+    "w_blackwood_gibbet_01"
+   ],
+   "once": false,
+   "title": "Gallows and Spring",
+   "kind": "landmark"
+  },
+  "w_huntsman_approach": {
+   "lines": [
+    "w_huntsman_approach_01"
+   ],
+   "once": false,
+   "title": "He Who Follows",
+   "kind": "boss"
+  },
+  "w_huntsman_victory": {
+   "lines": [
+    "w_huntsman_victory_01"
+   ],
+   "once": false,
+   "title": "The Hunter's Fear",
+   "kind": "victory"
+  },
+  "w_executioner_approach": {
+   "lines": [
+    "w_executioner_approach_01",
+    "w_executioner_approach_02",
+    "w_executioner_approach_03"
+   ],
+   "once": false,
+   "title": "The Clearing of Stumps",
+   "kind": "boss"
+  },
+  "w_executioner_victory": {
+   "lines": [
+    "w_executioner_victory_01"
+   ],
+   "once": false,
+   "title": "Nobody Told the Axe",
+   "kind": "victory"
+  },
+  "w_cathedral_approach": {
+   "lines": [
+    "w_cathedral_approach_01"
+   ],
+   "once": false,
+   "title": "The Cathedral of Ash",
+   "kind": "approach"
+  },
+  "w_cathedral_censer": {
+   "lines": [
+    "w_cathedral_censer_01"
+   ],
+   "once": false,
+   "title": "The Great Censer",
+   "kind": "landmark"
+  },
+  "w_widow_approach": {
+   "lines": [
+    "w_widow_approach_01",
+    "w_widow_approach_02",
+    "w_widow_approach_03"
+   ],
+   "once": false,
+   "title": "The Woman in Red",
+   "kind": "boss"
+  },
+  "w_widow_victory": {
+   "lines": [
+    "w_widow_victory_01"
+   ],
+   "once": false,
+   "title": "To Yield",
+   "kind": "victory"
+  },
+  "w_cathedral_nave": {
+   "lines": [
+    "w_cathedral_nave_01"
+   ],
+   "once": false,
+   "title": "The Open Nave",
+   "kind": "memory"
+  },
+  "w_cathedral_choir": {
+   "lines": [
+    "w_cathedral_choir_01"
+   ],
+   "once": false,
+   "title": "Forty Verses",
+   "kind": "landmark"
+  },
+  "w_beast_approach": {
+   "lines": [
+    "w_beast_approach_01",
+    "w_beast_approach_02",
+    "w_beast_approach_03"
+   ],
+   "once": false,
+   "title": "Under the Bronze",
+   "kind": "boss",
+   "essential": true
+  },
+  "w_beast_victory": {
+   "lines": [
+    "w_beast_victory_01"
+   ],
+   "once": false,
+   "title": "The Altar and the Works",
+   "kind": "victory"
+  },
+  "w_crypt_approach": {
+   "lines": [
+    "w_crypt_approach_01"
+   ],
+   "once": false,
+   "title": "The Sunken Crypt",
+   "kind": "approach"
+  },
+  "w_crypt_ossuary": {
+   "lines": [
+    "w_crypt_ossuary_01"
+   ],
+   "once": false,
+   "title": "The Ossuary",
+   "kind": "landmark"
+  },
+  "w_crypt_sluice": {
+   "lines": [
+    "w_crypt_sluice_01"
+   ],
+   "once": false,
+   "title": "The Sluice",
+   "kind": "landmark"
+  },
+  "w_crypt_door": {
+   "lines": [
+    "w_crypt_door_01"
+   ],
+   "once": false,
+   "title": "The Ledger",
+   "kind": "memory"
+  },
+  "w_gravewarden_approach": {
+   "lines": [
+    "w_gravewarden_approach_01",
+    "w_gravewarden_approach_02",
+    "w_gravewarden_approach_03"
+   ],
+   "once": false,
+   "title": "The Keeper",
+   "kind": "boss"
+  },
+  "w_gravewarden_victory": {
+   "lines": [
+    "w_gravewarden_victory_01"
+   ],
+   "once": false,
+   "title": "Every Name",
+   "kind": "victory"
+  },
+  "w_roost_approach": {
+   "lines": [
+    "w_roost_approach_01"
+   ],
+   "once": false,
+   "title": "The Glass Road",
+   "kind": "approach"
+  },
+  "w_roost_mews": {
+   "lines": [
+    "w_roost_mews_01"
+   ],
+   "once": false,
+   "title": "The Mews",
+   "kind": "landmark"
+  },
+  "w_roost_chain": {
+   "lines": [
+    "w_roost_chain_01"
+   ],
+   "once": false,
+   "title": "The Feeding Lift",
+   "kind": "landmark"
+  },
+  "w_roost_shells": {
+   "lines": [
+    "w_roost_shells_01"
+   ],
+   "once": false,
+   "title": "The Tally",
+   "kind": "memory"
+  },
+  "w_wyrm_approach": {
+   "lines": [
+    "w_wyrm_approach_01",
+    "w_wyrm_approach_02",
+    "w_wyrm_approach_03"
+   ],
+   "once": false,
+   "title": "Veyrath",
+   "kind": "boss",
+   "essential": true
+  },
+  "w_wyrm_victory": {
+   "lines": [
+    "w_wyrm_victory_01"
+   ],
+   "once": false,
+   "title": "No Orders",
+   "kind": "victory"
+  },
+  "w_citadel_approach": {
+   "lines": [
+    "w_citadel_approach_01"
+   ],
+   "once": false,
+   "title": "The Frozen Rank",
+   "kind": "approach"
+  },
+  "w_citadel_wall": {
+   "lines": [
+    "w_citadel_wall_01"
+   ],
+   "once": false,
+   "title": "The Shut Wall",
+   "kind": "landmark"
+  },
+  "w_rimewyrm_approach": {
+   "lines": [
+    "w_rimewyrm_approach_01",
+    "w_rimewyrm_approach_02",
+    "w_rimewyrm_approach_03"
+   ],
+   "once": false,
+   "title": "The Thing on the Chain",
+   "kind": "boss",
+   "essential": true
+  },
+  "w_rimewyrm_victory": {
+   "lines": [
+    "w_rimewyrm_victory_01"
+   ],
+   "once": false,
+   "title": "It Stayed",
+   "kind": "victory"
+  },
+  "w_citadel_lift": {
+   "lines": [
+    "w_citadel_lift_01"
+   ],
+   "once": false,
+   "title": "Manufactured Winter",
+   "kind": "landmark"
+  },
+  "w_citadel_solar": {
+   "lines": [
+    "w_citadel_solar_01"
+   ],
+   "once": false,
+   "title": "The Queen's Window",
+   "kind": "memory"
+  },
+  "w_frostking_approach": {
+   "lines": [
+    "w_frostking_approach_01",
+    "w_frostking_approach_02",
+    "w_frostking_approach_03"
+   ],
+   "once": false,
+   "title": "The Winter Throne",
+   "kind": "boss"
+  },
+  "w_frostking_victory": {
+   "lines": [
+    "w_frostking_victory_01"
+   ],
+   "once": false,
+   "title": "The Mark He Set",
+   "kind": "victory"
+  },
+  "w_deep_approach": {
+   "lines": [
+    "w_deep_approach_01"
+   ],
+   "once": false,
+   "title": "The Long Stair",
+   "kind": "approach"
+  },
+  "w_deep_names": {
+   "lines": [
+    "w_deep_names_01"
+   ],
+   "once": false,
+   "title": "The Gallery of Names",
+   "kind": "memory"
+  },
+  "w_deep_stair": {
+   "lines": [
+    "w_deep_stair_01",
+    "w_deep_stair_02",
+    "w_deep_stair_03"
+   ],
+   "once": false,
+   "title": "Beneath the Sanctuary",
+   "kind": "landmark"
+  },
+  "w_deep_oaths": {
+   "lines": [
+    "w_deep_oaths_01"
+   ],
+   "once": false,
+   "title": "The Oath Hall",
+   "kind": "memory"
+  },
+  "w_devourer_approach": {
+   "lines": [
+    "w_devourer_approach_01",
+    "w_devourer_approach_02",
+    "w_devourer_approach_03"
+   ],
+   "once": false,
+   "title": "The Bottom",
+   "kind": "boss"
+  },
+  "w_devourer_victory": {
+   "lines": [
+    "w_devourer_victory_01"
+   ],
+   "once": false,
+   "title": "The Rest of the Names",
+   "kind": "victory"
+  },
+  "w_throne_approach": {
+   "lines": [
+    "w_throne_approach_01"
+   ],
+   "once": false,
+   "title": "The Royal Mile",
+   "kind": "approach"
+  },
+  "w_throne_hooks": {
+   "lines": [
+    "w_throne_hooks_01"
+   ],
+   "once": false,
+   "title": "Thirteen Hooks",
+   "kind": "landmark"
+  },
+  "w_throne_crown": {
+   "lines": [
+    "w_throne_crown_01"
+   ],
+   "once": false,
+   "title": "What I Would Not Unwrite",
+   "kind": "memory"
+  },
+  "w_throne_guard": {
+   "lines": [
+    "w_throne_guard_01"
+   ],
+   "once": false,
+   "title": "Unrelieved",
+   "kind": "landmark"
+  },
+  "w_azhurion_approach": {
+   "lines": [
+    "w_azhurion_approach_01",
+    "w_azhurion_approach_02",
+    "w_azhurion_approach_03"
+   ],
+   "once": false,
+   "title": "The Last Wing",
+   "kind": "boss",
+   "essential": true
+  },
+  "w_azhurion_victory": {
+   "lines": [
+    "w_azhurion_victory_01"
+   ],
+   "once": false,
+   "title": "A Moral Declined",
+   "kind": "victory"
+  },
+  "w_monarch_approach": {
+   "lines": [
+    "w_monarch_approach_01",
+    "w_monarch_approach_02",
+    "w_monarch_approach_03"
+   ],
+   "once": false,
+   "title": "A Reasonable Man",
+   "kind": "boss"
+  },
+  "w_monarch_victory": {
+   "lines": [
+    "w_monarch_victory_01"
+   ],
+   "once": false,
+   "title": "As It Happened",
+   "kind": "victory"
+  },
+  "w_talk_mask": {
+   "lines": [
+    "w_talk_mask_01",
+    "w_talk_mask_02",
+    "w_talk_mask_03"
+   ],
+   "once": false,
+   "title": "The Mask",
+   "kind": "topic"
+  },
+  "w_talk_sword": {
+   "lines": [
+    "w_talk_sword_01",
+    "w_talk_sword_02",
+    "w_talk_sword_03"
+   ],
+   "once": false,
+   "title": "On Old Weapons",
+   "kind": "topic"
+  },
+  "w_talk_lyra": {
+   "lines": [
+    "w_talk_lyra_01",
+    "w_talk_lyra_02",
+    "w_talk_lyra_03",
+    "w_talk_lyra_04"
+   ],
+   "once": false,
+   "title": "The Voice in the Walls",
+   "kind": "topic"
+  },
+  "w_talk_return": {
+   "lines": [
+    "w_talk_return_01",
+    "w_talk_return_02",
+    "w_talk_return_03"
+   ],
+   "once": false,
+   "title": "Coming Back",
+   "kind": "topic"
+  },
+  "w_talk_smith": {
+   "lines": [
+    "w_talk_smith_01",
+    "w_talk_smith_02",
+    "w_talk_smith_03"
+   ],
+   "once": false,
+   "title": "The Smith",
+   "kind": "topic"
+  },
+  "w_talk_kings": {
+   "lines": [
+    "w_talk_kings_01",
+    "w_talk_kings_02",
+    "w_talk_kings_03",
+    "w_talk_kings_04"
+   ],
+   "once": false,
+   "title": "Thirteen Kings",
+   "kind": "topic"
+  },
+  "w_talk_people": {
+   "lines": [
+    "w_talk_people_01",
+    "w_talk_people_02",
+    "w_talk_people_03",
+    "w_talk_people_04"
+   ],
+   "once": false,
+   "title": "They Were People",
+   "kind": "topic"
+  },
+  "w_talk_silence": {
+   "lines": [
+    "w_talk_silence_01",
+    "w_talk_silence_02",
+    "w_talk_silence_03",
+    "w_talk_silence_04"
+   ],
+   "once": false,
+   "title": "The Great Silence",
+   "kind": "topic"
+  },
+  "w_talk_prayer": {
+   "lines": [
+    "w_talk_prayer_01",
+    "w_talk_prayer_02"
+   ],
+   "once": false,
+   "title": "What We Prayed To",
+   "kind": "topic"
+  },
+  "w_talk_stored": {
+   "lines": [
+    "w_talk_stored_01",
+    "w_talk_stored_02",
+    "w_talk_stored_03",
+    "w_talk_stored_04"
+   ],
+   "once": false,
+   "title": "The Stored",
+   "kind": "topic"
+  },
+  "w_talk_refusal": {
+   "lines": [
+    "w_talk_refusal_01",
+    "w_talk_refusal_02",
+    "w_talk_refusal_03"
+   ],
+   "once": false,
+   "title": "The Eighteenth Time",
+   "kind": "topic"
+  },
+  "w_talk_choice": {
+   "lines": [
+    "w_talk_choice_01",
+    "w_talk_choice_02",
+    "w_talk_choice_03"
+   ],
+   "once": false,
+   "title": "The Choice Ahead",
+   "kind": "topic"
+  },
+  "sx_cy_loose_stone": {
+   "lines": [
+    "sx_cy_loose_stone_01"
+   ],
+   "once": false,
+   "title": "The Relief Order",
+   "kind": "secret"
+  },
+  "sx_cy_second_candle": {
+   "lines": [
+    "sx_cy_second_candle_01"
+   ],
+   "once": false,
+   "title": "The Second Candle",
+   "kind": "secret"
+  },
+  "sx_cy_charcoal_sketch": {
+   "lines": [
+    "sx_cy_charcoal_sketch_01"
+   ],
+   "once": false,
+   "title": "A Charcoal Sketch",
+   "kind": "secret"
+  },
+  "sx_bw_dark_lantern": {
+   "lines": [
+    "sx_bw_dark_lantern_01"
+   ],
+   "once": false,
+   "title": "The Lamplighter's Round",
+   "kind": "secret"
+  },
+  "sx_bw_three_stones": {
+   "lines": [
+    "sx_bw_three_stones_01"
+   ],
+   "once": false,
+   "title": "The Shaded Stone",
+   "kind": "secret"
+  },
+  "sx_bw_woodpile_posts": {
+   "lines": [
+    "sx_bw_woodpile_posts_01"
+   ],
+   "once": false,
+   "title": "The Trimmed Posts",
+   "kind": "secret"
+  },
+  "sx_ca_end_of_cylinder": {
+   "lines": [
+    "sx_ca_end_of_cylinder_01"
+   ],
+   "once": false,
+   "title": "End of the Cylinder",
+   "kind": "secret"
+  },
+  "sx_cr_whispered_name": {
+   "lines": [
+    "sx_cr_whispered_name_01"
+   ],
+   "once": false,
+   "title": "A Name You Answer To",
+   "kind": "secret"
+  },
+  "sx_ro_no_shield": {
+   "lines": [
+    "sx_ro_no_shield_01"
+   ],
+   "once": false,
+   "title": "Unshielded at the Summit",
+   "kind": "secret"
+  },
+  "sx_ci_reflection": {
+   "lines": [
+    "sx_ci_reflection_01"
+   ],
+   "once": false,
+   "title": "Twice Yourself",
+   "kind": "secret"
+  },
+  "sx_de_candle_bearer": {
+   "lines": [
+    "sx_de_candle_bearer_01"
+   ],
+   "once": false,
+   "title": "Who Carried It",
+   "kind": "secret"
+  },
+  "sx_th_parade_sword": {
+   "lines": [
+    "sx_th_parade_sword_01"
+   ],
+   "once": false,
+   "title": "The Parade Sword of the Ninth Jubilee",
+   "kind": "secret"
+  },
+  "sx_cy_cycle_count": {
+   "lines": [
+    "sx_cy_cycle_count_01"
+   ],
+   "once": false,
+   "title": "The Cycle Count",
+   "kind": "secret"
+  }
+ },
+ "voices": {
+  "witness": "inworld:Hamish (en)",
+  "player_m": "inworld:Malcolm (en)",
+  "narrator": "inworld:Graham (en)",
+  "sentinel": "inworld:Mortimer (en)",
+  "executioner": "inworld:Mortimer (en)",
+  "lyra": "inworld:Claire (en)",
+  "player_f": "inworld:Victoria (en)",
+  "orren": "inworld:Callum (en)",
+  "monarch": "inworld:Hades (en)",
+  "archivist": "Onyx",
+  "huntsman": "Brooks",
+  "widow": "Sloane",
+  "gravewarden": "Bram",
+  "frostking": "Alistair",
+  "devourer": "Luna"
+ },
+ "names": {
+  "narrator": "",
+  "lyra": "Lyra",
+  "player": "",
+  "orren": "Orren",
+  "archivist": "The Archivist",
+  "sentinel": "Ashen Sentinel",
+  "executioner": "Hollow Executioner",
+  "huntsman": "Pale Huntsman",
+  "widow": "Crimson Widow",
+  "gravewarden": "Gravewarden",
+  "frostking": "Frostbound King",
+  "monarch": "Forgotten Monarch",
+  "devourer": "Devourer of Names",
+  "witness": "The Witness",
+  "forebear": ""
+ },
+ "speech": {
+  "ashen_sentinel": "B",
+  "hollow_executioner": "B",
+  "gravewarden": "B",
+  "crimson_widow": "C",
+  "pale_huntsman": "C",
+  "frostbound_king": "C",
+  "forgotten_monarch": "C",
+  "devourer": "D",
+  "cathedral_beast": "A",
+  "cinder_wyrm": "A",
+  "rimewyrm": "A",
+  "azhurion": "A"
+ },
+ "foe_voice": {
+  "ashen_sentinel": "sentinel",
+  "hollow_executioner": "executioner",
+  "pale_huntsman": "huntsman",
+  "crimson_widow": "widow",
+  "gravewarden": "gravewarden",
+  "frostbound_king": "frostking",
+  "devourer": "devourer",
+  "forgotten_monarch": "monarch"
+ },
+ "companion": {
+  "discovery": {
+   "scene": "witness_discovery",
+   "region": "courtyard",
+   "stage": 1
+  },
+  "stage": {
+   "courtyard": {
+    "2": [
+     "w_courtyard_approach"
+    ],
+    "3": [
+     "w_courtyard_gate"
+    ],
+    "4": [
+     "w_courtyard_passage"
+    ],
+    "5": [
+     "w_courtyard_candle"
+    ]
+   },
+   "blackwood": {
+    "0": [
+     "w_blackwood_approach"
+    ],
+    "2": [
+     "w_blackwood_briars"
+    ],
+    "3": [
+     "w_blackwood_bridge"
+    ],
+    "5": [
+     "w_blackwood_gibbet"
+    ]
+   },
+   "cathedral": {
+    "0": [
+     "w_cathedral_approach"
+    ],
+    "1": [
+     "w_cathedral_censer"
+    ],
+    "3": [
+     "w_cathedral_nave"
+    ],
+    "4": [
+     "w_cathedral_choir"
+    ]
+   },
+   "crypt": {
+    "0": [
+     "w_crypt_approach"
+    ],
+    "1": [
+     "w_crypt_ossuary"
+    ],
+    "3": [
+     "w_crypt_sluice"
+    ],
+    "4": [
+     "w_crypt_door"
+    ]
+   },
+   "roost": {
+    "0": [
+     "w_roost_approach"
+    ],
+    "1": [
+     "w_roost_mews"
+    ],
+    "3": [
+     "w_roost_chain"
+    ],
+    "4": [
+     "w_roost_shells"
+    ]
+   },
+   "citadel": {
+    "0": [
+     "w_citadel_approach"
+    ],
+    "1": [
+     "w_citadel_wall"
+    ],
+    "3": [
+     "w_citadel_lift"
+    ],
+    "5": [
+     "w_citadel_solar"
+    ]
+   },
+   "deep": {
+    "0": [
+     "w_deep_approach"
+    ],
+    "1": [
+     "w_deep_names"
+    ],
+    "3": [
+     "w_deep_stair"
+    ],
+    "4": [
+     "w_deep_oaths"
+    ]
+   },
+   "throne": {
+    "0": [
+     "w_throne_approach"
+    ],
+    "1": [
+     "w_throne_hooks"
+    ],
+    "2": [
+     "w_throne_crown"
+    ],
+    "4": [
+     "w_throne_guard"
+    ]
+   }
+  },
+  "boss": {
+   "ashen_sentinel": {
+    "approach": [
+     "w_sentinel_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_sentinel_victory"
+    ]
+   },
+   "pale_huntsman": {
+    "approach": [
+     "w_huntsman_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_huntsman_victory"
+    ]
+   },
+   "hollow_executioner": {
+    "approach": [
+     "w_executioner_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_executioner_victory"
+    ]
+   },
+   "crimson_widow": {
+    "approach": [
+     "w_widow_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_widow_victory"
+    ]
+   },
+   "cathedral_beast": {
+    "approach": [
+     "w_beast_approach"
+    ],
+    "fallback": [
+     "beast_intro"
+    ],
+    "victory": [
+     "beast_death",
+     "w_beast_victory"
+    ]
+   },
+   "gravewarden": {
+    "approach": [
+     "w_gravewarden_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_gravewarden_victory"
+    ]
+   },
+   "cinder_wyrm": {
+    "approach": [
+     "w_wyrm_approach"
+    ],
+    "fallback": [
+     "wyrm_intro"
+    ],
+    "victory": [
+     "w_wyrm_victory"
+    ]
+   },
+   "rimewyrm": {
+    "approach": [
+     "w_rimewyrm_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_rimewyrm_victory"
+    ]
+   },
+   "frostbound_king": {
+    "approach": [
+     "w_frostking_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_frostking_victory"
+    ]
+   },
+   "devourer": {
+    "approach": [
+     "w_devourer_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_devourer_victory"
+    ]
+   },
+   "azhurion": {
+    "approach": [
+     "w_azhurion_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_azhurion_victory"
+    ]
+   },
+   "forgotten_monarch": {
+    "approach": [
+     "w_monarch_approach"
+    ],
+    "fallback": [],
+    "victory": [
+     "w_monarch_victory"
+    ]
+   }
+  },
+  "topics": [
+   {
+    "id": "w_talk_mask"
+   },
+   {
+    "id": "w_talk_sword"
+   },
+   {
+    "id": "w_talk_lyra"
+   },
+   {
+    "id": "w_talk_return"
+   },
+   {
+    "id": "w_talk_smith"
+   },
+   {
+    "id": "w_talk_kings",
+    "after": "courtyard"
+   },
+   {
+    "id": "w_talk_people",
+    "after": "courtyard"
+   },
+   {
+    "id": "w_talk_silence",
+    "after": "blackwood"
+   },
+   {
+    "id": "w_talk_prayer",
+    "after": "cathedral"
+   },
+   {
+    "id": "w_talk_stored",
+    "after": "crypt"
+   },
+   {
+    "id": "w_talk_refusal",
+    "after": "citadel"
+   },
+   {
+    "id": "w_talk_choice",
+    "after": "citadel"
+   }
+  ]
+ }
+}

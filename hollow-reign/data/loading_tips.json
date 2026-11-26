@@ -1,0 +1,209 @@
+{
+ "_note": "Loading-screen lines. kind 'tip' is always eligible; kind 'lore' needs the region in 'after' to have been reached (null: from the start). Keep every line free of anything the player has not yet seen.",
+ "tips": [
+  {
+   "kind": "tip",
+   "text": "A parry answers a blow from the side it comes from. Watch the shoulder, not the blade."
+  },
+  {
+   "kind": "tip",
+   "text": "A parry made at the last instant costs nothing and leaves the guardian open for longer."
+  },
+  {
+   "kind": "tip",
+   "text": "The shield stops what you cannot read, and charges you stamina for it. Raise it at the last instant and it charges nothing."
+  },
+  {
+   "kind": "tip",
+   "text": "Dodging early is safe. Dodging late is safe and earns you an opening."
+  },
+  {
+   "kind": "tip",
+   "text": "An empty stamina bar is the most dangerous thing you carry. Let it fill before you commit."
+  },
+  {
+   "kind": "tip",
+   "text": "Every guardian repeats itself. The first death is the price of learning the rhythm; the knowledge is yours afterwards."
+  },
+  {
+   "kind": "tip",
+   "text": "When a seam of light opens on a staggered foe, cut along it. Cutting across it does nothing."
+  },
+  {
+   "kind": "tip",
+   "text": "Sequences are found by trying them. The yard behind the sanctuary has a foe that will stand still for it."
+  },
+  {
+   "kind": "tip",
+   "text": "A full surge breaks a foe in the middle of its attack. Spend it on the blow you cannot answer any other way."
+  },
+  {
+   "kind": "tip",
+   "text": "The relic at your belt mends a third of you, and then needs time. It will not let you waste it at full health."
+  },
+  {
+   "kind": "tip",
+   "text": "Two-handed weapons leave no hand for a shield. Decide which you trust more before you set out."
+  },
+  {
+   "kind": "tip",
+   "text": "Heavy weapons answer to strength, quick ones to dexterity. Putting points where your weapon does not look wastes them."
+  },
+  {
+   "kind": "tip",
+   "text": "Fight with a piece of equipment long enough and you master it. Each mastery is a point to spend."
+  },
+  {
+   "kind": "tip",
+   "text": "Dying costs you the road, not what you carried. Gold, experience and anything found stay with you."
+  },
+  {
+   "kind": "tip",
+   "text": "A lever pulled stays pulled. The short road it opens is there on every later journey."
+  },
+  {
+   "kind": "tip",
+   "text": "A shrine restores more than half of you. It is usually worth the detour before a guardian."
+  },
+  {
+   "kind": "tip",
+   "text": "Chests off the road are opened once. What is in them does not come back; a few coins sometimes do."
+  },
+  {
+   "kind": "tip",
+   "text": "Some stretches of road offer a second fight nobody asked you to take. They pay better than the road does."
+  },
+  {
+   "kind": "tip",
+   "text": "Orren can make a blade better than it was. He cannot make it a different blade."
+  },
+  {
+   "kind": "tip",
+   "text": "If the windows for parrying feel unkind, Forgiving Timing in the settings widens them. Nothing is withheld for using it."
+  },
+  {
+   "kind": "tip",
+   "text": "A staggered foe takes more from every cut. That is the time for your longest sequence, not your safest."
+  },
+  {
+   "kind": "tip",
+   "text": "Frost slows the arm and flame keeps biting after the blow. Resistance blunts both."
+  },
+  {
+   "kind": "tip",
+   "text": "You can turn back from any stop on the road. The sanctuary does not judge it."
+  },
+  {
+   "kind": "tip",
+   "text": "The records you find are not decoration. Enough of them, and a third choice opens at the end."
+  },
+  {
+   "kind": "lore",
+   "text": "Nobody alive remembers the kingdom being lit. The lamps along the old roads are taken for shrines, and people leave bread at them.",
+   "after": null
+  },
+  {
+   "kind": "lore",
+   "text": "The sanctuary bell has no rope. It rings anyway, each time you come back.",
+   "after": null
+  },
+  {
+   "kind": "lore",
+   "text": "Vaelora's maps still mark the royal roads. Nothing has been carried along them in three hundred years.",
+   "after": null
+  },
+  {
+   "kind": "lore",
+   "text": "Lyra speaks from the walls of the sanctuary. She says she has been waiting, and will not yet say for how long.",
+   "after": null
+  },
+  {
+   "kind": "lore",
+   "text": "Orren kept the forge lit because somebody told him to, once. He has stopped wondering who.",
+   "after": null
+  },
+  {
+   "kind": "lore",
+   "text": "The garrison of the Fallen Courtyard was never relieved. Most of it is still at its posts.",
+   "after": "courtyard"
+  },
+  {
+   "kind": "lore",
+   "text": "The statues in the courtyard have had their faces cut away. The hatches in their plinths have been kept oiled.",
+   "after": "courtyard"
+  },
+  {
+   "kind": "lore",
+   "text": "The Blackwood was planted, in rows, as a hunting park. It stopped keeping to the rows a long time ago.",
+   "after": "blackwood"
+  },
+  {
+   "kind": "lore",
+   "text": "Hunters in the Blackwood hang lanterns to find the road home. The lanterns here are still lit, and nobody tends them.",
+   "after": "blackwood"
+  },
+  {
+   "kind": "lore",
+   "text": "The Cathedral of Ash was built over something older, with thicker walls than a cathedral needs.",
+   "after": "cathedral"
+  },
+  {
+   "kind": "lore",
+   "text": "The fire in the cathedral has no fuel that anyone can find. It has burned since before the pilgrims' grandmothers were born.",
+   "after": "cathedral"
+  },
+  {
+   "kind": "lore",
+   "text": "What the people of the river towns call the Sunken Crypt has no bodies in it. The niches are the wrong shape for bodies.",
+   "after": "crypt"
+  },
+  {
+   "kind": "lore",
+   "text": "The river was not always in the crypt. Somebody opened a gate and let it in, and it was not an accident.",
+   "after": "crypt"
+  },
+  {
+   "kind": "lore",
+   "text": "The keepers of the Roost fed something every day for three centuries, on the strength of a standing order.",
+   "after": "roost"
+  },
+  {
+   "kind": "lore",
+   "text": "The king of the Frozen Citadel ordered his own gates frozen. The order was obeyed at once, as all his orders were.",
+   "after": "citadel"
+  },
+  {
+   "kind": "lore",
+   "text": "Cold of the citadel's kind does not come from the mountain. It comes from the walls, and it hums.",
+   "after": "citadel"
+  },
+  {
+   "kind": "lore",
+   "text": "There are stairs under the last hall that are on no plan. The court called what went down them 'the remainder'.",
+   "after": "deep"
+  },
+  {
+   "kind": "lore",
+   "text": "The Hollow Throne was never empty. That is not the same as saying a king sat on it.",
+   "after": "throne"
+  },
+  {
+   "kind": "lore",
+   "text": "The Everbound feared neither age nor sickness. What they feared was being forgotten."
+  },
+  {
+   "kind": "lore",
+   "text": "The oldest dragons were not born. They were commissioned.",
+   "after": "roost"
+  },
+  {
+   "kind": "tip",
+   "text": "A shield may withstand a thousand blades, yet fail the hand that raises it too late."
+  },
+  {
+   "kind": "lore",
+   "text": "The ruins beneath the Cathedral predate the kingdom that built it.",
+   "after": "cathedral"
+  }
+ ]
+}

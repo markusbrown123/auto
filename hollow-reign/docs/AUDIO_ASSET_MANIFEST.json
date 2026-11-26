@@ -1,0 +1,1461 @@
+{
+ "note": "Nobody has listened to any of this audio. Regenerate with tools/asset docs script in DEVELOPMENT notes.",
+ "files": [
+  {
+   "path": "assets/audio/amb/crypt.ogg",
+   "kind": "amb",
+   "seconds": 20.0,
+   "bytes": 318163,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/amb/fire.ogg",
+   "kind": "amb",
+   "seconds": 20.0,
+   "bytes": 633107,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/amb/rain.ogg",
+   "kind": "amb",
+   "seconds": 20.0,
+   "bytes": 557760,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/amb/wind.ogg",
+   "kind": "amb",
+   "seconds": 20.0,
+   "bytes": 527839,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/music/boss_ashen_sentinel.ogg",
+   "kind": "music",
+   "seconds": 90.1,
+   "bytes": 1656341,
+   "source": "generated music (unheard)",
+   "tool": "tools/music.py"
+  },
+  {
+   "path": "assets/audio/music/combat_a.ogg",
+   "kind": "music",
+   "seconds": 33.6,
+   "bytes": 504219,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/music/combat_b.ogg",
+   "kind": "music",
+   "seconds": 33.6,
+   "bytes": 544656,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/music/explore_courtyard.ogg",
+   "kind": "music",
+   "seconds": 85.1,
+   "bytes": 1521759,
+   "source": "generated music (unheard)",
+   "tool": "tools/music.py"
+  },
+  {
+   "path": "assets/audio/music/final.ogg",
+   "kind": "music",
+   "seconds": 40.0,
+   "bytes": 683034,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/music/hub.ogg",
+   "kind": "music",
+   "seconds": 75.1,
+   "bytes": 1240221,
+   "source": "generated music (unheard)",
+   "tool": "tools/music.py"
+  },
+  {
+   "path": "assets/audio/music/menu.ogg",
+   "kind": "music",
+   "seconds": 48.0,
+   "bytes": 675517,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/music/sanctuary.ogg",
+   "kind": "music",
+   "seconds": 48.0,
+   "bytes": 710705,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/music/theme.ogg",
+   "kind": "music",
+   "seconds": 90.1,
+   "bytes": 1569448,
+   "source": "generated music (unheard)",
+   "tool": "tools/music.py"
+  },
+  {
+   "path": "assets/audio/sfx/armor_1.wav",
+   "kind": "sfx",
+   "seconds": 0.16,
+   "bytes": 14156,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/armor_2.wav",
+   "kind": "sfx",
+   "seconds": 0.16,
+   "bytes": 14156,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/armor_3.wav",
+   "kind": "sfx",
+   "seconds": 0.16,
+   "bytes": 14156,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_breath.wav",
+   "kind": "sfx",
+   "seconds": 1.76,
+   "bytes": 155472,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_claw.wav",
+   "kind": "sfx",
+   "seconds": 0.6,
+   "bytes": 52960,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_death.wav",
+   "kind": "sfx",
+   "seconds": 2.59,
+   "bytes": 228490,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_growl_1.wav",
+   "kind": "sfx",
+   "seconds": 1.19,
+   "bytes": 105134,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_growl_2.wav",
+   "kind": "sfx",
+   "seconds": 1.49,
+   "bytes": 131438,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_lunge.wav",
+   "kind": "sfx",
+   "seconds": 0.69,
+   "bytes": 60984,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_pain.wav",
+   "kind": "sfx",
+   "seconds": 0.79,
+   "bytes": 69784,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/beast_threat.wav",
+   "kind": "sfx",
+   "seconds": 1.89,
+   "bytes": 166888,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/bell.wav",
+   "kind": "sfx",
+   "seconds": 4.0,
+   "bytes": 352844,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/block_1.wav",
+   "kind": "sfx",
+   "seconds": 0.4,
+   "bytes": 35324,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/block_2.wav",
+   "kind": "sfx",
+   "seconds": 0.4,
+   "bytes": 35322,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/clash_1.wav",
+   "kind": "sfx",
+   "seconds": 0.8,
+   "bytes": 70604,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/clash_2.wav",
+   "kind": "sfx",
+   "seconds": 0.7,
+   "bytes": 61782,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/clash_3.wav",
+   "kind": "sfx",
+   "seconds": 0.9,
+   "bytes": 79424,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/death.wav",
+   "kind": "sfx",
+   "seconds": 2.5,
+   "bytes": 220540,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/dodge.wav",
+   "kind": "sfx",
+   "seconds": 0.29,
+   "bytes": 25698,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_breath.wav",
+   "kind": "sfx",
+   "seconds": 2.35,
+   "bytes": 207452,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_claw.wav",
+   "kind": "sfx",
+   "seconds": 0.6,
+   "bytes": 52960,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_death.wav",
+   "kind": "sfx",
+   "seconds": 3.39,
+   "bytes": 299118,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_exhausted.wav",
+   "kind": "sfx",
+   "seconds": 1.56,
+   "bytes": 137966,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_fire.wav",
+   "kind": "sfx",
+   "seconds": 2.16,
+   "bytes": 190366,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_frost.wav",
+   "kind": "sfx",
+   "seconds": 2.17,
+   "bytes": 191114,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_growl_1.wav",
+   "kind": "sfx",
+   "seconds": 1.39,
+   "bytes": 122690,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_growl_2.wav",
+   "kind": "sfx",
+   "seconds": 1.69,
+   "bytes": 149100,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_land.wav",
+   "kind": "sfx",
+   "seconds": 0.6,
+   "bytes": 52962,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_pain_1.wav",
+   "kind": "sfx",
+   "seconds": 0.89,
+   "bytes": 78684,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_pain_2.wav",
+   "kind": "sfx",
+   "seconds": 1.09,
+   "bytes": 96370,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_roar_1.wav",
+   "kind": "sfx",
+   "seconds": 2.19,
+   "bytes": 193144,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_roar_2.wav",
+   "kind": "sfx",
+   "seconds": 2.79,
+   "bytes": 246234,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_roar_far.wav",
+   "kind": "sfx",
+   "seconds": 2.59,
+   "bytes": 228190,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_tail.wav",
+   "kind": "sfx",
+   "seconds": 0.6,
+   "bytes": 52962,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_wing_1.wav",
+   "kind": "sfx",
+   "seconds": 0.7,
+   "bytes": 61710,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/dragon_wing_2.wav",
+   "kind": "sfx",
+   "seconds": 0.85,
+   "bytes": 74984,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/ember_burst.wav",
+   "kind": "sfx",
+   "seconds": 0.9,
+   "bytes": 79416,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/finisher.wav",
+   "kind": "sfx",
+   "seconds": 1.37,
+   "bytes": 120794,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/footstep_1.wav",
+   "kind": "sfx",
+   "seconds": 0.25,
+   "bytes": 22092,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/footstep_2.wav",
+   "kind": "sfx",
+   "seconds": 0.25,
+   "bytes": 22094,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/footstep_3.wav",
+   "kind": "sfx",
+   "seconds": 0.2,
+   "bytes": 17672,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/footstep_4.wav",
+   "kind": "sfx",
+   "seconds": 0.2,
+   "bytes": 17682,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/frost.wav",
+   "kind": "sfx",
+   "seconds": 1.1,
+   "bytes": 97064,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/guard_break.wav",
+   "kind": "sfx",
+   "seconds": 1.1,
+   "bytes": 97064,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/guardian_breath.wav",
+   "kind": "sfx",
+   "seconds": 2.15,
+   "bytes": 189656,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/guardian_death.wav",
+   "kind": "sfx",
+   "seconds": 1.79,
+   "bytes": 157844,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/guardian_effort_1.wav",
+   "kind": "sfx",
+   "seconds": 0.44,
+   "bytes": 38916,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/guardian_effort_2.wav",
+   "kind": "sfx",
+   "seconds": 0.54,
+   "bytes": 47772,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/guardian_pain.wav",
+   "kind": "sfx",
+   "seconds": 0.59,
+   "bytes": 52164,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_creatures.py"
+  },
+  {
+   "path": "assets/audio/sfx/hit_armor_1.wav",
+   "kind": "sfx",
+   "seconds": 0.45,
+   "bytes": 39732,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/hit_armor_2.wav",
+   "kind": "sfx",
+   "seconds": 0.45,
+   "bytes": 39734,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/hit_flesh_1.wav",
+   "kind": "sfx",
+   "seconds": 0.35,
+   "bytes": 30906,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/hit_flesh_2.wav",
+   "kind": "sfx",
+   "seconds": 0.35,
+   "bytes": 30910,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/levelup.wav",
+   "kind": "sfx",
+   "seconds": 1.45,
+   "bytes": 127946,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/loot.wav",
+   "kind": "sfx",
+   "seconds": 0.6,
+   "bytes": 52964,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/parry_perfect.wav",
+   "kind": "sfx",
+   "seconds": 1.2,
+   "bytes": 105884,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/roar_1.wav",
+   "kind": "sfx",
+   "seconds": 1.29,
+   "bytes": 113744,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/roar_2.wav",
+   "kind": "sfx",
+   "seconds": 1.59,
+   "bytes": 140306,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/roar_3.wav",
+   "kind": "sfx",
+   "seconds": 1.79,
+   "bytes": 157896,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/roll.wav",
+   "kind": "sfx",
+   "seconds": 0.58,
+   "bytes": 50934,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/shield_heavy.wav",
+   "kind": "sfx",
+   "seconds": 0.55,
+   "bytes": 48550,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/shield_scrape.wav",
+   "kind": "sfx",
+   "seconds": 0.32,
+   "bytes": 28268,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio_extra.py"
+  },
+  {
+   "path": "assets/audio/sfx/stagger.wav",
+   "kind": "sfx",
+   "seconds": 0.7,
+   "bytes": 61780,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/swing_1.wav",
+   "kind": "sfx",
+   "seconds": 0.31,
+   "bytes": 27772,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/swing_2.wav",
+   "kind": "sfx",
+   "seconds": 0.34,
+   "bytes": 29976,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/swing_3.wav",
+   "kind": "sfx",
+   "seconds": 0.29,
+   "bytes": 25300,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/swing_heavy.wav",
+   "kind": "sfx",
+   "seconds": 0.62,
+   "bytes": 54978,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/telegraph_unblockable.wav",
+   "kind": "sfx",
+   "seconds": 0.5,
+   "bytes": 44140,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/ui_back.wav",
+   "kind": "sfx",
+   "seconds": 0.28,
+   "bytes": 24738,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/ui_confirm.wav",
+   "kind": "sfx",
+   "seconds": 0.35,
+   "bytes": 30910,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/ui_tap.wav",
+   "kind": "sfx",
+   "seconds": 0.12,
+   "bytes": 10628,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/sfx/victory.wav",
+   "kind": "sfx",
+   "seconds": 3.0,
+   "bytes": 264644,
+   "source": "synthesised (unheard)",
+   "tool": "tools/gen_audio.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_01.ogg",
+   "kind": "vo",
+   "seconds": 1.31,
+   "bytes": 16822,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_02_f.ogg",
+   "kind": "vo",
+   "seconds": 1.15,
+   "bytes": 14669,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_02_m.ogg",
+   "kind": "vo",
+   "seconds": 1.07,
+   "bytes": 13596,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_03.ogg",
+   "kind": "vo",
+   "seconds": 3.41,
+   "bytes": 40802,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_04_f.ogg",
+   "kind": "vo",
+   "seconds": 1.41,
+   "bytes": 17233,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_04_m.ogg",
+   "kind": "vo",
+   "seconds": 1.49,
+   "bytes": 17940,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_05.ogg",
+   "kind": "vo",
+   "seconds": 2.78,
+   "bytes": 34338,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_06_f.ogg",
+   "kind": "vo",
+   "seconds": 2.59,
+   "bytes": 29560,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_06_m.ogg",
+   "kind": "vo",
+   "seconds": 2.51,
+   "bytes": 28426,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/awakening_07.ogg",
+   "kind": "vo",
+   "seconds": 1.89,
+   "bytes": 23073,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_01.ogg",
+   "kind": "vo",
+   "seconds": 1.81,
+   "bytes": 22446,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_02_f.ogg",
+   "kind": "vo",
+   "seconds": 2.12,
+   "bytes": 24755,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_02_m.ogg",
+   "kind": "vo",
+   "seconds": 1.88,
+   "bytes": 21394,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/beast_death_03.ogg",
+   "kind": "vo",
+   "seconds": 1.5,
+   "bytes": 18745,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/beast_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 5.4,
+   "bytes": 62284,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_0_01.ogg",
+   "kind": "vo",
+   "seconds": 5.7,
+   "bytes": 66622,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_1_01.ogg",
+   "kind": "vo",
+   "seconds": 5.9,
+   "bytes": 66240,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_2_01.ogg",
+   "kind": "vo",
+   "seconds": 5.9,
+   "bytes": 69763,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_3_01.ogg",
+   "kind": "vo",
+   "seconds": 5.9,
+   "bytes": 66794,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_4_01.ogg",
+   "kind": "vo",
+   "seconds": 5.8,
+   "bytes": 65671,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_5_01.ogg",
+   "kind": "vo",
+   "seconds": 5.3,
+   "bytes": 61654,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/courtyard_6_01.ogg",
+   "kind": "vo",
+   "seconds": 5.5,
+   "bytes": 67039,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/devourer_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 1.69,
+   "bytes": 20206,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/devourer_intro_02.ogg",
+   "kind": "vo",
+   "seconds": 2.08,
+   "bytes": 26408,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/devourer_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 2.79,
+   "bytes": 31156,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/executioner_death_01.ogg",
+   "kind": "vo",
+   "seconds": 6.6,
+   "bytes": 75743,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 3.04,
+   "bytes": 30430,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_02_f.ogg",
+   "kind": "vo",
+   "seconds": 2.59,
+   "bytes": 28818,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_02_m.ogg",
+   "kind": "vo",
+   "seconds": 2.59,
+   "bytes": 30016,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/executioner_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 3.04,
+   "bytes": 30790,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/first_road_01.ogg",
+   "kind": "vo",
+   "seconds": 8.3,
+   "bytes": 92166,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/first_road_02.ogg",
+   "kind": "vo",
+   "seconds": 6.6,
+   "bytes": 75000,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/frostking_death_01.ogg",
+   "kind": "vo",
+   "seconds": 5.1,
+   "bytes": 48658,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 6.0,
+   "bytes": 56460,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_02_f.ogg",
+   "kind": "vo",
+   "seconds": 2.19,
+   "bytes": 26175,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_02_m.ogg",
+   "kind": "vo",
+   "seconds": 2.19,
+   "bytes": 26253,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/frostking_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 2.62,
+   "bytes": 27333,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/frostking_retry_01.ogg",
+   "kind": "vo",
+   "seconds": 3.66,
+   "bytes": 36293,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_death_01.ogg",
+   "kind": "vo",
+   "seconds": 6.2,
+   "bytes": 59877,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_death_02.ogg",
+   "kind": "vo",
+   "seconds": 5.7,
+   "bytes": 53401,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 2.14,
+   "bytes": 21513,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_02_f.ogg",
+   "kind": "vo",
+   "seconds": 1.15,
+   "bytes": 14819,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_02_m.ogg",
+   "kind": "vo",
+   "seconds": 0.99,
+   "bytes": 13083,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/gravewarden_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 3.11,
+   "bytes": 29218,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 5.6,
+   "bytes": 47453,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_02_f.ogg",
+   "kind": "vo",
+   "seconds": 1.72,
+   "bytes": 20322,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_02_m.ogg",
+   "kind": "vo",
+   "seconds": 1.8,
+   "bytes": 24226,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/huntsman_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 1.6,
+   "bytes": 17367,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_01.ogg",
+   "kind": "vo",
+   "seconds": 6.2,
+   "bytes": 54641,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_02.ogg",
+   "kind": "vo",
+   "seconds": 2.12,
+   "bytes": 26604,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_03_f.ogg",
+   "kind": "vo",
+   "seconds": 1.49,
+   "bytes": 18668,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_death_03_m.ogg",
+   "kind": "vo",
+   "seconds": 1.41,
+   "bytes": 16806,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 2.88,
+   "bytes": 28239,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_02_f.ogg",
+   "kind": "vo",
+   "seconds": 3.16,
+   "bytes": 35399,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_02_m.ogg",
+   "kind": "vo",
+   "seconds": 3.32,
+   "bytes": 38580,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 4.9,
+   "bytes": 45702,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_04_f.ogg",
+   "kind": "vo",
+   "seconds": 2.51,
+   "bytes": 28539,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_04_m.ogg",
+   "kind": "vo",
+   "seconds": 2.43,
+   "bytes": 27576,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_intro_05.ogg",
+   "kind": "vo",
+   "seconds": 4.3,
+   "bytes": 42103,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/monarch_retry_01.ogg",
+   "kind": "vo",
+   "seconds": 3.43,
+   "bytes": 33485,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/opening_01.ogg",
+   "kind": "vo",
+   "seconds": 4.1,
+   "bytes": 45396,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/opening_02.ogg",
+   "kind": "vo",
+   "seconds": 2.44,
+   "bytes": 28192,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/opening_03.ogg",
+   "kind": "vo",
+   "seconds": 8.3,
+   "bytes": 92031,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/opening_04.ogg",
+   "kind": "vo",
+   "seconds": 4.3,
+   "bytes": 48390,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/opening_05.ogg",
+   "kind": "vo",
+   "seconds": 8.2,
+   "bytes": 84132,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/opening_06.ogg",
+   "kind": "vo",
+   "seconds": 1.58,
+   "bytes": 18231,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/orren_idle_01.ogg",
+   "kind": "vo",
+   "seconds": 6.2,
+   "bytes": 76981,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/orren_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 3.16,
+   "bytes": 39076,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/orren_intro_02.ogg",
+   "kind": "vo",
+   "seconds": 4.6,
+   "bytes": 57023,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/orren_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 5.8,
+   "bytes": 66533,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_0_01.ogg",
+   "kind": "vo",
+   "seconds": 2.44,
+   "bytes": 30547,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_1_01.ogg",
+   "kind": "vo",
+   "seconds": 4.5,
+   "bytes": 51833,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_2_01.ogg",
+   "kind": "vo",
+   "seconds": 2.85,
+   "bytes": 35681,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_3_01.ogg",
+   "kind": "vo",
+   "seconds": 2.28,
+   "bytes": 30991,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_4_01.ogg",
+   "kind": "vo",
+   "seconds": 2.93,
+   "bytes": 37235,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/rebirth_5_01.ogg",
+   "kind": "vo",
+   "seconds": 4.7,
+   "bytes": 53792,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sanctuary_return_01.ogg",
+   "kind": "vo",
+   "seconds": 3.41,
+   "bytes": 42565,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sanctuary_return_02.ogg",
+   "kind": "vo",
+   "seconds": 6.9,
+   "bytes": 77456,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_01.ogg",
+   "kind": "vo",
+   "seconds": 2.3,
+   "bytes": 22442,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_02_f.ogg",
+   "kind": "vo",
+   "seconds": 2.04,
+   "bytes": 24060,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_02_m.ogg",
+   "kind": "vo",
+   "seconds": 2.12,
+   "bytes": 25907,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_death_03.ogg",
+   "kind": "vo",
+   "seconds": 2.3,
+   "bytes": 22793,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 1.6,
+   "bytes": 16842,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_02_f.ogg",
+   "kind": "vo",
+   "seconds": 1.72,
+   "bytes": 20525,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_02_m.ogg",
+   "kind": "vo",
+   "seconds": 1.88,
+   "bytes": 22120,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 2.07,
+   "bytes": 20594,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_memory_01.ogg",
+   "kind": "vo",
+   "seconds": 5.3,
+   "bytes": 50715,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_memory_02.ogg",
+   "kind": "vo",
+   "seconds": 8.5,
+   "bytes": 78754,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_memory_03.ogg",
+   "kind": "vo",
+   "seconds": 6.1,
+   "bytes": 70505,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/sentinel_retry_01.ogg",
+   "kind": "vo",
+   "seconds": 2.72,
+   "bytes": 26912,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/widow_death_01.ogg",
+   "kind": "vo",
+   "seconds": 4.3,
+   "bytes": 42567,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/widow_death_02.ogg",
+   "kind": "vo",
+   "seconds": 2.44,
+   "bytes": 29519,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 3.82,
+   "bytes": 37273,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_02_f.ogg",
+   "kind": "vo",
+   "seconds": 1.65,
+   "bytes": 19749,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_02_m.ogg",
+   "kind": "vo",
+   "seconds": 1.49,
+   "bytes": 20221,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/widow_intro_03.ogg",
+   "kind": "vo",
+   "seconds": 3.27,
+   "bytes": 31580,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  },
+  {
+   "path": "assets/audio/vo/wyrm_intro_01.ogg",
+   "kind": "vo",
+   "seconds": 6.0,
+   "bytes": 74478,
+   "source": "generated speech (provisional, unheard)",
+   "tool": "tools/voices.py"
+  }
+ ]
+}

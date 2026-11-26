@@ -1,0 +1,750 @@
+class_name Explore
+extends Node
+## One stop along a region's road: a slow camera move through the place,
+## a line of description, and the ways onward.
+
+signal fight(option: Dictionary)
+signal moved_on
+signal turned_back
+
+var backdrop: Backdrop
+var layer: CanvasLayer
+var cards: VBoxContainer
+var prompt: Label
+var hp_bar: ProgressBar
+var angle := 0.0
+var markers: Array = []       # world positions of each option's path marker
+var pouches: Array = []       # [prop, button]
+var _leaving := false
+var adopted: Backdrop         # a place already built and on screen (the Approach hands its own over): no rebuild, no cut
+var foes: Array = []          # the figure standing at each fight's marker, or null
+var _staging := false         # a staged moment has the camera; the choices wait
+var relic: Node3D             # the Witness's mask on the stones, while it is being found
+var spots: Array = []         # hidden things at this stop: {node, button, secret, index, lamp}
+var _idle := 0.0              # seconds stood here without doing anything (some places answer that)
+var _order: Dictionary = {}   # secret id -> the inscriptions touched so far, in order
+var _clock := 0.0
+
+const CAM_POS := Vector3(1.3, 1.7, 4.2)
+const CAM_LOOK := Vector3(-0.3, 1.25, -4.0)
+
+## Each stage looks across the arena from its own bearing.
+static func bearing(stage: int) -> float:
+	return stage * 0.85 - 0.4
+
+func _ready() -> void:
+	var region := Game.run_region()
+	var stage: int = Game.run.stage
+	angle = bearing(stage)
+	if adopted:
+		# the knight has just walked in, in this very place: keep it, and let the camera settle from where it is
+		backdrop = adopted
+		if backdrop.get_parent():
+			backdrop.get_parent().remove_child(backdrop)
+		add_child(backdrop)
+		backdrop.cam.make_current()
+		backdrop.rig.rotation.y = angle
+		backdrop.rig.walking = false
+		backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK))
+	else:
+		backdrop = Backdrop.new()
+		add_child(backdrop)
+		backdrop.build(region.theme)
+		# arriving pans from the last stage's bearing
+		var prev := angle - 0.85
+		backdrop.rig.rotation.y = angle
+		backdrop.move_camera(_at(prev, Vector3(1.3, 1.9, 5.2)), _at(prev, Vector3(0, 1.3, -4.0)), true)
+		backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK))
+		Sfx.play("footstep", -6.0)
+	Sfx.ambience(str(region.amb))
+	Sfx.music_for("explore_" + str(region.id), "menu")
+	layer = CanvasLayer.new()
+	add_child(layer)
+	var m := UI.margin(get_viewport(), 8)
+	layer.add_child(m)
+	var frame := Control.new()
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	m.add_child(frame)
+	var head := VBoxContainer.new()
+	head.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	head.add_theme_constant_override("separation", 2)
+	frame.add_child(head)
+	head.add_child(UI.title(region.name, 24))
+	var pips := ""
+	for i in region.stages.size():
+		pips += "◆ " if i < stage else ("◇ " if i > stage else "❖ ")
+	head.add_child(UI.label(pips, 18, UI.GOLD_DIM))
+	hp_bar = UI.bar(Color("#9a2a2a"), 10)
+	hp_bar.custom_minimum_size.x = 230
+	hp_bar.max_value = Game.stats().max_hp
+	hp_bar.value = Game.run.hp
+	head.add_child(hp_bar)
+	for l in Game.find_lore(region.id, stage):
+		head.add_child(UI.label("Record found  ·  " + str(l.title), 15, UI.GOLD))
+	var back := UI.button("Turn Back", 14, 150)
+	back.custom_minimum_size.y = 40
+	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	back.offset_left = -150
+	back.pressed.connect(func(): turned_back.emit())
+	frame.add_child(back)
+	var bottom := VBoxContainer.new()
+	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	bottom.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bottom.add_theme_constant_override("separation", 10)
+	frame.add_child(bottom)
+	prompt = UI.label(Game.run_stage().prompt, 24, UI.BONE)
+	prompt.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	prompt.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.95))
+	prompt.add_theme_constant_override("shadow_offset_y", 2)
+	bottom.add_child(prompt)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 12)
+	bottom.add_child(row)
+	var opts := Game.stage_options()
+	for i in opts.size():
+		# each way onward is marked on the ground ahead, left to right
+		var x := (float(i) - (opts.size() - 1) * 0.5) * 3.2
+		var at := _at(angle, Vector3(x - 0.3, 0, -4.6))
+		backdrop.add_prop("marker", at)
+		markers.append(at)
+		_stand_foe(opts[i], at)
+		row.add_child(_card(opts[i], i))
+	_scatter_pouches(frame, int(Game.run_stage().get("pouches", 1)))
+	_place_secrets(frame)
+	for note: Dictionary in Secrets.take_notes():
+		head.add_child(UI.label("Secret found  ·  " + str(note.name), 15, UI.GOLD))
+		_banner(note)
+	layer.get_child(0).modulate.a = 0.0
+	var said: Array = Companion.pick_stage(str(region.id), stage)
+	if not said.is_empty():
+		# let the place and the voice land first; the choices appear once the line is done
+		await get_tree().create_timer(1.4).timeout
+		if not is_inside_tree():
+			return
+		if said.has(Companion.discovery_id()) and _monument() != Vector3.INF:
+			await _find_witness(str(region.id), stage)
+		else:
+			await Companion.on_stage(str(region.id), stage)
+		if not is_inside_tree():
+			return
+	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.3)
+
+func _at(a: float, v: Vector3) -> Vector3:
+	return v.rotated(Vector3.UP, a)
+
+# ---------------------------------------------------------------- what waits on the road
+## The foe of a fight stands at its marker, so the way onward shows what is on it. Guardians keep their entrance
+## for the duel. Its files are read on a thread first, so neither this nor the duel after it has to stop the picture.
+static var _kept: Array = []          # models read ahead, held so the duel finds them loaded
+
+func _stand_foe(o: Dictionary, at: Vector3) -> void:
+	var index := foes.size()
+	foes.append(null)
+	if not o.has("foe") or not Db.foes.has(str(o.foe)):
+		return
+	var foe: Dictionary = Db.foes[str(o.foe)]
+	var files: Array = CineActor.foe_files(str(o.foe))
+	if o.type != "fight" or str(foe.rig.get("kind", "")) == "dragon":
+		_read_ahead(files, Callable())
+		return
+	_read_ahead(files, func():
+		var f := FighterRig.new()
+		backdrop.props.add_child(f)
+		f.build(CineActor.foe_look(str(o.foe)), true)
+		f.position = at + _at(angle, Vector3(0, 0, -1.6))
+		f.rotation.y = angle + PI
+		f.time_scale = 0.6
+		foes[index] = f)
+
+func _read_ahead(files: Array, then: Callable) -> void:
+	var pending: Array = []
+	for p: String in files:
+		if ResourceLoader.exists(p) and not ResourceLoader.has_cached(p) and ResourceLoader.load_threaded_request(p) == OK:
+			pending.append(p)
+	while not pending.is_empty():
+		await get_tree().process_frame
+		if not is_inside_tree():
+			return
+		for p: String in pending.duplicate():
+			if ResourceLoader.load_threaded_get_status(p) != ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+				_kept.append(ResourceLoader.load_threaded_get(p))
+				pending.erase(p)
+	while _kept.size() > 8:
+		_kept.pop_front()
+	if then.is_valid():
+		then.call()
+
+# ---------------------------------------------------------------- the Witness is found
+## Where the fallen monument lies in this place (INF where the place has none).
+func _monument() -> Vector3:
+	if backdrop.arena._theme_id == "courtyard" and PropModel.exists("res://assets/models/env_statue_head.glb"):
+		return Vector3(6.4, 0, -2.4)
+	return Vector3.INF
+
+## The camera goes to the fallen monument, a light kindles under it, they talk, and the mask is lifted down:
+## after this it is on the knight's belt, not on the stones.
+func _find_witness(region_id: String, stage: int) -> void:
+	_staging = true
+	var m := _monument()
+	var from := (backdrop.rig.position - m).normalized()
+	var side := from.rotated(Vector3.UP, -0.9)
+	var rest := m + side * 1.25 + Vector3(0, 0.12, 0)
+	relic = PropModel.scenery(backdrop.props, "res://assets/models/witness_relic.glb", 0.36, rest, rad_to_deg(atan2(side.x, side.z)))
+	var lamp := OmniLight3D.new()
+	lamp.light_color = Color("#ffb347")
+	lamp.light_energy = 0.0
+	lamp.omni_range = 3.4
+	lamp.position = rest + side * 0.35 + Vector3(0, 0.45, 0)
+	backdrop.props.add_child(lamp)
+	var keep_pos := backdrop.cam_pos
+	var keep_look := backdrop.cam_look
+	backdrop.move_camera(rest + side * 1.55 + from * 0.25 + Vector3(0, 0.5, 0), rest + Vector3(0, 0.22, 0))
+	var d := m - backdrop.rig.position
+	create_tween().tween_property(backdrop.rig, "rotation:y", atan2(-d.x, -d.z), 0.8).set_trans(Tween.TRANS_SINE)
+	var tw := create_tween()
+	tw.tween_interval(1.1)
+	tw.tween_callback(func(): Sfx.play("levelup", -12.0, 0.7))
+	tw.tween_property(lamp, "light_energy", 2.6, 1.4)
+	await Companion.on_stage(region_id, stage)
+	if not is_inside_tree():
+		return
+	# lifted down: gone from the stones, and worn from here on
+	if relic:
+		relic.queue_free()
+		relic = null
+	Sfx.play("loot", -4.0)
+	var out := create_tween()
+	out.tween_property(lamp, "light_energy", 0.0, 0.6)
+	out.tween_callback(lamp.queue_free)
+	if Companion.witness_found():
+		var pos := backdrop.rig.position
+		backdrop.refresh_knight()
+		backdrop.rig.position = pos
+		backdrop.rig.rotation.y = angle
+	backdrop.move_camera(keep_pos, keep_look)
+	_staging = false
+
+## Hidden coin: small, off the path, and only yours if you spot and tap it.
+func _scatter_pouches(frame: Control, n: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("%s%d%d" % [Game.run.region, Game.run.stage, Game.profile.deaths])
+	for i in n:
+		var side := -1.0 if rng.randf() < 0.5 else 1.0
+		var at := _at(angle, Vector3(side * rng.randf_range(2.2, 4.2) - 0.3, 0, rng.randf_range(-6.5, -2.0)))
+		var prop := backdrop.add_prop("pouch", at)
+		var b := Button.new()
+		b.flat = true
+		b.custom_minimum_size = Vector2(84, 84)
+		b.size = Vector2(84, 84)
+		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		frame.add_child(b)
+		frame.move_child(b, 0)
+		b.pressed.connect(func(): _take_pouch(prop, b))
+		pouches.append([prop, b])
+
+func _take_pouch(prop: Node3D, b: Button) -> void:
+	_idle = 0.0
+	var amount := Game.take_pouch()
+	Sfx.play("loot", -2.0)
+	var l := UI.label("+%d gold" % amount, 22, UI.GOLD, "bold")
+	l.position = b.position + Vector2(10, 10)
+	b.get_parent().add_child(l)
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(l, "position:y", l.position.y - 60.0, 0.9)
+	tw.tween_property(l, "modulate:a", 0.0, 0.9)
+	tw.chain().tween_callback(l.queue_free)
+	for e in pouches:
+		if e[0] == prop:
+			pouches.erase(e)
+			break
+	prop.queue_free()
+	b.queue_free()
+
+func _process(_dt: float) -> void:
+	_tick_secrets(_dt)
+	# keep each pouch's tap target over its place in the world
+	for e in pouches:
+		var p: Vector3 = e[0].global_position + Vector3(0, 0.15, 0)
+		e[1].visible = not backdrop.cam.is_position_behind(p)
+		e[1].position = backdrop.cam.unproject_position(p) - e[1].size * 0.5 - e[1].get_parent().global_position
+
+## The knight walks to the chosen marker before the scene changes.
+func _walk_then(index: int, then: Callable) -> void:
+	if _leaving:
+		return
+	_leaving = true
+	var rig := backdrop.rig
+	var to: Vector3 = markers[index] if index < markers.size() else _at(angle, Vector3(0, 0, -4.0))
+	var dir := to - rig.position
+	rig.rotation.y = atan2(-dir.x, -dir.z)
+	var tw := create_tween()
+	tw.tween_property(rig, "position", rig.position + dir * 0.8, 1.0).set_trans(Tween.TRANS_SINE)
+	for i in 3:
+		get_tree().create_timer(0.3 * i).timeout.connect(func(): Sfx.play("footstep", -5.0))
+	backdrop.move_camera(backdrop.cam_pos + dir * 0.45, to + Vector3(0, 1.2, 0))
+	tw.tween_callback(then)
+
+## The foe on the road is shown before steel is drawn: the knight starts toward it, and the camera goes low
+## and looks up at what is waiting. The duel opens on the same two figures facing each other.
+func _reveal_then(index: int, then: Callable) -> void:
+	if _leaving:
+		return
+	_leaving = true
+	create_tween().tween_property(layer.get_child(0), "modulate:a", 0.0, 0.3)
+	var rig := backdrop.rig
+	var foe: FighterRig = foes[index]
+	var dir := foe.position - rig.position
+	var step := dir.normalized()
+	var side := step.rotated(Vector3.UP, PI * 0.5)
+	rig.rotation.y = atan2(-dir.x, -dir.z)
+	rig.walking = true
+	rig.footsteps = true
+	foe.rotation.y = atan2(dir.x, dir.z)
+	foe.time_scale = 1.0
+	var tw := create_tween()
+	tw.tween_property(rig, "position", rig.position + dir * 0.3, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	# past the knight, low, and to the side they are not walking on: nothing of theirs crosses the lens
+	backdrop.move_camera(foe.position - step * 2.3 - side * 1.2 + Vector3(0, 0.5, 0), foe.position + Vector3(0, 1.3 * foe.scale.y, 0))
+	Sfx.play("armor", -6.0, 0.8)
+	tw.tween_callback(then)
+
+func _card(o: Dictionary, index: int = 0) -> Button:
+	var tag: String = {"fight": "A foe", "boss": "The guardian", "treasure": "A cache", "shrine": "Respite", "lever": "A mechanism", "pass": "Onward"}[o.type]
+	if o.get("optional", false):
+		tag = "A hunt  ·  optional"
+	if o.has("foe"):
+		# name the kind of fight ahead, so the right weapon can be in hand
+		tag += "  ·  " + str(Db.foes[o.foe].get("cls", ""))
+	var b := UI.button("", 18, 0)
+	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	b.custom_minimum_size.y = 104
+	var v := VBoxContainer.new()
+	UI.full(v)
+	v.offset_left = 16
+	v.offset_top = 10
+	v.offset_right = -16
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	v.add_theme_constant_override("separation", 0)
+	b.add_child(v)
+	v.add_child(UI.label(tag.to_upper(), 13, UI.BLOOD.lightened(0.3) if o.type in ["fight", "boss"] else UI.GOLD_DIM, "bold"))
+	v.add_child(UI.title(o.label, 20, UI.BONE))
+	v.add_child(UI.label(o.hint, 17, UI.DIM))
+	b.pressed.connect(func(): _choose(o, index))
+	return b
+
+func _choose(o: Dictionary, index: int = 0) -> void:
+	_idle = 0.0
+	match o.type:
+		"fight", "boss":
+			if index < foes.size() and foes[index] != null:
+				_reveal_then(index, func(): fight.emit(o))
+			else:
+				_walk_then(index, func(): fight.emit(o))
+		"pass":
+			_walk_then(index, func(): moved_on.emit())
+		_:
+			_interact(o)
+
+func _interact(o: Dictionary) -> void:
+	layer.get_child(0).visible = false
+	var spot := _at(angle, Vector3(0.9, 0, -2.4))
+	var prop := backdrop.add_prop(o.type, spot)
+	prop.rotation.y = angle
+	backdrop.move_camera(_at(angle, Vector3(2.6, 1.3, 0.4)), spot + Vector3(0, 0.6, 0))
+	var verb: String = {"treasure": "Open", "shrine": "Rest", "lever": "Pull"}[o.type]
+	var l2 := CanvasLayer.new()
+	add_child(l2)
+	var c := UI.full(CenterContainer.new())
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l2.add_child(c)
+	var b := UI.button(verb, 24, 220)
+	c.add_child(b)
+	b.modulate.a = 0.0
+	create_tween().tween_property(b, "modulate:a", 1.0, 0.5).set_delay(0.9)
+	b.pressed.connect(func():
+		l2.queue_free()
+		_resolve(o, prop))
+
+func _resolve(o: Dictionary, prop: Node3D) -> void:
+	var lines: Array = []
+	var heading := ""
+	match o.type:
+		"treasure":
+			create_tween().tween_property(prop.get_node("Lid"), "rotation:x", -1.9, 0.6).set_trans(Tween.TRANS_BACK)
+			Sfx.play("loot", 0.0)
+			var got := Game.open_treasure(o)
+			heading = o.label
+			for id in got.items:
+				lines.append([Db.item(id).name, Db.rarity_color(Db.item(id))])
+			if got.gold > 0:
+				lines.append("%d gold" % got.gold)
+			if got.shards > 0:
+				lines.append("%d shard%s" % [got.shards, "" if got.shards == 1 else "s"])
+			if lines.is_empty():
+				lines.append("Already emptied.")
+		"shrine":
+			Sfx.play("levelup", -6.0, 0.8)
+			var heal := Game.rest_at_shrine()
+			heading = "Respite"
+			lines.append("Wounds close.  +%d health" % int(heal))
+		"lever":
+			create_tween().tween_property(prop.get_node("Arm"), "rotation:z", -0.6, 0.5).set_trans(Tween.TRANS_BACK)
+			Sfx.play("guard_break", -8.0, 0.7)
+			Game.pull_lever(o)
+			heading = "A Way Opens"
+			lines.append("%s will stay open." % Game.run_region().shortcut.label)
+			lines.append("You may begin from here when you return.")
+	await get_tree().create_timer(0.9).timeout
+	Overlays.message(self, heading, lines, "Onward", func(): moved_on.emit())
+
+# ---------------------------------------------------------------- secrets (rules in Secrets, content in data/secrets.json)
+## Something slightly off, set down in the place: small, unlabelled, and only yours if you notice it and touch it.
+## A secret whose time has not come is either not there at all, or there and mute (`locked_text`).
+func _place_secrets(frame: Control) -> void:
+	for s: Dictionary in Secrets.at_stop(str(Game.run.region), int(Game.run.stage)):
+		var kind := str(s.trigger.type)
+		if kind == "wait":
+			continue
+		if not Secrets.open_now(s) and not s.has("locked_text"):
+			continue
+		if kind == "duel" and not Game.profile.tutorial_done:
+			continue
+		var places: Array = s.trigger.spots if kind == "sequence" else [{"tell": s.tell, "pos": s.pos}]
+		for i: int in places.size():
+			var at := _at(angle, Vector3(float(places[i].pos[0]) - 0.3, 0, float(places[i].pos[1])))
+			var node := _tell(str(places[i].tell), at)
+			var b := Button.new()
+			b.flat = true
+			b.custom_minimum_size = Vector2(96, 96)
+			b.size = Vector2(96, 96)
+			b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+			frame.add_child(b)
+			frame.move_child(b, 0)
+			var spot := {"node": node, "button": b, "secret": s, "index": i, "lamp": node.get_node_or_null("Lamp")}
+			b.pressed.connect(func(): _touch(spot))
+			spots.append(spot)
+	# things that only speak when touched: the tell of something that is earned elsewhere
+	for c: Dictionary in Secrets.clues_at(str(Game.run.region), int(Game.run.stage)):
+		var node := _tell(str(c.tell), _at(angle, Vector3(float(c.pos[0]) - 0.3, 0, float(c.pos[1]))))
+		var b := Button.new()
+		b.flat = true
+		b.custom_minimum_size = Vector2(96, 96)
+		b.size = Vector2(96, 96)
+		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		frame.add_child(b)
+		frame.move_child(b, 0)
+		var text := str(c.text)
+		b.pressed.connect(func():
+			if _quiet():
+				_idle = 0.0
+				_whisper(text))
+		spots.append({"node": node, "button": b, "secret": {}, "index": 0, "lamp": node.get_node_or_null("Lamp"), "clue": true})
+
+func _tbox(n: Node3D, size: Vector3, pos: Vector3, mat: Material, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = size
+	mi.mesh = bm
+	mi.position = pos
+	mi.rotation = rot
+	mi.material_override = mat
+	n.add_child(mi)
+	return mi
+
+## The thing itself, built from boxes and one faint light that breathes. Each is meant to read as part of the place
+## at a glance and as wrong on a second look.
+func _tell(kind: String, at: Vector3) -> Node3D:
+	var n := Node3D.new()
+	backdrop.props.add_child(n)
+	n.position = at
+	n.rotation.y = angle
+	var stone := Look.stone(Color("#6a665e"))
+	var pale := Look.stone(Color("#9a958a"))
+	var dark := Look.flat(Color("#1c1a18"), 0.7)
+	var wood := Look.flat(Color("#3a2a1c"), 0.85)
+	var steel := Look.flat(Color("#9aa0a8"), 0.35, 0.9)
+	var glow_c := Color(backdrop.arena.theme.fire)
+	var lamp_at := Vector3(0, 0.35, 0.25)
+	var lamp_e := 0.5
+	match kind:
+		"stone":
+			# one flagstone paler than its neighbours, and not lying flat
+			_tbox(n, Vector3(0.75, 0.05, 0.6), Vector3(0, 0.02, 0), stone)
+			_tbox(n, Vector3(0.62, 0.07, 0.5), Vector3(0.02, 0.07, 0), pale, Vector3(0.07, 0.3, 0.05))
+			_tbox(n, Vector3(0.5, 0.03, 0.03), Vector3(0, 0.045, 0.26), dark)
+		"candle":
+			glow_c = Color("#9fd0ff")
+			_tbox(n, Vector3(0.3, 0.06, 0.3), Vector3(0, 0.03, 0), stone)
+			_tbox(n, Vector3(0.06, 0.24, 0.06), Vector3(0, 0.18, 0), Look.flat(Color("#d8cfb8")))
+			_tbox(n, Vector3(0.03, 0.06, 0.03), Vector3(0, 0.33, 0), Look.glow(glow_c, 3.0))
+			lamp_at = Vector3(0, 0.45, 0)
+			lamp_e = 0.9
+		"scroll":
+			_tbox(n, Vector3(0.45, 0.3, 0.35), Vector3(-0.26, 0.15, 0), stone, Vector3(0, 0.4, 0))
+			_tbox(n, Vector3(0.4, 0.24, 0.3), Vector3(0.24, 0.12, 0.03), stone, Vector3(0, -0.3, 0.1))
+			_tbox(n, Vector3(0.07, 0.07, 0.3), Vector3(0, 0.1, 0.1), Look.flat(Color("#c9b98f"), 0.9), Vector3(0.2, 0.2, 0))
+			lamp_e = 0.35
+		"lantern":
+			# the one lantern on the road that is not lit
+			_tbox(n, Vector3(0.07, 1.0, 0.07), Vector3(0, 0.5, 0), wood)
+			_tbox(n, Vector3(0.3, 0.05, 0.05), Vector3(0.12, 0.98, 0), wood)
+			_tbox(n, Vector3(0.16, 0.22, 0.16), Vector3(0.24, 0.82, 0), dark)
+			_tbox(n, Vector3(0.08, 0.1, 0.08), Vector3(0.24, 0.82, 0), Look.flat(Color("#5a6a60"), 0.3))
+			lamp_at = Vector3(0.24, 0.6, 0.2)
+			lamp_e = 0.15
+			glow_c = Color("#b6ff7a")
+		"three_stones":
+			for i: int in 3:
+				_tbox(n, Vector3(0.3, 0.2, 0.26), Vector3((i - 1) * 0.42, 0.1, 0), dark if i == 1 else pale, Vector3(0, i * 0.5, 0.05))
+			lamp_e = 0.3
+		"blade":
+			_tbox(n, Vector3(0.4, 0.22, 0.34), Vector3(0, 0.11, 0), stone, Vector3(0, 0.5, 0))
+			_tbox(n, Vector3(0.05, 0.75, 0.012), Vector3(0, 0.55, 0), steel, Vector3(0, 0.6, 0.12))
+			_tbox(n, Vector3(0.2, 0.03, 0.03), Vector3(0.03, 0.8, 0), dark, Vector3(0, 0.6, 0.12))
+			lamp_at = Vector3(0.2, 0.7, 0.3)
+			lamp_e = 0.45
+			glow_c = Color("#dfe6f0")
+		"ice":
+			# a slab of black ice that shows the knight a little too well
+			glow_c = Color("#8fdcff")
+			var ice := Look.flat(Color("#0c141c"), 0.05, 0.6)
+			_tbox(n, Vector3(1.0, 2.0, 0.14), Vector3(0, 1.0, 0), ice, Vector3(0.04, 0, 0))
+			_tbox(n, Vector3(0.9, 1.9, 0.02), Vector3(0, 1.0, 0.08), Look.glow(Color("#16303f"), 0.5), Vector3(0.04, 0, 0))
+			lamp_at = Vector3(0, 1.1, 0.7)
+			lamp_e = 0.6
+		"gaudy":
+			# enormous, gilded, and propped where the looters left it
+			var gilt := Look.flat(Color("#d9b84a"), 0.25, 1.0)
+			_tbox(n, Vector3(0.5, 0.5, 0.4), Vector3(0.3, 0.25, -0.1), wood)
+			_tbox(n, Vector3(0.2, 1.7, 0.04), Vector3(0, 0.95, 0), gilt, Vector3(0, 0, 0.3))
+			_tbox(n, Vector3(0.7, 0.1, 0.1), Vector3(-0.42, 1.62, 0), gilt, Vector3(0, 0, 0.3))
+			_tbox(n, Vector3(0.14, 0.14, 0.14), Vector3(-0.56, 2.0, 0), Look.flat(Color("#8a1f2a"), 0.2, 0.3), Vector3(0, 0, 0.3))
+			lamp_at = Vector3(0, 1.2, 0.6)
+			lamp_e = 0.5
+			glow_c = Color("#ffe2a0")
+		_:
+			# marker posts, told apart by shape alone: tall, short, leaning, split
+			var h := 1.5 if kind == "post_tall" else (0.6 if kind == "post_short" else 1.0)
+			if kind == "post_split":
+				_tbox(n, Vector3(0.07, h, 0.12), Vector3(-0.07, h * 0.5, 0), wood, Vector3(0, 0, 0.09))
+				_tbox(n, Vector3(0.07, h, 0.12), Vector3(0.07, h * 0.5, 0), wood, Vector3(0, 0, -0.09))
+			else:
+				_tbox(n, Vector3(0.14, h, 0.14), Vector3(0.2 if kind == "post_lean" else 0.0, h * 0.48, 0), wood, Vector3(0, 0, -0.42 if kind == "post_lean" else 0.0))
+			_tbox(n, Vector3(0.1, 0.06, 0.1), Vector3(0, 0.03, 0), dark)
+			lamp_at = Vector3(0, minf(h, 0.9), 0.3)
+			lamp_e = 0.0
+	var lamp := OmniLight3D.new()
+	lamp.name = "Lamp"
+	lamp.light_color = glow_c
+	lamp.light_energy = lamp_e
+	lamp.omni_range = 1.8
+	lamp.position = lamp_at
+	lamp.set_meta("base", lamp_e)
+	n.add_child(lamp)
+	return n
+
+func _quiet() -> bool:
+	var ui: Control = layer.get_child(0)
+	return ui.visible and ui.modulate.a > 0.95 and not _leaving and not _staging and not Story.busy
+
+func _tick_secrets(dt: float) -> void:
+	_clock += dt
+	for e: Dictionary in spots:
+		if not is_instance_valid(e.node):
+			continue
+		var p: Vector3 = e.node.global_position + Vector3(0, 0.35, 0)
+		e.button.visible = not backdrop.cam.is_position_behind(p)
+		e.button.position = backdrop.cam.unproject_position(p) - e.button.size * 0.5 - e.button.get_parent().global_position
+		if e.lamp != null and not e.has("lit"):
+			e.lamp.light_energy = float(e.lamp.get_meta("base")) * (0.65 + 0.35 * sin(_clock * 1.3 + float(e.index)))
+	if not _quiet():
+		return
+	_idle += dt
+	# some places only answer someone who stays
+	for s: Dictionary in Secrets.at_stop(str(Game.run.region), int(Game.run.stage)):
+		if str(s.trigger.type) == "wait" and _idle >= float(s.trigger.seconds) and Secrets.open_now(s):
+			_discover(s, _at(angle, Vector3(-0.3, 0.6, -5.5)), false)
+			return
+
+func _touch(spot: Dictionary) -> void:
+	if not _quiet():
+		return
+	_idle = 0.0
+	var s: Dictionary = spot.secret
+	if not Secrets.open_now(s):
+		_whisper(str(s.get("locked_text", "")))
+		return
+	match str(s.trigger.type):
+		"sequence":
+			var so_far: Array = _order.get(s.id, [])
+			var order: Array = s.trigger.order
+			if int(order[so_far.size()]) == int(spot.index):
+				so_far.append(spot.index)
+				_order[s.id] = so_far
+				spot["lit"] = true
+				Sfx.play("levelup", -14.0, 1.0 + 0.12 * so_far.size())
+				create_tween().tween_property(spot.lamp, "light_energy", 1.4, 0.4)
+				if so_far.size() == order.size():
+					_discover(s, spot.node.position)
+			else:
+				# wrong: they go dark, and it starts again
+				_order[s.id] = []
+				Sfx.play("guard_break", -16.0, 0.6)
+				for e: Dictionary in spots:
+					if e.secret == s:
+						e.erase("lit")
+				_whisper("It goes cold under your hand. Not that one, not yet.")
+		"duel":
+			_challenge(s, spot.node.position)
+		_:
+			_discover(s, spot.node.position)
+
+## A line of plain text over the prompt, for a thing that will not answer yet.
+func _whisper(text: String) -> void:
+	if text == "":
+		return
+	var l := UI.label(text, 19, UI.DIM.lightened(0.3))
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.custom_minimum_size.x = 760
+	l.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	l.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	l.offset_top = 150
+	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.95))
+	prompt.get_parent().get_parent().add_child(l)
+	l.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(l, "modulate:a", 1.0, 0.3)
+	tw.tween_interval(2.0 + text.length() / 30.0)
+	tw.tween_property(l, "modulate:a", 0.0, 0.6)
+	tw.tween_callback(l.queue_free)
+
+## The camera eases over to what was noticed, a light comes up on it, one of the companions says a line (subtitle
+## only: none of these lines is recorded), and what it was is named.
+func _discover(s: Dictionary, at: Vector3, close: bool = true) -> void:
+	if _staging or _leaving:
+		return
+	_staging = true
+	_idle = 0.0
+	var ui: Control = layer.get_child(0)
+	create_tween().tween_property(ui, "modulate:a", 0.0, 0.3)
+	var keep_pos := backdrop.cam_pos
+	var keep_look := backdrop.cam_look
+	var lamp := OmniLight3D.new()
+	lamp.light_color = Color("#ffcf8a")
+	lamp.light_energy = 0.0
+	lamp.omni_range = 3.0
+	lamp.position = Vector3(at.x, 0.9, at.z)
+	backdrop.props.add_child(lamp)
+	if close:
+		var from := backdrop.cam_pos - at
+		from.y = 0.0
+		from = from.normalized()
+		backdrop.move_camera(at + from * 2.4 + Vector3(0, 1.05, 0), at + Vector3(0, 0.3, 0))
+	else:
+		backdrop.move_camera(backdrop.cam_pos + (at - backdrop.cam_pos) * 0.12, at)
+	Sfx.play("levelup", -12.0, 0.7)
+	create_tween().tween_property(lamp, "light_energy", 1.8, 1.0)
+	await get_tree().create_timer(1.1).timeout
+	if not is_inside_tree():
+		return
+	var got := Game.find_secret(str(s.id))
+	var scene := Secrets.line_scene(s)
+	if scene != "":
+		Companion.mark_heard(scene)
+		await Story.play(scene, true)
+		if not is_inside_tree():
+			return
+	if not got.is_empty():
+		Sfx.play("loot", -4.0)
+		await _banner(got)
+		if not is_inside_tree():
+			return
+	for e: Dictionary in spots.duplicate():
+		if e.secret == s:
+			e.button.queue_free()
+			spots.erase(e)
+	if hp_bar != null and not Game.run.is_empty():
+		hp_bar.value = Game.run.hp
+	var out := create_tween()
+	out.tween_property(lamp, "light_energy", 0.0, 0.8)
+	out.tween_callback(lamp.queue_free)
+	backdrop.move_camera(keep_pos, keep_look)
+	create_tween().tween_property(ui, "modulate:a", 1.0, 0.6).set_delay(0.5)
+	_staging = false
+
+## Names what was found and what it gave, at the top of the screen, and goes.
+func _banner(got: Dictionary) -> void:
+	var l2 := CanvasLayer.new()
+	l2.layer = 5
+	add_child(l2)
+	# a dark plate behind the words: the place behind them is too busy to read against
+	var plate := UI.panel(Color(0.02, 0.02, 0.03, 0.8), UI.GOLD_DIM)
+	plate.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
+	plate.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	plate.offset_top = 56
+	plate.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	l2.add_child(plate)
+	var pad := MarginContainer.new()
+	for side: String in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 18 if side in ["left", "right"] else 10)
+	pad.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	plate.add_child(pad)
+	var v := VBoxContainer.new()
+	v.alignment = BoxContainer.ALIGNMENT_CENTER
+	v.add_theme_constant_override("separation", 4)
+	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	pad.add_child(v)
+	var parts: Array = [UI.label("A SECRET OF THE ROAD", 14, UI.GOLD_DIM.lightened(0.35), "bold"), UI.title(str(got.name), 32, UI.GOLD),
+		UI.wrapped(str(got.found), 19, UI.BONE, 760)]
+	for line in got.lines:
+		parts.append(UI.label(str(line), 17, UI.GOLD_DIM.lightened(0.4)))
+	for c: Label in parts:
+		c.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		c.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.95))
+		c.add_theme_constant_override("shadow_offset_y", 2)
+		v.add_child(c)
+	plate.modulate.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(plate, "modulate:a", 1.0, 0.5)
+	tw.tween_interval(3.6)
+	tw.tween_property(plate, "modulate:a", 0.0, 0.7)
+	tw.tween_callback(l2.queue_free)
+	await tw.finished
+
+## A hidden duel: the camera goes to what was touched, the line is said, and steel is drawn through the same door
+## as any fight on the road. Winning it finds the secret; the road is where it was afterwards.
+func _challenge(s: Dictionary, at: Vector3) -> void:
+	if _staging or _leaving:
+		return
+	_staging = true
+	create_tween().tween_property(layer.get_child(0), "modulate:a", 0.0, 0.3)
+	var from := backdrop.cam_pos - at
+	from.y = 0.0
+	backdrop.move_camera(at + from.normalized() * 3.2 + Vector3(0, 1.3, 0), at + Vector3(0, 1.0, 0))
+	Sfx.play("armor", -6.0, 0.7)
+	await get_tree().create_timer(1.2).timeout
+	if not is_inside_tree():
+		return
+	var scene := Secrets.line_scene(s)
+	if scene != "":
+		Companion.mark_heard(scene)
+		await Story.play(scene, true)
+		if not is_inside_tree():
+			return
+	_leaving = true
+	fight.emit(Secrets.duel_option(s))
+
+## Dev captures: find the named secret of this stop after `after` seconds, as a touch would.
+func dev_tap(id: String, after: float) -> void:
+	await get_tree().create_timer(after).timeout
+	while is_inside_tree() and not _quiet():
+		await get_tree().process_frame
+	if not is_inside_tree():
+		return
+	for e: Dictionary in spots:
+		if str(e.secret.get("id", "")) == id and str(e.secret.trigger.type) != "sequence":
+			_touch(e)
+			return
+	if Secrets.by_id.has(id):
+		_discover(Secrets.by_id[id], _at(angle, Vector3(-0.3, 0.6, -5.5)), false)

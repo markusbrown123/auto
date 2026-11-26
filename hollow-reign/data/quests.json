@@ -1,0 +1,232 @@
+{
+ "quests": [
+  {
+   "id": "relief_of_the_gate",
+   "name": "The Relief of the Gate",
+   "giver": "Lyra",
+   "text": "The Sentinel asked why no one came back for him. Lay him to rest, and gather what the Courtyard still records of his posting, so that someone can finally say he is relieved.",
+   "need": {
+    "defeated": [
+     "ashen_sentinel"
+    ],
+    "lore": 4
+   },
+   "reward": {
+    "gold": 150,
+    "shards": 2,
+    "item": "w_vigil_edge"
+   },
+   "done_text": "\"Sergeant. You are relieved.\" Nobody answers. Lyra is quiet for a while afterward."
+  },
+  {
+   "id": "older_than_my_bloodline",
+   "name": "Older Than My Bloodline",
+   "giver": "Orren",
+   "text": "Orren wants proof that you are more than a thing the old kings left lying about. Walk the Courtyard, the Blackwood and the Citadel to their ends, and show him five sequences of the blade you found for yourself.",
+   "need": {
+    "cleared": [
+     "courtyard",
+     "blackwood",
+     "citadel"
+    ],
+    "combos": 5
+   },
+   "reward": {
+    "gold": 300,
+    "shards": 12,
+    "item": "w_dawnline"
+   },
+   "done_text": "Orren unrolls a bundle of his family's scraps on the anvil. \"My grandmother called it prayer. It was a wiring diagram.\""
+  },
+  {
+   "id": "what_the_kings_bred",
+   "name": "What the Kings Bred",
+   "giver": "The Pale Huntsman",
+   "text": "The Huntsman has spent his life ending what the old kings bred. Put down the whelp in the Roost's boneyard and the drake on the Citadel's kennel stair, and he may believe you are not one of them.",
+   "need": {
+    "defeated": [
+     "cinder_whelp",
+     "frost_drake"
+    ]
+   },
+   "reward": {
+    "gold": 350,
+    "shards": 5
+   },
+   "done_text": "Two fresh marks are scored through on a strip of hide left where you would find it. Beside them, a purse, and no message."
+  },
+  {
+   "id": "six_people_i_buried",
+   "name": "Six People I Buried",
+   "giver": "The Crimson Widow",
+   "text": "She said you fight like six people she buried. Face her on the Cathedral steps, then walk the Sunken Crypt to its end, where the ones who made you left their names.",
+   "need": {
+    "defeated": [
+     "crimson_widow"
+    ],
+    "cleared": [
+     "crypt"
+    ]
+   },
+   "reward": {
+    "gold": 400,
+    "shards": 6
+   },
+   "done_text": "Six names, said aloud in order. You knew each one before it was spoken."
+  },
+  {
+   "id": "surviving_version",
+   "name": "The Surviving Version",
+   "giver": "The Archivist",
+   "text": "History has been rewritten seventeen times. Recover thirty records from the road and the Archivist will have enough to state the one that was not.",
+   "need": {
+    "lore": 30
+   },
+   "reward": {
+    "gold": 600,
+    "shards": 10
+   },
+   "done_text": "\"Version zero. Not surviving. True. I had forgotten there was a difference.\""
+  },
+  {
+   "id": "names_for_the_waiting",
+   "name": "Names for the Waiting",
+   "giver": "The Gravewarden's lantern",
+   "text": "The keeper of the First Tomb learned every name he guarded. With him gone, go down to the Gallery of Names and take them back from the thing that is eating them.",
+   "need": {
+    "defeated": [
+     "gravewarden",
+     "soul_eater"
+    ]
+   },
+   "reward": {
+    "gold": 450,
+    "shards": 8
+   },
+   "done_text": "The lantern at the First Tomb burns a little higher. The names you carried up are said there now, by you."
+  },
+  {
+   "id": "chain_that_stayed",
+   "name": "The Chain That Stayed",
+   "giver": "Lyra",
+   "text": "Whatever is chained in the pit under the Citadel was told to stay, three hundred years ago, and has. Go down and end its waiting.",
+   "need": {
+    "defeated": [
+     "rimewyrm"
+    ]
+   },
+   "reward": {
+    "gold": 500,
+    "shards": 8
+   },
+   "done_text": "\"It waited all that time for someone to tell it otherwise,\" Lyra says. \"I am glad it was not alone at the end.\""
+  },
+  {
+   "id": "the_rain",
+   "name": "The Rain",
+   "giver": "Lyra",
+   "text": "Lyra thinks she remembers rain, and does not know where she would have felt it. Follow the trail through the Cathedral, the Crypt and the Throne to learn where her mind is kept.",
+   "need": {
+    "cleared": [
+     "cathedral",
+     "crypt",
+     "throne"
+    ]
+   },
+   "reward": {
+    "gold": 800,
+    "shards": 12,
+    "item": "w_throneshard"
+   },
+   "done_text": "Now you know where she is. \"Tell me about it again,\" she says. \"The rain. Slowly, this time.\""
+  }
+ ],
+ "side": [
+  {
+   "id": "orren_stock",
+   "name": "Stock for the Anvil",
+   "giver": "Orren",
+   "text": "Orren is low on sound metal. Bring him six pieces of Old Iron from the Courtyard or the Blackwood, and he will show you what his family did with the offcuts.",
+   "need": {
+    "materials": {
+     "m_iron": 6
+    }
+   },
+   "reward": {
+    "gold": 150,
+    "finish": "f_oiled"
+   },
+   "done_text": "\"Garrison stock. Rust on the outside, honest underneath.\" He rubs a rag of black oil along your vambrace without asking.",
+   "side": true
+  },
+  {
+   "id": "orren_proof",
+   "name": "Proof Strokes",
+   "giver": "Orren",
+   "text": "Orren has reground a Courtyard Longsword and does not trust his own work until it has been used in earnest. Win three fights with one in your hand.",
+   "need": {
+    "feats": {
+     "win_item:w_knight_sword": 3
+    }
+   },
+   "reward": {
+    "gold": 200,
+    "shards": 3
+   },
+   "done_text": "He sights down the edge for a long time. \"It held. Good. I was not sure I still could.\"",
+   "side": true
+  },
+  {
+   "id": "lyra_courtyard",
+   "name": "What the Courtyard Hid",
+   "giver": "Lyra",
+   "text": "Lyra's plans of the Fallen Courtyard are three hundred years out of date. Find three things there that are on no plan she holds.",
+   "need": {
+    "secrets_in": {
+     "courtyard": 3
+    }
+   },
+   "reward": {
+    "gold": 150,
+    "shards": 2
+   },
+   "done_text": "\"Three. On a ground I thought I knew stone by stone. I am going to have to look at everything again.\"",
+   "side": true
+  },
+  {
+   "id": "lyra_stand_still",
+   "name": "Stand Still",
+   "giver": "Lyra",
+   "text": "You walk through places as if they were only on the way. Lyra asks you, twice, somewhere on the road, simply to stay and listen until the place has finished speaking.",
+   "need": {
+    "feats": {
+     "listened": 2
+    }
+   },
+   "reward": {
+    "finish": "f_dusk",
+    "gold": 120
+   },
+   "done_text": "\"You heard them. Most people leave before a place has finished.\"",
+   "side": true
+  },
+  {
+   "id": "witness_record",
+   "name": "For the Record",
+   "giver": "The Witness",
+   "text": "The Witness wrote down what he was told to for a lifetime. Bring him six things nobody told anyone to write down.",
+   "need": {
+    "secrets": 6
+   },
+   "reward": {
+    "title": "ti_corrector",
+    "gold": 300
+   },
+   "done_text": "\"Six corrections. The record is still a disgrace, but it is now a disgrace with footnotes.\"",
+   "side": true,
+   "after": {
+    "witness": true
+   }
+  }
+ ]
+}

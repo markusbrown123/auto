@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_garrison_m_v1.png",
+ "model": {
+  "task_id": "24bdc188-7da0-4935-98ac-5b43b3389634",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "3699fb54-02c9-43d4-a626-65bdf3c1e7db",
+  "credits": 25.0
+ }
+}

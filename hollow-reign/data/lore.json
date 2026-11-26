@@ -1,0 +1,444 @@
+{
+ "lore": [
+  {
+   "id": "defaced_king",
+   "title": "Defaced King",
+   "text": "A statue of a king with the face chiselled away. Low on the plinth is a small iron hatch, and the scratches around its lock are newer than the damage above. Someone went on tending the thing long after they stopped honouring it.",
+   "region": "courtyard",
+   "stage": 0
+  },
+  {
+   "id": "garrison_roll",
+   "title": "Garrison Roll",
+   "text": "A muster list nailed inside the guardhouse door, the ink gone brown. Every name is marked 'posted' but one, a sergeant of the gate, marked 'volunteered: one winter'. No relief is entered against any of them.",
+   "region": "courtyard",
+   "stage": 1
+  },
+  {
+   "id": "standing_banner",
+   "title": "The Standing Banner",
+   "text": "The banner on the barbican has flown through three hundred years of weather and has not frayed. The cloth is cold and slick to the hand and takes no dirt. Whoever wove it did not use a loom.",
+   "region": "courtyard",
+   "stage": 2
+  },
+  {
+   "id": "winch_housing",
+   "title": "Winch Housing",
+   "text": "Behind the chain drum is a sealed drum of grey metal with no handle and no seam. It hums when the winch turns and is warm afterward. The garrison oiled the chain every spring and never once opened the part that did the work.",
+   "region": "courtyard",
+   "stage": 3
+  },
+  {
+   "id": "breakers_harness",
+   "title": "Breaker's Harness",
+   "text": "The plate of the gate's great brute is not buckled on. It is bolted, through the armour and into what is underneath, and the bolt heads have been painted over many times. Nobody was ever meant to take it off.",
+   "region": "courtyard",
+   "stage": 4
+  },
+  {
+   "id": "candle_that_is_not",
+   "title": "The Candle That Is Not",
+   "text": "The chapel candle gives light and no heat, and its wax has never run. Kneeling close, the wounds of the road knit as if days had passed. The alcove was built around it, not the other way about.",
+   "region": "courtyard",
+   "stage": 5
+  },
+  {
+   "id": "cold_lantern",
+   "title": "Cold Lantern",
+   "text": "A lantern from the branches, lit and cool as river stone. There is no oil in it and no wick, only a bead of glass that glows. It dims when carried off the road and brightens when brought back.",
+   "region": "blackwood",
+   "stage": 0
+  },
+  {
+   "id": "hunters_tally",
+   "title": "Hunter's Tally",
+   "text": "A strip of hide cut with rows of marks, each row headed by a drawing of a beast that has too many joints or too many teeth. Nearly every row has been scored through. The last three have not.",
+   "region": "blackwood",
+   "stage": 1
+  },
+  {
+   "id": "park_wardens_key",
+   "title": "Park Warden's Key",
+   "text": "A heavy key on a rotted cord, stamped with a crown and the words 'royal park, inner fence'. The fences of this wood face inward, with the spikes on the forest side. They were raised to keep something in.",
+   "region": "blackwood",
+   "stage": 2
+  },
+  {
+   "id": "barred_from_outside",
+   "title": "Barred From Outside",
+   "text": "The charcoal burner's hut has its bar on the outer side of the door, and the inside of the planks is scored by hands. A tin plate nailed beside it reads 'held pending sentence'. No date follows, and no name.",
+   "region": "blackwood",
+   "stage": 3
+  },
+  {
+   "id": "fuel_order",
+   "title": "Fuel Order",
+   "text": "A requisition pressed into a sheet of thin grey metal: so many cords of timber, monthly, for the furnace of the forest gaol. It is countersigned by an office that has not existed for centuries. The woodpile is still stacked to the figure it asks for.",
+   "region": "blackwood",
+   "stage": 4
+  },
+  {
+   "id": "sentence_without_court",
+   "title": "Sentence Without a Court",
+   "text": "A warrant tied to the gibbet tree, the seal unbroken. The charge is blank, the verdict is filled in, and the line for the judge carries only a number. The same number is on every warrant that hangs here.",
+   "region": "blackwood",
+   "stage": 5
+  },
+  {
+   "id": "pilgrims_token",
+   "title": "Pilgrim's Token",
+   "text": "A disc of dull metal on a neck cord, worn smooth by a thumb. It bears no saint and no prayer, only a long number and a second, shorter one. Pilgrims were counted in here, and the count mattered to someone.",
+   "region": "cathedral",
+   "stage": 0
+  },
+  {
+   "id": "almoners_ledger",
+   "title": "Almoner's Ledger",
+   "text": "The almoner's book of gifts, kept in a careful hand. No coin is entered anywhere in it. Beside each giver's name is a span of years, and at the foot of each page the years are summed and carried forward.",
+   "region": "cathedral",
+   "stage": 1
+  },
+  {
+   "id": "transfer_cradle",
+   "title": "Transfer Cradle",
+   "text": "A frame of metal ribs shaped to hold a person lying down, pushed into a side porch and left under a cloth. The straps are padded and the headpiece is ringed with fine needles. It was used often and cleaned well.",
+   "region": "cathedral",
+   "stage": 2
+  },
+  {
+   "id": "saints_bones",
+   "title": "Saint's Bones",
+   "text": "The reliquary holds a full skeleton, laid out with reverence. Its joints are pinned with grey metal and a fine wire runs the length of the spine into the skull. The faithful kissed the glass and did not ask what the saint had been before.",
+   "region": "cathedral",
+   "stage": 3
+  },
+  {
+   "id": "hymn_cylinder",
+   "title": "The Hymn Cylinder",
+   "text": "In the choir loft, behind a carved screen, a drum of dark glass turns by itself. The hymn comes from it, every voice of a choir long dead, without a breath taken between verses. It has sung to an empty nave since the Silence.",
+   "region": "cathedral",
+   "stage": 4
+  },
+  {
+   "id": "votive_array",
+   "title": "Votive Array",
+   "text": "Hundreds of candles, each one the same cold light as the one in the courtyard chapel. They are set in ranks, and under the wax drippings each socket carries a number. This was never an altar. It was a ward with many beds.",
+   "region": "cathedral",
+   "stage": 5
+  },
+  {
+   "id": "lower_facility",
+   "title": "The Lower Facility",
+   "text": "Where the bell fell it broke the floor, and under the floor there is no crypt. There are white rooms, glass tanks and tables with channels cut in them, lit by lamps that still work. They did not pray in this place. They made things here.",
+   "region": "cathedral",
+   "stage": 6
+  },
+  {
+   "id": "drowned_lamp",
+   "title": "Drowned Lamp",
+   "text": "A lamp lifted from the black water, still burning in the hand. The flame does not flicker and the glass is cold. It was never fire, and whoever let the river in knew it would not put these out.",
+   "region": "crypt",
+   "stage": 0
+  },
+  {
+   "id": "newer_mortar",
+   "title": "The Newer Mortar",
+   "text": "One niche of the ossuary is sealed with mortar far paler than the rest. Behind it there are no bones, only a slot of dark glass and a plate with a name. There are more of these niches than this kingdom ever had dead.",
+   "region": "crypt",
+   "stage": 1
+  },
+  {
+   "id": "seepage",
+   "title": "Seepage",
+   "text": "What weeps from the tomb lid is not water. It is thin, blue and bitterly cold, and it leaves frost on the stone where it runs. Something inside is being kept, and the keeping has begun to leak.",
+   "region": "crypt",
+   "stage": 2
+  },
+  {
+   "id": "flood_order",
+   "title": "Flood Order",
+   "text": "An order cut into the sluice housing itself: open the river gates and drown the lower halls, by authority of the stewardship. Beneath it another hand has scratched four words. 'So no one counts.'",
+   "region": "crypt",
+   "stage": 3
+  },
+  {
+   "id": "donor_plates",
+   "title": "Donor Plates",
+   "text": "Six small plates fixed in a row where no king's effigy stands. A soldier, two engineers, a baker, a ferryman and a girl of nine, each with the line 'gave freely what they remembered'. The dates are recent. The names feel like your own handwriting.",
+   "region": "crypt",
+   "stage": 4
+  },
+  {
+   "id": "reliquary_lamp",
+   "title": "Reliquary Lamp",
+   "text": "The lamp in the doorless room is fed by a cord that runs down through the floor. Sitting by it, the stone hums very faintly, like a great many people breathing in their sleep. It asks nothing and it does not go out.",
+   "region": "crypt",
+   "stage": 5
+  },
+  {
+   "id": "project_record_unbound",
+   "title": "Project Record: Unbound",
+   "text": "A working record left at the first tomb by mortal hands. It describes one mind assembled from many given memories, so that no single stored record could claim it and no Crown door could command it. The last line reads: 'Not a god returning. Our way past them.'",
+   "region": "crypt",
+   "stage": 6
+  },
+  {
+   "id": "glazed_mile_marker",
+   "title": "Glazed Mile-Marker",
+   "text": "A mile-stone on the cliff road, melted smooth on one face and sharp-cut on the other. The glaze runs in one direction, uphill, in a straight line as wide as a cart. Whatever breathed on this road was aiming.",
+   "region": "roost",
+   "stage": 0
+  },
+  {
+   "id": "long_neck_harness",
+   "title": "Long-Neck Harness",
+   "text": "A harness of scale and chain, made for a neck longer than a horse is tall. Along the collar are sockets ringed in grey metal, set where a rider's hand could never reach. The beast that wore this was steered from somewhere else.",
+   "region": "roost",
+   "stage": 1
+  },
+  {
+   "id": "feeding_schedule",
+   "title": "Feeding Schedule",
+   "text": "A slate ruled into columns: weight of meat, hours between, and a column headed 'growth against target'. The entries are neat for years and then stop in the middle of a row. Below, the bones go on piling without anyone to record them.",
+   "region": "roost",
+   "stage": 2
+  },
+  {
+   "id": "keepers_last_entry",
+   "title": "Keeper's Last Entry",
+   "text": "The final page of the keeper's book. 'Orders came for brood two to fly against the walls of the levy. She looked at me and did not rise. I have written that the orders were never received.'",
+   "region": "roost",
+   "stage": 3
+  },
+  {
+   "id": "shell_seventeen",
+   "title": "Shell Seventeen",
+   "text": "A curve of old eggshell, thick as a shield, with a number burned into it before it was laid. The numbers in the chamber run from one to sixteen. This is seventeen, it is still warm, and no one alive ordered it.",
+   "region": "roost",
+   "stage": 4
+  },
+  {
+   "id": "standing_order",
+   "title": "Standing Order",
+   "text": "A plaque set in the wall of the pass: 'The rank will hold position until dismissed by the king in person.' The soldiers along the road froze where they stood, upright, eyes front. That was obedience, not weather.",
+   "region": "citadel",
+   "stage": 0
+  },
+  {
+   "id": "frozen_rack",
+   "title": "Frozen Rack",
+   "text": "A rack of relic blades rimed to the wall. Each has a small dark cell set in the hilt, and every cell is cracked and dead. The armourers went on sharpening them for generations and wondered why the old swords had stopped singing.",
+   "region": "citadel",
+   "stage": 1
+  },
+  {
+   "id": "kennel_ledger",
+   "title": "Kennel Ledger",
+   "text": "A ledger of the pit, kept by the kennel master. One entry is repeated daily for years: 'Told to stay. Stayed.' Further down the hand grows shaky. 'The chain is for our comfort. It has never once pulled against it.'",
+   "region": "citadel",
+   "stage": 2
+  },
+  {
+   "id": "kept_fire",
+   "title": "The Kept Fire",
+   "text": "Deep in the lift shaft is a furnace that gives no warmth, only a steady breath of cold. It is tended by nothing and has not faltered since the king shut the doors. The winter here does not fall from the sky. It is made below and sent up.",
+   "region": "citadel",
+   "stage": 3
+  },
+  {
+   "id": "queens_refusal",
+   "title": "The Queen's Refusal",
+   "text": "A letter under frosted glass, in a firm hand. 'I will not be copied into your Crown and called continued. I will grow old in this chair and then I will stop, and you may sit beside me or you may go.' Her name has been cut from every other record.",
+   "region": "citadel",
+   "stage": 5
+  },
+  {
+   "id": "partition_key",
+   "title": "Partition Key",
+   "text": "A rod of pale metal in a case behind the winter throne, with a note in the king's hand. The Crown was made as one thing so that one hand could hold it. This would break it into many, each too small to rule and too separate to starve the rest. He never turned it.",
+   "region": "citadel",
+   "stage": 6
+  },
+  {
+   "id": "discard_manifest",
+   "title": "Discard Manifest",
+   "text": "A list fixed at the head of the long stair, column after column of numbers with one word against each: 'incomplete'. At the foot is an instruction to retain all incomplete records below until reviewed. No review is entered.",
+   "region": "deep",
+   "stage": 0
+  },
+  {
+   "id": "surviving_names",
+   "title": "Surviving Names",
+   "text": "A handful of names on the great wall that have not been worn away. A woman, a boy, a man who gives his trade instead of his family. Read aloud, they make the dark at the end of the gallery go still, as if listening.",
+   "region": "deep",
+   "stage": 1
+  },
+  {
+   "id": "growth_medium",
+   "title": "Growth Medium",
+   "text": "The grain in the dark is real. It is a pale thread that has grown through the stone like roots through a wall, feeding along the old conduits. It was laid here to hold broken minds together, and it never stopped growing.",
+   "region": "deep",
+   "stage": 2
+  },
+  {
+   "id": "carried_candle",
+   "title": "The Carried Candle",
+   "text": "A stub of plain tallow on the unlit stair, burned low and pinched out by fingers. It is an ordinary candle, the only one seen on this road. Someone came down here from the sanctuary, more than once, and went back up.",
+   "region": "deep",
+   "stage": 3
+  },
+  {
+   "id": "one_vow_kept",
+   "title": "One Vow, Kept",
+   "text": "Every banner in the oath hall hangs blank but one, small and near the floor, where a single line can still be read. 'I will remember them when the record does not.' It is signed with a keeper's lantern mark.",
+   "region": "deep",
+   "stage": 4
+  },
+  {
+   "id": "first_donor",
+   "title": "The First Donor",
+   "text": "A plate at the very bottom, older than the others. It names the first person who gave their memories to the making of the Unbound, and beneath the name: 'own record incomplete; retained below'. They gave you what they had, and what was left of them was sent down here.",
+   "region": "deep",
+   "stage": 6
+  },
+  {
+   "id": "signal_mast",
+   "title": "The Signal Mast",
+   "text": "Above the royal mile stands a mast of black metal that the people took for a spire. It is warm, and the air near it tastes of storms. From here the waking order went out to every guardian in the kingdom, one post at a time.",
+   "region": "throne",
+   "stage": 0
+  },
+  {
+   "id": "empty_treasury",
+   "title": "Empty Treasury",
+   "text": "The treasury shelves are bare and the tally sticks explain it. Year upon year of the kingdom's gold is entered against a single line, 'upkeep of the Crown'. When the gold was gone the entries continue, in a different unit.",
+   "region": "throne",
+   "stage": 1
+  },
+  {
+   "id": "crown_unplugged",
+   "title": "A Crown, Unplugged",
+   "text": "A plain circlet with a row of fine contacts on the inner band, tarnished where they met a brow. Away from the throne it is only metal. The thing on the steps turns it over and over, looking for the place where it used to connect.",
+   "region": "throne",
+   "stage": 2
+  },
+  {
+   "id": "letter_of_appointment",
+   "title": "Letter of Appointment",
+   "text": "A commission, sealed in haste. It names a court official steward of the Crown 'for the duration of the present collapse, until a rightful authority is restored'. None was. He has kept the seat for three hundred years on a temporary letter.",
+   "region": "throne",
+   "stage": 3
+  },
+  {
+   "id": "the_count",
+   "title": "The Count",
+   "text": "The steward's own ledger, two columns to a page. On the left, every stored mind the Crown has consumed to keep running. On the right, every life its machines have kept fed, warmed and lit. He has never let the left column pass the right.",
+   "region": "throne",
+   "stage": 4
+  },
+  {
+   "id": "external_handshake_log",
+   "title": "External Handshake Log",
+   "text": "A strip of printed marks by the open doors, repeating at long intervals. The Crown has been calling outward, past the kingdom, for longer than the kingdom has had a name. On the most recent line, for the first time, there is a second mark.",
+   "region": "throne",
+   "stage": 5
+  },
+  {
+   "id": "lyras_cradle",
+   "title": "Lyra's Cradle",
+   "text": "Behind the throne, a narrow frame like the one in the cathedral, sealed and still drawing power. The plate gives a young woman's name and a date nineteen years gone, the week of the Great Silence. The voice that woke you has been lying here the whole time.",
+   "region": "throne",
+   "stage": 6
+  }
+ ],
+ "hidden": [
+  {
+   "id": "s_cy_loose_stone",
+   "title": "The Relief Order",
+   "text": "'Sergeant of the Gate: you are relieved at first thaw. Report to the inner ward.' Signed, sealed, dated the first spring. It was hidden under a flagstone thirty paces from the man it names. Whoever was sent with it chose not to arrive.",
+   "region": "courtyard",
+   "stage": -1,
+   "secret": "cy_loose_stone"
+  },
+  {
+   "id": "s_cy_second_candle",
+   "title": "The Second Candle",
+   "text": "After the gate lost its keeper a second light appeared in the alcove. It was not carried there. The maintenance point registered one fewer body in service and, for the first time in three centuries, marked it.",
+   "region": "courtyard",
+   "stage": -1,
+   "secret": "cy_second_candle"
+  },
+  {
+   "id": "s_cy_charcoal_sketch",
+   "title": "Sketch: The Spring",
+   "text": "Charcoal on hide. A tree with a rope hanging from it, and a spring at its foot. To the left of the water three stones lie in a row. The artist has rubbed the middle stone black, and written nothing.",
+   "region": "courtyard",
+   "stage": -1,
+   "secret": "cy_charcoal_sketch"
+  },
+  {
+   "id": "s_bw_dark_lantern",
+   "title": "The Lamplighter's Round",
+   "text": "Bark, cut with a knife: 'My round, as my mother walked it. At the woodpile trim the posts in her order: the tall post, the split post, the leaning post, the short. Do it wrong and start again. Nobody is watching. Do it right anyway.'",
+   "region": "blackwood",
+   "stage": -1,
+   "secret": "bw_dark_lantern"
+  },
+  {
+   "id": "s_bw_woodpile_posts",
+   "title": "The Unfinished Road",
+   "text": "Four lamp posts in a clearing with no road between them. The survey pegs for the rest still stand in a line through the trees, pointing at the Cathedral. The woodcutter was clearing the way for it. Nobody told him the road had been cancelled, or what it was meant to carry.",
+   "region": "blackwood",
+   "stage": -1,
+   "secret": "bw_woodpile_posts"
+  },
+  {
+   "id": "s_ca_end_of_cylinder",
+   "title": "End of the Cylinder",
+   "text": "'Devotional cycle nine. Congregation batch forty-one. Play until relieved.' The voice is bored. It is the only voice in the cathedral that sounds like a person at work.",
+   "region": "cathedral",
+   "stage": -1,
+   "secret": "ca_end_of_cylinder"
+  },
+  {
+   "id": "s_cr_whispered_name",
+   "title": "A Name You Answer To",
+   "text": "The lamp reads its row aloud when someone sits long enough: a soldier's name, a child's, and a third with a line struck through it on the plate. You know all three the way you know your own hands. The lamp does not read a fourth, though there is room on the plate for one.",
+   "region": "crypt",
+   "stage": -1,
+   "secret": "cr_whispered_name"
+  },
+  {
+   "id": "s_ci_reflection",
+   "title": "Recall Surface",
+   "text": "A sheet of black ice that is not ice. The Everbound used such surfaces to rehearse: it stores whoever stands before it and gives them back as an opponent. The duellist on the wall had been losing to himself, narrowly, for three hundred years.",
+   "region": "citadel",
+   "stage": -1,
+   "secret": "ci_reflection"
+  },
+  {
+   "id": "s_de_candle_bearer",
+   "title": "Who Carried It",
+   "text": "The candle on the unlit stair is the sanctuary's, and the thumbprint in its wax is a living hand's. Lyra remembers no body and no stair. The Witness remembers a woman going down with a light, and coming up without it, and being asked to forget which.",
+   "region": "deep",
+   "stage": -1,
+   "secret": "de_candle_bearer"
+  },
+  {
+   "id": "s_th_parade_sword",
+   "title": "The Parade Sword of the Ninth Jubilee",
+   "text": "Commissioned by a guild that wished to be noticed, at a weight no arm could lift twice. The blade is soft gold over softer iron; the hilt has nine enamelled royal portraits, two of them of the same king. It was carried in one procession, by four men. Orren, shown it, was silent for some time and then asked to be left alone with his anvil.",
+   "region": "throne",
+   "stage": -1,
+   "secret": "th_parade_sword"
+  },
+  {
+   "id": "s_cy_cycle_count",
+   "title": "The Cycle Count",
+   "text": "Somebody has been marking the breach each time they walked out through it. The cuts are old at one end and bright at the other, and all of them were made by the same hand at the same height. The Gravewarden's record said you were the first the chamber permitted to leave. It did not say you were the first to wake.",
+   "region": "courtyard",
+   "stage": -1,
+   "secret": "cy_cycle_count"
+  }
+ ]
+}

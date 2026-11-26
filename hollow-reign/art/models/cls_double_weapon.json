@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/cls_double_weapon_v1.png",
+ "model": {
+  "task_id": "c872dd19-f6b7-418f-b00e-d4dd82fe61de",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "0c517c90-87b4-4361-a21a-d03c9bb5ab24",
+  "credits": 25.0
+ }
+}

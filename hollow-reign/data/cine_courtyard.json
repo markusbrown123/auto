@@ -1,0 +1,95 @@
+{
+ "region": "courtyard",
+ "clip_len": 6.0,
+ "stops": [
+  {
+   "stage": 0,
+   "clip": "road_0",
+   "still": "courtyard_stop_0.jpg",
+   "spots": [
+    [
+     0.495,
+     0.552
+    ]
+   ]
+  },
+  {
+   "stage": 1,
+   "clip": "road_1",
+   "still": "courtyard_stop_1.jpg",
+   "spots": [
+    [
+     0.373,
+     0.549
+    ],
+    [
+     0.624,
+     0.554
+    ]
+   ]
+  },
+  {
+   "stage": 2,
+   "clip": "road_2",
+   "still": "courtyard_stop_2.jpg",
+   "spots": [
+    [
+     0.495,
+     0.552
+    ]
+   ]
+  },
+  {
+   "stage": 3,
+   "clip": "road_3",
+   "still": "courtyard_stop_3.jpg",
+   "spots": [
+    [
+     0.373,
+     0.549
+    ],
+    [
+     0.624,
+     0.554
+    ]
+   ]
+  },
+  {
+   "stage": 4,
+   "clip": "road_4",
+   "still": "courtyard_stop_4.jpg",
+   "spots": [
+    [
+     0.373,
+     0.549
+    ],
+    [
+     0.624,
+     0.554
+    ]
+   ]
+  },
+  {
+   "stage": 5,
+   "clip": "road_5",
+   "still": "courtyard_stop_5.jpg",
+   "spots": [
+    [
+     0.495,
+     0.552
+    ]
+   ]
+  },
+  {
+   "stage": 6,
+   "clip": "road_6",
+   "still": "courtyard_stop_6.jpg",
+   "spots": [
+    [
+     0.464,
+     0.443
+    ]
+   ]
+  }
+ ]
+}

@@ -1,0 +1,30 @@
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+render t=2.6 draw_calls=243 primitives=176298 objects=1184 video_mem=184.9MB nodes=290
+render t=4.2 draw_calls=238 primitives=229691 objects=1085 video_mem=204.6MB nodes=284
+render t=5.8 draw_calls=273 primitives=166564 objects=1065 video_mem=203.1MB nodes=265
+render t=7.4 draw_calls=272 primitives=166526 objects=1114 video_mem=203.1MB nodes=265
+render t=9.0 draw_calls=269 primitives=166354 objects=1123 video_mem=203.1MB nodes=268
+render t=10.6 draw_calls=251 primitives=176427 objects=1026 video_mem=219.3MB nodes=278
+render t=11.9 draw_calls=251 primitives=176427 objects=1026 video_mem=219.3MB nodes=278
+render t=13.6 draw_calls=270 primitives=166230 objects=934 video_mem=219.3MB nodes=267
+render t=15.2 draw_calls=243 primitives=176292 objects=1181 video_mem=219.2MB nodes=290
+render t=16.8 draw_calls=243 primitives=176298 objects=1184 video_mem=219.2MB nodes=290
+render t=18.4 draw_calls=262 primitives=175146 objects=1268 video_mem=273.3MB nodes=309
+render t=19.9 draw_calls=294 primitives=189708 objects=1350 video_mem=349.0MB nodes=339
+ERROR: Parameter "material" is null.
+   at: material_casts_shadows (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2404)
+ERROR: Parameter "material" is null.
+   at: material_is_animated (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2391)
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2435)
+ERROR: Parameter "material" is null.
+   at: material_update_dependency (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2447)
+ERROR: Parameter "material" is null.
+   at: material_casts_shadows (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2404)
+ERROR: Parameter "material" is null.
+   at: material_is_animated (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2391)
+ERROR: Parameter "material" is null.
+   at: material_get_instance_shader_parameters (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2435)
+ERROR: Parameter "material" is null.
+   at: material_update_dependency (servers/rendering/renderer_rd/storage_rd/material_storage.cpp:2447)
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).

@@ -322,6 +322,9 @@ func _ready() -> void:
 	ok(d.hud.pad_block.pips_left == 1, "the sim's shield_charges event drives the pips")
 	# ================================================================ the victory screen
 	Game.profile.gold = 200
+	Game.equip("s_plank")
+	Game.profile.inventory.erase("s_tower")             # (the Sentinel's own shield: not held yet, so it is what falls)
+	Game.profile.upgrades.erase("s_tower")
 	Game.profile.defeated.erase("ashen_sentinel")       # its first fall: the guaranteed piece, and a blade opens in the shop
 	var r: Dictionary = Game.on_victory("ashen_sentinel", 50.0)
 	var went := [false]
@@ -342,7 +345,7 @@ func _ready() -> void:
 		shop_ok = shop_ok and vt.contains("New in the shop:  %s" % Db.item(id).name)
 	ok(shop_ok, "and what Orren can now sell (%s)" % str(r.shop_unlocks))
 	ok(not r.items_new.is_empty() and vt.contains(str(Db.item(str(r.items_new[0])).name).to_upper()) and vt.contains("COMPARE") and vt.contains("INSPECT"), "a new piece is revealed with Compare and Inspect (%s)" % str(r.items_new))
-	ok(vt.contains(str(Db.item("w_rusted_sword").name)) and vt.contains(str(Db.item("s_tower").name)), "everything worn has its mastery bar")
+	ok(vt.contains(str(Db.item("w_rusted_sword").name)) and vt.contains(str(Db.item("s_plank").name)), "everything worn has its mastery bar")
 	for tw: Tween in ov.get_meta("tweens"):
 		if tw.is_valid():
 			tw.custom_step(60.0)

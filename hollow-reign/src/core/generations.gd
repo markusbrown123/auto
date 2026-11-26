@@ -122,6 +122,8 @@ static func _whole(v: Variant) -> Variant:
 	return v
 
 static func _norm(p: Dictionary) -> void:
+	if p.get("flags") is Dictionary and p.flags.has("generation"):
+		p.flags["generation"] = int(p.flags.generation)        # the scenes' own marker (src/cine/arrival.gd)
 	for k: String in ["campaign", "world", "generations", "family"]:
 		if p.has(k):
 			p[k] = _whole(p[k])
@@ -248,7 +250,8 @@ static func sync(p: Dictionary) -> void:
 	if canon_open(p):
 		# the one on the road is whoever the profile says they are; an authored forebear is of the same lineage
 		var rec := record(gen(p), p)
-		rec.name = str(p.get("name", ""))
+		if int(rec.index) >= 2:
+			rec.name = str(p.get("name", ""))        # the first is never the player's named knight
 		rec.body = str(p.get("body", "m"))
 		for r: Dictionary in p.generations:
 			if r.authored and not r.migrated and int(r.index) < int(rec.index):

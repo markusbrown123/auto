@@ -573,7 +573,16 @@ func swing(dir: Vector2, time: float, finish: String = "") -> void:
 	_swing = time * 0.5
 	_go(Mode.WINDUP, time * 0.6)
 	_root_target = Vector3(0, 0, -0.25)
+	if mirror > 0.0:
+		if _clock - _au_hist_t > 1.6:
+			_au_hist.clear()
+		_au_hist_t = _clock
+		_au_hist.append(_au_label())
+		if _au_hist.size() > 6:
+			_au_hist.pop_front()
 	_au_begin(_au_label(), 0.0, time * 0.6, finish)
+	if finish != "":
+		_au_hist.clear()
 
 var _parry_t := 0.0
 func parry(dir: Vector2) -> void:
@@ -1610,9 +1619,26 @@ func _au_label() -> String:
 	return ["R", "UR", "U", "UL", "L", "DL", "D", "DR"][posmod(int(round(a / (PI / 4.0))), 8)]
 
 ## The clip for a swipe: [clip, hit index, options] or [] to stay procedural.
-func _au_pick(label: String, _finish_kind: String) -> Array:
+func _au_pick(label: String, finish_kind: String) -> Array:
 	var tbl: Dictionary = AU_CUTS.get(au_set(), {})
-	return tbl.get(label, [])
+	var spec: Array = tbl.get(label, [])
+	if mirror < 0.0 or combo_book.is_empty() or _au_hist.size() < 2:
+		return spec
+	# a known combo in progress: from its second cut on, each cut is the one written for that place in that combo
+	var rows_for: Dictionary = AU_COMBOS.get(au_set(), {})
+	var top := 0
+	for c: Dictionary in combo_book:
+		var rows: Array = rows_for.get(str(c.id), [])
+		var seq: Array = c.seq
+		for k in range(mini(seq.size(), _au_hist.size()), 1, -1):
+			if _au_hist.slice(_au_hist.size() - k) == seq.slice(0, k):
+				# the combo this cut completes (the duel names its kind) outranks a longer one merely begun
+				var score := k + (100 if k == seq.size() and finish_kind != "" and str(c.kind) == finish_kind else 0)
+				if score > top and k - 1 < rows.size() and rows[k - 1] != null:
+					top = score
+					spec = rows[k - 1]
+				break
+	return spec
 
 func _xfade(dur: float) -> void:
 	_xf_dir_r = _last_dir_r
@@ -1775,8 +1801,11 @@ func _au_update(dt: float) -> void:
 	if _au.is_empty():
 		return
 	if not (mode in [Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW, Mode.THRUST_WINDUP, Mode.THRUST]):
-		_au_stop()
-		return
+		# a combo's last cut that met nothing is followed through to its own recovery before the guard comes back
+		if mode != Mode.GUARD or blocking or float(_au.freeze) >= 0.0 or _au_t > float(_au.hit) + _swing * 0.5 + 0.3 + float(_au.linger) \
+				or _au_time(_au_t) >= float(_au.t_out) - 0.001:
+			_au_stop()
+			return
 	var prev := _au_t
 	_au_t += dt
 	if float(_au.freeze) >= 0.0 or dt <= 0.0 or not auto_bite or _pin_t > 0.0 or _au_t <= float(_au.from):
@@ -1794,7 +1823,7 @@ func _au_update(dt: float) -> void:
 		var hd: Dictionary = skin.clip_hand(str(_au.clip), ct, "Right", float(_au.roll), float(_au.travel))
 		if _blade_in(hd.p, hd.axis, targets, 0.75 if thrust else 0.3, 0.35 if thrust else 0.3):
 			_au.freeze = ct
-			_go(Mode.FOLLOW, BITE_HOLD + 0.22)
+			_go(Mode.FOLLOW, BITE_HOLD + 0.22 + float(_au.linger) * 0.4)      # a finishing blow stays in a moment longer
 			break
 
 func _au_apply() -> void:
@@ -1988,3 +2017,47 @@ func _fit_sheath() -> void:
 var combo_book: Array = []    # the combos this fighter knows (`DuelSim.combos`: {id, seq, kind}); set by the duel
 var _au_hist: Array = []      # swipes of the cuts thrown lately, oldest first
 var _au_hist_t := -9.0
+
+## Each combo's own choreography: per weapon set, per combo, the cut to throw at each place in its sequence
+## (null: the ordinary cut for that swipe; the first cut is always the ordinary one, since nothing is yet known).
+## `linger`: seconds the last cut is followed through (or held in the body) beyond an ordinary cut.
+const AU_COMBOS := {
+	"ss": {
+		"double_slash": [null, ["ss_c8_2", 0, {"linger": 0.2}]],
+		"riposte": [null, ["ss_fin_double", 0, {"linger": 0.35}]],
+		"rising_fang": [null, null, ["ss_c4_2", 0, {"linger": 0.2}]],
+		"armor_splitter": [null, null, ["ss_fin_cleave", 0, {"linger": 0.45}]],
+		"crossbreaker": [null, null, ["ss_c8_3", 0, {"linger": 0.3}]],
+		"mirror_step": [null, null, ["ss_c8_2", 0, {"linger": 0.2}]],
+		"falling_crown": [null, ["ss_c4_1", 0], ["th_cut_d2", 0, {"arm_l": 0.0, "linger": 0.5}]],
+		"reversal": [null, null, ["ss_cut_r2", 0], ["th_cut_u", 0, {"arm_l": 0.0, "linger": 0.35}]],
+		"serpents_path": [null, null, null, ["ss_c7_3", 0, {"linger": 0.4}]],
+		"eternal_edge": [null, ["ss_c8_2", 0], null, null, ["th_cut_d", 0, {"arm_l": 0.0, "linger": 0.55}]],
+		"headsmans_due": [null, ["th_cut_d2", 0, {"arm_l": 0.0, "linger": 0.5}]],
+		"timberfall": [null, ["ss_c8_2", 0], ["ss_fin_cleave", 0, {"linger": 0.5}]]},
+	"th": {
+		"double_slash": [null, ["th_cut_l", 1, {"linger": 0.2}]],
+		"riposte": [null, ["th_cut_l", 1, {"linger": 0.3}]],
+		"rising_fang": [null, null, ["th_cut_l", 1, {"linger": 0.2}]],
+		"armor_splitter": [null, null, ["th_cut_d2", 0, {"linger": 0.45}]],
+		"crossbreaker": [null, null, ["th_cut_dl2", 0, {"linger": 0.3}]],
+		"mirror_step": [null, null, ["th_spin", 2, {"linger": 0.2}]],
+		"falling_crown": [null, null, ["th_cut_d2", 0, {"linger": 0.5}]],
+		"reversal": [null, null, ["th_cut_l", 1], ["th_cut_u", 0, {"linger": 0.35}]],
+		"serpents_path": [null, null, null, ["th_overhead", 0, {"linger": 0.4}]],
+		"eternal_edge": [null, null, null, null, ["th_cut_d2", 0, {"linger": 0.55}]],
+		"colossus": [null, ["th_cut_d2", 0, {"linger": 0.5}]],
+		"tidebreaker": [null, ["th_cut_l", 1], ["th_cut_d2", 0], ["th_cut_u", 0, {"linger": 0.45}]]},
+	"dw": {
+		"double_slash": [null, ["dw_a2", 1, {"linger": 0.2}]],
+		"rising_fang": [null, null, ["dw_a2", 1, {"linger": 0.2}]],
+		"armor_splitter": [null, null, ["dw_lunge", 0, {"linger": 0.4}]],
+		"crossbreaker": [null, null, ["dw_x", 0, {"linger": 0.3}]],
+		"mirror_step": [null, null, ["dw_x", 2, {"linger": 0.2}]],
+		"falling_crown": [null, null, ["dw_lunge", 0, {"linger": 0.45}]],
+		"reversal": [null, null, ["dw_a2", 1], null],
+		"serpents_path": [null, null, null, ["dw_lunge", 0, {"linger": 0.4}]],
+		"eternal_edge": [null, null, null, null, ["dw_lunge", 0, {"linger": 0.5}]],
+		"twin_fang": [null, ["dw_a2", 1], ["dw_cut_l", 0], ["dw_cut_r", 0, {"linger": 0.3}]],
+		"whirlwind": [null, ["dw_x", 2], null, ["dw_x", 0, {"linger": 0.35}]]},
+}

@@ -1,5 +1,12 @@
 # Development backlog
 
+## Checkpoint — read this first when resuming
+Background jobs were running when this was last written (2026-11-26). They die with the container, so check each:
+1. **Region kit models** — `python3 tools/kit_props.py` (resumable; a model already paid for is re-downloaded from the task id in `art/models/<name>.json`, never regenerated). Done when `ls assets/models/env_{ca,ci,cr,de,ro,th}_*.glb | wc -l` prints 42. Then `godot --headless --path . --import`, capture each arena (`tools/shoot.sh <dir> 5 --demo=<boss> --skip_intro --bot=3` for gravewarden, cinder_wyrm, devourer, forgotten_monarch), fix layouts in `src/world/arena.gd`, commit, and add the spend to `docs/SPENDING_LOG.md` ($0.30 per model; read the balance from `GET /account/balance`).
+2. **Courtyard road re-film for both knights** — takes go to `art/takes/road_N.avi` and `f_road_N.avi`; then `python3 tools/cut_clips.py` writes `assets/video/courtyard_road_N.ogv`, `courtyard_f_road_N.ogv` and stills. Check with `ls assets/video | grep f_road`. If missing, re-run the loop in `tools/render_clips.sh` style with `--take=road_N --body=m|f`.
+3. **After both:** `tools/test.sh` (all five suites; takes about 6 minutes, run it in the background), then `tools/visual_test.sh --update`, look at `tests/golden/*.png`, commit them.
+4. Remaining demonstration recordings: see `QUALITY_CHECKLIST.md`.
+
 Work top to bottom. Status: TODO · DOING · DONE (evidence) · BLOCKED (why, and on whom).
 Update this file in the same commit as the work.
 

@@ -563,6 +563,12 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			p_side_owed += float(d.side) * 1.3      # the roll carries on past where the sidestep would have stopped
 			player_rig.roll(float(d.side))
 			Sfx.play("dodge", -1.0, 0.8)
+		&"marks":
+			if int(d.n) >= int(d.of):
+				hud.toast("SENTENCED", Color("#d23a2a"), 1.2)
+				Sfx.play("bell", -4.0, 0.7)
+			elif int(d.n) > 0:
+				hud.toast("MARKED  %d / %d" % [int(d.n), int(d.of)], Color("#c98a6a"), 0.8)
 		&"combo_reset":
 			hud.training_cuts([], "")
 		&"player_advance":

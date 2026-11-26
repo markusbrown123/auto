@@ -39,3 +39,15 @@ Cap: $100 total across Higgsfield and Tripo, including everything below. Tripo c
 
 Running total after this entry: Tripo ≈ $39.20, Higgsfield ≈ $8.80, combined ≈ $48.00 of the $100 cap.
 No failed tasks were regenerated. Nothing else was bought in this pass.
+
+## Voice casting (continuous-development pass, 2026-11-26)
+
+| Item | Service | Credits | Cost |
+|---|---|---|---|
+| Measured catalogue: one test line from each of 114 preset voices (`docs/VOICE_CATALOG.json`) | Higgsfield speech | about 53 | about $2.15 |
+| Audition reel: 10 roles × 3 candidates (`marketing/audition/casting/`) | Higgsfield speech | about 14 | about $0.60 |
+
+Account balance read after both: 931.25 credits (was about 998). One catalogue take failed and was not retried.
+Animation libraries added in this pass were free (CC0 / MIT); nothing was bought.
+
+Running total: Tripo ≈ $39.20, Higgsfield ≈ $11.55, combined ≈ **$50.75 of the $100 cap**.

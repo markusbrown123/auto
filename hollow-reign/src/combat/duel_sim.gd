@@ -151,7 +151,14 @@ func time_to_impact() -> float:
 	return b_t if b_state == B.WINDUP else -1.0
 
 func speed() -> float:
-	return float(phase().get("speed", 1.0)) * b_speed
+	# frenzy: the more it bleeds, the faster it comes
+	return float(phase().get("speed", 1.0)) * b_speed * (1.0 + trait_v("frenzy") * (1.0 - b_hp / maxf(b_hp_max, 1.0)))
+
+## Per-foe rule changes (bosses.json "traits"), 0 when the foe has none:
+## frenzy, block_tax, marks + mark_mult, parry_open, dodge_open, lifesteal.
+var marks := 0
+func trait_v(key: String) -> float:
+	return float(bd.get("traits", {}).get(key, 0.0))
 
 func _emit(n: StringName, d: Dictionary = {}) -> void:
 	ev.emit(n, d)
@@ -605,6 +612,9 @@ func _start_attack() -> void:
 func _resolve_strike() -> void:
 	var a := b_attack
 	var dmg: float = float(a.dmg) * b_dmg_mult
+	var sentenced := trait_v("marks") > 0.0 and marks >= int(trait_v("marks"))
+	if sentenced:
+		dmg *= maxf(1.0, trait_v("mark_mult"))      # the sentence, carried out
 	var result := "hit"
 	var perfect := false
 	# --- dodge
@@ -648,7 +658,7 @@ func _resolve_strike() -> void:
 			stats.blocks += 1
 			# a block raised at the last instant turns the blow for free and rattles the attacker
 			var timed: bool = time - p_block_since <= PERFECT_BLOCK * assist
-			var cost: float = 0.0 if timed else float(a.guard) * (1.0 - float(pl.block_eff))
+			var cost: float = 0.0 if timed else float(a.guard) * (1.0 - float(pl.block_eff)) * maxf(1.0, trait_v("block_tax"))
 			if timed:
 				perfect = true
 				stats["perfect_blocks"] = int(stats.get("perfect_blocks", 0)) + 1
@@ -674,6 +684,11 @@ func _resolve_strike() -> void:
 			if a.get("drain", false):
 				_drain(dmg)
 			_damage_player(dmg)
+			if trait_v("lifesteal") > 0.0:
+				b_hp = minf(b_hp_max, b_hp + dmg * trait_v("lifesteal") * 6.0)
+			if trait_v("marks") > 0.0:
+				marks = 0 if sentenced else marks + 1
+				_emit(&"marks", {"n": marks, "of": int(trait_v("marks"))})
 			if p_state != P.DEAD:
 				_set_p(P.HURT, HURT_TIME)
 			_end_opening()
@@ -695,6 +710,13 @@ func _resolve_strike() -> void:
 	var rec: float = float(b_combo.recover) / speed()
 	if result == "dodged" and perfect:
 		rec += 0.6
+	if result == "parried" and trait_v("parry_open") > 0.0:
+		rec *= trait_v("parry_open")
+	if result == "dodged" and trait_v("dodge_open") > 0.0:
+		rec *= trait_v("dodge_open")
+	if result == "parried" and perfect and marks > 0:
+		marks = 0                                   # a perfect parry is an acquittal
+		_emit(&"marks", {"n": 0, "of": int(trait_v("marks"))})
 	if result == "blocked" and perfect:
 		_add_posture(12.0)
 	opening_from = "dodge" if result == "dodged" else ("parry" if result == "parried" else "")

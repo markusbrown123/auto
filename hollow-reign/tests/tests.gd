@@ -459,6 +459,21 @@ func t_meters_combos() -> void:
 	s.ev.connect(func(n, d): if n == &"boss_combo": seen[d.id] = true)
 	run_for(s, 25.0)
 	ok(seen.size() == 1 and s.pl.hp == s.pl.max_hp and not s.over, "then it throws one plain cut and nobody is hurt")
+	# guardian traits
+	s = mk("hollow_executioner")
+	ok(s.trait_v("marks") == 3.0 and mk("ashen_sentinel").trait_v("marks") == 0.0, "traits come from data")
+	var dealt: Array = []
+	s.ev.connect(func(n, d): if n == &"player_hurt": dealt.append(d.dmg))
+	s.pl.max_hp = 1.0e6; s.pl.hp = 1.0e6
+	for i in 400:
+		run_for(s, 0.5)
+		if dealt.size() >= 4:
+			break
+	ok(dealt.size() >= 4 and s.marks <= 3, "the Executioner marks each wound")
+	s = mk("cathedral_beast")
+	var sp0: float = s.speed()
+	s.b_hp = s.b_hp_max * 0.4
+	ok(s.speed() > sp0 * 1.1, "the Beast quickens as it bleeds")
 	# training ground
 	s = mk("ashen_sentinel", 7, {}, {"training": true})
 	hits.clear()

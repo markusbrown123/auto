@@ -500,6 +500,20 @@ FOOT_BY_CLS = {"Humanoid": (0.10, 0.7), "Heavy": (0.05, 0.9), "Giant": (0.035, 1
                "Monstrosity": (0.26, 0.9), "Soul-Eater": (0.22, 1.0)}
 FOOT_BY_ID = {"ashen_sentinel": (0.07, 0.9), "hollow_executioner": (0.05, 0.8), "crimson_widow": (0.46, 0.5), "cathedral_beast": (0.24, 1.0),
               "gravewarden": (0.04, 1.3), "frostbound_king": (0.08, 1.0), "pale_huntsman": (0.36, 1.3), "forgotten_monarch": (0.20, 0.8), "devourer": (0.30, 1.1)}
+# What makes each guardian a different problem, beyond its patterns (rules in DuelSim.trait_v).
+TRAITS = {
+ "hollow_executioner": {"marks": 3, "mark_mult": 1.7},          # three wounds are a sentence; the next blow carries it out. A perfect parry acquits
+ "crimson_widow": {"dodge_open": 0.55, "parry_open": 1.35},     # she flows past a sidestep; only meeting her blade stops her
+ "cathedral_beast": {"frenzy": 0.3},                            # faster as it bleeds
+ "gravewarden": {"block_tax": 1.8, "parry_open": 1.25},         # too heavy to hold a shield against; slow enough to turn
+ "frostbound_king": {"block_tax": 1.4, "dodge_open": 1.3},      # punishes standing still, rewards movement
+ "pale_huntsman": {"dodge_open": 0.7, "frenzy": 0.15},
+ "forgotten_monarch": {"marks": 4, "mark_mult": 1.5, "parry_open": 1.15},
+ "devourer": {"lifesteal": 0.25, "frenzy": 0.2},                # it feeds on what it takes
+}
+for f in B:
+    if f["id"] in TRAITS:
+        f["traits"] = TRAITS[f["id"]]
 for f in B:
     c, k = FOOT_BY_ID.get(f["id"], FOOT_BY_CLS.get(f.get("cls", ""), (0.08, 0.7)))
     f["footwork"] = {"circle": c, "keep": k}

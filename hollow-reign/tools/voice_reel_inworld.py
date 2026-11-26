@@ -11,30 +11,13 @@ import json, os, subprocess, sys
 import numpy as np
 
 ROLES = {
- "witness": (["Hamish (en)", "Mortimer (en)", "Graham (en)", "Clive (en)", "Malcolm (en)", "Gareth (en)"],
-   "Ah. At last. I had begun to suspect the dead were better company. ... That gate once bore the banners of thirteen kings. Now look at it. Eternity has a peculiar sense of humour."),
- "orren": (["Shaun (en)", "Callum (en)", "Liam (en)"],
-   "So you're what she woke. Hm. Shoulders are wrong. Feet are worse. Well. We'll start with the feet."),
- "monarch": (["Dominus (en)", "Hades (en)", "Rupert (en)", "Nikolai (ru)"],
-   "I was never a king. I was the one who stayed. Somebody had to keep the lights burning, and you will find it is harder than it looks."),
- "frostking": (["Lennart (nl)", "Josef (de)", "Erik (nl)"],
-   "I watched men become gods. Then I watched gods become machines. Forgive an old man for wanting to sleep through the rest."),
- "player_m": (["Simon (en)", "Edward (en)", "Theodore (en)"],
-   "What was it built for? ... Can it be killed?"),
- "lyra": (["Pippa (en)", "Tessa (en)", "Claire (en)", "Celeste (en)"],
-   "Can you hear me? Good. Don't try to stand just yet. You've been gone a long while, and I'd rather not lose you twice."),
- "narrator": (["Victoria (en)", "Miranda (en)", "Elizabeth (en)"],
-   "The Everbound feared neither age nor sickness. What they feared was being forgotten. And so they built a crown that would remember them for ever."),
- "widow": (["Serena (en)", "Veronica (en)", "Svetlana (ru)"],
-   "That stance. I knew the soldier who taught it. He died badly. Let's see whether he taught you why."),
- "player_f": (["Abby (en)", "Julia (en)", "Olivia (en)"],
-   "What was it built for? ... Can it be killed?"),
- "archivist": (["Evelyn (en)", "Deborah (en)"],
-   "Record incomplete. Witness deceased. Memory ... retained. I am sorry. I was asked to forget this, and I did not."),
+ # the female protagonist: grounded, capable, mature; never bright or girlish. Four candidates from the same voice family as the approved cast, same lines.
+ "player_f": (["Elizabeth (en)", "Victoria (en)", "Serena (en)", "Veronica (en)"],
+   "Who speaks? ... And why does my hand know the weight of this blade? ... What was it built for? ... Then it ends here."),
 }
 # a little room, a little weight; the voice itself is left alone
 FX = "bass=g=2.5:f=150,aecho=0.9:0.35:55|110:0.16|0.08,loudnorm=I=-18:TP=-2"
-OUT = "marketing/audition/casting_v4"
+OUT = "marketing/audition/female_knight"
 os.makedirs(OUT, exist_ok=True)
 
 def pitch(path):
@@ -51,7 +34,7 @@ def pitch(path):
             f0.append(16000.0 / k)
     return float(np.median(f0)) if len(f0) > 10 else 0.0
 
-notes = ["# Casting reel 4\n", "Deeper, a little echo, regional and continental voices. Candidates in this order. Accents are guessed from the voice names and are not verified; nobody has listened to these.\n"]
+notes = ["# Casting reel 4\n", "The female knight: four candidates reading the same lines, in this order, with the same light room echo as the approved male voices. Nobody has listened to these.\n"]
 parts = []
 for role in (sys.argv[1:] or ROLES):
     voices, line = ROLES[role]

@@ -11,7 +11,7 @@ const ENDING_LINE := {
 	"steward": "The Crown was taken up, to be worn differently.",
 	"cities": "The Crown was divided, so that nobody could rule it.",
 }
-const DIR_WORD := {"L": "Left", "R": "Right", "U": "Up", "D": "Down"}
+const DIR_WORD := {"L": "Left", "R": "Right", "U": "Up", "D": "Down", "UL": "Up-left", "UR": "Up-right", "DL": "Down-left", "DR": "Down-right"}
 
 var tab := "Records"
 var _tabs: HBoxContainer
@@ -133,7 +133,7 @@ func _tab_sequences() -> void:
 			for d in c.seq:
 				steps.append(str(DIR_WORD.get(str(d), str(d))))
 			var uses := int(Game.profile.combo_uses.get(c.id, 0))
-			_entry("%s   ·   %s" % [c.name, "  ›  ".join(steps)], "%s  %s%s" % [c.get("kind", ""), c.get("use", ""), ("   Used %d times." % uses) if uses > 0 else ""], UI.BONE)
+			_entry("%s   ·   %s" % [c.name, "  ›  ".join(steps)], "%s.  %s%s" % [c.get("kind", "Sequence"), c.get("use", ""), ("   Used %d time%s." % [uses, "" if uses == 1 else "s"]) if uses > 0 else ""], UI.BONE)
 		else:
 			_entry("Not yet found", "", UI.DIM)
 

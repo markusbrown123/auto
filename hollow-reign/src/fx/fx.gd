@@ -150,10 +150,10 @@ func _make(kind: String) -> CPUParticles3D:
 			p.color_ramp = _ramp([Color(1, 1, 1, 0), Color(1, 1, 1, 0.13), Color(1, 1, 1, 0.07), Color(1, 1, 1, 0)])
 		"chips":
 			var b := BoxMesh.new()
-			b.size = Vector3(0.06, 0.04, 0.05)
+			b.size = Vector3(0.04, 0.025, 0.035)
 			p.mesh = b
 			var m := StandardMaterial3D.new()
-			m.vertex_color_use_as_albedo = true
+			m.albedo_color = ground.darkened(0.35)
 			m.roughness = 0.95
 			p.material_override = m
 			p.lifetime = 0.65
@@ -267,14 +267,14 @@ func sparks(at: Vector3, dir: Vector3, amount: int = 16, color: Color = Color(1.
 
 ## A low puff at the feet: rolls, sidesteps, being driven back.
 func dust(at: Vector3, amount: int = 6, tint = null, strength: float = 1.0) -> void:
-	var c: Color = tint if tint != null else ground.lerp(Color(0.72, 0.7, 0.66), 0.4)
+	var c: Color = tint if tint != null else ground.lerp(Color(0.7, 0.68, 0.64), 0.2)
 	c.a = clampf(strength, 0.2, 1.5)
 	_fire("dust", Vector3(at.x, maxf(at.y, 0.0) + 0.08, at.z), Vector3.UP, count(amount, BUDGET.dust), c)
 
 ## Broken flagstone thrown up where a slam lands, with its dust.
 func chips(at: Vector3, amount: int = 10) -> void:
 	var g := Vector3(at.x, 0.05, at.z)
-	_fire("chips", g, Vector3.UP, count(amount, BUDGET.chips), ground.darkened(0.15))
+	_fire("chips", g, Vector3.UP, count(amount, BUDGET.chips), Color.WHITE)
 	dust(g, 7, null, 1.3)
 
 ## Elemental accent at a contact point. Returns false for an element with no effect.

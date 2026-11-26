@@ -781,7 +781,8 @@ func _on_strike(d: Dictionary) -> void:
 		_lesson_done({"parried": 2, "dodged": 3, "blocked": 4}.get(str(d.result), -9))
 	# effects that belong to the blow itself, whatever came of it
 	if str(a.get("kind", "")) == "slam":
-		fx.chips(foe_rig.blade_tip())
+		# where the blow comes down: beside the knight if it was dodged, otherwise just in front of the feet
+		fx.chips(foe_rig.blade_tip() if str(d.result) == "dodged" else _feet(player_rig).lerp(_feet(foe_rig), 0.3))
 	if a.get("element") != null and str(d.result) != "dodged":
 		fx.element(str(a.element), meet if str(d.result) != "hit" else player_rig.chest_point(), _deflect_dir(a))
 	match d.result:

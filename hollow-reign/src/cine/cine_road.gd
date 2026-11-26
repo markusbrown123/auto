@@ -116,12 +116,12 @@ func _arrive() -> void:
 		c.queue_free()
 	var region := Game.run_region()
 	var stage: int = Game.run.stage
+	# the choices appear at once; the companions talk over them, never in front of them
+	_build_ui()
 	if not Companion.pick_stage(str(region.id), stage).is_empty():
 		await get_tree().create_timer(0.4).timeout
-		await Companion.on_stage(str(region.id), stage)
-		if not is_inside_tree():
-			return
-	_build_ui()
+		if is_inside_tree():
+			Companion.on_stage(str(region.id), stage)
 
 ## Where a normalised picture point lands on screen, given the cover-fit of a 16:9 image.
 func _to_screen(n: Vector2) -> Vector2:

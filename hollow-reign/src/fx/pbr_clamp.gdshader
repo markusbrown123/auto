@@ -1,7 +1,7 @@
 shader_type spatial;
 // Hollow Reign surface shader for generated (Tripo PBR) models.
 // Same texture reads as StandardMaterial3D (albedo, normal, packed ORM), but roughness and metallic
-// are remapped per pixel into a range chosen by asset class, so nothing renders as liquid chrome
+// are clamped per pixel into a range chosen by asset class, so nothing renders as liquid chrome
 // or wet plastic. Optional fresnel rim keeps a figure readable against a dark arena.
 // Cost: 3 texture samples, no extra passes. Works on the Mobile renderer.
 render_mode diffuse_burley, specular_schlick_ggx; //CULL
@@ -25,7 +25,7 @@ void fragment() {
 	vec4 a = texture(albedo_tex, UV);
 	vec3 orm = texture(orm_tex, UV).rgb;
 	ALBEDO = a.rgb * tint.rgb;
-	ROUGHNESS = mix(rough_min, rough_max, orm.g);
+	ROUGHNESS = clamp(orm.g, rough_min, rough_max);
 	METALLIC = min(orm.b, metal_max);
 	SPECULAR = spec;
 	NORMAL_MAP = texture(normal_tex, UV).rgb;

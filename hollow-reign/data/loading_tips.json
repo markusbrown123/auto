@@ -186,6 +186,24 @@
    "kind": "lore",
    "text": "The Hollow Throne was never empty. That is not the same as saying a king sat on it.",
    "after": "throne"
+  },
+  {
+   "kind": "lore",
+   "text": "The Everbound feared neither age nor sickness. What they feared was being forgotten."
+  },
+  {
+   "kind": "lore",
+   "text": "The oldest dragons were not born. They were commissioned.",
+   "after": "roost"
+  },
+  {
+   "kind": "tip",
+   "text": "A shield may withstand a thousand blades, yet fail the hand that raises it too late."
+  },
+  {
+   "kind": "lore",
+   "text": "The ruins beneath the Cathedral predate the kingdom that built it.",
+   "after": "cathedral"
   }
  ]
 }

@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_save", "t_runs"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -634,6 +634,20 @@ func t_progression() -> void:
 	ok(Game.profile.mastered.size() > 0 and Game.profile.attr_points > pts, "equipment mastery grants a point")
 	var res := Game.on_victory("ashen_sentinel", 50.0)
 	ok(Game.owns("w_ashen_great") and res.gold > 0, "boss first-kill loot")
+
+func t_endings() -> void:
+	Game.new_game("#123456")
+	var by := {}
+	for r in Db.regions:
+		by[r.id] = r
+	ok(by.throne.requires == "citadel" and by.citadel.requires == "crypt" and by.roost.get("optional", false) and by.deep.get("optional", false), "the Roost and the Deep are side roads")
+	Game.profile.cleared = ["courtyard", "blackwood", "cathedral", "crypt", "citadel", "throne"]
+	ok(Game.game_complete() and not Game.can_divide_crown(), "the main road alone finishes the game but cannot divide the Crown")
+	Game.profile.cleared.append("roost")
+	Game.profile.defeated["devourer"] = 1
+	ok(Game.can_divide_crown(), "the side roads earn the third ending")
+	Game.choose_ending("cities"); Game.choose_ending("cities")
+	ok(Game.profile.endings == ["cities"] and Game.profile.flags.last_ending == "cities", "the ending is recorded once")
 
 func t_save() -> void:
 	Game.new_game("#123456")

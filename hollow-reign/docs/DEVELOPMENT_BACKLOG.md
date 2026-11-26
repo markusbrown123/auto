@@ -53,9 +53,9 @@ Update this file in the same commit as the work.
 |---|---|---|
 | D1 | Unique mechanics and movement per boss (8 remaining + Devourer) | DOING — one rule trait each (`TRAITS` in `tools/gen_bosses.py`), tested; pattern sets not yet widened like the Sentinel's |
 | D2 | Dragons on the stance system | DOING — dragons now ride the turning line; needs a capture |
-| D3 | Environment kits for the six regions still on primitive geometry | DOING — 42 concepts made, models generating (`tools/kit_props.py`), layouts written in `arena.gd`; needs captures per region |
+| D3 | Environment kits for the six regions still on primitive geometry | DOING — Cathedral kit in and captured (237k triangles); other five kits: 42 concepts made, models generating (`tools/kit_props.py`), layouts written in `arena.gd`; needs captures per region |
 | D4 | Optional quests, lore collectibles, memories | TODO |
-| D5 | Three endings, New Game Plus check | TODO |
+| D5 | Three endings, New Game Plus check | DOING — choice after the Monarch, three written epilogues, post-credits text, third ending gated on the side roads; text only, no footage or voice; needs a capture (`--screen=ending`) |
 | D6 | Modular armour customisation | TODO |
 
 ## E. Delivery
@@ -71,7 +71,7 @@ Update this file in the same commit as the work.
 |---|---|---|
 | F1 | Boss intro cards, region blurbs and some item text still tell the older story (a returning servant of the crown); the story bible says the Unbound is a newly made person | DONE — intro cards, titles, region blurbs and two items rewritten to the story bible |
 | F2 | Master brief asks for nine guardians and three dragons; data has eight guardians, the Devourer and two dragons (no Azhurion) | DOING — Azhurion added (optional, throne hall, three phases, 2,821 checks pass); a ninth guardian is still undesigned |
-| F3 | Story bible wants the Roost and the Deep optional; data chains all eight regions, so the third ending's condition cannot fail | TODO |
+| F3 | Story bible wants the Roost and the Deep optional; data chains all eight regions, so the third ending's condition cannot fail | DONE — Roost and Deep are side roads; throne follows the Citadel; test `t_endings` |
 | F4 | Missing scenes: Huntsman, Veyrath and Devourer deaths; all of Skeldra; the Unbound's origin; stage remarks outside the Courtyard | TODO — proposed text in `CAMPAIGN_SCRIPT.md`; recording waits on casting |
 | F5 | Memory clip is 5 s under about 20 s of speech; `sentinel_travel` clip missing; all footage shows the male knight | TODO (see C1) |
 | F6 | Phase music layer is hard-coded to one cue and may not fit generated boss tracks; one roar set for every boss; `menu` cue still used as exploration music in seven regions | TODO — see `SOUNDTRACK_PLAN.md` |

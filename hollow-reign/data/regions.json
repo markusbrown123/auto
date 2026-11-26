@@ -559,6 +559,7 @@
    "theme": "roost",
    "amb": "wind",
    "requires": "crypt",
+   "optional": true,
    "blurb": "A volcanic fortress. Under it they kept a thing built to break sieges, and never told it the wars were over.",
    "shortcut": {
     "flag": "roost_chain",
@@ -696,7 +697,7 @@
    "name": "The Frozen Citadel",
    "theme": "citadel",
    "amb": "wind",
-   "requires": "roost",
+   "requires": "crypt",
    "blurb": "The mountain fortress. Its king had the gates frozen shut, and himself with them.",
    "shortcut": {
     "flag": "citadel_lift",
@@ -842,6 +843,7 @@
    "theme": "deep",
    "amb": "crypt",
    "requires": "citadel",
+   "optional": true,
    "blurb": "Under the throne is where the Crown sent what it had no use for. All of it is still down there, together.",
    "shortcut": {
     "flag": "deep_stair",
@@ -975,7 +977,7 @@
    "name": "The Hollow Throne",
    "theme": "throne",
    "amb": "wind",
-   "requires": "deep",
+   "requires": "citadel",
    "blurb": "The last hall, and the machine at the end of it. Somebody stayed to keep it running.",
    "shortcut": {
     "flag": "throne_door",

@@ -98,7 +98,7 @@ R = [
    st("The oldest tomb. Its keeper has not left his post.",
       boss("The First Tomb", "A lantern, held very still.", "gravewarden")),
   ]),
- dict(id="roost", name="The Wyrm's Roost", theme="roost", amb="wind", requires="crypt",
+ dict(id="roost", name="The Wyrm's Roost", theme="roost", amb="wind", requires="crypt", optional=True,
   blurb="A volcanic fortress. Under it they kept a thing built to break sieges, and never told it the wars were over.",
   shortcut=dict(flag="roost_chain", stage=4, label="The Feeding Chain"),
   stages=[
@@ -120,7 +120,7 @@ R = [
    st("The summit. The sky is very large here, and part of it is looking at you.",
       boss("The Summit", "A shadow crosses the sun, and comes back.", "cinder_wyrm")),
   ]),
- dict(id="citadel", name="The Frozen Citadel", theme="citadel", amb="wind", requires="roost",
+ dict(id="citadel", name="The Frozen Citadel", theme="citadel", amb="wind", requires="crypt",
   blurb="The mountain fortress. Its king had the gates frozen shut, and himself with them.",
   shortcut=dict(flag="citadel_lift", stage=4, label="The Ice Lift"),
   stages=[
@@ -143,7 +143,7 @@ R = [
    st("The hall of the winter throne.",
       boss("The Winter Throne", "He has not moved in an age. He moves now.", "frostbound_king")),
   ]),
- dict(id="deep", name="The Hollow Deep", theme="deep", amb="crypt", requires="citadel",
+ dict(id="deep", name="The Hollow Deep", theme="deep", amb="crypt", requires="citadel", optional=True,
   blurb="Under the throne is where the Crown sent what it had no use for. All of it is still down there, together.",
   shortcut=dict(flag="deep_stair", stage=4, label="The Unlit Stair"),
   stages=[
@@ -165,7 +165,7 @@ R = [
    st("The bottom. It is not dark. It is occupied.",
       boss("The Bottom", "It says a name. It might be yours.", "devourer")),
   ]),
- dict(id="throne", name="The Hollow Throne", theme="throne", amb="wind", requires="deep",
+ dict(id="throne", name="The Hollow Throne", theme="throne", amb="wind", requires="citadel",
   blurb="The last hall, and the machine at the end of it. Somebody stayed to keep it running.",
   shortcut=dict(flag="throne_door", stage=4, label="The King's Door"),
   stages=[

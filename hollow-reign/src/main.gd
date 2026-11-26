@@ -197,17 +197,49 @@ func _region_done() -> void:
 		show_sanctuary()
 		if finale:
 			Sfx.play("bell", -3.0)
-			Overlays.message(current, "The Throne Is Empty", [
-				"The crown lies where it fell. Nobody reaches for it.",
-				"Outside, for the first time in an age, it begins to rain.",
-				"You wake in the sanctuary. The candle is still burning.",
-				["The kingdom may be walked again, and it will be crueller.", UI.GOLD]], "Rest", func(): pass)
+			_ending()
 		elif first:
 			var nxt := ""
 			for r in Db.regions:
 				if r.requires == region.id:
 					nxt = r.name
 			Overlays.message(current, region.name, ["Its guardian is ended.", ["The road to %s is open." % nxt, UI.GOLD]], "Rest", func(): pass))
+
+## The Crown is in reach: what the Unbound does with it. Three endings; the third must be earned.
+const ENDINGS := {
+	"silence": ["The Final Silence", [
+		"You pull the last coupling. The hum that has been under everything, always, stops.",
+		"The Everbound end where they stand, mid-word. The archives go dark. So does Lyra.",
+		"Outside, the sun comes up on people who will die one day, and know it.",
+		["Nothing answers you now. It is very quiet. It is morning.", UI.GOLD]]],
+	"steward": ["The Last Steward", [
+		"You put the crown on. It is lighter than it looked.",
+		"You will not do what he did. You are almost sure. The machines wait to be told.",
+		"Lyra says nothing for a long time. Then: \"I'll be watching. Somebody has to.\"",
+		["The lights of the kingdom come on, one district at a time.", UI.GOLD]]],
+	"cities": ["The Free Cities", [
+		"You do not break the Crown and you do not wear it. You divide it.",
+		"A hundred small systems, none of which can command the others. Each mind inside is asked what it wants.",
+		"Some stay. Some ask for bodies. Some, very politely, ask to stop.",
+		["Lyra's voice comes from a doorway, not from the air. \"So this is what standing feels like.\"", UI.GOLD]]],
+}
+func _ending() -> void:
+	var divide := Game.can_divide_crown()
+	Overlays.choice(current, "The Crown", [
+		"The steward is ended. The machine he kept is still running.",
+		"Lyra: \"Whatever you do next, do it because you chose it. That's all I ever wanted for you.\""], [
+		["Disconnect it", true, "End the Crown, and everything it holds."],
+		["Take it up", true, "Rule in his place, and try to do it differently."],
+		["Divide it", divide, "Split it so no one can rule it." if divide else "You have not seen enough of what the Crown threw away to know how."],
+	], func(i: int):
+		var id: String = ["silence", "steward", "cities"][i]
+		Game.choose_ending(id)
+		Overlays.message(current, ENDINGS[id][0], ENDINGS[id][1], "Continue", func():
+			Overlays.message(current, "Elsewhere", [
+				"A far fortress, under a sky with the wrong stars. A machine wakes.",
+				"\"Local network disconnected. Searching for external systems.\"",
+				["Something answers.", UI.GOLD],
+				"The kingdom may be walked again, and it will be crueller."], "Rest", func(): pass)))
 
 # ================================================================ dev / capture
 func _dev_boot() -> void:
@@ -256,6 +288,12 @@ func _dev_boot() -> void:
 				print("snap ", kind, " ", idx))
 		return
 	match _args.screen:
+		"ending":
+			show_sanctuary()
+			if _args.has("all"):
+				Game.profile.defeated["devourer"] = 1
+				Game.profile.cleared.append("roost")
+			_ending()
 		"title": show_title()
 		"sanctuary":
 			show_sanctuary()

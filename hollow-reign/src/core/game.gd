@@ -35,7 +35,7 @@ func default_profile() -> Dictionary:
 		"equipped": {"weapon": "w_rusted_sword", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest",
 			"gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": null, "relic": null},
 		"upgrades": {}, "mastery": {}, "mastered": [],
-		"flags": {}, "defeated": {}, "cleared": [], "ng": 0, "deaths": 0, "heraldry": "#3d0f0f",
+		"flags": {}, "defeated": {}, "cleared": [], "endings": [], "ng": 0, "deaths": 0, "heraldry": "#3d0f0f",
 		"tutorial_done": false, "playtime": 0.0, "body": "m", "combos": ["double_slash"], "combo_uses": {},
 	}
 
@@ -368,7 +368,17 @@ func on_death() -> Dictionary:
 	return summary
 
 func game_complete() -> bool:
-	return profile.cleared.size() >= Db.regions.size()
+	return profile.cleared.has(Db.regions[-1].id)      # the throne; the Roost and the Deep are optional
+
+## The third ending needs the side roads walked: the Devourer ended and the wyrm of the Roost faced.
+func can_divide_crown() -> bool:
+	return profile.defeated.has("devourer") and profile.cleared.has("roost")
+
+func choose_ending(id: String) -> void:
+	if not profile.endings.has(id):
+		profile.endings.append(id)
+	profile.flags["last_ending"] = id
+	save()
 
 func start_ng_plus() -> void:
 	profile.ng += 1

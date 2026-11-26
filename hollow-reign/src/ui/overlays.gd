@@ -107,6 +107,26 @@ static func _pause_fill(v: VBoxContainer, parent: Node, resume: Callable, abando
 		abandon.call())
 	h.add_child(a)
 
+## A decision. `options` is [[label, enabled, note], ...]; `chosen` gets the index.
+static func choice(parent: Node, heading: String, lines: Array, options: Array, chosen: Callable) -> void:
+	var v := _shell(parent, 0.8)
+	v.custom_minimum_size.x = 760
+	v.add_child(_centered(heading, 32, UI.GOLD, "title"))
+	v.add_child(UI.rule())
+	for l in lines:
+		v.add_child(_centered(str(l), 21, UI.BONE))
+	v.add_child(UI.spacer(8))
+	for i in options.size():
+		var o: Array = options[i]
+		var b := UI.button(str(o[0]), 21, 520)
+		b.disabled = not bool(o[1])
+		b.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		b.pressed.connect(func():
+			v.get_meta("layer").queue_free()
+			chosen.call(i))
+		v.add_child(b)
+		v.add_child(_centered(str(o[2]), 15, UI.DIM))
+
 static func message(parent: Node, heading: String, lines: Array, button: String, done: Callable, heading_color: Color = UI.GOLD) -> void:
 	var v := _shell(parent, 0.66)
 	v.add_child(_centered(heading, 32, heading_color, "title"))

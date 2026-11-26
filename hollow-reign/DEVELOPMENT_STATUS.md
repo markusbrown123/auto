@@ -56,6 +56,16 @@ Backlog with per-item status: `docs/DEVELOPMENT_BACKLOG.md`. Resume instructions
 - **Tests.** 2,727 rule checks. All five suites passed before the review fixes; only the rule suite has been re-run since. Visual regression script written, golden images not yet captured.
 - **Recordings.** `marketing/demos/` (rendered offline in software).
 
+## Campaign roll-out 2026-11-26 (same pass, later)
+- **Regions.** All six regions that were primitive geometry are now built from generated kits (42 models, $12.60): Cathedral, Crypt, Roost, Citadel, Deep, Throne. Captures: `marketing/region_*_kit.png`. Duel frames are 231k–298k triangles in them.
+- **Dragons.** Veyrath, Skeldra and the new optional Azhurion are generated, quadruped-rigged models driven in fights (neck, claws, tail, wings). Mouths do not open and legs do not step: the auto-rig has no jaw and no walk is authored.
+- **Story.** Three endings with a choice after the Monarch; the third needs the Devourer ended, the Roost cleared and 30 records. Roost and Deep are optional side roads. 50 records and 8 tasks in the Journal. Intro cards, phase lines, region blurbs brought in line with the story bible. Text only: no new voice, no ending footage.
+- **Bosses.** A rule trait each (marks, frenzy, shield tax, life-steal…), third phases for the Executioner and Gravewarden, second for the Huntsman.
+- **Audio.** Adaptive music filter (explore / combat / danger), eight new synthesised effects on their frames. Unheard.
+- **Footage.** Courtyard road re-filmed for both knights; the road screen shows the player's knight.
+- **Spend.** About $68.85 of the $100 cap (`docs/SPENDING_LOG.md`).
+- **Tests.** All five suites pass on this state: 2,995 rule checks, 83 cinematic checks, integration (a duel against every foe, the three dragons and Azhurion included), touch, and cinematic playback. These prove rules and wiring, not how it looks, sounds or runs on a phone.
+
 ## Experiment 2026-11-26: cinematic presentation
 A complete, playable test of prerecorded footage with live rules (the Ashen Sentinel in the Fallen Courtyard), plus a short hotspot-and-travel exploration example. Off by default; switch on in Settings. The real-time duel is unchanged. Full write-up, measurements and recommendation: `docs/CINEMATIC_COMBAT.md`. Short version: it works and is verified on desktop; it suits travel, intros, finishers and story scenes; the real-time duel remains the better choice for the fighting itself. Asset manifest: `docs/ASSET_MANIFEST.json` (`tools/asset_manifest.py`). Audition reels for the unheard voices and music: `marketing/audition/`.
 

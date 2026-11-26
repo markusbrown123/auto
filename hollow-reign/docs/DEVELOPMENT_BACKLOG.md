@@ -1,14 +1,11 @@
 # Development backlog
 
 ## Checkpoint — read this first when resuming
-Background jobs were running when this was last written (2026-11-26). They die with the container, so check each:
-1. **Region kit models** — `python3 tools/kit_props.py` (resumable; a model already paid for is re-downloaded from the task id in `art/models/<name>.json`, never regenerated). Done when `ls assets/models/env_{ca,ci,cr,de,ro,th}_*.glb | wc -l` prints 42. Then `godot --headless --path . --import`, capture each arena (`tools/shoot.sh <dir> 5 --demo=<boss> --skip_intro --bot=3` for gravewarden, cinder_wyrm, devourer, forgotten_monarch), fix layouts in `src/world/arena.gd`, commit, and add the spend to `docs/SPENDING_LOG.md` ($0.30 per model; read the balance from `GET /account/balance`).
-2. **Courtyard road re-film for both knights** — takes go to `art/takes/road_N.avi` and `f_road_N.avi`; then `python3 tools/cut_clips.py` writes `assets/video/courtyard_road_N.ogv`, `courtyard_f_road_N.ogv` and stills. Check with `ls assets/video | grep f_road`. If missing, re-run the loop in `tools/render_clips.sh` style with `--take=road_N --body=m|f`.
-3. **After both:** `tools/test.sh` (all five suites; takes about 6 minutes, run it in the background), then `tools/visual_test.sh --update`, look at `tests/golden/*.png`, commit them.
-4. Remaining demonstration recordings: see `QUALITY_CHECKLIST.md`.
-
-Work top to bottom. Status: TODO · DOING · DONE (evidence) · BLOCKED (why, and on whom).
-Update this file in the same commit as the work.
+Last written 2026-11-26, end of the continuous pass. No background jobs are outstanding: all 42 kit models, three dragons and the road re-film are finished and committed.
+Next actions, in order:
+1. `tools/test.sh` (all five suites, about 6–8 minutes; run in the background) — confirm the result recorded in `DEVELOPMENT_STATUS.md` still holds.
+2. `tools/visual_test.sh --update` if `tests/golden/` is empty, look at the images, commit; afterwards run `tools/visual_test.sh` with each change.
+3. Take the first TODO/DOING row below. Biggest remaining gaps: directional sword-arm animation (needs a paid library — owner decision), voice recording after the owner picks a cast, remaining demonstration recordings, per-boss pattern widening (Widow, Beast, Frost King), story scenes listed under F4.
 
 ## A. First encounter to standard (Fallen Courtyard, Ashen Sentinel)
 | # | Task | Status |
@@ -34,7 +31,7 @@ Update this file in the same commit as the work.
 | A19 | Subtle temporary sword trails; replace drawn parry arrow with blade glint | DONE — trails exist; prompts shrunk and dimmed; blade glints as each blow commits; needs a capture |
 | A20 | Camera redesign for the duel | DOING — camera now tracks the knight's real position and sits wider |
 | A21 | Courtyard art pass | TODO |
-| A22 | Visual regression test (golden captures, tolerance) | DOING — `tools/visual_test.sh` written; golden images not yet captured |
+| A22 | Visual regression test (golden captures, tolerance) | DONE — nine golden images in `tests/golden/`, compared by structural similarity (`tools/visual_test.sh`); covers static scenes only, not motion |
 | A23 | Triangle reduction / LOD | DOING — duel frame 548k → 402k triangles via LOD threshold and scenery bias; characters (32k each) not yet reduced |
 | A24 | Onboarding as an interactive lesson | DONE — five do-it-once steps before the first fight; rule test; needs a capture |
 
@@ -50,8 +47,8 @@ Update this file in the same commit as the work.
 ## C. Cinematics
 | # | Task | Status |
 |---|---|---|
-| C1 | Hybrid: live knight over filmed backgrounds, so equipment and body show | DOING — investigated (`CINEMATIC_COMBAT.md`): compositing rejected; road is being re-filmed per body with the authored walk; live-rendered road is the route to equipment-accurate walks |
-| C2 | Re-film crowded Courtyard stops 3 and 5 | TODO |
+| C1 | Hybrid: live knight over filmed backgrounds, so equipment and body show | DONE (as far as chosen) — road now filmed per body with the authored walk and picked by the player's knight; investigated (`CINEMATIC_COMBAT.md`): compositing rejected; road is being re-filmed per body with the authored walk; live-rendered road is the route to equipment-accurate walks |
+| C2 | Re-film crowded Courtyard stops 3 and 5 | TODO — all stops were re-filmed with the same camera spots; framing of 3 and 5 not yet changed |
 | C3 | Memories, conversations, finishers | TODO |
 | C4 | `CAMPAIGN_SCRIPT.md`, `CINEMATIC_SCRIPT.md` | DONE — written; new lines marked proposed |
 

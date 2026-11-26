@@ -62,6 +62,8 @@ static var _mask: ImageTexture
 static var _road := PackedVector2Array()    # the road sampled every half metre
 static var _big: FastNoiseLite
 static var _small: FastNoiseLite
+static var _mask_px := PackedByteArray()    # the road mask's own bytes, for asking "is this on the road?" cheaply
+static var _grass_mm := {}                  # density -> the grass batches (MultiMesh resources are shared between builds)
 
 # ================================================================ the ground
 static func _noises() -> void:
@@ -185,12 +187,15 @@ static func road_at_z(z: float) -> float:
 			return float(i) * 0.5
 	return road_length()
 
-static func _road_dist(x: float, z: float) -> float:
-	var best := 1.0e9
-	var p := Vector2(x, z)
-	for i in range(0, _road.size(), 4):
-		best = minf(best, p.distance_squared_to(_road[i]))
-	return sqrt(best)
+## How much of the road is underfoot at a point: 0 turf, 1 the middle of the road (read from the mask).
+static func on_road(x: float, z: float) -> float:
+	_road_mask()
+	var w := int(MASK_W * MASK_PX)
+	var px := int((x - MASK_X0) * MASK_PX)
+	var pz := int((z - MASK_Z0) * MASK_PX)
+	if px < 0 or pz < 0 or px >= w or pz >= int(MASK_L * MASK_PX):
+		return 0.0
+	return float(_mask_px[pz * w + px]) / 255.0
 
 # ================================================================ meshes
 static func _terrain_mesh() -> ArrayMesh:
@@ -250,6 +255,7 @@ static func _road_mask() -> ImageTexture:
 				var val := int(255.0 * clampf(1.0 - (d - half * 0.55) / (half * 0.9), 0.0, 1.0))
 				if val > px[z * w + x]:
 					px[z * w + x] = val
+	_mask_px = px
 	var img := Image.create_from_data(w, l, false, Image.FORMAT_R8, px)
 	_mask = ImageTexture.create_from_image(img)
 	return _mask
@@ -351,6 +357,11 @@ static func _grass(a: Arena) -> ShaderMaterial:
 	mat.shader = load("res://src/world/highland_grass.gdshader")
 	mat.set_shader_parameter("albedo_tex", _blades())
 	var density := Game.particle_scale()            # 0.5 Performance, 0.8 Balanced, 1.0 High
+	if _grass_mm.has(density):
+		for mm0: MultiMesh in _grass_mm[density]:
+			_grass_batch(a, mm0, mat)
+		return mat
+	_grass_mm[density] = []
 	var blade := QuadMesh.new()
 	blade.size = Vector2(0.95, 0.5)
 	blade.center_offset = Vector3(0, 0.24, 0)
@@ -373,7 +384,7 @@ static func _grass(a: Arena) -> ShaderMaterial:
 			var wide := i >= near
 			var off := ((1.4 + pow(rng.randf(), 1.7) * 30.0) if not wide else rng.randf_range(24.0, 120.0)) * (1.0 if rng.randf() < 0.5 else -1.0)
 			var p := road(s, off)
-			if p.x > 58.0 or _road_dist(p.x, p.z) < (2.3 if p.z > 30.0 else 4.2) or Vector2(p.x, p.z + 4.0).length() < COURT_R + 1.0 or p.y < SEA + 8.0:
+			if p.x > 58.0 or on_road(p.x, p.z) > 0.02 or Vector2(p.x, p.z + 4.0).length() < COURT_R + 1.0 or p.y < SEA + 8.0:
 				continue
 			var slope := absf(height(p.x + 1.0, p.z) - p.y) + absf(height(p.x, p.z + 1.0) - p.y)
 			if slope > 1.1:
@@ -397,14 +408,18 @@ static func _grass(a: Arena) -> ShaderMaterial:
 				mm.set_instance_transform(i, xf[i])
 				mm.set_instance_color(i, cols[i])
 			mm.custom_aabb = AABB(lo - Vector3(2, 1, 2), hi - lo + Vector3(4, 3, 4))
-			var mi := MultiMeshInstance3D.new()
-			mi.multimesh = mm
-			mi.material_override = mat
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			mi.visibility_range_end = 260.0 + span
-			a.add_child(mi)
+			_grass_mm[density].append(mm)
+			_grass_batch(a, mm, mat)
 		s0 += span
 	return mat
+
+static func _grass_batch(a: Arena, mm: MultiMesh, mat: ShaderMaterial) -> void:
+	var mi := MultiMeshInstance3D.new()
+	mi.multimesh = mm
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.visibility_range_end = 310.0
+	a.add_child(mi)
 
 ## Blades of grass for the cards: thin, many, pale at the tip. Tinted by the shader.
 static func _blades() -> Texture2D:
@@ -579,7 +594,7 @@ static func _wayside(a: Arena) -> void:
 		var sr := rng.randf() * road_length()
 		var off := rng.randf_range(4.5, 60.0) * (1.0 if rng.randf() < 0.5 else -1.0)
 		var p := road(sr, off)
-		if p.y < SEA + 8.0 or Vector2(p.x, p.z + 4.0).length() < COURT_R + 4.0 or _road_dist(p.x, p.z) < 4.0:
+		if p.y < SEA + 8.0 or Vector2(p.x, p.z + 4.0).length() < COURT_R + 4.0 or on_road(p.x, p.z) > 0.0:
 			continue
 		var size := rng.randf_range(0.6, 2.6)
 		var b := Basis.from_euler(Vector3(rng.randf_range(-0.5, 0.5), rng.randf() * TAU, rng.randf_range(-0.5, 0.5)))

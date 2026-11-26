@@ -105,6 +105,10 @@ func _make_look() -> void:
 	if _args.has("model"):
 		_look["skin"] = "res://assets/models/%s.glb" % str(_args.model)
 		_tag = str(_args.model) + ("" if not _args.has("gear") else "_" + str(_args.gear).replace(",", "+"))
+	if _args.has("witness"):
+		_tag += "_witness"
+	if _args.has("tag"):
+		_tag = str(_args.tag)
 	if _args.has("noskin"):
 		_look.erase("skin")
 

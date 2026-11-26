@@ -68,3 +68,7 @@ Planned and not yet spent: two more dragons (Skeldra, Azhurion) at $1.35 each, o
 | Skeldra and Azhurion: low-poly model + quadruped rig each | Tripo | 2 × 135 | $2.70 |
 
 All three dragons rigged and seen in game. Running total: Tripo ≈ $55.85, Higgsfield ≈ $13.00, combined ≈ **$68.85 of the $100 cap**.
+
+| Second audition reel (deeper, older direction): 30 takes | Higgsfield speech | 15.9 | about $0.65 |
+
+Running total: Tripo ≈ $55.85, Higgsfield ≈ $13.65, combined ≈ **$69.50 of the $100 cap**.

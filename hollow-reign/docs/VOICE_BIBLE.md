@@ -27,6 +27,17 @@ Pitch guide: low male under 105 Hz · male 105–135 · high male / low female 1
 
 The audition reel's lines for the Widow, Monarch and Devourer were written before this table was reconciled with the character bible. They are still fair tests of the voices, but they are audition text, not script: do not treat them as canon.
 
+## Owner's direction (2026-11-26): older, deeper, graver
+The first reel was too light and modern. The target is the weight of dark-fantasy epics: deep, weathered, unhurried voices that sound as if they have been speaking in stone halls for centuries. This is a direction of tone only; no existing game's actors, lines or characters are imitated.
+
+What that changes:
+- **Casting:** the lowest and slowest voices in the measured catalogue for every role. Male roles from under about 105 Hz; female roles from the low end (about 140–175 Hz), never bright.
+- **Writing:** plainer, older cadence. Short declaratives, inverted order where it is natural ("The gate has ever been shut"), no contractions for the guardians, no modern idiom, no quips. Lyra keeps warmth but loses the lightness.
+- **Delivery:** higher stability than before (0.45–0.75) so lines are held and level rather than lively; pauses written in.
+- **Processing:** each take set about a semitone lower, low shelf lifted, top softened, short stone-hall reflection. Guardians keep the closed-helm treatment on top.
+- **Second reel:** `marketing/audition/casting_v2/` (`tools/voice_reel.py`). The script itself (`data/dialogue.json`) is to be rewritten in this cadence once a cast is chosen, then recorded.
+- **Limit:** voices are chosen by measured pitch and pace, not by ear, and the catalogue gives no gender. A candidate may be the wrong sex for a role; that is for the listener to reject.
+
 ## Direction notes for generation
 - Lower `stability` (0.30–0.40) for Lyra, Orren, Widow, Monarch, Devourer: they need movement in the line. Higher (0.60–0.75) for Sentinel, Executioner, Archivist, Gravewarden: flatness is the character.
 - Punctuate for breath, not grammar: short sentences, em dashes for held pauses, ellipses only where a thought fails.

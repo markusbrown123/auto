@@ -5,28 +5,35 @@ casting_reel.mp3 (all, in order) and casting_reel.md (what you are hearing). ~0.
 Usage: tools/voice_reel.py [role ...]"""
 import json, os, subprocess, sys, tempfile
 CAT = json.load(open("docs/VOICE_CATALOG.json"))
+# Second reel, after the owner's note: older, deeper, graver — the weight of dark fantasy epics.
+# Cast from the lowest and slowest voices in the measured catalogue, written in a plainer, older cadence,
+# then set a little deeper and placed in stone (pitch down about a semitone, low shelf, short hall).
 # role: (pitch lo, pitch hi, wants wide range, stability, line)
 ROLES = {
- "narrator": (165, 200, False, 0.5, "Once, men begged the gods to spare them from death. The gods did not answer. So men built something that would."),
- "lyra": (185, 225, True, 0.35, "Can you hear me? Good. Don't try to stand yet — you've been dead a long time, and I'd rather you didn't do it again straight away."),
- "player_m": (100, 125, False, 0.5, "Who are you? And why do I know how to hold this?"),
- "player_f": (180, 210, False, 0.5, "Who are you? And why do I know how to hold this?"),
- "orren": (90, 115, True, 0.35, "So you're what she woke up. Hm. Shoulders are wrong. Feet are worse. We'll start with the feet."),
- "sentinel": (85, 105, False, 0.7, "State your allegiance. The gate is closed. The gate has always been closed."),
- "widow": (165, 200, True, 0.35, "That stance. I knew the soldier who taught it. He died badly — let's see if he taught you why."),
- "monarch": (100, 125, True, 0.35, "Look upon what remains of our civilization. I did not destroy it. I am all of it that agreed to stay."),
- "gravewarden": (60, 95, False, 0.7, "These are not tombs. Nothing here was ever allowed to finish dying."),
- "devourer": (150, 200, True, 0.3, "I had a daughter. I think... I think she had my hands."),
+ "narrator": (140, 175, False, 0.6, "In the elder days, men begged the gods to spare them from death. The gods kept their silence. And so men built a thing that would answer."),
+ "lyra": (150, 185, True, 0.45, "Can you hear me? Good. Lie still a while. You have been a long time dead, and I would not have you do it twice."),
+ "player_m": (80, 108, False, 0.6, "Who speaks? ... And why does my hand know the weight of this blade?"),
+ "player_f": (140, 175, False, 0.6, "Who speaks? ... And why does my hand know the weight of this blade?"),
+ "orren": (75, 102, True, 0.45, "So. You are what she woke. Hm. The shoulders are wrong. The feet are worse. We begin with the feet."),
+ "sentinel": (70, 98, False, 0.75, "Halt. Name your allegiance. The gate is shut. The gate has ever been shut."),
+ "widow": (140, 175, True, 0.45, "That stance. I knew the soldier who taught it. He died badly. Come, then. Show me whether he taught you why."),
+ "monarch": (75, 105, True, 0.5, "Look upon what remains of us. I did not unmake it. I am only the last of it that would not leave."),
+ "gravewarden": (60, 92, False, 0.75, "These are not tombs, child. Nothing here was ever suffered to finish dying."),
+ "devourer": (95, 150, True, 0.4, "I had a daughter once. I think ... I think she had my hands."),
 }
-OUT = "marketing/audition/casting"
+# deeper, and in a hall of stone
+FX = "asetrate=44100*0.94,aresample=44100,atempo=1.03,bass=g=5:f=140,treble=g=-2:f=5000,aecho=0.85:0.5:60|140:0.22|0.12"
+OUT = "marketing/audition/casting_v2"
 os.makedirs(OUT, exist_ok=True)
-notes, parts = ["# Casting reel\n", "Three candidates per role, in this order. Nobody has listened to these; the choice is yours.\n"], []
+notes, parts = ["# Casting reel\n", "Second reel: deeper, older, graver. Three candidates per role, in this order. Each take is set about a semitone lower and placed in a stone hall. Nobody has listened to these; the choice is yours.\n"], []
 for role in (sys.argv[1:] or ROLES):
     lo, hi, wide, stab, line = ROLES[role]
     mid = (lo + hi) / 2.0
     def score(n):
         v = CAT[n]; rng = v["f0_p90"] - v["f0_p10"]
-        return abs(v["f0_median"] - mid) / (hi - lo) - (0.004 * rng if wide else -0.004 * rng)
+        # lean low and slow: below the middle of the band is better than above it, and unhurried is better than quick
+        off = (v["f0_median"] - mid) / (hi - lo)
+        return (abs(off) if off < 0 else off * 2.0) - (0.004 * rng if wide else -0.004 * rng) + 0.25 * (v["words_per_second"] - 3.0)
     picks = sorted(CAT, key=score)[:3]
     notes.append("\n## %s\nLine: \"%s\"\n" % (role, line))
     for k, name in enumerate(picks, 1):
@@ -42,7 +49,9 @@ for role in (sys.argv[1:] or ROLES):
             url = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
             if not url.startswith("http"):
                 print(role, name, "FAILED", (r.stderr or r.stdout)[-160:], flush=True); continue
-            subprocess.run(["curl", "-sS", "-m", "120", "-o", path, url], check=True)
+            subprocess.run(["curl", "-sS", "-m", "120", "-o", path + ".raw.mp3", url], check=True)
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", path + ".raw.mp3", "-af", FX, "-c:a", "libmp3lame", "-q:a", "3", path], check=True)
+            os.remove(path + ".raw.mp3")
         parts.append(path)
         notes.append("%d. **%s** — median pitch %.0f Hz, range %.0f Hz, %.1f words/s, stability %.2f" % (k, name, v["f0_median"], v["f0_p90"] - v["f0_p10"], v["words_per_second"], stab))
         print(role, k, name, flush=True)

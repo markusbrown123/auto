@@ -56,8 +56,8 @@ func _room() -> void:
 	sh.code = "shader_type spatial; render_mode unshaded, cull_disabled, depth_draw_never;
 varying vec3 wp;
 void vertex(){ wp = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz; }
-void fragment(){ vec2 g = abs(fract(wp.xz * 2.0) - 0.5); float l = step(0.47, max(g.x, g.y));
-ALBEDO = mix(vec3(0.16, 0.2, 0.26), vec3(0.95, 0.85, 0.3), l); ALPHA = mix(0.55, 0.95, l); }"
+void fragment(){ vec2 g = abs(fract(wp.xz) - 0.5); float l = step(0.485, max(g.x, g.y));
+ALBEDO = mix(vec3(0.16, 0.2, 0.26), vec3(0.95, 0.85, 0.3), l); ALPHA = mix(0.5, 0.8, l); }"
 	var sm := ShaderMaterial.new()
 	sm.shader = sh
 	var pm := PlaneMesh.new()
@@ -142,6 +142,11 @@ func _poses() -> Array:
 		p.append(["far", func(): rig.set_far(true), 2.5, [1.0, 2.2]])
 		p.append(["die", func(): rig.die(), 3.0, [0.8, 1.6, 2.8]])
 		return p
+	if _args.has("clip"):
+		# one authored clip at full weight on the whole body, four moments through it
+		var cn := str(_args.clip)
+		var cl := SkinDriver.clip_length(cn)
+		return [["clip_" + cn, func(): rig.combat_steps = false; rig.walking = false; rig.set("_clock", 0.0); rig.test_clip = cn, cl, [cl * 0.2, cl * 0.45, cl * 0.7, cl * 0.95]]]
 	p.append(["guard", func(): pass, 1.4, [1.2]])
 	p.append(["block", func(): rig.blocking = true, 1.0, [0.8]])
 	p.append(["step_side", func(): _vel = Vector3(0.9, 0, 0), 1.3, [0.6, 0.85, 1.1]])
@@ -233,7 +238,7 @@ func _aim_cam(dir: Vector3) -> void:
 		var a: PackedStringArray = str(_args.aim).split(",")
 		centre = Vector3(_mid.x, 0, _mid.z) + Vector3(float(a[0]), float(a[1]), float(a[2])) * s
 	cam.size = (9.5 if _is_dragon else 2.75) * s / _zoom
-	cam.position = centre + (dir + Vector3(0, 0.12, 0)).normalized() * 30.0
+	cam.position = centre + (dir + Vector3(0, 0.07, 0)).normalized() * 30.0
 	cam.look_at(centre)
 
 # ---------------------------------------------------------------- measurement

@@ -1043,7 +1043,7 @@ func choose_ending(id: String) -> void:
 ## A legacy journey (the old New Game Plus): the roads again, harder, with everything kept. It is outside the three
 ## generations: from here on nothing is written to the lineage, the world's facts or the canon's ending.
 func start_ng_plus() -> void:
-	Generations.sync(profile)                   # the canon is credited one last time, then it is closed
+	Generations.seal(profile)                   # the canon is credited one last time, then it is closed
 	profile.ng += 1
 	profile.campaign.legacy = int(profile.ng)
 	profile.cleared = []

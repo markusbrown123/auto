@@ -681,10 +681,19 @@ static func endings(p: Dictionary = Game.profile) -> Array:
 static func note_ending(p: Dictionary, id: String) -> void:
 	ensure(p)
 	if canon_open(p):
-		_credit(p)
-		_gather(p)
+		seal(p)
 		p.campaign.ending = id
 		p.world.facts["ending:" + id] = gen(p)
+	_norm(p)
+
+## The canon is about to close (an ending chosen, or the world turned over): the one on the road is credited one
+## last time and set down as they stand, so the lineage shows them as they were then.
+static func seal(p: Dictionary) -> void:
+	ensure(p)
+	if not canon_open(p):
+		return
+	sync(p)
+	record(gen(p), p).loadout = loadout(p)
 	_norm(p)
 
 # ================================================================ lineage
@@ -717,7 +726,7 @@ static func lineage(p: Dictionary = Game.profile) -> Dictionary:
 			"relation": str(d.relation[body]), "relation_words": d.relation.duplicate(),
 			"kin": str(data().kin[str(int(r.index) - now)][body]), "year": int(r.year), "years_ago": int(def(now).year) - int(r.year),
 			"fate": str(r.fate), "cause": str(r.cause), "current": int(r.index) == now, "authored": bool(r.get("authored", false)),
-			"loadout": r.loadout if int(r.index) != now else loadout(p),
+			"loadout": r.loadout if int(r.index) != now or not canon_open(p) else loadout(p),
 			"deeds": {"guardians": guardians, "routes": named.call(r.deeds.routes), "regions": named.call(r.deeds.regions),
 				"discoveries": r.deeds.discoveries.size(), "lore": lore, "secrets": r.deeds.discoveries.size() - lore},
 			"stats": r.stats, "weapon_left": left})

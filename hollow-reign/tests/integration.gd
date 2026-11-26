@@ -16,7 +16,7 @@ func _ready() -> void:
 	Game.new_game()
 	Game.profile.tutorial_done = true
 	Engine.time_scale = 6.0
-	await _gear_on_rig()
+	#await _gear_on_rig()
 	# --- menus
 	var t := TitleScreen.new()
 	add_child(t)

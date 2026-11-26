@@ -125,16 +125,118 @@
    "text": "Then you have no passage.",
    "dir": "final"
   },
-  "prologue_cairn_01": {
-   "speaker": "tessaly",
-   "text": "I kept the stance, Father. You would still find fault with it.",
-   "dir": "low, to the sword in the cairn",
+  "gen1_open_01": {
+   "speaker": "narrator",
+   "text": "For centuries the bells of Vaelora rang beneath the same sovereign.",
+   "dir": "slow, grave",
    "recorded": false
   },
-  "prologue_gate_01": {
-   "speaker": "tessaly",
-   "text": "The same as my father's.",
-   "dir": "level, already drawing",
+  "gen1_open_02": {
+   "speaker": "narrator",
+   "text": "Harvests failed and were mended. Villages fell silent and were forgotten. Upon the throne, nothing changed.",
+   "dir": "measured",
+   "recorded": false
+  },
+  "gen1_open_03": {
+   "speaker": "narrator",
+   "text": "One warden of the low road dared to ask what such permanence had cost.",
+   "dir": "quieter",
+   "recorded": false
+  },
+  "gen1_throne_01": {
+   "speaker": "forebear",
+   "text": "Three villages have fallen silent. Their names are struck from your records.",
+   "dir": "level, not afraid",
+   "recorded": false
+  },
+  "gen1_throne_02": {
+   "speaker": "monarch",
+   "text": "Their silence has bought another winter for thousands.",
+   "dir": "regal, unhurried",
+   "recorded": false
+  },
+  "gen1_throne_03": {
+   "speaker": "forebear",
+   "text": "You speak of people as though they were coin.",
+   "dir": "hard",
+   "recorded": false
+  },
+  "gen1_throne_04": {
+   "speaker": "monarch",
+   "text": "A ruler must count what others refuse to count.",
+   "dir": "patient",
+   "recorded": false
+  },
+  "gen1_guard_01": {
+   "speaker": "monarch",
+   "text": "Show the warden to the gate.",
+   "dir": "bored, final",
+   "recorded": false
+  },
+  "gen1_records_01": {
+   "speaker": "forebear",
+   "text": "The count is behind that seal. I did not climb this far to be told the sum.",
+   "dir": "moving already",
+   "recorded": false
+  },
+  "gen1_records_02": {
+   "speaker": "monarch",
+   "text": "Then you climbed for nothing.",
+   "dir": "rising",
+   "recorded": false
+  },
+  "gen1_seal_01": {
+   "speaker": "monarch",
+   "text": "Enough. Seal the hall.",
+   "dir": "cold",
+   "recorded": false
+  },
+  "gen1_seal_02": {
+   "speaker": "monarch",
+   "text": "You have done nothing but leave this burden to another.",
+   "dir": "almost pity",
+   "recorded": false
+  },
+  "gen1_seal_03": {
+   "speaker": "forebear",
+   "text": "Then another will come better prepared.",
+   "dir": "failing, certain",
+   "recorded": false
+  },
+  "gen1_close_m_01": {
+   "speaker": "narrator",
+   "text": "His name disappeared from the royal histories.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "gen1_close_m_02": {
+   "speaker": "narrator",
+   "text": "But not from those of his house.",
+   "dir": "near whisper",
+   "recorded": false
+  },
+  "gen1_close_f_01": {
+   "speaker": "narrator",
+   "text": "Her name disappeared from the royal histories.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "gen1_close_f_02": {
+   "speaker": "narrator",
+   "text": "But not from those of her house.",
+   "dir": "near whisper",
+   "recorded": false
+  },
+  "gen2_arrive_m_01": {
+   "speaker": "player",
+   "text": "I know where you died, Father. I would know why.",
+   "dir": "low, to the gate",
+   "recorded": false
+  },
+  "gen2_arrive_f_01": {
+   "speaker": "player",
+   "text": "I know where you died, Mother. I would know why.",
+   "dir": "low, to the gate",
    "recorded": false
   },
   "sentinel_death_01": {
@@ -1248,17 +1350,67 @@
    ],
    "once": true
   },
-  "prologue_cairn": {
+  "gen1_open": {
    "lines": [
-    "prologue_cairn_01"
+    "gen1_open_01",
+    "gen1_open_02",
+    "gen1_open_03"
    ],
    "once": false
   },
-  "prologue_gate": {
+  "gen1_throne": {
    "lines": [
-    "sentinel_intro_01",
-    "prologue_gate_01",
-    "sentinel_intro_03"
+    "gen1_throne_01",
+    "gen1_throne_02",
+    "gen1_throne_03",
+    "gen1_throne_04"
+   ],
+   "once": false
+  },
+  "gen1_guard": {
+   "lines": [
+    "gen1_guard_01"
+   ],
+   "once": false
+  },
+  "gen1_records": {
+   "lines": [
+    "gen1_records_01",
+    "gen1_records_02"
+   ],
+   "once": false
+  },
+  "gen1_seal": {
+   "lines": [
+    "gen1_seal_01",
+    "gen1_seal_02",
+    "gen1_seal_03"
+   ],
+   "once": false
+  },
+  "gen1_close_m": {
+   "lines": [
+    "gen1_close_m_01",
+    "gen1_close_m_02"
+   ],
+   "once": false
+  },
+  "gen1_close_f": {
+   "lines": [
+    "gen1_close_f_01",
+    "gen1_close_f_02"
+   ],
+   "once": false
+  },
+  "gen2_arrive_m": {
+   "lines": [
+    "gen2_arrive_m_01"
+   ],
+   "once": false
+  },
+  "gen2_arrive_f": {
+   "lines": [
+    "gen2_arrive_f_01"
    ],
    "once": false
   },
@@ -2222,7 +2374,7 @@
   "monarch": "Forgotten Monarch",
   "devourer": "Devourer of Names",
   "witness": "The Witness",
-  "tessaly": "Tessaly Marrek"
+  "forebear": ""
  },
  "speech": {
   "ashen_sentinel": "B",

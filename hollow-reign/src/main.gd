@@ -150,8 +150,21 @@ func show_prologue(then: Callable = Callable()) -> void:
 		if then.is_valid():
 			then.call()
 		else:
-			show_awakening())
+			show_time_jump(22, 1, 2, show_arrival))
 	_swap(p, 0.0)
+
+## Years pass on the one view of the fortress (src/cine/time_jump.gd). Needed again after the second generation.
+func show_time_jump(years: int, from_gen: int, to_gen: int, then: Callable) -> void:
+	var t := TimeJump.make(years, from_gen, to_gen)
+	t.finished.connect(then)
+	_swap(t, 0.0)
+
+## The second generation comes up the road (src/cine/arrival.gd), and goes down to the Inheritance Engine.
+func show_arrival() -> void:
+	var a := Arrival.new()
+	a.only_shot = int(_args.get("shot", "0"))
+	a.finished.connect(show_awakening)
+	_swap(a, 0.0)
 
 ## The fall of the kingdoms. It opens from black and ends on black, so nothing is faded here.
 func show_opening(then: Callable = Callable()) -> void:
@@ -433,8 +446,16 @@ func _dev_boot() -> void:
 		"awakening":
 			show_awakening()
 		"prologue":
-			# the high road by itself, then on into the chamber:  --beat=1..3  --shot=1..7 (hold one walk shot)  --auto (a bot fights)
+			# generation I by itself, then on as a new journey goes:  --beat=1..5  --shot=1..6 (hold one road shot)  --auto (a bot fights)
 			show_prologue()
+		"timejump":
+			# --years=22 --from=1 --to=2
+			show_time_jump(int(_args.get("years", "22")), int(_args.get("from", "1")), int(_args.get("to", "2")), show_arrival)
+		"arrival":
+			# the second generation on the road:  --shot=1..6   --gen=1..3 shows that generation's road instead
+			show_arrival()
+			if _args.has("gen"):
+				Highland.generation(current.road.arena, int(_args.gen))
 		"approach":
 			Game.profile.tutorial_done = _args.has("bot")
 			show_approach()

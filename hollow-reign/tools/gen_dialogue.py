@@ -54,11 +54,31 @@ scene("sentinel_intro",
  ("sentinel", "State your allegiance.", "flat, immense, helmeted"),
  (P, "I serve no crown.", "steady"),
  ("sentinel", "Then you have no passage.", "final"))
-# the prologue (src/cine/prologue.gd): the two who climbed the high road before the knight woke. Text only, not recorded.
-# At the gate the Sentinel says to the daughter exactly what he says to everyone: his two recorded lines are reused, not rewritten.
-scene("prologue_cairn", ("tessaly", "I kept the stance, Father. You would still find fault with it.", "low, to the sword in the cairn"), once=False, new=True)
-scene("prologue_gate", ("tessaly", "The same as my father's.", "level, already drawing"), once=False, new=True)
-S["prologue_gate"]["lines"] = ["sentinel_intro_01", "prologue_gate_01", "sentinel_intro_03"]
+# ---------------------------------------------------------------- the generations (docs/GENERATIONAL_CAMPAIGN_BRIEF.md)
+# Generation I (src/cine/prologue.gd) and the second generation's arrival (src/cine/arrival.gd). Text only: nothing here is
+# recorded. "forebear" is the first of the house (the Father, or the Mother in a woman's lineage): the same words either way.
+FB = "forebear"
+scene("gen1_open",
+ (N, "For centuries the bells of Vaelora rang beneath the same sovereign.", "slow, grave"),
+ (N, "Harvests failed and were mended. Villages fell silent and were forgotten. Upon the throne, nothing changed.", "measured"),
+ (N, "One warden of the low road dared to ask what such permanence had cost.", "quieter"), once=False, new=True)
+scene("gen1_throne",
+ (FB, "Three villages have fallen silent. Their names are struck from your records.", "level, not afraid"),
+ ("monarch", "Their silence has bought another winter for thousands.", "regal, unhurried"),
+ (FB, "You speak of people as though they were coin.", "hard"),
+ ("monarch", "A ruler must count what others refuse to count.", "patient"), once=False, new=True)
+scene("gen1_guard", ("monarch", "Show the warden to the gate.", "bored, final"), once=False, new=True)
+scene("gen1_records",
+ (FB, "The count is behind that seal. I did not climb this far to be told the sum.", "moving already"),
+ ("monarch", "Then you climbed for nothing.", "rising"), once=False, new=True)
+scene("gen1_seal",
+ ("monarch", "Enough. Seal the hall.", "cold"),
+ ("monarch", "You have done nothing but leave this burden to another.", "almost pity"),
+ (FB, "Then another will come better prepared.", "failing, certain"), once=False, new=True)
+scene("gen1_close_m", (N, "His name disappeared from the royal histories.", "elegiac"), (N, "But not from those of his house.", "near whisper"), once=False, new=True)
+scene("gen1_close_f", (N, "Her name disappeared from the royal histories.", "elegiac"), (N, "But not from those of her house.", "near whisper"), once=False, new=True)
+scene("gen2_arrive_m", (P, "I know where you died, Father. I would know why.", "low, to the gate"), once=False, new=True)
+scene("gen2_arrive_f", (P, "I know where you died, Mother. I would know why.", "low, to the gate"), once=False, new=True)
 # speech category B: the Sentinel keeps only its challenge and its last words (the retry line was cut)
 scene("sentinel_death",
  ("sentinel", "Is the war... over?", "failing, suddenly human"),
@@ -401,7 +421,7 @@ for _lid, _l in L.items():
         if _takes.get(_f) == hashlib.sha1(_l["text"].encode()).hexdigest()[:12]:
             del _l["recorded"]
 NAMES = {"narrator": "", "lyra": "Lyra", "player": "", "orren": "Orren", "archivist": "The Archivist", "sentinel": "Ashen Sentinel", "executioner": "Hollow Executioner",
- "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness", "tessaly": "Tessaly Marrek"}
+ "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness", "forebear": ""}
 OUT = {"lines": L, "scenes": S, "voices": VOICES, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}
 for path in ["data/dialogue.json", "docs/DIALOGUE_DATABASE.json"]:   # the docs copy is the same file, kept for readers
     json.dump(OUT, open(path, "w"), indent=1)

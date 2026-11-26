@@ -1,0 +1,71 @@
+class_name Arrival
+extends Node3D
+## The second generation arrives. The same view of the fortress, twenty-two years on, and on the road the player's
+## own knight in whatever they wear: one line, the game's name, and the walk up to the gate their parent went
+## through. It ends at the foot of the ring; under it is the Inheritance Engine (Awakening).
+
+signal finished
+
+var road: HighRoad
+var cards: CineCards
+var only_shot := 0                # dev: hold on one shot of the walk (1-6)
+var gen := 2
+var _over := false
+
+func _ready() -> void:
+	cards = CineCards.new()
+	add_child(cards)
+	cards.skip_pressed.connect(skip)
+	road = HighRoad.new()
+	add_child(road)
+	road.setup(gen)
+	road.walker(Duel.player_look())
+	if not Game.profile.is_empty():
+		Game.profile.flags["generation"] = gen
+	Sfx.music_for("theme", "menu", 2.0)
+	_run()
+
+func _run() -> void:
+	if only_shot > 0:
+		cards.veil.color.a = 0.0
+		road.shot(only_shot)
+		if only_shot == 1:
+			cards.logo.modulate.a = 1.0
+		return
+	road.shot(1)
+	cards.fade(0.0, 1.6)
+	if not await _w(2.4):
+		return
+	var line := "gen2_arrive_" + str(Game.profile.get("body", "m"))
+	Story.play(line, true)
+	while Story.busy and not _over:
+		await get_tree().process_frame
+	if _over:
+		return
+	# they set off, and the game's name comes up over the road
+	road.hero.walking = true
+	create_tween().tween_property(road, "s", 30.0 + 6.5 * HighRoad.WALK, 6.5)
+	cards.show_item(cards.logo, 3.6)
+	if not await _w(6.4):
+		return
+	for i: int in [3, 4, 5, 6]:
+		road.shot(i)
+		if not await _w(float(HighRoad.HOLD[i]) - (2.0 if i != 6 else 0.5)):
+			return
+	await cards.fade(1.0, 0.6)
+	_end()
+
+func _w(t: float) -> bool:
+	await get_tree().create_timer(t).timeout
+	return not _over
+
+func skip() -> void:
+	_end()
+
+func _end() -> void:
+	if _over:
+		return
+	_over = true
+	Story.stop()
+	cards.veil.color = Color(0.01, 0.01, 0.012, 1.0)
+	finished.emit()

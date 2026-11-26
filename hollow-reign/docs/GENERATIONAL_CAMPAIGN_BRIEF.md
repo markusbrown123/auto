@@ -80,3 +80,8 @@ Father's opening → first fight → first canonical death → time jump → inh
 
 ## Owner clarification (2026-11-26, later)
 "Don't have to copy the father dying exactly, I just like that kind of twist. We can keep the original or a different story and plot, but make it amazing and crazy, like in 2011 it wowed me that you died twice." The plot is free to change; the requirement is a genuine shock of our own. Options are to be put to the owner before recording or filming.
+
+## Owner decision on the twist (2026-11-26): "mix of 1 and 3"
+- **Death when you are winning.** The first hero falls mid-fight while doing well, through the story and not a rigged fight. Their sword stays where it fell; the next of the family, on the same road years later, picks up that actual sword with its stats and mods.
+- **You become what you fought.** The second hero is kept by the Monarch's machinery. In the third generation the heir fights a guardian wearing the exact armour, sword, shield and mods the player equipped as the second hero, using the combos that player used most. The Witness recognises them first.
+Not chosen: the false ending and the predecessors speaking in the final fight.

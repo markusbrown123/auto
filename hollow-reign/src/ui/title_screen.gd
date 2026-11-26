@@ -66,14 +66,17 @@ func _pose_knight() -> void:
 
 ## The vista backdrop: the prologue's opening shot, with the player's own knight standing on the road.
 func _vista() -> void:
+	var v := HighRoad.vista()
 	var at := Highland.road(30.0)
 	if backdrop.rig:
 		backdrop.rig.position = at
 		backdrop.rig.rotation.y = Highland.road_yaw(30.0)
+	Highland.generation(backdrop.arena, int(Game.profile.get("flags", {}).get("generation", 2)) if not Game.profile.is_empty() else 1)
 	backdrop.key.visible = false
-	backdrop.cam_fov = 34.0
+	backdrop.cam.far = 6000.0
+	backdrop.cam_fov = v[2]
 	backdrop.cam_drift = 2.0
-	backdrop.move_camera(Highland.on_ground(at.x + 6.5, at.z + 21.0, 3.1), Vector3(-16.0, -17.0, 0.0), true)
+	backdrop.move_camera(v[0], v[1], true)
 
 ## Dust in the light and a few embers off the braziers, close to the camera.
 func _motes() -> void:

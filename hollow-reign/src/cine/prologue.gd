@@ -1,395 +1,98 @@
 class_name Prologue
 extends Node3D
-## The prologue: the high road to the Ring-Gate, climbed twice before the player's own knight ever wakes.
+## Generation I, "The First Oath": the short playable opening. The player's forebear (the Father, or the Mother
+## for a woman's lineage) climbs the high road, stands before the Forgotten Monarch, fights the royal guardian
+## sent to show them out, reaches for the sealed records, crosses blades with the Monarch himself, and gives up
+## the way out to send what they found into the Inheritance Engine.
 ##
-##   Beat 1  the ninth year of the Silence. Corvan Marrek, an old soldier, walks the road at dawn (six designed
-##           shots, the narrator over them), meets the Ashen Sentinel at the gate and fights him: a real duel, the
-##           game's own, which cannot be won. He falls.
-##   Beat 2  the fourteenth year. The same road in autumn weather. His daughter Tessaly climbs it, passes his
-##           sword at the dead tree, and falls at the same gate. Directed, short.
-##   Beat 3  the nineteenth year. The road in snow, nobody on it, two swords at the tree, and the gate awake.
-##           Then black: the chamber under that gate is the next scene (Awakening).
+##   beat 1  the road       six designed shots; the recorded narrator over them, then the new narration
+##   beat 2  the throne     the exchange with the Monarch; the guardian steps out
+##   beat 3  the guardian   a real duel (the game's own), winnable, retried if lost; it teaches cut and guard
+##   beat 4  the records    the reach for the seal, and a real clash with the Monarch that is cut short by the
+##                          story at a threshold, whoever is ahead: he seals the hall rather than finish it
+##   beat 5  the fall       the transmission, the last exchange, the family's mark, the narrator's close
 ##
-## Nothing here is the player's knight. "SKIP" (top right) passes over the beat on show; a later new journey does
-## not play the prologue at all (Opening.SEEN_FILE, the same mark the old opening used).
+## Both duels are the game's own Duel. For their length Game.profile is the forebear's (so the knight on screen
+## and the numbers are theirs) and anything saved goes to a scratch folder, never to a save slot.
+## SKIP passes over the beat on show. A later new journey does not play this at all (Opening.SEEN_FILE).
 
 signal finished
 
-const WALK := 1.38                # metres a second
-const DUEL_NG := 8                # how far beyond the old knight the Sentinel is (the duel's own "ng" scaling)
-const DUEL_CAP := 38.0            # seconds of fighting after which the next blow that comes is the last
-const CARDS := ["THE NINTH YEAR OF THE SILENCE", "THE FOURTEENTH YEAR", "THE NINETEENTH YEAR"]
-## The two who climbed first, as profiles the knight's own look code can dress (Duel.player_look).
-const FATHER := {"body": "m", "heraldry": "#1f2f4a", "kit": ["w_knight_sword", "s_garrison", "a_garrison_helm", "a_garrison_chest", "a_garrison_gauntlets", "a_garrison_legs"]}
-const SISTER := {"body": "f", "heraldry": "#1f2f4a", "kit": ["w_knight_sword", "a_black_helm", "a_black_chest", "a_black_gauntlets", "a_black_legs"]}
+const GUARDIAN := "throne_guard"          # who plays the Royal Gatekeeper
+const CLASH_TIME := 30.0                  # the Monarch ends the clash after this long,
+const CLASH_HURT := 0.45                  # or when the forebear is this far down,
+const CLASH_DENT := 0.86                  # or when he himself is (so a strong player is answered, not cheated)
+## The first of the house: a veteran in the garrison's weathered silver, a clean sword, a practical shield.
+const KIT := ["w_knight_sword", "s_garrison", "a_garrison_helm", "a_garrison_chest", "a_garrison_gauntlets", "a_garrison_legs"]
+const SEAL := Vector3(6.2, 0, -8.2)       # where the records are, in the hall
+const MONARCH_AT := Vector3(0, 0, -8.6)
 
-var auto := false                 # dev captures and recordings: a bot fights the duel
-var start_beat := 1               # dev: 1 the walk, 2 the second fall, 3 the winter and the hand-off
-var only_shot := 0                # dev: hold on one shot of the walk (1-7)
+var auto := false                 # dev captures and recordings: a bot fights
+var start_beat := 1
+var only_shot := 0                # dev: hold on one shot of the road (1-6)
 var beat := 0
-var stage: Node3D                 # everything of the place on show; freed between beats
-var arena: Arena
+var road: HighRoad
+var hall: Node3D                  # the throne hall and whoever stands in it
 var cam: CineCam
 var hero: CineActor
-var foe: FighterRig
+var monarch: FighterRig
+var guard: FighterRig
 var duel: Duel
-var ui: CanvasLayer
-var _veil: ColorRect
-var _logo: Control
-var _card: Label
-var _hint: Label
-var _skip: Button
+var cards: CineCards
+var clash_result := ""            # how the clash stood when the story cut it: "ahead", "behind" or "even"
 var _token := 0
 var _over := false
-var _s := 0.0                     # where the walker is on the road
-var _on_road := false
 var _clock := 0.0
 var _fight_t := 0.0
-var _kept := {}                   # what the duel borrows from Game, to give back
+var _kept := {}                   # what a duel borrows from Game, to give back
+var _seal_light: OmniLight3D
+var _alarm: OmniLight3D
 
 func _ready() -> void:
-	ui = CanvasLayer.new()
-	ui.layer = 70
-	add_child(ui)
-	_veil = UI.full(ColorRect.new())
-	_veil.color = Color(0.01, 0.01, 0.012, 1.0)
-	_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ui.add_child(_veil)
-	_build_cards()
+	cards = CineCards.new()
+	add_child(cards)
+	cards.skip_pressed.connect(skip_beat)
 	Highland.warm()
-	_begin(clampi(start_beat, 1, 3))
+	_begin(clampi(start_beat, 1, 5))
 
 func _exit_tree() -> void:
 	_give_back()
 
-# ================================================================ the page furniture
-func _build_cards() -> void:
-	# the game's mark, as the menu sets it: the name, a rule, a line under it
-	var v := VBoxContainer.new()
-	v.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
-	v.offset_top = 92
-	v.offset_left = 70
-	v.offset_right = 760
-	v.alignment = BoxContainer.ALIGNMENT_CENTER
-	v.add_theme_constant_override("separation", 2)
-	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var t := UI.label("HOLLOW REIGN", 76, UI.BONE, "title")
-	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	t.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.55))
-	t.add_theme_constant_override("shadow_offset_y", 3)
-	v.add_child(t)
-	var orn := UI.ornament(470, UI.GOLD)
-	orn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	v.add_child(orn)
-	for c in v.get_children():
-		(c as Control).mouse_filter = Control.MOUSE_FILTER_IGNORE
-	v.modulate.a = 0.0
-	ui.add_child(v)
-	_logo = v
-	_card = UI.title("", 22, UI.BONE)
-	_card.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
-	_card.offset_left = 64
-	_card.offset_top = -150
-	_card.offset_right = 900
-	_card.offset_bottom = -110
-	_card.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
-	_card.add_theme_constant_override("shadow_offset_y", 2)
-	_card.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_card.modulate.a = 0.0
-	ui.add_child(_card)
-	_hint = UI.title("", 20, UI.GOLD)
-	_hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	_hint.offset_left = -400
-	_hint.offset_right = 400
-	_hint.offset_top = 96
-	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
-	_hint.add_theme_constant_override("shadow_offset_y", 2)
-	_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_hint.modulate.a = 0.0
-	ui.add_child(_hint)
-	_skip = UI.menu_item("SKIP  ›", 15, 110)
-	_skip.alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_skip.add_theme_color_override("font_color", UI.BONE)
-	_skip.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
-	_skip.add_theme_constant_override("outline_size", 5)
-	_skip.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	_skip.offset_left = -170
-	_skip.offset_top = 14
-	_skip.offset_right = -24
-	_skip.offset_bottom = 62
-	_skip.modulate.a = 0.0
-	_skip.pressed.connect(skip_beat)
-	ui.add_child(_skip)
-	create_tween().tween_property(_skip, "modulate:a", 0.6, 0.8).set_delay(2.0)
+## The forebear's body follows the lineage the player chose.
+static func body() -> String:
+	return str(Game.profile.get("body", "m")) if not Game.profile.is_empty() else "m"
 
-func _show_card(text: String, hold: float) -> void:
-	_card.text = text
-	var tw := create_tween()
-	tw.tween_property(_card, "modulate:a", 1.0, 0.8)
-	tw.tween_interval(hold)
-	tw.tween_property(_card, "modulate:a", 0.0, 0.8)
-
-func _fade(to: float, time: float) -> void:
-	var tw := create_tween()
-	tw.tween_property(_veil, "color:a", to, time)
-	await tw.finished
-
-## Waits `t` seconds; false if the beat was skipped or the scene ended meanwhile.
-func _w(t: float, me: int) -> bool:
-	await get_tree().create_timer(t).timeout
-	return me == _token and not _over
-
-## Waits for the narrator (or whoever) to reach line `i` of scene `id`, or for the scene to end.
-func _line(id: String, i: int, me: int) -> bool:
-	while me == _token and not _over and Story.busy:
-		var lines: Array = Story.data.scenes[id].lines
-		var now := -1
-		for k in lines.size():
-			if str(Story.data.lines[lines[k]].text) == Story._text.text:
-				now = k
-		if now >= i:
-			break
-		await get_tree().process_frame
-	return me == _token and not _over
-
-# ================================================================ the place and the people
-func _clear() -> void:
-	_on_road = false
-	if duel:
-		duel.free()
-		duel = null
-	_give_back()
-	if stage:
-		stage.free()
-		stage = null
-	arena = null
-	cam = null
-	hero = null
-	foe = null
-
-func _build(season: int) -> void:
-	_clear()
-	stage = Node3D.new()
-	add_child(stage)
-	arena = Arena.new()
-	stage.add_child(arena)
-	arena.build("highland")
-	Highland.generation(arena, season + 1)
-	cam = CineCam.new()
-	stage.add_child(cam)
-	cam.far = 6000.0
-	cam.drift = 0.03
-	Sfx.ambience("wind")
-
-## A profile for one of the two who climbed first: the default knight in their own kit.
-static func profile_of(who: Dictionary) -> Dictionary:
+## A profile for the forebear: a seasoned knight in their own kit.
+static func forebear() -> Dictionary:
 	var p: Dictionary = Game.default_profile()
-	p.body = who.body
-	p.heraldry = who.heraldry
+	p.body = body()
+	p.heraldry = str(Game.profile.get("heraldry", "#1f2f4a")) if not Game.profile.is_empty() else "#1f2f4a"
 	p.tutorial_done = true
+	p.level = 12
+	p.attrs = {"health": 14, "strength": 16, "dex": 9, "endurance": 12, "defense": 6, "crit": 2, "resist": 0}
 	for slot: String in ["shield", "helm", "chest", "gauntlets", "legs"]:
 		p.equipped[slot] = null
-	for id: String in who.kit:
+	for id: String in KIT:
 		if Db.items.has(id):
 			if not p.inventory.has(id):
 				p.inventory.append(id)
 			p.equipped[str(Db.item(id).slot)] = id
 	return p
 
-## How that profile looks, by the same code that dresses the player's knight.
-static func look_of(who: Dictionary) -> Dictionary:
+## How the forebear looks, by the same code that dresses the player's knight.
+static func forebear_look() -> Dictionary:
 	var real: Dictionary = Game.profile
-	Game.profile = profile_of(who)
+	Game.profile = forebear()
 	var look: Dictionary = Duel.player_look()
 	Game.profile = real
 	return look
 
-func _actor(who: Dictionary) -> CineActor:
-	var a := CineActor.new()
-	stage.add_child(a)
-	a.build(look_of(who), false)
-	a.footsteps = true
-	return a
+# ================================================================ plumbing
+func _w(t: float, me: int) -> bool:
+	await get_tree().create_timer(t).timeout
+	return me == _token and not _over
 
-func _sentinel(at: Vector3, yaw: float) -> void:
-	foe = FighterRig.new()
-	stage.add_child(foe)
-	foe.build(CineActor.foe_look("ashen_sentinel"), true)
-	foe.position = at
-	foe.rotation.y = yaw
-	foe.time_scale = 0.6
-
-## Sets the walker going along the road from `a` to `b` (metres from its foot).
-func _stride(a: float, b: float) -> void:
-	_s = a
-	_on_road = true
-	hero.walking = true
-	_place_hero()
-	create_tween().tween_property(self, "_s", b, absf(b - a) / WALK)
-
-func _place_hero() -> void:
-	hero.position = Highland.road(_s)
-	hero.rotation.y = Highland.road_yaw(_s)
-
-func _process(delta: float) -> void:
-	_clock += delta
-	if _on_road and hero and is_instance_valid(hero):
-		_place_hero()
-	if arena and cam and is_instance_valid(cam):
-		Highland.follow(arena, cam.global_position)
-	if duel and is_instance_valid(duel):
-		_duel_tick(delta)
-
-# ================================================================ beats
-func _begin(b: int) -> void:
-	_token += 1
-	beat = b
-	Story.stop()
-	_logo.modulate.a = 0.0
-	_card.modulate.a = 0.0
-	_hint.modulate.a = 0.0
-	_veil.color.a = 1.0
-	match b:
-		1: _beat_walk(_token)
-		2: _beat_second(_token)
-		3: _beat_winter(_token)
-		_: _end()
-
-## SKIP: on to the next thing. The walk gives way to the duel, the duel to the second fall, that to the chamber.
-func skip_beat() -> void:
-	if _over:
-		return
-	Sfx.play("ui_confirm", -8.0)
-	if beat == 1 and duel == null:
-		_token += 1
-		Story.stop()
-		_veil.color.a = 1.0
-		_logo.modulate.a = 0.0
-		_card.modulate.a = 0.0
-		_enter_duel(_token)
-	elif beat == 1:
-		_begin(2)
-	else:
-		_end()
-
-## Ends the whole prologue now (tests, and the last beat running out).
-func skip() -> void:
-	_end()
-
-func _end() -> void:
-	if _over:
-		return
-	_over = true
-	_token += 1
-	Story.stop()
-	_veil.color.a = 1.0
-	_clear()
-	Opening.mark_seen()
-	finished.emit()
-
-# ---------------------------------------------------------------- beat 1: the road, and Corvan
-## One designed shot of the walk. Each sets the walker on his stretch of road and frames it.
-func _shot(i: int) -> void:
-	match i:
-		1:  # the vista: a small figure, the road ahead of him, and the gate on the heights with the sun in it
-			_s = 30.0
-			_on_road = true
-			hero.walking = false
-			_place_hero()
-			var h := hero.position
-			var back := Highland.on_ground(h.x + 8.0, h.z + 34.0, 4.2)
-			cam.cut(back, Vector3(-80.0, -14.0, 0.0), 27.0)
-			cam.move(back + Vector3(-1.0, 0.5, -6.0), Vector3(-76.0, -12.0, 0.0), 13.0)
-		2:  # low, through the grass, beside him: the sea and the light beyond
-			_stride(118.0, 134.0)
-			cam.ride(hero, Vector3(-4.8, 0.62, -2.4), Vector3(0.0, 1.25, -1.0))
-			cam.fov = 40.0
-		3:  # the climb, whole: the road folding up the slope, the walker small on it, the ring above
-			var s3 := Highland.road_at_z(196.0)
-			_stride(s3 - 20.0, s3 - 6.0)
-			var eye := Highland.on_ground(-64.0, 262.0, 9.0)
-			cam.cut(eye, Vector3(4.0, -16.0, 150.0), 38.0)
-			cam.move(eye + Vector3(3.0, 1.0, -4.0), Vector3(4.0, -14.0, 150.0), 9.0)
-		4:  # over his shoulder as he tops the rise: the gate's foot comes up out of the ground
-			var s4 := Highland.road_at_z(108.0)
-			_stride(s4 - 12.0, s4 + 3.0)
-			cam.ride(hero, Vector3(0.62, 0.95, 2.5), Vector3(-0.25, 2.3, -8.0))
-			cam.fov = 44.0
-		5:  # passing the dead tree, the ring filling the sky behind it
-			var s5 := Highland.tree_s()
-			_stride(s5 - 7.0, s5 + 5.0)
-			var t := Highland.road(s5, -5.5)
-			var low := Highland.on_ground(t.x - 5.5, t.z + 12.0, 0.7)
-			cam.cut(low, t + Vector3(3.5, 7.0, -16.0), 46.0)
-			cam.move(low + Vector3(1.2, 0.15, -0.8), t + Vector3(3.5, 7.4, -16.0), 9.0)
-		6:  # arrival: the court, the shut gate, and one figure standing in front of it
-			var s6 := Highland.road_at_z(27.0)
-			_stride(s6, Highland.road_length())
-			cam.cut(Vector3(8.5, 5.4, 33.0), Vector3(-1.0, 4.5, -12.0), 44.0)
-			cam.move(Vector3(6.5, 4.2, 27.0), Vector3(-1.0, 4.8, -12.0), 16.0)
-		7:  # the Sentinel, from the ground: he turns
-			_on_road = false
-			hero.walking = false
-			hero.position = Vector3(0.4, 0, 4.6)
-			hero.rotation.y = 0.0
-			cam.cut(Vector3(1.9, 0.38, 1.3), Vector3(-0.2, 2.6, -4.6), 40.0)
-			cam.move(Vector3(1.5, 0.45, 2.0), Vector3(-0.1, 2.4, -4.6), 5.0)
-			foe.time_scale = 1.0
-			var tw := foe.create_tween()
-			tw.tween_interval(0.9)
-			tw.tween_callback(func(): Sfx.play("armor", -4.0, 0.7))
-			tw.tween_property(foe, "rotation:y", PI, 1.9).set_trans(Tween.TRANS_SINE)
-
-func _beat_walk(me: int) -> void:
-	_build(0)
-	hero = _actor(FATHER)
-	_sentinel(Vector3(0, 0, -4.2), 0.0)
-	Sfx.music_for("theme", "menu", 2.0)
-	if only_shot > 0:
-		_veil.color.a = 0.0
-		_shot(only_shot)
-		if only_shot == 1:
-			_logo.modulate.a = 1.0
-		return
-	# 1: the vista and the game's name
-	_shot(1)
-	_fade(0.0, 2.0)
-	create_tween().tween_property(_logo, "modulate:a", 1.0, 1.6).set_delay(0.9)
-	if not await _w(5.2, me):
-		return
-	create_tween().tween_property(_logo, "modulate:a", 0.0, 1.0)
-	_show_card(CARDS[0], 3.2)
-	hero.walking = true
-	create_tween().tween_property(self, "_s", 30.0 + 9.0 * WALK, 9.0)
-	if not await _w(2.2, me):
-		return
-	Story.play("opening", true)
-	if not await _line("opening", 1, me):
-		return
-	# 2-5: one shot to a line or two of the narrator, no shot held longer than it is worth
-	for step: Array in [[2, 3, 9.5], [3, 4, 9.0], [4, 5, 10.5]]:
-		_shot(int(step[0]))
-		var left := float(step[2])
-		while left > 0.0 and me == _token and not _over and (left > float(step[2]) - 5.0 or not Story.busy or _now("opening") < int(step[1])):
-			await get_tree().process_frame
-			left -= get_process_delta_time()
-		if me != _token or _over:
-			return
-	_shot(5)
-	if not await _w(7.5, me):
-		return
-	_shot(6)
-	if not await _w(8.2, me):
-		return
-	_shot(7)
-	if not await _w(3.9, me):
-		return
-	await _fade(1.0, 0.35)
-	if me != _token or _over:
-		return
-	_enter_duel(me)
-
+## Which line of the scene being spoken is on screen (99 when nothing is).
 func _now(id: String) -> int:
 	if not Story.busy:
 		return 99
@@ -399,47 +102,233 @@ func _now(id: String) -> int:
 			return k
 	return -1
 
-# ---------------------------------------------------------------- the duel that cannot be won
-## The game's own duel, at the gate, with the old knight in the player's place. Nothing in src/combat is special-
-## cased for it: the Sentinel is set beyond him with the duel's existing "ng" scaling, the place is chosen with the
-## foe's existing "arena" field, and the knight is whoever Game.profile says, so for the length of the fight the
-## profile is Corvan's and anything saved meanwhile goes to a scratch folder, never to a save slot.
-func _enter_duel(me: int) -> void:
-	Story.stop()
-	_veil.color.a = 1.0
-	if stage:
-		stage.free()
-		stage = null
-	arena = null
+func _until(id: String, i: int, me: int) -> bool:
+	while me == _token and not _over and Story.busy and _now(id) < i:
+		await get_tree().process_frame
+	return me == _token and not _over
+
+func _spoken(me: int) -> bool:
+	while me == _token and not _over and Story.busy:
+		await get_tree().process_frame
+	return me == _token and not _over
+
+func _clear() -> void:
+	if duel:
+		duel.free()
+		duel = null
+	_give_back()
+	if road:
+		road.free()
+		road = null
+	if hall:
+		hall.free()
+		hall = null
 	cam = null
 	hero = null
-	foe = null
-	_on_road = false
-	var sentinel: Dictionary = Db.foes["ashen_sentinel"]
-	_kept = {"profile": Game.profile, "dir": Game.save_dir_override, "arena": sentinel.get("arena"), "run": Game.run}
+	monarch = null
+	guard = null
+	_seal_light = null
+	_alarm = null
+
+func _begin(b: int) -> void:
+	_token += 1
+	beat = b
+	Story.stop()
+	cards.clear()
+	cards.veil.color = Color(0.01, 0.01, 0.012, 1.0)
+	_clear()
+	match b:
+		1: _beat_road(_token)
+		2: _beat_throne(_token)
+		3: _beat_guardian(_token)
+		4: _beat_records(_token)
+		5: _beat_fall(_token)
+		_: _end()
+
+## SKIP: on to the next beat.
+func skip_beat() -> void:
+	if _over:
+		return
+	Sfx.play("ui_confirm", -8.0)
+	_begin(beat + 1)
+
+## Ends the whole of it now (tests, and the last beat running out).
+func skip() -> void:
+	_end()
+
+func _end() -> void:
+	if _over:
+		return
+	_over = true
+	_token += 1
+	Story.stop()
+	cards.veil.color = Color(0.01, 0.01, 0.012, 1.0)
+	_clear()
+	Opening.mark_seen()
+	# the hook the generational campaign reads: the first of the house has fallen, and what they sent was received
+	if not Game.profile.is_empty():
+		Game.profile.flags["gen1_complete"] = true
+		Game.profile.flags["gen1_clash"] = clash_result
+	finished.emit()
+
+func _process(delta: float) -> void:
+	_clock += delta
+	if duel and is_instance_valid(duel):
+		_duel_tick(delta)
+	if _alarm:
+		_alarm.light_energy = 3.0 + 2.5 * sin(_clock * 5.0)
+
+# ================================================================ beat 1: the road
+func _beat_road(me: int) -> void:
+	road = HighRoad.new()
+	add_child(road)
+	road.setup(1)
+	road.walker(forebear_look())
+	Sfx.music_for("theme", "menu", 2.0)
+	if only_shot > 0:
+		cards.veil.color.a = 0.0
+		road.shot(only_shot)
+		return
+	road.shot(1)
+	cards.fade(0.0, 2.0)
+	if not await _w(2.4, me):
+		return
+	cards.show_card("VAELORA   ·   THE FIRST OATH", 3.4)
+	Story.play("opening", true)
+	if not await _w(3.0, me):
+		return
+	road.hero.walking = true
+	create_tween().tween_property(road, "s", 30.0 + 8.0 * HighRoad.WALK, 8.0)
+	if not await _until("opening", 2, me):
+		return
+	# one shot to a line or so of the narrator; none held longer than it is worth
+	for step: Array in [[2, 3], [3, 4], [4, 5], [5, 99]]:
+		road.shot(int(step[0]))
+		var hold := float(HighRoad.HOLD[int(step[0])])
+		var left := hold
+		while left > 0.0 and me == _token and not _over and (left > hold - 5.5 or _now("opening") < int(step[1])):
+			await get_tree().process_frame
+			left -= get_process_delta_time()
+		if me != _token or _over:
+			return
+	Story.stop()
+	road.shot(6)
+	Story.play("gen1_open", true)
+	if not await _w(float(HighRoad.HOLD[6]), me):
+		return
+	if not await _spoken(me):
+		return
+	await cards.fade(1.0, 0.5)
+	if me == _token and not _over:
+		_begin(2)
+
+# ================================================================ the hall
+func _hall(with_guard: bool) -> void:
+	hall = Node3D.new()
+	add_child(hall)
+	var arena := Arena.new()
+	hall.add_child(arena)
+	arena.build("throne")
+	cam = CineCam.new()
+	hall.add_child(cam)
+	hero = CineActor.new()
+	hall.add_child(hero)
+	hero.build(forebear_look(), false)
+	hero.footsteps = true
+	monarch = FighterRig.new()
+	hall.add_child(monarch)
+	monarch.build(CineActor.foe_look("forgotten_monarch"), true)
+	monarch.position = MONARCH_AT
+	monarch.rotation.y = PI
+	monarch.time_scale = 0.5
+	if with_guard:
+		guard = FighterRig.new()
+		hall.add_child(guard)
+		guard.build(CineActor.foe_look(GUARDIAN), true)
+		guard.position = Vector3(4.6, 0, -5.4)
+		guard.rotation.y = PI * 0.5
+		guard.time_scale = 0.5
+	# the sealed records: a panel in the wall of the hall that is not stone
+	var metal := Look.flat(Color("#2a2c2e"), 0.45, 0.85)
+	arena.box(Vector3(1.6, 2.8, 0.5), SEAL + Vector3(1.2, 1.4, 0), metal, Vector3(0, -70, 0))
+	arena.box(Vector3(0.9, 1.5, 0.52), SEAL + Vector3(1.15, 1.55, 0.02), Look.glow(Color("#5fe0c8"), 1.6), Vector3(0, -70, 0))
+	_seal_light = OmniLight3D.new()
+	_seal_light.light_color = Color("#5fe0c8")
+	_seal_light.light_energy = 0.9
+	_seal_light.omni_range = 6.0
+	_seal_light.position = SEAL + Vector3(0.2, 1.7, 0.3)
+	hall.add_child(_seal_light)
+	Sfx.ambience("")
+
+func _walk(who: FighterRig, to: Vector3, speed: float = HighRoad.WALK) -> Tween:
+	var d := to - who.position
+	who.rotation.y = atan2(-d.x, -d.z)
+	who.walking = true
+	var tw := who.create_tween()
+	tw.tween_property(who, "position", to, d.length() / speed)
+	tw.tween_callback(func(): who.walking = false)
+	return tw
+
+func _face(who: Node3D, point: Vector3, time: float) -> void:
+	var d := point - who.position
+	var yaw := atan2(-d.x, -d.z)
+	var from := who.rotation.y
+	who.create_tween().tween_property(who, "rotation:y", from + wrapf(yaw - from, -PI, PI), time).set_trans(Tween.TRANS_SINE)
+
+# ---------------------------------------------------------------- beat 2: before the throne
+func _beat_throne(me: int) -> void:
+	_hall(true)
+	Sfx.music_for("boss_forgotten_monarch", "final", 2.5)
+	hero.position = Vector3(0, 0, 13.5)
+	_walk(hero, Vector3(0, 0, 1.6))
+	# down the length of the hall behind the one who has come to ask
+	cam.cut(Vector3(1.4, 2.3, 18.0), Vector3(0, 3.2, -14.0), 44.0)
+	cam.move(Vector3(1.0, 1.9, 8.5), Vector3(0, 3.4, -14.0), 8.6)
+	cards.fade(0.0, 1.0)
+	if not await _w(8.4, me):
+		return
+	Story.play("gen1_throne", true)
+	for i in 4:
+		if not await _until("gen1_throne", i, me):
+			return
+		if i % 2 == 0:
+			# the forebear, from the Monarch's side
+			cam.cut(Vector3(-1.5, 1.55, -1.6), Vector3(0.1, 1.5, 1.6), 36.0)
+			cam.move(Vector3(-1.3, 1.55, -1.3), Vector3(0.1, 1.5, 1.6), 5.0)
+		else:
+			# the Monarch, from below
+			cam.cut(Vector3(1.3, 0.8, -3.6), MONARCH_AT + Vector3(0, 2.2, 0), 38.0)
+			cam.move(Vector3(1.0, 0.9, -4.2), MONARCH_AT + Vector3(0, 2.3, 0), 6.0)
+	if not await _spoken(me):
+		return
+	# "Show the warden out": the guardian leaves the wall, and turns
+	Story.play("gen1_guard", true)
+	guard.time_scale = 1.0
+	cam.cut(Vector3(2.2, 0.4, -0.6), Vector3(3.2, 1.9, -4.6), 40.0)
+	cam.move(Vector3(1.6, 0.45, 0.2), Vector3(0.3, 2.0, -1.8), 4.2)
+	await _walk(guard, Vector3(0.3, 0, -1.7), 1.1).finished
+	if me != _token or _over:
+		return
+	Sfx.play("armor", -4.0, 0.7)
+	_face(guard, hero.position, 1.1)
+	if not await _w(1.6, me):
+		return
+	await cards.fade(1.0, 0.35)
+	if me == _token and not _over:
+		_begin(3)
+
+# ================================================================ the duels
+## Puts the forebear in the player's place for a duel, and remembers what to give back.
+func _borrow() -> void:
+	if not _kept.is_empty():
+		return
+	_kept = {"profile": Game.profile, "dir": Game.save_dir_override, "run": Game.run}
+	var mine := forebear()
 	Game.save_dir_override = OS.get_cache_dir() + "/hollow_reign_prologue"
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
-	Game.profile = profile_of(FATHER)
-	sentinel["arena"] = "highland"
-	duel = Duel.new()
-	add_child(duel)
-	var opts := {"ng": DUEL_NG, "seed": 11}
-	if auto:
-		opts["autoplay"] = true
-		opts["bot_style"] = DuelBot.Style.SLOPPY
-	duel.setup("ashen_sentinel", opts)
-	if _kept.arena == null:
-		sentinel.erase("arena")
-	else:
-		sentinel["arena"] = _kept.arena
-	duel.cam.far = 6000.0
-	arena = duel.arena
-	_fight_t = 0.0
-	duel.sim.ev.connect(_on_duel_ev)
-	duel.finished.connect(func(_won: bool, _sim: DuelSim): _duel_over(me))
-	_fade(0.0, 0.7)
+	Game.profile = mine
 
-## Gives Game back what the duel borrowed. Safe to call twice.
+## Gives Game back what a duel borrowed. Safe to call twice.
 func _give_back() -> void:
 	if _kept.is_empty():
 		return
@@ -448,155 +337,159 @@ func _give_back() -> void:
 	Game.run = _kept.run
 	_kept = {}
 
-## What to do, said once each in the fight's own terms as the moment for it comes.
+func _fight(foe_id: String, opts: Dictionary) -> void:
+	_borrow()
+	duel = Duel.new()
+	add_child(duel)
+	if auto:
+		opts["autoplay"] = true
+		opts["bot_style"] = DuelBot.Style.SKILLED
+	opts["skip_intro"] = true
+	duel.setup(foe_id, opts)
+	_fight_t = 0.0
+
+## One line of instruction, in the fight's own terms, as the moment for it comes.
 func _duel_tick(delta: float) -> void:
 	if duel.stage != Duel.Stage.FIGHT:
-		_say("")
+		cards.say("", delta)
 		return
 	_fight_t += delta
 	var sim := duel.sim
-	if sim.b_state == DuelSim.B.WINDUP:
-		_say("SWIPE AGAINST HIS BLADE TO TURN IT")
-	elif sim.b_state == DuelSim.B.RECOVER or sim.b_state == DuelSim.B.STAGGER:
-		_say("HE IS OPEN  ·  SWIPE TO CUT")
-	else:
-		_say("")
+	if beat == 3:
+		if sim.b_state == DuelSim.B.WINDUP:
+			cards.say("HOLD YOUR SHIELD UP  ·  OR SWIPE INTO THE BLOW TO TURN IT", delta)
+		elif sim.b_state == DuelSim.B.RECOVER or sim.b_state == DuelSim.B.STAGGER:
+			cards.say("HE IS OPEN  ·  SWIPE ACROSS HIM TO CUT", delta)
+		else:
+			cards.say("", delta)
+		return
+	cards.say("", delta)
+	# the clash with the Monarch: the story takes it at a threshold, whoever is ahead
+	var mine: float = float(sim.pl.hp) / maxf(float(sim.pl.max_hp), 1.0)
+	var his: float = sim.b_hp / maxf(sim.b_hp_max, 1.0)
+	if _fight_t >= CLASH_TIME or mine <= CLASH_HURT or his <= CLASH_DENT:
+		clash_result = "ahead" if (1.0 - his) * 3.0 > (1.0 - mine) else ("behind" if mine <= CLASH_HURT else "even")
+		sim.paused = true
+		var d := duel
+		duel = null
+		_sealed(d, _token)
 
-func _say(text: String) -> void:
-	if text != "" and _hint.text != text:
-		_hint.text = text
-	_hint.modulate.a = move_toward(_hint.modulate.a, 0.95 if text != "" else 0.0, get_process_delta_time() * 4.0)
+# ---------------------------------------------------------------- beat 3: the royal guardian
+func _beat_guardian(me: int) -> void:
+	_fight(GUARDIAN, {"seed": 5})
+	duel.finished.connect(func(won: bool, _sim: DuelSim): _guardian_done(won, me))
+	cards.fade(0.0, 0.7)
 
-## After long enough, the next blow he lands or has turned is the one that ends it: he was never going to tire.
-func _on_duel_ev(n: StringName, _e: Dictionary) -> void:
-	if n == &"boss_strike" and _fight_t >= DUEL_CAP and duel and duel.sim.pl.hp > 0.0:
-		duel.sim._damage_player(999999.0, true)
-
-func _duel_over(me: int) -> void:
+func _guardian_done(won: bool, me: int) -> void:
 	if me != _token or _over:
 		return
-	_hint.modulate.a = 0.0
-	await _fade(1.0, 0.6)
+	await cards.fade(1.0, 0.5)
 	if me != _token or _over:
 		return
-	_begin(2)
+	# an ordinary defeat is an ordinary defeat: the fight is taken again, and the family's story does not move
+	_begin(4 if won else 3)
 
-# ---------------------------------------------------------------- beat 2: Tessaly, five years on
-func _beat_second(me: int) -> void:
-	_build(1)
-	hero = _actor(SISTER)
-	_sentinel(Vector3(0, 0, -1.6), PI)
-	foe.time_scale = 1.0
-	_cairn(1)
-	Sfx.music("", 2.0)
-	# the same view as the first: the same road, another year, another walker
-	_shot(1)
-	hero.walking = true
-	create_tween().tween_property(self, "_s", 30.0 + 6.0 * WALK, 6.0)
-	_show_card(CARDS[1], 2.6)
-	_fade(0.0, 1.2)
-	if not await _w(5.0, me):
+# ---------------------------------------------------------------- beat 4: the records, and the Monarch
+func _beat_records(me: int) -> void:
+	_hall(false)
+	Sfx.music_for("boss_forgotten_monarch", "final", 1.0)
+	hero.position = Vector3(0.4, 0, 0.6)
+	cam.cut(Vector3(-2.6, 1.5, 3.0), SEAL + Vector3(0, 1.5, 0), 42.0)
+	cam.move(Vector3(-1.2, 1.5, 0.4), SEAL + Vector3(0, 1.5, 0), 5.0)
+	_walk(hero, SEAL + Vector3(-2.6, 0, 1.8))
+	create_tween().tween_property(_seal_light, "light_energy", 2.6, 3.0)
+	cards.fade(0.0, 0.7)
+	Story.play("gen1_records", true)
+	if not await _until("gen1_records", 1, me):
 		return
-	# the tree, and what stands under it now
-	var st := Highland.tree_s()
-	_stride(st - 6.5, st - 0.4)
-	var tree := Highland.road(st, -5.5)
-	var mark := Highland.road(st, -2.3)
-	cam.cut(mark + Vector3(3.6, 0.9, 3.4), mark + Vector3(-0.6, 0.9, -0.6), 40.0)
-	cam.move(mark + Vector3(3.0, 1.0, 3.9), mark + Vector3(-0.6, 1.0, -0.6), 8.0)
-	if not await _w(4.4, me):
+	# he comes down from the throne himself
+	monarch.time_scale = 1.0
+	cam.cut(Vector3(3.6, 0.5, -3.4), MONARCH_AT + Vector3(0, 2.0, 0), 38.0)
+	cam.move(Vector3(3.9, 0.6, -2.6), Vector3(1.6, 2.0, -5.6), 4.0)
+	_walk(monarch, Vector3(2.4, 0, -5.2), 1.0)
+	_face(hero, MONARCH_AT, 0.8)
+	if not await _spoken(me):
 		return
-	hero.walking = false
-	_turn(hero, tree, 0.9)
-	Story.play("prologue_cairn", true)
-	if not await _w(4.2, me):
+	if not await _w(0.5, me):
 		return
-	# the gate: said and done in one wide shot, small against the ring
-	Story.stop()
-	_on_road = false
-	hero.position = Vector3(0.2, 0, 2.3)
-	hero.rotation.y = 0.0
-	hero.walking = false
-	cam.cut(Vector3(-8.5, 1.05, 11.5), Vector3(0.6, 3.4, -4.0), 42.0)
-	cam.move(Vector3(-6.4, 1.1, 9.4), Vector3(0.4, 2.6, -3.0), 12.0)
-	Story.play("prologue_gate", true)
-	while me == _token and not _over and Story.busy:
-		await get_tree().process_frame
+	await cards.fade(1.0, 0.35)
 	if me != _token or _over:
 		return
-	# one blow turned, and the next not
-	foe.telegraph(Vector2(1, 0.2), 0.8, 0.3)
-	if not await _w(0.72, me):
-		return
-	hero.parry(Vector2(-1, 0.2))
-	Sfx.play("clash", -2.0)
-	if not await _w(0.7, me):
-		return
-	foe.telegraph(Vector2(0, -1), 0.95, 0.32, "slam")
-	if not await _w(1.05, me):
-		return
-	hero.die(1.0)
-	Sfx.play("death", -2.0)
-	foe.guard()
-	if not await _w(2.6, me):
-		return
-	await _fade(1.0, 0.9)
-	if me != _token or _over:
-		return
-	_begin(3)
+	if hall:
+		hall.free()
+		hall = null
+	_fight("forgotten_monarch", {"seed": 9})
+	duel.finished.connect(func(won: bool, _sim: DuelSim):
+		# the duel ran to its own end before the story reached its threshold (rare): a win is answered as "ahead",
+		# a death is an ordinary defeat and the clash is taken again
+		if me != _token or _over:
+			return
+		if won:
+			clash_result = "ahead"
+			_begin(5)
+		else:
+			_begin(4))
+	cards.fade(0.0, 0.7)
 
-# ---------------------------------------------------------------- beat 3: the nineteenth year
-func _beat_winter(me: int) -> void:
-	_build(2)
-	_cairn(2)
-	Sfx.music("", 1.0)
-	# the vista a third time: no one on the road
-	var h := Highland.road(30.0)
-	var back := Highland.on_ground(h.x + 8.0, h.z + 34.0, 4.2)
-	cam.cut(back, Vector3(-80.0, -14.0, 0.0), 27.0)
-	cam.move(back + Vector3(-0.6, 0.3, -3.0), Vector3(-78.0, -12.0, 0.0), 8.0)
-	_show_card(CARDS[2], 2.4)
-	_fade(0.0, 1.2)
-	if not await _w(4.4, me):
-		return
-	# two swords under the tree, and behind them the gate, lit from inside
-	var st := Highland.tree_s()
-	var mark := Highland.road(st, -2.3)
-	cam.cut(mark + Vector3(2.2, 0.5, 4.4), mark + Vector3(-0.5, 2.6, -6.0), 40.0)
-	cam.move(mark + Vector3(1.8, 0.55, 3.6), mark + Vector3(-0.5, 3.4, -6.0), 6.0)
-	if not await _w(4.2, me):
-		return
-	await _fade(1.0, 1.1)
+## The story takes the clash: the Monarch does not finish it. He seals the hall.
+func _sealed(d: Duel, me: int) -> void:
+	Sfx.play("guard_break", -3.0, 0.6)
+	Sfx.play("bell", -6.0, 0.7)
+	await cards.fade(1.0, 0.45)
+	if is_instance_valid(d):
+		d.free()
+	_give_back()
 	if me != _token or _over:
+		return
+	_begin(5)
+
+# ---------------------------------------------------------------- beat 5: the fall
+func _beat_fall(me: int) -> void:
+	_hall(false)
+	Sfx.music("", 2.5)
+	# the hall is shut: its light is the alarm's, and the seal's
+	_alarm = OmniLight3D.new()
+	_alarm.light_color = Color("#ff4a22")
+	_alarm.omni_range = 30.0
+	_alarm.position = Vector3(0, 6.0, 9.0)
+	hall.add_child(_alarm)
+	hero.position = SEAL + Vector3(-1.0, 0, 0.7)
+	hero.rotation.y = -PI * 0.5 - 0.3
+	monarch.position = Vector3(1.6, 0, -3.0)
+	monarch.time_scale = 0.7
+	_face(monarch, hero.position, 0.01)
+	_seal_light.light_energy = 3.0
+	cam.cut(Vector3(1.8, 1.3, -4.2), SEAL + Vector3(-0.4, 1.3, 0.4), 40.0)
+	cam.move(Vector3(2.6, 1.4, -5.0), SEAL + Vector3(-0.4, 1.3, 0.4), 9.0)
+	cards.fade(0.0, 0.8)
+	Story.play("gen1_seal", true)
+	# the records go out through the seal while he speaks
+	create_tween().tween_property(_seal_light, "light_energy", 9.0, 7.0)
+	if not await _until("gen1_seal", 1, me):
+		return
+	hero.hold("wounded", 2.2)
+	cam.cut(Vector3(4.6, 0.7, -5.2), monarch.position + Vector3(0, 2.2, 0), 38.0)
+	cam.move(Vector3(4.9, 0.8, -5.6), monarch.position + Vector3(0, 2.2, 0), 5.0)
+	if not await _until("gen1_seal", 2, me):
+		return
+	cam.cut(Vector3(3.2, 0.55, -6.4), SEAL + Vector3(-0.8, 0.8, 0.6), 36.0)
+	cam.move(Vector3(3.0, 0.6, -6.1), SEAL + Vector3(-0.8, 0.8, 0.6), 6.0)
+	if not await _spoken(me):
+		return
+	Sfx.play("levelup", -8.0, 0.5)
+	var flare := create_tween()
+	flare.tween_property(_seal_light, "light_energy", 26.0, 0.9)
+	flare.tween_property(_seal_light, "light_energy", 0.0, 1.4)
+	if not await _w(1.2, me):
+		return
+	await cards.fade(1.0, 1.4)
+	if me != _token or _over:
+		return
+	# the family's mark, and what was written of them
+	cards.show_item(cards.emblem, 6.0, 1.6)
+	Story.play("gen1_close_" + body(), true)
+	if not await _spoken(me):
+		return
+	if not await _w(1.4, me):
 		return
 	_end()
-
-# ---------------------------------------------------------------- small things
-## The marker under the dead tree: a heap of stones with a sword standing in it for each of them who fell.
-func _cairn(swords: int) -> void:
-	var at := Highland.road(Highland.tree_s(), -2.3)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 5
-	var stone := Look.stone(Color("#77726a"), 0.6)
-	for i in 11:
-		var b := BoxMesh.new()
-		b.size = Vector3(rng.randf_range(0.22, 0.5), rng.randf_range(0.14, 0.3), rng.randf_range(0.22, 0.45))
-		var mi := MeshInstance3D.new()
-		mi.mesh = b
-		mi.material_override = stone
-		var ring := 0.55 if i < 7 else 0.2
-		mi.position = at + Vector3(cos(i * 0.9) * ring * rng.randf_range(0.5, 1.0), (0.1 if i < 7 else 0.34) - 0.05, sin(i * 0.9) * ring * rng.randf_range(0.5, 1.0))
-		mi.rotation = Vector3(rng.randf_range(-0.3, 0.3), rng.randf() * TAU, rng.randf_range(-0.3, 0.3))
-		stage.add_child(mi)
-	for k in swords:
-		var holder := Node3D.new()
-		stage.add_child(holder)
-		var length := PropModel.weapon(holder, "res://assets/models/w_knight_sword.glb", "sword")
-		holder.rotation = Vector3(PI + (0.12 if k == 0 else -0.16), 0.5 + k * 1.3, 0.07 if k == 0 else -0.1)
-		holder.position = at + Vector3(-0.16 + k * 0.34, 0.3 + length * 0.78, 0.05 - k * 0.12)
-
-func _turn(who: Node3D, point: Vector3, time: float) -> void:
-	var d := point - who.position
-	var yaw := atan2(-d.x, -d.z)
-	var from := who.rotation.y
-	create_tween().tween_property(who, "rotation:y", from + wrapf(yaw - from, -PI, PI), time).set_trans(Tween.TRANS_SINE)

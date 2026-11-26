@@ -30,3 +30,12 @@ Cap: $100 total across Higgsfield and Tripo, including everything below. Tripo c
 - Concept images for props are generated at 1k, not 2k.
 - Higgsfield's CLI blocks on standard input when run from a script; pass `stdin=DEVNULL`. Run speech jobs one at a time.
 - Generated model textures are capped at 1024 px on import (`project.godot`, importer defaults). That alone cut video memory from about 1.1 GB to about 330 MB.
+
+## Animation clips (overhaul pass)
+
+| Item | Service | Credits | Cost |
+|---|---|---|---|
+| 9 retargeted clips for the knight skeleton (idle, walk, run, turn, slash, hurt, fall, dive, jump) | Tripo API | 90 | $0.90 |
+
+Running total after this entry: Tripo ≈ $39.20, Higgsfield ≈ $8.80, combined ≈ $48.00 of the $100 cap.
+No failed tasks were regenerated. Nothing else was bought in this pass.

@@ -35,6 +35,16 @@ Verified means covered by `tools/test.sh` or seen in software-rendered screensho
 | Audio: 37 sound effects, 4 ambiences, 5 music loops, phase-2 music layer | In. **Nobody has listened to it** (see below) |
 | Settings: quality, frame cap, volumes, haptics, shake, prompts, forgiving timing, reduced flashes | Works |
 
+## Overhaul pass 2026-11-26: movement, combos, controls, authored motion
+Scope is the first encounter only (Fallen Courtyard, Ashen Sentinel), per the overhaul brief. Audit and register: `docs/BUG_REGISTER.md`.
+- **Movement.** Both fighters move: the foe circles, closes and gives ground, blows push bodies back, the knight steps into cuts. Dodges carry the knight 1.25 m sideways; the foe has to turn to find them and the camera follows.
+- **Combos.** 16 data-driven sequences (`data/combos.json`), ten general and six weapon-specific, with distinct purposes (fast, heavy, guard-breaking, armour-piercing, counter, finisher). Found by performing them; the Journal tab lists what is found and hints at the rest; Orren's training ground lets you practise against a foe that only stands open.
+- **Blocking.** A shield raised within 0.22 s of impact is a timed block: no stamina, no chip damage, posture added to the attacker.
+- **Controls.** Dodge and shield pads rest at 20% opacity, light under the thumb, fade back. Settings has a visibility slider down to hidden; touch areas are unchanged.
+- **Authored motion.** Nine skeletal clips bought ($0.90) and baked to `assets/anim/humanoid.res`. Walk and death now use them on the male knight; sword and shield arms stay on IK so cuts keep their exact directions. Not yet checked on the female knight or the bosses.
+- **Tests.** 2,654 rule checks, 83 cinematic checks, integration and touch suites pass. The cinematic playback suite was not re-run to completion in this pass.
+- **Not done from the brief:** directional sword-cut clips (none owned), blade-to-blade parry contact, boss rework, voice recasting, sound and music overhaul, six-bus mix, camera redesign, courtyard art pass, onboarding, LODs, the demonstration recordings.
+
 ## Experiment 2026-11-26: cinematic presentation
 A complete, playable test of prerecorded footage with live rules (the Ashen Sentinel in the Fallen Courtyard), plus a short hotspot-and-travel exploration example. Off by default; switch on in Settings. The real-time duel is unchanged. Full write-up, measurements and recommendation: `docs/CINEMATIC_COMBAT.md`. Short version: it works and is verified on desktop; it suits travel, intros, finishers and story scenes; the real-time duel remains the better choice for the fighting itself. Asset manifest: `docs/ASSET_MANIFEST.json` (`tools/asset_manifest.py`). Audition reels for the unheard voices and music: `marketing/audition/`.
 

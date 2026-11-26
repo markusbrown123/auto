@@ -58,7 +58,9 @@ static func roll(profile: Dictionary, foe_id: String) -> Dictionary:
 	var rep := repeat_share(profile, foe_id)
 	var region: String = str(foe.get("region", ""))
 	var mat: String = str(eq.region_material.get(region, "m_iron"))
-	var elite: bool = eq.elites.has(foe_id)
+	# a foe of another generation's cast pays from its original's tables (its own id still seeds the roll)
+	var rid: String = str(foe.get("reward_as", foe_id))
+	var elite: bool = eq.elites.has(rid)
 	var rng := RandomNumberGenerator.new()
 	rng.seed = roll_seed(profile, foe_id)
 	var items: Array = []
@@ -69,7 +71,7 @@ static func roll(profile: Dictionary, foe_id: String) -> Dictionary:
 	var has := func(id: String) -> bool: return profile.get("inventory", []).has(id) or items.has(id)
 	if foe.boss:
 		out.shards = int(r.shards_boss) + int(r.shards_boss_per_region) * maxi(0, eq.region_order.find(region))
-		var b: Dictionary = eq.boss_rewards.get(foe_id, {"first": [], "pool": [], "materials": {}})
+		var b: Dictionary = eq.boss_rewards.get(rid, {"first": [], "pool": [], "materials": {}})
 		# one guardian core for each guardian, once in each cycle of the world
 		out.core = int(st.get("cores", {}).get(foe_id, 0)) <= ng
 		for m: String in b.materials:
@@ -109,7 +111,7 @@ static func roll(profile: Dictionary, foe_id: String) -> Dictionary:
 		var pick := rng.randi()
 		var k_roll := rng.randf()
 		_add(mats, mat, int(r.mat_elite) if elite else (int(r.mat_fight) if m_roll < float(r.mat_chance) * rep else 0))
-		var exclusive: String = str(eq.encounters.get(foe_id, ""))
+		var exclusive: String = str(eq.encounters.get(rid, ""))
 		if exclusive != "" and not has.call(exclusive):
 			items.append(exclusive)
 		var pool: Array = eq.drops.get(region, []).filter(func(id): return not has.call(id))
@@ -119,6 +121,7 @@ static func roll(profile: Dictionary, foe_id: String) -> Dictionary:
 			var unknown: Array = region_items(region).filter(func(id): return not known(profile, id) and not items.has(id))
 			if not unknown.is_empty():
 				out.discoveries.append(str(unknown[pick % unknown.size()]))
+	out.shards = roundi(float(out.shards) * float(foe.get("shard_mult", 1.0)))
 	# the dry-streak rule: after `pity` wins with nothing new to look at, something new is found
 	if items.is_empty() and out.discoveries.is_empty() and int(st.get("pity", 0)) >= int(r.pity) - 1:
 		out.pity = true

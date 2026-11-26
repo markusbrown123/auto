@@ -1,0 +1,916 @@
+{
+ "house": "Marrek",
+ "generations": [
+  {
+   "index": 1,
+   "role": "first",
+   "ordinal": "the First",
+   "chapter": "The First Oath",
+   "year": 0,
+   "fate": "fallen",
+   "relation": {
+    "m": "Father",
+    "f": "Mother"
+   },
+   "aim": "Stop the exploitation",
+   "scenes_min": 4.0
+  },
+  {
+   "index": 2,
+   "role": "second",
+   "ordinal": "the Second",
+   "chapter": "The Broken Crown",
+   "year": 22,
+   "fate": "kept",
+   "relation": {
+    "m": "Son",
+    "f": "Daughter"
+   },
+   "aim": "Avenge the first",
+   "scenes_min": 9.0
+  },
+  {
+   "index": 3,
+   "role": "heir",
+   "ordinal": "the Last",
+   "chapter": "The Last Heir",
+   "year": 46,
+   "fate": "alive",
+   "relation": {
+    "m": "Grandson",
+    "f": "Granddaughter"
+   },
+   "aim": "Free the kingdom",
+   "scenes_min": 8.0
+  }
+ ],
+ "kin": {
+  "-2": {
+   "m": "Grandfather",
+   "f": "Grandmother"
+  },
+  "-1": {
+   "m": "Father",
+   "f": "Mother"
+  },
+  "0": {
+   "m": "Yourself",
+   "f": "Yourself"
+  },
+  "1": {
+   "m": "Son",
+   "f": "Daughter"
+  },
+  "2": {
+   "m": "Grandson",
+   "f": "Granddaughter"
+  }
+ },
+ "forebear": {
+  "level": 12,
+  "attrs": {
+   "health": 14,
+   "strength": 16,
+   "dex": 9,
+   "endurance": 12,
+   "defense": 6,
+   "crit": 2,
+   "resist": 0
+  },
+  "weapon": "w_knight_sword",
+  "equipped": {
+   "shield": null,
+   "helm": null,
+   "chest": null,
+   "gauntlets": null,
+   "legs": null
+  }
+ },
+ "access": {
+  "1": {
+   "courtyard": {
+    "state": "passed",
+    "why": "The gate is kept and manned. Nobody bars a warden with a petition."
+   },
+   "blackwood": {
+    "state": "open",
+    "optional": true,
+    "why": "The low road, and the patrol that walks it."
+   },
+   "cathedral": {
+    "state": "sealed",
+    "why": "The cathedral is whole, and its doors are the Crown's."
+   },
+   "crypt": {
+    "state": "shut",
+    "why": "The crypt is not yet flooded, and not yet open."
+   },
+   "roost": {
+    "state": "distant",
+    "why": "A far light on the mountain."
+   },
+   "citadel": {
+    "state": "shut",
+    "why": "The winter king still keeps his gates."
+   },
+   "deep": {
+    "state": "unknown",
+    "why": "Nobody alive knows there is anything under the throne."
+   },
+   "throne": {
+    "state": "open",
+    "why": "A warden may petition the throne."
+   }
+  },
+  "3": {
+   "courtyard": {
+    "state": "open"
+   },
+   "blackwood": {
+    "state": "open",
+    "requires": [
+     "courtyard"
+    ]
+   },
+   "cathedral": {
+    "state": "open",
+    "requires": [
+     "courtyard"
+    ]
+   },
+   "citadel": {
+    "state": "open",
+    "requires": [
+     "courtyard"
+    ],
+    "optional_guardian": true
+   },
+   "crypt": {
+    "state": "open",
+    "requires": [
+     "courtyard"
+    ],
+    "optional": true,
+    "why": "The way down."
+   },
+   "roost": {
+    "state": "open",
+    "requires": [
+     "courtyard"
+    ],
+    "optional": true,
+    "why": "The dragon hunt."
+   },
+   "throne": {
+    "state": "open",
+    "requires_any": {
+     "of": [
+      "blackwood",
+      "cathedral",
+      "citadel"
+     ],
+     "count": 2
+    }
+   },
+   "deep": {
+    "state": "open",
+    "optional": true,
+    "needs_fact": "monarch_felled:3",
+    "sealed_as": "sealed",
+    "why": "The door the Witness remembers. It opens from the other side of the throne."
+   }
+  }
+ },
+ "stops": {
+  "1": {
+   "blackwood": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Low Road",
+      "hint": "The patrol knows a warden's colours. It has orders all the same.",
+      "foe": "royal_patrol"
+     }
+    ]
+   },
+   "throne": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The King's Door",
+      "hint": "\"Show the warden to the gate.\"",
+      "foe": "royal_gatekeeper"
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Hollow Throne",
+      "hint": "He comes down the steps himself.",
+      "foe": "monarch_i",
+      "optional": false
+     }
+    ]
+   }
+  },
+  "3": {
+   "courtyard": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Breach",
+      "hint": "New plate, new recruits. The Crown replaces what it loses.",
+      "foe": "pike_sergeant"
+     }
+    ],
+    "1": [
+     {
+      "keep": "The Guardhouse"
+     },
+     {
+      "type": "pass",
+      "label": "The Rampart Stair",
+      "hint": "Nobody walks the stair now."
+     }
+    ],
+    "2": [
+     {
+      "type": "pass",
+      "label": "The Barbican",
+      "hint": "The banner is down. The one who stood under it was not replaced."
+     }
+    ],
+    "4": [
+     {
+      "type": "fight",
+      "label": "The Gate Passage",
+      "hint": "Something larger has been posted where the Breaker stood.",
+      "foe": "gate_colossus"
+     },
+     {
+      "keep": "The Murder Hole"
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Inner Ward",
+      "hint": "A guardian stands in the Sentinel's post. You know the way it stands.",
+      "foe": "the_kept",
+      "optional": false
+     }
+    ]
+   },
+   "blackwood": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Lantern Road",
+      "hint": "The lanterns are out. Something moves between them anyway.",
+      "foe": "veil_dancer"
+     }
+    ],
+    "1": [
+     {
+      "type": "pass",
+      "label": "The Road",
+      "hint": "Bootprints, old ones, going one way."
+     },
+     {
+      "type": "boss",
+      "label": "The Deer Trail",
+      "hint": "White antlers, greyer now, between the trunks.",
+      "foe": "pale_huntsman",
+      "optional": true,
+      "unless": "slain:pale_huntsman"
+     }
+    ],
+    "2": [
+     {
+      "type": "pass",
+      "label": "The Briar Gate",
+      "hint": "The briars were cut through years ago, and never grew back."
+     },
+     {
+      "keep": "The Hollow Oak"
+     }
+    ],
+    "4": [
+     {
+      "type": "pass",
+      "label": "The Woodpile",
+      "hint": "The stacks have rotted where they stood."
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Clearing",
+      "hint": "The stumps have been torn out of the ground.",
+      "foe": "awakened_beast",
+      "optional": false
+     }
+    ]
+   },
+   "cathedral": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Pilgrim Stair",
+      "hint": "The robes are new. The hymn is not.",
+      "foe": "censer_adept"
+     }
+    ],
+    "1": [
+     {
+      "type": "pass",
+      "label": "The Porch",
+      "hint": "The great censer lies where it fell."
+     },
+     {
+      "keep": "The Almoner's Box"
+     }
+    ],
+    "2": [
+     {
+      "type": "pass",
+      "label": "The Cathedral Steps",
+      "hint": "Nobody is waiting on the steps."
+     }
+    ],
+    "4": [
+     {
+      "type": "fight",
+      "label": "The Choir Loft",
+      "hint": "The choir is silent. The bell is not.",
+      "foe": "bell_ringer"
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Lower Door",
+      "hint": "Under the crossing, where the bronze lay, a door stands open.",
+      "foe": "laboratory_guardian",
+      "optional": false
+     }
+    ]
+   },
+   "crypt": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Drowned Stair",
+      "hint": "The water is lower. What it covered is not gone.",
+      "foe": "tomb_mummer"
+     }
+    ],
+    "1": [
+     {
+      "keep": "The Ossuary"
+     },
+     {
+      "type": "pass",
+      "label": "The Processional",
+      "hint": "The footfalls have stopped."
+     }
+    ],
+    "2": [
+     {
+      "type": "pass",
+      "label": "The Weeping Tomb",
+      "hint": "The lid is dry."
+     }
+    ],
+    "4": [
+     {
+      "keep": "The Royal Vault"
+     },
+     {
+      "type": "fight",
+      "label": "The Gallery of Kings",
+      "hint": "Something crawls where the wardens walked.",
+      "foe": "crypt_crawler"
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Way Down",
+      "hint": "Behind the first tomb, a stair. Something at the foot of it says a name.",
+      "foe": "devourer",
+      "optional": false,
+      "unless": "slain:devourer"
+     },
+     {
+      "type": "pass",
+      "label": "The Way Down",
+      "hint": "The stair goes down to an emptied place.",
+      "when": "slain:devourer"
+     }
+    ]
+   },
+   "roost": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Glass Road",
+      "hint": "The scale is new. The oath is the old one.",
+      "foe": "scalebound"
+     }
+    ],
+    "1": [
+     {
+      "type": "pass",
+      "label": "The Mews",
+      "hint": "The perches are empty."
+     },
+     {
+      "keep": "The Tack Room"
+     }
+    ],
+    "2": [
+     {
+      "type": "fight",
+      "label": "The Boneyard",
+      "hint": "The keeper of the clutch has come down to the bones.",
+      "foe": "brood_keeper"
+     }
+    ],
+    "4": [
+     {
+      "keep": "The Clutch"
+     },
+     {
+      "type": "pass",
+      "label": "The Brood Guard",
+      "hint": "Nobody guards the shells."
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Summit",
+      "hint": "A shadow crosses the sun, and comes back.",
+      "foe": "cinder_wyrm",
+      "optional": false,
+      "unless": "slain:cinder_wyrm"
+     },
+     {
+      "type": "boss",
+      "label": "The Summit",
+      "hint": "The old one has come down from the hall to the empty nest.",
+      "foe": "azhurion",
+      "optional": false,
+      "unless": "slain:azhurion",
+      "when": "slain:cinder_wyrm"
+     },
+     {
+      "type": "pass",
+      "label": "The Summit",
+      "hint": "The sky is only sky.",
+      "when": "slain:azhurion"
+     }
+    ]
+   },
+   "citadel": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Frozen Rank",
+      "hint": "The ranks have thawed. One of them kept his post.",
+      "foe": "rime_glaive"
+     }
+    ],
+    "1": [
+     {
+      "type": "pass",
+      "label": "The Wall Walk",
+      "hint": "The duellist's footprints are worn into the ice. He is not in them."
+     },
+     {
+      "keep": "The Armoury"
+     }
+    ],
+    "2": [
+     {
+      "type": "pass",
+      "label": "The Kennel Stair",
+      "hint": "The chain hangs slack."
+     }
+    ],
+    "4": [
+     {
+      "type": "fight",
+      "label": "The Great Stair",
+      "hint": "It has made its den on the landing.",
+      "foe": "hoarbeast"
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Winter Throne",
+      "hint": "The king is gone. What he kept chained has climbed to his seat.",
+      "foe": "rimewyrm",
+      "optional": false,
+      "unless": "slain:rimewyrm"
+     },
+     {
+      "type": "boss",
+      "label": "The Winter Throne",
+      "hint": "The pit is empty. Her brood has taken the hall.",
+      "foe": "white_brood",
+      "optional": false,
+      "when": "slain:rimewyrm"
+     }
+    ]
+   },
+   "throne": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The King's Door",
+      "hint": "The King's Shadow stands where the Gatekeeper stood.",
+      "foe": "throne_colossus"
+     }
+    ],
+    "1": [
+     {
+      "type": "pass",
+      "label": "The Antechamber",
+      "hint": "The king's own blade does not bow to you. He is not here."
+     },
+     {
+      "keep": "The Treasury"
+     }
+    ],
+    "2": [
+     {
+      "type": "pass",
+      "label": "The Steps",
+      "hint": "A crown lies on the steps. Nobody is turning it."
+     }
+    ],
+    "4": [
+     {
+      "type": "fight",
+      "label": "The Last Post",
+      "hint": "A herald, with nothing left to announce.",
+      "foe": "herald"
+     },
+     {
+      "keep": "Behind the Throne"
+     }
+    ],
+    "5": [
+     {
+      "keep": "Steady Yourself"
+     },
+     {
+      "type": "boss",
+      "label": "The Roof of the Hall",
+      "hint": "Something vast is still folded among the rafters.",
+      "foe": "azhurion",
+      "optional": true,
+      "unless": "slain:azhurion"
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Hollow Throne",
+      "hint": "The floor of the hall stands open.",
+      "foe": "monarch_iii",
+      "optional": false
+     }
+    ]
+   },
+   "deep": {
+    "0": [
+     {
+      "type": "fight",
+      "label": "The Long Stair",
+      "hint": "The ones along the wall have turned round.",
+      "foe": "husk"
+     }
+    ],
+    "1": [
+     {
+      "type": "pass",
+      "label": "The Gallery of Names",
+      "hint": "No more names have gone from the wall."
+     },
+     {
+      "keep": "The Unread Wall"
+     }
+    ],
+    "2": [
+     {
+      "type": "fight",
+      "label": "The Grain",
+      "hint": "It wears a name it took.",
+      "foe": "name_thief"
+     }
+    ],
+    "4": [
+     {
+      "type": "fight",
+      "label": "The Oath Hall",
+      "hint": "It was put in the ground and did not stay.",
+      "foe": "the_unburied"
+     },
+     {
+      "keep": "The Reliquary of Vows"
+     }
+    ],
+    "6": [
+     {
+      "type": "boss",
+      "label": "The Bottom",
+      "hint": "It says a name. It might be yours.",
+      "foe": "devourer",
+      "optional": false,
+      "unless": "slain:devourer"
+     },
+     {
+      "type": "pass",
+      "label": "The Eternal Crown",
+      "hint": "The lowest room. The machine is here, and it is waiting to be told.",
+      "when": "slain:devourer"
+     }
+    ]
+   }
+  }
+ },
+ "mortals": {
+  "ashen_sentinel": {
+   "after": "the_kept",
+   "why": "His post was given to another."
+  },
+  "hollow_executioner": {
+   "after": "awakened_beast",
+   "why": "The clearing was empty for twenty-four years."
+  },
+  "crimson_widow": {
+   "after": "",
+   "why": "She is not waiting on the steps."
+  },
+  "cathedral_beast": {
+   "after": "laboratory_guardian",
+   "why": "Its fall uncovered the lower door."
+  },
+  "gravewarden": {
+   "after": "devourer",
+   "why": "Behind the first tomb there was always a way down."
+  },
+  "frostbound_king": {
+   "after": "rimewyrm",
+   "why": "He gave up his crown. What he kept chained did not."
+  },
+  "pale_huntsman": {
+   "after": "",
+   "why": "If he fell, the trail is empty."
+  },
+  "cinder_wyrm": {
+   "after": "azhurion",
+   "why": "The old one comes down to the empty nest."
+  },
+  "rimewyrm": {
+   "after": "white_brood",
+   "why": "What she left in the pit grew."
+  },
+  "azhurion": {
+   "after": "",
+   "why": "The rafters are empty."
+  },
+  "devourer": {
+   "after": "",
+   "why": "The bottom is an emptied place."
+  },
+  "kingsblade": {
+   "after": "herald",
+   "why": "The king's own blade was not replaced."
+  },
+  "crownless": {
+   "after": "",
+   "why": "Only the crown is left on the steps."
+  },
+  "banneret": {
+   "after": "",
+   "why": "The banner is down."
+  }
+ },
+ "tuning": {
+  "3": {
+   "regions": {
+    "courtyard": {
+     "hp": 7.01,
+     "dmg": 3.51,
+     "xp": 7.89,
+     "gold": 12.8
+    },
+    "blackwood": {
+     "hp": 6.22,
+     "dmg": 3.2,
+     "xp": 5.31,
+     "gold": 9.08
+    },
+    "cathedral": {
+     "hp": 4.15,
+     "dmg": 2.11,
+     "xp": 3.3,
+     "gold": 5.71
+    },
+    "crypt": {
+     "hp": 4.06,
+     "dmg": 2.11,
+     "xp": 2.71,
+     "gold": 4.69
+    },
+    "roost": {
+     "hp": 2.94,
+     "dmg": 1.6,
+     "xp": 2.01,
+     "gold": 3.54
+    },
+    "citadel": {
+     "hp": 2.95,
+     "dmg": 1.56,
+     "xp": 1.79,
+     "gold": 3.17
+    },
+    "deep": {
+     "hp": 2.53,
+     "dmg": 1.34,
+     "xp": 1.48,
+     "gold": 2.61
+    },
+    "throne": {
+     "hp": 2.4,
+     "dmg": 1.3,
+     "xp": 1.25,
+     "gold": 2.2
+    }
+   },
+   "boss_hp_target": 13000,
+   "boss_hp_range": [
+    1.4,
+    4.6
+   ],
+   "boss_dmg_share": 0.7,
+   "shards": 2.0
+  }
+ },
+ "records": [
+  {
+   "id": "first_oath",
+   "gen": 1,
+   "auto": true,
+   "name": "The First Oath",
+   "text": "What the first of the house sent out through the sword.",
+   "need": {
+    "fallen": 1
+   }
+  },
+  {
+   "id": "measure_of_him",
+   "gen": 1,
+   "name": "The Measure of Him",
+   "text": "How he fights, set down by one who crossed blades with him and was winning.",
+   "need": {
+    "clash": "won"
+   }
+  },
+  {
+   "id": "broken_crown",
+   "gen": 2,
+   "auto": true,
+   "name": "The Broken Crown",
+   "text": "The count behind the seal, carried out whole.",
+   "need": {
+    "fallen": 2
+   }
+  },
+  {
+   "id": "the_crown_can_bleed",
+   "gen": 2,
+   "name": "The Crown Can Bleed",
+   "text": "He was beaten once, in a fair fight, and the machines stood him up again.",
+   "need": {
+    "monarch_won": 2
+   }
+  },
+  {
+   "id": "surviving_version",
+   "gen": 0,
+   "ending": true,
+   "name": "The Surviving Version",
+   "text": "Thirty records of what the Crown rewrote.",
+   "need": {
+    "lore": 30
+   }
+  },
+  {
+   "id": "siege_engine",
+   "gen": 0,
+   "ending": true,
+   "name": "The Siege That Outlived Its War",
+   "text": "What was kept under the Roost, faced.",
+   "need": {
+    "cleared": [
+     "roost"
+    ]
+   }
+  },
+  {
+   "id": "partition_key",
+   "gen": 0,
+   "ending": true,
+   "name": "The Partition Key",
+   "text": "What the Devourer was made of, and how it was unmade.",
+   "need": {
+    "defeated": [
+     "devourer"
+    ]
+   }
+  },
+  {
+   "id": "one_who_was_kept",
+   "gen": 3,
+   "ending": true,
+   "name": "One Who Was Kept",
+   "text": "A stored mind that was asked, and chose.",
+   "need": {
+    "defeated": [
+     "the_kept"
+    ]
+   }
+  }
+ ],
+ "monarch": {
+  "1": {
+   "foe": "monarch_i",
+   "kind": "clash",
+   "region": "throne",
+   "stop": 6,
+   "outcome": "story",
+   "note": "The story takes the fight on a cut the player lands, not on a health bar. Nothing here is won or lost."
+  },
+  "2": {
+   "foe": "forgotten_monarch",
+   "kind": "duel",
+   "region": "throne",
+   "stop": 6,
+   "threshold": {
+    "phase": 2,
+    "at": 0.33
+   },
+   "choices": [
+    "press",
+    "records"
+   ],
+   "note": "At the threshold the seal burns: press the attack, or save the records. A player who wins is recorded as having won."
+  },
+  "3": {
+   "foe": "monarch_iii",
+   "kind": "final",
+   "region": "throne",
+   "stop": 6,
+   "phases": [
+    "The Sovereign",
+    "The Ancient Crown",
+    "The Last Defense"
+   ]
+  }
+ },
+ "endings": [
+  {
+   "id": "silence",
+   "name": "The Final Silence",
+   "need": {}
+  },
+  {
+   "id": "steward",
+   "name": "The Last Steward",
+   "need": {}
+  },
+  {
+   "id": "cities",
+   "name": "The Free Cities",
+   "need": {
+    "records": "ending"
+   }
+  }
+ ],
+ "echo": {
+  "id": "the_kept",
+  "name": "The Crownless Champion",
+  "title": "The Kept",
+  "region": "courtyard",
+  "stop": 6,
+  "music_as": "frostbound_king",
+  "intro": "It is wearing what you wore. It stands the way you stood.",
+  "combos": 5
+ }
+}

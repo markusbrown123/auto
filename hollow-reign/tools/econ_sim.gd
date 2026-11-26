@@ -21,6 +21,10 @@ var row: Dictionary = {}
 var start_weapon := "w_rusted_sword"
 var per_win := {}                 # region -> gold a win paid there, on average
 var quiet := false
+var track := false                # the generational run: combinations used and each generation's own tally are recorded, as the game does
+var generations_mode := false
+var clock := {}                   # the generational run: {key: {fights, wins, deaths, fight_s, stops, rests, gold}}
+var clock_key := ""
 
 func _ready() -> void:
 	for a: String in OS.get_cmdline_user_args():
@@ -32,11 +36,17 @@ func _ready() -> void:
 			seed_base = int(a.trim_prefix("--seed="))
 		if a.begins_with("--start="):
 			start_weapon = a.trim_prefix("--start=")
+		if a == "--generations":
+			generations_mode = true
 	Game.save_dir_override = OS.get_cache_dir() + "/hollow_reign_econ"
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f: String in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
 	Game.slot = 1
+	if generations_mode:
+		generations_report()
+		get_tree().quit(0)
+		return
 	begin(start_weapon)
 	print("ECONOMY SIMULATION  starting blade: %s" % Db.item(start_weapon).name)
 	print("ECONOMY SIMULATION  (player: %s, seed %d)" % ["struggling: sloppy bot, loses about one fight in three" if struggling else ("skilled bot" if style == DuelBot.Style.SKILLED else "sloppy bot, which wins every fight"), seed_base])
@@ -180,6 +190,7 @@ func play_region(region: String) -> void:
 		Game.start_run(region, Game.shortcut_open(region) and cleared == false and attempts > 1 and not unfinished(region))
 		var alive := true
 		while alive:
+			tick_clock("stops", 1)
 			var o: Dictionary = choose(Game.stage_options())
 			match str(o.type):
 				"treasure":
@@ -198,7 +209,9 @@ func play_region(region: String) -> void:
 				break
 		if not alive:
 			row.deaths += 1
+			tick_clock("deaths", 1)
 			Game.on_death()
+		tick_clock("rests", 1)
 		row.spent += sanctuary()
 		if attempts > 40:
 			flags.append("%s: not cleared in 40 attempts" % region)
@@ -226,8 +239,9 @@ func play_region(region: String) -> void:
 ## Something still to do on a cleared road: an unopened chest or an optional guardian not yet ended.
 func unfinished(region: String) -> bool:
 	var r: Dictionary = Db.region_by_id[region]
+	var gen := Encounters.generation(Game.profile)
 	for i: int in r.stages.size():
-		for o: Dictionary in r.stages[i].options:
+		for o: Dictionary in Encounters.stop(gen, region, i, Game.profile).options:      # the second generation: the road's own options
 			if o.type == "treasure" and not Game.profile.flags.has("chest_%s_%d_%s" % [region, i, o.label]):
 				if not o.has("needs") or Game.profile.flags.has(o.needs):
 					return true
@@ -262,14 +276,25 @@ func duel(foe: String, attempt: int) -> bool:
 	if struggling and absi(hash("lose|%d" % sd)) % 100 < 35:
 		how = DuelBot.Style.TURTLE
 	var bot := DuelBot.new(s, DuelBot.Style.SKILLED if attempt > 6 else how, sd)
+	if track:
+		s.ev.connect(func(n: StringName, d: Dictionary):
+			if n == &"boss_hit" and str(d.get("named", "")) != "":
+				Game.use_combo(str(d.get("combo_id", ""))))
 	for i: int in 300 * 60:
 		bot.tick(1.0 / 60.0)
 		s.tick(1.0 / 60.0)
 		if s.over:
 			break
+	tick_clock("fights", 1)
+	tick_clock("fight_s", s.time)
+	if OS.get_cmdline_user_args().has("--fights"):
+		print("    %-4s %-22s %5.0fs  %s  health left %3.0f%%  hits taken %d" % [clock_key, foe, s.time, "won " if s.b_state == DuelSim.B.DEAD else "LOST", 100.0 * float(s.pl.hp) / float(s.pl.max_hp), int(s.stats.hits_taken)])
+	if track:
+		Generations.note_duel(Game.profile, s.b_state == DuelSim.B.DEAD, s)
 	if s.b_state != DuelSim.B.DEAD:
 		return false
 	row.wins += 1
+	tick_clock("wins", 1)
 	var r := Game.on_victory(foe, s.pl.hp)
 	for id: String in r.items:
 		var t := Db.tier(Db.item(id))
@@ -498,3 +523,149 @@ func balance_band() -> void:
 	trial.call("Sovereign x6 (medium)", build(all.call("regal"), "w_frost_great", null, 18), "forgotten_monarch")
 	trial.call("Architect x6 (light)", build(all.call("hollow"), "w_frost_great", null, 18), "forgotten_monarch")
 	trial.call("3 Sovereign + 3 Architect", build(mix.call("regal", "hollow"), "w_frost_great", null, 18), "forgotten_monarch")
+
+# ------------------------------------------------------------------ the three generations:  tools/econ_sim.sh --generations [--style=skilled]
+## Plays the whole of the campaign as the generations tell it, through the same rules: the first generation's slice
+## (with the forebear's sheet), the fall, the second generation's roads (today's campaign), the second fall, and the
+## last heir's faster pass with everything inherited. Prints fights and estimated minutes for each, what the last
+## pass pays, and how far the shop's top shelf is from what it pays.
+const WALK_S := 20.0             # a stop: the walk to it and the choice
+const FRAME_S := 35.0            # around a fight: the approach, the first words, the end, the reward screen
+const HUMAN_X := 3.0            # how much longer a person fights than the bot does (assumed)
+const REST_S := 75.0             # a visit to the sanctuary
+const G2_MAIN := ["courtyard", "blackwood", "cathedral", "crypt", "citadel", "throne"]
+const G3_MAIN := ["courtyard", "blackwood", "cathedral", "throne"]
+const G3_SIDE := ["citadel", "crypt", "roost", "deep"]
+
+func tick_clock(what: String, n: float) -> void:
+	if clock_key == "":
+		return
+	if not clock.has(clock_key):
+		clock[clock_key] = {"fights": 0.0, "wins": 0.0, "deaths": 0.0, "fight_s": 0.0, "stops": 0.0, "rests": 0.0}
+	clock[clock_key][what] += n
+
+## Minutes of play for a tally. The bots end a fight far sooner than a person does, so the fighting is counted
+## HUMAN_X times over: an assumption, stated in the report, not a measurement.
+func clock_minutes(key: String) -> float:
+	var c: Dictionary = clock.get(key, {})
+	if c.is_empty():
+		return 0.0
+	return (float(c.fight_s) * HUMAN_X + FRAME_S * float(c.fights) + WALK_S * float(c.stops) + REST_S * float(c.rests)) / 60.0
+
+## One fight outside a road (the first generation's two): returns the sim when it is over or `limit` seconds have gone.
+func staged(foe: String, st: Dictionary, limit: float, cuts_to_end: int = 0, not_before: float = 0.0) -> DuelSim:
+	var s := DuelSim.new()
+	var sd: int = hash("%d|%s" % [seed_base, foe])
+	s.setup(st, Db.foes[foe], sd, {"combos": [Db.combos[0]]})
+	var bot := DuelBot.new(s, style, sd)
+	var landed := [0]
+	s.ev.connect(func(n: StringName, d: Dictionary):
+		if n == &"boss_hit" and not d.get("chip", false):
+			landed[0] += 1)
+	while s.time < limit and not s.over:
+		bot.tick(1.0 / 60.0)
+		s.tick(1.0 / 60.0)
+		if cuts_to_end > 0 and s.time >= not_before and landed[0] >= cuts_to_end:
+			break
+	tick_clock("fights", 1)
+	tick_clock("fight_s", s.time)
+	return s
+
+func generations_report() -> void:
+	track = true
+	quiet = true
+	for f: String in ["save.json", "save.bak", "save.tmp"]:
+		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
+	Game.new_game("#3d0f0f", "m", start_weapon, 1)
+	Game.profile.rewards.seed = seed_base
+	Game.rng.seed = seed_base
+	print("THE THREE GENERATIONS  (%s bot, seed %d, starting blade %s)" % ["skilled" if style == DuelBot.Style.SKILLED else "sloppy", seed_base, Db.item(start_weapon).name])
+	# ---- I
+	clock_key = "I"
+	var notes: Array = []
+	for e: Dictionary in Encounters.route(1, "throne", Game.profile):
+		tick_clock("stops", 1)
+		var v: Dictionary = Encounters.variants[e.foe]
+		if v.has("clash"):
+			var s := staged(str(e.foe), Game.fighter_stats(1), float(v.clash.release), int(v.clash.cuts), float(v.clash.min_time))
+			notes.append("%s: story ends it at %.0fs, forebear at %.0f%% health%s" % [v.name, s.time, 100.0 * float(s.pl.hp) / float(s.pl.max_hp), "  ! THE FOREBEAR DIED" if s.p_state == DuelSim.P.DEAD else ""])
+			Game.fall(1, "sealed_hall", {"clash": "ahead" if s.time < float(v.clash.release) else "even"})
+		else:
+			var tries := 0
+			var s := staged(str(e.foe), Game.fighter_stats(1), 300.0)
+			while s.b_state != DuelSim.B.DEAD and tries < 5:
+				tries += 1
+				tick_clock("deaths", 1)
+				seed_base += 1000
+				s = staged(str(e.foe), Game.fighter_stats(1), 300.0)
+			seed_base -= 1000 * tries
+			notes.append("%s: won in %.0fs after %d defeat(s)" % [v.name, s.time, tries])
+	Game.inherit()
+	gen_line(1, ["I"], notes)
+	# ---- II
+	var side: Array = []
+	for r: String in ORDER:
+		clock_key = "II" if G2_MAIN.has(r) else "II+"
+		play_region(r)
+		if not G2_MAIN.has(r):
+			side.append(r)
+	gen_line(2, ["II", "II+"], ["optional roads: %s" % ", ".join(side), "the Monarch was beaten in the fight: %s" % str(Game.monarch_won(2)),
+		"at the fall: level %d, %d gold held, wearing %s" % [Game.profile.level, Game.profile.gold, worn()]])
+	Game.fall(2, "saved_the_records", {"choice": "records"})
+	Game.inherit()
+	# ---- III
+	var gold0: int = Game.profile.gold
+	var pay: Array = []
+	for r: String in G3_MAIN + G3_SIDE:
+		clock_key = "III" if G3_MAIN.has(r) else "III+"
+		if not Game.region_unlocked(r):
+			pay.append("%s: not open" % r)
+			continue
+		play_region(r)
+		pay.append("%-10s %2d fights %2d died  %6d gold  (%4.0f a win)  level %d" % [r, row.fights, row.deaths, row.gold, per_win.get(r, 0.0), Game.profile.level])
+	gen_line(3, ["III", "III+"], ["the echo: %s" % ("built from the second's snapshot" if not Game.echo_foe().default else "the default"),
+		"at the end: level %d, %d gold held, wearing %s" % [Game.profile.level, Game.profile.gold, worn()]])
+	print("\nGENERATION III, ROAD BY ROAD  (foes brought up to the end of the road: data/generations.json \"tuning\")")
+	for l: String in pay:
+		print("  " + l)
+	var total := 0.0
+	var total_all := 0.0
+	for k: String in ["I", "II", "III"]:
+		total += clock_minutes(k) + float(Generations.def(["I", "II", "III"].find(k) + 1).scenes_min)
+	total_all = total + clock_minutes("II+") + clock_minutes("III+")
+	print("\n(a person is taken to fight %.0f times as long as the bot; a stop %.0fs, the frame of a fight %.0fs, a rest %.0fs)" % [HUMAN_X, WALK_S, FRAME_S, REST_S])
+	print("WHOLE CAMPAIGN  main roads %.0f min (%.1f h); with every optional road %.0f min (%.1f h)" % [total, total / 60.0, total_all, total_all / 60.0])
+	# ---- the top shelf
+	var g3: Dictionary = clock.get("III", {})
+	var earned: float = float(Game.profile.gold - gold0)
+	print("\nTOP SHELF  (what is still for sale when the last road is walked; a win on the last heir's main roads pays about %.0f gold)" % (float(per_win.get("throne", 0.0))))
+	var rows: Array = []
+	for e: Dictionary in Game.shop_catalog():
+		if e.available:
+			rows.append(e)
+	for id: String in Game.profile.inventory:
+		if int(Db.item(id).get("ng_min", 0)) > 0:
+			print("  owned        %-26s %-10s (only offered to those who return)" % [Db.item(id).name, Db.tier(Db.item(id))])
+	for e: Dictionary in rows:
+		print("  %-12s %-26s %-10s %6d gold  %s" % ["affordable" if e.affordable else "for sale", e.item.name, Db.tier(e.item), e.price,
+			"" if e.affordable else "%.1f more wins" % (float(e.price - Game.profile.gold) / maxf(1.0, float(per_win.get("throne", 1.0))))])
+	if rows.is_empty():
+		print("  nothing is left on the shelf")
+	print("  held: %d gold, %d shards; net gold over the last generation %+.0f" % [Game.profile.gold, Game.profile.shards, earned])
+	print("\nFLAGS")
+	if flags.is_empty():
+		print("  none")
+	for f: String in flags:
+		print("  " + f)
+
+func gen_line(i: int, keys: Array, notes: Array) -> void:
+	var d: Dictionary = Generations.def(i)
+	var main: Dictionary = clock.get(keys[0], {"fights": 0.0, "wins": 0.0, "deaths": 0.0, "fight_s": 0.0})
+	var scenes: float = float(d.scenes_min)
+	print("\nGENERATION %s  %s  (year +%d)" % [keys[0], d.chapter, int(d.year)])
+	print("  main road   %3d fights, %2d defeats, %5.1f min of fighting by the bot; about %3.0f min for a person with walking, rests and %.0f min of scenes" % [int(main.fights), int(main.deaths), float(main.fight_s) / 60.0, clock_minutes(keys[0]) + scenes, scenes])
+	if keys.size() > 1 and clock.has(keys[1]):
+		var opt: Dictionary = clock[keys[1]]
+		print("  optional    %3d fights, %2d defeats, %5.1f min of fighting; about %3.0f min more" % [int(opt.fights), int(opt.deaths), float(opt.fight_s) / 60.0, clock_minutes(keys[1])])
+	for n: String in notes:
+		print("  " + n)

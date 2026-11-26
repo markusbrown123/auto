@@ -58,9 +58,11 @@ static func _centre(c: Control) -> Control:
 ## counting into the purse. It all runs in under two seconds and a tap anywhere finishes it at once; Continue is
 ## there from the first frame. Nothing spins or bursts.
 static func victory(parent: Node, foe: Dictionary, r: Dictionary, sim: DuelSim, done: Callable) -> void:
-	var v := _shell(parent, 0.74)
+	var v := _shell(parent, 0.86)
 	var layer: CanvasLayer = v.get_meta("layer")
 	var still: bool = bool(Game.settings.get("reduce_motion", false))
+	if parent.get("hud") is CanvasLayer:
+		(parent.get("hud") as CanvasLayer).visible = false       # the fight's bars are done with; the banner stands where they were
 	var tweens: Array = []
 	var run := func(delay: float) -> Tween:
 		var tw := layer.create_tween()
@@ -296,8 +298,9 @@ static func _item_card(layer: CanvasLayer, it: Dictionary, grand: bool) -> Contr
 	if grand:
 		tv.add_child(UI.label("TAKEN FROM THE FALLEN", 18, UI.DIM, "head"))
 	var nm := UI.title(("" if grand else "New:  ") + str(it.name), 26 if grand else 22, col)
-	nm.clip_text = not grand
-	nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if not grand:
+		nm.clip_text = true
+		nm.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	if grand:
 		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		nm.custom_minimum_size.x = 150

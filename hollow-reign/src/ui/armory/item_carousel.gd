@@ -354,7 +354,7 @@ func _draw() -> void:
 			draw_circle(Vector2.ZERO, rx * f, Color(col.lerp(Color.WHITE, 0.15), (0.035 + 0.05 * near) * a))
 		draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		if not has_piece(i):
-			_medallion(c, size.y * 0.3 * s, e, a)
+			_medallion(c, size.y * 0.3 * minf(s, 1.0), e, a)
 
 func _medallion(c: Vector2, r: float, e: Dictionary, a: float) -> void:
 	var col: Color = e.color
@@ -382,11 +382,10 @@ func _draw_over() -> void:
 		var c := Vector2(size.x * 0.5 + o * spacing(), size.y * 0.5)
 		var near := clampf(1.0 - absf(o), 0.0, 1.0)
 		if e.get("locked", false):
-			c.y += drop * size.y / WORLD_H
-		if e.get("locked", false):
 			var h := 30.0 * s
-			_over.draw_circle(c + Vector2(0, -size.y * 0.02), h * 0.95, Color(0.03, 0.03, 0.04, 0.72 * a))
-			InvGlyph.paint(_over, "lock", c + Vector2(-h * 0.5, -size.y * 0.02 - h * 0.55), h, Color(0.82, 0.78, 0.7, a))
+			var lc := c + Vector2(0, drop * size.y / WORLD_H)
+			_over.draw_circle(lc + Vector2(0, -size.y * 0.02), h * 0.95, Color(0.03, 0.03, 0.04, 0.72 * a))
+			InvGlyph.paint(_over, "lock", lc + Vector2(-h * 0.5, -size.y * 0.02 - h * 0.55), h, Color(0.82, 0.78, 0.7, a))
 		if near < 0.75:
 			# a neighbour carries its own name; the middle one's is written large below the row
 			var w := minf(spacing() * 0.95, 2.0 * (size.x * 0.5 - absf(c.x - size.x * 0.5)) - 12.0)

@@ -76,6 +76,8 @@ static func cond(when: Dictionary, p: Dictionary = Game.profile) -> bool:
 		return false
 	if int(p.get("ng", 0)) < int(when.get("ng_min", 0)):
 		return false
+	if when.has("generation") and not when.generation.has(float(Generations.gen(p))) and not when.generation.has(Generations.gen(p)):
+		return false                 # a secret only one generation can find (none is authored so yet)
 	if when.has("secret") and not found(str(when.secret), p):
 		return false
 	if when.has("quest") and not p.get("quests_done", []).has(when.quest):
@@ -244,6 +246,7 @@ static func duel_ended(o: Dictionary, won: bool, sim: DuelSim) -> Array:
 		add_feat("parry_first:" + foe, 1, p)
 	_seen = {}
 	add_feat("perfect_parries", int(sim.stats.get("perfect_parries", 0)), p)
+	Generations.note_duel(p, won, sim)          # the present generation's own tally of fights
 	if not won:
 		return out
 	add_feat("win:" + foe, 1, p)
@@ -364,7 +367,7 @@ static func things(p: Dictionary = Game.profile) -> Array:
 		for i: int in r.stages.size():
 			out.append({"cat": "stops", "id": "%s:%d" % [r.id, i], "region": str(r.id), "done": walked.has(i) or walked.has(float(i)), "hint": str(c.hints.stops)})
 	for id: String in Db.foes:
-		if Db.foes[id].boss:
+		if Db.foes[id].boss and not Db.foes[id].get("variant", false):      # another generation's cast is not counted twice
 			out.append({"cat": "guardians", "id": id, "region": str(Db.foes[id].region), "done": p.get("defeated", {}).has(id), "hint": str(c.hints.guardians)})
 	for s: Dictionary in list():
 		out.append({"cat": "secrets", "id": str(s.id), "region": str(s.region), "done": found(str(s.id), p), "hint": str(s.hint)})

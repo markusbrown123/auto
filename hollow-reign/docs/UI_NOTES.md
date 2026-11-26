@@ -98,7 +98,8 @@ gear with its forge state: `gear_id`, `gear_mod`, `gear_sword`, `sig`, `studio_e
 `Db.equipment.basic_swords` in an `ItemCarousel` (real models, unworked: blade 0, grip 0, iron), role, `role_text`, and
 four bars (Damage, Speed, Economy, Stagger) from `Stats.compute` on a new knight holding that sword, each against the
 best of the four, fuller always better. Rise sets `CharacterSelect.start_weapon`; `main.gd` passes it to
-`Game.new_game` (one changed line). The knights standing in the scene still hold the old sword model.
+`Game.new_game` (one changed line). The two knights standing in the scene are not re-dressed as the row moves:
+they show the default kit until the journey starts.
 Dev: `--screen=charselect --step=blade [--sword=<id>] [--cs_demo=<t>:<id>,...]`.
 
 **Sanctuary bar**: Journey, Armory, Shop, Forge, Character, Journal, Settings. The forge's tab is still named

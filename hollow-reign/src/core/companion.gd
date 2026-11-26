@@ -10,6 +10,13 @@ extends Node
 ## - Game.settings "chatter" = false silences everything that is not essential;
 ## - nothing is said while a duel is being fought;
 ## - the Witness says nothing until its discovery scene has played.
+##
+## Generations (docs/GENERATIONS_DATA.md). The lines are the story's; this is only how one is chosen:
+## - a scene "<id>_g<N>" is played in place of "<id>" by generation N, wherever a scene is picked here;
+## - "companion": {"gen": {"<N>": {"stage": {region: {stop: [ids]}}, "boss": {foe: {...}}, "topics": [...]}}} replaces,
+##   for generation N, the entry of the same region or foe (or the whole topic list) in the tables above it;
+## - a foe of another generation's cast (Encounters) speaks as the foe it is cast from, unless "speech", "foe_voice"
+##   or the boss table name it by its own id; "<voice key>_g<N>_intro" and the rest are used when they exist.
 
 const FOUND_FLAG := "witness_found"
 const MAX_REMARKS_PER_STOP := 2
@@ -22,18 +29,39 @@ var _duel: WeakRef = null
 func _c() -> Dictionary:
 	return Story.data.get("companion", {})
 
+func generation() -> int:
+	return Encounters.generation(Game.profile)
+
+## The scene a generation hears for an id: its own variant where the script provides one.
+func scene_for(id: String) -> String:
+	var mine := "%s_g%d" % [id, generation()]
+	return mine if Story.has_scene(mine) else id
+
+## One entry of a companion table ("stage" by region, "boss" by foe), generation's own first.
+func _entry(table: String, key: String) -> Dictionary:
+	var own: Dictionary = _c().get("gen", {}).get(str(generation()), {}).get(table, {})
+	return own[key] if own.has(key) else _c().get(table, {}).get(key, {})
+
+func _boss(foe_id: String) -> Dictionary:
+	var b := _entry("boss", foe_id)
+	return b if not b.is_empty() else _entry("boss", Encounters.base_of(foe_id))
+
 func _scene(id: String) -> Dictionary:
 	return Story.data.get("scenes", {}).get(id, {})
 
 ## "A" creature (no human speech), "B" a few short lines, "C" directed dialogue, "D" fragments only.
 func speech(foe_id: String) -> String:
-	return str(Story.data.get("speech", {}).get(foe_id, "A"))
+	var t: Dictionary = Story.data.get("speech", {})
+	return str(t.get(foe_id, t.get(Encounters.base_of(foe_id), "A")))
 
 ## Prefix of a foe's own scenes (<key>_intro, _retry, _death, _memory); "" for anything that does not speak.
 func voice_key(foe_id: String) -> String:
 	if speech(foe_id) == "A":
 		return ""
-	return str(Story.data.get("foe_voice", {}).get(foe_id, ""))
+	var t: Dictionary = Story.data.get("foe_voice", {})
+	var key := str(t.get(foe_id, t.get(Encounters.base_of(foe_id), "")))
+	var mine := "%s_g%d" % [key, generation()]
+	return mine if key != "" and Story.has_scene(mine + "_intro") else key
 
 func discovery_id() -> String:
 	return str(_c().get("discovery", {}).get("scene", ""))
@@ -119,31 +147,35 @@ func pick_stage(region_id: String, stage: int) -> Array:
 		return [d]
 	var out: Array = []
 	var ids: Array = ["%s_%d" % [region_id, stage]]          # Lyra's remark on the place, where one exists
-	ids.append_array(_c().get("stage", {}).get(region_id, {}).get(str(stage), []))
-	for id: String in ids:
+	ids.append_array(_entry("stage", region_id).get(str(stage), []))
+	for raw: String in ids:
+		var id := scene_for(raw)
 		if out.size() < MAX_REMARKS_PER_STOP and _wanted(id, false):
 			out.append(id)
 	return out
 
 ## What is said before a guardian: context from the Witness, or Lyra's older line where the Witness cannot give it.
 func pick_boss_approach(foe_id: String) -> Array:
-	var b: Dictionary = _c().get("boss", {}).get(foe_id, {})
+	var b: Dictionary = _boss(foe_id)
 	var out: Array = []
-	for id: String in b.get("approach", []):
+	for raw: String in b.get("approach", []):
+		var id := scene_for(raw)
 		if _wanted(id, true):
 			out.append(id)
 	if out.is_empty():
-		for id: String in b.get("fallback", []):
+		for raw: String in b.get("fallback", []):
+			var id := scene_for(raw)
 			var covered := false
 			for a: String in b.get("approach", []):
-				covered = covered or heard(a)
+				covered = covered or heard(scene_for(a))
 			if not covered and _wanted(id, true):
 				out.append(id)
 	return out
 
 func pick_victory(foe_id: String) -> Array:
 	var out: Array = []
-	for id: String in _c().get("boss", {}).get(foe_id, {}).get("victory", []):
+	for raw: String in _boss(foe_id).get("victory", []):
+		var id := scene_for(raw)
 		if _wanted(id, true):
 			out.append(id)
 	return out
@@ -177,8 +209,8 @@ func sanctuary_topics() -> Array:
 	var old: Array = []
 	if Game.profile.is_empty() or not witness_found():
 		return fresh
-	for t: Dictionary in _c().get("topics", []):
-		var id := str(t.id)
+	for t: Dictionary in _c().get("gen", {}).get(str(generation()), {}).get("topics", _c().get("topics", [])):
+		var id := scene_for(str(t.id))
 		if not Story.has_scene(id) or (t.has("after") and not Game.profile.cleared.has(t.after)):
 			continue
 		var e := {"id": id, "title": title(id), "heard": heard(id), "speakers": speakers(id)}

@@ -610,5 +610,61 @@ DRAGON_SKIN = {"cinder_wyrm": "dragon_veyrath", "cinder_whelp": "dragon_veyrath"
 for f in B:
     if f["id"] in DRAGON_SKIN and os.path.exists("assets/models/%s.glb" % DRAGON_SKIN[f["id"]]):
         f["rig"]["skin"] = "res://assets/models/%s.glb" % DRAGON_SKIN[f["id"]]
-json.dump({"bosses": B}, open("data/bosses.json","w"), indent=1)
-print(len(B), "foes")
+# ---------------------------------------------------------------- generational variants (docs/GENERATIONS_DATA.md)
+# Additive: the 52 foes above are untouched and are Generation II's cast. A variant is an existing foe re-cast for
+# another generation: `base` supplies rig, model, patterns and footwork; the numbers here are multipliers on it.
+# Encounters.foe() builds one in memory when the director asks for it (as Secrets.challenger does); none of them is
+# on a road's list in regions.json, and none counts toward completion.
+#   hp/dmg/speed/xp/gold  multipliers on the base        phases   base phase indexes kept, or a full list of phases
+#   immortal + reason     why this one may stand again   carry    the item whose model it holds
+#   monarch               which of the three meetings    clash    Generation I's story-ended fight (seconds, cuts)
+def _monarch_phase(i): return [f for f in B if f["id"] == "forgotten_monarch"][0]["phases"][i]["combos"]
+V = [
+ dict(id="royal_gatekeeper", base="throne_guard", gen=1, name="Royal Gatekeeper", title="Of the King's Own Door", boss=False,
+      hp=0.42, dmg=0.5, speed=0.9, xp=0.0, gold=0.0, mortal=True, region="throne",
+      intro="He was posted at the door the day the hall was finished. He has shown many wardens to the gate."),
+ dict(id="royal_patrol", base="pike_sergeant", gen=1, name="Royal Patrol", title="", boss=False, hp=1.0, dmg=1.0, speed=1.0, xp=0.0, gold=0.0,
+      mortal=True, region="blackwood", staged=False),
+ # Generation I: a brief clash. Phase one only, blows that wound but do not kill; the story ends it, not a health bar.
+ dict(id="monarch_i", base="forgotten_monarch", gen=1, monarch=1, name="The Forgotten Monarch", title="Sovereign of Vaelora", boss=True,
+      hp=1.0, dmg=0.4, speed=0.92, xp=0.0, gold=0.0, phases=[0], immortal=True, reason="He does not age.", carry="w_monarch", region="throne",
+      clash=dict(min_time=9.0, cuts=4, release=32.0), traits={}),
+ # Generation III: the last meeting, in three named phases. Phase three is the restoration machinery: he falls and is
+ # stood up again (`revive`), and feeds on what he takes (`lifesteal`). Both are weakened at run time by the inheritance
+ # records the family gathered (Generations.monarch_final): the figures here are the worst case, with none.
+ dict(id="monarch_iii", base="forgotten_monarch", gen=3, monarch=3, name="The Forgotten Monarch", title="The Last Defense of the Crown", boss=True,
+      hp=1.7, dmg=1.22, speed=1.0, xp=1.6, gold=2.2, immortal=True, reason="The network restores him while it runs.", carry="w_monarch", region="throne",
+      intro="The floor of the hall stands open. What kept him is no longer hidden under it.",
+      traits={"marks": 4, "mark_mult": 1.5, "parry_open": 1.15, "lifesteal": 0.3},
+      records=dict(revive=[0.6, 0.2], lifesteal=[0.3, 0.0], parry_open=[1.15, 1.45]),
+      phases=[
+       dict(at=1.0, speed=1.04, name="The Sovereign", combos=_monarch_phase(0)),
+       dict(at=0.6, speed=1.14, name="The Ancient Crown", roar="Plates along his arms turn and lock. The crown was never the only machine he wore.",
+            combos=_monarch_phase(1) + [
+             C("lattice",3,[A("UL",0.85,30),A("DR",0.6,30),A("UR",0.6,30),A("DL",0.6,34)],1.8,tags=("anti_dodge",)),
+             C("arc",2,[A("L",1.25,44,unblockable=True,dodge="none",kind="sweep",element="fire")],1.6,tags=("anti_block",)),
+            ]),
+       dict(at=0.0, revive=0.6, speed=1.2, name="The Last Defense", roar="He falls. Under the floor the engines turn over, and stand him up again.",
+            combos=_monarch_phase(2) + [
+             C("draw",3,[A("U",1.6,38,drain=True,swing=0.22,kind="thrust",guard=120)],1.5,tags=("anti_parry","anti_block")),
+            ]),
+      ]),
+ # Generation III guardians: what stands in a post whose first keeper is gone.
+ dict(id="awakened_beast", base="maulbeast", gen=3, name="The Awakened Beast", title="What the Blackwood Kept Asleep", boss=True,
+      hp=20.0, dmg=3.2, speed=1.1, xp=13.0, gold=15.0, mortal=True, region="blackwood", traits={"frenzy": 0.25},
+      replaces="hollow_executioner", reason="The Executioner's block stood empty for twenty-four years. Something older took the clearing.",
+      rig=dict(scale=1.45), intro="The stumps have been pulled up like teeth. Whatever did it is still hungry."),
+ dict(id="laboratory_guardian", base="gate_colossus", gen=3, name="The Laboratory Guardian", title="Bolted Into Its Post", boss=True,
+      hp=12.0, dmg=3.3, speed=1.0, xp=13.0, gold=14.0, mortal=True, region="cathedral", traits={"block_tax": 1.5, "parry_open": 1.2},
+      replaces="cathedral_beast", reason="The Beast's fall uncovered the lower door. This was behind it.",
+      rig=dict(metal="#7f8a8c", cloth="#1c2a2e", eye="#9fe8ff"), intro="A door under the crossing, and the thing that was built to stand in it."),
+ dict(id="white_brood", base="frost_drake", gen=3, name="The White Brood", title="Skeldra's Get", boss=True,
+      hp=6.6, dmg=1.6, speed=1.05, xp=6.0, gold=7.0, mortal=True, region="citadel", traits={"frenzy": 0.15},
+      replaces="rimewyrm", reason="Skeldra died in the pit. What she left there grew."),
+]
+for v in V:
+    assert v["base"] in [f["id"] for f in B], v["id"]
+    assert v["id"] not in [f["id"] for f in B], v["id"]
+    assert v.get("immortal") or v.get("mortal"), v["id"]
+json.dump({"bosses": B, "variants": V}, open("data/bosses.json","w"), indent=1)
+print(len(B), "foes,", len(V), "generational variants")

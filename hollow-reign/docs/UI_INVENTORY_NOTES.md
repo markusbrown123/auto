@@ -3,7 +3,8 @@
 ## Follow-up pass (2026-11-26, later): what changed on the Armory
 - The rail is `Db.EQUIP_SLOTS` without the off hand (it has no items): helm, chest, pauldrons, gauntlets, greaves, boots, weapon, shield, ring, relic.
 - The case is taller (about 300 px at 720p instead of 225) with its heading, Sort and Grid laid over its top edge, and the middle piece is drawn at 1.25× (`ItemCarousel.zoom`; 1.1× for whole suits). The EQUIPPED tag moved under the piece.
-- Weapons and shields with a hand-modelled piece (`gear_id` + `gear_ready`) are shown as THAT model, in their forge state (blade and grip parts, ore tint, polished edge). **The knight still holds the older model** (the rig is a later pass); the note line says so for those items.
+- Weapons and shields with a hand-modelled piece (`gear_id` + `gear_ready`) are shown as THAT model, in their forge state (blade and grip parts, ore tint, polished edge), built by `GearModel.spawn` with `GearModel.mod_from_visual`, the same call the rig makes. During this pass the rig work landed too (`Duel.player_look` now hands the gear model and the armour parts to `fighter_rig.gd`), so the knight holds the same piece; the per-item notes about that (`part_note`) belong to that work.
+- The case's pieces sit a little low (`ItemCarousel.drop`) so they clear the heading.
 - Every slot's view keeps the whole knight in frame, feet included; a slot only turns the knight and steps a little closer than Full Body.
 - Rows: weight class after the rank; a second line for an unmet requirement, a keen edge and forge state, or set progress ("Ashbound set 3 of 6 with this · 2 ✓ 4 – 6 – · at 4: …"); undiscovered pieces are silhouettes named "Unknown <kind>" with `Game.item_hint`; shop pieces show the price or `unlock_text`. Inspect lists requirement, forge work, weight text and all three set tiers.
 - Body text is 22 px. Upgrade stays enabled for a weapon at blade V (its other tracks live in the forge).

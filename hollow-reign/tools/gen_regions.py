@@ -212,3 +212,201 @@ for r in R:
 assert used == set(POOLS), set(POOLS) - used
 json.dump({"regions": R}, open("data/regions.json", "w"), indent=1)
 print(len(R), "regions")
+
+# ================================================================ the three generations (docs/GENERATIONS_DATA.md)
+# Written to data/generations.json and read by src/core/generations.gd and src/core/encounters.gd. The roads above are
+# Generation II's and are not touched: the other generations are told as differences from them, stop by stop, so a
+# stop keeps its number (and with it its records, its secrets, its chest and its place in the completion count).
+def keep(label): return dict(keep=label)
+def quiet(label, hint, **k): return dict(type="pass", label=label, hint=hint, **k)
+def when(o, fact): o = dict(o); o["when"] = fact; return o
+def unless(o, fact): o = dict(o); o["unless"] = fact; return o
+GENERATIONS = [
+ dict(index=1, role="first", ordinal="the First", chapter="The First Oath", year=0, fate="fallen", relation=dict(m="Father", f="Mother"),
+      aim="Stop the exploitation", scenes_min=4.0),
+ dict(index=2, role="second", ordinal="the Second", chapter="The Broken Crown", year=22, fate="kept", relation=dict(m="Son", f="Daughter"),
+      aim="Avenge the first", scenes_min=9.0),
+ dict(index=3, role="heir", ordinal="the Last", chapter="The Last Heir", year=46, fate="alive", relation=dict(m="Grandson", f="Granddaughter"),
+      aim="Free the kingdom", scenes_min=8.0),
+]
+# What one of the house is to another, by how many generations apart (theirs minus the reader's).
+KIN = {"-2": dict(m="Grandfather", f="Grandmother"), "-1": dict(m="Father", f="Mother"), "0": dict(m="Yourself", f="Yourself"),
+       "1": dict(m="Son", f="Daughter"), "2": dict(m="Grandson", f="Granddaughter")}
+# The forebear's own sheet: Generation I is fought with it and never with the family's profile (src/cine/prologue.gd).
+FOREBEAR = dict(level=12, attrs=dict(health=14, strength=16, dex=9, endurance=12, defense=6, crit=2, resist=0), weapon="w_knight_sword",
+                equipped=dict(shield=None, helm=None, chest=None, gauntlets=None, legs=None))
+# Where each generation may go. Generation II is the chain of `requires` above. States: open, passed (walked through,
+# nobody bars the way), sealed, shut, distant (seen, not reached), unknown.
+ACCESS = {
+ "1": dict(courtyard=dict(state="passed", why="The gate is kept and manned. Nobody bars a warden with a petition."),
+           blackwood=dict(state="open", optional=True, why="The low road, and the patrol that walks it."),
+           cathedral=dict(state="sealed", why="The cathedral is whole, and its doors are the Crown's."),
+           crypt=dict(state="shut", why="The crypt is not yet flooded, and not yet open."),
+           roost=dict(state="distant", why="A far light on the mountain."),
+           citadel=dict(state="shut", why="The winter king still keeps his gates."),
+           deep=dict(state="unknown", why="Nobody alive knows there is anything under the throne."),
+           throne=dict(state="open", why="A warden may petition the throne.")),
+ "3": dict(courtyard=dict(state="open"),
+           blackwood=dict(state="open", requires=["courtyard"]), cathedral=dict(state="open", requires=["courtyard"]),
+           citadel=dict(state="open", requires=["courtyard"], optional_guardian=True),
+           crypt=dict(state="open", requires=["courtyard"], optional=True, why="The way down."),
+           roost=dict(state="open", requires=["courtyard"], optional=True, why="The dragon hunt."),
+           throne=dict(state="open", requires_any=dict(of=["blackwood", "cathedral", "citadel"], count=2)),
+           deep=dict(state="open", optional=True, needs_fact="monarch_felled:3", sealed_as="sealed",
+                     why="The door the Witness remembers. It opens from the other side of the throne.")),
+}
+# Stops told as differences. A stop not listed is as Generation II left it (levers already turned stay turned, chests
+# already opened stay open). In Generation I every stop not listed is walked past.
+STOPS = {
+ "1": {
+  "blackwood": {0: [fight("The Low Road", "The patrol knows a warden's colours. It has orders all the same.", "royal_patrol")]},
+  "throne": {0: [fight("The King's Door", "\"Show the warden to the gate.\"", "royal_gatekeeper")],
+             6: [boss("The Hollow Throne", "He comes down the steps himself.", "monarch_i")]},
+ },
+ "3": {
+  "courtyard": {
+   0: [fight("The Breach", "New plate, new recruits. The Crown replaces what it loses.", "pike_sergeant")],
+   1: [keep("The Guardhouse"), quiet("The Rampart Stair", "Nobody walks the stair now.")],
+   2: [quiet("The Barbican", "The banner is down. The one who stood under it was not replaced.")],
+   4: [fight("The Gate Passage", "Something larger has been posted where the Breaker stood.", "gate_colossus"), keep("The Murder Hole")],
+   6: [boss("The Inner Ward", "A guardian stands in the Sentinel's post. You know the way it stands.", "the_kept")],
+  },
+  "blackwood": {
+   0: [fight("The Lantern Road", "The lanterns are out. Something moves between them anyway.", "veil_dancer")],
+   1: [quiet("The Road", "Bootprints, old ones, going one way."),
+       unless(boss("The Deer Trail", "White antlers, greyer now, between the trunks.", "pale_huntsman", optional=True), "slain:pale_huntsman")],
+   2: [quiet("The Briar Gate", "The briars were cut through years ago, and never grew back."), keep("The Hollow Oak")],
+   4: [quiet("The Woodpile", "The stacks have rotted where they stood.")],
+   6: [boss("The Clearing", "The stumps have been torn out of the ground.", "awakened_beast")],
+  },
+  "cathedral": {
+   0: [fight("The Pilgrim Stair", "The robes are new. The hymn is not.", "censer_adept")],
+   1: [quiet("The Porch", "The great censer lies where it fell."), keep("The Almoner's Box")],
+   2: [quiet("The Cathedral Steps", "Nobody is waiting on the steps.")],
+   4: [fight("The Choir Loft", "The choir is silent. The bell is not.", "bell_ringer")],
+   6: [boss("The Lower Door", "Under the crossing, where the bronze lay, a door stands open.", "laboratory_guardian")],
+  },
+  "crypt": {
+   0: [fight("The Drowned Stair", "The water is lower. What it covered is not gone.", "tomb_mummer")],
+   1: [keep("The Ossuary"), quiet("The Processional", "The footfalls have stopped.")],
+   2: [quiet("The Weeping Tomb", "The lid is dry.")],
+   4: [keep("The Royal Vault"), fight("The Gallery of Kings", "Something crawls where the wardens walked.", "crypt_crawler")],
+   6: [unless(boss("The Way Down", "Behind the first tomb, a stair. Something at the foot of it says a name.", "devourer"), "slain:devourer"),
+       when(quiet("The Way Down", "The stair goes down to an emptied place."), "slain:devourer")],
+  },
+  "roost": {
+   0: [fight("The Glass Road", "The scale is new. The oath is the old one.", "scalebound")],
+   1: [quiet("The Mews", "The perches are empty."), keep("The Tack Room")],
+   2: [fight("The Boneyard", "The keeper of the clutch has come down to the bones.", "brood_keeper")],
+   4: [keep("The Clutch"), quiet("The Brood Guard", "Nobody guards the shells.")],
+   6: [unless(boss("The Summit", "A shadow crosses the sun, and comes back.", "cinder_wyrm"), "slain:cinder_wyrm"),
+       when(unless(boss("The Summit", "The old one has come down from the hall to the empty nest.", "azhurion"), "slain:azhurion"), "slain:cinder_wyrm"),
+       when(when(quiet("The Summit", "The sky is only sky."), "slain:cinder_wyrm"), "slain:azhurion")],
+  },
+  "citadel": {
+   0: [fight("The Frozen Rank", "The ranks have thawed. One of them kept his post.", "rime_glaive")],
+   1: [quiet("The Wall Walk", "The duellist's footprints are worn into the ice. He is not in them."), keep("The Armoury")],
+   2: [quiet("The Kennel Stair", "The chain hangs slack.")],
+   4: [fight("The Great Stair", "It has made its den on the landing.", "hoarbeast")],
+   6: [unless(boss("The Winter Throne", "The king is gone. What he kept chained has climbed to his seat.", "rimewyrm"), "slain:rimewyrm"),
+       when(boss("The Winter Throne", "The pit is empty. Her brood has taken the hall.", "white_brood"), "slain:rimewyrm")],
+  },
+  "throne": {
+   0: [fight("The King's Door", "The King's Shadow stands where the Gatekeeper stood.", "throne_colossus")],
+   1: [quiet("The Antechamber", "The king's own blade does not bow to you. He is not here."), keep("The Treasury")],
+   2: [quiet("The Steps", "A crown lies on the steps. Nobody is turning it.")],
+   4: [fight("The Last Post", "A herald, with nothing left to announce.", "herald"), keep("Behind the Throne")],
+   5: [keep("Steady Yourself"),
+       unless(boss("The Roof of the Hall", "Something vast is still folded among the rafters.", "azhurion", optional=True), "slain:azhurion")],
+   6: [boss("The Hollow Throne", "The floor of the hall stands open.", "monarch_iii")],
+  },
+  "deep": {
+   0: [fight("The Long Stair", "The ones along the wall have turned round.", "husk")],
+   1: [quiet("The Gallery of Names", "No more names have gone from the wall."), keep("The Unread Wall")],
+   2: [fight("The Grain", "It wears a name it took.", "name_thief")],
+   4: [fight("The Oath Hall", "It was put in the ground and did not stay.", "the_unburied"), keep("The Reliquary of Vows")],
+   6: [unless(boss("The Bottom", "It says a name. It might be yours.", "devourer"), "slain:devourer"),
+       when(quiet("The Eternal Crown", "The lowest room. The machine is here, and it is waiting to be told."), "slain:devourer")],
+  },
+ },
+}
+# The individuals of Generation II that a later generation must account for. A mortal one that fell is never met again;
+# `after` is who stands in its post and why. One that was not fought may still be there.
+MORTALS = {
+ "ashen_sentinel": dict(after="the_kept", why="His post was given to another."),
+ "hollow_executioner": dict(after="awakened_beast", why="The clearing was empty for twenty-four years."),
+ "crimson_widow": dict(after="", why="She is not waiting on the steps."),
+ "cathedral_beast": dict(after="laboratory_guardian", why="Its fall uncovered the lower door."),
+ "gravewarden": dict(after="devourer", why="Behind the first tomb there was always a way down."),
+ "frostbound_king": dict(after="rimewyrm", why="He gave up his crown. What he kept chained did not."),
+ "pale_huntsman": dict(after="", why="If he fell, the trail is empty."),
+ "cinder_wyrm": dict(after="azhurion", why="The old one comes down to the empty nest."),
+ "rimewyrm": dict(after="white_brood", why="What she left in the pit grew."),
+ "azhurion": dict(after="", why="The rafters are empty."),
+ "devourer": dict(after="", why="The bottom is an emptied place."),
+ "kingsblade": dict(after="herald", why="The king's own blade was not replaced."),
+ "crownless": dict(after="", why="Only the crown is left on the steps."),
+ "banneret": dict(after="", why="The banner is down."),
+}
+# Generation III's numbers: every foe it meets is brought up to the end of the road, so what the house inherited does
+# not walk through it, and pays at that level. Measured against the roster itself (ordinary foes, by home region).
+_foes = json.load(open("data/bosses.json"))["bosses"]
+def _mean(region, f):
+    v = [f(x) for x in _foes if x["region"] == region and not x["boss"]]
+    return sum(v) / len(v)
+def _dmg(x):
+    d = [a["dmg"] for ph in x["phases"] for c in ph["combos"] for a in c["attacks"]]
+    return sum(d) / len(d)
+G3 = dict(hp=2.4, dmg=1.3, xp=1.25, gold=2.2)          # against the Hollow Throne's own road; tuned with tools/econ_sim.sh --generations
+TUNING = {"3": dict(regions={}, boss_hp_target=13000, boss_hp_range=[1.4, 4.6], boss_dmg_share=0.7, shards=2.0)}
+for r in R:
+    rid = r["id"]
+    TUNING["3"]["regions"][rid] = dict(
+        hp=round(G3["hp"] * _mean("throne", lambda x: x["hp"]) / _mean(rid, lambda x: x["hp"]), 2),
+        dmg=round(G3["dmg"] * _mean("throne", _dmg) / _mean(rid, _dmg), 2),
+        xp=round(G3["xp"] * _mean("throne", lambda x: x["xp"]) / _mean(rid, lambda x: x["xp"]), 2),
+        gold=round(G3["gold"] * _mean("throne", lambda x: x["gold"]) / _mean(rid, lambda x: x["gold"]), 2))
+# The family's knowledge. Gathered in the generation named (0 = whichever finds it), kept for good. `auto` ones cannot be
+# missed; the rest are the optional discoveries. `ending` ones are what dividing the Crown needs; every one gathered
+# weakens the Monarch's last defence (bosses.json variants, monarch_iii `records`).
+RECORDS = [
+ dict(id="first_oath", gen=1, auto=True, name="The First Oath", text="What the first of the house sent out through the sword.", need=dict(fallen=1)),
+ dict(id="measure_of_him", gen=1, name="The Measure of Him", text="How he fights, set down by one who crossed blades with him and was winning.", need=dict(clash="won")),
+ dict(id="broken_crown", gen=2, auto=True, name="The Broken Crown", text="The count behind the seal, carried out whole.", need=dict(fallen=2)),
+ dict(id="the_crown_can_bleed", gen=2, name="The Crown Can Bleed", text="He was beaten once, in a fair fight, and the machines stood him up again.", need=dict(monarch_won=2)),
+ dict(id="surviving_version", gen=0, ending=True, name="The Surviving Version", text="Thirty records of what the Crown rewrote.", need=dict(lore=30)),
+ dict(id="siege_engine", gen=0, ending=True, name="The Siege That Outlived Its War", text="What was kept under the Roost, faced.", need=dict(cleared=["roost"])),
+ dict(id="partition_key", gen=0, ending=True, name="The Partition Key", text="What the Devourer was made of, and how it was unmade.", need=dict(defeated=["devourer"])),
+ dict(id="one_who_was_kept", gen=3, ending=True, name="One Who Was Kept", text="A stored mind that was asked, and chose.", need=dict(defeated=["the_kept"])),
+]
+# The three meetings with the Monarch.
+MONARCH = {
+ "1": dict(foe="monarch_i", kind="clash", region="throne", stop=6, outcome="story",
+           note="The story takes the fight on a cut the player lands, not on a health bar. Nothing here is won or lost."),
+ "2": dict(foe="forgotten_monarch", kind="duel", region="throne", stop=6, threshold=dict(phase=2, at=0.33), choices=["press", "records"],
+           note="At the threshold the seal burns: press the attack, or save the records. A player who wins is recorded as having won."),
+ "3": dict(foe="monarch_iii", kind="final", region="throne", stop=6, phases=["The Sovereign", "The Ancient Crown", "The Last Defense"]),
+}
+ENDINGS = [
+ dict(id="silence", name="The Final Silence", need=dict()),
+ dict(id="steward", name="The Last Steward", need=dict()),
+ dict(id="cities", name="The Free Cities", need=dict(records="ending")),
+]
+ECHO = dict(id="the_kept", name="The Crownless Champion", title="The Kept", region="courtyard", stop=6, music_as="frostbound_king",
+            intro="It is wearing what you wore. It stands the way you stood.", combos=5)
+# checks: every stop named exists, every kept label is on that stop, every foe is in the roster or is a variant
+_ids = set(x["id"] for x in _foes) | set(v["id"] for v in json.load(open("data/bosses.json")).get("variants", [])) | {ECHO["id"]}
+_by = {r["id"]: r for r in R}
+for g in STOPS:
+    for rid in STOPS[g]:
+        for i, opts in STOPS[g][rid].items():
+            labels = [o["label"] for o in _by[rid]["stages"][i]["options"]]
+            for o in opts:
+                assert "keep" not in o or o["keep"] in labels, (g, rid, i, o)
+                assert "foe" not in o or o["foe"] in _ids, (g, rid, i, o)
+        STOPS[g][rid] = {str(i): v for i, v in STOPS[g][rid].items()}
+for m in MORTALS:
+    assert m in _ids and (MORTALS[m]["after"] == "" or MORTALS[m]["after"] in _ids), m
+json.dump(dict(house="Marrek", generations=GENERATIONS, kin=KIN, forebear=FOREBEAR, access=ACCESS, stops=STOPS, mortals=MORTALS, tuning=TUNING,
+               records=RECORDS, monarch=MONARCH, endings=ENDINGS, echo=ECHO), open("data/generations.json", "w"), indent=1)
+print("generations:", len(GENERATIONS), "| records:", len(RECORDS))

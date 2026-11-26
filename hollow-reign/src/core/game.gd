@@ -7,7 +7,7 @@ const SAVE_PATH := "user://save.json"
 const SAVE_TMP := "user://save.tmp"
 const SAVE_BAK := "user://save.bak"
 const SETTINGS_PATH := "user://settings.json"
-const SAVE_VERSION := 2           # 0: no version field · 1: flat lists · 2: per-item records, materials, cosmetics, reward state
+const SAVE_VERSION := 3           # 0: no version field · 1: flat lists · 2: per-item records, materials, cosmetics, reward state · 3: generations, world, campaign
 const SLOT_COUNT := 3          # slot 1 keeps the original file names, so an old single save simply is slot 1
 const LORE_FOR_DIVIDE := 30   # records needed before the Crown can be divided
 
@@ -32,6 +32,11 @@ func _ready() -> void:
 
 # ================================================================ profile
 func default_profile() -> Dictionary:
+	var p := _base_profile()
+	Generations.begin(p)           # the three generations (save version 3): `family`, `generations`, `world`, `campaign`
+	return p
+
+func _base_profile() -> Dictionary:
 	return {
 		"version": SAVE_VERSION, "level": 1, "xp": 0, "attr_points": 0,
 		"attrs": {"health": 5, "strength": 5, "dex": 5, "endurance": 5, "defense": 2, "crit": 0, "resist": 0},
@@ -92,7 +97,8 @@ func slot_summary(n: int) -> Dictionary:
 	var weapon: Dictionary = Db.item(str(p.equipped.weapon)) if p.equipped.weapon != null else {}
 	return {"slot": n, "body": str(p.body), "name": str(p.name), "level": int(p.level), "chapter": str(chapter.name), "chapter_id": str(chapter.id),
 		"playtime": float(p.playtime), "last_played": float(p.last_played), "weapon": str(weapon.get("name", "Unarmed")),
-		"ng": int(p.ng), "heraldry": str(p.heraldry), "cleared": p.cleared.size()}
+		"ng": int(p.ng), "heraldry": str(p.heraldry), "cleared": p.cleared.size(),
+		"generation": Generations.gen(p), "generation_title": str(Generations.def(Generations.gen(p)).chapter), "family": str(p.get("family", {}).get("name", ""))}
 
 ## The furthest region a profile has reached (unlocked), in the order the regions are listed.
 func furthest_region(p: Dictionary = profile) -> Dictionary:
@@ -147,8 +153,12 @@ func _p(path: String) -> String:
 
 ## `weapon` is the blade the knight wakes holding: one of the four basic swords (Db.equipment.basic_swords). Anything
 ## else, or nothing, gives the Wayfarer's Blade. The other three are in Orren's first stock.
-func new_game(heraldry: String = "#3d0f0f", body: String = "m", weapon: String = "w_rusted_sword") -> void:
+## `start_generation` is 2 (the first generation is the filmed opening, as it has been) or 1 (the first generation is
+## the present one until Game.fall(1, …) and Game.inherit(); see docs/GENERATIONS_DATA.md).
+func new_game(heraldry: String = "#3d0f0f", body: String = "m", weapon: String = "w_rusted_sword", start_generation: int = 2) -> void:
 	profile = default_profile()
+	profile.body = body
+	Generations.begin(profile, start_generation)
 	weapon = Db.canon(weapon)
 	if Db.equipment.basic_swords.has(weapon):
 		profile.inventory[profile.inventory.find("w_rusted_sword")] = weapon
@@ -168,6 +178,7 @@ func save() -> bool:
 		return false
 	profile["last_played"] = Time.get_unix_time_from_system()
 	Secrets.sync(profile)          # a completion milestone reached since the last save is paid here, once
+	Generations.sync(profile)      # deeds, world facts and inheritance records are credited here
 	var f := FileAccess.open(slot_file(slot, "tmp"), FileAccess.WRITE)
 	if f == null:
 		push_warning("save failed: %s" % FileAccess.get_open_error())
@@ -280,6 +291,9 @@ func _unpack(v: Dictionary) -> void:
 func _migrate(v: Dictionary) -> Dictionary:
 	var from: int = int(v.get("version", 0))
 	_unpack(v)
+	if not (v.get("flags") is Dictionary):
+		v["flags"] = {}
+	Generations.migrate(v)         # before version 3: the journey becomes one generation's, with those before it recorded
 	if not (v.get("completion") is Dictionary):
 		Secrets.backfill(v)        # a journey from before secrets and completion: credit the roads it has walked
 	var base := default_profile()
@@ -359,8 +373,8 @@ func _migrate(v: Dictionary) -> Dictionary:
 			v.cosmetics[slot_name].erase("look_as")
 	Secrets.tidy(v)
 	for foe_id in v.defeated:
-		if not Db.foes.has(foe_id):
-			Secrets.challenger(str(foe_id))      # a hidden challenger this journey has beaten: known again
+		if not Db.foes.has(foe_id) and Secrets.challenger(str(foe_id)).is_empty():      # a hidden challenger this journey has beaten: known again
+			Encounters.foe(str(foe_id), v)       # or one of another generation's cast
 	v.version = SAVE_VERSION
 	return v
 
@@ -650,7 +664,12 @@ func _dull() -> void:
 
 ## How far along the road Orren's stock has come: regions cleared, or everything once the world has turned over.
 func shop_progress() -> int:
-	return 99 if int(profile.ng) > 0 else profile.cleared.size()
+	return 99 if int(profile.ng) > 0 else Generations.cleared_ever(profile).size()
+
+## Which turn of the world the stock is for: each legacy journey is one, and so is the last heir's road, which is
+## where the gear "only offered to those who return" is first offered.
+func shop_cycle() -> int:
+	return int(profile.ng) + (1 if Generations.gen(profile) >= 3 else 0)
 
 ## Has the road been walked far enough for Orren to stock this (a guardian ended, or enough regions cleared)?
 func shop_unlocked(it: Dictionary) -> bool:
@@ -662,15 +681,15 @@ func shop_unlocked(it: Dictionary) -> bool:
 	return int(u.get("cleared", 0)) <= shop_progress()
 
 func _in_stock(it: Dictionary) -> bool:
-	return int(it.get("price", 0)) > 0 and int(it.get("ng_min", 0)) <= int(profile.ng) and shop_unlocked(it)
+	return int(it.get("price", 0)) > 0 and int(it.get("ng_min", 0)) <= shop_cycle() and shop_unlocked(it)
 
 ## A locked shop entry the player may already see: its guardian's region is open, or it is the next step of stock.
 func _shop_visible(it: Dictionary) -> bool:
-	if int(it.get("price", 0)) <= 0 or int(it.get("ng_min", 0)) > int(profile.ng):
+	if int(it.get("price", 0)) <= 0 or int(it.get("ng_min", 0)) > shop_cycle():
 		return false
 	var u: Dictionary = it.get("unlock", {})
 	if u.has("boss"):
-		return region_unlocked(str(Db.foes[u.boss].region))
+		return region_known(str(Db.foes[u.boss].region))
 	return int(u.get("cleared", 0)) <= shop_progress() + 1
 
 ## The whole shop as a screen wants it: what is for sale now and what is visibly locked, cheapest first.
@@ -727,9 +746,16 @@ func shop_stock() -> Array:
 	return out
 
 # ================================================================ runs
+## Whether a run can set out for the region now. The second generation: the road before it is cleared, as always.
+## The others: what Encounters.access says of that generation (sealed, shut, or open by the routes it has walked).
 func region_unlocked(id: String) -> bool:
+	return Encounters.unlocked(id, profile)
+
+## Whether the house has ever reached the region (the forge and the shop go by this: what one generation found,
+## Orren still knows).
+func region_known(id: String) -> bool:
 	var req = Db.region_by_id[id].requires
-	return req == null or profile.cleared.has(req)
+	return region_unlocked(id) or req == null or Generations.ever_cleared(str(req), profile)
 
 func shortcut_open(id: String) -> bool:
 	return profile.flags.has(Db.region_by_id[id].shortcut.flag)
@@ -749,7 +775,10 @@ func run_stage() -> Dictionary:
 
 func stage_options() -> Array:
 	var out: Array = []
-	for o in run_stage().options:
+	var gen := Encounters.generation(profile)
+	# the second generation's stops are the road's own; the others are the director's telling of the same stop
+	var src: Array = run_stage().options if gen == 2 else Encounters.options(gen, str(run.region), int(run.stage), profile)
+	for o in src:
 		if o.has("needs") and not profile.flags.has(o.needs):
 			continue
 		if o.type == "treasure" and profile.flags.has(_chest_flag(o)) and out.size() > 0:
@@ -761,6 +790,11 @@ func stage_options() -> Array:
 			o = o.duplicate()
 			var pool: Array = o.foes
 			o.foe = pool[absi(hash("%d|%d|%s" % [int(run.get("seed", 0)), int(run.stage), o.label])) % pool.size()]
+		if gen != 2 and o.has("foe"):
+			# who is actually fought: a variant, the echo, or the same foe brought up to this generation
+			o = o.duplicate()
+			o["was"] = str(o.foe)
+			o.foe = Encounters.cast(gen, str(o.foe), profile)
 		out.append(o)
 	if out.is_empty():
 		out.append({"type": "pass", "label": "Press On", "hint": "Nothing more to find here."})
@@ -820,6 +854,7 @@ func on_victory(foe_id: String, hp_left: float) -> Dictionary:
 	var out := Rewards.roll(profile, foe_id)
 	var st: Dictionary = profile.rewards
 	profile.defeated[foe_id] = int(profile.defeated.get(foe_id, 0)) + 1
+	Generations.note_victory(profile, foe_id)       # a meeting with the Monarch that the player won is recorded as won
 	st.recent.append(foe_id)
 	while st.recent.size() > int(Db.equipment.rewards.window):
 		st.recent.pop_front()
@@ -925,8 +960,10 @@ func game_complete() -> bool:
 
 ## The third ending needs the side roads walked: the Devourer ended and the wyrm of the Roost faced,
 ## and enough of the record recovered to know what is being divided.
+## Since the generations these are three of the family's inheritance records (data/generations.json "records"), and
+## the last heir must also have faced the Kept.
 func can_divide_crown() -> bool:
-	return profile.defeated.has("devourer") and profile.cleared.has("roost") and profile.lore.size() >= LORE_FOR_DIVIDE
+	return Generations.ending_open("cities", profile)
 
 # ================================================================ records and tasks
 ## Grants every record kept at this stop that is not yet held. Returns the newly found entries.
@@ -954,7 +991,7 @@ func _quest_parts(id: String) -> Array:
 	if need.has("cleared"):
 		var n := 0
 		for r in need.cleared:
-			n += 1 if profile.cleared.has(r) else 0
+			n += 1 if Generations.ever_cleared(str(r), profile) else 0
 		parts.append([n, need.cleared.size(), "regions"])
 	if need.has("lore"):
 		parts.append([mini(profile.lore.size(), int(need.lore)), int(need.lore), "records"])
@@ -997,13 +1034,18 @@ func claim_quest(id: String) -> bool:
 	return true
 
 func choose_ending(id: String) -> void:
+	Generations.note_ending(profile, id)        # the first ending chosen is the canon's; later ones are a legacy journey's
 	if not profile.endings.has(id):
 		profile.endings.append(id)
 	profile.flags["last_ending"] = id
 	save()
 
+## A legacy journey (the old New Game Plus): the roads again, harder, with everything kept. It is outside the three
+## generations: from here on nothing is written to the lineage, the world's facts or the canon's ending.
 func start_ng_plus() -> void:
+	Generations.sync(profile)                   # the canon is credited one last time, then it is closed
 	profile.ng += 1
+	profile.campaign.legacy = int(profile.ng)
 	profile.cleared = []
 	var keep := {}
 	profile.flags = keep
@@ -1421,7 +1463,7 @@ func material_price(id: String) -> int:
 	if int(m.get("price", 0)) <= 0:
 		return 0
 	for r: String in m.get("regions", []):
-		if profile.cleared.has(r) or int(profile.ng) > 0:
+		if Generations.ever_cleared(r, profile) or int(profile.ng) > 0:
 			return int(m.price)
 	return 0
 
@@ -1496,7 +1538,7 @@ func craft_block(id: String) -> String:
 	if owns(id):
 		return "Already yours"
 	var fam: Dictionary = Db.family(it)
-	if not fam.is_empty() and not region_unlocked(str(fam.region)):
+	if not fam.is_empty() and not region_known(str(fam.region)):
 		return "Unknown work"
 	var c: Dictionary = it.craft
 	if profile.gold < int(c.get("gold", 0)):
@@ -1600,7 +1642,7 @@ func items_for_slot(slot_name: String, include_locked: bool = false) -> Array:
 			for it in Db.item_list:
 				if it.slot != slot_name or owns(it.id) or item_state(it.id) != want:
 					continue
-				if want == "undiscovered" and int(it.get("ng_min", 0)) > int(profile.ng):
+				if want == "undiscovered" and int(it.get("ng_min", 0)) > shop_cycle():
 					continue
 				ids.append(it.id)
 	var out: Array = []
@@ -1727,3 +1769,118 @@ func set_title(id: String) -> bool:
 	profile.completion.title = id
 	save()
 	return true
+
+# ================================================================ the three generations (rules in Generations, cast in Encounters)
+## See docs/GENERATIONS_DATA.md for the layers of a save and for who is expected to call what.
+
+## The present generation: 1 the First Oath, 2 the Broken Crown, 3 the Last Heir.
+func generation() -> int:
+	return Generations.gen(profile)
+
+func generation_record(i: int = 0) -> Dictionary:
+	return Generations.record(i if i > 0 else generation(), profile)
+
+## One of the house falls at an authored moment: Game.fall(1, …) and Game.fall(2, …), each once, and never anything
+## else. An ordinary defeat is Game.on_death and does not come near this. True when the fall was recorded.
+## `context`: weapon, where, clash (I), choice and won (II). The save is written at once.
+func fall(gen: int, cause: String, context: Dictionary = {}) -> bool:
+	if not Generations.fall(profile, gen, cause, context):
+		return false
+	run = {}
+	save()
+	profile_changed.emit()
+	return true
+
+## The next of the house takes up the road after a fall. `who`: body, name, heraldry (all optional).
+func inherit(who: Dictionary = {}) -> bool:
+	if not Generations.inherit(profile, who):
+		return false
+	run = {}
+	just_died = false
+	save()
+	profile_changed.emit()
+	return true
+
+## A fall has been recorded and nobody has yet inherited: the scenes between two generations are due.
+func transition_pending() -> Dictionary:
+	return profile.get("campaign", {}).get("transition", {})
+
+## The blade the one before left where they fell ({} when there is none). It is in the inventory and in the heir's
+## hand whether or not the scene of taking it up is played; take_fallen_weapon() only records that it was.
+func fallen_weapon() -> Dictionary:
+	return Generations.fallen_weapon(profile)
+
+func take_fallen_weapon() -> Dictionary:
+	var w := fallen_weapon()
+	if w.is_empty() or bool(w.get("taken", false)):
+		return w
+	w["taken"] = true
+	if owns(str(w.id)) and profile.equipped.weapon != str(w.id):
+		equip(str(w.id))
+	save()
+	return w
+
+## The profile a generation fights with: the family's own, except the first, who has the forebear's sheet and the
+## blade that will be left (data/generations.json "forebear"). Hand it to Stats.compute.
+func fighter_profile(gen: int = 0) -> Dictionary:
+	if (gen if gen > 0 else generation()) != 1:
+		return profile
+	var fb: Dictionary = Generations.data().forebear
+	var p := profile.duplicate(true)
+	p.level = int(fb.level)
+	p.attrs = fb.attrs.duplicate()
+	for slot_name: String in p.equipped:
+		if slot_name != "weapon":
+			p.equipped[slot_name] = fb.equipped.get(slot_name)
+	if p.equipped.weapon == null or Db.item(str(p.equipped.weapon)).get("cls", "") != "sword":
+		p.equipped.weapon = str(fb.weapon)
+	return p
+
+func fighter_stats(gen: int = 0) -> Dictionary:
+	return Stats.compute(fighter_profile(gen), Db.items, Db.classes)
+
+## The echo of the second generation as a foe the duel can run (Duel.setup("the_kept")): see Generations.echo_foe.
+func echo_foe() -> Dictionary:
+	return Generations.echo_foe(profile)
+
+## How a meeting with the Monarch stood: {won, choice ("press" / "records"), result, …}. A victory through
+## Game.on_victory records `won` by itself; scenes add the rest.
+func record_monarch(gen: int, result: Dictionary) -> void:
+	Generations.note_monarch(profile, gen, result)
+	save()
+
+## The data of a meeting (foe id, threshold, choices, phase names) and what is recorded of it under `record`.
+func monarch(gen: int = 0) -> Dictionary:
+	return Generations.monarch(gen if gen > 0 else generation(), profile)
+
+func monarch_won(gen: int) -> bool:
+	return bool(profile.get("campaign", {}).get("monarch", {}).get(str(gen), {}).get("won", false))
+
+func add_fact(fact: String) -> bool:
+	return Generations.add_fact(fact, profile)
+
+func has_fact(fact: String) -> bool:
+	return Encounters.has_fact(fact, profile)
+
+## The family's inheritance records, held or not: [{id, name, text, held, generation, auto, ending}].
+func inheritance() -> Array:
+	return Generations.records(profile)
+
+## The three endings with whether each can be chosen now: [{id, name, open, chosen}].
+func endings() -> Array:
+	return Generations.endings(profile)
+
+## "imprisoned", "found" or "returning".
+func witness_state() -> String:
+	return Generations.witness(profile)
+
+## Everything a lineage screen needs (Generations.lineage). Reads only.
+func lineage() -> Dictionary:
+	return Generations.lineage(profile)
+
+## A legacy journey is under way (the story is over and the roads are being walked again).
+func on_legacy_journey() -> bool:
+	return int(profile.get("ng", 0)) > 0
+
+func start_legacy_journey() -> void:
+	start_ng_plus()

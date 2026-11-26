@@ -289,7 +289,7 @@ func t_migration() -> void:
 		var mem := snap()
 		ok(Game.save(), "%s saves in the new shape" % name)
 		var on_disk = JSON.parse_string(FileAccess.get_file_as_string(Game.slot_file(1)))
-		ok(on_disk is Dictionary and int(on_disk.version) == 2 and on_disk.has("items") and on_disk.has("equipped"), "%s: the file is version 2" % name)
+		ok(on_disk is Dictionary and int(on_disk.version) == Game.SAVE_VERSION and on_disk.has("items") and on_disk.has("equipped"), "%s: the file is the current version" % name)
 		Game.profile = {}
 		ok(Game.load_game(), "%s loads again" % name)
 		var a: Dictionary = JSON.parse_string(mem)

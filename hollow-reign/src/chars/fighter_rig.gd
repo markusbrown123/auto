@@ -1011,7 +1011,7 @@ func _fit_props(hands: Dictionary) -> void:
 		dir = dir.slerp(carried, _whole_w) if dir.dot(carried) > -0.99 else carried
 	var caps := _body_caps()
 	if _pin_t <= 0.0:
-		dir = _clear_blade(hands.r, dir, weapon_len, caps)
+		dir = _clear_blade(hands.r, dir, weapon_len, caps + ([] if two_handed else [_arm_cap("Left")]))
 	dir = _off_floor(hands.r, dir, weapon_len, _pommel)
 	var pr: Vector3 = skin.grip("Right", dir)
 	var dir2 := _off_floor(pr, dir, weapon_len, _pommel)
@@ -1030,7 +1030,7 @@ func _fit_props(hands: Dictionary) -> void:
 		var carried_l := skin.hand_axis("Left")
 		if _whole_w > 0.01 and carried_l != Vector3.ZERO:
 			dl = dl.slerp(carried_l, _whole_w) if dl.dot(carried_l) > -0.99 else carried_l
-		dl = _clear_blade(hands.l, dl, weapon_len, caps)
+		dl = _clear_blade(hands.l, dl, weapon_len, caps + [_arm_cap("Right")])
 		dl = _off_floor(hands.l, dl, weapon_len, _pommel)
 		var pl: Vector3 = skin.grip("Left", dl)
 		weapon_l.transform = Transform3D(_basis_y(dl, Vector3(0, 0, -1) if absf(dl.z) < 0.9 else Vector3.RIGHT), pl)
@@ -1043,7 +1043,20 @@ func _fit_props(hands: Dictionary) -> void:
 			_shield_local = fore.affine_inverse() * held
 		else:
 			# strapped to the forearm: where a whole-body clip takes the arm, the shield goes
-			held = held.interpolate_with(fore * _shield_local, _whole_w)
+			var strapped := fore * _shield_local
+			if mode != Mode.DEAD:
+				# thrown about by a roll or a blow, the board stays on the outside of the forearm, facing away from the chest
+				var hand_at: Vector3 = skin.point("LeftHand")
+				var axis := (hand_at - fore.origin).normalized()
+				var mid := fore.origin.lerp(hand_at, 0.6)
+				var out := mid - skin.point("Spine2")
+				out = out - axis * out.dot(axis)
+				if out.length() > 0.02:
+					out = out.normalized()
+					var up := Vector3.UP - out * out.y
+					up = up.normalized() if up.length() > 0.2 else axis
+					strapped = Transform3D(Basis(up.cross(-out).normalized(), up, -out), mid + out * 0.07)
+			held = held.interpolate_with(strapped, _whole_w)
 		# the board is kept off the head and trunk: pushed out along its own facing, to the side they are not on
 		var nrm := held.basis.z.normalized()
 		for c2: Array in [caps[0], caps[1]]:
@@ -1051,7 +1064,7 @@ func _fit_props(hands: Dictionary) -> void:
 			var l2 := held.affine_inverse() * q2
 			var r2: float = float(c2[2]) + 0.03
 			var d2 := (q2 - held.origin).dot(nrm)
-			if absf(d2) < r2 and l2.x * l2.x / 0.09 + l2.y * l2.y / 0.2 < 1.0:
+			if absf(d2) < r2 and l2.x * l2.x / ((0.28 + r2) * (0.28 + r2)) + l2.y * l2.y / ((0.42 + r2) * (0.42 + r2)) < 1.0:
 				held.origin -= nrm * (r2 - absf(d2)) * (1.0 if d2 >= 0.0 else -1.0)
 		# no part of the rim under the floor
 		var low := 1e9
@@ -1073,6 +1086,10 @@ func _body_caps() -> Array:
 	for side: String in ["Left", "Right"]:
 		out.append([skin.point(side + "UpLeg"), skin.point(side + "Leg"), trunk_r * 0.5])
 	return out
+
+## The upper arm on one side, for the blade held in the other hand.
+func _arm_cap(side: String) -> Array:
+	return [skin.point(side + "Arm"), skin.point(side + "ForeArm"), 0.07 * bulk]
 
 ## Turn a blade about the hand that holds it until it is clear of the body.
 func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Vector3:

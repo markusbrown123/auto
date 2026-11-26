@@ -234,7 +234,8 @@ func _enter_duel(o: Dictionary) -> void:
 	for p: String in warm:
 		if ResourceLoader.exists(p) and not ResourceLoader.has_cached(p):
 			ready = false
-	if ready:
+	if ready or not Game.profile.tutorial_done:
+		# (the first duel of a journey never shows one: whatever is still unread is read behind the fade)
 		_fade_then(func(): start_duel(o))
 		return
 	LoadingScreen.show(str(Game.run.get("region", "")), func(): start_duel(o), warm)

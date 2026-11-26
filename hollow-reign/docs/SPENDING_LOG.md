@@ -98,8 +98,11 @@ The Tripo account has received $150 in total: $50 on 25 Nov and $100 on 26 Nov 0
 
 Higgsfield balance read after: 472.68 credits.
 **Original $100 cap:** Tripo $56.15 + Higgsfield ≈ $30.20 = about **$86.35**. About $13.65 left; Higgsfield (images, video, speech, music) can only be paid from this.
-**Graphics allocation ($100, Tripo only):** 16 armour-suit models in progress, $21.60 when complete.
+**Graphics allocation ($100, Tripo only):** 16 armour-suit models complete (8 suits x 2 bodies, 135 credits each) = **$21.60**. The last one (`knight_f_hollow`) failed to download and was recovered from its paid rig task id at no extra cost.
 
 ## Higgsfield top-up authorised (owner, 2026-11-26)
 The Higgsfield balance rose by exactly 1,000 credits (472.68 → 1,472.68). The owner confirmed it is "meant to be used for better graphics, fixing bugs, clipping, characters in the floor, swords going through": a clean, professional result. It is spendable on Higgsfield work that serves that (images, textures, footage, speech), still logged item by item, and still not to be burned on things the existing tools can do.
 Most of what the owner listed (clipping, floor penetration, weapons passing through) is code and animation work that costs nothing to fix.
+
+## Animation packs (owner purchase, 2026-11-26)
+The owner bought the Game Dev Hero bundle ($59.97, paid directly by the owner, outside the generation caps): Sword & Shield V3, Two-Handed Sword V3, Dual Sword V1 (Mixamo skeleton, 1,181 FBX). Source files live only in the git-ignored `art/anim_src/gamedevhero/` and the private repo `hollow-reign-anims`; the licence forbids redistributing them, so they must never be committed here. No licence text was inside the zips.

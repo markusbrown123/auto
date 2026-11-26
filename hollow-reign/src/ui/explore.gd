@@ -292,8 +292,9 @@ func _reveal_then(index: int, then: Callable) -> void:
 	foe.rotation.y = atan2(dir.x, dir.z)
 	foe.time_scale = 1.0
 	var tw := create_tween()
-	tw.tween_property(rig, "position", rig.position + dir * 0.45, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	backdrop.move_camera(foe.position - step * 2.7 + side * 1.1 + Vector3(0, 0.55, 0), foe.position + Vector3(0, 1.35 * foe.scale.y, 0))
+	tw.tween_property(rig, "position", rig.position + dir * 0.3, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	# past the knight, low, and to the side they are not walking on: nothing of theirs crosses the lens
+	backdrop.move_camera(foe.position - step * 2.3 - side * 1.2 + Vector3(0, 0.5, 0), foe.position + Vector3(0, 1.3 * foe.scale.y, 0))
 	Sfx.play("armor", -6.0, 0.8)
 	tw.tween_callback(then)
 

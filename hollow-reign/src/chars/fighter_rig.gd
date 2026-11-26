@@ -78,6 +78,10 @@ var hunch := 0.0
 var arm_scale := 1.0
 
 
+const RELIC_YAW := -35.0                              # degrees: the mask's front (+X) turned to face right and a little back
+const RELIC_EYES := Vector3(0.079, 0.187, 0.0235)     # midpoint between the mask's eye slits, in the relic's own space
+const RELIC_EYE_GAP := 0.0465                         # half the distance between them
+
 # ================================================================ construction
 func build(config: Dictionary, as_foe: bool) -> void:
 	cfg = config
@@ -92,16 +96,17 @@ func build(config: Dictionary, as_foe: bool) -> void:
 	pelvis = Node3D.new()
 	body.add_child(pelvis)
 	if cfg.get("witness", false):
-		# the Witness rides behind the right hip, face outward
-		# (a child of the body, not of the pelvis node: the primitive pelvis is hidden when a generated model is worn)
-		var relic := PropModel.scenery(body, "res://assets/models/witness_relic.glb", 0.4, Vector3(0.2, 0.9, 0.1), 215.0)
+		# the Witness hangs at the right hip, face outward and a little to the rear, where the duel camera sees it
+		# (a child of the body, not of the pelvis node: the primitive pelvis is hidden when a generated model is worn).
+		# The model's own front is +X (its strap loop is on -X); it stands 0.4 m with the strap, the mask itself about 0.28 m.
+		var relic := PropModel.scenery(body, "res://assets/models/witness_relic.glb", 0.4, Vector3(0.24, 0.66, 0.06), RELIC_YAW)
 		_relic = relic
 		if relic:
 			var eye := OmniLight3D.new()
 			eye.light_color = Color("#ffb347")
 			eye.light_energy = 0.4
 			eye.omni_range = 0.9
-			eye.position = Vector3(0, 0.2, 0.0)
+			eye.position = Vector3(0.14, 0.19, 0.02)      # in front of the face, not inside the mask
 			relic.add_child(eye)
 			# the mask itself is lifted out of shadow and its eyes burn amber: an artefact, not a dark lump
 			for mi in relic.find_children("*", "MeshInstance3D", true, false):
@@ -111,7 +116,7 @@ func build(config: Dictionary, as_foe: bool) -> void:
 				ov.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
 				ov.albedo_color = Color(1.0, 0.72, 0.35, 0.035)
 				(mi as MeshInstance3D).material_overlay = ov
-			for ex: float in [-0.028, 0.028]:
+			for ez: float in [RELIC_EYES.z - RELIC_EYE_GAP, RELIC_EYES.z + RELIC_EYE_GAP]:
 				var e := MeshInstance3D.new()
 				var sm := SphereMesh.new()
 				sm.radius = 0.011
@@ -124,7 +129,7 @@ func build(config: Dictionary, as_foe: bool) -> void:
 				em.emission = Color(1.0, 0.7, 0.25)
 				em.emission_energy_multiplier = 3.0
 				e.material_override = em
-				e.position = Vector3(ex, 0.235, 0.075)
+				e.position = Vector3(RELIC_EYES.x, RELIC_EYES.y, ez)      # on the mask's own eye slits (measured on the model)
 				relic.add_child(e)
 	_box(pelvis, Vector3(0.36 * bulk, 0.18, 0.24 * bulk), Vector3(0, 0.02, 0), mat_metal)
 	_fauld()
@@ -406,10 +411,12 @@ func set_weapon(kind: String, look: Dictionary = {}) -> void:
 	var g := float(PropModel.GRIP.get(kind, 0.11))
 	_pommel = weapon_len * g / (1.0 - g) if PropModel.exists(model) and kind != "claws" else 0.14
 	_off_grip = clampf(_pommel * 0.62, 0.1, 0.22)
+	_blade_half = 0.11 if kind in ["axe", "cleaver"] else (0.05 if kind in ["greatsword", "glaive"] else 0.025)
 	if dual or two_handed:
 		set_shield(null)
 
 var _pommel := 0.14
+var _blade_half := 0.025      # half the width of the blade or axe head: what must also clear the body
 var _off_grip := 0.2
 
 func _weapon_mesh(n: Node3D, kind: String, look: Dictionary) -> void:
@@ -566,7 +573,9 @@ func swing(dir: Vector2, time: float, finish: String = "") -> void:
 	_go(Mode.WINDUP, time * 0.6)
 	_root_target = Vector3(0, 0, -0.25)
 
+var _parry_t := 0.0
 func parry(dir: Vector2) -> void:
+	_parry_t = 0.5
 	_arc_dir = Vector3(dir.x * mirror, dir.y, 0).normalized()
 	_swing = 0.16
 	_finish = ""
@@ -596,8 +605,12 @@ func flash(v: float = 1.0) -> void:
 	_flash = v
 
 ## How far in front of its own centre this fighter's blade reaches at the middle of a cut, in world units.
+## (Measured on the rig: the hand is carried forward by the arc, by the step into the cut and by the lean of the body;
+## the last fifth of the blade is what should meet the opponent, not its middle.)
 func reach() -> float:
-	return (0.05 + 0.5 * arm_scale + weapon_len * 0.8) * scale.x
+	return (0.05 + 0.5 * arm_scale + REACH_STEP + weapon_len * 0.8) * scale.x
+
+const REACH_STEP := 0.4       # metres the step and lean of a cut carry the sword hand forward
 
 var _pin_t := 0.0
 var _pin_hand := Vector3.ZERO
@@ -628,6 +641,83 @@ func halt(hold: float = 0.2) -> void:
 	_pin_blade = ap[1]
 	_pin_t = hold
 	_solve(0.0)
+
+## The blow has landed on a body at `world_point` (the duel may call this on a hit; the rig also finds the moment
+## itself, see `auto_bite`). The blade is held where it meets the near side of that body, then drawn back.
+func bite(world_point: Vector3, hold: float = BITE_HOLD) -> void:
+	if _pin_t > 0.0 or mode == Mode.DEAD:
+		return
+	var local: Vector3 = body.to_local(world_point)
+	# the near side: a little toward this fighter and toward the side the cut comes from
+	var target := local + Vector3(0, 0, 0.1) - _arc_dir * 0.12
+	var hand := _hand
+	var dir := target - hand
+	if dir.length() < 0.2:
+		return
+	_pin_hand = hand
+	_pin_blade = dir.normalized()
+	_pin_t = hold
+	_go(Mode.FOLLOW, hold + 0.22)
+	_solve(0.0)
+
+const BITE_HOLD := 0.13
+const BITE_FROM := 0.0
+var auto_bite := true         # cuts and thrusts stop in the first body they reach
+var _target_cache: Array = []
+var _target_frame := -1
+
+## Other fighters standing with this one (the duel's two rigs are siblings), as world-space capsules [a, b, r].
+func _targets() -> Array:
+	var f := Engine.get_process_frames()
+	if f == _target_frame:
+		return _target_cache
+	_target_frame = f
+	_target_cache = []
+	var par := get_parent()
+	if par == null:
+		return _target_cache
+	for c in par.get_children():
+		if c != self and c is Node3D and c.has_method("hit_caps") and (c as Node3D).visible \
+				and (c as Node3D).global_position.distance_to(global_position) < 9.0:
+			_target_cache.append_array(c.call("hit_caps"))
+	return _target_cache
+
+## This fighter's body for an opponent's blade: trunk and head, in world space.
+func hit_caps() -> Array:
+	if mode == Mode.DEAD:
+		return []
+	var g := body.global_transform
+	var k := scale.x
+	if skin and skin.ok:
+		var hb: Array = skin.ball("Head")
+		var guard_caps: Array = []
+		if shield and (blocking or _brace_t > 0.0):
+			guard_caps.append([shield.global_position, shield.global_position, 0.3 * k])      # a raised shield is met first
+		if _parry_t > 0.0:
+			# a blade thrown up in a parry is met before the body behind it
+			var wt := weapon_r.global_transform
+			guard_caps.append([wt * Vector3(0, weapon_len * 0.15, 0), wt * Vector3(0, weapon_len, 0), 0.09 * k])
+		return guard_caps + [[g * skin.point("Hips"), g * skin.point("Neck"), minf(float(skin.ball("Hips")[1]), 0.24) * 0.8 * k], [g * (hb[0] as Vector3), g * (hb[0] as Vector3), float(hb[1]) * 0.8 * k]]
+	return [[pelvis.global_position, chest.global_transform * Vector3(0, 0.3, 0), 0.19 * bulk * k], [head.global_position, head.global_position, 0.13 * k]]
+
+## Whether a blade held at `hand` along `dir` (rig body space) is inside one of the capsules (world space).
+## `from` and `depth`: the part of the blade tested, and how far inside the capsule's surface counts as a bite.
+func _blade_in(hand: Vector3, dir: Vector3, caps: Array, from: float = 0.3, depth: float = 0.3) -> bool:
+	var g := body.global_transform
+	var a := g * (hand + dir * weapon_len * from)
+	var b := g * (hand + dir * weapon_len)
+	for c: Array in caps:
+		var ca: Vector3 = c[0]
+		var cb2: Vector3 = c[1]
+		var d: float
+		if ca.is_equal_approx(cb2):
+			d = Geometry3D.get_closest_point_to_segment(ca, a, b).distance_to(ca)
+		else:
+			var cp := Geometry3D.get_closest_points_between_segments(a, b, ca, cb2)
+			d = cp[0].distance_to(cp[1])
+		if d < float(c[2]) * (1.0 - depth):
+			return true
+	return false
 
 ## Put the shield where the blow lands.
 func brace(world_point: Vector3, hold: float = 0.3) -> void:
@@ -707,6 +797,7 @@ func _process(delta: float) -> void:
 	var dt := delta * time_scale
 	_clock += dt
 	_t += dt
+	_parry_t = maxf(0.0, _parry_t - dt)
 	# stride phase advances with ground actually covered, so feet never slide
 	var moved := global_position.distance_to(_last_world) / maxf(scale.x, 0.01)
 	_last_world = global_position
@@ -728,9 +819,28 @@ func _process(delta: float) -> void:
 	_walk_amount = lerpf(_walk_amount, 1.0 if (walking and moved > 0.0005) else 0.0, 1.0 - exp(-dt * 7.0))
 	_solve(dt)
 
+func _out_of_helm(p: Vector3) -> Vector3:
+	var helm := Vector3(0, 1.74 - hunch * 0.3, 0.04)
+	var off := p - helm
+	if off.length() < 0.38:
+		off.z = minf(off.z, -0.02)
+		return helm + off.normalized() * 0.38
+	return p
+
+## The low end of a rising or falling cut stops short of pointing back at the wielder: past this angle from straight
+## ahead the hand would be drawn into the belly and the blade into the wielder's own legs and the floor.
+const ARC_LOW := 1.12
+func _arc_low(angle: float) -> float:
+	var steep := clampf((absf(_arc_dir.y) - 0.3) / 0.4, 0.0, 1.0)
+	if steep <= 0.0 or _arc_dir.y * sin(angle) >= 0.0 or absf(angle) <= ARC_LOW:
+		return angle
+	return lerpf(angle, signf(angle) * ARC_LOW, steep)
+
 func _arc_point(theta: float, lag: float) -> Array:
 	var f := Vector3(0, 0, -1)
 	var d := _arc_dir
+	lag = _arc_low(theta + lag) - _arc_low(theta)
+	theta = _arc_low(theta)
 	var c := Vector3(0.05 * signf(d.x) * -0.0, 1.34 - hunch * 0.25, -0.05)
 	var r := 0.5 * arm_scale
 	var p := c + (f * cos(theta) + d * sin(theta)) * r
@@ -739,11 +849,7 @@ func _arc_point(theta: float, lag: float) -> Array:
 	# keep the arm in front of the body
 	p.z = minf(p.z, 0.1)
 	# and the hand out of the wielder's own head: an overhead wind-up passes above and in front of the helm, not through it
-	var helm := Vector3(0, 1.74 - hunch * 0.3, 0.04)
-	var off := p - helm
-	if off.length() < 0.34:
-		off.z = minf(off.z, -0.02)
-		p = helm + off.normalized() * 0.34
+	p = _out_of_helm(p)
 	var b := (f * cos(theta + lag) + d * sin(theta + lag)).normalized()
 	return [p, b]
 
@@ -800,7 +906,24 @@ func _solve(dt: float) -> void:
 	match mode:
 		Mode.STRIKE:
 			var u2 := clampf(_t / _dur, 0.0, 1.0)
-			_theta = lerpf(-ARC_MAX if _dur > 0.17 else -0.9, ARC_MAX * 0.9 if _dur > 0.17 else 0.35, u2)
+			var full_cut := _dur > 0.17
+			var bitten := false
+			if full_cut and auto_bite and _pin_t <= 0.0 and dt > 0.0:
+				# The arc is walked in small steps from where it was last frame: the first step at which the blade is in
+				# an opponent's body is where the cut stops. It bites there; it does not sail on through to the far side.
+				var u_from := clampf((_t - dt) / _dur, 0.0, 1.0)
+				var targets := _targets()
+				if not targets.is_empty():
+					for i in range(1, 7):
+						var ui := lerpf(u_from, u2, i / 6.0)
+						if ui < BITE_FROM:
+							continue      # the rules settle a blow at the middle of the arc: a parry or a block pins the blade first
+						var api := _arc_point(lerpf(-ARC_MAX, ARC_MAX * 0.9, ui), lerpf(-0.5, 0.45, ui))
+						if _blade_in(api[0], api[1], targets):
+							u2 = ui
+							bitten = true
+							break
+			_theta = lerpf(-ARC_MAX if full_cut else -0.9, ARC_MAX * 0.9 if full_cut else 0.35, u2)
 			var ap2 := _arc_point(_theta, lerpf(-0.5, 0.45, u2))
 			hand_t = ap2[0]
 			blade_t = ap2[1]
@@ -808,17 +931,40 @@ func _solve(dt: float) -> void:
 			lean_t = 0.28 + hunch
 			twist_t = -_arc_dir.x * 0.5 * (u2 * 2.0 - 1.0)
 			crouch_t = 0.1
-			if u2 >= 1.0:
+			if bitten:
+				_pin_hand = ap2[0]
+				_pin_blade = ap2[1]
+				_pin_t = BITE_HOLD
+				_go(Mode.FOLLOW, BITE_HOLD + 0.22)
+			elif u2 >= 1.0:
 				_go(Mode.FOLLOW, 0.3)
 		Mode.THRUST:
 			var u3 := clampf(_t / _dur, 0.0, 1.0)
-			hand_t = _thrust_from.lerp(Vector3(0.12, 1.2 - hunch * 0.2, -0.78 * arm_scale), ease(u3, 0.4))
+			var thrust_to := Vector3(0.12, 1.2 - hunch * 0.2, -0.78 * arm_scale)
 			blade_t = Vector3(-0.05, 0.08, -1).normalized()
+			var stuck := false
+			if auto_bite and _pin_t <= 0.0 and dt > 0.0:
+				# the point goes in a hand's breadth and stops; the rest of the lunge is not driven through the body
+				var u_from2 := clampf((_t - dt) / _dur, 0.0, 1.0)
+				var targets2 := _targets()
+				if not targets2.is_empty():
+					for i in range(1, 7):
+						var ui2 := lerpf(u_from2, u3, i / 6.0)
+						if ui2 >= BITE_FROM and _blade_in(_thrust_from.lerp(thrust_to, ease(ui2, 0.4)), blade_t, targets2, 0.75, 0.35):
+							u3 = ui2
+							stuck = true
+							break
+			hand_t = _thrust_from.lerp(thrust_to, ease(u3, 0.4))
 			direct = true
 			lean_t = 0.35 + hunch
 			twist_t = -0.3
 			crouch_t = 0.14
-			if u3 >= 1.0:
+			if stuck:
+				_pin_hand = hand_t
+				_pin_blade = blade_t
+				_pin_t = BITE_HOLD
+				_go(Mode.FOLLOW, BITE_HOLD + 0.22)
+			elif u3 >= 1.0:
 				_go(Mode.FOLLOW, 0.3)
 		Mode.FOLLOW:
 			hand_t = _hand
@@ -945,7 +1091,10 @@ func _pose() -> void:
 	if two_handed:
 		hl = hr - _blade * _off_grip
 	elif dual:
-		hl = Vector3(-_hand.x, _hand.y - 0.04, _hand.z + 0.05)
+		hl = _out_of_helm(Vector3(-_hand.x, _hand.y - 0.04, _hand.z + 0.05))
+		if absf(_hand.x) < 0.14:
+			# both hands on the centre line (an overhead or rising cut): the off hand keeps to its own side
+			hl.x = -0.14 - 0.5 * (0.14 - absf(_hand.x))
 		if mode == Mode.STRIKE:
 			# the second blade follows a beat behind, crossing the first
 			var ap := _arc_point(_theta - 0.55, -0.4)
@@ -967,9 +1116,9 @@ func _pose() -> void:
 	if has_shield and not blocking and _brace_t <= 0.0 and mode in [Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW, Mode.GUARD]:
 		across = clampf((0.12 - _hand.x) / 0.45, 0.0, 1.0)
 		# low when the sword passes high, high and forward when it passes low: the blade never has to go through the shield arm
-		hl = hl.lerp(Vector3(-0.56, 0.92, 0.04) if _hand.y > 1.15 else Vector3(-0.5, 1.46, -0.14), across)
+		hl = hl.lerp(Vector3(-0.5, 1.46, -0.14) if (_arc_dir.x < -0.3 and _arc_dir.y < -0.3) else Vector3(-0.56, 0.92, 0.04), across)
 	_shield_open = lerpf(_shield_open, across, 0.4)
-	_hand_l = _hand_l.lerp(hl, 0.4) if not two_handed else hl
+	_hand_l = _out_of_helm(_hand_l.lerp(hl, 0.4)) if not two_handed else hl
 	_blade_l = _blade_l.lerp(bl, 0.4).normalized()
 	var hl2 := sh_l + (_hand_l - sh_l).limit_length(reach)
 	_arm("l", sh_l, hl2, Vector3(-0.7, -0.8, 0.35))
@@ -1000,13 +1149,16 @@ func _pose() -> void:
 	if skin:
 		# authored motion where it exists: the walk cycle out of combat, and the fall when killed
 		_pick_clip()
-		if _relic:
-			_relic.position = pel + Vector3(0.19, -0.03, 0.11)      # behind the sword-side hip, where the duel camera sees it; moves with the hips
 		var pinned := _pin_t > 0.0 or _brace_t > 0.0
 		var hands: Dictionary = skin.drive({"pelvis": pel + Vector3(0, 0.06, 0), "pelvis_rot": Basis.from_euler(pelvis.rotation), "chest_rot": cb,
 			"head_rot": Basis.from_euler(head.rotation), "hand_r": hr, "hand_l": hl2, "ankle_r": _ankle.r, "ankle_l": _ankle.l,
 			"follow_r": 0.0 if _pin_t > 0.0 else 1.0, "follow_l": 0.0 if pinned else 1.0, "settle": true})
 		_fit_props(hands)
+		if _relic:
+			# hung from the belt just outside whatever armour this suit has at the hip; it turns and travels with the hips
+			var ht: Basis = skin.turn("Hips")
+			var out: float = maxf(skin.extent("Hips", Vector3.RIGHT), skin.extent("RightUpLeg", Vector3.RIGHT) + (skin.point("RightUpLeg") - skin.point("Hips")).dot(ht.x)) + 0.035
+			_relic.transform = Transform3D(ht * Basis(Vector3.UP, deg_to_rad(RELIC_YAW)), skin.point("Hips") + ht * Vector3(out, -0.36, 0.05))
 
 ## With a generated body: the weapons and shield are fitted to the real hands after the skeleton is posed.
 ## The blade is kept out of the wielder's own head, trunk and thighs and off the floor; the hand closes round the
@@ -1124,7 +1276,7 @@ func _clear_blade(hand: Vector3, dir: Vector3, length: float, caps: Array) -> Ve
 			var tip := hand + dir * length
 			var a: Vector3 = c[0]
 			var b: Vector3 = c[1]
-			var r: float = c[2]
+			var r: float = float(c[2]) + _blade_half
 			var p: Vector3
 			var q: Vector3
 			if a.is_equal_approx(b):

@@ -330,6 +330,39 @@ func blade_mid() -> Vector3:
 func chest_point() -> Vector3:
 	return head.global_transform * Vector3(0, 0.1, 0.0)
 
+## What a fighter's blade can bite into: the head and the upper neck, in world space ([a, b, radius]).
+func hit_caps() -> Array:
+	if mode == Mode.DEAD:
+		return []
+	var k := scale.x
+	return [[(neck[NECK_SEGS - 3] as Node3D).global_position, head.global_transform * Vector3(0, 0, -0.5), 0.36 * k]]
+
+## The same interface as FighterRig: a dragon's head is its weapon and is stopped short of its prey in `_keep_out`.
+func bite(_world_point: Vector3, _hold: float = 0.13) -> void:
+	pass
+
+## The head never ends up inside whoever it is attacking: the snout stops at the surface of the body.
+func _keep_out() -> void:
+	var par := get_parent()
+	if par == null or mode == Mode.DEAD:
+		return
+	var inv := body.global_transform.affine_inverse()
+	for c in par.get_children():
+		if c == self or not (c is Node3D) or not c.has_method("hit_caps") or not (c as Node3D).visible:
+			continue
+		for cap: Array in c.call("hit_caps"):
+			var a: Vector3 = inv * (cap[0] as Vector3)
+			var b: Vector3 = inv * (cap[1] as Vector3)
+			var r: float = float(cap[2]) / maxf(scale.x, 0.01) + 0.12
+			var snout_a := _head
+			var snout_b := _head + _aim.normalized() * 1.25
+			var cp := Geometry3D.get_closest_points_between_segments(snout_a, snout_b, a, b) if not a.is_equal_approx(b) \
+				else PackedVector3Array([Geometry3D.get_closest_point_to_segment(a, snout_a, snout_b), a])
+			var d := cp[0].distance_to(cp[1])
+			if d < r:
+				# draw the head back along the way it is pointing (and a little up) until the snout is clear
+				_head -= (_aim.normalized() * Vector3(1, 0.3, 1)).normalized() * (r - d)
+
 
 # ================================================================ per-frame
 func _process(delta: float) -> void:
@@ -478,6 +511,7 @@ func _solve(dt: float) -> void:
 	_lift = _far * (1.6 if has_wings else 0.0)
 	_spread = lerpf(_spread, maxf(spread_t, _far), 1.0 - exp(-dt * 4.0))
 	_root = _root.lerp(_root_target + Vector3(0, 0, _far * 1.8), 1.0 - exp(-dt * 7.0))
+	_keep_out()
 	fire.emitting = breathing
 	if mode != Mode.BREATH_WINDUP:
 		throat.light_energy = lerpf(throat.light_energy, 5.0 if breathing else 0.0, 1.0 - exp(-dt * 10.0))

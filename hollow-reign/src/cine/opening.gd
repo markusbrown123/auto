@@ -25,6 +25,7 @@ var _mob: OmniLight3D            # the light of the crowd at the doors
 var _wake: Array = []            # [light, mesh material, delay]: the machines that come back on
 var _wake_t := -1.0
 var _throne_glow: OmniLight3D
+var _back: Array = []            # firelight behind the line of figures, for the shot that makes shapes of them
 
 static func seen_before() -> bool:
 	return FileAccess.file_exists(Game._p(SEEN_FILE))
@@ -98,13 +99,21 @@ func _people() -> void:
 			f.position = Vector3(row[1] * 3.3, 0, 4.5 - i * 3.4)
 			f.rotation.y = PI - row[1] * 1.15      # turned in toward the aisle
 			figures.append(f)
+			if row[1] > 0.0:
+				var l := OmniLight3D.new()
+				l.light_color = Color("#ff9a48")
+				l.light_energy = 0.0
+				l.omni_range = 7.0
+				l.position = f.position + Vector3(2.6, 1.6, -0.6)
+				add_child(l)
+				_back.append(l)
 
 ## Lamps set into the floor of the aisle, dead until the last line.
 func _machines() -> void:
 	for i in 9:
 		for sx: float in [-1.0, 1.0]:
 			var mat := Look.glow(Color("#5fe0c8") if i % 3 != 2 else Color("#ffb45a"), 0.0)
-			mat.albedo_color = Color(0.03, 0.03, 0.03)
+			mat.albedo_color = Color(0.1, 0.075, 0.05)
 			var m := arena.box(Vector3(0.12, 0.05, 1.1), Vector3(sx * 1.25, 0.03, 6.0 - i * 2.2), mat)
 			m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 			var l: OmniLight3D = null
@@ -122,14 +131,14 @@ func _grade(life: float, time: float) -> void:
 	var t: Dictionary = arena.theme
 	var env := arena.env
 	var to := {
-		"tonemap_exposure": lerpf(0.85, 1.75, life),
-		"ambient_light_energy": lerpf(0.55, 2.1, life),
-		"ambient_light_color": Color("#27323e").lerp(Color("#7a5a3a"), life),
-		"fog_light_color": Color("#0c1118").lerp(Color("#5a3a1c"), life),
-		"fog_density": lerpf(0.03, 0.008, life),
+		"tonemap_exposure": lerpf(1.3, 1.75, life),
+		"ambient_light_energy": lerpf(1.5, 2.1, life),
+		"ambient_light_color": Color("#3c4c62").lerp(Color("#7a5a3a"), life),
+		"fog_light_color": Color("#1a2634").lerp(Color("#5a3a1c"), life),
+		"fog_density": lerpf(0.022, 0.008, life),
 	}
-	var sun_c := Color("#7f9fc8").lerp(Color("#ffd9a0"), life)
-	var sun_e := lerpf(0.35, 2.4, life)
+	var sun_c := Color("#9fbce0").lerp(Color("#ffd9a0"), life)
+	var sun_e := lerpf(1.3, 2.4, life)
 	for f: Array in arena.fires:
 		f[1] = lerpf(0.0, 3.4, life)
 	for p in arena.find_children("*", "CPUParticles3D", true, false):
@@ -156,13 +165,23 @@ func _shot(i: int) -> void:
 			cam.move(Vector3(0.0, 5.6, 11.5), Vector3(0, 5.0, -16.0), 9.0)
 			create_tween().tween_property(_throne_glow, "light_energy", 3.5, 2.0)
 		2:  # "Then men became gods": from the floor, up at the seat they made
-			cam.cut(Vector3(2.2, 0.5, -5.0), Vector3(0.0, 6.0, -17.5), 46.0)
-			cam.move(Vector3(1.4, 0.7, -6.6), Vector3(0.0, 7.4, -17.5), 5.0)
+			cam.cut(Vector3(0.7, 0.45, -6.9), Vector3(0.0, 5.8, -17.5), 46.0)
+			cam.move(Vector3(0.35, 0.6, -8.3), Vector3(0.0, 7.0, -17.5), 5.0)
 		3:  # bodies that could not grow old: along the line of them, each a shape against the fire
+			# only the fires behind them: the figures go dark against it
+			var dim := create_tween().set_parallel(true)
+			dim.tween_property(arena.env, "ambient_light_energy", 0.45, 0.01)
+			dim.tween_property(arena.sun, "light_energy", 0.15, 0.01)
+			for l: OmniLight3D in _back:
+				dim.tween_property(l, "light_energy", 6.0, 0.01)
 			cam.cut(Vector3(-0.9, 1.5, 7.4), Vector3(4.2, 1.75, 3.6), 38.0)
 			cam.move(Vector3(-0.9, 1.6, -3.2), Vector3(4.2, 1.85, -6.4), 10.5, -1.0, Tween.TRANS_LINEAR)
 		4:  # the people they ruled: a red light from the doors behind us, growing
 			cam.drift = 0.07
+			arena.env.ambient_light_energy = 1.2
+			arena.sun.light_energy = 0.8
+			for l: OmniLight3D in _back:
+				l.light_energy = 0.0
 			cam.cut(Vector3(0.4, 1.3, 13.5), Vector3(0, 2.6, -8.0), 44.0)
 			cam.move(Vector3(0.0, 1.5, 9.6), Vector3(0, 2.4, -8.0), 6.0)
 			var tw := create_tween().set_parallel(true)
@@ -178,6 +197,12 @@ func _shot(i: int) -> void:
 			var fallen: FighterRig = figures[1] if figures.size() > 1 else null
 			if fallen:
 				var p := fallen.global_position
+				var moon := OmniLight3D.new()
+				moon.light_color = Color("#a8c4e8")
+				moon.light_energy = 1.6
+				moon.omni_range = 5.5
+				moon.position = p + Vector3(-1.2, 1.5, 1.4)
+				add_child(moon)
 				cam.cut(p + Vector3(-2.6, 0.45, 2.2), p + Vector3(0.2, 0.3, 0.2), 36.0)
 				cam.move(p + Vector3(-2.2, 0.6, 2.9), p + Vector3(0.2, 0.3, 0.2), 6.0)
 		7:  # "We were wrong": in the dark, down the length of the floor, something is switching itself back on
@@ -185,6 +210,8 @@ func _shot(i: int) -> void:
 			cam.cut(Vector3(0.0, 0.42, 9.0), Vector3(0, 2.6, -16.0), 44.0)
 			cam.move(Vector3(0.0, 0.6, 7.0), Vector3(0, 3.4, -16.0), 5.0)
 			_wake_t = 0.0
+			create_tween().tween_property(arena.env, "ambient_light_energy", 0.8, 1.0)
+			create_tween().tween_property(arena.sun, "light_energy", 0.5, 1.0)
 			Sfx.play("levelup", -10.0, 0.5)
 			_throne_glow.light_color = Color("#5fe0c8")
 			create_tween().tween_property(_throne_glow, "light_energy", 5.0, 2.4).set_delay(2.0)
@@ -195,6 +222,8 @@ func _ruin() -> void:
 		return
 	_ruined = true
 	cam.drift = 0.02
+	for l: OmniLight3D in _back:
+		l.light_energy = 0.0
 	_mob.light_energy = 0.0
 	_throne_glow.light_energy = 0.0
 	_grade(0.0, 0.0)
@@ -293,7 +322,7 @@ func _process(delta: float) -> void:
 			var k := clampf((_wake_t - float(w[2])) / 0.25, 0.0, 1.0)
 			var pulse: float = k * (1.6 + 0.9 * sin(_clock * 5.0 - float(w[2]) * 6.0))
 			(w[1] as StandardMaterial3D).emission_energy_multiplier = pulse * 2.2
-			(w[1] as StandardMaterial3D).albedo_color = Color(0.03, 0.03, 0.03).lerp((w[1] as StandardMaterial3D).emission, clampf(pulse / 2.0, 0.0, 1.0))
+			(w[1] as StandardMaterial3D).albedo_color = Color(0.1, 0.075, 0.05).lerp((w[1] as StandardMaterial3D).emission, clampf(pulse / 2.0, 0.0, 1.0))
 			if w[0]:
 				(w[0] as OmniLight3D).light_energy = pulse * 0.9
 

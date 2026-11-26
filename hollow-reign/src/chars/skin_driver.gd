@@ -9,6 +9,7 @@ extends RefCounted
 
 const HEIGHT := 1.95          # metres, to match the procedural rig's proportions
 const ELBOW_MIN := 0.7        # radians: an elbow is never folded tighter than this
+const KNEE := 0.075           # metres from a knee joint to the outside of the knee
 const SOLE := 0.012           # metres kept between the measured sole and the floor (the measured points are a sample)
 
 var root: Node3D              # the instanced model
@@ -190,6 +191,16 @@ func drive(j: Dictionary) -> Dictionary:
 	# pose had it, the hand targets ride with the shoulders, so an arm is neither folded into the chest nor pulled straight.
 	var tr: Vector3 = to_skel * j.hand_r + (_fk_origin("RightArm") - sh_r0) * float(j.get("follow_r", 1.0))
 	var tl: Vector3 = to_skel * j.hand_l + (_fk_origin("LeftArm") - sh_l0) * float(j.get("follow_l", 1.0))
+	# a hand (or a claw) does not go into the floor
+	for side: String in ["Right", "Left"]:
+		var hb: Vector3 = back * (tr if side == "Right" else tl)
+		var least: float = float(ball(side + "Hand", back)[1]) * 0.9
+		if hb.y < least:
+			hb.y = least
+			if side == "Right":
+				tr = to_skel * hb
+			else:
+				tl = to_skel * hb
 	var hr := _limb("RightArm", "RightForeArm", "RightHand", tr, q * Vector3(0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
 	var hl := _limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * Vector3(-0.7, -0.8, 0.35), 0.985, ELBOW_MIN)
 	if whole:
@@ -274,6 +285,20 @@ func hand_axis(side: String) -> Vector3:
 	var h := skel.get_bone_global_pose(bone[side + "Hand"])
 	return (_back.basis * (h.basis.orthonormalized() * ((rest[side + "Hand"] as Transform3D).basis.orthonormalized().inverse() * (ax[0] as Vector3)))).normalized()
 
+## How a bone has been turned from its rest pose, as a rotation in rig body space.
+func turn(name: String) -> Basis:
+	var r := _back.basis.orthonormalized()
+	return r * (skel.get_bone_global_pose(bone[name]).basis.orthonormalized() * (rest[name] as Transform3D).basis.orthonormalized().inverse()) * r.inverse()
+
+## How far what the named bone carries reaches from the bone along `dir` (rig body space, the model at rest), in metres.
+func extent(name: String, dir: Vector3) -> float:
+	var pts: PackedVector3Array = _contact.get(name, PackedVector3Array())
+	var t: Transform3D = _back * Transform3D((rest[name] as Transform3D).basis, Vector3.ZERO)
+	var m := 0.0
+	for p in pts:
+		m = maxf(m, (t.basis * p).dot(dir))
+	return m
+
 ## A bone's frame in rig body space (no scale).
 func frame(name: String) -> Transform3D:
 	var g := skel.get_bone_global_pose(bone[name])
@@ -281,7 +306,7 @@ func frame(name: String) -> Transform3D:
 
 ## A rough ball round what the named bone carries: [centre, radius] in rig body space.
 var _ball := {}
-func ball(name: String) -> Array:
+func ball(name: String, back: Transform3D = _back) -> Array:
 	if not _ball.has(name):
 		var pts: PackedVector3Array = _contact.get(name, PackedVector3Array())
 		var c := Vector3.ZERO
@@ -294,7 +319,7 @@ func ball(name: String) -> Array:
 			far = maxf(far, c.distance_to(p))
 		_ball[name] = [c, lerpf(mean, far, 0.5)]
 	var e: Array = _ball[name]
-	return [_back * (skel.get_bone_global_pose(bone[name]) * (e[0] as Vector3)), float(e[1]) * _back.basis.get_scale().y]
+	return [back * (skel.get_bone_global_pose(bone[name]) * (e[0] as Vector3)), float(e[1]) * back.basis.get_scale().y]
 
 # ---------------------------------------------------------------- grounding
 ## The floor is y = 0 of the rig body space. Nothing the model is made of may go under it.
@@ -438,9 +463,18 @@ func _plant(back: Transform3D, q: Basis, whole: bool) -> void:
 ## (a knee in a deep lunge); figures in a whole-body clip (falls, rolls, deaths) at every part.
 func _ground(back: Transform3D, q: Basis, whole: bool, settle: bool) -> void:
 	var low := 1e9
-	for nm: String in _contact:
-		if whole or nm.ends_with("Leg") or nm.ends_with("Foot"):
+	if whole:
+		for nm: String in _contact:
 			low = minf(low, _low(nm, back))
+	else:
+		# the feet are already planted; what is left is a knee driven into the floor by a deep lunge
+		for side: String in ["Left", "Right"]:
+			low = minf(low, (back * skel.get_bone_global_pose(bone[side + "Leg"]).origin).y - KNEE)
+		# and whatever hangs from the hips and thighs (a long skirt, a fauld), by a small amount at most
+		var hang := 0.0
+		for nm2: String in ["Hips", "LeftUpLeg", "RightUpLeg"]:
+			hang = minf(hang, _low(nm2, back))
+		low = minf(low, maxf(hang, -0.03))
 	if low > 1e8:
 		return
 	low -= SOLE

@@ -1354,6 +1354,28 @@ func t_struggle() -> void:
 	run_for(tt, 2.5, tb)
 	ok(int(tt.stats.get("struggles", 0)) == 1 and int(tt.stats.get("struggles_won", 0)) == 0, "a slow hand (4 taps a second) loses to the Sentinel")
 
+	# the HUD's TAP target: a touch on it is a tap, only while a struggle is on
+	var hud := DuelHud.new()
+	add_child(hud)
+	var taps := [0]
+	var press := InputEventScreenTouch.new()
+	press.pressed = true
+	press.position = Vector2(300, 300)
+	hud.struggle._gui_input(press)
+	ok(not hud.struggle.visible and hud.struggle.mouse_filter == Control.MOUSE_FILTER_IGNORE, "the TAP target is absent outside a struggle")
+	hud.struggle_begin(9, DuelSim.STRUGGLE_TIME, func(): taps[0] += 1)
+	ok(hud.struggle.visible and hud.struggle.mouse_filter == Control.MOUSE_FILTER_STOP and hud.struggle.size.x >= hud.root.size.x * 0.9, "it appears, large, when blades lock")
+	for i in 3:
+		hud.struggle._gui_input(press)
+	var lift := InputEventScreenTouch.new()
+	lift.pressed = false
+	hud.struggle._gui_input(lift)
+	ok(taps[0] == 3, "each touch on it is one tap (%d)" % taps[0])
+	hud.struggle_end()
+	hud.struggle._gui_input(press)
+	ok(taps[0] == 3 and not hud.struggle.visible and hud.struggle.mouse_filter == Control.MOUSE_FILTER_IGNORE, "and it is gone, and deaf, when the struggle ends")
+	hud.queue_free()
+
 func t_story_beat() -> void:
 	var s := mk("frostbound_king")
 	var beats: Array = []

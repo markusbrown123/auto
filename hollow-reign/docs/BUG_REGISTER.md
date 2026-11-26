@@ -61,3 +61,11 @@ Review items not yet acted on: one-frame pose pop on some clip changes; roll ani
   Usable now: walk, run, idle, fall, dive. "hurt" is a seated wounded loop, suited to the defeat screen. "slash" is not a sword cut.
 - Tripo's preset list has no directional sword set, parries, shield blocks or sidesteps.
 - A full sword-and-shield set (eight cuts, parries, blocks, steps, hit reactions) exists in commercial motion libraries whose licences permit shipping in a game. Buying one is a spending and licensing decision for the owner; it would import through the same bake step, because the skeleton already uses the standard humanoid bone names.
+
+### Armory suit inspection (2026-11-26, `marketing/armor_pass/knights.jpg`)
+All 16 suit models load on both bodies, read as distinct, and hold the sword in the hand. Open defects seen in the captures:
+- The shield covers the whole torso in the Armory pose, hiding the suit being chosen. Lower or hide the shield (or turn the knight) when the armour-suit slot is selected.
+- The shield hand's fingers show through the front face of the shield.
+- The knight is small in the Armory frame and the lower legs fall behind the dialogue line; needs the dedicated inspection framing.
+- Suits not yet checked in motion (authored clips, relic placement) or in a duel.
+

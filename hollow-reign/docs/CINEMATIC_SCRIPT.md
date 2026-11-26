@@ -41,21 +41,44 @@ Gaps and oddities in the file list
 
 ## 1. The opening
 
-Status: EXISTS (live) as a black screen with narration, then a camera move in the Sanctuary set (`src/main.gd`: fader at full black, `theme` music, `opening`, fade over 2.5 s, camera move, `awakening`, `first_road`). The shot list below is PLANNED and would replace the black screen.
+Status: **EXISTS (live)** since the flow pass of 2026-11-26, in three scenes staged in real time: `src/cine/opening.gd`, `src/cine/awakening.gd`, `src/cine/approach.gd`. Step-by-step flow, lengths and joins are in `docs/FLOW.md`. The earlier version (a black screen with narration, then a camera move in the Sanctuary set) is gone, and so is the Sanctuary as the first place a new knight sees.
 
-| # | Framing | Camera | Dur. | Action | Audio |
+Stills of every shot were looked at during the pass (`marketing/flow_pass/`). Nobody has listened to it: timing against the recorded lines is by the line on screen, not by ear.
+
+### 1a. The fall (`opening.gd`, about 39 s, skippable after 2 s, first new journey only)
+
+Built in one set, the `throne` arena, relit. The planned shot list (a walled city, a crowd at a gate, a time-lapse) needed sets that do not exist; this tells the same six lines in the hall where the story ends, without naming it.
+
+| # | Line | Framing | Camera | Action | Status |
 |---|---|---|---|---|---|
-| O1 | Black | — | 4 s | Nothing. | [Music] `theme` solo cello enters. [Dialogue] `opening_01` |
-| O2 | ELS, a walled city at dusk, lit windows | Slow push in | 5 s | Lights come on in rows, too regular for torches. | [Dialogue] `opening_02` |
-| O3 | MS, a row of identical thrones, figures seated, faces in shadow | Lateral track | 9 s | The figures do not move. Dust does. | [Dialogue] `opening_03`. [Cinematics] low machine hum |
-| O4 | LS, a crowd with torches at a gate | Handheld drift | 5 s | The gate gives. | [Dialogue] `opening_04`. [Cinematics] crowd, distant, filtered |
-| O5 | ELS, the same city, dark, overgrown | Static, time-lapse of seasons | 9 s | Three hundred years pass: snow, green, snow. | [Dialogue] `opening_05`. [Music] theme falls back to solo cello |
-| O6 | CU, a dead indicator on a stone wall | Static | 3 s | It lights. | [Dialogue] `opening_06`. [Cinematics] `cine_crown_wake` single tone. Music cuts to silence |
-| O7 | MCU, the resurrection chamber, lid cracked, the knight's hand on the rim | Slow tilt up to the face/helm | 8 s | The Unbound sits up. Light from old machinery flickers. | [Dialogue] `awakening` begins (`awakening_01` "Can you hear me?"). [Ambience] `amb_sanctuary` |
-| O8 | MS, knight seated on the chamber edge; a wall speaker grille behind | Slow orbit, 30° | 18 s | The exchange. The knight looks at their own hands on `awakening_06`. | [Dialogue] `awakening_02` … `awakening_07`. [Music] `hub` enters under the last line |
-| O9 | LS from behind the knight, a stair up to daylight | Static, then follow | 15 s | The knight stands, takes the sword from the rack, climbs. | [Dialogue] `first_road`. [Combat/Ambience] `foot_stone`, `armor_move` |
+| 1 | `opening_01` | ELS, the hall at its height from the doors: banners, fires, the seat at the far end | Slow push in and down | — | EXISTS (live) |
+| 2 | `opening_02` | Low angle from the aisle floor up at the seat | Creep forward, tilt up | — | EXISTS (live) |
+| 3 | `opening_03` | MS, a line of armoured figures (guardian models, standing), dark against firelight | Lateral track, 10.5 s | They do not move. | EXISTS (live) |
+| 4 | `opening_04` | LS down the aisle from the doors | Handheld drift forward | A red light grows from behind the camera and flickers; the hall reddens. | EXISTS (live) |
+| 5 | `opening_05` | The shot-1 view, cold, fogged, fires dead, the figures fallen | Dip through black, then pull back | — | EXISTS (live) |
+| 6 | `opening_05` (second half) | CU from floor height on one fallen figure | Slow drift | — | EXISTS (live) |
+| 7 | `opening_06` | Floor level down the dark aisle | Creep forward, tilt up | Lamps set in the floor come on in sequence toward the seat; the seat lights, teal. Hold, cut to black. | EXISTS (live) |
 
-Proposed footage route: O2–O6 generated (places and distant history, the use `CINEMATIC_COMBAT.md` recommends for generation); O7–O9 in-engine so both knights and their equipment are exact.
+Not built from the earlier plan: the city exterior (O2), the crowd itself (O4, now only its light), the passing seasons (O5). Music: `theme` in from the first frame, out on the cut to black. The "single tone" on shot 7 is a pitched-down stock chime, a placeholder.
+
+### 1b. The chamber (`awakening.gd`, about 36 s plus one tap)
+
+New set: the `chamber` arena theme (`_layout_chamber` in `src/world/arena.gd`). The knight is the chosen body in the equipped armour.
+
+| # | Line | Framing | Camera | Action | Status |
+|---|---|---|---|---|---|
+| A1 | `awakening_01`, `_02` | MCU, low: the knight seated on the floor against the cradle | Slow drift back | One amber light comes up from black. The wall grille glows when Lyra speaks. | EXISTS (live) |
+| A2 | `awakening_03` | MCU → MS | Pull back and up, 3.8 s | The knight gets up (`wounded` → `idle`, 2.6 s). | EXISTS (live) |
+| A3 | `awakening_04` | MS | Hold | The knight turns toward the voice. | EXISTS (live) |
+| A4 | `awakening_05` | OTS toward the grille | Slow drift | — | EXISTS (live) |
+| A5 | `awakening_06` | CU, the helm | Slow drift | (The planned look at their own hands is not animated.) | EXISTS (live) |
+| A6 | `awakening_07` | LS: knight, cradle, the sword in its block, the door | Slow drift | Light rises on the sword; `hub` enters. Then the prompt: a ring on the sword. | EXISTS (live) |
+| A7 | — | MS by the block | Ease in | On the tap the knight walks to the block and takes sword and shield. | EXISTS (live) |
+| A8 | `first_road` | From behind the knight | Rides with the knight | The door slides up, daylight; the knight walks out; white. | EXISTS (live) |
+
+### 1c. The walk out (`approach.gd`, about 6 s)
+
+From white, behind the walking knight at the same offset as A8, across the first stretch of the Fallen Courtyard to the first stop, where the road screen takes over the same place with no cut. EXISTS (live). The planned stair up to daylight (O9) is the doorway and a short passage.
 
 ---
 
@@ -72,6 +95,8 @@ Status: EXISTS (in-engine render), seven clips of 6.0 s. Each plays once in full
 | `courtyard_road_4` | 4 Gate Passage / Murder Hole | Into the narrow gate passage. | Follow | 2 | `courtyard_4` | Same |
 | `courtyard_road_5` | 5 Kneel | To the chapel alcove and the candle. | Follow | 1 | `courtyard_5` | Same |
 | `courtyard_road_6` | 6 The Inner Ward | Into the inner ward; the Sentinel standing at his post. | Follow, hotspot sits higher in frame (y 0.443) | 1 | `courtyard_6` | Same |
+
+On the real-time road (`src/ui/explore.gd`, the default) there is no footage: since the flow pass the foe of each fight stands at its marker, and choosing the fight gives a 1.7 s low-angle look at it before the duel (EXISTS (live)); at stage 1 the finding of the Witness is staged at the fallen statue head (camera ease, the mask on the stones, an amber light, `witness_discovery`, then the mask is worn). The filmed road below plays `witness_discovery` as dialogue only.
 
 To verify by viewing: that each clip's content matches its stage prompt; that feet do not slide; that the footstep timer lands on visible footfalls (it is not derived from the animation, so it probably does not).
 

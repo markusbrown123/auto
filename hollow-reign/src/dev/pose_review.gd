@@ -35,8 +35,140 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(_out)
 	_zoom = float(_args.get("zoom", "1.0"))
 	_room()
+	if _args.has("relic"):
+		_relic_sheet()
+		return
 	_make_look()
+	if _args.has("versus"):
+		_versus()
+		return
 	_run()
+
+## Two fighters at duelling distance: the knight cuts the foe, then the foe cuts the knight; frames around contact.
+##   --versus=<foe id> [--gap=2.6] [--nobite] [--dirs=R,D]
+func _versus() -> void:
+	var foe: Dictionary = Db.foes[str(_args.versus)]
+	var look2: Dictionary = foe.rig.duplicate()
+	for candidate in ["res://assets/models/%s.glb" % str(_args.versus), "res://assets/models/cls_%s.glb" % str(foe.get("cls", "")).to_lower().replace("-", "_")]:
+		if ResourceLoader.exists(candidate) and str(foe.rig.get("kind", "")) != "dragon":
+			look2["skin"] = candidate
+			break
+	var carried: String = Duel.BOSS_WEAPON.get(str(_args.versus), Duel.FOE_WEAPON.get(str(foe.rig.get("weapon", "")), ""))
+	if carried != "":
+		look2.merge(Duel.weapon_model(carried))
+	var dragon := str(foe.rig.get("kind", "")) == "dragon"
+	var gap := float(_args.get("gap", str(2.5 + (float(foe.rig.scale) - 1.0) * 1.5)))
+	for d: String in str(_args.get("dirs", "R,D")).split(","):
+		for who in 2:
+			for c in get_children():
+				if c is FighterRig or c is DragonRig:
+					c.free()
+			var a := FighterRig.new()
+			add_child(a)
+			a.build(_look, false)
+			a.position = Vector3(0, 0, gap * 0.5)
+			a.walking = true
+			a.combat_steps = true
+			var b: Node3D = DragonRig.new() if dragon else FighterRig.new()
+			add_child(b)
+			b.call("build", look2, true)
+			b.position = Vector3(0, 0, -gap * 0.5)
+			b.rotation.y = PI
+			if not _args.has("gap"):
+				# the duel steps the attacker to exactly striking distance (Duel._footwork)
+				gap = (a.reach() + 0.18 * float(foe.rig.scale)) if who == 0 else ((float(b.call("reach")) + 0.22) if b is FighterRig else gap)
+				a.position.z = gap * 0.5
+				b.position.z = -gap * 0.5
+			if _args.has("nobite"):
+				a.auto_bite = false
+				if b is FighterRig:
+					b.auto_bite = false
+			rig = a
+			for i in 14:
+				await get_tree().process_frame
+			var times: Array = [0.3, 0.37, 0.43, 0.5] if who == 0 else [0.78, 0.86, 0.93, 1.0]
+			if who == 0:
+				a.swing(DIRS[d], 0.55)
+			else:
+				b.call("telegraph", DIRS[d], 0.8, 0.3, "bite" if dragon and d == "D" else "slash")
+			var t := 0.0
+			var tiles: Array = []
+			while not times.is_empty():
+				await get_tree().process_frame
+				var att: Node3D = a if who == 0 else b
+				if att is FighterRig and (att as FighterRig).is_striking():
+					var fwd: Vector3 = -att.global_transform.basis.z.normalized()
+					print("reach %s t=%.2f mid=%.2f tip=%.2f hand=%.2f  rig.reach()=%.2f gap=%.2f" % ["knight" if who == 0 else "foe", t, (att.call("blade_mid") - att.global_position).dot(fwd), (att.call("blade_tip") - att.global_position).dot(fwd), ((att as FighterRig).weapon_r.global_position - att.global_position).dot(fwd), float(att.call("reach")), gap])
+				if t >= float(times[0]) - 0.001:
+					times.pop_front()
+					a.time_scale = 0.0
+					b.set("time_scale", 0.0)
+					for v: Vector3 in [Vector3(1, 0, 0), Vector3(0.6, 0.5, 0.65)]:
+						cam.size = (3.3 + gap * 0.5) * maxf(1.0, float(foe.rig.scale) * 0.75) / _zoom
+						var centre := Vector3(0, cam.size * 0.36, 0)
+						cam.position = centre + v.normalized() * 30.0
+						cam.look_at(centre)
+						_floor.position = Vector3(0, -3.0, 0)
+						await RenderingServer.frame_post_draw
+						await RenderingServer.frame_post_draw
+						tiles.append(get_viewport().get_texture().get_image())
+					a.time_scale = 1.0
+					b.set("time_scale", 1.0)
+					await get_tree().process_frame
+				t += 1.0 / 30.0
+			var w: int = tiles[0].get_width()
+			var h: int = tiles[0].get_height()
+			var sheet := Image.create(w * 4, h * 2, false, Image.FORMAT_RGB8)
+			for i in tiles.size():
+				(tiles[i] as Image).convert(Image.FORMAT_RGB8)
+				sheet.blit_rect(tiles[i], Rect2i(0, 0, w, h), Vector2i((i / 2) * w, (i % 2) * h))
+			sheet.save_png("%s/versus_%s__%s_%s%s.png" % [_out, str(_args.versus), "knight_cuts" if who == 0 else "foe_cuts", d, "_nobite" if _args.has("nobite") else ""])
+	get_tree().quit()
+
+## The Witness relic on its own, as the rig places it (0.4 m tall, no turn), from -Z, +X, +Z and above,
+## with a red ball 5 cm out along +Z so the mask's real front can be told.
+func _relic_sheet() -> void:
+	var r := PropModel.scenery(self, "res://assets/models/witness_relic.glb", 0.4, Vector3.ZERO, 0.0)
+	var mark := MeshInstance3D.new()
+	var sm := SphereMesh.new()
+	sm.radius = 0.01
+	sm.height = 0.02
+	mark.mesh = sm
+	var mm := StandardMaterial3D.new()
+	mm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mm.albedo_color = Color(1, 0, 0)
+	mark.material_override = mm
+	mark.position = Vector3(0, 0.2, 0.15)
+	add_child(mark)
+	if _args.has("eyes"):
+		var e: PackedStringArray = str(_args.eyes).split(",")
+		for sx: float in [-1.0, 1.0]:
+			var m2 := MeshInstance3D.new()
+			m2.mesh = sm
+			var gm := StandardMaterial3D.new()
+			gm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+			gm.albedo_color = Color(0, 1, 0)
+			m2.material_override = gm
+			m2.position = Vector3(sx * float(e[0]), float(e[1]), float(e[2]))
+			add_child(m2)
+	_floor.visible = false
+	var tiles: Array = []
+	for v: Vector3 in [Vector3(0, 0, -1), Vector3(1, 0, 0), Vector3(0, 0, 1), Vector3(0, 1, 0.001)]:
+		cam.size = 0.6
+		cam.position = Vector3(0, 0.2, 0) + v.normalized() * 5.0
+		cam.look_at(Vector3(0, 0.2, 0))
+		await RenderingServer.frame_post_draw
+		await RenderingServer.frame_post_draw
+		tiles.append(get_viewport().get_texture().get_image())
+	var w: int = tiles[0].get_width()
+	var h: int = tiles[0].get_height()
+	var sheet := Image.create(w * 4, h, false, Image.FORMAT_RGB8)
+	for i in 4:
+		(tiles[i] as Image).convert(Image.FORMAT_RGB8)
+		sheet.blit_rect(tiles[i], Rect2i(0, 0, w, h), Vector2i(i * w, 0))
+	sheet.save_png("%s/relic.png" % _out)
+	print("relic ", r)
+	get_tree().quit()
 
 func _room() -> void:
 	var env := Environment.new()

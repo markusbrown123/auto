@@ -29,7 +29,7 @@ func _init(s: DuelSim, st: int = Style.SKILLED, seed_value: int = 1) -> void:
 func _on_ev(n: StringName, d: Dictionary) -> void:
 	if n == &"struggle_start":
 		_tap_t = 0.3                      # the moment it takes to see what has happened
-		if sim.force_struggle:
+		if OS.get_cmdline_user_args().has("--struggle"):
 			print("struggle_start frame=%d t=%.1f" % [Engine.get_process_frames(), Engine.get_process_frames() / 30.0])      # dev: where to point a capture
 		_plan = {}
 		return

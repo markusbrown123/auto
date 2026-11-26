@@ -256,13 +256,26 @@ Measured from the downloaded files:
 - **Root motion.** The `_RM` files move `root`; the plain files keep `root` still. Use the plain files with the current bake step, which only keeps the Hips position.
 - **Loops.** UAL marks loops with a `_Loop` suffix, which can drive the `LOOPS` list. UAL attacks come as hit plus `_Rec` recovery, which suits combo cancelling.
 - **KayKit zero-length clips.** `T-Pose`, `Death_A_Pose` and other `*_Pose` clips have duration 0 and should be skipped.
-- **FBX packs.** The Game Dev Hero files are FBX. Godot 4.6 imports FBX natively, and `FBXDocument` has the same interface as `GLTFDocument`, so the bake script needs only the loader swapped. This was not tested here.
+- **FBX packs.** The Game Dev Hero files are FBX. `tools/bake_anims.gd` reads them with `FBXDocument` / `FBXState` (same calls as `GLTFDocument`); tested, see "Game Dev Hero packs: bought and inspected" below.
 - **Alternative route.** Godot's importer can retarget on import with a `BoneMap` and `SkeletonProfileHumanoid`; the map table above is what that needs. That would mean moving files out of `art/`, which the importer ignores today.
 
 ## Blockers and things not verified
 
 - No proxy refusals for download hosts. `mocap.cs.cmu.edu` failed TLS verification through the proxy; `helpx.adobe.com` answered with Adobe's own "Access Denied"; one Rokoko URL returned 404.
 - Mixamo needs an Adobe login. Rokoko and ActorCore need accounts. Fab needs an Epic login. Unity Asset Store needs a Unity login. None were attempted.
-- Not inspected: any paid file. The Game Dev Hero Mixamo zips, the Explosive full pack's skeleton, and the exact heights of the shield blocks are taken from the sellers' descriptions.
+- Not inspected: the Explosive full pack's skeleton (paid, not bought). The Game Dev Hero packs have since been bought and inspected (next section).
 - The Quaternius website now carries a "Quaternius Asset License (QAL) v1.0" page dated 2026-08-28 that forbids reselling the assets as assets. The UAL pages and the `License.txt` inside both downloaded zips still say CC0, and the FAQ says each kit is "either CC0 or the QAL License". Keep the downloaded `License.txt` files as the record of the terms we obtained them under.
-- Not retargeted or played back in Godot yet. The map and the model-space delta note come from reading the GLB data, not from a test bake.
+- (Superseded: the free libraries and the bought packs are baked and played in the game; `ANIMATION_LIBRARY.md`.)
+
+## Game Dev Hero packs: bought and inspected
+
+The three packs recommended above were bought and unpacked to `art/anim_src/gamedevhero/` (git-ignored; **the licence forbids passing the source files on, and this repository is public, so no FBX or per-file conversion may be tracked**). Full clip list with lengths: `ANIMATION_PACKS.md`. What is baked into the game and how: `ANIMATION_LIBRARY.md`.
+
+What the files turned out to be, measured with `tools/dev/fbx_probe.gd` and `tools/bake_anims.gd -- --catalogue=`:
+
+- 1,181 FBX files: 522 in place (`IP/`) and 659 with root motion (`RM/`). One clip per file, 30 fps, no mesh.
+- Skeleton: 66 bones, plain Mixamo names with **no** `mixamorig` prefix (`Hips`, `Spine`..`Spine2`, `Neck`, `Head`, `LeftShoulder`..`LeftHand`, fingers `*Hand{Thumb,Index,Middle,Ring,Pinky}1-4`, `LeftUpLeg`..`LeftToe_End`) under one extra `root` bone. No bone map is needed.
+- Rest pose: T-pose, metres, Y up, **facing +Z** (left arm on +X), hips 1.043 m, all bone scales 1. The tool's toe-direction test turns it onto -Z like the other sources.
+- Tracks: rotation on every bone, position on `root` and `Hips` only. In `IP` files `root` stays at the origin; in `RM` files it carries the travel.
+- **Corrections to the table above** (it was written from the sellers' pages): hit reactions, deaths, dodges, dashes, rolls, flips, block hits and parries exist **only in the root-motion files**. Sword and shield has 2 block poses (`Block1`, `Block2`) with a hit on each and one parry, not 7 blocks. The two-handed pack has one parry (start / complete / back) and a parry-attack, not 5 parries. The dual pack has **no block or parry at all**. The `_React` files are the victim's half of each attack (paired), not the attacker's.
+- The attacks are showy: many turn the fighter's back to the opponent in a spin, and many chain two to four cuts. Rising cuts (up, up-left, up-right) barely exist in the sword-and-shield pack.

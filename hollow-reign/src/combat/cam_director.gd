@@ -275,14 +275,14 @@ func _shot_establish() -> Dictionary:
 ## Near the ground in front of the foe, looking up its body. Rises a little.
 func _shot_reveal() -> Dictionary:
 	var d := shot_t * (0.0 if _calm else 0.12)
-	return {"pos": _F + Vector3(1.15 * _big, 0.3 + d, 1.4 * _big + 0.35 - d * 0.5),
+	return {"pos": _F + Vector3(0.7 * _big, 0.3 + d, 1.4 * _big + 0.35 - d * 0.5),
 		"look": _F + Vector3(0, _H * 0.9, 0), "fov": 48.0, "roll": 0.04, "rate": 30.0}
 
 ## The foe's helm (or a dragon's head). Slow push.
 func _shot_close_up() -> Dictionary:
 	var h := _foe_head()
 	var d := shot_t * (0.0 if _calm else 0.1)
-	return {"pos": h + Vector3(0.55 * _big, -0.14 * _big, (1.35 - d) * _big), "look": h, "fov": 34.0, "rate": 30.0}
+	return {"pos": h + Vector3(0.8 * _big, 0.1 * _big, (1.25 - d) * _big), "look": h, "fov": 32.0, "rate": 30.0}
 
 ## Over the knight's sword shoulder at the foe.
 func _shot_ots() -> Dictionary:
@@ -290,7 +290,8 @@ func _shot_ots() -> Dictionary:
 
 ## Over the foe's shoulder at the knight, from the same side of the line.
 func _shot_reverse() -> Dictionary:
-	return {"pos": _F + Vector3(0.75 * _big, _H * 1.05 + 0.2, -1.0 * _big), "look": _K + Vector3(-0.3, 1.25, 0), "fov": 44.0, "rate": 30.0}
+	var h := _foe_head()
+	return {"pos": h + Vector3(0.55 * _big, 0.15 * _S, -0.45 * _S), "look": _K + Vector3(-0.3, 1.25, 0), "fov": 44.0, "rate": 30.0}
 
 ## The standard view: low at the knight's sword flank, looking up, so the knight sits in the lower
 ## left corner and the foe towers. `back` widens (metres), `round` swings toward side-on.
@@ -299,8 +300,9 @@ func _combat(back: float, round: float, lift: float, dfov: float) -> Dictionary:
 	if OS.has_environment("HR_CAM"):      # dev tuning: side,back,y,fov,look_h,look_x
 		var v := OS.get_environment("HR_CAM").split_floats(",")
 		c = {"side": v[0], "back": v[1], "y": v[2], "fov": v[3], "look_h": v[4], "look_x": v[5]}
-	var far := 0.1 if duel.sim.b_far else 0.0
-	back += far - 0.18 * _tight + 0.7 * _wide
+	back += -0.18 * _tight + 0.7 * _wide
+	if duel.sim.b_far:
+		dfov -= 5.0      # it has backed off: hold it large with the lens, not by chasing it
 	var pos := Vector3(float(c.side) + _side + duel.p_side * 0.6 + round + 0.25 * _wide, float(c.y) + lift + 0.1 * _wide, _K.z + float(c.back) + back)
 	var look := Vector3(float(c.look_x) + _side * 0.4, _H * float(c.look_h), _F.z + duel.f_back * 0.4)
 	var fov := float(c.fov) + dfov - 2.5 * _tight + 3.0 * _wide
@@ -352,7 +354,7 @@ func _shot_clash() -> Dictionary:
 ## Blade lock: close two-shot from the side at blade height.
 func _shot_struggle() -> Dictionary:
 	var m := _mid(1.15 + 0.1 * (_S - 1.0))
-	return {"pos": m + Vector3(1.9 + 0.5 * _big, -0.15, 0.45), "look": m, "fov": 48.0, "roll": -0.03, "rate": 5.0}
+	return {"pos": m + Vector3(2.1 + 0.7 * _big, -0.15, 0.45), "look": m, "fov": 48.0, "roll": -0.03, "rate": 5.0}
 
 ## Phase change: a low hero angle on the foe.
 func _shot_phase() -> Dictionary:

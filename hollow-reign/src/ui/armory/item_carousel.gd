@@ -55,14 +55,8 @@ func _init() -> void:
 	_vp.positional_shadow_atlas_size = 0
 	_vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 	add_child(_vp)
-	var env := Environment.new()
-	env.background_mode = Environment.BG_CLEAR_COLOR
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color("#4a4640")
-	env.ambient_light_energy = 1.0
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	var we := WorldEnvironment.new()
-	we.environment = env
+	we.environment = ItemModel.studio_env()
 	_vp.add_child(we)
 	var cam := Camera3D.new()
 	cam.fov = FOV

@@ -9,7 +9,10 @@ extends SceneTree
 ## Writes assets/models/parts/<body>_<suit>_<slot>.res (ArrayMesh, no material), <body>_<suit>_mat.res (material)
 ## and <body>_under.res (the base body without its helmet: a dark undersuit shown under mixed parts).
 ## Run:  Godot --headless --path . -s tools/armor_split.gd -- [--only=m_frost,f_ash] [--margin=0.22] [--out=dir] [--despike=all] [--tag=_ds]
-const SUITS := ["base", "garrison", "ash", "black", "vigil", "frost", "regal", "wyrm", "hollow"]
+const SUITS := ["crownless", "base", "garrison", "ash", "black", "vigil", "frost", "regal", "wyrm", "hollow"]
+## The suit whose skeleton and body every other suit is fitted to (--host=base restores the first study's choice).
+## "crownless" is the sleek benchmark knight (knight_<body>_v3.glb): flat boots, compact visored helm, undersuit gaps.
+var host_suit := "crownless"
 const SLOTS := ["helm", "chest", "shoulders", "arms", "legs", "boots"]
 const CHILD := {"Spine": "Spine1", "Spine1": "Spine2", "Spine2": "Neck", "Neck": "Head",
 	"LeftShoulder": "LeftArm", "LeftArm": "LeftForeArm", "LeftForeArm": "LeftHand", "RightShoulder": "RightArm", "RightArm": "RightForeArm", "RightForeArm": "RightHand",
@@ -48,6 +51,7 @@ func _init() -> void:
 		var kv := a.trim_prefix("--").split("=")
 		args[kv[0]] = kv[1] if kv.size() > 1 else "1"
 	out_dir = str(args.get("out", out_dir))
+	host_suit = str(args.get("host", host_suit))
 	if not out_dir.ends_with("/"):
 		out_dir += "/"
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -56,7 +60,7 @@ func _init() -> void:
 	var margin := float(args.get("margin", "0.22"))
 	var tag := str(args.get("tag", ""))
 	for body: String in ["m", "f"]:
-		var host := _read(body, "base")
+		var host := _read(body, host_suit)
 		var hull := {}
 		for suit: String in SUITS:
 			var id := "%s_%s" % [body, suit]
@@ -64,7 +68,7 @@ func _init() -> void:
 			if not wanted and (tag != "" or args.has("nohull")):
 				continue
 			var t0 := Time.get_ticks_msec()
-			var src := host if suit == "base" else _read(body, suit)
+			var src := host if suit == host_suit else _read(body, suit)
 			var m := _conform(src, host)
 			if tag == "" and not args.has("nohull"):
 				_hull_add(hull, m, host)
@@ -80,7 +84,7 @@ func _init() -> void:
 				total += part.idx.size() / 3
 				line += "%s %d  " % [SLOTS[r], part.idx.size() / 3]
 				_save(part, "%s%s%s_%s.res" % [out_dir, id, tag, SLOTS[r]], id)
-			if suit == "base" and tag == "":
+			if suit == host_suit and tag == "":
 				# the Skin every part is bound with: the base skeleton's own rest pose, bone by name
 				var sk := Skin.new()
 				for i in (host.names as Array).size():
@@ -104,7 +108,7 @@ func _init() -> void:
 
 # ---------------------------------------------------------------- reading
 func _read(body: String, suit: String) -> Dictionary:
-	var path := "res://assets/models/knight_%s%s.glb" % [body, "" if suit == "base" else "_" + suit]
+	var path := "res://assets/models/knight_%s%s.glb" % [body, "" if suit == "base" else ("_v3" if suit == "crownless" else "_" + suit)]
 	var root: Node = (load(path) as PackedScene).instantiate()
 	var skel: Skeleton3D = root.find_children("*", "Skeleton3D", true, false)[0]
 	var mi: MeshInstance3D = root.find_children("*", "MeshInstance3D", true, false)[0]

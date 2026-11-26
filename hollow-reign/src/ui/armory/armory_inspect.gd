@@ -58,14 +58,8 @@ func _ready() -> void:
 		vp.msaa_3d = Viewport.MSAA_DISABLED if q == 0 else Viewport.MSAA_4X
 		vp.positional_shadow_atlas_size = 0
 		svc.add_child(vp)
-		var env := Environment.new()
-		env.background_mode = Environment.BG_CLEAR_COLOR
-		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		env.ambient_light_color = Color("#4a4640")
-		env.ambient_light_energy = 0.6
-		env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 		var we := WorldEnvironment.new()
-		we.environment = env
+		we.environment = ItemModel.studio_env()
 		vp.add_child(we)
 		_cam = Camera3D.new()
 		_cam.fov = 30.0

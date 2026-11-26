@@ -880,11 +880,6 @@ func _process(delta: float) -> void:
 		_focus_tick = 0.2
 	_aim(_first_frame)
 	_first_frame = false
-	# while a companion's line is on screen the bottom rows step back, so the subtitle is read cleanly over them
-	var dim: float = 0.12 if Story.busy else 1.0
-	_acts.modulate.a = lerpf(_acts.modulate.a, dim, 1.0 - exp(-delta * 8.0))
-	_foot.modulate.a = _acts.modulate.a
-
 	_run_demo(delta)
 
 # ================================================================ scripted input for captures

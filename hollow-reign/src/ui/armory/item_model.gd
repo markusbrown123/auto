@@ -17,6 +17,35 @@ static var _pending := {}        # path -> true
 const ORE_GEAR := {"steel": "steel", "m_iron": "graphite", "m_silver": "silver", "m_scale": "bronze", "m_rime": "frost"}
 const ORE_OWN := {"iron": Color(0.8, 0.78, 0.76), "m_glass": Color(0.8, 0.74, 1.12)}
 
+static var _env: Environment
+
+## The light a piece is looked at in: a soft box all the way round for the metal to reflect (a polished flat with
+## nothing to mirror goes black), over a transparent ground. Shared by the carousel, the previews and Inspect.
+static func studio_env() -> Environment:
+	if _env:
+		return _env
+	var sky_mat := ProceduralSkyMaterial.new()
+	sky_mat.sky_top_color = Color(0.42, 0.45, 0.52)
+	sky_mat.sky_horizon_color = Color(0.66, 0.67, 0.7)
+	sky_mat.ground_horizon_color = Color(0.5, 0.5, 0.52)
+	sky_mat.ground_bottom_color = Color(0.2, 0.2, 0.23)
+	sky_mat.sky_curve = 0.35
+	sky_mat.ground_curve = 0.25
+	sky_mat.sun_angle_max = 0.0
+	var sky := Sky.new()
+	sky.sky_material = sky_mat
+	sky.radiance_size = Sky.RADIANCE_SIZE_64
+	var env := Environment.new()
+	env.background_mode = Environment.BG_CLEAR_COLOR
+	env.sky = sky
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color("#4a4640")
+	env.ambient_light_energy = 0.8
+	env.reflected_light_source = Environment.REFLECTION_SOURCE_SKY
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	_env = env
+	return env
+
 ## The name the item's hand-modelled piece is built under in assets/models/gear/, "" when it has none.
 static func gear_id(it: Dictionary) -> String:
 	var g := str(it.get("gear_id", ""))
@@ -195,6 +224,23 @@ static func build(it: Dictionary, body: String = "m", dark: bool = false, mod = 
 				sh.transform = Transform3D(face.scaled(Vector3.ONE * k2), -(face * Vector3(float(bc[0]), float(bc[1]), float(bc[2]))) * k2)
 				pivot.add_child(sh)
 				ok = true
+		"weapon":
+			var cls: String = it.cls
+			var wm: Dictionary = Duel.weapon_model(str(it.id))
+			var grip: float = float(PropModel.GRIP.get(cls, 0.11))
+			var kk: float = 1.3 / float(PropModel.LENGTH.get(cls, 1.1))
+			var nn: int = 2 if cls == "dual" else 1
+			for i in nn:
+				var arm := Node3D.new()
+				pivot.add_child(arm)
+				arm.rotation.z = 0.0 if nn == 1 else (0.2 if i == 0 else -0.2)
+				var holder := Node3D.new()
+				arm.add_child(holder)
+				holder.position = Vector3(0.0 if nn == 1 else (0.12 if i == 0 else -0.12), -1.3 * (0.5 - grip), 0.04 * i)
+				ok = PropModel.weapon(holder, wm.weapon_model, cls, wm.get("weapon_tint"), kk) > 0.0
+			tilt.rotation.z = -PI * (0.26 if nn == 1 else 0.0)      # point up and to the right, as on a rack
+		"shield":
+			ok = PropModel.shield(pivot, list[0], 0.98)
 		"chest":
 			ok = _suit(pivot, list[0], it, body)
 	if not ok:

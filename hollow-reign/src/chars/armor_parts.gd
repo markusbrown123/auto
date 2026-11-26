@@ -13,7 +13,15 @@ extends RefCounted
 ## stored in that skeleton's rest pose and bound with the one shared Skin, so no per-part retargeting happens here.
 const DIR := "res://assets/models/parts/"
 const SLOTS := ["helm", "chest", "shoulders", "arms", "legs", "boots"]
-const SUITS := ["base", "garrison", "ash", "black", "vigil", "frost", "regal", "wyrm", "hollow"]
+const SUITS := ["crownless", "base", "garrison", "ash", "black", "vigil", "frost", "regal", "wyrm", "hollow"]
+## The suit every part is fitted to: its model is the body the rig drives (host_path), its own six parts are what an
+## empty slot wears (there is no bare head, hand or foot), and the undersuit is its body drawn in.
+## "crownless" = the sleek benchmark knights (knight_<body>_v3.glb). tools/armor_split.gd --host must agree.
+static var host := "crownless"
+
+## The model whose skeleton the parts are bound to: the skin a rig that wears parts must attach.
+static func host_path(b: String) -> String:
+	return "res://assets/models/knight_%s%s.glb" % [b, "_v3" if host == "crownless" else ""]
 ## Parts that only look right next to another part of the same suit (docs/MODULAR_ARMOR.md): suit -> {slot: [slots that
 ## must be the same suit]}. An equipment screen should show such a piece as "worn with ..." and not as a free piece.
 ##   vigil helm     is a hood whose mantle is the shoulders part: alone it ends in a torn hem in the air
@@ -81,7 +89,7 @@ static func mesh_of(b: String, suit: String, slot: String) -> ArrayMesh:
 
 static func skin_of(b: String) -> Skin:
 	if not _skin.has(b):
-		_skin[b] = load("%s%s_skin.res" % [DIR, b])
+		_skin[b] = load("%s%s_skin.res" % [dir, b])
 	return _skin[b]
 
 static func finish_of(suit: String) -> Dictionary:
@@ -92,7 +100,7 @@ static func finish_of(suit: String) -> Dictionary:
 static func _material(b: String, suit: String) -> ShaderMaterial:
 	var key := "%s_%s" % [b, suit.get_slice("_", 0)]      # (a suffix names a variant of the same suit's meshes)
 	if not _mat.has(key):
-		var path := "%s%s_mat.res" % [DIR, key]
+		var path := "%s%s_mat.res" % [dir, key]
 		_mat[key] = load(path) if ResourceLoader.exists(path) else null
 	return _mat[key]
 
@@ -100,6 +108,7 @@ static func _material(b: String, suit: String) -> ShaderMaterial:
 static func flush() -> void:
 	_mesh.clear()
 	_mat.clear()
+	_skin.clear()
 
 # ---------------------------------------------------------------- dressing
 ## Dresses a base-knight skeleton. `loadout` maps slot -> suit id; a missing or empty slot is left bare (undersuit).
@@ -223,7 +232,7 @@ void fragment() {
 }"
 
 func _build_under() -> void:
-	var path := "%s%s_under.res" % [DIR, body]
+	var path := "%s%s_under.res" % [dir, body]
 	if not ResourceLoader.exists(path):
 		return
 	if _under_shader == null:
@@ -238,7 +247,7 @@ func _build_under() -> void:
 	var m := ShaderMaterial.new()
 	m.shader = _under_shader
 	m.set_shader_parameter("shrink", UNDER_SHRINK)
-	var base := _material(body, "base")
+	var base := _material(body, host)
 	if base:
 		m.set_shader_parameter("normal_tex", base.get_shader_parameter("normal_tex"))
 	under.set_surface_override_material(0, m)

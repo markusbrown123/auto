@@ -108,6 +108,23 @@ func _ready() -> void:
 	show_tab("Journey")
 	_greet()
 
+## While somebody is speaking the whole hub draws its bottom edge up above the subtitle, so a line is never read
+## across the buttons (the armoury's actions, the shop's Buy) and they are never hidden by it.
+const SPEECH_LIFT := 122.0
+var _lift := 0.0
+var _base_bottom := -1
+
+func _process(delta: float) -> void:
+	if frame == null:
+		return
+	if _base_bottom < 0:
+		_base_bottom = frame.get_theme_constant("margin_bottom")
+	var want: float = SPEECH_LIFT if Story.busy else 0.0
+	if is_equal_approx(_lift, want):
+		return
+	_lift = want if bool(Game.settings.reduce_motion) or absf(_lift - want) < 0.5 else lerpf(_lift, want, 1.0 - exp(-delta * 9.0))
+	frame.add_theme_constant_override("margin_bottom", _base_bottom + int(_lift))
+
 func _greet() -> void:
 	await get_tree().create_timer(1.0).timeout
 	if not is_inside_tree() or Story.busy:

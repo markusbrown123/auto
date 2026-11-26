@@ -8,7 +8,7 @@ var item_id := ""
 var body := "m"
 var dark := false
 var mod = null                    # a forge state to show instead of the profile's ({blade_tier, grip_tier, ore, keen})
-var dist := 2.75                  # camera distance; the piece is about 1.3 units long
+var dist := 2.3                   # camera distance; the piece is about 1.3 units long
 var spin_speed := 0.5
 var has_piece := false
 var _vp: SubViewport
@@ -30,14 +30,8 @@ func _init() -> void:
 	_vp.positional_shadow_atlas_size = 0
 	_vp.render_target_update_mode = SubViewport.UPDATE_WHEN_VISIBLE
 	add_child(_vp)
-	var env := Environment.new()
-	env.background_mode = Environment.BG_CLEAR_COLOR
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color("#4a4640")
-	env.ambient_light_energy = 0.9
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	var we := WorldEnvironment.new()
-	we.environment = env
+	we.environment = ItemModel.studio_env()
 	_vp.add_child(we)
 	_cam = Camera3D.new()
 	_cam.fov = 30.0

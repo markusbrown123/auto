@@ -683,6 +683,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				_creature("effort" if a.kind != "slam" else "growl", -8.0, 1.2)      # it commits with its voice as well as its body
 		&"boss_strike":
 			_on_strike(d)
+		&"shield_charges": hud.shield_charges(d)
 		&"boss_combo":
 			if randf() < 0.5:
 				ring_dir = -ring_dir       # comes at you from the other side

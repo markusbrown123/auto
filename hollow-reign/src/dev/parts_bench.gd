@@ -17,6 +17,8 @@ const SEAMS := [["neck", "helm", "chest"], ["shoulder", "chest", "shoulders"], [
 const FOCUS := {"neck": ["Neck", 1.25], "shoulder": ["RightArm", 1.3], "elbow": ["RightForeArm", 1.2], "waist": ["Hips", 1.6], "ankle": ["RightFoot", 1.25], "upper": ["Spine2", 2.9]}
 
 func _ready() -> void:
+	ArmorParts.dir = str(args.get("parts_dir", ArmorParts.DIR))      # (a set cut another way: --host must name its host suit)
+	ArmorParts.host = str(args.get("host", ArmorParts.host))
 	_studio()
 	if args.has("measure"):
 		_measure()
@@ -58,7 +60,7 @@ func _studio() -> void:
 	cam.make_current()
 
 func _loadout() -> Dictionary:
-	var base := str(args.get("set", "base"))
+	var base := str(args.get("set", ArmorParts.host))
 	var tag := str(args.get("tag", ""))
 	var out := {}
 	for slot: String in ArmorParts.SLOTS:
@@ -79,7 +81,10 @@ func _rig(yaw_deg: float, x: float) -> FighterRig:
 	var rig := FighterRig.new()
 	add_child(rig)
 	var look: Dictionary = Duel.player_look()
-	look["skin"] = "res://assets/models/knight_%s%s.glb" % [body, ("_" + str(args.orig)) if args.has("orig") and str(args.orig) != "base" else ""]
+	look["skin"] = ArmorParts.host_path(body)
+	if args.has("orig"):
+		look["skin"] = "res://assets/models/knight_%s%s.glb" % [body, {"base": "", "crownless": "_v3"}.get(str(args.orig), "_" + str(args.orig))]
+	look.erase("parts")
 	look.erase("skin_tint")
 	rig.build(look, false)
 	rig.rotation.y = PI + deg_to_rad(yaw_deg)

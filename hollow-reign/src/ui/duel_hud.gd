@@ -24,9 +24,39 @@ class Pad extends Control:
 	var _teach_t := 0.0
 	var _hold_t := 0.0
 	const HOLD_FULL := 0.7
+	## The shield pad only: how many blows the shield will still stop (`pips_left` of `pips`), drawn as small
+	## diamonds over the pad so they fade with it. `notice` lights the pad for a moment when the count changes.
+	var pips := 0
+	var pips_left := 0
+	var notice := 0.0
+	var _pip_t := 9.0         # seconds since the count last changed
+	var _pip_at := -1         # the pip that changed
+	var _pip_gain := false
+	var _hit_t := 9.0         # seconds since a blow landed on a spent shield
+	func set_pips(left: int, of: int, struck_spent: bool = false, quiet: bool = false) -> void:
+		var was := pips_left
+		pips = of
+		pips_left = clampi(left, 0, of)
+		if not quiet and pips_left != was:
+			_pip_gain = pips_left > was
+			_pip_at = pips_left - 1 if _pip_gain else pips_left
+			_pip_t = 0.0
+			notice = 1.0
+		if struck_spent and not quiet:
+			_hit_t = 0.0
+			notice = 1.0
+		queue_redraw()
 	func _process(dt: float) -> void:
 		# near-invisible at rest, fully lit under the thumb, fading back afterwards
 		glow = 1.0 if held else maxf(0.0, glow - dt * 2.2)
+		if pips > 0:
+			_pip_t += dt
+			_hit_t += dt
+			# a change is held bright for a moment, then lets go; a spent shield never quite goes dark
+			notice = maxf(0.0, notice - dt * 0.8)
+			glow = maxf(glow, minf(1.0, notice * 1.6))
+			if pips_left == 0:
+				glow = maxf(glow, 0.45)
 		var rest: float = float(Game.settings.get("pad_opacity", 0.2))
 		if charge >= 1.0:
 			rest = maxf(rest, 0.8)      # a full burst or flame announces itself
@@ -66,14 +96,19 @@ class Pad extends Control:
 	func _draw() -> void:
 		var c := size * 0.5
 		var r := size.x * 0.5 - 2.0
+		var broken: bool = pips > 0 and pips_left == 0
 		draw_circle(c, r, Color(0.04, 0.04, 0.05, 0.62 if not held else 0.85))
-		draw_arc(c, r, 0, TAU, 48, UI.GOLD if held else UI.GOLD_DIM, 2.0, true)
-		if glow > 0.0:
+		draw_arc(c, r, 0, TAU, 48, (UI.CRIMSON.lightened(0.25) if broken else (UI.GOLD if held else UI.GOLD_DIM)), 2.0, true)
+		if pips > 0:
+			_draw_pips(c, r, broken)
+		if glow > 0.0 and not broken:
 			draw_arc(c, r - 3.0, 0, TAU, 48, Color(UI.GOLD.r, UI.GOLD.g, UI.GOLD.b, 0.45 * glow), 6.0, true)
 			draw_circle(c, r - 6.0, Color(UI.GOLD.r, UI.GOLD.g, UI.GOLD.b, 0.12 * glow))
 		if teach != "":
 			_draw_teach(c, r)
 		var col := UI.GOLD if held else UI.BONE
+		if broken:
+			col = Color(0.5, 0.42, 0.4)
 		if charge >= 0.0:
 			var full := charge >= 1.0
 			col = tint if full else Color(0.45, 0.44, 0.42)
@@ -101,7 +136,44 @@ class Pad extends Control:
 			"shield":
 				var pts := PackedVector2Array([c + Vector2(-s, -s), c + Vector2(s, -s), c + Vector2(s, s * 0.2), c + Vector2(0, s * 1.25), c + Vector2(-s, s * 0.2), c + Vector2(-s, -s)])
 				draw_polyline(pts, col, 3.0, true)
-				draw_line(c + Vector2(0, -s), c + Vector2(0, s * 1.2), col, 1.5, true)
+				if broken:
+					# spent: a crack down the face instead of the boss line
+					var crack := UI.CRIMSON.lightened(0.35)
+					draw_polyline(PackedVector2Array([c + Vector2(s * 0.25, -s), c + Vector2(-s * 0.2, -s * 0.35), c + Vector2(s * 0.22, s * 0.05), c + Vector2(-s * 0.12, s * 0.55), c + Vector2(0, s * 1.2)]), crack, 2.5, true)
+					draw_line(c + Vector2(-s * 0.2, -s * 0.35), c + Vector2(-s * 0.7, -s * 0.15), crack, 2.0, true)
+				else:
+					draw_line(c + Vector2(0, -s), c + Vector2(0, s * 1.2), col, 1.5, true)
+
+	## The blows the shield will still stop: diamonds on an arc over the pad. A used one is an outline; one coming
+	## back swells into place; the one just lost flares and empties. With reduced motion they simply change.
+	func _draw_pips(c: Vector2, r: float, broken: bool) -> void:
+		var still: bool = bool(Game.settings.get("reduce_motion", false))
+		var step := 0.3
+		var a0 := -PI * 0.5 - step * (pips - 1) * 0.5
+		var shake := Vector2.ZERO
+		if _hit_t < 0.3 and not still:
+			shake = Vector2(sin(_hit_t * 70.0) * 3.0 * (1.0 - _hit_t / 0.3), 0)
+		for i in pips:
+			var a := a0 + step * i
+			var at := c + Vector2(cos(a), sin(a)) * (r + 13.0) + shake
+			var d := 6.5
+			var full := i < pips_left
+			var col := UI.BONE.lerp(UI.GOLD, 0.45)
+			if i == _pip_at and _pip_t < 0.45 and not still:
+				var u := _pip_t / 0.45
+				if _pip_gain:
+					d *= lerpf(1.9, 1.0, u * u * (3.0 - 2.0 * u))
+					col = Color.WHITE.lerp(col, u)
+				else:
+					# the lost one: a white flare that empties
+					draw_circle(at, d * (1.0 + 1.6 * u), Color(1, 1, 1, 0.35 * (1.0 - u)))
+			var pts := PackedVector2Array([at + Vector2(0, -d), at + Vector2(d, 0), at + Vector2(0, d), at + Vector2(-d, 0)])
+			if full:
+				draw_colored_polygon(pts, col)
+			else:
+				draw_colored_polygon(pts, Color(0.03, 0.03, 0.04, 0.7))
+				pts.append(pts[0])
+				draw_polyline(pts, UI.CRIMSON.lightened(0.3) if broken else Color(0.6, 0.57, 0.5, 0.8), 1.5, true)
 
 	## The demonstration around a pad: a pulsing ring, plus a filling ring for "hold" or a double pulse and "x2" for a roll.
 	func _draw_teach(c: Vector2, r: float) -> void:
@@ -317,6 +389,7 @@ var _poise_t := 0.0
 var _toast_tw: Tween
 var _sub_tw: Tween
 var _phase_pips: HBoxContainer
+var keen_mark: Control          # shown while the equipped blade's sharpened edge lasts
 
 func _ready() -> void:
 	layer = 5
@@ -407,6 +480,20 @@ func _ready() -> void:
 	pl.add_child(st_bar)
 	status_label = UI.label("", 16, UI.FROST, "bold")
 	pl.add_child(status_label)
+
+	# a sharpened edge: a small mark beside the bars for as long as it lasts
+	var keen := HBoxContainer.new()
+	keen.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+	keen.offset_left = 260
+	keen.offset_top = -6
+	keen.add_theme_constant_override("separation", 4)
+	keen.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	keen.add_child(InvGlyph.new("keen", Color("#e8dcc0"), 0, 20.0))
+	keen.add_child(UI.label("KEEN", 22, Color("#e8dcc0"), "head"))
+	keen.modulate.a = 0.8
+	frame.add_child(keen)
+	keen_mark = keen
+	set_keen(not Game.profile.is_empty() and Game.profile.equipped.get("weapon") != null and int(Game.weapon_mods(str(Game.profile.equipped.weapon)).edge) > 0)
 
 	var pause := UI.button("II", 18, 52)
 	pause.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
@@ -514,7 +601,22 @@ func set_combat_visible(on: bool, time: float = 0.4) -> void:
 	controls.visible = on or controls.visible
 	swipe_input.mouse_filter = Control.MOUSE_FILTER_PASS if on else Control.MOUSE_FILTER_IGNORE
 
+func set_keen(on: bool) -> void:
+	keen_mark.visible = on
+
+## The sim's `shield_charges {left, max, spent}`: the pips by the shield pad follow it. Reaching none is said once
+## ("SHIELD SPENT"); a blow caught on a spent shield shakes the pad; a block coming back swells into place.
+func shield_charges(d: Dictionary) -> void:
+	var left := int(d.get("left", 0))
+	var was := pad_block.pips_left
+	pad_block.set_pips(left, int(d.get("max", 0)), bool(d.get("spent", false)))
+	if left == 0 and was > 0:
+		toast("SHIELD SPENT", UI.CRIMSON.lightened(0.4), 0.6)
+		Game.haptic(30, 0.5)
+
 func update_bars(sim: DuelSim, dt: float) -> void:
+	if pad_block.pips != sim.p_shield_max:
+		pad_block.set_pips(sim.p_shield, sim.p_shield_max, false, true)      # the fight's shield, before any blow
 	boss_bar.max_value = sim.b_hp_max
 	boss_bar.value = sim.b_hp
 	boss_ghost.max_value = sim.b_hp_max

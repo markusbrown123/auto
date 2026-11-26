@@ -1,0 +1,262 @@
+{
+ "Ainsley": {
+  "f0_median": 202.5,
+  "f0_p10": 166.7,
+  "f0_p90": 271.2,
+  "id": "731b4ffe-e95e-59f4-8c00-81608936091f",
+  "seconds": 6.61,
+  "speech_seconds": 4.64,
+  "voice_type": "preset",
+  "words_per_second": 3.45
+ },
+ "Archie": {
+  "f0_median": 141.6,
+  "f0_p10": 117.6,
+  "f0_p90": 225.4,
+  "id": "bd072316-f77c-588b-b6e5-e46b9b03d008",
+  "seconds": 6.35,
+  "speech_seconds": 4.28,
+  "voice_type": "preset",
+  "words_per_second": 3.74
+ },
+ "Arthur": {
+  "f0_median": 148.1,
+  "f0_p10": 106.2,
+  "f0_p90": 210.5,
+  "id": "30fc8796-ceb6-4a66-b3a7-4a145ef7f346",
+  "seconds": 6.61,
+  "speech_seconds": 5.13,
+  "voice_type": "preset",
+  "words_per_second": 3.12
+ },
+ "Benji": {
+  "f0_median": 129.0,
+  "f0_p10": 102.6,
+  "f0_p90": 186.0,
+  "id": "e6f9b893-51b1-51d3-afe9-9e0482cb7ac1",
+  "seconds": 6.03,
+  "speech_seconds": 4.47,
+  "voice_type": "preset",
+  "words_per_second": 3.58
+ },
+ "Brielle": {
+  "f0_median": 186.0,
+  "f0_p10": 148.1,
+  "f0_p90": 242.4,
+  "id": "a00bc7f3-0236-5e76-ac65-90137ce0f5a4",
+  "seconds": 6.92,
+  "speech_seconds": 5.1,
+  "voice_type": "preset",
+  "words_per_second": 3.14
+ },
+ "Celine": {
+  "f0_median": 153.8,
+  "f0_p10": 126.0,
+  "f0_p90": 246.2,
+  "id": "57ccb351-84d7-54ba-afd4-26b566ca6023",
+  "seconds": 6.92,
+  "speech_seconds": 5.08,
+  "voice_type": "preset",
+  "words_per_second": 3.15
+ },
+ "Cillian": {
+  "f0_median": 128.0,
+  "f0_p10": 86.5,
+  "f0_p90": 183.9,
+  "id": "d8ba9f14-8a24-44db-932b-99e16c45bd32",
+  "seconds": 6.61,
+  "speech_seconds": 4.82,
+  "voice_type": "preset",
+  "words_per_second": 3.32
+ },
+ "Delia": {
+  "f0_median": 177.8,
+  "f0_p10": 146.8,
+  "f0_p90": 246.2,
+  "id": "1550321e-7f5b-526e-b001-02328b03e9bc",
+  "seconds": 6.92,
+  "speech_seconds": 4.85,
+  "voice_type": "preset",
+  "words_per_second": 3.3
+ },
+ "Dylan": {
+  "f0_median": 128.0,
+  "f0_p10": 100.4,
+  "f0_p90": 210.5,
+  "id": "b847bc29-f184-583a-8ad9-d1f1e16d1a60",
+  "seconds": 6.27,
+  "speech_seconds": 4.82,
+  "voice_type": "preset",
+  "words_per_second": 3.32
+ },
+ "Elodie": {
+  "f0_median": 160.0,
+  "f0_p10": 111.1,
+  "f0_p90": 219.2,
+  "id": "8b95a259-62fd-545d-b0f0-7b521a972b6b",
+  "seconds": 7.16,
+  "speech_seconds": 4.9,
+  "voice_type": "preset",
+  "words_per_second": 3.27
+ },
+ "Faye": {
+  "f0_median": 210.5,
+  "f0_p10": 166.7,
+  "f0_p90": 275.9,
+  "id": "d198dc0b-c4e5-5198-aa1d-ecf5ca0927c4",
+  "seconds": 6.27,
+  "speech_seconds": 4.36,
+  "voice_type": "preset",
+  "words_per_second": 3.67
+ },
+ "Fraser": {
+  "f0_median": 122.6,
+  "f0_p10": 89.9,
+  "f0_p90": 196.8,
+  "id": "6705e465-7b52-5915-a1d8-b1222885e01d",
+  "seconds": 6.43,
+  "speech_seconds": 4.62,
+  "voice_type": "preset",
+  "words_per_second": 3.46
+ },
+ "Ginger": {
+  "f0_median": 148.1,
+  "f0_p10": 122.1,
+  "f0_p90": 195.1,
+  "id": "8d261e04-3a3a-5853-96fc-0d89cca28bb4",
+  "seconds": 6.77,
+  "speech_seconds": 5.25,
+  "voice_type": "preset",
+  "words_per_second": 3.05
+ },
+ "Giselle": {
+  "f0_median": 183.9,
+  "f0_p10": 150.2,
+  "f0_p90": 252.0,
+  "id": "9d3128b8-dd25-5158-9bdb-2e69ac8998b9",
+  "seconds": 6.69,
+  "speech_seconds": 4.21,
+  "voice_type": "preset",
+  "words_per_second": 3.8
+ },
+ "Grady": {
+  "f0_median": 118.5,
+  "f0_p10": 92.0,
+  "f0_p90": 164.8,
+  "id": "e2a2d2e6-9ed2-59cd-82af-feaa27f8a678",
+  "seconds": 6.69,
+  "speech_seconds": 4.95,
+  "voice_type": "preset",
+  "words_per_second": 3.23
+ },
+ "Helena": {
+  "f0_median": 188.2,
+  "f0_p10": 146.8,
+  "f0_p90": 246.2,
+  "id": "3c2b83c0-2e0a-5ae8-998a-a5fe71b7eccd",
+  "seconds": 6.77,
+  "speech_seconds": 4.52,
+  "voice_type": "preset",
+  "words_per_second": 3.54
+ },
+ "Holden": {
+  "f0_median": 112.7,
+  "f0_p10": 87.0,
+  "f0_p90": 160.0,
+  "id": "3c9d6053-6334-592c-8997-4e325286af3f",
+  "seconds": 6.43,
+  "speech_seconds": 4.98,
+  "voice_type": "preset",
+  "words_per_second": 3.21
+ },
+ "Isla": {
+  "f0_median": 173.9,
+  "f0_p10": 132.2,
+  "f0_p90": 225.4,
+  "id": "7367e919-3069-5a0b-939e-dfb1c0fd91b4",
+  "seconds": 6.69,
+  "speech_seconds": 5.28,
+  "voice_type": "preset",
+  "words_per_second": 3.03
+ },
+ "Juno": {
+  "f0_median": 183.9,
+  "f0_p10": 145.5,
+  "f0_p90": 262.3,
+  "id": "a3ce02fe-4d3e-55bc-b4d4-a4801b9acdb4",
+  "seconds": 6.61,
+  "speech_seconds": 4.46,
+  "voice_type": "preset",
+  "words_per_second": 3.59
+ },
+ "Maeve": {
+  "f0_median": 188.2,
+  "f0_p10": 130.9,
+  "f0_p90": 252.4,
+  "id": "64cf4f1a-61c8-5938-9aea-83d12b2e1d13",
+  "seconds": 6.43,
+  "speech_seconds": 4.86,
+  "voice_type": "preset",
+  "words_per_second": 3.29
+ },
+ "Nadine": {
+  "f0_median": 177.8,
+  "f0_p10": 135.6,
+  "f0_p90": 269.8,
+  "id": "165d9309-bb17-56ff-964a-5d6a38dab92f",
+  "seconds": 6.53,
+  "speech_seconds": 4.98,
+  "voice_type": "preset",
+  "words_per_second": 3.21
+ },
+ "Opal": {
+  "f0_median": 190.5,
+  "f0_p10": 137.9,
+  "f0_p90": 246.2,
+  "id": "66f35c82-2088-55eb-a0aa-7bf715dc03b7",
+  "seconds": 6.43,
+  "speech_seconds": 5.08,
+  "voice_type": "preset",
+  "words_per_second": 3.15
+ },
+ "Petra": {
+  "f0_median": 179.8,
+  "f0_p10": 146.8,
+  "f0_p90": 254.0,
+  "id": "0c63637d-2ecb-5bda-9bbe-38894aa9a876",
+  "seconds": 6.61,
+  "speech_seconds": 4.51,
+  "voice_type": "preset",
+  "words_per_second": 3.55
+ },
+ "Raina": {
+  "f0_median": 200.0,
+  "f0_p10": 168.4,
+  "f0_p90": 258.1,
+  "id": "1c3a4775-9afb-52c1-a2bf-b6543231a9a1",
+  "seconds": 6.27,
+  "speech_seconds": 4.64,
+  "voice_type": "preset",
+  "words_per_second": 3.45
+ },
+ "Reid": {
+  "f0_median": 153.8,
+  "f0_p10": 123.1,
+  "f0_p90": 207.8,
+  "id": "66469f5a-10db-586a-bab1-72f6ee66ba69",
+  "seconds": 6.84,
+  "speech_seconds": 4.92,
+  "voice_type": "preset",
+  "words_per_second": 3.25
+ },
+ "Romy": {
+  "f0_median": 183.9,
+  "f0_p10": 144.1,
+  "f0_p90": 250.0,
+  "id": "2e5f5f01-6d50-5335-a9ae-e8f81cd42342",
+  "seconds": 6.92,
+  "speech_seconds": 4.35,
+  "voice_type": "preset",
+  "words_per_second": 3.68
+ }
+}

@@ -133,6 +133,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	_begin_intro(bool(opts.get("skip_intro", false)) or training)
 	if training:
 		hud.show_training()
+		foe_rig.recover()
 
 ## Weapons that share another weapon's model, recoloured (their own concept could not be generated).
 const MODEL_ALIAS := {"w_censer_sword": ["w_vigil_edge", "#e0b060"], "w_monarch": ["w_starfall", "#f0d080"],
@@ -331,7 +332,8 @@ func _footwork(dt: float) -> void:
 				ring += ring_dir * float(foot.circle) * late * dt
 				f_back_t = (1.7 if sim.b_far else float(foot.keep) / late)
 			DuelSim.B.WINDUP:
-				f_back_t = -0.15 if str(sim.b_attack.get("kind", "")) in ["lunge", "thrust"] else 0.05
+				# step to exactly striking distance, so the blade arrives where the knight is
+				f_back_t = clampf(foe_rig.reach() + 0.22 - gap - p_back, -1.0, 1.4) if foe_rig is FighterRig else 0.05
 			DuelSim.B.RECOVER:
 				f_back_t = 1.7 if sim.b_far else 0.1
 			DuelSim.B.SHIFT:
@@ -411,8 +413,9 @@ func _camera(delta: float) -> void:
 			if sim.b_far:
 				zoom_t -= 0.3
 			_cam_zoom = lerpf(_cam_zoom, zoom_t, 1.0 - exp(-delta * 2.5))
-			pos = Vector3(1.15 + _cam_side, 1.62, pz + 1.55 - _cam_zoom * 0.5)
-			look = Vector3(0.38 + _cam_side * 0.4, foe_h * 0.82, -pz)
+			# stays behind and to the side of wherever the knight actually stands, so the knight never hides the foe
+			pos = Vector3(1.55 + _cam_side + p_side * 0.6, 1.72, pz + p_back + 2.0 - _cam_zoom * 0.5)
+			look = Vector3(0.15 + _cam_side * 0.4, foe_h * 0.74, -pz - f_back * 0.6)
 			fov = 64.0 - _cam_zoom * 5.0
 	var k := 1.0 - exp(-delta * rate)
 	if _cam_pos == Vector3.ZERO:
@@ -508,7 +511,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			if randf() < 0.5:
 				ring_dir = -ring_dir       # comes at you from the other side
 		&"player_swing":
-			p_back_t = -0.3                # step into the cut
+			# step in until the blade will reach the body
+			p_back_t = clampf(player_rig.reach() + 0.18 * float(foe.rig.scale) - gap - f_back, -1.1, 0.3)
 			player_rig.swing(DuelSim.dir_vec(d.dir), d.time)
 			Sfx.play("swing", -4.0, 1.25 - float(d.time) * 0.8)
 		&"player_parry_swing":
@@ -645,9 +649,17 @@ func _on_strike(d: Dictionary) -> void:
 	hud.cue.clear()
 	_set_foe_blade_warning(false)
 	var meet := player_rig.chest_point().lerp(foe_rig.blade_mid(), 0.45) + Vector3(0, 0.1, 0)
+	if foe_rig is FighterRig and str(d.result) in ["parried", "blocked", "guard_break"] and str(a.get("kind", "")) not in ["thrust", "lunge"]:
+		foe_rig.halt(0.3 if d.result == "parried" else 0.2)
+	if foe_rig is FighterRig:
+		# the real point on the foe's blade nearest the knight, so contact is where it looks like it is
+		var a0: Vector3 = foe_rig.weapon_r.global_position
+		var a1: Vector3 = foe_rig.blade_tip()
+		meet = a0.lerp(a1, 0.72)
 	match d.result:
 		"parried":
 			player_rig.guard()
+			player_rig.clash(meet, 0.3 if d.perfect else 0.22)
 			sparks(meet, Vector3(0, 0.8, 0.6), 34 if d.perfect else 16, Color(1.0, 0.85, 0.55), 7.0 if d.perfect else 5.0)
 			Sfx.play("clash", 0.0)
 			shake(0.35 if d.perfect else 0.2)
@@ -662,6 +674,7 @@ func _on_strike(d: Dictionary) -> void:
 				_slow = 0.28
 				Game.haptic(15, 0.4)
 		"blocked":
+			player_rig.brace(meet, 0.34 if heavy else 0.26)
 			sparks(meet, Vector3(0, 0.5, 1), 8, Color(1, 0.8, 0.6), 3.5)
 			p_back_t = 0.75 if heavy else 0.4          # the blow shoves the player back across the stones
 			Sfx.play("block", 0.0)

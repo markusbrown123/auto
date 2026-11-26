@@ -544,6 +544,51 @@ func hurt() -> void:
 func flash(v: float = 1.0) -> void:
 	_flash = v
 
+## How far in front of its own centre this fighter's blade reaches at the middle of a cut, in world units.
+func reach() -> float:
+	return (0.05 + 0.5 * arm_scale + weapon_len * 0.8) * scale.x
+
+var _pin_t := 0.0
+var _pin_hand := Vector3.ZERO
+var _pin_blade := Vector3.UP
+var _brace_t := 0.0
+var _brace_at := Vector3.ZERO
+
+## Hold the blade for `hold` seconds so that it crosses `world_point` — where another weapon is.
+func clash(world_point: Vector3, hold: float = 0.2) -> void:
+	var local: Vector3 = body.to_local(world_point)
+	var shoulder := Vector3(0.25, 1.35, 0.0)
+	var dir := Vector3(-0.3 * signf(local.x + 0.001), 0.85, -0.4).normalized()
+	var hand := local - dir * weapon_len * 0.55
+	var max_reach := (UPPER + FORE) * arm_scale - 0.03
+	if (hand - shoulder).length() > max_reach:
+		hand = shoulder + (hand - shoulder).normalized() * max_reach
+		dir = (local - hand).normalized()
+	_pin_hand = hand
+	_pin_blade = dir
+	_pin_t = hold
+	_solve(0.0)      # take the pose now, so the contact shows during the hit-stop
+
+## The blow has been stopped: hold the blade at the point of the cut where it reaches furthest forward,
+## instead of letting it sweep on through whatever stopped it.
+func halt(hold: float = 0.2) -> void:
+	var ap := _arc_point(-0.12, 0.0)
+	_pin_hand = ap[0]
+	_pin_blade = ap[1]
+	_pin_t = hold
+	_solve(0.0)
+
+## Put the shield where the blow lands.
+func brace(world_point: Vector3, hold: float = 0.3) -> void:
+	var local: Vector3 = body.to_local(world_point)
+	var shoulder := Vector3(-0.25, 1.35, 0.0)
+	var max_reach := (UPPER + FORE) * arm_scale - 0.06
+	_brace_at = shoulder + (local - shoulder).limit_length(max_reach)
+	_brace_at.z = minf(_brace_at.z, -0.25)
+	_brace_t = hold
+	_hand_l = _brace_at
+	_solve(0.0)
+
 func dodge(side: float) -> void:
 	_dodge_side = side
 	_go(Mode.DODGE, 0.5)
@@ -639,8 +684,9 @@ func _solve(dt: float) -> void:
 		Mode.GUARD:
 			hand_t.y += breathe
 			if two_handed:
-				hand_t = Vector3(0.1, 0.98 + breathe, -0.36)
-				blade_t = Vector3(-0.15, 0.9, -0.4).normalized()
+				# long blades are held at the hip with the point forward and up at the foe, clear of the wielder's own head
+				hand_t = Vector3(0.2, 0.9 + breathe, -0.32)
+				blade_t = Vector3(-0.18, 0.5, -0.85).normalized()
 		Mode.WINDUP:
 			var rise := minf(_dur * 0.5, 0.5)
 			var sweep_start := _dur - _swing * 0.5
@@ -808,6 +854,11 @@ func _pose() -> void:
 	var sh_l := chest_pos + cb * Vector3(-sw, 0.24, 0)
 	# --- right arm + weapon
 	var reach := (UPPER + FORE) * arm_scale - 0.015
+	if _pin_t > 0.0:
+		# contact: for a moment the blade is held exactly where it met the other weapon
+		_pin_t -= get_process_delta_time() * time_scale
+		_hand = _pin_hand
+		_blade = _pin_blade
 	var hr := sh_r + (_hand - sh_r).limit_length(reach)
 	_arm("r", sh_r, hr, Vector3(0.7, -0.8, 0.35))
 	weapon_r.transform = Transform3D(_basis_y(_blade, Vector3(0, 0, -1) if absf(_blade.z) < 0.9 else Vector3.RIGHT), hr)
@@ -825,6 +876,11 @@ func _pose() -> void:
 			bl = ap[1]
 	elif has_shield:
 		hl = Vector3(-0.05, 1.3, -0.42) if blocking else Vector3(-0.3, 1.08, -0.24)
+		if _brace_t > 0.0:
+			# the shield goes to where the blow lands, then is driven back toward the body by it
+			_brace_t -= get_process_delta_time() * time_scale
+			var k := clampf(_brace_t / 0.3, 0.0, 1.0)
+			hl = _brace_at + Vector3(0, -0.04, 0.16) * (1.0 - k)
 	else:
 		hl = Vector3(-0.32, 0.86, -0.05)
 	if _walk_amount > 0.01 and not two_handed and not blocking:

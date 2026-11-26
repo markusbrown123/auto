@@ -233,6 +233,22 @@ func _dev_boot() -> void:
 		_swap(d)
 		d.setup(_args.demo, {"autoplay": true, "seed": int(_args.get("seed", "3")), "skip_intro": _args.has("skip_intro"), "bot_style": int(_args.get("bot", "3"))})
 		d.finished.connect(func(won, _s): print("duel finished won=", won))
+		if _args.has("snap"):
+			# contact review: save a frame at each named moment (--snap=parried,blocked,hit,dodged,boss_hit --snapdir=dir)
+			var want: PackedStringArray = str(_args.snap).split(",")
+			var counts := {}
+			var dir: String = _args.get("snapdir", "user://snap")
+			DirAccess.make_dir_recursive_absolute(dir)
+			d.sim.ev.connect(func(n: StringName, e: Dictionary):
+				var kind := str(e.get("result", "")) if n == &"boss_strike" else str(n)
+				if not want.has(kind) or int(counts.get(kind, 0)) >= int(_args.get("snapmax", "3")):
+					return
+				counts[kind] = int(counts.get(kind, 0)) + 1
+				var idx: int = counts[kind]
+				for i in int(_args.get("snapdelay", "2")):
+					await RenderingServer.frame_post_draw
+				get_viewport().get_texture().get_image().save_png("%s/%s_%d.png" % [dir, kind, idx])
+				print("snap ", kind, " ", idx))
 		return
 	match _args.screen:
 		"title": show_title()

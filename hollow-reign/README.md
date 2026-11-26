@@ -1,4 +1,4 @@
-# Eternal Edge
+# Hollow Reign
 
 A dark-fantasy sword-duelling action RPG for iPhone and iPad. Swipe to cut, swipe against a blow to parry it, step aside, hold the line, and learn each guardian's rhythm. Premium, offline, no ads, no purchases, no accounts.
 

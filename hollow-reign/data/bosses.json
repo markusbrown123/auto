@@ -13825,7 +13825,7 @@
   },
   {
    "id": "cinder_wyrm",
-   "name": "Vharn, the Cinder Wyrm",
+   "name": "Veyrath, the Cinder Wyrm",
    "title": "Last of the Royal Brood",
    "region": "roost",
    "boss": true,
@@ -14540,7 +14540,7 @@
   },
   {
    "id": "rimewyrm",
-   "name": "The Rimewyrm",
+   "name": "Skeldra, the White Ruin",
    "title": "What the King Kept Chained",
    "region": "citadel",
    "boss": true,

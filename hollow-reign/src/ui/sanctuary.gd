@@ -24,7 +24,7 @@ func _ready() -> void:
 	add_child(backdrop)
 	backdrop.build("sanctuary")
 	backdrop.move_camera(Vector3(2.5, 1.45, 3.4), Vector3(1.15, 1.05, 0), true)
-	Sfx.music("sanctuary")
+	Sfx.music_for("hub", "sanctuary")
 	Sfx.ambience("fire")
 	layer = CanvasLayer.new()
 	add_child(layer)
@@ -72,6 +72,17 @@ func _ready() -> void:
 		if Game.region_unlocked(r.id):
 			sel_region = r.id
 	show_tab("Journey")
+	_greet()
+
+func _greet() -> void:
+	await get_tree().create_timer(1.0).timeout
+	if not is_inside_tree() or Story.busy:
+		return
+	if Game.just_died:
+		Game.just_died = false
+		Story.play("rebirth_%d" % (randi() % 6))
+	elif Game.profile.cleared.has("courtyard"):
+		Story.play("sanctuary_return")
 
 func _on_profile() -> void:
 	backdrop.refresh_knight()
@@ -300,6 +311,11 @@ func _item_detail(det: VBoxContainer, it: Dictionary, compare: bool) -> void:
 
 # ================================================================ Blacksmith
 func _tab_blacksmith() -> void:
+	if Story.pending("orren_intro"):
+		Story.play("orren_intro")
+	elif randf() < 0.25 and not Story.busy:
+		Story.play("orren_idle")
+	content.add_child(UI.title("Orren's Forge", 22))
 	var modes := _row()
 	content.add_child(modes)
 	for mname in ["Upgrade", "Wares"]:

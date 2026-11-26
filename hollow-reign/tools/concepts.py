@@ -64,15 +64,35 @@ W = {
  "s_scale": SH + "rounded shield made from one huge dark red dragon scale with a ridged surface, rimmed in dark metal.",
 }
 C.update(W)
+# ---- scenery: one set piece each, isolated, for the Fallen Courtyard kit
+EFRAME = (" A single isolated object, complete and fully visible, three-quarter front view, standing on nothing, plain light grey background, "
+          "soft even daylight, realistic weathered materials, high detail, game environment asset. No people, no text, no logos.")
+ESTYLE = "Environment set piece for a sci-fantasy action game: an ancient mountain fortress in ruin, pale weathered limestone, moss and ivy, subtle hints of forgotten advanced technology. "
+E = {
+ "env_wall": "A long straight section of ruined fortress curtain wall with crenellations, one end collapsed into a jagged breach, ivy climbing it.",
+ "env_gate": "A massive ruined fortress gatehouse: a tall pointed stone archway flanked by two square buttress towers, a bent iron portcullis half raised, thin lines of faint blue light in the seams of the arch.",
+ "env_statue": "A colossal broken statue of an armoured king in sleek stylised plate, standing on a square plinth, the head and one arm missing, cracked and overgrown with moss.",
+ "env_statue_head": "The fallen head of a colossal stone statue lying on its side: a smooth stylised crowned helm with a blank faceplate, cracked, half covered in moss.",
+ "env_tower": "A tall round ruined fortress tower with a broken open top, narrow arrow slits, part of a wooden hoarding still clinging on, ivy up one side.",
+ "env_pillar": "A thick broken stone column on a square base, snapped two thirds of the way up, its fallen top section lying beside it, moss in the cracks.",
+ "env_rubble": "A low heap of large fallen limestone blocks and broken masonry with grass and small ferns growing between the stones.",
+ "env_tree": "An old gnarled leafless tree with a twisted thick trunk and spreading bare branches, pale bark, exposed roots gripping broken paving stones.",
+ "env_brazier": "A tall sleek wrought-iron brazier on three slender legs with a wide shallow bowl holding glowing coals and a small flame.",
+ "env_banner": "A tall iron banner pole on a stone base with a long tattered faded crimson banner bearing a simple crown emblem, torn and sun-bleached.",
+ "env_obelisk": "A half-buried ancient machine disguised as a stone obelisk: a tall four-sided pale stone pillar split open at one corner to reveal smooth dark metal and thin glowing blue circuit lines inside.",
+ "env_peak": "A single huge jagged rocky mountain peak with sheer grey cliffs and patches of snow near the summit, sparse pine trees at its base.",
+ "env_chest": "An ornate closed treasure chest of dark wood with sleek silver metal banding and a glowing blue seam under the lid.",
+}
+C.update(E)
 
 def gen(cid):
     out = "art/concept/%s_v1.png" % cid
     if os.path.exists(out):
         return cid, "exists"
-    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else (STYLE + C[cid] + FRAME)
+    prompt = (WSTYLE + C[cid] + WFRAME) if cid in W else ((ESTYLE + C[cid] + EFRAME) if cid in E else (STYLE + C[cid] + FRAME))
     r = subprocess.run(["higgsfield", "generate", "create", "gpt_image_2_6", "--prompt", prompt,
-                        "--aspect_ratio", "9:16" if cid in W and not cid.startswith("s_") else "3:4",
-                        "--resolution", "1k" if cid in W else "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True)
+                        "--aspect_ratio", "9:16" if cid in W and not cid.startswith("s_") else ("1:1" if cid in E else "3:4"),
+                        "--resolution", "1k" if (cid in W or cid in E) else "2k", "--wait", "--wait-timeout", "10m"], capture_output=True, text=True, stdin=subprocess.DEVNULL)
     url = r.stdout.strip().splitlines()[-1] if r.stdout.strip() else ""
     if not url.startswith("http"):
         return cid, "FAILED: " + (r.stderr or r.stdout)[-200:]
@@ -81,6 +101,8 @@ def gen(cid):
 ids = sys.argv[1:] or list(C)
 if ids == ["weapons"]:
     ids = list(W)
+if ids == ["env"]:
+    ids = list(E)
 with cf.ThreadPoolExecutor(4) as ex:
     for cid, status in ex.map(gen, ids):
         print(cid, status, flush=True)

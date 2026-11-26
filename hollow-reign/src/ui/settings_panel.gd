@@ -7,6 +7,7 @@ const ROWS := [
 	["fps", "Frame rate", [30, 60, 120], "Higher rates use more battery"],
 	["music", "Music", "slider", ""],
 	["sfx", "Sound", "slider", ""],
+	["voice", "Voices", "slider", ""],
 	["haptics", "Haptics", "toggle", "Vibration on impacts"],
 	["shake", "Camera shake", "slider", ""],
 	["hints", "Combat prompts", "toggle", "Show the parry direction and timing ring"],

@@ -3,6 +3,7 @@ extends Node
 
 var current: Node
 var _fader: ColorRect
+var _fade_tw: Tween
 var _shots: Array = []
 var _shot_dir := ""
 var _t := 0.0
@@ -43,7 +44,10 @@ func _swap(next: Node) -> void:
 	current = next
 	add_child(next)
 	_fader.color.a = 1.0
-	create_tween().tween_property(_fader, "color:a", 0.0, 0.7)
+	if _fade_tw:
+		_fade_tw.kill()
+	_fade_tw = create_tween()
+	_fade_tw.tween_property(_fader, "color:a", 0.0, 0.7)
 
 func _fade_then(f: Callable) -> void:
 	var tw := create_tween()
@@ -62,12 +66,25 @@ func show_title() -> void:
 	_swap(t)
 
 func _opening() -> void:
+	# darkness and the narrator; then the chamber, and a voice in the walls
 	show_sanctuary()
-	Overlays.message(current, "You Wake", [
-		"Cold stone. A candle that has never gone out.",
-		"You were a knight of this kingdom. You fell defending it, or failing to.",
-		"Its rulers did not die. They should have.",
-		["Go and correct that.", UI.GOLD]], "Rise", func(): pass)
+	var s: Sanctuary = current
+	s.layer.visible = false
+	s.backdrop.move_camera(Vector3(0.4, 1.0, 1.6), Vector3(1.0, 1.5, 0), true)
+	if _fade_tw:
+		_fade_tw.kill()
+	_fader.color.a = 1.0
+	Sfx.music_for("theme", "menu")
+	await get_tree().create_timer(1.2).timeout
+	await Story.play("opening")
+	create_tween().tween_property(_fader, "color:a", 0.0, 2.5)
+	s.backdrop.move_camera(Vector3(2.5, 1.45, 3.4), Vector3(1.15, 1.05, 0))
+	await get_tree().create_timer(1.6).timeout
+	await Story.play("awakening")
+	await Story.play("first_road")
+	if is_instance_valid(s):
+		s.layer.visible = true
+		Sfx.music_for("hub", "sanctuary")
 
 func show_sanctuary() -> void:
 	var s := Sanctuary.new()

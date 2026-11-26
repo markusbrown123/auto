@@ -19,7 +19,7 @@ func _ready() -> void:
 	backdrop.rig.rotation.y = PI * 0.15
 	backdrop.rig.position = Vector3(1.4, 0, 0)
 	backdrop.move_camera(Vector3(-0.6, 1.0, 4.4), Vector3(0.2, 1.75, -3.0), true)
-	Sfx.music("menu")
+	Sfx.music_for("theme", "menu")
 	Sfx.ambience("wind")
 	layer = CanvasLayer.new()
 	add_child(layer)
@@ -52,10 +52,10 @@ func _clear() -> void:
 		c.queue_free()
 
 func _logo() -> void:
-	var t := UI.label("ETERNAL EDGE", 68, UI.BONE, "title")
+	var t := UI.label("HOLLOW REIGN", 68, UI.BONE, "title")
 	t.add_theme_constant_override("outline_size", 0)
 	menu.add_child(t)
-	var sub := UI.title("Fall. Rise. Cut deeper.", 17, UI.GOLD)
+	var sub := UI.title("Three hundred years of silence", 17, UI.GOLD)
 	menu.add_child(sub)
 	menu.add_child(UI.spacer(26))
 

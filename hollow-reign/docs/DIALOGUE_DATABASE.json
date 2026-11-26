@@ -1,0 +1,735 @@
+{
+ "lines": {
+  "opening_01": {
+   "speaker": "narrator",
+   "text": "Once, men begged the gods to spare them from death.",
+   "dir": "slow, grave"
+  },
+  "opening_02": {
+   "speaker": "narrator",
+   "text": "Then men became gods.",
+   "dir": "quiet awe"
+  },
+  "opening_03": {
+   "speaker": "narrator",
+   "text": "They built bodies that could not grow old. Thrones that could not be inherited. Kingdoms that could not escape them.",
+   "dir": "measured"
+  },
+  "opening_04": {
+   "speaker": "narrator",
+   "text": "But even eternity could not protect them from the people they ruled.",
+   "dir": "harder"
+  },
+  "opening_05": {
+   "speaker": "narrator",
+   "text": "The crowns shattered. Their kingdoms fell. And for three hundred years, humanity believed itself free.",
+   "dir": "elegiac"
+  },
+  "opening_06": {
+   "speaker": "narrator",
+   "text": "We were wrong.",
+   "dir": "near whisper"
+  },
+  "awakening_01": {
+   "speaker": "lyra",
+   "text": "Can you hear me?",
+   "dir": "tentative, through old machinery"
+  },
+  "awakening_02": {
+   "speaker": "player",
+   "text": "Who are you?",
+   "dir": "hoarse, just woken"
+  },
+  "awakening_03": {
+   "speaker": "lyra",
+   "text": "Someone who has been waiting a very long time.",
+   "dir": "relief held back"
+  },
+  "awakening_04": {
+   "speaker": "player",
+   "text": "What happened here?",
+   "dir": "wary"
+  },
+  "awakening_05": {
+   "speaker": "lyra",
+   "text": "That depends. What do you remember?",
+   "dir": "careful"
+  },
+  "awakening_06": {
+   "speaker": "player",
+   "text": "Things I couldn't possibly have seen.",
+   "dir": "unsettled"
+  },
+  "awakening_07": {
+   "speaker": "lyra",
+   "text": "Then it worked.",
+   "dir": "quiet wonder"
+  },
+  "first_road_01": {
+   "speaker": "lyra",
+   "text": "The doors above you open onto what was a fortress. Walk. Your body remembers how, even if you don't.",
+   "dir": "gentle"
+  },
+  "first_road_02": {
+   "speaker": "lyra",
+   "text": "Tap where you want to go. If something stands in the way, it has been standing there a long time.",
+   "dir": "dry"
+  },
+  "courtyard_0_01": {
+   "speaker": "lyra",
+   "text": "Those statues were kings once. People prayed to them. Some of them answered.",
+   "dir": "low"
+  },
+  "courtyard_1_01": {
+   "speaker": "lyra",
+   "text": "Look at its armour. Under the plate there is light. That is not rust moving it.",
+   "dir": "uneasy"
+  },
+  "courtyard_2_01": {
+   "speaker": "lyra",
+   "text": "It salutes before it strikes. Someone taught it manners, three hundred years ago.",
+   "dir": "wry"
+  },
+  "courtyard_3_01": {
+   "speaker": "lyra",
+   "text": "That winch will hold. Most things they built still do. That is rather the problem.",
+   "dir": "dry"
+  },
+  "courtyard_4_01": {
+   "speaker": "lyra",
+   "text": "Careful. The big ones were made for breaking gates. You are much smaller than a gate.",
+   "dir": "light"
+  },
+  "courtyard_5_01": {
+   "speaker": "lyra",
+   "text": "Rest. That candle is not a candle, but it will not hurt you.",
+   "dir": "soft"
+  },
+  "courtyard_6_01": {
+   "speaker": "lyra",
+   "text": "He is still at his post. He has not been told that there is nothing left behind him.",
+   "dir": "sad"
+  },
+  "sentinel_intro_01": {
+   "speaker": "sentinel",
+   "text": "State your allegiance.",
+   "dir": "flat, immense, helmeted"
+  },
+  "sentinel_intro_02": {
+   "speaker": "player",
+   "text": "I serve no crown.",
+   "dir": "steady"
+  },
+  "sentinel_intro_03": {
+   "speaker": "sentinel",
+   "text": "Then you have no passage.",
+   "dir": "final"
+  },
+  "sentinel_retry_01": {
+   "speaker": "sentinel",
+   "text": "Your oath must be stronger than mine.",
+   "dir": "grudging respect"
+  },
+  "sentinel_death_01": {
+   "speaker": "sentinel",
+   "text": "Is the war... over?",
+   "dir": "failing, suddenly human"
+  },
+  "sentinel_death_02": {
+   "speaker": "player",
+   "text": "It ended centuries ago.",
+   "dir": "gentle"
+  },
+  "sentinel_death_03": {
+   "speaker": "sentinel",
+   "text": "Then why did no one return for me?",
+   "dir": "a child's question"
+  },
+  "sentinel_memory_01": {
+   "speaker": "archivist",
+   "text": "Record incomplete. Witness deceased. Memory retained.",
+   "dir": "calm, broken cadence"
+  },
+  "sentinel_memory_02": {
+   "speaker": "archivist",
+   "text": "Subject: gate sergeant, forty-one years of service. Volunteered. He was told it would be for one winter.",
+   "dir": "even"
+  },
+  "sentinel_memory_03": {
+   "speaker": "lyra",
+   "text": "They were people. All of them. Remember that when the next one raises its sword.",
+   "dir": "quiet"
+  },
+  "sanctuary_return_01": {
+   "speaker": "lyra",
+   "text": "You came back by the door this time. I prefer it.",
+   "dir": "warm"
+  },
+  "sanctuary_return_02": {
+   "speaker": "lyra",
+   "text": "There is a smith here. He does not trust you. He is very good. Let him look at that sword.",
+   "dir": "amused"
+  },
+  "orren_intro_01": {
+   "speaker": "orren",
+   "text": "So you're what she woke up. Hm.",
+   "dir": "gravel, unimpressed"
+  },
+  "orren_intro_02": {
+   "speaker": "orren",
+   "text": "That sword is older than my entire bloodline. Try not to drop it.",
+   "dir": "dry"
+  },
+  "orren_intro_03": {
+   "speaker": "orren",
+   "text": "Bring me shards and coin. Your armour remembers its shape. I just remind it.",
+   "dir": "matter of fact"
+  },
+  "orren_idle_01": {
+   "speaker": "orren",
+   "text": "People spend their lives searching for legendary weapons. Most of them wouldn't know what to do with one.",
+   "dir": "dry"
+  },
+  "rebirth_0_01": {
+   "speaker": "lyra",
+   "text": "You returned sooner than I expected.",
+   "dir": "close, intimate"
+  },
+  "rebirth_1_01": {
+   "speaker": "lyra",
+   "text": "Your body has recovered. Your memories are another matter.",
+   "dir": "close, intimate"
+  },
+  "rebirth_2_01": {
+   "speaker": "lyra",
+   "text": "You remembered something this time, didn't you?",
+   "dir": "close, intimate"
+  },
+  "rebirth_3_01": {
+   "speaker": "lyra",
+   "text": "The system is learning from you.",
+   "dir": "close, intimate"
+  },
+  "rebirth_4_01": {
+   "speaker": "lyra",
+   "text": "You're becoming someone it cannot predict.",
+   "dir": "close, intimate"
+  },
+  "rebirth_5_01": {
+   "speaker": "lyra",
+   "text": "Those memories aren't orders. You don't owe the dead your future.",
+   "dir": "close, intimate"
+  },
+  "executioner_intro_01": {
+   "speaker": "executioner",
+   "text": "Your identity is unregistered.",
+   "dir": "toneless"
+  },
+  "executioner_intro_02": {
+   "speaker": "player",
+   "text": "Your kingdom no longer exists.",
+   "dir": "flat"
+  },
+  "executioner_intro_03": {
+   "speaker": "executioner",
+   "text": "The law does not require a kingdom.",
+   "dir": "certain"
+  },
+  "executioner_death_01": {
+   "speaker": "lyra",
+   "text": "That prison was switched back on from somewhere else. Someone is waking them. On purpose.",
+   "dir": "alarmed, controlled"
+  },
+  "huntsman_intro_01": {
+   "speaker": "huntsman",
+   "text": "I have hunted what the old kings bred. I know one of their things when I see it.",
+   "dir": "cold"
+  },
+  "huntsman_intro_02": {
+   "speaker": "player",
+   "text": "I am not theirs.",
+   "dir": "even"
+  },
+  "huntsman_intro_03": {
+   "speaker": "huntsman",
+   "text": "They all said that.",
+   "dir": "tired"
+  },
+  "widow_intro_01": {
+   "speaker": "widow",
+   "text": "That stance. I knew the soldier who taught it.",
+   "dir": "sharp, shaken"
+  },
+  "widow_intro_02": {
+   "speaker": "player",
+   "text": "I've never met you.",
+   "dir": "guarded"
+  },
+  "widow_intro_03": {
+   "speaker": "widow",
+   "text": "No. But someone inside you has.",
+   "dir": "bitter"
+  },
+  "widow_death_01": {
+   "speaker": "widow",
+   "text": "You fight like six people I buried. And none of them.",
+   "dir": "breathless"
+  },
+  "widow_death_02": {
+   "speaker": "lyra",
+   "text": "She is yielding. Let her.",
+   "dir": "urgent, soft"
+  },
+  "beast_intro_01": {
+   "speaker": "lyra",
+   "text": "That was grown, not born. Do not look for a man inside it.",
+   "dir": "tight"
+  },
+  "beast_death_01": {
+   "speaker": "lyra",
+   "text": "They didn't pray here.",
+   "dir": "hushed"
+  },
+  "beast_death_02": {
+   "speaker": "player",
+   "text": "Then what was this place?",
+   "dir": "low"
+  },
+  "beast_death_03": {
+   "speaker": "lyra",
+   "text": "A laboratory.",
+   "dir": "plain"
+  },
+  "gravewarden_intro_01": {
+   "speaker": "gravewarden",
+   "text": "These are not tombs.",
+   "dir": "old, patient"
+  },
+  "gravewarden_intro_02": {
+   "speaker": "player",
+   "text": "What are they?",
+   "dir": "quiet"
+  },
+  "gravewarden_intro_03": {
+   "speaker": "gravewarden",
+   "text": "People waiting for someone to remember their names.",
+   "dir": "tender"
+  },
+  "gravewarden_death_01": {
+   "speaker": "archivist",
+   "text": "You are not the first to enter this chamber. You are merely the first it has permitted to leave.",
+   "dir": "calm"
+  },
+  "gravewarden_death_02": {
+   "speaker": "archivist",
+   "text": "History has been rewritten seventeen times. Would you prefer the surviving version?",
+   "dir": "almost wry"
+  },
+  "frostking_intro_01": {
+   "speaker": "frostking",
+   "text": "I watched men become gods. Then I watched gods become machines.",
+   "dir": "ancient, weary"
+  },
+  "frostking_intro_02": {
+   "speaker": "player",
+   "text": "Why didn't you destroy the Crown?",
+   "dir": "direct"
+  },
+  "frostking_intro_03": {
+   "speaker": "frostking",
+   "text": "Because there were still people inside it.",
+   "dir": "simple"
+  },
+  "frostking_retry_01": {
+   "speaker": "frostking",
+   "text": "Every resurrection makes the chains harder to break.",
+   "dir": "warning"
+  },
+  "frostking_death_01": {
+   "speaker": "frostking",
+   "text": "Go to the capital. Do better than we did. It will not be difficult.",
+   "dir": "fading, dry"
+  },
+  "wyrm_intro_01": {
+   "speaker": "lyra",
+   "text": "They built her to break sieges. She has had centuries to decide what else she is.",
+   "dir": "awed"
+  },
+  "devourer_intro_01": {
+   "speaker": "devourer",
+   "text": "I had a daughter.",
+   "dir": "a man, lost"
+  },
+  "devourer_intro_02": {
+   "speaker": "devourer",
+   "text": "I remember the sea.",
+   "dir": "a woman, far away"
+  },
+  "devourer_intro_03": {
+   "speaker": "devourer",
+   "text": "Please. What was my name?",
+   "dir": "a child"
+  },
+  "monarch_intro_01": {
+   "speaker": "monarch",
+   "text": "Look upon what remains of our civilization.",
+   "dir": "regal, controlled"
+  },
+  "monarch_intro_02": {
+   "speaker": "player",
+   "text": "I see a kingdom that should have been allowed to die.",
+   "dir": "hard"
+  },
+  "monarch_intro_03": {
+   "speaker": "monarch",
+   "text": "And I see children who will never wake if these machines fall silent.",
+   "dir": "patient"
+  },
+  "monarch_intro_04": {
+   "speaker": "player",
+   "text": "How many people have you sacrificed?",
+   "dir": "cold"
+  },
+  "monarch_intro_05": {
+   "speaker": "monarch",
+   "text": "Enough to ensure there are still people left to ask that question.",
+   "dir": "unflinching"
+  },
+  "monarch_retry_01": {
+   "speaker": "monarch",
+   "text": "You still believe death cannot teach you surrender.",
+   "dir": "almost fond"
+  },
+  "monarch_death_01": {
+   "speaker": "monarch",
+   "text": "I have counted every life this machine has taken. Have you counted the lives it has saved?",
+   "dir": "failing"
+  },
+  "monarch_death_02": {
+   "speaker": "lyra",
+   "text": "I think I remember the rain.",
+   "dir": "distant"
+  },
+  "monarch_death_03": {
+   "speaker": "player",
+   "text": "Tell me about it.",
+   "dir": "soft"
+  }
+ },
+ "scenes": {
+  "opening": {
+   "lines": [
+    "opening_01",
+    "opening_02",
+    "opening_03",
+    "opening_04",
+    "opening_05",
+    "opening_06"
+   ],
+   "once": true
+  },
+  "awakening": {
+   "lines": [
+    "awakening_01",
+    "awakening_02",
+    "awakening_03",
+    "awakening_04",
+    "awakening_05",
+    "awakening_06",
+    "awakening_07"
+   ],
+   "once": true
+  },
+  "first_road": {
+   "lines": [
+    "first_road_01",
+    "first_road_02"
+   ],
+   "once": true
+  },
+  "courtyard_0": {
+   "lines": [
+    "courtyard_0_01"
+   ],
+   "once": true
+  },
+  "courtyard_1": {
+   "lines": [
+    "courtyard_1_01"
+   ],
+   "once": true
+  },
+  "courtyard_2": {
+   "lines": [
+    "courtyard_2_01"
+   ],
+   "once": true
+  },
+  "courtyard_3": {
+   "lines": [
+    "courtyard_3_01"
+   ],
+   "once": true
+  },
+  "courtyard_4": {
+   "lines": [
+    "courtyard_4_01"
+   ],
+   "once": true
+  },
+  "courtyard_5": {
+   "lines": [
+    "courtyard_5_01"
+   ],
+   "once": true
+  },
+  "courtyard_6": {
+   "lines": [
+    "courtyard_6_01"
+   ],
+   "once": true
+  },
+  "sentinel_intro": {
+   "lines": [
+    "sentinel_intro_01",
+    "sentinel_intro_02",
+    "sentinel_intro_03"
+   ],
+   "once": true
+  },
+  "sentinel_retry": {
+   "lines": [
+    "sentinel_retry_01"
+   ],
+   "once": false
+  },
+  "sentinel_death": {
+   "lines": [
+    "sentinel_death_01",
+    "sentinel_death_02",
+    "sentinel_death_03"
+   ],
+   "once": true
+  },
+  "sentinel_memory": {
+   "lines": [
+    "sentinel_memory_01",
+    "sentinel_memory_02",
+    "sentinel_memory_03"
+   ],
+   "once": true
+  },
+  "sanctuary_return": {
+   "lines": [
+    "sanctuary_return_01",
+    "sanctuary_return_02"
+   ],
+   "once": true
+  },
+  "orren_intro": {
+   "lines": [
+    "orren_intro_01",
+    "orren_intro_02",
+    "orren_intro_03"
+   ],
+   "once": true
+  },
+  "orren_idle": {
+   "lines": [
+    "orren_idle_01"
+   ],
+   "once": false
+  },
+  "rebirth_0": {
+   "lines": [
+    "rebirth_0_01"
+   ],
+   "once": false
+  },
+  "rebirth_1": {
+   "lines": [
+    "rebirth_1_01"
+   ],
+   "once": false
+  },
+  "rebirth_2": {
+   "lines": [
+    "rebirth_2_01"
+   ],
+   "once": false
+  },
+  "rebirth_3": {
+   "lines": [
+    "rebirth_3_01"
+   ],
+   "once": false
+  },
+  "rebirth_4": {
+   "lines": [
+    "rebirth_4_01"
+   ],
+   "once": false
+  },
+  "rebirth_5": {
+   "lines": [
+    "rebirth_5_01"
+   ],
+   "once": false
+  },
+  "executioner_intro": {
+   "lines": [
+    "executioner_intro_01",
+    "executioner_intro_02",
+    "executioner_intro_03"
+   ],
+   "once": true
+  },
+  "executioner_death": {
+   "lines": [
+    "executioner_death_01"
+   ],
+   "once": true
+  },
+  "huntsman_intro": {
+   "lines": [
+    "huntsman_intro_01",
+    "huntsman_intro_02",
+    "huntsman_intro_03"
+   ],
+   "once": true
+  },
+  "widow_intro": {
+   "lines": [
+    "widow_intro_01",
+    "widow_intro_02",
+    "widow_intro_03"
+   ],
+   "once": true
+  },
+  "widow_death": {
+   "lines": [
+    "widow_death_01",
+    "widow_death_02"
+   ],
+   "once": true
+  },
+  "beast_intro": {
+   "lines": [
+    "beast_intro_01"
+   ],
+   "once": true
+  },
+  "beast_death": {
+   "lines": [
+    "beast_death_01",
+    "beast_death_02",
+    "beast_death_03"
+   ],
+   "once": true
+  },
+  "gravewarden_intro": {
+   "lines": [
+    "gravewarden_intro_01",
+    "gravewarden_intro_02",
+    "gravewarden_intro_03"
+   ],
+   "once": true
+  },
+  "gravewarden_death": {
+   "lines": [
+    "gravewarden_death_01",
+    "gravewarden_death_02"
+   ],
+   "once": true
+  },
+  "frostking_intro": {
+   "lines": [
+    "frostking_intro_01",
+    "frostking_intro_02",
+    "frostking_intro_03"
+   ],
+   "once": true
+  },
+  "frostking_retry": {
+   "lines": [
+    "frostking_retry_01"
+   ],
+   "once": false
+  },
+  "frostking_death": {
+   "lines": [
+    "frostking_death_01"
+   ],
+   "once": true
+  },
+  "wyrm_intro": {
+   "lines": [
+    "wyrm_intro_01"
+   ],
+   "once": true
+  },
+  "devourer_intro": {
+   "lines": [
+    "devourer_intro_01",
+    "devourer_intro_02",
+    "devourer_intro_03"
+   ],
+   "once": true
+  },
+  "monarch_intro": {
+   "lines": [
+    "monarch_intro_01",
+    "monarch_intro_02",
+    "monarch_intro_03",
+    "monarch_intro_04",
+    "monarch_intro_05"
+   ],
+   "once": true
+  },
+  "monarch_retry": {
+   "lines": [
+    "monarch_retry_01"
+   ],
+   "once": false
+  },
+  "monarch_death": {
+   "lines": [
+    "monarch_death_01",
+    "monarch_death_02",
+    "monarch_death_03"
+   ],
+   "once": true
+  }
+ },
+ "voices": {
+  "narrator": "Helena",
+  "lyra": "Vesper",
+  "player_m": "Callum",
+  "player_f": "Imogen",
+  "orren": "Gideon",
+  "archivist": "Onyx",
+  "sentinel": "Sterling",
+  "executioner": "Vlad",
+  "huntsman": "Brooks",
+  "widow": "Sloane",
+  "gravewarden": "Bram",
+  "frostking": "Alistair",
+  "monarch": "Caspian",
+  "devourer": "Luna"
+ },
+ "names": {
+  "narrator": "",
+  "lyra": "Lyra",
+  "player": "",
+  "orren": "Orren",
+  "archivist": "The Archivist",
+  "sentinel": "Ashen Sentinel",
+  "executioner": "Hollow Executioner",
+  "huntsman": "Pale Huntsman",
+  "widow": "Crimson Widow",
+  "gravewarden": "Gravewarden",
+  "frostking": "Frostbound King",
+  "monarch": "Forgotten Monarch",
+  "devourer": "Devourer of Names"
+ }
+}

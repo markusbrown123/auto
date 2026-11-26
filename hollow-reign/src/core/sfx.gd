@@ -16,7 +16,7 @@ var _layer_tween: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	for b in ["Music", "Sfx"]:
+	for b in ["Music", "Sfx", "Voice"]:
 		if AudioServer.get_bus_index(b) < 0:
 			AudioServer.add_bus()
 			AudioServer.set_bus_name(AudioServer.bus_count - 1, b)
@@ -61,6 +61,10 @@ func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float 
 	p.volume_db = vol_db
 	p.pitch_scale = pitch * randf_range(1.0 - jitter, 1.0 + jitter)
 	p.play()
+
+## Picks a bespoke track when one has been produced, else the fallback.
+func music_for(preferred: String, fallback: String, fade: float = 1.5) -> void:
+	music(preferred if ResourceLoader.exists("res://assets/audio/music/%s.ogg" % preferred) else fallback, fade)
 
 func music(track: String, fade: float = 1.5) -> void:
 	if track == _music_name:

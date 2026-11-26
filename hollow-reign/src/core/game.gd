@@ -12,10 +12,11 @@ const SAVE_VERSION := 1
 var profile: Dictionary = {}
 var run: Dictionary = {}          # {region, stage, hp, found:[...]} — reset on death
 var settings: Dictionary = {
-	"quality": 1, "fps": 60, "music": 0.8, "sfx": 1.0, "haptics": true,
+	"quality": 1, "fps": 60, "music": 0.8, "sfx": 1.0, "voice": 1.0, "haptics": true,
 	"shake": 1.0, "assist": false, "hints": true, "reduce_flash": false,
 }
 var rng := RandomNumberGenerator.new()
+var just_died := false         # set on death, consumed by the sanctuary
 var save_dir_override := ""   # tests point this at a temp location
 
 
@@ -349,6 +350,7 @@ func complete_region() -> bool:
 func on_death() -> Dictionary:
 	# Everything earned is kept; only the route resets.
 	profile.deaths += 1
+	just_died = true
 	var summary := run.duplicate(true)
 	run = {}
 	save()
@@ -386,10 +388,10 @@ func apply_settings() -> void:
 	if vp:
 		vp.scaling_3d_scale = [0.6, 0.8, 1.0][q]
 		vp.msaa_3d = Viewport.MSAA_DISABLED if q == 0 else Viewport.MSAA_2X
-	for bus_name in ["Music", "Sfx"]:
+	for bus_name in ["Music", "Sfx", "Voice"]:
 		var idx := AudioServer.get_bus_index(bus_name)
 		if idx >= 0:
-			var vol: float = settings.music if bus_name == "Music" else settings.sfx
+			var vol: float = float(settings[bus_name.to_lower()])
 			AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(vol, 0.0001)))
 			AudioServer.set_bus_mute(idx, vol <= 0.001)
 

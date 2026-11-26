@@ -35,6 +35,10 @@ var _intro_card: Control
 var _noise := FastNoiseLite.new()
 var _sparks: Array = []
 var _result_sent := false
+var _voice_key := ""
+const VOICE_KEYS := {"ashen_sentinel": "sentinel", "hollow_executioner": "executioner", "pale_huntsman": "huntsman", "crimson_widow": "widow",
+	"cathedral_beast": "beast", "gravewarden": "gravewarden", "frostbound_king": "frostking", "cinder_wyrm": "wyrm", "devourer": "devourer", "forgotten_monarch": "monarch"}
+var _intro_talk := false
 
 
 func setup(foe_id: String, opts: Dictionary = {}) -> void:
@@ -98,7 +102,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	if opts.get("autoplay", false):
 		bot = DuelBot.new(sim, int(opts.get("bot_style", DuelBot.Style.SLOPPY)), 5)
 	Sfx.ambience(str(region.amb))
-	Sfx.music(str(foe.music))
+	Sfx.music_for("boss_" + foe_id, str(foe.music))
 	_noise.frequency = 2.0
 	_begin_intro(bool(opts.get("skip_intro", false)))
 
@@ -159,6 +163,15 @@ func _begin_intro(skip: bool) -> void:
 		_begin_fight()
 		return
 	Sfx.play("bell", -4.0)
+	_voice_key = VOICE_KEYS.get(str(foe.id), "")
+	if Story.pending(_voice_key + "_intro"):
+		# first meeting: they speak before steel is drawn, and the fight waits for them
+		_intro_talk = true
+		foe_rig.guard()
+		_speak_then_fight()
+		return
+	if Story.has_scene(_voice_key + "_retry"):
+		Story.play(_voice_key + "_retry")
 	_intro_card = UI.full(Control.new())
 	_intro_card.mouse_filter = Control.MOUSE_FILTER_STOP
 	_intro_card.gui_input.connect(func(e):
@@ -189,6 +202,18 @@ func _begin_intro(skip: bool) -> void:
 	tw.tween_property(_intro_card, "modulate:a", 1.0, 0.9)
 	foe_rig.roar()
 	get_tree().create_timer(0.9).timeout.connect(func(): Sfx.play("roar", -2.0, 0.9 / maxf(float(foe.rig.scale) * 0.75, 0.8)))
+
+func _speak_then_fight() -> void:
+	await get_tree().create_timer(1.2).timeout
+	await Story.play(_voice_key + "_intro")
+	if not is_inside_tree():
+		return
+	foe_rig.roar()
+	Sfx.play("roar", -2.0, 0.9 / maxf(float(foe.rig.scale) * 0.75, 0.8))
+	hud.toast(str(foe.name).to_upper(), UI.BONE, 1.6)
+	await get_tree().create_timer(1.7).timeout
+	_intro_talk = false
+	_begin_fight()
 
 func _begin_fight() -> void:
 	if stage == Stage.FIGHT:
@@ -242,7 +267,7 @@ func _process(delta: float) -> void:
 	foe_rig.time_scale = ts
 	match stage:
 		Stage.INTRO:
-			if _stage_t > 4.6:
+			if _stage_t > 4.6 and not _intro_talk:
 				_begin_fight()
 		Stage.FIGHT:
 			if bot:
@@ -268,6 +293,12 @@ func _finish(won: bool) -> void:
 		return
 	_result_sent = true
 	stage = Stage.DONE
+	if won and _voice_key != "":
+		# last words, and what the dead leave behind
+		await Story.play(_voice_key + "_death")
+		await Story.play(_voice_key + "_memory")
+		if not is_inside_tree():
+			return
 	finished.emit(won, sim)
 
 func _camera(delta: float) -> void:
@@ -281,9 +312,9 @@ func _camera(delta: float) -> void:
 		Stage.INTRO:
 			# low orbit around the foe: let the silhouette land
 			# sweeps from the foe's flank round to the knight's shoulder
-			var a := 1.3 - _stage_t * 0.19
+			var a := 1.3 - minf(_stage_t, 4.6) * 0.19
 			var r := 2.4 + float(foe.rig.scale) * 1.6
-			pos = Vector3(sin(a) * r, 0.5 + _stage_t * 0.2, -pz + cos(a) * r)
+			pos = Vector3(sin(a) * r, 0.5 + minf(_stage_t, 4.6) * 0.2, -pz + cos(a) * r)
 			look = Vector3(0, foe_h * 0.85, -pz)
 			fov = 42.0
 			rate = 30.0

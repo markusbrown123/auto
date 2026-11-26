@@ -388,7 +388,7 @@ os.makedirs("data", exist_ok=True)
 def breath(dir, windup, dmg, el="fire", **k):
     # a sweeping gout: cannot be blocked or parried, only stepped out of
     return A(dir, windup, dmg, unblockable=True, parry=False, kind="breath", element=el, swing=0.4, **k)
-B.append(dict(id="cinder_wyrm", name="Vharn, the Cinder Wyrm", title="Last of the Royal Brood", region="roost", boss=True,
+B.append(dict(id="cinder_wyrm", name="Veyrath, the Cinder Wyrm", title="Last of the Royal Brood", region="roost", boss=True,
  hp=1900, armor=0.22, posture=170, patience=3, adapt=0.9, idle=[0.9,1.6], weak="frost", xp=2400, gold=1400,
  loot=[["w_wyrmfang",1.0],["s_scale",0.7],["a_wyrm_chest",0.7],["a_wyrm_helm",0.6],["r_brood",0.5]], music="combat_b", arena="roost",
  intro="The kings rode her mother to war. She has had the sky to herself since, and she has not missed them.",
@@ -422,7 +422,7 @@ B.append(dict(id="cinder_wyrm", name="Vharn, the Cinder Wyrm", title="Last of th
    C("snap_r",2,[A("R",0.9,34,kind="bite")],1.2),
   ])]))
 # ---------------------------------------------------------------- optional: the Rimewyrm
-B.append(dict(id="rimewyrm", name="The Rimewyrm", title="What the King Kept Chained", region="citadel", boss=True,
+B.append(dict(id="rimewyrm", name="Skeldra, the White Ruin", title="What the King Kept Chained", region="citadel", boss=True,
  hp=1700, armor=0.2, posture=160, patience=3, adapt=0.9, idle=[0.9,1.5], weak="fire", xp=2600, gold=1500,
  loot=[["w_rime_sword",1.0],["a_frost_legs",0.6],["a_frost_gauntlets",0.6]], music="combat_b", arena="citadel",
  intro="The chain froze through an age ago. It stayed anyway. It had been told to.",

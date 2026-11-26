@@ -1,4 +1,4 @@
-# Eternal Edge: development status
+# Hollow Reign: development status
 
 Last updated 2026-11-25. Version 0.1.0.
 
@@ -34,6 +34,16 @@ Verified means covered by `tools/test.sh` or seen in software-rendered screensho
 | Feedback: hit-stop, camera shake, sparks, blade trails, haptics calls, slow motion on perfect dodge, finisher and death sequences | In. Haptics untested (needs a device) |
 | Audio: 37 sound effects, 4 ambiences, 5 music loops, phase-2 music layer | In. **Nobody has listened to it** (see below) |
 | Settings: quality, frame cap, volumes, haptics, shake, prompts, forgiving timing, reduced flashes | Works |
+
+## Milestone 2026-11-26: the first region, voiced
+- **Weapons and shields:** 21 generated models (8 swords incl. two recoloured variants, 5 greatswords, axes, 4 dual-blade sets, 6 shields), fitted automatically to the hand (`src/chars/prop_model.gd`). Bosses carry their signature weapons. Four concepts were refused by the image service's content filter and are covered by recoloured variants; the glaive is still a primitive shape.
+- **The Fallen Courtyard:** rebuilt from 13 generated set pieces (gatehouse, walls, towers, statues, pillars, braziers, banners, tree, rubble, a half-buried machine obelisk, mountain peaks), enclosed on all sides, with grass, fire light and shadows. The other seven regions are still primitive geometry.
+- **Story:** the new canon is in `docs/STORY_BIBLE.md`, `WORLD_HISTORY.md`, `CHARACTER_BIBLE.md`. A dialogue system (`src/core/story.gd`, `data/dialogue.json`, 83 lines in 40 scenes) plays subtitled, voiced lines: opening narration, the awakening with Lyra, a remark at each Courtyard stop, the Sentinel's challenge and last words, the Archivist's record, Orren at the forge, resurrection lines, and first-meeting and death exchanges for the other guardians.
+- **Voices:** 97 files generated (player lines in both a male and a female voice). Cast by name only and never listened to; treat as placeholder until auditioned.
+- **Music:** four generated cues (main theme, hub, Courtyard exploration, Ashen Sentinel) alongside the earlier synthesized ones. Also never listened to.
+- **Memory:** video memory in a Courtyard duel is about 350 MB after capping textures at 1024 px; about 550k triangles per frame, which is high and needs level-of-detail work before older phones.
+
+Not done from the 2026-11-25 direction: animation polish, cinematic camera work beyond the existing road system, interface redesign, modular armour, dragons as real models, the remaining regions, the story's choices and endings, adaptive music layers, the lore collectibles. Remaining required documents not yet written: CAMPAIGN_SCRIPT, CINEMATIC_SCRIPT, VOICE_BIBLE, SOUNDTRACK_PLAN, SOUND_DESIGN_BIBLE, AUDIO_ASSET_MANIFEST.
 
 ## Generated art pipeline (added 2026-11-25)
 Characters are no longer primitive shapes. The pipeline, all scripted and repeatable:

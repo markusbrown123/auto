@@ -123,6 +123,33 @@ static func weapon(parent: Node3D, path: String, cls: String, tint = null, lengt
 		_tint(root, Color(str(tint)))
 	return want * (1.0 - grip)
 
+## Places a scenery model standing on the ground at `pos`, scaled to `height`, turned by `yaw` degrees.
+static func scenery(parent: Node3D, path: String, height: float, pos: Vector3, yaw: float = 0.0) -> Node3D:
+	if not exists(path):
+		return null
+	var root := _instance(path)
+	if root == null:
+		return null
+	var key := path + "#scenery"
+	if not _fit_cache.has(key):
+		var lo := Vector3.ONE * 1e9
+		var hi := Vector3.ONE * -1e9
+		for p in _verts(root):
+			lo = lo.min(p)
+			hi = hi.max(p)
+		_fit_cache[key] = [lo, hi]
+	var lo2: Vector3 = _fit_cache[key][0]
+	var hi2: Vector3 = _fit_cache[key][1]
+	var k := height / maxf(hi2.y - lo2.y, 0.001)
+	var holder := Node3D.new()
+	parent.add_child(holder)
+	holder.position = pos
+	holder.rotation_degrees.y = yaw
+	holder.add_child(root)
+	root.scale = Vector3.ONE * k
+	root.position = -Vector3((lo2.x + hi2.x) * 0.5, lo2.y, (lo2.z + hi2.z) * 0.5) * k
+	return holder
+
 static func shield(parent: Node3D, path: String, height: float = 0.82) -> bool:
 	var root := _instance(path)
 	if root == null:

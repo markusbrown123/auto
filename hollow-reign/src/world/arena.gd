@@ -229,7 +229,99 @@ func banner(pos: Vector3, h: float, c: Color) -> void:
 	box(Vector3(1.1, 0.06, 0.06), pos, Look.flat(Color("#2a2018"), 0.6, 0.6))
 
 # ---------------------------------------------------------------- layouts
+func prop(id: String, height: float, pos: Vector3, yaw: float = 0.0) -> Node3D:
+	return PropModel.scenery(self, "res://assets/models/env_%s.glb" % id, height, pos, yaw)
+
+## The Fallen Courtyard, built from the generated set pieces: the inner ward of
+## a mountain fortress, with the gatehouse behind the foe and the peaks beyond.
 func _layout_ruin() -> void:
+	if not PropModel.exists("res://assets/models/env_gate.glb"):
+		_layout_ruin_basic()
+		return
+	sun.directional_shadow_max_distance = 60.0
+	prop("gate", 12.0, Vector3(0, 0, -15.0), 0.0)
+	for sx: float in [-1.0, 1.0]:
+		prop("wall", 8.5, Vector3(sx * 17.0, 0, -14.0), 0.0 if sx < 0 else 180.0)
+		prop("wall", 7.5, Vector3(sx * 21.0, 0, -1.0), 90.0 * sx)
+		prop("pillar", 4.2, Vector3(sx * 6.2, 0, -4.2), sx * 35.0)
+		prop("banner", 6.0, Vector3(sx * 7.4, 0, -11.5), sx * -20.0)
+		fire(Vector3(sx * 4.0, 1.75, -7.2), 2.0, 9.0, false)
+		prop("brazier", 1.9, Vector3(sx * 4.0, 0, -7.2), 0.0)
+		prop("rubble", 2.6, Vector3(sx * 10.5, 0, -7.5), sx * 60.0)
+	prop("tower", 20.0, Vector3(-20.0, 0, -20.0), 20.0)
+	prop("tower", 17.0, Vector3(22.0, 0, -22.0), -60.0)
+	prop("statue", 8.0, Vector3(-8.5, 0, -8.5), 25.0)
+	prop("statue", 8.0, Vector3(9.5, 0, -10.5), -30.0)
+	prop("statue_head", 2.4, Vector3(6.4, 0, -2.4), -40.0)
+	prop("tree", 8.5, Vector3(-12.5, 0, 0.5), 110.0)
+	prop("rubble", 1.8, Vector3(-5.8, 0, 2.4), 10.0)
+	prop("pillar", 3.6, Vector3(11.0, 0, 3.0), 160.0)
+	# something under the stone was never medieval
+	var ob := prop("obelisk", 5.5, Vector3(11.5, 0, -3.5), -25.0)
+	if ob:
+		var glow := OmniLight3D.new()
+		glow.light_color = Color("#6fc8ff")
+		glow.light_energy = 1.6
+		glow.omni_range = 6.0
+		glow.position = Vector3(0, 2.6, 0.8)
+		ob.add_child(glow)
+	# the mountains the fortress was cut from
+	for m in [[-150.0, -170.0, 120.0, 30.0], [-40.0, -210.0, 150.0, 160.0], [90.0, -190.0, 130.0, -70.0], [190.0, -110.0, 105.0, 200.0], [-220.0, -60.0, 110.0, 100.0]]:
+		var pk := prop("peak", m[2], Vector3(m[0], -8.0, m[1]), m[3])
+		if pk:
+			for mi in pk.find_children("*", "MeshInstance3D", true, false):
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# the road turns to look every way, so the ward is enclosed on all sides
+	prop("wall", 8.0, Vector3(-9.0, 0, 19.0), 180.0)
+	prop("wall", 7.0, Vector3(12.0, 0, 20.0), 170.0)
+	prop("tower", 16.0, Vector3(-22.0, 0, 16.0), 200.0)
+	prop("tower", 19.0, Vector3(24.0, 0, 12.0), 100.0)
+	prop("statue", 7.0, Vector3(-15.0, 0, 9.0), 120.0)
+	prop("pillar", 4.0, Vector3(15.5, 0, 7.5), 80.0)
+	prop("rubble", 2.4, Vector3(4.0, 0, 14.0), 200.0)
+	prop("tree", 7.5, Vector3(17.0, 0, -9.0), 30.0)
+	prop("banner", 5.5, Vector3(-6.5, 0, 12.0), 160.0)
+	for m in [[120.0, 170.0, 125.0, 10.0], [-60.0, 200.0, 140.0, 250.0], [-190.0, 110.0, 115.0, 130.0], [230.0, 40.0, 120.0, 300.0]]:
+		var pk2 := prop("peak", m[2], Vector3(m[0], -8.0, m[1]), m[3])
+		if pk2:
+			for mi in pk2.find_children("*", "MeshInstance3D", true, false):
+				mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_grass(420, 24.0)
+
+## Tufts of grass between the flagstones: crossed quads, wind handled by a tiny vertex sway.
+func _grass(count: int, radius: float) -> void:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	var blade := QuadMesh.new()
+	blade.size = Vector2(0.5, 0.45)
+	blade.center_offset = Vector3(0, 0.22, 0)
+	mm.mesh = blade
+	mm.instance_count = count * 2
+	var n := 0
+	for i in count:
+		var a := rng.randf() * TAU
+		var d := sqrt(rng.randf()) * radius
+		var p := Vector3(cos(a) * d, 0, sin(a) * d - 3.0)
+		if p.length() < 4.6 or (absf(p.x) < 2.2 and p.z > -1.0):
+			p = p.normalized() * rng.randf_range(5.0, radius)
+		var yaw := rng.randf() * PI
+		var s := rng.randf_range(0.6, 1.5)
+		for k in 2:
+			mm.set_instance_transform(n, Transform3D(Basis(Vector3.UP, yaw + k * PI * 0.5).scaled(Vector3.ONE * s), p))
+			n += 1
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = Look.grass()
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR
+	mat.alpha_scissor_threshold = 0.35
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.roughness = 1.0
+	var mi2 := MultiMeshInstance3D.new()
+	mi2.multimesh = mm
+	mi2.material_override = mat
+	mi2.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mi2)
+
+func _layout_ruin_basic() -> void:
 	# broken curtain wall behind the foe, with the gatehouse arch
 	arch(Vector3(0, 0, -11), 4.5, 5.5, 1.6)
 	for sx: float in [-1.0, 1.0]:

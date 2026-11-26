@@ -30,7 +30,7 @@ func _ready() -> void:
 	backdrop.move_camera(_at(prev, Vector3(1.3, 1.9, 5.2)), _at(prev, Vector3(0, 1.3, -4.0)), true)
 	backdrop.move_camera(_at(angle, Vector3(1.3, 1.7, 4.2)), _at(angle, Vector3(-0.3, 1.25, -4.0)))
 	Sfx.ambience(str(region.amb))
-	Sfx.music("menu")
+	Sfx.music_for("explore_" + str(region.id), "menu")
 	Sfx.play("footstep", -6.0)
 	layer = CanvasLayer.new()
 	add_child(layer)
@@ -81,8 +81,15 @@ func _ready() -> void:
 		markers.append(at)
 		row.add_child(_card(opts[i], i))
 	_scatter_pouches(frame, int(Game.run_stage().get("pouches", 1)))
+	var remark := "%s_%d" % [region.id, stage]
 	layer.get_child(0).modulate.a = 0.0
-	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.5)
+	if Story.pending(remark):
+		# let the place and the voice land first; the choices appear once the line is done
+		await get_tree().create_timer(1.4).timeout
+		await Story.play(remark)
+		if not is_inside_tree():
+			return
+	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.3)
 
 func _at(a: float, v: Vector3) -> Vector3:
 	return v.rotated(Vector3.UP, a)

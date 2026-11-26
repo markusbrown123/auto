@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/armor_frost_m_v1.png",
+ "model": {
+  "task_id": "de8f00bb-2131-4a5e-9c4d-5fd73b020aeb",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "7d551dca-9a02-44dc-baf0-05f5e35b0163",
+  "credits": 25.0
+ }
+}

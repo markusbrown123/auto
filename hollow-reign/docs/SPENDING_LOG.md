@@ -64,3 +64,7 @@ Balances read after: Tripo 9,685 credits with 25 held; Higgsfield 896 credits. N
 
 Running total: Tripo ≈ $53.15, Higgsfield ≈ $13.00, combined ≈ **$66.15 of the $100 cap**.
 Planned and not yet spent: two more dragons (Skeldra, Azhurion) at $1.35 each, only if the first one rigs and animates acceptably.
+
+| Skeldra and Azhurion: low-poly model + quadruped rig each | Tripo | 2 × 135 | $2.70 |
+
+All three dragons rigged and seen in game. Running total: Tripo ≈ $55.85, Higgsfield ≈ $13.00, combined ≈ **$68.85 of the $100 cap**.

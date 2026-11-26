@@ -59,7 +59,7 @@ Update this file in the same commit as the work.
 | # | Task | Status |
 |---|---|---|
 | D1 | Unique mechanics and movement per boss (8 remaining + Devourer) | DOING — one rule trait each (`TRAITS` in `tools/gen_bosses.py`), tested; pattern sets not yet widened like the Sentinel's |
-| D2 | Dragons on the stance system | DOING — on the turning line (seen in `region_roost_kit.png`); the dragon body itself is still the primitive placeholder: concepts for all three made, Veyrath being modelled and rigged as a quadruped, then needs a skeleton driver in `dragon_rig.gd` |
+| D2 | Dragons on the stance system | DONE — three generated, quadruped-rigged dragons driven by `dragon_skin.gd` (neck aim, claw swipe, tail, wings) on the turning line; captures in `marketing/dragon*`. No jaw bone found, so mouths do not open; no walk cycle for the legs |
 | D3 | Environment kits for the six regions still on primitive geometry | DONE — all six kits generated (42 models) and seen in game: `marketing/region_*_kit.png`; 231k–298k triangles per duel frame |
 | D4 | Optional quests, lore collectibles, memories | DOING — 50 records found on the road, 8 tasks claimable from the Journal, third ending needs 30 records; quests are profile conditions (the scripted steps are not built); needs captures |
 | D5 | Three endings, New Game Plus check | DOING — choice after the Monarch, three written epilogues, post-credits text, third ending gated on the side roads; text only, no footage or voice; needs a capture (`--screen=ending`) |

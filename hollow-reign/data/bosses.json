@@ -8659,7 +8659,8 @@
     "hide": "#8aa8b8",
     "belly": "#d8e8f0",
     "eye": "#9fe4ff",
-    "glow": "#7fd4ff"
+    "glow": "#7fd4ff",
+    "skin": "res://assets/models/dragon_skeldra.glb"
    },
    "music": "combat_a",
    "punish": {
@@ -15928,7 +15929,8 @@
     "belly": "#d8e8f0",
     "eye": "#9fe4ff",
     "glow": "#7fd4ff",
-    "wings": true
+    "wings": true,
+    "skin": "res://assets/models/dragon_skeldra.glb"
    },
    "punish": {
     "dir": "U",
@@ -16353,7 +16355,8 @@
     "belly": "#8a7448",
     "eye": "#ffe9b0",
     "glow": "#ffd27a",
-    "wings": true
+    "wings": true,
+    "skin": "res://assets/models/dragon_azhurion.glb"
    },
    "punish": {
     "dir": "U",

@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/dragon_skeldra_v1.png",
+ "model": {
+  "task_id": "6886083f-9e1b-4fb4-be66-28461c4b5e1d",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "quadruped"
+  }
+ },
+ "rig": {
+  "task_id": "3870a2fd-575e-4e07-9c2f-bbeb413b2412",
+  "credits": 25.0
+ }
+}

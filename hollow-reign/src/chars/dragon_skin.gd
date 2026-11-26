@@ -60,7 +60,25 @@ func _analyse() -> void:
 	var centre := Vector3.ZERO
 	for i in limb_roots:
 		centre += (_g[i] as Transform3D).origin / limb_roots.size()
+	# forward runs along the spine: from the hind pair of legs to the fore pair. The head only decides which end is the front
+	# (a long neck held to one side would otherwise turn the whole body).
 	var f: Vector3 = (_g[head_tip] as Transform3D).origin - centre
+	var best_d := 1.0e9
+	var mate := 1
+	for k in range(1, 4):
+		var dd: float = ((_g[limb_roots[0]] as Transform3D).origin - (_g[limb_roots[k]] as Transform3D).origin).length()
+		if dd < best_d:
+			best_d = dd
+			mate = k
+	var pair_a: Vector3 = ((_g[limb_roots[0]] as Transform3D).origin + (_g[limb_roots[mate]] as Transform3D).origin) * 0.5
+	var pair_b := Vector3.ZERO
+	for k in range(1, 4):
+		if k != mate:
+			pair_b += (_g[limb_roots[k]] as Transform3D).origin * 0.5
+	var axis := pair_a - pair_b
+	axis = Vector3(axis.x, 0, axis.z)
+	if axis.length() > 0.01:
+		f = axis * signf(axis.dot(f))
 	_fwd = Vector3(f.x, 0, f.z).normalized()
 	var right := _fwd.cross(Vector3.UP).normalized()
 	# forelegs: the two limb roots furthest forward

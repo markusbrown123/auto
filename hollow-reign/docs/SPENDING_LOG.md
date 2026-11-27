@@ -117,3 +117,5 @@ Two concept images (about 2.5 Higgsfield credits) and two prop models, `env_road
 - Final casting round: 27 new speech takes (about 54 Higgsfield credits), 17 earlier takes reused. Asked for by the owner.
 - Three concept images (about 3.75 Higgsfield credits) and three prop models: `env_road_gate_future`, `hilt_wayfarer`, `hilt_eternal` (30 Tripo credits each = **$0.90**). Tripo graphics allocation spent so far: **$25.80** of $100. The medieval `env_road_gatehouse` ($0.30, bought the day before) is unused after the owner's futuristic-environment direction.
 - Casting round 2 (owner asked for deeper, East Asian and anime-style voices): 44 new speech takes, 28 on the Inworld model (about 56 credits) and 16 on the second model (about 7 credits).
+- Casting rounds 3 to 5 (owner's correction: anime-dub style, no accent): 35 second-model takes (about 16 credits), 12 Inworld takes (about 24 credits), 1 second-model take; most of round 5 is earlier takes lowered in pitch at no cost.
+- Eight sculpted hilt concepts (about 10 Higgsfield credits) and eight hilt models (30 Tripo credits each = **$2.40**). Tripo graphics allocation spent so far: **$28.20** of $100.

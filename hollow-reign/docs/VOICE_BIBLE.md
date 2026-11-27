@@ -80,3 +80,6 @@ Unchanged and approved earlier: Witness Hamish, narrator Graham, son Malcolm, gu
 - **Mother (first generation): Celine** (second speech model, low). Round 2, option 3. Chosen by the owner.
 - The owner did not mean a Chinese accent: the wanted style is an English anime-dub voice, deeper and edgier, like the two voices chosen above. The granddaughter must be higher in pitch than the mother.
 - Round 3 (`marketing/audition/final_cast3/`) re-does the grandson and every character after him in that style. Not yet applied in `tools/gen_dialogue.py`.
+
+## Correction from the owner (2026-11-27, later)
+Only **Father = Gideon** and **Mother = Celine** are chosen. The table above is NOT locked: the owner said they liked voices *like* those numbers. Round 5 (`marketing/audition/final_cast5/`) gives four options per remaining character with the liked voice as option 1 and three similar new ones (natural English, lowered or deep, no Asian accent); the granddaughter set is all higher than the mother. Awaiting the owner's picks. Do not record new lines for these characters until they are chosen.

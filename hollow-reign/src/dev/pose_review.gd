@@ -508,6 +508,8 @@ func _poses() -> Array:
 		var cn := str(_args.clip)
 		var cl := SkinDriver.clip_length(cn)
 		return [["clip_" + cn, func(): rig.combat_steps = false; rig.walking = false; rig.set("_clock", 0.0); rig.test_clip = cn, cl, [cl * 0.2, cl * 0.45, cl * 0.7, cl * 0.95]]]
+	if _as_foe and _args.has("seq"):
+		return _seq_poses()
 	var sw := float(_args.get("swing", "0.55"))
 	p.append(["guard", func(): pass, 1.4, [1.2]])
 	p.append(["block", func(): rig.blocking = true, 1.0, [0.8]])
@@ -554,6 +556,103 @@ func _poses() -> Array:
 	p.append(["die_a", func(): rig.die(1.0), 3.2, [0.5, 1.0, 1.6, 3.0]])
 	p.append(["die_b", func(): rig.die(-1.0), 3.2, [1.0, 3.0]])
 	return p
+
+## --seq [--phase=0] [--combos=a,b]: the foe's own strings from its data, called on the rig exactly as the duel calls them
+## (telegraph with the rules' wind-up and swing, the next blow's telegraph at each hit, recover() after the last, then guard),
+## and `--seqhit=parried|blocked` calls halt() at each hit as the duel does when a blow is stopped. Adds per string:
+## `imp` ms from the rules' hit to the frame the blade reaches furthest forward (mean of the blows, worst in brackets),
+## `still` the longest stretch of a wind-up with the tip all but still (s), `drive` the seconds from the strike's start to
+## the hit (worst blow), `snap` the fastest the tip moves in the recovery (m/s, after scale), `slide` worst cm a planted
+## foot moves from where it came down.
+func _seq_poses() -> Array:
+	var foe: Dictionary = Db.foes[str(_args.foe)]
+	var ph: Dictionary = foe.phases[clampi(int(_args.get("phase", "0")), 0, foe.phases.size() - 1)]
+	var sp := float(ph.get("speed", 1.0))
+	var want: PackedStringArray = str(_args.get("combos", "")).split(",", false)
+	var p: Array = []
+	for c: Dictionary in ph.combos:
+		if not want.is_empty() and not want.has(str(c.id)):
+			continue
+		var plan: Array = []        # [time, callable]
+		var hits: Array = []
+		var winds: Array = []
+		var t := 0.0
+		for i in c.attacks.size():
+			var a: Dictionary = c.attacks[i]
+			var w := float(a.windup) / sp + (float(c.get("gap", 0.15)) if i > 0 else 0.0)
+			var dv := DuelSim.dir_vec(str(a.dir))
+			var sw2 := float(a.swing)
+			var kind := str(a.kind)
+			plan.append([t, func(): rig.telegraph(dv, w, sw2, kind)])
+			winds.append([t, t + w])
+			t += w
+			hits.append(t)
+			if _args.has("seqhit"):
+				plan.append([t, func(): rig.halt(0.3 if str(_args.seqhit) == "parried" else 0.2)])
+		plan.append([t, func(): rig.recover()])
+		var rec := minf(float(c.recover) / sp, 1.6)
+		plan.append([t + rec, func(): rig.guard()])
+		var shots: Array = []
+		for h: float in hits:
+			shots.append(h)
+		p.append(["seq_" + str(c.id), func():
+			for e: Array in plan:
+				if float(e[0]) <= 0.0:
+					(e[1] as Callable).call()
+				else:
+					_later(float(e[0]), e[1]), t + rec + 0.6, shots, {"seq": hits, "winds": winds}])
+	return p
+
+func _seq_motion(stat: Dictionary) -> void:
+	if not _cur.has("seq") or _track.size() < 4:
+		return
+	var s: float = rig.scale.x
+	var spd: Array = []         # [t, tip speed m/s]
+	for i in range(1, _track.size()):
+		var dt: float = float(_track[i][0]) - float(_track[i - 1][0])
+		spd.append([float(_track[i][0]), (_track[i][1] as Vector3).distance_to(_track[i - 1][1]) * s / maxf(dt, 0.001)])
+	var offs: Array = []
+	var drive := 9.0
+	for h: float in _cur.seq:
+		var best := -1e9
+		var bt := h
+		for e: Array in _track:
+			if float(e[0]) >= h - 0.35 and float(e[0]) <= h + 0.2 and -(e[1] as Vector3).z > best:
+				best = -(e[1] as Vector3).z
+				bt = float(e[0])
+		offs.append((bt - h) * 1000.0)
+		# the strike: back from the hit while the tip is moving faster than 1.2 m/s
+		var st := h
+		for i in range(spd.size() - 1, -1, -1):
+			if float(spd[i][0]) > h + 0.001:
+				continue
+			if float(spd[i][1]) < 1.2:
+				break
+			st = float(spd[i][0])
+		drive = minf(drive, h - st)
+	var worst := 0.0
+	var mean := 0.0
+	for o: float in offs:
+		mean += o / offs.size()
+		if absf(o) > absf(worst):
+			worst = o
+	stat["imp"] = [mean, worst, ""]
+	stat["drive"] = [drive, 0.0, ""]
+	var still := 0.0
+	for wnd: Array in _cur.winds:
+		var run := 0.0
+		for e: Array in spd:
+			if float(e[0]) < float(wnd[0]) + 0.05 or float(e[0]) > float(wnd[1]) - 0.05:
+				continue
+			run = run + 1.0 / 30.0 if float(e[1]) < 0.12 else 0.0
+			still = maxf(still, run)
+	stat["still"] = [still, 0.0, ""]
+	var snap := 0.0
+	var last: float = _cur.seq[_cur.seq.size() - 1]
+	for e: Array in spd:
+		if float(e[0]) > last + 0.25:
+			snap = maxf(snap, float(e[1]))
+	stat["snap"] = [snap, 0.0, ""]
 
 func only_has(n: String) -> bool:
 	return str(_args.get("poses", "")).split(",", false).has(n)
@@ -651,6 +750,7 @@ func _run() -> void:
 					_timers.erase(tm)
 					(tm[1] as Callable).call()
 		_motion(stat)
+		_seq_motion(stat)
 		_report(str(pose[0]), stat)
 		FighterRig.log_feet = false
 		if str(pose[0]) == "road":
@@ -790,6 +890,19 @@ func _skinned() -> Array:
 			out_n.append(_short(skel, part.dom[i]))
 	return [out_p, out_n]
 
+## Where a closed hand holds a handle (world): the palm, out of it by the grip's depth, as SkinDriver.grip() has it.
+func _grip_point(d: SkinDriver, side: String) -> Vector3:
+	var g := d.skel.global_transform
+	var h := d.skel.get_bone_global_pose(d.bone[side + "Hand"])
+	var palm: Vector3 = h.origin
+	if d.bone.has(side + "HandMiddle1"):
+		palm = palm.lerp(d.skel.get_bone_global_pose(d.bone[side + "HandMiddle1"]).origin, 0.75)
+	var ax: Array = d._grip_rest(side)
+	if ax.is_empty():
+		return g * palm
+	var rot: Basis = h.basis.orthonormalized() * (d.rest[side + "Hand"] as Transform3D).basis.orthonormalized().inverse()
+	return g * (palm + rot * (ax[2] as Vector3) * (float(ax[3]) * 0.3))
+
 func _seg_dist(p: Vector3, a: Vector3, b: Vector3) -> float:
 	var ab := b - a
 	var u := clampf((p - a).dot(ab) / maxf(ab.length_squared(), 0.000001), 0.0, 1.0)
@@ -819,7 +932,7 @@ func _tip_local() -> Vector3:
 ## `dir_err` degrees between the tip's travel across the hit instant and the swipe (as seen from behind the fighter),
 ## `yaw` the furthest the chest turned from facing the opponent (degrees), `tipz` how far ahead the tip is at the hit.
 func _motion(stat: Dictionary) -> void:
-	if _cur.is_empty() or _track.size() < 4:
+	if not _cur.has("hit") or _track.size() < 4:
 		return
 	var p0: Vector3 = _track[0][1]
 	for e: Array in _track:
@@ -855,6 +968,26 @@ func _audit(stat: Dictionary, t: float) -> void:
 		var f: Vector3 = (rig as FighterRig).skin.turn("Spine2") * Vector3(0, 0, -1)
 		# (the rig has already taken the step that ends at t + one frame)
 		_track.append([t + 1.0 / float(_args.get("fps", "30")), _tip_local(), atan2(f.x, -f.z)])
+	if _args.has("trace") and not _is_dragon and (rig as FighterRig).skin:
+		# --trace: one line a frame: clip and clip time, the body's offset, both ankles (world), the blade tip (rig space)
+		var fr0: FighterRig = rig
+		var d0: SkinDriver = fr0.skin
+		var g0 := d0.skel.global_transform
+		var al: Vector3 = g0 * d0.skel.get_bone_global_pose(d0.bone["LeftFoot"]).origin
+		var ar: Vector3 = g0 * d0.skel.get_bone_global_pose(d0.bone["RightFoot"]).origin
+		var lw0: Vector3 = g0 * d0.skel.get_bone_global_pose(d0.bone["LeftHand"]).origin
+		if d0.bone.has("LeftHandMiddle1"):
+			lw0 = lw0.lerp(g0 * d0.skel.get_bone_global_pose(d0.bone["LeftHandMiddle1"]).origin, 0.75)
+		var wt0 := fr0.weapon_r.global_transform
+		var tgt0: Vector3 = wt0 * Vector3(0, -fr0._off_grip / maxf(wt0.basis.get_scale().y, 0.001), 0)
+		var sh0: Vector3 = g0 * d0.skel.get_bone_global_pose(d0.bone["LeftArm"]).origin
+		var el0: Vector3 = g0 * d0.skel.get_bone_global_pose(d0.bone["LeftForeArm"]).origin
+		var wr0: Vector3 = g0 * d0.skel.get_bone_global_pose(d0.bone["LeftHand"]).origin
+		if _args.has("armlen"):
+			print("  arm %.2f+%.2f=%.2f  shoulder->target %.2f  (world m)" % [sh0.distance_to(el0), el0.distance_to(wr0), sh0.distance_to(el0) + el0.distance_to(wr0), sh0.distance_to(tgt0)])
+		var oh0 := lw0.distance_to(wt0 * Vector3(0, -fr0._off_grip / maxf(wt0.basis.get_scale().y, 0.001), 0)) / fr0.scale.x
+		print("  xf=%.2f t=%.3f mode=%d clip=%s ct=%.3f w=%.2f root=(%.2f,%.2f) L=(%.2f,%.2f,%.2f) R=(%.2f,%.2f,%.2f) tip=%s oh=%.2f grip=%.2f pom=%.2f wsc=%.2f roll=%.2f" % [d0.xf_u(), t, fr0.mode, d0.clip, d0.clip_t, d0.clip_w,
+			fr0.body.position.x, fr0.body.position.z, al.x, al.y, al.z, ar.x, ar.y, ar.z, str(_tip_local().snapped(Vector3.ONE * 0.01)), oh0, fr0._off_grip, fr0._pommel, wt0.basis.get_scale().y, float(fr0._au.get("roll", 0.0))])
 	if _args.has("motiononly"):
 		return      # only the blade's path (fast enough to run at 120 frames a second)
 	var sk: Array = _skinned()
@@ -965,8 +1098,13 @@ func _audit(stat: Dictionary, t: float) -> void:
 			if down and e2[0] and t >= _slip_from:
 				e2[2] = float(e2[2]) + Vector2(ank2.x - (e2[1] as Vector3).x, ank2.z - (e2[1] as Vector3).z).length()
 				_worse(stat, "slip", float(e2[2]) / s * 100.0, t, side, false)
+				# `slide`: how far the planted foot now is from where it came down (jitter does not add up here)
+				var at0: Vector3 = _slip.get(side + "_at", ank2)
+				_worse(stat, "slide", Vector2(ank2.x - at0.x, ank2.z - at0.z).length() * 100.0, t, side, false)
 			elif not down:
 				e2[2] = 0.0
+			if down and not e2[0]:
+				_slip[side + "_at"] = ank2
 			if down and not e2[0] and t >= _slip_from:
 				_contacts.append([Engine.get_process_frames(), side])
 			e2[0] = down
@@ -1012,14 +1150,19 @@ func _audit(stat: Dictionary, t: float) -> void:
 			for ck: String in cnt:
 				_worse(stat, ck, float(cnt[ck]), t, str(cnames) if ck == "sh_th" else "", false)
 		if fr.two_handed:
-			var lh: Vector3 = fr.weapon_l.global_position
+			# the real left palm (the skinned hand, not the node the rig parks at the grip) against the handle below the sword hand
+			var lh: Vector3 = _grip_point(d, "Left")
 			var wt := fr.weapon_r.global_transform
-			_worse(stat, "offhand", _seg_dist(lh, wt * Vector3(0, -0.35, 0), wt * Vector3(0, 0.05, 0)) / s, t, "", false)
+			if fr._release_l < 0.1:
+				_worse(stat, "offhand", _seg_dist(lh, wt * Vector3(0, -maxf(fr._pommel, 0.2), 0), wt.origin) / s, t, "", false)
+			elif fr._release_l > 0.5:
+				# (seconds the second hand is off the handle because the clip itself has let go)
+				stat["let_go"] = [float(stat.get("let_go", [0.0])[0]) + 1.0 / float(_args.get("fps", "30")), t, ""]
 
 func _report(pose: String, stat: Dictionary) -> void:
 	var out := "%-16s" % pose
 	var flags := ""
-	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "fingers", "knee_min", "knee_back", "elbow_min", "ankle_low", "slip", "moved", "off10", "off40", "sh_arm", "offhand", "sh_fa", "sh_ua", "sh_hip", "sh_th", "delay", "dir_err", "yaw", "tipz"]:
+	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "fingers", "knee_min", "knee_back", "elbow_min", "ankle_low", "slip", "moved", "off10", "off40", "sh_arm", "offhand", "sh_fa", "sh_ua", "sh_hip", "sh_th", "delay", "dir_err", "yaw", "tipz", "let_go", "slide", "imp", "still", "drive", "snap"]:
 		if not stat.has(k):
 			continue
 		var e: Array = stat[k]
@@ -1040,6 +1183,10 @@ func _report(pose: String, stat: Dictionary) -> void:
 			"ankle_low": bad = v < -0.03
 			"offhand": bad = v > 0.06
 			"slip": bad = v > 2.0
+			"slide": bad = v > 4.0
+			"imp": bad = absf(v) > 34.0
+			"still": bad = v > 0.5
+			"drive": bad = v < 0.12
 			"sh_arm", "sh_fa", "sh_ua", "sh_hip", "sh_th": bad = v >= 3.0
 			"moved": bad = v > 0.07
 			"delay": bad = v > 0.085

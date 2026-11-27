@@ -14,6 +14,7 @@ var hero: CineActor
 var gen := 1
 var s := 0.0                      # where the walker is on the road, metres from its foot
 var on_road := false
+var _walk: Tween                  # the stride in progress: one at a time, or an earlier shot's walk keeps dragging `s` back
 
 func setup(generation: int) -> void:
 	gen = generation
@@ -41,9 +42,14 @@ func stride(a: float, b: float) -> void:
 	on_road = true
 	hero.walking = true
 	_place()
-	create_tween().tween_property(self, "s", b, absf(b - a) / WALK)
+	if _walk:
+		_walk.kill()
+	_walk = create_tween()
+	_walk.tween_property(self, "s", b, absf(b - a) / WALK)
 
 func stand(at: float) -> void:
+	if _walk:
+		_walk.kill()
 	s = at
 	on_road = true
 	hero.walking = false

@@ -262,6 +262,18 @@ func _ready() -> void:
 	ok(picked == ["retry"], "death screen: Retry calls the retry")
 	Overlays.victory(d2, Db.foes.hollow_soldier, Game.on_victory("hollow_soldier", 10.0), d2.sim, func(): pass)
 	await get_tree().process_frame
+	# --- the pause panel opens once however often it is asked for, and Resume leaves nothing behind
+	var layers_before := d2.get_children().filter(func(c): return c is CanvasLayer and (c as CanvasLayer).layer == 20).size()
+	Overlays.pause(d2, func(): pass, func(): pass)
+	Overlays.pause(d2, func(): pass, func(): pass)
+	await get_tree().process_frame
+	var pause_layers: Array = d2.get_children().filter(func(c): return c is CanvasLayer and (c as CanvasLayer).layer == 20)
+	ok(pause_layers.size() == layers_before + 1, "pause: two requests, one panel")
+	for n: Node in pause_layers[pause_layers.size() - 1].find_children("*", "Button", true, false):
+		if (n as Button).text.to_lower() == "resume":
+			(n as Button).pressed.emit()
+	await get_tree().process_frame
+	ok(d2.get_children().filter(func(c): return c is CanvasLayer and (c as CanvasLayer).layer == 20 and not c.is_queued_for_deletion()).size() == layers_before and not get_tree().paused, "pause: Resume takes the panel down and unpauses")
 	d2.queue_free()
 	# --- the campaign fix pass (tests/fix_pass.gd; also runs alone as tests/fix_pass.tscn)
 	var fp: Node = load("res://tests/fix_pass.gd").new()

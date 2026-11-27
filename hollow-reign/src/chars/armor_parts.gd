@@ -61,7 +61,7 @@ const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38
 ## `--neon` the second pass's coloured light back (FINISH_NEON, GLOW, FX_*): lines of light, lit visor, cast light, vents.
 const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.36, 0.37, 0.39), "coat_metal": 0.28, "coat_rough": 0.5, "edge_shine": 0.16,
 	"wear": 0.85, "wear_edge": 0.0, "wear_color": Color(0.06, 0.06, 0.065), "spec": 0.42,
-	"etch": 1.0, "trim": 0.6, "motif": 0.0, "visor": 0.0, "fx": 0.0}
+	"etch": 1.0, "trim": 0.6, "motif": 0.0, "visor": 0.0, "fx": 0.0, "under_lift": 1.0}
 const FINISH_NEON := {"motif": 1.0, "motif_dark": Color(0.13, 0.13, 0.14), "motif_energy": 2.2, "visor": 4.5, "etch": 0.0, "fx": 1.0}
 static var neon: bool = OS.get_cmdline_user_args().has("--neon")
 static var hood_on: bool = OS.get_cmdline_user_args().has("--hood")   # owner rejected the hood (2026-11-27): off unless asked for
@@ -581,6 +581,7 @@ func cost() -> Dictionary:
 	return {"tris": tris, "surfaces": surfaces, "materials": suits.size() + (1 if under else 0)}
 
 # ---------------------------------------------------------------- undersuit
+const UNDER_FINISH := Color(0.21, 0.215, 0.225)    # charcoal, not black (matches under_color in armor_part.gdshader)
 const UNDER_SHRINK := 0.002           # of body height (the parts are stored at height 1): about 4 mm on the knight
 const UNDER_CODE := "shader_type spatial;
 // The body under the armour: the base knight drawn a little smaller and in flat dark cloth, so a gap between two
@@ -614,6 +615,8 @@ func _build_under() -> void:
 	var m := ShaderMaterial.new()
 	m.shader = _under_shader
 	m.set_shader_parameter("shrink", UNDER_SHRINK)
+	if host == "crownless" and not chrome:
+		m.set_shader_parameter("cloth", UNDER_FINISH)      # the same charcoal the parts' undersuit texels take
 	var base := _material(body, host)
 	if base:
 		m.set_shader_parameter("normal_tex", base.get_shader_parameter("normal_tex"))

@@ -420,3 +420,28 @@ Open after this pass:
 | SC7 | C | `s_garrison` (first-generation kite) roll_r: the board comes off the back one frame late and the arm is through its face (`sh_arm` 39-45 at 0.77 s) | Not the starting kit |
 | SC8 | C | Rim of the slung shield under the floor in rolls (`rim` -0.2 to -0.35) | Existing (row 96); the board lies on the back |
 | SC9 | C | A small blue light stays at the neck/gorget on the knight in the pose sheets; the heater face is dark blue enamel | `src/chars/armor_parts.gd` finish constants and the shield's enamel are outside this task |
+
+## Foe animation pass (2026-11-27): bosses and big foes (owner's phone note)
+
+Measured with `pose_review --foe=<id> --seq` (the foe's real strings, called as the duel calls them); recordings in
+`marketing/foe_anim_pass/`. Nothing has run on a phone. Details: `docs/ANIMATION_LIBRARY.md`, "Foe animation pass".
+
+### Fixed
+| # | Sev | Issue | Root cause | Fix | Before → after (Sentinel / Colossus worst) |
+|---|---|---|---|---|---|
+| FA1 | A | Big foes skated: feet slid across the floor through every blow | Procedural root lunge (0.18 m back, 0.35 m forward, x scale) under the clip, plus the `_IP` clips' in-place drag | No lunge under a foe's authored blow; clip feet planted in the world, a lifted step where the clip moves a foot (`_feet_clip`) | slide 44-152 cm → 4-18 cm |
+| FA2 | A | Wind-up froze into a statue, then a 0.15 s snap of a strike | Eased into the wound-up pose in ~0.2 s and held still for the whole warning | Gather (eased change of pose), slow draw-back, coil, scale-aware strike start (0.22 / 0.32 s) | strike 0.15 / 0.18 s → 0.22 / 0.32 s |
+| FA3 | A | Recovery snapped: the clip was dropped on the contact frame | `recover()` at the sim's hit stopped the authored clip | Follow-through decelerates to rest, then a slow ease to a spent pose and back to guard | recovery tip speed 27-67 m/s → 9-14 m/s |
+| FA4 | B | Second hand floated off the greatsword's handle | Closing the hand turned it about the wrist; the cut's roll was taken at the sword arm only | `SkinDriver.grip_at`; roll at the chest for two-handers; the clip's own arm where the clip lets go | 20-53 cm → 2-16 cm while gripped |
+| FA5 | B | Wind-up whipped the blade round behind the head and through it, flipping it | The clip's own wind-up raced through; blade direction slerped apart from the hand | Only the last 0.12 s of the clip's wind-up; blade rigid in the eased hand | 1.3 m tip jump in a frame → continuous; blade-in-body 6-31 → 0-9 vertices |
+| FA6 | B | Spent greatsword stabbed into the floor and jittered | Procedural recover pose pointed a 2 m blade steeply down | Out low to the side the blow finished on | (part of FA3) |
+| FA7 | C | `pose_review`'s `offhand` always read 0 | It measured a node parked on the handle | Measures the skinned grip | — |
+
+### Open
+| # | Sev | Issue | Reproduce | Plan |
+|---|---|---|---|---|
+| FA8 | B | Pike Sergeant (glaive): rising cuts put the shaft through its own thigh (10-37 sampled vertices) | `pose_review --foe=pike_sergeant --seq --combos=rise_fall` | Glaive-specific clearance or a different rising clip |
+| FA9 | B | Foe stagger and hit reactions are still free-library body clips under procedural arms; a long blade hangs beside the leg | `--foe=ashen_sentinel --poses=stagger` | Two-handed `th_hit_*` / `th_block_hit_*` for foes |
+| FA10 | C | After a blow ends the second hand regrips over a few frames (22-39 cm for 2-4 frames) | `--seq --combos=sweep_l` | Ease the release back over the change of pose |
+| FA11 | C | In chains the frame of furthest reach is up to 100 ms after the sim's hit (the next gather carries the blade on); single blows are within one frame | `--seq --phase=1 --combos=gate_drill` | Measure contact per blow rather than by furthest reach |
+| FA12 | C | The held follow-through of an overhead chop lies low in front for up to ~0.7 s; a knight stepping in at once can stand over the blade | duel, Gate Colossus hammer | Shorter hold for overhead chops, or step the foe back |

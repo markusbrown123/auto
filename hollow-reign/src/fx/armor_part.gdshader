@@ -69,6 +69,10 @@ uniform float edge_shine = 0.0;
 //  trim  0 off .. 1 a pale line along the plates' borders (the steep parts of the normal map next to a seam).
 uniform float etch = 0.0;
 uniform float trim = 0.0;
+//  under_lift  0 off .. 1 the undersuit (the texels `cloth` finds) is one even dark charcoal (under_color) with a fine
+//        weave and a soft sheen, in place of the texture's near-black and its dark blotches. Plates are not touched.
+uniform float under_lift = 0.0;
+uniform vec3 under_color : source_color = vec3(0.21, 0.215, 0.225);
 
 float line_at(float d, float half_w, float aa) { return 1.0 - smoothstep(half_w, half_w + aa, abs(d)); }
 float diamond(vec2 d, float r, float aa) { return 1.0 - smoothstep(r, r + aa, abs(d.x) + abs(d.y)); }
@@ -160,6 +164,17 @@ void fragment() {
 		float inc = clamp((sig * front + cut * in_face), 0.0, 1.0) * plate * etch;
 		alb = mix(alb, alb * 0.42, inc);
 		r = mix(r, 0.7, inc);
+	}
+	if (under_lift > 0.0 && coat > 0.0) {
+		// the same texels as `under`, at full strength where the texture is flat black: its blotches are not carried over
+		float cl = under * under_lift;
+		float wv = sin(UV.x * 380.0) * sin(UV.y * 380.0);
+		float wfade = 1.0 - smoothstep(0.12, 0.45, fwidth(UV.x) * 380.0);
+		vec3 charcoal = under_color * (1.0 + 0.2 * wv * wfade);
+		alb = mix(alb, charcoal, cl);
+		r = mix(r, 0.5, cl);
+		metal = mix(metal, 0.0, cl);
+		under *= 1.0 - cl;
 	}
 	vec3 glow = vec3(0.0);
 	float sheen = 0.0;

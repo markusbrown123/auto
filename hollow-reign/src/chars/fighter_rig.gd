@@ -597,6 +597,8 @@ func _go(m: int, dur: float = 1.0) -> void:
 
 func guard() -> void:
 	if mode != Mode.DEAD:
+		if mirror < 0.0 and polish and skin != null and mode in [Mode.RECOVER, Mode.STAGGER] and _au.is_empty():
+			_xfade(AU_OUT_FOE * (1.0 + 0.6 * _mass()))      # a spent or reeling foe gathers itself back into guard
 		_go(Mode.GUARD)
 		_root_target = Vector3.ZERO
 
@@ -612,7 +614,14 @@ func telegraph(dir: Vector2, windup: float, swing: float, kind: String = "slash"
 	else:
 		_go(Mode.WINDUP, windup)
 	_root_target = Vector3(0, 0, 0.18)
-	_au_begin("thrust" if (kind == "thrust" or kind == "lunge") else _au_label(), maxf(windup - swing * 0.5, 0.0), windup, "")
+	# (a big foe's blow is seen to start earlier and travel longer, with the same instant of landing: the rules' hit time
+	# is not moved, only how much of the warning the visible strike takes; `_mass` 0 keeps half the swing as before)
+	var drive := swing * 0.5 * (1.0 + 0.9 * _mass())
+	_au_begin("thrust" if (kind == "thrust" or kind == "lunge") else _au_label(), maxf(windup - minf(drive, windup * 0.4), 0.0), windup, "")
+
+## How much weight a foe's blows are shown with: 0 for a man-sized foe, 1 for a giant (scale 1.75 and up). The player: 0.
+func _mass() -> float:
+	return clampf((scale.x - 1.0) / 0.75, 0.0, 1.0) if mirror < 0.0 else 0.0
 
 ## Player attack: a short rise then the cut. Contact is at 60% of `time`.
 ## `finish` names the kind of combo this cut completes ("" for an ordinary cut): each kind has its own body.
@@ -1114,6 +1123,11 @@ func _solve(dt: float) -> void:
 			# spent: weapon low and wide, chest heaving — this is the opening
 			hand_t = Vector3(0.42, 0.62, -0.25)
 			blade_t = Vector3(0.35, -0.75, -0.55).normalized()
+			if two_handed and mirror < 0.0 and polish:
+				# (a long blade pointed that steeply was driven into the floor and flipped about as the floor guard and the
+				# second hand fought over it: carried out low to whichever side the blow finished on, point off the ground)
+				hand_t = Vector3(0.34 if _spent_side > 0.0 else 0.0, 0.8, -0.3)
+				blade_t = Vector3(0.78 * _spent_side, -0.3, -0.55).normalized()
 			lean_t = 0.42 + hunch + _osc(5.0) * 0.03
 			twist_t = 0.1
 			crouch_t = 0.16
@@ -1196,6 +1210,10 @@ func _solve(dt: float) -> void:
 	_twist = lerpf(_twist, twist_t, slow * 1.6)
 	_crouch = lerpf(_crouch, crouch_t, slow * 1.4)
 	_far = lerpf(_far, _far_target, 1.0 - exp(-dt * 4.0))
+	if mirror < 0.0 and polish and not _au.is_empty() and float(_au.from) > 0.05:
+		# a foe's authored blow carries its own weight and step: the body is not also lunged back and forth under it
+		# (that slid the clip's planted feet up to 1.2 m across the floor)
+		_root_target = Vector3.ZERO
 	_root = _root.lerp(_root_target + Vector3(0, 0, _far), 1.0 - exp(-dt * (16.0 if mode == Mode.DODGE else 9.0)))
 	if mode == Mode.DODGE and _dg_on():
 		_root.x = _root_target.x
@@ -1441,7 +1459,11 @@ func _fit_props(hands: Dictionary) -> void:
 	elif _whole_w > 0.01 and carried != Vector3.ZERO and _pin_t <= 0.0 and _au_state == "":
 		# a whole-body clip (a fall, a hit, a roll) throws the arm: the weapon goes with the hand, not with the old aim
 		dir = dir.slerp(carried, _whole_w) if dir.dot(carried) > -0.99 else carried
-	if skin.xf_u() < 1.0 and _pin_t <= 0.0:
+	if skin.xf_u() < 1.0 and _pin_t <= 0.0 and mirror < 0.0 and polish and carried != Vector3.ZERO and au_arm:
+		# a foe's change of pose: the blade stays rigid in the hand and turns as the eased wrist turns (two directions
+		# slerped apart from the hand swung a long blade through the wielder's own head and flipped it about the hand)
+		dir = carried
+	elif skin.xf_u() < 1.0 and _pin_t <= 0.0:
 		dir = _xf_dir_r.slerp(dir, skin.xf_u()) if _xf_dir_r.dot(dir) > -0.99 else dir
 	if _pin_t <= 0.0:
 		# (on the broad-shouldered base body a blade brought back over the shoulder also has to clear its own upper arm)
@@ -1461,7 +1483,25 @@ func _fit_props(hands: Dictionary) -> void:
 		weapon_l.position = pr
 		if mode != Mode.DEAD and _sheath_w <= 0.0:
 			skin.reach_hand("Left", pr - dir * _off_grip)
-			skin.grip("Left", dir)
+			if mirror < 0.0:
+				# a foe's second hand: closing the hand round the handle turns it about the wrist and carries it off the
+				# grip (20-50 cm on the big two-handers), so the wrist is moved until the closed hand is on the handle.
+				# Where the clip itself has let go (the packs' one-handed reach at the end of a wide cut, the handle out
+				# of the arm's reach), the arm is given back to the clip instead of being stretched straight at the hilt.
+				var keep := {}
+				for b: String in ["LeftArm", "LeftForeArm", "LeftHand"]:
+					keep[b] = skin.skel.get_bone_pose_rotation(skin.bone[b])
+				var want_l := pr - dir * _off_grip
+				var arm_len: float = (skin.point("LeftForeArm").distance_to(skin.point("LeftArm")) + skin.point("LeftHand").distance_to(skin.point("LeftForeArm")))
+				var far_l: float = skin.point("LeftArm").distance_to(want_l)
+				_release_l = lerpf(_release_l, smoothstep(0.95, 1.2, far_l / maxf(arm_len, 0.01)) if (whole and _au_state == "cut") else 0.0, 0.35)
+				skin.grip_at("Left", want_l, dir)
+				if _release_l > 0.01:
+					for b: String in keep:
+						var bi: int = skin.bone[b]
+						skin.skel.set_bone_pose_rotation(bi, skin.skel.get_bone_pose_rotation(bi).slerp(keep[b], _release_l))
+			else:
+				skin.grip("Left", dir)
 	elif dual:
 		var dl: Vector3 = weapon_l.transform.basis.y
 		var carried_l := skin.hand_axis("Left")
@@ -1506,6 +1546,7 @@ func _held_basis(side: String, dir: Vector3) -> Basis:
 ## Hands close on what they hold (only on a fighter carrying the new equipment: other models keep their own hands).
 var _curl_r := 1.0
 var _curl_l := 1.0
+var _release_l := 0.0         # 0..1: how far a foe's second hand has let go of a two-handed grip (the clip's own arm instead)
 func _fit_fingers() -> void:
 	if parts == null and _gear == "" and _sh_gear == "":
 		return
@@ -1518,6 +1559,8 @@ func _fit_fingers() -> void:
 		grab = smoothstep(DRAW_GRAB - 0.14, DRAW_GRAB, u if _draw_dir > 0 else 1.0 - u)
 	var want_r := (0.22 if away else lerpf(0.22, 1.0, grab)) * (1.0 - 0.85 * _present_open())
 	var want_l := want_r if (dual or two_handed) else (1.0 if shield else 0.22)
+	if two_handed:
+		want_l = lerpf(want_l, 0.3, _release_l)      # (a second hand that has let go of the handle opens)
 	if shield and _present == "recall" and _present_shield:
 		want_l = 1.0 - 0.85 * _present_open()
 	_curl_r = lerpf(_curl_r, want_r, 0.4)
@@ -1908,7 +1951,10 @@ func _au_begin(label: String, strike_from: float, hit_at: float, finish: String)
 		return
 	_au_t = 0.0
 	_au_state = "cut"
-	_xfade(minf(AU_IN, float(_au.hit) * 0.45) if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
+	if mirror < 0.0 and strike_from > 0.05 and polish:
+		_xfade(_au_gather(strike_from))      # (the whole gather is the change of pose: nothing is snapped into)
+	else:
+		_xfade(minf(AU_IN, float(_au.hit) * 0.45) if strike_from <= 0.05 else minf(AU_IN_FOE, strike_from * 0.5))
 
 func _au_build(spec: Array, label: String, strike_from: float, hit_at: float) -> void:
 	_au = {}
@@ -1919,6 +1965,7 @@ func _au_build(spec: Array, label: String, strike_from: float, hit_at: float) ->
 	if int(spec[1]) >= hits.size():
 		return
 	var opt: Dictionary = spec[2] if spec.size() > 2 else {}
+	skin.roll_chest = two_handed and mirror < 0.0 and polish      # (a foe's two-handed cut is turned with both arms)
 	var h: Dictionary = hits[int(spec[1])]
 	var tc := float(h.contact)
 	var ts := minf(float(h.start), tc - 0.1)
@@ -1946,6 +1993,18 @@ func _au_build(spec: Array, label: String, strike_from: float, hit_at: float) ->
 		if absf(_au_yaw(n, tq)) > AU_YAW_MAX or (tq > tc + 0.1 and (skin.clip_hand(n, tq).p as Vector3).distance_to(Vector3(0, 1.58, 0.0)) < 0.36):
 			t_out = maxf(tc + 0.03, tq - 0.033)
 			break
+	if mirror < 0.0 and strike_from > 0.05 and polish:
+		# a foe's follow-through is held as its spent pose, then eased back to guard: it ends while the blade is still in
+		# front of the body and the chest no more than ~55 deg from the opponent (the packs' recoveries swing the blade
+		# round behind the back, which then had to come back past the body to the guard in one stroke)
+		var tq2 := tc + 0.033
+		while tq2 < t_out:
+			var hd2: Dictionary = skin.clip_hand(n, tq2)
+			var tip2: Vector3 = hd2.p + hd2.axis * weapon_len
+			if absf(_au_yaw(n, tq2)) > 0.95 or tip2.z > -0.15:
+				t_out = maxf(tc + 0.03, tq2 - 0.033)
+				break
+			tq2 += 0.033
 	te = minf(te, t_out)
 	# the wound-up pose: the moment before the cut at which the blade is furthest back along the line it will travel
 	# (high for a falling cut, out to the left for a cut to the right). A foe holds it for the whole warning; the
@@ -1965,7 +2024,9 @@ func _au_build(spec: Array, label: String, strike_from: float, hit_at: float) ->
 	var pre := apex
 	if strike_from > 0.05:
 		ts = apex
-		while pre > maxf(0.0, apex - 0.3) and absf(_au_yaw(n, pre - 0.033)) < AU_YAW_MAX:
+		# (a foe comes into its wound-up pose by an eased change of pose from wherever it stood, not by racing through the
+		# clip's own wind-up, which on the packs' chain stages whips the blade round behind the head first)
+		while pre > maxf(0.0, apex - (AU_PRE_FOE if mirror < 0.0 else 0.3)) and absf(_au_yaw(n, pre - 0.033)) < AU_YAW_MAX:
 			pre -= 0.033
 		pre = maxf(pre, 0.0)
 	else:
@@ -1992,11 +2053,61 @@ func _au_build(spec: Array, label: String, strike_from: float, hit_at: float) ->
 	var hc: Dictionary = skin.clip_hand(n, tc, "Right", float(_au.roll))
 	_au.reach = -(hc.p.z + hc.axis.z * weapon_len * 0.8)
 
+## A foe's warning, in three parts: it gathers into its wind-up (`_au_gather` seconds, an eased change of pose), keeps
+## drawing back slowly while it waits, then coils the last of the way (`_au_coil` seconds) before the blow, so the pose
+## is never a statue and the release is anticipated. The blow is slow-in, fast at contact (heavier the bigger the foe);
+## after the hit the clip follows through and decelerates into the end of its own recovery instead of stopping dead.
+var _spent_side := 1.0        # which side a spent foe's long blade is let down to: the side its blow finished on
+const AU_PRE_FOE := 0.12      # seconds of a clip's own wind-up a foe plays before its wound-up pose
+const AU_OUT_FOE := 0.34      # seconds a foe takes from the end of its follow-through back into guard (more for a giant)
+
+func _au_gather(from: float) -> float:
+	return clampf(from * 0.5, 0.22, 0.42 + 0.18 * _mass())
+
+func _au_coil(from: float) -> float:
+	return clampf(minf(0.2 + 0.16 * _mass(), from - _au_gather(from)), 0.0, 1.0)
+
+func _au_time_foe(tau: float) -> float:
+	var from := float(_au.from)
+	var hit := float(_au.hit)
+	var pre := float(_au.pre)
+	var ts := float(_au.ts)
+	var tc := float(_au.tc)
+	if tau < from:
+		var g := _au_gather(from)
+		var a := _au_coil(from)
+		var mid := lerpf(pre, ts, 0.55)
+		var mid2 := lerpf(pre, ts, 0.72)
+		if tau < g:
+			return lerpf(pre, mid, smoothstep(0.0, 1.0, tau / g))
+		if tau < from - a:
+			return lerpf(mid, mid2, smoothstep(0.0, 1.0, (tau - g) / maxf(from - a - g, 0.001)))
+		return lerpf(mid2, ts, smoothstep(0.0, 1.0, (tau - (from - a)) / maxf(a, 0.001)))
+	var k := 1.5 + 0.6 * _mass()
+	if tau < hit:
+		return lerpf(ts, tc, pow((tau - from) / maxf(hit - from, 0.001), k))
+	# the follow-through leaves contact at the blow's own speed and slows to rest at the end of what is played
+	var t_out := float(_au.t_out)
+	var pace := k * (tc - ts) / maxf(hit - from, 0.001)
+	var span := maxf(t_out - tc, 0.0)
+	var dur := clampf(2.0 * span / maxf(pace, 0.01), 0.25, 0.45 + 0.25 * _mass())
+	var v := clampf((tau - hit) / dur, 0.0, 1.0)
+	return tc + span * (1.0 - (1.0 - v) * (1.0 - v))
+
+## Seconds a foe's follow-through takes from the hit to rest (as `_au_time_foe` plays it).
+func _au_follow() -> float:
+	var k := 1.5 + 0.6 * _mass()
+	var pace := k * (float(_au.tc) - float(_au.ts)) / maxf(float(_au.hit) - float(_au.from), 0.001)
+	return clampf(2.0 * maxf(float(_au.t_out) - float(_au.tc), 0.0) / maxf(pace, 0.01), 0.25, 0.45 + 0.25 * _mass())
+
 ## Clip time for a moment of the attack. The warning window eases into the wound-up pose and holds there; the blow
 ## runs from there to the clip's contact frame, arriving at the hit instant; what follows plays at the clip's own pace.
+## (A foe's warning and follow-through: `_au_time_foe`.)
 func _au_time(tau: float) -> float:
 	var from := float(_au.from)
 	var hit := float(_au.hit)
+	if mirror < 0.0 and from > 0.05 and polish:
+		return _au_time_foe(tau)
 	if tau < from:
 		var u := clampf(tau / maxf(from, 0.001), 0.0, 1.0)
 		return lerpf(float(_au.pre), float(_au.ts), 1.0 - pow(1.0 - u, 3.0))
@@ -2036,16 +2147,34 @@ func _au_yaw(n: String, t: float) -> float:
 func _au_stop() -> void:
 	if _au.is_empty():
 		return
+	var calm := mirror < 0.0 and polish and mode == Mode.GUARD
 	_au = {}
 	_au_state = ""
 	_clip_w = 0.0
 	if skin:
-		_xfade(AU_OUT)
+		# a foe going back to its guard from a spent blow takes its time (the weight of the blade); anything else is quick
+		_xfade(AU_OUT_FOE * (1.0 + 0.6 * _mass()) if calm else AU_OUT)
 
 func _au_update(dt: float) -> void:
 	if _au.is_empty():
 		return
-	if not (mode in [Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW, Mode.THRUST_WINDUP, Mode.THRUST]):
+	var foe_spent := mirror < 0.0 and polish and mode == Mode.RECOVER and float(_au.from) > 0.05
+	if foe_spent:
+		# a foe's spent blow is not dropped the moment the rules call the recovery: the clip follows through and settles
+		# (or, stopped by a guard or a body, rebounds a little off it) and is held there until the foe returns to guard
+		if float(_au.freeze) >= 0.0 and not _au.has("freeze_t"):
+			_au.freeze_t = _au_t
+		# once followed through (or rebounded) and settled, the spent foe lets the blade go out wide and low, clear of
+		# whoever steps in to punish it, over a slow change of pose (the held clip pose had the point at the opponent)
+		var done_at := float(_au.get("freeze_t", float(_au.hit))) + (0.38 if float(_au.freeze) >= 0.0 else _au_follow() + 0.05)
+		if _au_t >= done_at:
+			_spent_side = 1.0 if (body.global_transform.affine_inverse() * blade_tip()).x >= -0.2 else -1.0
+			_au = {}
+			_au_state = ""
+			_clip_w = 0.0
+			_xfade(0.5 + 0.25 * _mass())
+			return
+	elif not (mode in [Mode.WINDUP, Mode.STRIKE, Mode.FOLLOW, Mode.THRUST_WINDUP, Mode.THRUST]):
 		# a combo's last cut that met nothing is followed through to its own recovery before the guard comes back
 		if mode != Mode.GUARD or blocking or float(_au.freeze) >= 0.0 or _au_t > float(_au.hit) + _swing * 0.5 + 0.3 + float(_au.linger) \
 				or _au_time(_au_t) >= float(_au.t_out) - 0.001:
@@ -2068,7 +2197,10 @@ func _au_update(dt: float) -> void:
 		var hd: Dictionary = skin.clip_hand(str(_au.clip), ct, "Right", float(_au.roll), float(_au.travel))
 		if _blade_in(hd.p, hd.axis, targets, 0.75 if thrust else 0.3, 0.35 if thrust else 0.3):
 			_au.freeze = ct
-			_go(Mode.FOLLOW, BITE_HOLD + 0.22 + float(_au.linger) * 0.4)      # a finishing blow stays in a moment longer
+			if foe_spent:
+				_au.freeze_t = _au_t      # (the follow-through met the body after the rules' hit: it stops there)
+			else:
+				_go(Mode.FOLLOW, BITE_HOLD + 0.22 + float(_au.linger) * 0.4)      # a finishing blow stays in a moment longer
 			break
 
 func _au_apply() -> void:
@@ -2083,6 +2215,11 @@ func _au_apply() -> void:
 		return
 	skin.clip = str(_au.clip)
 	skin.clip_t = float(_au.freeze) if float(_au.freeze) >= 0.0 else _au_time(_au_t)
+	if float(_au.freeze) >= 0.0 and _au.has("freeze_t"):
+		# stopped by a guard or a body, then spent: held a beat, then the blade rebounds back a little along its own line
+		var since := _au_t - float(_au.freeze_t)
+		var back := minf(0.12, maxf(float(_au.freeze) - float(_au.ts), 0.0) * 0.5)
+		skin.clip_t = float(_au.freeze) - back * smoothstep(0.08, 0.38, since)
 	skin.clip_full = true
 	skin.clip_w = 1.0
 	skin.clip_travel = float(_au.travel)
@@ -2645,7 +2782,9 @@ func _feet_mode() -> int:
 			if _rolling:
 				return 2 if _au_state == "roll" and _t / _dur > 0.66 * ROLL_UP else 0      # (coming up out of it: the feet that land stay put)
 			return 2 if _au_state == "dodge" else 1
-		return 1 if _au.is_empty() else 0
+		if _au.is_empty():
+			return 1
+		return 4 if (mirror < 0.0 and float(_au.from) > 0.05) else 0
 	if mode != Mode.GUARD or not _walk_clip_ok() or get("armed") == false or not (_au_state in ["walk", ""]):
 		return 0
 	if _walk_amount > 0.05:
@@ -2664,16 +2803,26 @@ func _feet_pass() -> void:
 	elif m == 3 and _fw.is_empty() and not _ft.is_empty():
 		for side: String in _ft:
 			_fw[side] = {"lock": not _ft[side].step, "at": _ft[side].at, "off": Vector3.ZERO}
+	if m == 4 and _fl.is_empty():
+		for side: String in _ft:      # into a blow: each foot starts where it stands in the guard
+			_fl[side] = {"lock": true, "at": _ft[side].at, "w": 1.0, "from": _ft[side].at, "t": 9.0}
+	elif m == 1 and _ft.is_empty() and not _fl.is_empty():
+		for side: String in _fl:      # out of a blow: the guard's feet start where the blow left them
+			var at_w: Vector3 = _fl[side].at if _fl[side].lock else (body.global_transform * skin.point(side + "Foot"))
+			_ft[side] = {"at": Vector3(at_w.x, global_position.y, at_w.z), "yaw": global_rotation.y + body.rotation.y + skin.foot_yaw(side), "step": false, "t": 0.0, "dur": 0.2, "from": at_w, "fyaw": 0.0, "lift": 0.06}
 	if m != 1:
 		_ft.clear()
 		_ft_prev = body.global_transform.origin
 	if m != 3:
 		_fw.clear()
+	if m != 4:
+		_fl.clear()
 	match m:
 		0: _ft_drop = 0.0
 		1: _feet_step(dt)
 		2: _feet_dodge()
 		3: _feet_walk(dt)
+		4: _feet_clip(dt)
 
 func _feet_step(dt: float) -> void:
 	var xf := body.global_transform
@@ -2740,6 +2889,60 @@ func _feet_step(dt: float) -> void:
 		skin.shift_hips(Vector3(0, -_ft_drop, 0))
 	for side: String in ["Left", "Right"]:
 		skin.step_foot(side, put[side][0], put[side][1], put[side][2])
+
+## A foe's authored blow: a foot the clip has on the floor stays where it came down in the world, whatever the clip's
+## in-place body does over it (the packs' `_IP` attacks drag a planted foot across the floor as the hips travel); a foot
+## the clip lifts goes with the clip, eased from where it stood. A planted foot the clip has left far behind steps
+## (lifted) to the clip's place. The hips drop if a leg cannot reach.
+var _fl := {}                 # side -> {lock, at (world), w (0..1 how much the foot keeps its place), from, t (step time)}
+const FL_LIFT := 0.045        # metres above its standing height at which the clip's foot counts as lifted
+const FL_STEP := 0.3          # metres (rig) a planted foot may lag the clip's before it steps
+
+func _feet_clip(dt: float) -> void:
+	var xf := body.global_transform
+	var inv := xf.affine_inverse()
+	var s := maxf(scale.x, 0.01)
+	var need := 0.0
+	var put := {}
+	for side: String in ["Left", "Right"]:
+		var c: Vector3 = skin.point(side + "Foot")      # where the clip has the ankle (rig body space)
+		var cw: Vector3 = xf * c
+		var lifted := c.y > skin.ankle_height(side) + FL_LIFT
+		if not _fl.has(side):
+			_fl[side] = {"lock": not lifted, "at": Vector3(cw.x, global_position.y, cw.z), "w": 0.0 if lifted else 1.0, "from": cw, "t": 9.0}
+		var f: Dictionary = _fl[side]
+		var at_b: Vector3 = inv * (f.at as Vector3)
+		var lag := Vector2(at_b.x - c.x, at_b.z - c.z).length()
+		var cv: float = Vector2(c.x - (f.get("pc", c) as Vector3).x, c.z - (f.get("pc", c) as Vector3).z).length() / maxf(dt, 0.001)
+		f.pc = c
+		if f.lock and (lifted or lag > FL_STEP):
+			f.lock = false       # the clip lifts it, or has left it too far behind: it steps to the clip's foot
+			f.from = f.at
+			f.t = 0.0
+			f.land = 0.0
+		f.t = float(f.t) + dt
+		var p := c
+		if f.lock:
+			var lb: Vector3 = inv * (f.at as Vector3)
+			p = Vector3(lb.x, c.y, lb.z)
+		else:
+			# a step: off the floor at once, carried to wherever the clip's foot is going, set down once that has stopped
+			if float(f.t) >= 0.18 and cv < 0.5 and not lifted:
+				f.land = minf(1.0, float(f.land) + dt / 0.1)
+			var u := smoothstep(0.0, 1.0, float(f.t) / 0.18)
+			var fb: Vector3 = inv * (f.from as Vector3)
+			var up := 0.075 * smoothstep(0.0, 0.07, float(f.t)) * (1.0 - float(f.land))
+			p = Vector3(lerpf(fb.x, c.x, u), maxf(c.y, skin.ankle_height(side) + up), lerpf(fb.z, c.z, u))
+			if float(f.land) >= 1.0:
+				f.lock = true    # down again: it stays here
+				f.at = Vector3(cw.x, global_position.y, cw.z)
+		put[side] = p
+		need = maxf(need, skin.point(side + "UpLeg").distance_to(p) - skin.leg_len(side) * 0.98)
+	_ft_drop = lerpf(_ft_drop, clampf(need, 0.0, 0.14), 0.5)
+	if _ft_drop > 0.002:
+		skin.shift_hips(Vector3(0, -_ft_drop, 0))
+	for side: String in ["Left", "Right"]:
+		skin.move_foot(side, put[side])
 
 ## A planted foot in the clip is planted in the world: what each foot does along the line of travel is scaled as the
 ## travel itself is (the clip covers about two metres, the duel's sidestep 1.25).

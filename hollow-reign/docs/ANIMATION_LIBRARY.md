@@ -348,6 +348,69 @@ the floor as the duel carries them; `--strip=<fps> --view=duel|side|front|back|q
 
 `sheath(instant := false) -> float`, `draw(instant := false) -> float` (seconds it will take), `is_sheathed() -> bool`, `preview_attack(dir := "R", time := 0.5) -> float`, `preview_block(hold := 1.0) -> float` (seconds until back in guard), `au_set() -> String`, `combo_book: Array`, static `authored: bool`, static `clip_meta(name) -> Dictionary`. `ArmoryRig` overrides `_pick_clip`; the authored layer runs after it (`_au_apply`), so these work there too while an attack, block or draw is in progress.
 
+### Foe animation pass: bosses and big foes (2026-11-27)
+
+Owner, after playing on the phone: sword animations of bosses and bigger foes need tidying to look natural. No clip was added
+or re-baked (still 169 clips); everything is in how a foe's blow is timed and placed. Code: `src/chars/fighter_rig.gd`
+(`_au_time_foe`, `_au_gather`, `_au_coil`, `_au_follow`, `_mass`, `_feet_clip`, the foe branch of the second hand in
+`_fit_props`), `src/chars/skin_driver.gd` (`grip_at`, `roll_chest`). Every change is for foes only (`mirror < 0`) and only
+with `polish` on (`--oldanim` turns it off); the player's numbers in `pose_review` are identical before and after.
+The rules are untouched: the blow still lands on the sim's hit instant (`DuelSim._start_attack` windup).
+
+**How a foe was animated.** Foes are the same `FighterRig` as the knight, scaled (`rig.scale` 1.0-1.9, applied to the whole
+node, so clip time is not scaled and the duel spaces the pair by `2.5 + (scale-1) x 1.5`). The skin is the foe's own GLB, its
+class model (`cls_heavy`, `cls_giant`, ...) or, for the Throne Guard / Royal Gatekeeper, the dressed knight. Greatsword and
+glaive play the `th_` clips (two-handed), axe, cleaver and sword the `ss_` clips, dual `dw_`. A telegraph eased into the
+clip's wound-up pose in the first ~0.2 s, **held it still for the rest of the warning**, then struck in the last half of the
+swing (0.15 s). At the hit the sim calls `recover()`, which **dropped the clip on the contact frame** and blended in 0.22 s to
+a procedural "spent" pose (a long blade pointed into the floor). Under all of it the procedural layer lunged the body 0.18 m
+back and 0.35 m forward, sliding the clip-posed feet.
+
+**What was wrong (measured with `pose_review --seq`, real strings from the data; Ashen Sentinel phase 0 / Gate Colossus):**
+feet slid 44-152 cm across the floor in every blow (the root lunge plus the `_IP` clips' in-place drag); the second hand was
+20-53 cm off the handle (closing the hand turned it about the wrist; the sword-arm roll moved the right hand away from the
+left); the blade whipped round behind the head at the start of a wind-up (1.3 m of tip travel in one frame) and was slerped
+through the wielder's own head and flipped; recovery tip speeds of 27-67 m/s (the blade snapping to the floor and back up);
+blade through the wielder's own arm/shoulder for the first frames of a wind-up (6-31 sampled vertices).
+
+**What a foe's blow does now.**
+- *Wind-up.* `gather` (`clamp(0.5 x warning, 0.22, 0.42 + 0.18 x mass)` s) is one eased change of pose from wherever the foe
+  stood into the wound-up pose (only the last 0.12 s of the clip's own wind-up is played); then a slow draw-back while it
+  waits, then a `coil` (`0.2 + 0.16 x mass` s) the rest of the way before the blow. Never a statue, and the release is
+  anticipated. `mass` = `clamp((scale - 1) / 0.75, 0, 1)`: 0 for man-sized foes, 0.6 the Sentinel, 1 the Colossus.
+- *Blow.* The visible strike starts `swing/2 x (1 + 0.9 x mass)` before the hit (Sentinel 0.22 s, Colossus 0.32 s, was
+  0.15/0.18), slow-in fast-at-contact (`u^(1.5 + 0.6 x mass)`); the hit instant is unchanged.
+- *Follow-through.* After the hit the clip keeps going at the blow's own speed and decelerates to rest
+  (`_au_follow`, 0.25-0.7 s), ending while the blade is still in front and the chest within ~55 deg of the opponent; it
+  still stops in a body it meets. Then it eases (0.5 s) into a spent pose with the long blade out low to the side the blow
+  finished on, and from there back to guard in 0.34-0.54 s (`AU_OUT_FOE`, longer for the bigger). A blow stopped by a
+  guard (`halt`) is held a beat and rebounds a little back along its own line.
+- *Feet.* No procedural lunge under a foe's authored blow. Each foot the clip has on the floor is planted in the world
+  (`_feet_clip`); one the clip lifts, or leaves more than 0.3 m behind, steps there (lifted 7.5 cm, set down when the clip's
+  foot stops). The guard's own stepping takes over from where the blow left the feet.
+- *Two hands.* The roll that puts a cut on the swiped line is taken at the chest for a two-handed foe (both arms together).
+  The second hand is placed with `SkinDriver.grip_at` (the closed hand's grip point on the handle, solved a few times, best
+  kept). Where the clip itself lets go (the packs' one-handed reach at the end of a wide cut: the handle beyond the arm's
+  reach) the left arm is given back to the clip and the hand opens, instead of being stretched at the hilt.
+- *Changes of pose.* While a foe changes pose into a clip the blade stays rigid in the eased hand.
+
+**After (same strings):** foot slide 2-18 cm worst per string (most 4-9; the rest are the first frames of a lifted step),
+second hand on the handle within 2-16 cm worst while held (a few frames at 22-39 cm as the hand regrips after letting go),
+recovery tip speed 9-14 m/s, blade through own body 0-9 vertices on the Sentinel and Colossus. The frame on which the blade
+reaches furthest is within 0-17 ms of the sim's hit on single blows (one frame at 30 fps); in chains up to 100 ms late,
+where the next blow's gather carries the blade on (a limit of the measure as much as of the motion).
+
+**Still wrong / not done:** the pike's glaive rising cuts put the shaft through the wielder's own thigh (10-37 vertices);
+foe stagger and hit reactions are still the free-library `stunned` / `hit_chest` under procedural arms (the long blade
+hangs by the leg); the Sentinel's overhead wind-up passes the hilt close to its own helm; nothing has been judged on a phone.
+
+**Dev tooling.** `pose_review --foe=<id> --seq [--phase=n] [--combos=a,b] [--seqhit=blocked|parried]` plays a foe's real
+strings as the duel calls them and adds `imp` (ms, mean@worst), `still` (longest still stretch of a wind-up, s), `drive`
+(s from the strike's start to the hit), `snap` (fastest tip speed in the recovery, m/s), `slide` (cm a planted foot moves
+from where it came down), `let_go` (s the second hand is deliberately off). `offhand` now measures the real skinned grip
+(it used to measure a node the rig parks on the handle, so it always read 0). `--trace` prints one line a frame.
+Recordings: `marketing/foe_anim_pass/`.
+
 ## How to play one of these clips with the arms (for the rig pass)
 The clips carry both arms, both hands and the spine. What decides whether the arms follow the clip is **`SkinDriver.clip_full`**:
 

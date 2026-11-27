@@ -215,7 +215,13 @@ func drive(j: Dictionary) -> Dictionary:
 	if whole:
 		# whole-body clips (falling, dying) carry the arms too; the weapons follow the real hands
 		_overlay(true)
-		if clip_roll != 0.0 and arm_r > 0.0:
+		if clip_roll != 0.0 and roll_chest:
+			# a two-handed grip: the whole chest is turned about the line to the opponent, carrying both arms together, so
+			# the second hand stays on the handle (turned at the sword shoulder alone it was taken 30-50 cm off it)
+			var fwd_c := (q * Vector3(0, 0, 1)).normalized()
+			var gc := skel.get_bone_global_pose(bone["Spine2"])
+			skel.set_bone_global_pose(bone["Spine2"], Transform3D(Basis(fwd_c, clip_roll * clip_w) * gc.basis, gc.origin))
+		elif clip_roll != 0.0 and arm_r > 0.0:
 			# the sword arm turned about the line to the opponent, so the cut travels the way that was swiped
 			var fwd_axis := (q * Vector3(0, 0, 1)).normalized()
 			for part: Array in [["RightShoulder", ROLL_CLAVICLE], ["RightArm", 1.0 - ROLL_CLAVICLE]]:
@@ -322,7 +328,9 @@ func clip_hand(cn: String, t: float, side: String = "Right", roll: float = 0.0, 
 				o.y = h
 		else:
 			o += d_par * (rest[b].origin - rest[prev].origin)
-		if roll != 0.0 and side == "Right" and (b == "RightShoulder" or b == "RightArm"):
+		if roll != 0.0 and roll_chest and b == "Spine2":
+			extra = Basis(fwd_axis, roll) * extra
+		elif roll != 0.0 and not roll_chest and side == "Right" and (b == "RightShoulder" or b == "RightArm"):
 			extra = Basis(fwd_axis, roll * (ROLL_CLAVICLE if b == "RightShoulder" else 1.0 - ROLL_CLAVICLE)) * extra
 		if map.has(b):
 			var d := Basis(a.rotation_track_interpolate(map[b], t))
@@ -415,6 +423,39 @@ func grip(side: String, dir: Vector3) -> Vector3:
 	return _back * (_palm(side, h.origin) + rot * (ax[2] as Vector3) * (float(ax[3]) * 0.3))
 
 var grip_fwd := {}        # side -> the way the knuckles of a hand closed by grip() face (rig body space): a held edge leads that way
+
+## Close a hand round a handle along `dir` with its grip point (what grip() returns) at `at` (rig body space): the hand is
+## closed, then the wrist is moved by what is still missing and the arm solved to it again, a few times (closing the hand
+## turns it about the wrist, which carries the grip off a target reached with the open hand). Returns the grip point.
+func grip_at(side: String, at: Vector3, dir: Vector3, tries: int = 6) -> Vector3:
+	var to_skel := _back.affine_inverse()
+	var pole := to_skel.basis.orthonormalized() * (Vector3(0.7, -0.8, 0.35) if side == "Right" else pole_l)
+	var names: Array = [side + "Arm", side + "ForeArm", side + "Hand"]
+	var got := grip(side, dir)
+	var best_e := (at - got).length()
+	var best: Array = []
+	for b: String in names:
+		best.append(skel.get_bone_pose_rotation(bone[b]))
+	var best_got := got
+	var step := 1.0
+	for i in tries:
+		var err := at - got
+		if err.length() < 0.006:
+			break
+		var wrist: Vector3 = skel.get_bone_global_pose(bone[side + "Hand"]).origin
+		_limb(side + "Arm", side + "ForeArm", side + "Hand", wrist + to_skel.basis * err * step, pole, 0.985, ELBOW_MIN)
+		got = grip(side, dir)
+		var e := (at - got).length()
+		if e < best_e:
+			best_e = e
+			best_got = got
+			for k in names.size():
+				best[k] = skel.get_bone_pose_rotation(bone[names[k]])
+		else:
+			step *= 0.5      # (closing the hand turns it with the forearm: where that overshoots, smaller steps)
+	for k in names.size():
+		skel.set_bone_pose_rotation(bone[names[k]], best[k])
+	return best_got
 
 # ---------------------------------------------------------------- fingers
 ## A hand closed round a handle or a shield's grip bar: every finger joint is turned toward the palm, the thumb
@@ -755,6 +796,7 @@ var arm_l := 1.0              # the same for the shield / off arm (a braced shie
 var clip_look := false        # whole-body clip, but the head is still turned to the opponent as far as the neck allows
 var clip_roll := 0.0          # radians the sword arm is turned about the line to the opponent (+ lifts a rightward cut)
 var clip_axis := {}           # "Right"/"Left" -> the way the clip itself points a handle in that hand, this frame
+var roll_chest := false       # `clip_roll` is taken at the chest (both arms together, a two-handed grip), not the sword arm
 const ROLL_CLAVICLE := 0.3    # share of `clip_roll` taken at the collar bone; the rest at the shoulder joint
 static var _lib: AnimationLibrary
 static var _tracks: Dictionary = {}      # clip -> {bone: track index}, plus "_pos" for the hips

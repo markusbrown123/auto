@@ -240,8 +240,7 @@ func _beat_road(me: int) -> void:
 	Story.play("opening", true)
 	if not await _w(3.0, me):
 		return
-	road.hero.walking = true
-	create_tween().tween_property(road, "s", 30.0 + 8.0 * HighRoad.WALK, 8.0)
+	road.stride(HighRoad.VISTA_S, HighRoad.VISTA_S + 8.0 * HighRoad.WALK)
 	if not await _until("opening", 2, me):
 		return
 	# one shot to a line or so of the narrator; none held longer than it is worth

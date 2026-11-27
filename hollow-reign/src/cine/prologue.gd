@@ -665,8 +665,8 @@ func _beat_fall(me: int) -> void:
 	beyond.light_color = Color("#ffc27a")
 	beyond.light_energy = 3.2
 	(arena.get_node("Daylight") as MeshInstance3D).material_override = Look.glow(Color("#ffb060"), 2.4)
-	cam.cut(Vector3(-1.7, 1.05, 0.2), Vector3(0.1, 1.55, -6.0), 46.0)
-	cam.move(Vector3(-2.0, 0.95, 0.9), Vector3(0.2, 1.45, -6.0), 3.2)
+	cam.cut(Vector3(-2.3, 1.05, -1.5), Vector3(0.3, 1.55, -6.2), 46.0)
+	cam.move(Vector3(-2.6, 0.95, -0.9), Vector3(0.4, 1.45, -6.2), 3.2)
 	cards.fade(0.0, 0.5)
 	_walk(hero, Vector3(0.5, 0, -3.3), 1.5)
 	if not await _w(1.35, me):
@@ -717,8 +717,8 @@ func _beat_fall(me: int) -> void:
 		return
 	hero.create_tween().tween_property(hero, "rotation:y", PI, 1.2)
 	hero.hold("wounded", 2.4)
-	cam.cut(Vector3(-1.3, 1.2, 5.3), Vector3(0.3, 1.0, -2.0), 42.0)
-	cam.move(Vector3(-0.9, 1.0, 5.1), Vector3(0.4, 0.9, -2.0), 9.0)
+	cam.cut(Vector3(-1.1, 1.2, 4.5), Vector3(0.3, 1.0, -2.0), 44.0)
+	cam.move(Vector3(-0.8, 1.0, 4.3), Vector3(0.4, 0.9, -2.0), 9.0)
 	if not await _until("gen1_seal", 2, me):
 		return
 	# the last word is the forebear's: low and close, where the heir will be found

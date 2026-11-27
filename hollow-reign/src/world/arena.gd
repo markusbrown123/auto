@@ -1112,8 +1112,6 @@ func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
 	Highland._solid(self, "Ribs", ribs, Highland.built(Color("#5c6268"), 0.55, 0.5, 0.5), false)
 	Highland._solid(self, "ChannelsTeal", channels_teal, teal, false)
 	Highland._solid(self, "ChannelsAmber", channels_amber, amber, false)
-	for c: Array in [[-4.3, 3.0, 130.0], [-5.0, -0.5, 80.0], [3.0, -4.9, -30.0]]:
-		prop("de_conduit", 2.6, Vector3(float(c[0]), 0, float(c[1])), float(c[2]))
 	# the cradle: three hoops over the bed, a head unit with its panel, feet under the frame
 	var solid: Array = []
 	var hoops: Array = []
@@ -1122,9 +1120,8 @@ func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
 	for k in 3:
 		var z := -0.9 + k * 0.75
 		for sx: float in [-1.0, 1.0]:
-			hoops.append([Vector3(0.05, 0.5, 0.06), Vector3(sx * 0.74, 0.8, z), Vector3(0, 0, sx * -14.0)])
-			hoops.append([Vector3(0.05, 0.42, 0.06), Vector3(sx * 0.52, 1.14, z), Vector3(0, 0, sx * -56.0)])
-		hoops.append([Vector3(0.72, 0.05, 0.06), Vector3(0, 1.26, z)])
+			hoops.append([Vector3(0.05, 0.62, 0.06), Vector3(sx * 0.76, 0.86, z)])
+		hoops.append([Vector3(1.57, 0.05, 0.06), Vector3(0, 1.17, z)])
 	solid.append([Vector3(1.7, 1.7, 0.5), Vector3(0, 0.85, -1.62)])
 	solid.append([Vector3(1.2, 0.4, 0.6), Vector3(0, 1.9, -1.6)])
 	lit_teal.append([Vector3(1.1, 0.5, 0.04), Vector3(0, 1.2, -1.36)])

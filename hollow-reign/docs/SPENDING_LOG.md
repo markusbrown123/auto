@@ -141,3 +141,6 @@ Owner direction: "Environment more new and space but land like futuristic not me
 
 ## 2026-11-27: male knight v4 concepts (owner: "body is morphed every render for the male, fix, make look more like a soldier real")
 Three concept images (gpt_image_2_6, 2k, 3:4): art/concept/knight_m_v4{a,b,c}.png, sheet marketing/armor_finish_pass/male_v4_concepts_A_B_C.jpg. About 1.25 credits each at list (about 3.75 credits). No 3D model bought: waiting for the owner to choose one (a knight model is 135 Tripo credits = $1.35). Account read after: View the signed-in account's balance, subscription plan, and recent credit transactions..
+
+## 2026-11-27: protagonist voice round
+Three samples on one line (elevenlabs_v4, stability 0.5): Caspian, Barrett, Holden, in marketing/audition/protagonist_round/. About 0.46 credits each (about 1.4 credits). Unauditioned. No lines regenerated; waiting for the owner's choice.

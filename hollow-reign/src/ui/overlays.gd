@@ -371,12 +371,7 @@ static func death(parent: Node, _foe: Dictionary, _summary: Dictionary, done: Ca
 	t.add_theme_font_override("font", tracked)
 	v.add_child(t)
 	v.add_child(UI.spacer(2))
-	var it := _centered("Your journey is not yet over.", 26, UI.BONE.darkened(0.12))
-	var slanted := FontVariation.new()
-	slanted.base_font = UI.font("body")
-	slanted.variation_transform = Transform2D(Vector2(1, 0), Vector2(-0.22, 1), Vector2.ZERO)
-	it.add_theme_font_override("font", slanted)
-	v.add_child(it)
+	v.add_child(_centre(_italic("Your journey is not yet over.", 26, UI.BONE.darkened(0.12))))
 	v.add_child(UI.spacer(34))
 	var close := func(f: Callable):
 		for c in v.find_children("*", "Button", true, false):
@@ -392,8 +387,26 @@ static func death(parent: Node, _foe: Dictionary, _summary: Dictionary, done: Ca
 	v.add_child(UI.spacer(4))
 	var m := UI.menu_item("Return to main menu", 20, 380)
 	m.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	m.alignment = HORIZONTAL_ALIGNMENT_CENTER
 	m.pressed.connect(func(): close.call(actions.get("menu", done)))
 	v.add_child(m)
+
+## One line of the body face slanted to the right (the game has no italic file): drawn under a skew about the baseline.
+static func _italic(text: String, size: int, color: Color) -> Control:
+	var f: Font = UI.font("body")
+	var sz := UI.text_size(size)
+	var ext := f.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, sz)
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(ext.x + 14.0, f.get_height(sz) + 6.0)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.set_meta("text", text)
+	c.draw.connect(func():
+		var base := f.get_ascent(sz) + 3.0
+		var k := 0.22
+		c.draw_set_transform_matrix(Transform2D(Vector2(1, 0), Vector2(-k, 1), Vector2(k * base, 0)))
+		c.draw_string(f, Vector2(5, base + 2.0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, sz, Color(0, 0, 0, 0.75))
+		c.draw_string(f, Vector2(5, base), text, HORIZONTAL_ALIGNMENT_LEFT, -1, sz, color))
+	return c
 
 ## A small upright sword, drawn in code: pommel, grip, cross-guard, blade to a point.
 static func _sword_mark() -> Control:

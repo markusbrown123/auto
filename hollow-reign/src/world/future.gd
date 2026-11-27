@@ -623,9 +623,32 @@ static func _court(a: Arena, k: Kit) -> void:
 		mast(k, Vector3(sx * 21.0, 0, 9.0 - sx * 2.0), 6.5)
 	mast(k, Vector3(-4.0, 0, 18.5), 6.0)
 	lamp(a, Vector3(0, 6.0, -14.0), lamp_c, 1.2, 12.0)
+	_court_sights(a, k)
 	tufts(a, 420, 9.2, 22.0)
 	ranges(a, 0.6)
 	sky(a)
+
+## What the court is seen against from the road (not the duel: the duel camera's far plane is 120 m): a ring of the makers'
+## ceramic standing on the horizon beyond the gate, and a broken tether, a slender tower that rises out of sight and ends in
+## torn ribs. Silhouettes, no shadows, no new textures.
+static func _court_sights(a: Arena, k: Kit) -> void:
+	if Highland.off_sights():
+		return
+	ring(k, Vector3(-70, 112, -250), 58.0, 3.2, 0.7, TAU - 1.1, true)
+	var at := Vector3(120, 0, -190)
+	var y := 0.0
+	for t: Array in [[9.0, 5.0, 70.0], [5.0, 3.2, 110.0], [3.2, 2.4, 100.0]]:
+		Highland._prism(k.pale(true), at + Vector3(0, y, 0), float(t[0]), float(t[1]), float(t[2]), 6, 0.3)
+		for f in 3:
+			var ang := 0.3 + PI / 6.0 + f * TAU / 3.0
+			var d := Vector3(sin(ang), 0, cos(ang)) * 0.86
+			Highland._beam(k.tool("lit"), at + d * float(t[0]) + Vector3(0, y + float(t[2]) * 0.06, 0), at + d * float(t[1]) + Vector3(0, y + float(t[2]) * 0.94, 0), 0.5, 0.4)
+		y += float(t[2])
+		Highland._prism(k.alloy(true), at + Vector3(0, y - 1.0, 0), float(t[1]) * 1.2, float(t[1]) * 1.2, 2.0, 6, 0.3)
+	for f in 4:
+		var ang2 := f * TAU / 4.0 + 0.5
+		var d2 := Vector3(sin(ang2), 0, cos(ang2))
+		Highland._beam(k.alloy(true), at + Vector3(0, y, 0) + d2 * 1.2, at + Vector3(0, y + 9.0 + 6.0 * (f % 2), 0) + d2 * 2.0, 0.6, 0.6)
 
 ## Dev (FU_CHECK=1): every kit prop in a row, unturned, to see which way each one faces.
 static func _check(a: Arena, _k: Kit) -> void:

@@ -38,6 +38,7 @@ var _sr := PackedVector2Array()
 var _sc := PackedFloat32Array()
 var _quad := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
 var _quad_c := PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE, Color.WHITE])
+var _quad_uv := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
 var _trails_live := false
 
 func _ready() -> void:
@@ -224,8 +225,8 @@ func _draw_trail(i: int) -> void:
 		_sl[j] = _sp[j] + nrm
 		_sr[j] = _sp[j] - nrm
 	for j: int in ns - 1:
-		var a0 := TRAIL_ALPHA * pow(_sc[j] / total, 0.7) * fade
-		var a1 := TRAIL_ALPHA * pow(_sc[j + 1] / total, 0.7) * fade
+		var a0 := TRAIL_ALPHA * (0.2 + 0.8 * pow(_sc[j] / total, 0.7)) * fade
+		var a1 := TRAIL_ALPHA * (0.2 + 0.8 * pow(_sc[j + 1] / total, 0.7)) * fade
 		_quad[0] = _sl[j]
 		_quad[1] = _sl[j + 1]
 		_quad[2] = _sr[j + 1]
@@ -234,9 +235,10 @@ func _draw_trail(i: int) -> void:
 		_quad_c[1] = Color(1, 1, 1, a1)
 		_quad_c[2] = Color(1, 1, 1, a1)
 		_quad_c[3] = Color(1, 1, 1, a0)
-		draw_primitive(_quad, _quad_c, PackedVector2Array())
+		draw_primitive(_quad, _quad_c, _quad_uv)
 	for j: int in ns - 1:
 		var t1 := _sc[j + 1] / total
+		draw_line(_sp[j], _sp[j + 1], Color(0, 0, 0, 0.22 * t1 * fade), 3.5 + 2.5 * t1, true)       # a faint dark edge, so the core reads over bright ground
 		draw_line(_sp[j], _sp[j + 1], Color(1, 1, 1, minf(1.0, 0.95 * pow(t1, 0.6)) * fade), 1.5 + 2.5 * t1, true)
 
 func _now() -> float:

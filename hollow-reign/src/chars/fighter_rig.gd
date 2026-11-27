@@ -905,10 +905,13 @@ func _process(delta: float) -> void:
 	var step_i := int(floor(_walk_phase / PI))
 	if step_i != _step_i:
 		_step_i = step_i
+		if _walk_amount > 0.35 and not combat_steps and mode == Mode.GUARD:
+			_impact = _walk_amount
 		if footsteps and _walk_amount > 0.35 and mode != Mode.DODGE and moved < 0.12:
 			Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
 			Sfx.play("armor", -17.0 + 4.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x), 0.12)      # plates shift with every step
 	_walk_amount = lerpf(_walk_amount, _walk_want(moved, dt), 1.0 - exp(-dt * 7.0))
+	_impact = maxf(0.0, _impact - dt * 5.0)
 	_solve(dt)
 
 func _out_of_helm(p: Vector3) -> Vector3:
@@ -1179,7 +1182,7 @@ func _solve(dt: float) -> void:
 			skin.flash(_flash)
 
 func _pose() -> void:
-	body.position = _root + _lag + Vector3(0, _dock_lift, 0)
+	body.position = _root + _lag + Vector3(0, _dock_lift - 0.032 * _impact, 0)      # (a footfall has weight: the body gives a little as the foot lands)
 	body.rotation.y = _lag_yaw
 	var pel := Vector3(0, 0.96 - _crouch * 0.6, 0)
 	if cfg.get("wraith", false):
@@ -1189,7 +1192,7 @@ func _pose() -> void:
 	var cb := Basis.from_euler(Vector3(-_lean, _twist, 0))
 	var chest_pos := pel + cb * Vector3(0, 0.42, 0)
 	chest.transform = Transform3D(cb, chest_pos)
-	head.rotation = Vector3(_lean * 0.75, -_twist * 0.8, 0)
+	head.rotation = Vector3(_lean * 0.75, -_twist * 0.8 + _head_lead, 0)
 	var sw := 0.245 * bulk + 0.05
 	var sh_r := chest_pos + cb * Vector3(sw, 0.24, 0)
 	var sh_l := chest_pos + cb * Vector3(-sw, 0.24, 0)
@@ -1379,6 +1382,23 @@ func _fit_props(hands: Dictionary) -> void:
 			held = Transform3D(Basis(x2, up2, x2.cross(up2)), _on_forearm(skin.grip("Left", up2), x2))
 		else:
 			held.origin += shift
+		# the thighs and shins against the board's plane: wherever a leg stands behind the board's footprint the board is
+		# moved outward (along its face normal, the board alone: the clip's arm is not moved) until the whole leg, skin included, is on the body side of it
+		if _sh_gear != "" and _dock_w < 0.5 and not old_shield:
+			held.origin -= held.basis.z * SHIELD_STANDOFF      # the board stands this much farther out from the forearm it is strapped to
+		var legb := Transform3D(held.basis, held * _sh_c)
+		var out_n := -legb.basis.z.normalized()
+		var inv_b := legb.affine_inverse()
+		var need := 0.0
+		for c3: Array in [caps[2], caps[3], caps[4], caps[5]]:
+			var r3: float = float(c3[2]) + SHIELD_LEG_MARGIN
+			for k3 in 5:
+				var p3: Vector3 = (c3[0] as Vector3).lerp(c3[1], k3 / 4.0)
+				var l3 := inv_b * p3
+				if l3.x * l3.x / pow(_sh_hw + r3, 2) + l3.y * l3.y / pow(_sh_hh + r3, 2) < 1.0:
+					need = maxf(need, (p3 - legb.origin).dot(out_n) + r3)
+		if _dock_w < 0.5 and not old_shield:
+			held.origin += out_n * minf(need, 0.2)
 		shield.transform = held
 	# --- right hand
 	var dir: Vector3 = weapon_r.transform.basis.y
@@ -1483,7 +1503,11 @@ var _sh_hw := 0.27
 var _sh_hh := 0.41
 
 ## How much farther than their capsules the board is kept off the thighs and shins (the skin is fuller than the capsule).
-const SHIELD_LEG_MARGIN := 0.045
+## `--oldshield` plays the shield as it was before the clipping pass (for before/after measurements).
+static var old_shield := "--oldshield" in OS.get_cmdline_user_args()
+## The board's stand-off from the forearm, beyond the grip posts (the skinned forearm is fuller than the posts allow for).
+const SHIELD_STANDOFF := 0.02
+const SHIELD_LEG_MARGIN := 0.065
 const SHIELD_RIM := [Vector3(0.27, 0.41, 0), Vector3(-0.27, 0.41, 0), Vector3(0.27, -0.41, 0), Vector3(-0.27, -0.41, 0), Vector3(0, -0.41, 0), Vector3(0, 0.41, 0)]
 
 ## The wielder's own body as a few capsules [a, b, radius] in rig body space: head, trunk, thighs.
@@ -2454,10 +2478,11 @@ func _travel(dt: float) -> float:
 		_lag = Vector3.ZERO
 		_lag_on = false
 		_lag_yaw = 0.0
+		_head_lead = 0.0
 		_slope_now = 0.0
 		_speed = raw / maxf(dt, 0.001)
 		return raw
-	const W := 8.0
+	const W := 6.5      # (a damped mass: it takes about 0.7 s to gather way and as long to come to rest)
 	var prev := _vis
 	_vis_v += ((global_position - _vis) * W * W - _vis_v * 2.0 * W) * dt
 	_vis += _vis_v * dt
@@ -2470,7 +2495,9 @@ func _travel(dt: float) -> float:
 		_lag = Vector3(0, _lag.y, 0)
 	var hv: Vector3 = global_transform.basis.inverse() * Vector3(_vis_v.x, 0, _vis_v.z)
 	var want_yaw := clampf(atan2(-hv.x, -hv.z), -1.0, 1.0) if _speed > 0.3 and hv.z < 0.0 else 0.0
-	_lag_yaw = lerp_angle(_lag_yaw, want_yaw, 1.0 - exp(-dt * 5.0))
+	_lag_yaw = lerp_angle(_lag_yaw, want_yaw, 1.0 - exp(-dt * 4.0))
+	# the head goes first: into a bend the eyes are on the way before the shoulders are (never further than the neck turns)
+	_head_lead = lerpf(_head_lead, clampf((want_yaw - _lag_yaw) * 0.9, -0.5, 0.5), 1.0 - exp(-dt * 8.0))
 	var slope := 0.0
 	if ground.is_valid():
 		var f: Vector3 = (global_transform.basis * Basis(Vector3.UP, _lag_yaw) * Vector3(0, 0, -1)).normalized() * 0.4 * s
@@ -2484,7 +2511,15 @@ func _stride_now() -> float:
 		# the clip's own stride on this skeleton, shortened on a climb
 		return skin.clip_stride(WALK_CLIP) * 0.5 * STRIDE_FIT * (1.0 - 0.5 * clampf(_slope_now, 0.0, 0.5))
 	return STRIDE * (0.62 if combat_steps else 1.0)
-const STRIDE_FIT := 0.9       # share of a foot's whole sweep that is made on the ground
+const STRIDE_FIT := 1.0       # share of a foot's whole sweep that is made on the ground (1: the clip's own stride, so a foot the clip plants is planted on the ground too)
+## How fast the knight walks a road, metres a second. The walk clip's own pace on this skeleton is about 0.96 (see
+## `--strides`); this plays it a touch quicker, 104 steps a minute where the clip alone gives 90: an armoured, deliberate
+## pace rather than the 1.4 m/s (1.6 times the clip's rate, 135 steps a minute) it was walked at before the traversal pass.
+const ROAD_SPEED := 1.12
+static func road_time(metres: float) -> float:
+	return metres / ROAD_SPEED
+var _impact := 0.0            # the weight of the last footfall: 1 as a foot comes down, gone in a fifth of a second
+var _head_lead := 0.0         # how far the head has turned ahead of the body, into a bend
 
 func _walk_clip_ok() -> bool:
 	return polish and authored and use_clips and skin != null and skin.ok and not combat_steps and SkinDriver.has_clip(WALK_CLIP)
@@ -2740,7 +2775,9 @@ func _carry_dir(clip_dir: Vector3) -> Vector3:
 ## For a roll a strapped shield is slung onto the back (between the shoulders, face outward) so that nothing of it
 ## passes through the tumbling body; it comes back onto the arm as the knight rises.
 func _dock(held: Transform3D, caps: Array) -> Transform3D:
-	_dock_w = lerpf(_dock_w, 1.0 if (polish and _au_state == "roll") else 0.0, 0.55 if CamDirector.old_roll else 0.8)      # (two frames, not four: it passes through the arm on the way)
+	# (kept on the back until the roll clip has let go of the body: the legs are still tucked for the first frames after it)
+	var slung: bool = polish and (_au_state == "roll" or (not old_shield and _dock_w > 0.5 and _whole_w > 0.12))
+	_dock_w = lerpf(_dock_w, 1.0 if slung else 0.0, 0.55 if CamDirector.old_roll else 0.8)      # (two frames, not four: it passes through the arm on the way)
 	if _dock_w < 0.01:
 		_dock_w = 0.0
 		return held

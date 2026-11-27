@@ -882,6 +882,9 @@ func _dev_boot() -> void:
 					sc.scroll_vertical = int(_args.scroll)
 		"training":
 			start_training()
+		"trails":
+			start_training()
+			add_child(TrailDemo.new())       # the eight swipes, short and long, by synthetic touch (src/dev/trail_demo.gd)
 		"lesson":
 			Game.profile.tutorial_done = false
 			Game.start_run("courtyard")

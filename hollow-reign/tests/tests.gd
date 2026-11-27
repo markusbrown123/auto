@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson", "t_corridor"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -1708,3 +1708,19 @@ func t_lesson() -> void:
 	ok(plain.surge == 0.0 and plain.relic == 0.0 and plain.pl.hp == plain.pl.max_hp, "outside the lesson nothing fills a ring or hurts the knight")
 	d.queue_free()
 	Game.profile = saved
+
+# ------------------------------------------------------------------ the walking corridor (traversal pass)
+func t_corridor() -> void:
+	Corridor.reset()
+	Corridor.add(Vector3(0, 0, 10), Vector3.ZERO)
+	var clear := Corridor.clear(Vector3(5, 0, 5), 0.5, "far")
+	ok(clear == Vector3(5, 0, 5), "corridor: a piece well outside the lane is left alone")
+	var pushed := Corridor.clear(Vector3(0.3, 0, 5), 0.5, "near")
+	ok(pushed != Vector3(0.3, 0, 5) and absf(pushed.x) >= Corridor.HALF + 0.5, "corridor: a piece in the lane is pushed out of it")
+	ok(Corridor.intrusion(pushed, 0.5) <= 0.0, "corridor: and no longer intrudes")
+	var gone := Corridor.clear(Vector3(0.0, 0, 5), 6.0, "huge")
+	ok(gone == Vector3.INF, "corridor: a piece that would have to move far is taken out")
+	ok(Corridor.moves.size() == 2, "corridor: what was moved is logged")
+	ok(absf(Corridor.side(0.4, 0.2)) >= Corridor.HALF + 0.2, "corridor: a roadside offset is pushed out")
+	Corridor.reset()
+	ok(FighterRig.ROAD_SPEED >= 1.0 and FighterRig.ROAD_SPEED <= 1.3, "road pace is in the 1.0 to 1.3 m/s range")

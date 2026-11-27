@@ -78,7 +78,13 @@ Router: `src/main.gd` (`story_kind`, `_story_opts`, `_story_hooks`, `_story_won`
 
 **Continue** (`main.resume`): a fall not yet answered → the years and the heir; Generation II with the Monarch beaten or the seal chosen but no fall yet → the second fall; Generation III before `gen3_arrived` → the arrival; the Monarch felled before `facility_seen` → the aftermath; otherwise the sanctuary.
 
-**Ordinary defeat** (owner decision, 2026-11-27: dying is a normal part of the game and of its fiction). In all three generations a defeat is the Inheritance Engine restoring the one on the road: "THE REIGN ENDURES … The Inheritance Engine brings you back to the sanctuary, as it always does", everything earned kept, "Set out again" by the short way, and at the sanctuary one of the six `rebirth_*` lines (by count of deaths; `w_talk_return` stays among the Witness's topics). It never touches the lineage and is distinct from the two canonical falls. The story fights expect it: the second meeting offers the records choice again in every attempt, the Kept's reveal is not replayed, the last meeting starts from its silent card. (Generation I's two duels are before the Engine has anyone to restore: the guardian duel is simply taken again, and the clash cannot be lost.)
+**Death and checkpoints** (Addendum 5 of `MASTER_REQUIREMENTS.md`, 2026-11-27; supersedes the earlier "the Engine restores you to the sanctuary" defeat).
+An ordinary defeat on the road, in every generation, goes: the knight's fall clip plays out in full (`Duel._begin_death`; the wait before the fade is the clip's own length plus 0.4 s), the picture fades to black over `Duel.DEATH_FADE` (1.5 s, a layer over the bars and under the screens), `finished(false)`, `Main._duel_done` → `Game.on_death(true)` → `Overlays.death`: near-black ground, a small sword mark between two thin rules, "YOU HAVE FALLEN" in wide-tracked Cinzel capitals in the muted gold, "Your journey is not yet over." in italics, **RETRY FROM CHECKPOINT** (primary, 72 high) and a quieter **RETURN TO MAIN MENU** (60 high). Nothing respawns by itself; nothing is listed as lost, because nothing is.
+- **Checkpoints are data.** `checkpoint: true` on a stage of `data/regions.json`, authored in `tools/gen_regions.py` (`_checkpoints`): the road's start; the stop before any guardian's approach (always the stop before the last); the stop after a guardian that is not the last; and a stop in any run of three. Never a guardian's own stop. Today every road has 0, 3, 5 (the Cathedral also 1). `Game.run.checkpoint` is the last one passed (`start_run` sets it to the stop the road began at, so a road begun at an open gate has the gate as its start; `advance_stage` moves it on).
+- **What a fall does** (`Game.on_death(keep_road=true)`, `Game.rewind_to_checkpoint`): the run is put at its checkpoint with full health and saved there before anything is shown, so quitting at the death screen and pressing Continue lands in the same place (`resume_road`). Retry goes through the loading screen (`Main._retry_from_checkpoint`) to the road screen at that stop. Every foe and encounter from there is simply not yet reached again, so it stands again; the pooled foes keep the run's seed. Kept: gold, equipment, mods, mastery, levels, victories counted, flags. Not given twice: pouches (`profile.pouches`), chests and levers (flags), one-time rewards. `Game.on_death()` with no argument is the older call, still used where there is no road: it ends the route and the sanctuary follows.
+- **No time jump.** An ordinary defeat never touches the lineage. Only `Game.fall(1, …)` and `Game.fall(2, …)` (the two authored moments, `src/core/generations.gd`) do, and their scenes (`src/cine/prologue.gd` clash and fall, `second_fall.gd`) do not use the death screen (`tests/generations.gd` `t_checkpoints` reads the sources to prove it). The story fights expect defeat as before: the second meeting offers the records choice again in every attempt, the Kept's reveal is not replayed, the last meeting starts from its silent card. Generation I's guardian duel, when lost, fades and is simply taken again (it is not the road's; the Prologue handles it).
+- **The lesson** cannot be lost (`DuelSim.lesson`: nothing can die in it), so it has no death screen; Yield in its pause menu leaves it unfinished to be offered again, as before. Training likewise. Yield in a real duel is a defeat and goes the same way.
+- **Save version 5** adds `road.checkpoint`. A saved road without it (version 4) is given the last checkpoint at or before its stop. Fixture `tests/fixtures/save_v5.json`.
 
 **The Second's Edge** (`w_seconds_edge`, `tools/gen_equipment.py`): in the data a plain sword with one source, `story`. `KeptScene.sync_edge()` (called from `resume`, the inheritance and the dev helpers) lays the snapshot weapon's class, numbers and model over that entry, and `grant_edge()` copies its tier, grip, ore and edge records. A profile read without the router (a test) sees the plain entry until it is synced.
 
@@ -161,7 +167,7 @@ resumes.
 tools/record.sh <name> 900 --screen=slice [--body=m|f] [--weapon=<id>] [--die=1,boss] [--forge_first] [--audit]
                            [--fast] [--until=menu|arrival|quit] [--resume] [--log=<file>] [--snaps=<dir>] [--notch=l,t,r,b]
 ```
-`--die=1,boss` stands still in the first real fight and/or the Sentinel's, then takes "Set out again". `--until=quit`
+`--die=1,boss` stands still in the first real fight and/or the Sentinel's, then takes "Retry from checkpoint" (the road resumes at its last checkpoint, not at the foe). `--until=quit`
 ends at the main menu after the sanctuary visit; a second launch with `--resume` (and the same `--savedir`) presses
 Continue, checks what the save holds, and plays the rest: that pair is the app-relaunch test. `--fast` presses SKIP on
 every story beat. `--audit` lists, per screen, touch targets under 60 units, text under 22, and controls outside the
@@ -174,8 +180,7 @@ One full run is about 14 to 15 minutes of game time (measured: 883 s with two de
 machine's software renderer that is one to three hours of wall time.
 
 ## Continue
-Continue → the sanctuary of the latest save (0.35 s fade). It never plays the opening or the chamber. A road in
-progress is not stored in a save (a run ends with the session), so there is nowhere further along to return to.
+Continue → the road where it was left if the save holds one (the last stop reached; after a fall, its checkpoint at full health), else the sanctuary of the latest save (0.35 s fade). It never plays the opening or the chamber.
 
 ## Seen before
 `Opening.SEEN_FILE` (`user://opening_seen`, beside the settings, not in a save slot) is written when Generation I ends or is skipped through. Later new journeys go from character select straight to the chamber: no Generation I, no time jump, no arrival. The menu then shows a small "Watch the Opening" at the bottom right; it plays Generation I (duels included) and returns to the menu. The chamber always plays for a new knight. New Game Plus does not pass through any of this.
@@ -183,7 +188,7 @@ progress is not stored in a save (a run ends with the session), so there is nowh
 ## Where a wait or a cut is still shown
 | Where | What the player sees | Why |
 |---|---|---|
-| Setting out for a region from the sanctuary, the map, or "retry" after a death | Loading screen | A change of region: a whole place is built. This is the case the loading screen is kept for. |
+| Setting out for a region from the sanctuary or the map, or "Retry from checkpoint" after a death | Loading screen | A change of region: a whole place is built. This is the case the loading screen is kept for. |
 | Entering a duel when the foe's model is not yet in memory | Loading screen | Only if the player chooses within the moment it takes the road to read the foe ahead on a thread, or on the filmed road, which does not read ahead. Otherwise a 0.35 s fade. |
 | Character select → opening, opening → chamber | Black, held for as long as the next set takes to build | Both scenes open on black by design, so the build is hidden in it; it is still a held frame. |
 | Chamber → Approach | White, held while the Courtyard is built | A change of place, covered by the white of the doorway. |

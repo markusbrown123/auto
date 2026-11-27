@@ -10,6 +10,9 @@ extends Node
 ##   --fast            press SKIP on every story beat (the duels on the road are still fought)
 ##   --until=<step>    stop after: menu | arrival | quit (back at the main menu after the sanctuary visit)
 ##   --forge_first     visit the forge before the shop (the purse reaches one piece of work or one purchase, not both)
+##   --road=<stop>     skip the story: a new second-generation knight on the Courtyard's road at that stop (0 to 6), for the
+##                     death screen and the checkpoint (with --die=1 for the first fight, --die=boss for the Sentinel)
+##   --until=retry     (with --road) stop a few seconds after the road is taken up again from the checkpoint
 ##   --resume          a second launch: Continue from the save the last run left (checks that it persisted), then
 ##                     the rest of the road and the guardian
 ##   --log=<file>      where the step log goes (default: <save dir>/slice.log)
@@ -459,6 +462,10 @@ func _run() -> void:
 				DirAccess.remove_absolute(Game._p(f))
 	Game.profile = {}
 	Game.run = {}
+	if args.has("road"):
+		await _from_road(int(args.road))
+		await _end()
+		return
 	say("slice run: body=%s weapon=%s die=%s window=%s safe margins=%s preset=%s" % [args.get("body", "m"), args.get("weapon", "default"), str(_die),
 		str(DisplayServer.window_get_size()), str(UI.safe_margins(get_viewport())), str(Game.graphics().name)])
 	step("launch")
@@ -692,6 +699,19 @@ func _stop(e: Explore) -> bool:
 	await _wait(1.0)
 	return true
 
+## Dev: begins on the Courtyard's road at `stop` with a fresh knight, with nothing before it played.
+func _from_road(stop: int) -> void:
+	var want: String = Db.canon(str(args.get("weapon", "w_dawnline")))
+	Game.new_game("#3d0f0f", str(args.get("body", "m")), want, 2)
+	Game.profile.tutorial_done = true
+	Game.profile.flags["gen2_arrived"] = true
+	Game.start_run("courtyard")
+	Game.run.stage = stop
+	Game.run.checkpoint = Game.checkpoint_at_or_before("courtyard", stop)
+	step("on the road at stop %d (checkpoint %d)" % [stop + 1, int(Game.run.checkpoint)])
+	main.show_stage()
+	await _road()
+
 var _in_fight := 0
 var _paused_once := false
 
@@ -729,7 +749,7 @@ func _in_duel(d: Duel) -> bool:
 		await _wait(0.5)
 		say("  resumed; paused=%s" % str(get_tree().paused))
 		return true
-	for t: String in ["Continue", "Set out again", "Rise"]:
+	for t: String in ["Continue", "Retry from checkpoint", "Rise"]:
 		var b := _find(t)
 		if b != null and d.stage != Duel.Stage.FIGHT:
 			await _wait(2.4)                 # read the screen
@@ -737,8 +757,10 @@ func _in_duel(d: Duel) -> bool:
 			_snap("result")
 			var p: Dictionary = Game.profile
 			say("  result screen up: [%s]. gold %d, level %d, xp %d, inventory %d, deaths %d" % [t, int(p.gold), int(p.level), int(p.xp), p.inventory.size(), int(p.deaths)])
-			if t == "Set out again":
+			if t == "Retry from checkpoint":
 				deaths += 1
+				if str(args.get("until", "")) == "retry":
+					_retry_then_halt()
 				_die_now = false
 				if deaths > 3 + (2 if args.has("die") else 0) and not _assist:
 					_assist = true
@@ -747,6 +769,14 @@ func _in_duel(d: Duel) -> bool:
 			await _wait(1.0)
 			return true
 	return false
+
+## --until=retry: lets the road be walked on from the checkpoint for a while, then ends the run.
+func _retry_then_halt() -> void:
+	await get_tree().create_timer(1.0).timeout
+	await _until(func(): return main.current is Explore, 60.0, "the road at the checkpoint")
+	say("  retried: on the road at stop %d with %d of %d health" % [int(Game.run.stage) + 1, int(Game.run.hp), int(Game.stats().max_hp)])
+	await _wait(14.0)
+	_halt = true
 
 ## Logs a fight's own story: its length, the phases, how it ended.
 func _fight_watch(d: Duel) -> void:

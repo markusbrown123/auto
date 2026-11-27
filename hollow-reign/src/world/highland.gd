@@ -439,6 +439,9 @@ static func _tex(path: String) -> Texture2D:
 
 # ================================================================ building it
 ## Fills an Arena that has made its sky, sun and floor. Called by Arena._layout_highland.
+static func off_sights() -> bool:
+	return HighlandSights.off
+
 static func build(a: Arena) -> void:
 	_ensure()
 	var st := {"kept": [], "ruin": [], "woken": [], "fires": [], "shared": [], "sunlit": [], "lamps": [], "lights": []}
@@ -545,6 +548,7 @@ static func build(a: Arena) -> void:
 	_citadel(a, st)
 	_gate_court(a, st)
 	_wayside(a, st)
+	HighlandSights.build(a, st)
 	for m: ShaderMaterial in st.shared:
 		m.set_shader_parameter("noise_tex", _noise_tex())
 		m.set_shader_parameter("land_rect", land_rect)
@@ -1896,6 +1900,10 @@ static func generation(a: Arena, g: int) -> void:
 	sea.set_shader_parameter("deep", Color(str(s.deep)))
 	sea.set_shader_parameter("shelf", Color(str(s.shelf)))
 	sea.set_shader_parameter("glint", Color(str(s.sun)))
+	var water: ShaderMaterial = st.get("water")
+	if water:
+		water.set_shader_parameter("freeze", float(s.snow))
+		water.set_shader_parameter("haze", Color(str(s.haze)))
 	var shaft: ShaderMaterial = st.shaft
 	shaft.set_shader_parameter("tint", Color(str(s.sun)))
 	shaft.set_shader_parameter("strength", float(s.shafts))

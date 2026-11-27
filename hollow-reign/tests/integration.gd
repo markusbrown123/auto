@@ -240,7 +240,26 @@ func _ready() -> void:
 	d2.setup("forgotten_monarch", {"autoplay": true, "bot_style": DuelBot.Style.SPAM, "seed": 4})
 	var res2: Array = await d2.finished
 	ok(not res2[0], "defeat is reported")
-	Overlays.death(d2, Db.foes.forgotten_monarch, Game.on_death(), func(): pass)
+	ok(d2._death_fade != null and is_equal_approx(d2._death_fade.color.a, 1.0), "defeat: the picture has faded to black before the result is reported")
+	var picked := []
+	Overlays.death(d2, Db.foes.forgotten_monarch, Game.on_death(), func(): picked.append("done"), {"retry": func(): picked.append("retry"), "menu": func(): picked.append("menu")})
+	await get_tree().process_frame
+	var words: Array = []
+	var buttons: Array = []
+	var shown: Array = d2.get_children().filter(func(c): return c is CanvasLayer and (c as CanvasLayer).layer == 20)
+	ok(shown.size() == 1, "death screen: one layer over the picture")
+	for n: Node in shown[0].find_children("*", "", true, false):
+		if n is Label:
+			words.append((n as Label).text)
+		elif n.has_meta("text"):
+			words.append(str(n.get_meta("text")))
+		elif n is Button:
+			buttons.append(n)
+	ok(words.has("YOU HAVE FALLEN") and words.has("Your journey is not yet over."), "death screen: the words")
+	ok(buttons.size() == 2 and (buttons[0] as Button).text == "RETRY FROM CHECKPOINT" and (buttons[1] as Button).text == "RETURN TO MAIN MENU", "death screen: a retry and a way back to the menu, nothing else")
+	ok(buttons.all(func(b): return (b as Button).custom_minimum_size.y >= UI.TAP), "death screen: both buttons are at least %d high" % int(UI.TAP))
+	(buttons[0] as Button).pressed.emit()
+	ok(picked == ["retry"], "death screen: Retry calls the retry")
 	Overlays.victory(d2, Db.foes.hollow_soldier, Game.on_victory("hollow_soldier", 10.0), d2.sim, func(): pass)
 	await get_tree().process_frame
 	d2.queue_free()

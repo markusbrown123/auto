@@ -5,7 +5,7 @@ extends Node3D
 ##
 ##   xvfb-run -a -s "-screen 0 420x470x24" godot --path . --rendering-method mobile --resolution 420x470 --fixed-fps 30 \
 ##       res://src/dev/pose_review.tscn -- --out=<dir> [--model=<glb>] [--body=f] [--gear=w_x,s_y] [--foe=<foe id>]
-##       [--witness] [--poses=guard,cut_R,...] [--t=0.1,0.2] [--clip=<authored clip>] [--zoom=1.0] [--aim=x,y,z] [--tag=name]
+##       [--witness] [--poses=guard,cut_R,...] [--t=0.1,0.2] [--clip=<authored clip>] [--zoom=1.0] [--aim=x,y,z] [--tag=name] [--stat_from=s]
 ##   --versus=<foe id> [--dirs=R,D] [--gap=m] [--nobite]   two fighters at the duel's striking distance, frames round contact
 ##   --relic                                              the old Witness relic (the mask) alone from four sides
 ##   --drone[=plumb,reed,lens] [--attend] [--speak] [--dark]   the Witness drone: one row per variant, beside the knight
@@ -537,7 +537,7 @@ func _poses() -> Array:
 		p.append(["circle", func(): _vel = Vector3(0.14, 0, 0), 4.0, [1.0, 2.0, 3.0]])
 		p.append(["shove", func(): _later(0.3, func(): rig.hurt(); _push = 0.6), 1.6, [0.4, 0.8, 1.2]])
 		# (the first second is the change from the fighting stance to standing at ease: slip is counted from the walk's start)
-		p.append(["road", func(): rig.combat_steps = false; _slip_from = 1.0; _later(1.0, func(): _vel = Vector3(0, 0, -1.38)); _later(4.0, func(): _vel = Vector3.ZERO), 5.6, [1.9, 2.15, 2.4, 2.65]])
+		p.append(["road", func(): rig.combat_steps = false; _slip_from = 1.0; _later(1.0, func(): _vel = Vector3(0, 0, -FighterRig.ROAD_SPEED)); _later(4.0, func(): _vel = Vector3.ZERO), 5.6, [1.9, 2.15, 2.4, 2.65]])
 	if only_has("sheath") or only_has("draw") or only_has("preview_attack") or only_has("preview_block"):
 		p.append(["sheath", func(): rig.sheath(), 1.3, [0.15, 0.36, 0.5, 0.7, 1.1]])
 		p.append(["draw", func(): rig.sheath(true); _later(0.3, func(): rig.draw()), 1.5, [0.25, 0.5, 0.66, 0.8, 1.0, 1.3]])
@@ -776,6 +776,8 @@ func _seg_dist(p: Vector3, a: Vector3, b: Vector3) -> float:
 	return p.distance_to(a + ab * u)
 
 func _worse(stat: Dictionary, key: String, v: float, t: float, note: String = "", lower: bool = true) -> void:
+	if (key.begins_with("sh_") or key == "shield") and t < float(_args.get("stat_from", "0")):
+		return      # --stat_from=<s>: shield contacts are counted only from this time (the walking carry, past the change of stance)
 	if not stat.has(key) or (v < float(stat[key][0]) if lower else v > float(stat[key][0])):
 		stat[key] = [v, t, note]
 

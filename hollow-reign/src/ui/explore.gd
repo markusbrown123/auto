@@ -56,7 +56,11 @@ func _ready() -> void:
 		var prev := angle - 0.85
 		backdrop.rig.rotation.y = angle
 		backdrop.move_camera(_at(prev, Vector3(1.3, 1.9, 5.2)), _at(prev, Vector3(0, 1.3, -4.0)), true)
-		backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK))
+		backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK), Game.settings.reduce_motion)
+		if not Game.settings.reduce_motion:
+			# the arrival is a slow turn of the view onto the road, not a swing: it starts gently, gathers, and settles
+			backdrop.cam_speed = 0.55
+			create_tween().tween_property(backdrop, "cam_speed", 1.6, 5.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
 		Sfx.play("footstep", -6.0)
 	Sfx.ambience(str(region.amb))
 	Sfx.music_for("explore_" + str(region.id), "menu")
@@ -162,6 +166,21 @@ func _say_aside(region_id: String, stage: int) -> void:
 
 func _at(a: float, v: Vector3) -> Vector3:
 	return v.rotated(Vector3.UP, a)
+
+## The walking corridor of a stop (`Corridor`): from a few metres behind the knight (where the camera trails) to a way's
+## marker, for each way onward; and, at the first stop, the line the knight has walked in on. Props the place builds
+## after this are kept out of these lanes (Backdrop.build calls it before it builds the place).
+static func road_lanes(a: float, with_approach: bool) -> void:
+	Corridor.lanes.clear()
+	var back := Vector3(0, 0, 5.5).rotated(Vector3.UP, a)
+	var opts: Array = Game.stage_options()
+	for i in opts.size():
+		var x := (float(i) - (opts.size() - 1) * 0.5) * 3.2
+		if opts[i].has("foe"):
+			x = clear_x(x - 0.3) + 0.3
+		Corridor.add(back, Vector3(x - 0.3, 0, -4.9).rotated(Vector3.UP, a))
+	if with_approach:
+		Corridor.add(Vector3(0, 0, 17.0).rotated(Vector3.UP, a), Vector3.ZERO, 2.0)
 
 ## Where across the road a way's marker may be so that whoever waits on it (1.6 m beyond the marker) is not hidden
 ## behind the knight: seen from the stop's camera, the two must be at least CLEAR_DEG apart. With two ways onward the
@@ -429,27 +448,60 @@ func _take_pouch(prop: Node3D, b: Button, index: int = 0) -> void:
 
 func _process(_dt: float) -> void:
 	_tick_secrets(_dt)
+	_follow_cam()
 	# keep each pouch's tap target over its place in the world
 	for e in pouches:
 		var p: Vector3 = e[0].global_position + Vector3(0, 0.15, 0)
 		e[1].visible = not backdrop.cam.is_position_behind(p)
 		e[1].position = backdrop.cam.unproject_position(p) - e[1].size * 0.5 - e[1].get_parent().global_position
 
-## The knight walks to the chosen marker before the scene changes.
-func _walk_then(index: int, then: Callable) -> void:
+## The knight walks to the chosen marker before the scene changes, at the pace of the walk clip (FighterRig.ROAD_SPEED),
+## turning onto the line to it as they go; a way that is not a fight is walked on through, past the marker.
+func _walk_then(index: int, then: Callable, through: bool = false) -> void:
 	if _leaving:
 		return
 	_leaving = true
 	var rig := backdrop.rig
 	var to: Vector3 = markers[index] if index < markers.size() else _at(angle, Vector3(0, 0, -4.0))
 	var dir := to - rig.position
-	rig.rotation.y = atan2(-dir.x, -dir.z)
+	dir.y = 0.0
+	var go := dir.length() * (1.0 if through else 0.85) + (2.2 if through else 0.0)
+	var step := dir.normalized()
+	var yaw := atan2(-dir.x, -dir.z)
+	var from := rig.position
+	var turn_from := rig.rotation.y
+	rig.walking = true
+	rig.footsteps = true
+	_walk = {"u": 0.0}
+	var dur := FighterRig.road_time(go)
 	var tw := create_tween()
-	tw.tween_property(rig, "position", rig.position + dir * 0.8, 1.0).set_trans(Tween.TRANS_SINE)
-	for i in 3:
-		get_tree().create_timer(0.3 * i).timeout.connect(func(): Sfx.play("footstep", -5.0))
-	backdrop.move_camera(backdrop.cam_pos + dir * 0.45, to + Vector3(0, 1.2, 0))
-	tw.tween_callback(then)
+	# (the body does its own easing: it gathers way over the first part of a second and settles over the last; the
+	# origin is carried at the clip's own pace, so the stride and the ground agree)
+	tw.tween_method(func(u: float):
+		_walk.u = u
+		rig.position = from + step * go * u
+		rig.rotation.y = lerp_angle(turn_from, yaw, smoothstep(0.0, 0.3, u)), 0.0, 1.0, dur)
+	tw.tween_callback(func():
+		rig.walking = false
+		_walk = {}
+		then.call())
+
+## The camera that goes with the knight down the road: behind and to the sword side, low, looking a little ahead of
+## them so there is room in front for the road; it drifts round and up as the walk goes on. No cuts, and nothing but
+## the corridor (kept clear of props) is crossed by it. With Reduce motion the offsets are fixed.
+var _walk := {}
+var _way := 0                     # which way onward the stop's last interaction was at
+func _follow_cam() -> void:
+	if _walk.is_empty() or backdrop == null or backdrop.rig == null:
+		return
+	var rig := backdrop.rig
+	var u: float = float(_walk.u) if not Game.settings.reduce_motion else 0.0
+	var b := Basis(Vector3.UP, rig.rotation.y)
+	var back := b * Vector3(1.4 - 0.9 * u, 1.3 + 0.35 * u, 3.5 + 0.9 * u)
+	var ahead := b * Vector3(-0.25, 1.2, -2.8)
+	backdrop.cam_fov = 46.0
+	backdrop.cam_speed = 1.7
+	backdrop.move_camera(rig.position + back, rig.position + ahead)
 
 ## The foe on the road is shown before steel is drawn: the knight starts toward it, and the camera goes low
 ## and looks up at what is waiting. The duel opens on the same two figures facing each other.
@@ -469,7 +521,7 @@ func _reveal_then(index: int, then: Callable) -> void:
 	foe.rotation.y = atan2(dir.x, dir.z)
 	foe.time_scale = 1.0
 	var tw := create_tween()
-	tw.tween_property(rig, "position", rig.position + dir * 0.3, 1.7).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	tw.tween_property(rig, "position", rig.position + dir * 0.3, FighterRig.road_time(dir.length() * 0.3))
 	# past the knight, low, and to the side they are not walking on: nothing of theirs crosses the lens
 	backdrop.move_camera(foe.position - step * 2.3 - side * 1.2 + Vector3(0, 0.5, 0), foe.position + Vector3(0, 1.3 * foe.scale.y, 0))
 	Sfx.play("armor", -6.0, 0.8)
@@ -519,19 +571,24 @@ func _choose(o: Dictionary, index: int = 0) -> void:
 			else:
 				_walk_then(index, func(): fight.emit(o))
 		"pass":
-			_walk_then(index, func(): moved_on.emit())
+			_walk_then(index, func(): moved_on.emit(), true)
 		_:
-			_interact(o)
+			_interact(o, index)
 
-func _interact(o: Dictionary) -> void:
+func _interact(o: Dictionary, index: int = 0) -> void:
 	layer.get_child(0).visible = false
-	var spot := _at(angle, Vector3(0.9, 0, -2.4))
+	# (set to the side of the line to its marker, so the knight walks on past it afterwards and not through it)
+	_way = index
+	var mx := 0.9
+	if index < markers.size():
+		mx = (markers[index] as Vector3).rotated(Vector3.UP, -angle).x + 3.0
+	var spot := _at(angle, Vector3(mx, 0, -2.4))
 	var prop: Node3D = _shrine(spot) if o.type == "shrine" else backdrop.add_prop(o.type, spot)
 	prop.rotation.y = angle
 	if o.type == "shrine":
-		backdrop.move_camera(_at(angle, Vector3(2.9, 1.25, 1.3)), spot + Vector3(0, 1.25, 0))      # the whole monument, ring and all
+		backdrop.move_camera(spot + _at(angle, Vector3(2.0, 1.25, 3.7)), spot + Vector3(0, 1.25, 0))      # the whole monument, ring and all
 	else:
-		backdrop.move_camera(_at(angle, Vector3(2.6, 1.3, 0.4)), spot + Vector3(0, 0.6, 0))
+		backdrop.move_camera(spot + _at(angle, Vector3(1.7, 1.3, 2.8)), spot + Vector3(0, 0.6, 0))
 	var verb: String = {"treasure": "Open", "shrine": "Rest", "lever": "Pull"}[o.type]
 	var l2 := CanvasLayer.new()
 	add_child(l2)
@@ -660,7 +717,7 @@ func _resolve(o: Dictionary, prop: Node3D) -> void:
 			lines.append("%s will stay open." % Game.run_region().shortcut.label)
 			lines.append("You may begin from here when you return.")
 	await get_tree().create_timer(0.9).timeout
-	Overlays.message(self, heading, lines, "Onward", func(): moved_on.emit())
+	Overlays.message(self, heading, lines, "Onward", func(): _walk_then(_way, func(): moved_on.emit(), true))
 
 # ---------------------------------------------------------------- secrets (rules in Secrets, content in data/secrets.json)
 ## Something slightly off, set down in the place: small, unlabelled, and only yours if you notice it and touch it.

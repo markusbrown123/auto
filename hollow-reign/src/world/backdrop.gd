@@ -25,7 +25,12 @@ var _studio: Node3D
 func build(theme: String, with_knight: bool = true) -> void:
 	arena = Arena.new()
 	add_child(arena)
+	if with_knight and not Game.run.is_empty() and Game.run.has("stage"):
+		# a road screen: what the place builds keeps out of the lanes the knight walks (Corridor)
+		Corridor.moves.clear()
+		Explore.road_lanes(Explore.bearing(int(Game.run.stage)), int(Game.run.stage) == 0)
 	arena.build(theme)
+	Corridor.lanes.clear()
 	props = Node3D.new()
 	add_child(props)
 	key = SpotLight3D.new()

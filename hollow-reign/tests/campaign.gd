@@ -159,6 +159,7 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 	var weapon_before: Dictionary = Generations._weapon_record(blade, p)
 	Game.start_run("throne")
 	Game.run.stage = 6
+	Game.run.checkpoint = Game.checkpoint_at_or_before("throne", 6)      # (as if walked)
 	var o: Dictionary = Game.stage_options()[0]
 	ok(str(o.foe) == "forgotten_monarch", "the last stop of the Throne is the Monarch")
 	# ---- an ordinary defeat first: it is a defeat, and the family's story does not move
@@ -169,18 +170,21 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 	if d != null:
 		d.sim.pl.hp = 1.0
 		d.sim._damage_player(999999.0, true)
-		await until(func(): return button("Return to sanctuary") != null, 30.0)
+		await until(func(): return button("Retry from checkpoint") != null, 30.0)
 		ok(Game.generation() == 2 and Game.transition_pending().is_empty() and int(Game.profile.deaths) == deaths + 1 and not Game.monarch_won(2) and str(Game.generation_record(2).fate) == "alive",
-			"lost to him: an ordinary defeat. Nobody falls, nothing is inherited, the road is taken again")
+			"lost to him: an ordinary defeat. Nobody falls, nothing is inherited, no time passes")
 		var said := ""
-		for l: Label in m.find_children("*", "Label", true, false):
-			said += l.text + " "
-		ok(said.contains("THE REIGN ENDURES") and said.contains("Inheritance Engine brings you back") and not said.to_lower().contains("generation") and not said.to_lower().contains("heir") and Game.just_died,
-			"the defeat screen says what it is (the Engine restores the one on the road) and nothing of the lineage")
-		press("Return to sanctuary")
-		await until(func(): return m.current is Sanctuary, 10.0)
-		await until(func(): return not Game.just_died, 20.0)
-		ok(m.current is Sanctuary and not Game.just_died and Story.has_scene("rebirth_%d" % clampi(int(Game.profile.deaths) - 1, 0, 5)), "and the knight is back at the sanctuary, where Lyra says so (a rebirth line)")
+		for n: Node in m.find_children("*", "", true, false):
+			if n is Label:
+				said += (n as Label).text + " "
+			elif n.has_meta("text"):
+				said += str(n.get_meta("text")) + " "
+		ok(said.contains("YOU HAVE FALLEN") and said.contains("Your journey is not yet over.") and not said.to_lower().contains("generation") and not said.to_lower().contains("heir") and not said.contains("Engine"),
+			"the defeat screen says what it is and nothing of the lineage")
+		ok(Game.run.stage == 5 and is_equal_approx(float(Game.run.hp), Game.stats().max_hp), "and the road is already at the checkpoint (the stop before the Monarch), at full health")
+		press("Retry from checkpoint")
+		await until(func(): return m.current is Explore or m.current is CineRoad, 30.0)
+		ok((m.current is Explore or m.current is CineRoad) and Game.run.stage == 5, "Retry walks the road on from the checkpoint, not at the Monarch's door")
 	# ---- the second meeting, for real
 	Game.start_run("throne")
 	Game.run.stage = 6

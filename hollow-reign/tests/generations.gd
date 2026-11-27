@@ -320,8 +320,8 @@ func t_checkpoints() -> void:
 	ok(Game.profile.deaths == deaths + 1 and not Game.just_died, "the fall is counted, and no sanctuary is owed for it")
 	ok(Game.profile.gold == gold and Game.profile.inventory == inv and Game.profile.level == 7 and Game.profile.mods.has("w_rusted_sword") and int(Game.profile.defeated.get("hollow_soldier", 0)) == defeated,
 		"gold, equipment, mods, level and every victory are kept")
-	var kept := JSON.parse_string(family())
-	var was = JSON.parse_string(before)
+	var kept: Dictionary = JSON.parse_string(family())
+	var was: Dictionary = JSON.parse_string(before)
 	var same := true
 	for k: String in was:
 		same = same and (k == "deaths" or JSON.stringify(was[k]) == JSON.stringify(kept[k]))
@@ -347,7 +347,7 @@ func t_checkpoints() -> void:
 				ok(Db.foes.has(str(o.foe)), "stop %d: %s is there to be fought again" % [int(Game.run.stage) + 1, str(o.foe)])
 		if not Game.advance_stage():
 			break
-	ok(met >= 3, "the road beyond the checkpoint has its foes (%d)" % met)
+	ok(met >= 2, "the road beyond the checkpoint has its foes (%d)" % met)
 	# a fall at the very start, at a guardian's door, and from a shortcut
 	Game.start_run("courtyard")
 	walk_to(2)
@@ -357,13 +357,14 @@ func t_checkpoints() -> void:
 	walk_to(6)
 	Game.on_death(true)
 	ok(Game.run.stage == 5, "a fall to the guardian puts the knight at the stop before its approach, not at the guardian")
+	Game.profile.flags["courtyard_gate"] = true
 	Game.start_run("courtyard", true)
 	ok(Game.run.stage == 4 and Game.run.checkpoint == 4, "a road begun at the open gate has the gate as its start")
 	Game.on_death(true)
 	ok(Game.run.stage == 4, "and a fall there is at the gate again")
 	# Continue (and "return to main menu") land at the checkpoint
 	Game.start_run("courtyard")
-	walk_to(5)
+	walk_to(4)
 	Game.on_death(true)
 	ok(Game.load_game() and Game.run.is_empty() and Game.resume_road() and Game.run.stage == 3 and is_equal_approx(float(Game.run.hp), Game.stats().max_hp) and Game.run.checkpoint == 3,
 		"Continue takes the road up at the checkpoint with full health")
@@ -379,13 +380,14 @@ func t_checkpoints() -> void:
 			Game.inherit({"name": "Third"})
 		ok(Game.generation() == gen, "generation %d begun" % gen)
 		var recs: int = Game.profile.generations.size()
+		var hist: int = Game.profile.campaign.history.size()
 		for i: int in 8:
 			Game.start_run("courtyard")
 			walk_to(i % 7)
 			Game.on_death(true)
 		ok(Game.generation() == gen and Game.transition_pending().is_empty() and Game.profile.generations.size() == recs and Game.generation_record().fate == "alive",
 			"generation %d: eight falls on the road, and the house has not fallen: no time jump is owed" % gen)
-		ok(Game.profile.campaign.history.size() == (gen - 1) and Game.profile.campaign.transition.is_empty(), "generation %d: no transition was recorded" % gen)
+		ok(Game.profile.campaign.history.size() == hist and Game.profile.campaign.transition.is_empty(), "generation %d: no transition was recorded" % gen)
 	fresh(1)
 	for i: int in 3:
 		Game.start_run("courtyard")

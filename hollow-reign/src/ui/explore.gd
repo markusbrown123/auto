@@ -152,9 +152,14 @@ func _ready() -> void:
 			FighterRig.log_feet = true
 			FighterRig.foot_log.clear()
 			await get_tree().create_timer(3.0).timeout
-			var t0 := Time.get_ticks_msec()
+			var t0 := Engine.get_process_frames()
 			_walk_then(int(arg.trim_prefix("--walk=")), func():
-				print("FEETLOG %d footfalls in %.1f s: %s" % [FighterRig.foot_log.size(), (Time.get_ticks_msec() - t0) / 1000.0, str(FighterRig.foot_log)]), true)
+				var line := "FEETLOG %d footfalls, frames: %s" % [FighterRig.foot_log.size(), str(FighterRig.foot_log)]
+				print(line)
+				if OS.get_environment("FEETLOG") != "":
+					var f := FileAccess.open(OS.get_environment("FEETLOG"), FileAccess.WRITE)
+					f.store_line(line)
+					f.store_line("walk began at frame %d" % t0), true)
 		if arg.begins_with("--choose="):          # dev captures: take a way onward by its index, as a tap would
 			await get_tree().create_timer(2.0).timeout
 			var o: Array = Game.stage_options()

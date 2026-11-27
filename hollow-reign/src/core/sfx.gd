@@ -20,11 +20,16 @@ const POOLS := {
 	"step_stone": ["step_stone_%d", 6, 0.05, 1.0, "step"], "step_metal": ["step_metal_%d", 6, 0.05, 1.0, "step"],
 	"step_grass": ["step_grass_%d", 6, 0.05, 1.0, "step"], "step_snow": ["step_snow_%d", 6, 0.05, 1.0, "step"],
 	"step_water": ["step_water_%d", 6, 0.05, 1.0, "step"],
+	# generated slots (tools/sfx_buy.py): count 0 = none required; whatever numbered files exist are used (see _n)
+	"shield_hit": ["shield_hit_%d", 0, 0.03, 1.0, "shield"], "draw": ["draw_%d", 0, 0.03, 1.0, "foley"],
+	"sheath": ["sheath_%d", 0, 0.03, 1.0, "foley"], "body_fall": ["body_fall_%d", 0, 0.03, 1.0, "fall"],
+	"rustle": ["rustle_%d", 0, 0.05, 1.5, "foley"], "roll": ["roll_%d", 0, 0.04, 1.0, "foley"],
 }
 ## Voice families: [most voices at once (the oldest is stolen), minimum seconds between event starts].
 ## Rapid swipes therefore cannot stack into a wall, and one footstep call cannot become two steps.
 const FAMILIES := {"metal": [4, 0.04], "parry": [2, 0.12], "break": [2, 0.2], "hit": [4, 0.04], "flesh": [4, 0.04],
-	"whoosh": [3, 0.07], "layer": [8, 0.0], "step": [2, 0.08]}
+	"whoosh": [3, 0.07], "layer": [8, 0.0], "step": [2, 0.08],
+	"shield": [3, 0.06], "foley": [3, 0.08], "fall": [2, 0.3]}
 ## Named events: the first layer is the sound itself (it takes the retrigger gap), the rest are added with an
 ## optional delay "at" (s), a "vol" trim (dB), a minimum "min" intensity and a "chance".
 const EVENTS := {
@@ -35,6 +40,8 @@ const EVENTS := {
 	"hit_armor": [{"pool": "hit_armor"}, {"pool": "thump", "vol": -9.0, "min": 0.9, "chance": 0.6}],
 	"hit_flesh": [{"pool": "hit_flesh"}],
 	"swing": [{"pool": "@whoosh"}],
+	"shield_hit": [{"pool": "shield_hit"}], "draw": [{"pool": "draw"}], "sheath": [{"pool": "sheath"}],
+	"body_fall": [{"pool": "body_fall"}], "rustle": [{"pool": "rustle"}], "roll": [{"pool": "roll"}],
 }
 const SURFACES := {"stone": "stone", "rock": "stone", "metal": "metal", "metal_deck": "metal", "deck": "metal", "grass": "grass",
 	"earth": "grass", "dirt": "grass", "grass_earth": "grass", "snow": "snow", "water": "water", "water_shallow": "water", "shallow": "water"}
@@ -50,6 +57,7 @@ const AMBIENT_SOUNDS := ["bell"]
 const CINEMATIC_SOUNDS := ["victory", "death", "finisher"]      # stingers that belong to the staged moments
 var _cache := {}
 var _pool: Array = []
+var _counts := {}               # pool -> number of numbered files found (see _n)
 var _last := {}                 # pool or sound -> last variant played
 var _voices: Array = []         # {p, fam, t0, end} for every voice believed to be sounding (ms)
 var _gate_at := {}              # voice family -> ms of the last event start
@@ -128,7 +136,7 @@ func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float 
 		return
 	if sound == "parry_perfect":
 		sound = "parry"
-	if EVENTS.has(sound):
+	if EVENTS.has(sound) and _n(str(EVENTS[sound][0].pool)) > 0:     # "roll" keeps its old single file until roll_1.wav exists
 		event(sound, 1.0, vol_db, pitch, jitter)
 		return
 	var file := sound
@@ -155,6 +163,8 @@ func event(sound: String, intensity: float = 1.0, vol_db: float = 0.0, pitch: fl
 	intensity = clampf(intensity, 0.1, 2.0)
 	var layers: Array = EVENTS[sound]
 	var pool := _resolve(layers[0].pool, intensity)
+	if _n(pool) < 1:
+		return false
 	if not _gate(POOLS[pool][4], _now()):
 		return false
 	var whoosh := str(layers[0].pool) == "@whoosh"
@@ -169,7 +179,9 @@ func event(sound: String, intensity: float = 1.0, vol_db: float = 0.0, pitch: fl
 		if k > 0 and (intensity < float(lay.get("min", 0.0)) or randf() > float(lay.get("chance", 1.0))):
 			continue
 		var lp_name := pool if k == 0 else _resolve(lay.pool, intensity)
-		var idx := _pick(lp_name, POOLS[lp_name][1])
+		if _n(lp_name) < 1:
+			continue
+		var idx := _pick(lp_name, _n(lp_name))
 		var lv := v + float(lay.get("vol", 0.0))
 		var at := float(lay.get("at", 0.0))
 		if at > 0.0:
@@ -191,10 +203,22 @@ func footstep(surface: String = "", weight: float = 1.0, vol_db: float = 0.0, pi
 	weight = clampf(weight, 0.4, 2.5)
 	var v := vol_db + 6.0 * (weight - 1.0)
 	var pt := pitch * pow(weight, -0.35)
-	_launch(pool, _pick(pool, POOLS[pool][1]), v, pt, -1.0, 0.0)
+	_launch(pool, _pick(pool, _n(pool)), v, pt, -1.0, 0.0)
 	if jingle and weight >= 0.9 and randf() < clampf(0.2 + 0.4 * (weight - 0.9), 0.0, 0.6):
-		_launch("jingle", _pick("jingle", POOLS["jingle"][1]), v - 20.0, pitch * randf_range(0.9, 1.1), -1.0, 0.0)
+		_launch("jingle", _pick("jingle", _n("jingle")), v - 20.0, pitch * randf_range(0.9, 1.1), -1.0, 0.0)
 	return true
+
+## Number of variants of a pool: the listed count, or more when higher-numbered files exist (generated extras:
+## tools/sfx_buy.py writes clash_7.wav and so on). Counted once; numbered files must be contiguous.
+func _n(pool: String) -> int:
+	if not POOLS.has(pool):
+		return 1
+	if not _counts.has(pool):
+		var n := int(POOLS[pool][1])
+		while ResourceLoader.exists("res://assets/audio/sfx/%s.wav" % (str(POOLS[pool][0]) % (n + 1))):
+			n += 1
+		_counts[pool] = n
+	return _counts[pool]
 
 func _now() -> int:
 	return Time.get_ticks_msec()

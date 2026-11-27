@@ -1728,7 +1728,9 @@ func t_corridor() -> void:
 # ------------------------------------------------------------------ sound engine: variation, polyphony, footsteps
 func t_sfx() -> void:
 	for pool: String in Sfx.POOLS:
-		var n: int = Sfx.POOLS[pool][1]
+		var n: int = Sfx._n(pool)
+		if n == 0:
+			continue
 		var seen := {}
 		var prev := 0
 		var repeated := false

@@ -1,0 +1,227 @@
+extends Node
+## Verification wrapper (build check). Boots res://src/main.tscn unchanged and observes / drives from outside.
+## --bc=<mode> --bclog=<file>   modes: observe (default), death, walk
+var mode := "observe"
+var log_path := ""
+var lines: PackedStringArray = []
+var f := 0
+var main: Node
+var seen_models := {}
+var _connected := {}
+var step := 0
+var step_f := 0
+var notes := {}
+var G: Node
+var ST: Node
+
+func _ready() -> void:
+	process_priority = 100
+	for a: String in OS.get_cmdline_user_args():
+		if a.begins_with("--bc="):
+			mode = a.trim_prefix("--bc=")
+		if a.begins_with("--bclog="):
+			log_path = a.trim_prefix("--bclog=")
+	G = get_tree().root.get_node_or_null("Game")
+	ST = get_tree().root.get_node_or_null("Story")
+	print("autoloads ", G, ST)
+	main = get_tree().root.get_node("Main") if get_tree().root.has_node("Main") else get_tree().current_scene
+
+func L(s: String) -> void:
+	lines.append("%d\t%.3f\t%s" % [f, f / 30.0, s])
+
+func _exit_tree() -> void:
+	_flush()
+
+func _flush() -> void:
+	if log_path == "":
+		return
+	var fa := FileAccess.open(log_path, FileAccess.WRITE)
+	if fa:
+		fa.store_string("\n".join(lines) + "\n")
+		fa.close()
+
+func _cur() -> Node:
+	return main.get("current")
+
+func _duel() -> Duel:
+	var c = _cur()
+	if c is Duel:
+		return c
+	if c != null and is_instance_valid(c):
+		var d = c.get("duel")
+		if d is Duel:
+			return d
+	return null
+
+func _process(_dt: float) -> void:
+	f += 1
+	var d := _duel()
+	if d != null and is_instance_valid(d) and d.sim != null and not _connected.has(d.get_instance_id()):
+		_connected[d.get_instance_id()] = true
+		L("DUEL foe=%s" % str(d.sim.bd.get("id", d.sim.bd.get("name", "?"))))
+		d.sim.ev.connect(func(n: StringName, e: Dictionary):
+			var s := str(n)
+			for k in e:
+				var v = e[k]
+				if v is Dictionary or v is Array:
+					continue
+				s += " %s=%s" % [k, str(v)]
+			L("EV " + s + "  | hp=%.1f st=%.1f sh=%d bhp=%.1f" % [float(d.sim.pl.hp), float(d.sim.pl.stamina), d.sim.p_shield, d.sim.b_hp]))
+		if d.hud != null and d.hud.has_signal("swipe"):
+			d.hud.swipe.connect(func(dir: String, _v: Vector2): L("HUDSWIPE " + dir))
+	if d != null and is_instance_valid(d) and d.sim != null and f % 3 == 0:
+		L("ST hp=%.1f/%.0f st=%.1f sh=%d bhp=%.1f p=%d b=%d block=%s stage=%d" % [float(d.sim.pl.hp), float(d.sim.pl.max_hp), float(d.sim.pl.stamina), d.sim.p_shield, d.sim.b_hp, d.sim.p_state, d.sim.b_state, str(d.sim.p_block), int(d.stage)])
+	if f % 45 == 5:
+		_scan_models()
+	if f % 30 == 0:
+		var c = _cur()
+		L("SCREEN %s run=%s" % [(c.get_script().resource_path.get_file() if c != null and is_instance_valid(c) and c.get_script() else str(c)), str(_run_brief())])
+	if mode == "walk":
+		_walk_log()
+		if not _walked and f > 120 and _cur() is Explore and _explore_ready():
+			_walked = true
+			L("WALK choose pass at " + _run_brief())
+			_cur()._choose({"type": "pass", "label": "Press On"}, 0)
+	if mode == "death":
+		_death_drive()
+	if f % 300 == 0:
+		_flush()
+
+func _run_brief() -> String:
+	var r: Dictionary = G.run
+	if r.is_empty():
+		return "{}"
+	return "%s stage=%s cp=%s hp=%s" % [r.get("region"), r.get("stage"), r.get("checkpoint"), str(r.get("hp"))]
+
+func _scan_models() -> void:
+	var found := {}
+	for n: Node in get_tree().root.find_children("*", "", true, false):
+		if n is Node3D and not (n as Node3D).is_visible_in_tree():
+			continue
+		var sp := n.scene_file_path
+		if sp.contains("knight"):
+			found["GLB " + sp.get_file()] = true
+		if n is MeshInstance3D and str(n.name).begins_with("part_"):
+			var mp: String = (n as MeshInstance3D).mesh.resource_path.get_file() if (n as MeshInstance3D).mesh else "?"
+			found["PART %s %s" % [n.name, mp]] = true
+		if n is FighterRig:
+			var rg: FighterRig = n
+			var w := ""
+			if rg.parts != null:
+				w = str(rg.parts.worn)
+			found["RIG mirror=%.0f skin=%s parts=%s helm=%s" % [rg.mirror, str(rg.cfg.get("skin", "")).get_file(), w, str(rg.cfg.get("helm", ""))]] = true
+		if n is VideoStreamPlayer and (n as VideoStreamPlayer).is_playing():
+			found["VIDEO " + str((n as VideoStreamPlayer).stream.resource_path if (n as VideoStreamPlayer).stream else "?")] = true
+	var keys := found.keys()
+	keys.sort()
+	var sig := "|".join(keys)
+	if not seen_models.has(sig):
+		seen_models[sig] = true
+		L("MODELS " + "  ;  ".join(keys))
+	if f % 450 == 5:
+		L("MODELS_NOW " + "  ;  ".join(keys))
+
+# ---------------------------------------------------------------- walk speed
+var _last_pos := {}
+var _walked := false
+func _walk_log() -> void:
+	for n: Node in get_tree().root.find_children("*", "FighterRig", true, false):
+		var rg: FighterRig = n
+		if not rg.is_visible_in_tree() or rg.mirror < 0:
+			continue
+		var id := rg.get_instance_id()
+		var p := rg.global_position
+		if _last_pos.has(id):
+			var q: Vector3 = _last_pos[id]
+			var v := Vector2(p.x - q.x, p.z - q.z).length() * 30.0
+			if f % 3 == 0:
+				L("POS rig=%d x=%.3f y=%.3f z=%.3f v=%.3f walking=%s" % [id, p.x, p.y, p.z, v, str(rg.get("walking"))])
+		_last_pos[id] = p
+
+# ---------------------------------------------------------------- death / checkpoint drive
+func _buttons() -> Array:
+	var out: Array = []
+	for b: Node in get_tree().root.find_children("*", "Button", true, false):
+		if (b as Button).is_visible_in_tree():
+			out.append(b)
+	return out
+
+func _press(match_text: String) -> bool:
+	for b: Button in _buttons():
+		if b.text.to_lower().contains(match_text):
+			L("PRESS '%s'" % b.text)
+			b.pressed.emit()
+			return true
+	return false
+
+func _profile_brief() -> String:
+	var p: Dictionary = G.profile
+	return "gold=%s xp=%s level=%s deaths=%s inv=%d defeated=%s flags=%d" % [str(p.get("gold")), str(p.get("xp")), str(p.get("level")), str(p.get("deaths")), (p.get("inventory", []) as Array).size(), str(p.get("defeated")), (p.get("flags", {}) as Dictionary).size()]
+
+func _explore_ready() -> bool:
+	var c = _cur()
+	return c is Explore and not c._leaving and not c._staging and not ST.busy and c.layer.get_child(0).modulate.a > 0.95
+
+func _death_drive() -> void:
+	if f == 2:
+		G.profile.tutorial_done = true
+	var c = _cur()
+	var d := _duel()
+	var since := f - step_f
+	match step:
+		0:  # stop 2: choose the fight, let the bot win it
+			if _explore_ready() and since > 60:
+				L("RUN0 " + _run_brief() + " " + _profile_brief())
+				var opts: Array = G.stage_options()
+				for i in opts.size():
+					if opts[i].type == "fight":
+						L("CHOOSE fight %s" % str(opts[i].foe))
+						c._choose(opts[i], i)
+						break
+				step = 1; step_f = f
+		1:
+			if d != null and d.stage == Duel.Stage.FIGHT and d.bot == null:
+				d.bot = DuelBot.new(d.sim, DuelBot.Style.SKILLED, 5)
+				L("BOT attached (first fight only)")
+				step = 2; step_f = f
+		2:
+			if since > 30 and since % 15 == 0:
+				if _press("continue") or _press("onward"):
+					step = 3; step_f = f
+		3:  # stop 3 (checkpoint): press on
+			if _explore_ready() and since > 60:
+				L("RUN3 " + _run_brief() + " " + _profile_brief())
+				c._choose({"type": "pass", "label": "Press On"}, 0)
+				step = 4; step_f = f
+		4:  # stop 4: fight and stand still
+			if _explore_ready() and since > 60 and int(G.run.get("stage", -1)) == 4:
+				L("RUN4 " + _run_brief() + " " + _profile_brief())
+				var opts: Array = G.stage_options()
+				for i in opts.size():
+					if opts[i].type == "fight":
+						L("CHOOSE fight %s (player will not act)" % str(opts[i].foe))
+						c._choose(opts[i], i)
+						break
+				step = 5; step_f = f
+		5:
+			if d != null and d.sim.over:
+				L("DIED " + _run_brief() + " " + _profile_brief())
+				step = 6; step_f = f
+		6:
+			if since > 150 and since % 15 == 0 and _press("retry"):
+				step = 7; step_f = f
+		7:
+			if _explore_ready() and since > 30:
+				L("RESPAWN " + _run_brief() + " " + _profile_brief())
+				step = 8; step_f = f
+		8:
+			if since > 150:
+				c._choose({"type": "pass", "label": "Press On"}, 0)
+				step = 9; step_f = f
+		9:
+			if _explore_ready() and since > 60:
+				var names: Array = []
+				for o in G.stage_options():
+					names.append("%s:%s" % [o.type, str(o.get("foe", ""))])
+				L("AFTER " + _run_brief() + " options=" + str(names) + " " + _profile_brief())
+				step = 10; step_f = f

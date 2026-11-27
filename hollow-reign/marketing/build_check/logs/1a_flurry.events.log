@@ -1,0 +1,77 @@
+1	0.033	DUEL foe=ashen_sentinel
+5	0.167	MODELS GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=ashen_sentinel.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+5	0.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=ashen_sentinel.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+30	1.000	SCREEN duel.gd run={}
+44	1.467	EV poise_break from=cut  | hp=160.0 st=130.0 sh=3 bhp=1960.0
+44	1.467	EV boss_stagger time=3.2 break=true  | hp=160.0 st=130.0 sh=3 bhp=1960.0
+44	1.467	EV rift dir=UL  | hp=160.0 st=130.0 sh=3 bhp=1960.0
+58	1.933	EV player_swing dir=L time=0.26 finish= tired=false open=true  | hp=160.0 st=119.0 sh=3 bhp=1960.0
+58	1.933	HUDSWIPE L
+60	2.000	SCREEN duel.gd run={}
+62	2.067	EV boss_hit dir=L crit=true combo=1 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=21.9414033785462 hp=1938.05859662145  | hp=160.0 st=119.0 sh=3 bhp=1938.1
+66	2.200	HUDSWIPE UR
+66	2.200	EV player_swing dir=UR time=0.26 finish= tired=false open=true  | hp=160.0 st=108.0 sh=3 bhp=1938.1
+71	2.367	EV boss_hit dir=UR crit=true combo=2 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=23.1432109673023 hp=1914.91538565415  | hp=160.0 st=108.0 sh=3 bhp=1914.9
+74	2.467	HUDSWIPE D
+74	2.467	EV player_swing dir=D time=0.26 finish= tired=false open=true  | hp=160.0 st=97.0 sh=3 bhp=1914.9
+79	2.633	EV boss_hit dir=D crit=true combo=3 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=27.0162387419343 hp=1887.89914691222  | hp=160.0 st=97.0 sh=3 bhp=1887.9
+82	2.733	HUDSWIPE R
+82	2.733	EV player_swing dir=R time=0.26 finish= tired=false open=true  | hp=160.0 st=86.0 sh=3 bhp=1887.9
+87	2.900	EV boss_hit dir=R crit=true combo=4 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=28.3533955011964 hp=1859.54575141102  | hp=160.0 st=86.0 sh=3 bhp=1859.5
+90	3.000	SCREEN duel.gd run={}
+90	3.000	HUDSWIPE UL
+90	3.000	EV player_swing dir=UL time=0.26 finish= tired=false open=true  | hp=160.0 st=75.0 sh=3 bhp=1859.5
+95	3.167	EV boss_hit dir=UL crit=true combo=5 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=51.7536205993652 hp=1807.79213081166  | hp=160.0 st=75.0 sh=3 bhp=1807.8
+95	3.167	EV rift dir=L  | hp=160.0 st=75.0 sh=3 bhp=1807.8
+98	3.267	HUDSWIPE DR
+98	3.267	EV player_swing dir=DR time=0.26 finish= tired=false open=true  | hp=160.0 st=64.0 sh=3 bhp=1807.8
+103	3.433	EV boss_hit dir=DR crit=true combo=6 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=35.6447590327263 hp=1772.14737177893  | hp=160.0 st=64.0 sh=3 bhp=1772.1
+106	3.533	HUDSWIPE U
+106	3.533	EV player_swing dir=U time=0.26 finish= tired=false open=true  | hp=160.0 st=53.0 sh=3 bhp=1772.1
+111	3.700	EV boss_hit dir=U crit=true combo=6 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=33.9431807184219 hp=1738.20419106051  | hp=160.0 st=53.0 sh=3 bhp=1738.2
+114	3.800	HUDSWIPE DL
+114	3.800	EV player_swing dir=DL time=0.26 finish= tired=false open=true  | hp=160.0 st=42.0 sh=3 bhp=1738.2
+119	3.967	EV boss_hit dir=DL crit=true combo=6 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=34.666110098362 hp=1703.53808096215  | hp=160.0 st=42.0 sh=3 bhp=1703.5
+120	4.000	SCREEN duel.gd run={}
+150	5.000	SCREEN duel.gd run={}
+154	5.133	EV rift dir=  | hp=160.0 st=60.0 sh=3 bhp=1703.5
+154	5.133	EV poise frac=1.0 from=recover  | hp=160.0 st=60.0 sh=3 bhp=1703.5
+154	5.133	EV boss_idle far=false  | hp=160.0 st=60.0 sh=3 bhp=1703.5
+160	5.333	EV boss_idle far=false  | hp=160.0 st=65.0 sh=3 bhp=1703.5
+180	6.000	SCREEN duel.gd run={}
+180	6.000	EV boss_combo id=demo punish=true  | hp=160.0 st=85.0 sh=3 bhp=1703.5
+180	6.000	EV boss_telegraph windup=1.1 index=0 count=1  | hp=160.0 st=85.0 sh=3 bhp=1703.5
+210	7.000	SCREEN duel.gd run={}
+210	7.000	EV player_parry_swing dir=R  | hp=160.0 st=109.0 sh=3 bhp=1703.5
+210	7.000	HUDSWIPE R
+213	7.100	EV boss_strike result=parried perfect=false  | hp=160.0 st=115.0 sh=3 bhp=1703.5
+213	7.100	EV poise frac=0.72 from=parried  | hp=160.0 st=115.0 sh=3 bhp=1703.5
+213	7.100	EV boss_recover time=1.092 far=false  | hp=160.0 st=115.0 sh=3 bhp=1703.5
+213	7.100	EV rift dir=UL  | hp=160.0 st=115.0 sh=3 bhp=1703.5
+228	7.600	EV player_swing dir=UL time=0.26 finish= tired=false open=true  | hp=160.0 st=104.0 sh=3 bhp=1703.5
+228	7.600	HUDSWIPE UL
+232	7.733	EV boss_hit dir=UL crit=false combo=1 weak=false rift=true counter=true tired=false same=1 read=false named= combo_id= dmg=29.7448689579964 hp=1673.79321200415  | hp=160.0 st=104.0 sh=3 bhp=1673.8
+232	7.733	EV poise frac=0.69 from=cut  | hp=160.0 st=104.0 sh=3 bhp=1673.8
+232	7.733	EV rift dir=L  | hp=160.0 st=104.0 sh=3 bhp=1673.8
+235	7.833	HUDSWIPE U
+237	7.900	EV player_swing dir=U time=0.26 finish= tired=false open=true  | hp=160.0 st=93.0 sh=3 bhp=1673.8
+240	8.000	SCREEN duel.gd run={}
+242	8.067	HUDSWIPE R
+242	8.067	EV boss_hit dir=U crit=false combo=2 weak=false rift=false counter=false tired=false same=1 read=false named= combo_id= dmg=15.8673046023846 hp=1657.92590740176  | hp=160.0 st=93.0 sh=3 bhp=1657.9
+242	8.067	EV poise frac=0.6555 from=cut  | hp=160.0 st=93.0 sh=3 bhp=1657.9
+245	8.167	EV player_swing dir=R time=0.26 finish=Counter tired=false open=true  | hp=160.0 st=82.0 sh=3 bhp=1657.9
+250	8.333	EV boss_hit dir=R crit=false combo=3 weak=false rift=false counter=false tired=false same=1 read=false named=Riposte combo_id=riposte dmg=32.9722910678369 hp=1624.95361633393  | hp=160.0 st=82.0 sh=3 bhp=1625.0
+250	8.333	EV poise frac=0.6165 from=cut  | hp=160.0 st=82.0 sh=3 bhp=1625.0
+255	8.500	EV rift dir=  | hp=160.0 st=82.0 sh=3 bhp=1625.0
+255	8.500	EV boss_press  | hp=160.0 st=82.0 sh=3 bhp=1625.0
+255	8.500	EV boss_idle far=false  | hp=160.0 st=82.0 sh=3 bhp=1625.0
+267	8.900	EV boss_combo id=drill_cross punish=false  | hp=160.0 st=82.0 sh=3 bhp=1625.0
+267	8.900	EV boss_telegraph windup=1.15 index=0 count=2  | hp=160.0 st=82.0 sh=3 bhp=1625.0
+270	9.000	SCREEN duel.gd run={}
+281	9.367	EV boss_idle far=false  | hp=160.0 st=93.0 sh=3 bhp=1625.0
+300	10.000	SCREEN duel.gd run={}
+301	10.033	EV boss_idle far=false  | hp=160.0 st=113.0 sh=3 bhp=1625.0
+330	11.000	SCREEN duel.gd run={}
+360	12.000	SCREEN duel.gd run={}
+390	13.000	SCREEN duel.gd run={}
+420	14.000	SCREEN duel.gd run={}

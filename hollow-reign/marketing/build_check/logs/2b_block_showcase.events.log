@@ -1,0 +1,189 @@
+1	0.033	DUEL foe=ashen_sentinel
+5	0.167	MODELS GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=ashen_sentinel.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+5	0.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=ashen_sentinel.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+30	1.000	SCREEN duel.gd run={}
+48	1.600	EV boss_combo id=rise punish=false  | hp=160.0 st=130.0 sh=3 bhp=1960.0
+48	1.600	EV boss_telegraph windup=1.2 index=0 count=1  | hp=160.0 st=130.0 sh=3 bhp=1960.0
+60	2.000	SCREEN duel.gd run={}
+84	2.800	EV shield_charges left=2 max=3 spent=false  | hp=160.0 st=130.0 sh=2 bhp=1960.0
+84	2.800	EV block cost=11.5 left=2  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+84	2.800	EV boss_strike result=blocked perfect=false  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+84	2.800	EV poise frac=0.94 from=blocked  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+84	2.800	EV boss_recover time=0.588 far=false  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+84	2.800	EV rift dir=D  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+90	3.000	SCREEN duel.gd run={}
+104	3.467	EV rift dir=  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+104	3.467	EV boss_press  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+104	3.467	EV boss_idle far=false  | hp=160.0 st=118.5 sh=2 bhp=1960.0
+116	3.867	EV boss_combo id=sweep_r punish=false  | hp=160.0 st=127.5 sh=2 bhp=1960.0
+116	3.867	EV boss_telegraph windup=1.25 index=0 count=1  | hp=160.0 st=127.5 sh=2 bhp=1960.0
+120	4.000	SCREEN duel.gd run={}
+150	5.000	SCREEN duel.gd run={}
+154	5.133	EV shield_charges left=1 max=3 spent=false  | hp=160.0 st=130.0 sh=1 bhp=1960.0
+154	5.133	EV block cost=13.0 left=1  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+154	5.133	EV boss_strike result=blocked perfect=false  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+154	5.133	EV poise frac=0.888 from=blocked  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+154	5.133	EV boss_recover time=0.63 far=false  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+154	5.133	EV rift dir=L  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+175	5.833	EV rift dir=  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+175	5.833	EV boss_press  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+175	5.833	EV boss_idle far=false  | hp=160.0 st=117.0 sh=1 bhp=1960.0
+180	6.000	SCREEN duel.gd run={}
+189	6.300	EV boss_combo id=two_sweep punish=false  | hp=160.0 st=129.0 sh=1 bhp=1960.0
+189	6.300	EV boss_telegraph windup=1.2 index=0 count=2  | hp=160.0 st=129.0 sh=1 bhp=1960.0
+210	7.000	SCREEN duel.gd run={}
+225	7.500	EV shield_charges left=0 max=3 spent=false  | hp=160.0 st=130.0 sh=0 bhp=1960.0
+225	7.500	EV block cost=11.5 left=0  | hp=160.0 st=118.5 sh=0 bhp=1960.0
+225	7.500	EV boss_strike result=blocked perfect=false  | hp=160.0 st=118.5 sh=0 bhp=1960.0
+225	7.500	EV poise frac=0.83733333333333 from=blocked  | hp=160.0 st=118.5 sh=0 bhp=1960.0
+225	7.500	EV boss_telegraph windup=1.05 index=1 count=2  | hp=160.0 st=118.5 sh=0 bhp=1960.0
+240	8.000	SCREEN duel.gd run={}
+259	8.633	EV shield_charges left=0 max=3 spent=true  | hp=160.0 st=121.2 sh=0 bhp=1960.0
+259	8.633	EV player_hurt dmg=8.3969465648855 hp=151.603053435115  | hp=151.6 st=95.2 sh=0 bhp=1960.0
+259	8.633	EV guard_break why=shield dmg=8.3969465648855  | hp=151.6 st=95.2 sh=0 bhp=1960.0
+259	8.633	EV boss_strike result=guard_break perfect=false  | hp=151.6 st=95.2 sh=0 bhp=1960.0
+259	8.633	EV boss_recover time=0.714 far=false  | hp=151.6 st=95.2 sh=0 bhp=1960.0
+259	8.633	EV rift dir=U  | hp=151.6 st=95.2 sh=0 bhp=1960.0
+270	9.000	SCREEN duel.gd run={}
+284	9.467	EV rift dir=  | hp=151.6 st=96.2 sh=0 bhp=1960.0
+284	9.467	EV boss_idle far=false  | hp=151.6 st=96.2 sh=0 bhp=1960.0
+289	9.633	EV shield_charges left=3 max=3  | hp=151.6 st=101.2 sh=3 bhp=1960.0
+300	10.000	SCREEN duel.gd run={}
+326	10.867	EV boss_combo id=watch_change punish=false  | hp=151.6 st=130.0 sh=3 bhp=1960.0
+326	10.867	EV boss_telegraph windup=1.2 index=0 count=2  | hp=151.6 st=130.0 sh=3 bhp=1960.0
+330	11.000	SCREEN duel.gd run={}
+360	12.000	SCREEN duel.gd run={}
+362	12.067	EV shield_charges left=2 max=3 spent=false  | hp=151.6 st=130.0 sh=2 bhp=1960.0
+362	12.067	EV block cost=10.5 left=2  | hp=151.6 st=119.5 sh=2 bhp=1960.0
+362	12.067	EV boss_strike result=blocked perfect=false  | hp=151.6 st=119.5 sh=2 bhp=1960.0
+362	12.067	EV poise frac=0.80533333333333 from=blocked  | hp=151.6 st=119.5 sh=2 bhp=1960.0
+362	12.067	EV boss_telegraph windup=1.1 index=1 count=2  | hp=151.6 st=119.5 sh=2 bhp=1960.0
+362	12.067	EV unblockable_warning windup=1.1  | hp=151.6 st=119.5 sh=2 bhp=1960.0
+390	13.000	SCREEN duel.gd run={}
+397	13.233	EV block_failed why=unblockable  | hp=151.6 st=122.5 sh=2 bhp=1960.0
+397	13.233	EV player_hurt dmg=18.4732824427481 hp=133.129770992366  | hp=133.1 st=122.5 sh=2 bhp=1960.0
+397	13.233	EV boss_strike result=hit perfect=false  | hp=133.1 st=122.5 sh=2 bhp=1960.0
+397	13.233	EV boss_recover time=0.672 far=false  | hp=133.1 st=122.5 sh=2 bhp=1960.0
+397	13.233	EV rift dir=UL  | hp=133.1 st=122.5 sh=2 bhp=1960.0
+420	14.000	SCREEN duel.gd run={}
+421	14.033	EV rift dir=  | hp=133.1 st=130.0 sh=2 bhp=1960.0
+421	14.033	EV boss_idle far=false  | hp=133.1 st=130.0 sh=2 bhp=1960.0
+450	15.000	SCREEN duel.gd run={}
+455	15.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=ashen_sentinel.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+462	15.400	EV boss_combo id=two_sweep punish=false  | hp=133.1 st=130.0 sh=2 bhp=1960.0
+462	15.400	EV boss_telegraph windup=1.2 index=0 count=2  | hp=133.1 st=130.0 sh=2 bhp=1960.0
+480	16.000	SCREEN duel.gd run={}
+498	16.600	EV shield_charges left=1 max=3 spent=false  | hp=133.1 st=130.0 sh=1 bhp=1960.0
+498	16.600	EV block cost=11.5 left=1  | hp=133.1 st=118.5 sh=1 bhp=1960.0
+498	16.600	EV boss_strike result=blocked perfect=false  | hp=133.1 st=118.5 sh=1 bhp=1960.0
+498	16.600	EV poise frac=0.77266666666666 from=blocked  | hp=133.1 st=118.5 sh=1 bhp=1960.0
+498	16.600	EV boss_telegraph windup=1.05 index=1 count=2  | hp=133.1 st=118.5 sh=1 bhp=1960.0
+510	17.000	SCREEN duel.gd run={}
+532	17.733	EV shield_charges left=0 max=3 spent=false  | hp=133.1 st=121.2 sh=0 bhp=1960.0
+532	17.733	EV block cost=13.0 left=0  | hp=133.1 st=108.2 sh=0 bhp=1960.0
+532	17.733	EV boss_strike result=blocked perfect=false  | hp=133.1 st=108.2 sh=0 bhp=1960.0
+532	17.733	EV poise frac=0.71266666666666 from=blocked  | hp=133.1 st=108.2 sh=0 bhp=1960.0
+532	17.733	EV boss_recover time=0.714 far=false  | hp=133.1 st=108.2 sh=0 bhp=1960.0
+532	17.733	EV rift dir=DL  | hp=133.1 st=108.2 sh=0 bhp=1960.0
+540	18.000	SCREEN duel.gd run={}
+556	18.533	EV rift dir=  | hp=133.1 st=109.2 sh=0 bhp=1960.0
+556	18.533	EV boss_idle far=false  | hp=133.1 st=109.2 sh=0 bhp=1960.0
+570	19.000	SCREEN duel.gd run={}
+600	20.000	SCREEN duel.gd run={}
+601	20.033	EV boss_combo id=overhead punish=false  | hp=133.1 st=130.0 sh=0 bhp=1960.0
+601	20.033	EV boss_telegraph windup=1.45 index=0 count=1  | hp=133.1 st=130.0 sh=0 bhp=1960.0
+630	21.000	SCREEN duel.gd run={}
+645	21.500	EV shield_charges left=0 max=3 spent=true  | hp=133.1 st=130.0 sh=0 bhp=1960.0
+645	21.500	EV player_hurt dmg=11.7557251908397 hp=121.374045801527  | hp=121.4 st=94.0 sh=0 bhp=1960.0
+645	21.500	EV guard_break why=shield dmg=11.7557251908397  | hp=121.4 st=94.0 sh=0 bhp=1960.0
+645	21.500	EV boss_strike result=guard_break perfect=false  | hp=121.4 st=94.0 sh=0 bhp=1960.0
+645	21.500	EV boss_recover time=0.756 far=false  | hp=121.4 st=94.0 sh=0 bhp=1960.0
+645	21.500	EV rift dir=R  | hp=121.4 st=94.0 sh=0 bhp=1960.0
+660	22.000	SCREEN duel.gd run={}
+671	22.367	EV rift dir=  | hp=121.4 st=96.0 sh=0 bhp=1960.0
+671	22.367	EV boss_idle far=false  | hp=121.4 st=96.0 sh=0 bhp=1960.0
+675	22.500	EV shield_charges left=3 max=3  | hp=121.4 st=100.0 sh=3 bhp=1960.0
+690	23.000	SCREEN duel.gd run={}
+709	23.633	EV boss_combo id=sweep_r punish=false  | hp=121.4 st=130.0 sh=3 bhp=1960.0
+709	23.633	EV boss_telegraph windup=1.25 index=0 count=1  | hp=121.4 st=130.0 sh=3 bhp=1960.0
+720	24.000	SCREEN duel.gd run={}
+747	24.900	EV shield_charges left=2 max=3 spent=false  | hp=121.4 st=130.0 sh=2 bhp=1960.0
+747	24.900	EV block cost=13.0 left=2  | hp=121.4 st=117.0 sh=2 bhp=1960.0
+747	24.900	EV boss_strike result=blocked perfect=false  | hp=121.4 st=117.0 sh=2 bhp=1960.0
+747	24.900	EV poise frac=0.70799999999999 from=blocked  | hp=121.4 st=117.0 sh=2 bhp=1960.0
+747	24.900	EV boss_recover time=0.63 far=false  | hp=121.4 st=117.0 sh=2 bhp=1960.0
+747	24.900	EV rift dir=L  | hp=121.4 st=117.0 sh=2 bhp=1960.0
+750	25.000	SCREEN duel.gd run={}
+768	25.600	EV rift dir=  | hp=121.4 st=117.0 sh=2 bhp=1960.0
+768	25.600	EV boss_idle far=false  | hp=121.4 st=117.0 sh=2 bhp=1960.0
+780	26.000	SCREEN duel.gd run={}
+804	26.800	EV boss_combo id=watch_change punish=false  | hp=121.4 st=130.0 sh=2 bhp=1960.0
+804	26.800	EV boss_telegraph windup=1.2 index=0 count=2  | hp=121.4 st=130.0 sh=2 bhp=1960.0
+810	27.000	SCREEN duel.gd run={}
+840	28.000	SCREEN duel.gd run={}
+840	28.000	EV shield_charges left=1 max=3 spent=false  | hp=121.4 st=130.0 sh=1 bhp=1960.0
+840	28.000	EV block cost=10.5 left=1  | hp=121.4 st=119.5 sh=1 bhp=1960.0
+840	28.000	EV boss_strike result=blocked perfect=false  | hp=121.4 st=119.5 sh=1 bhp=1960.0
+840	28.000	EV poise frac=0.67199999999999 from=blocked  | hp=121.4 st=119.5 sh=1 bhp=1960.0
+840	28.000	EV boss_telegraph windup=1.1 index=1 count=2  | hp=121.4 st=119.5 sh=1 bhp=1960.0
+840	28.000	EV unblockable_warning windup=1.1  | hp=121.4 st=119.5 sh=1 bhp=1960.0
+870	29.000	SCREEN duel.gd run={}
+875	29.167	EV block_failed why=unblockable  | hp=121.4 st=122.5 sh=1 bhp=1960.0
+875	29.167	EV player_hurt dmg=18.4732824427481 hp=102.900763358779  | hp=102.9 st=122.5 sh=1 bhp=1960.0
+875	29.167	EV boss_strike result=hit perfect=false  | hp=102.9 st=122.5 sh=1 bhp=1960.0
+875	29.167	EV boss_recover time=0.672 far=false  | hp=102.9 st=122.5 sh=1 bhp=1960.0
+875	29.167	EV rift dir=DR  | hp=102.9 st=122.5 sh=1 bhp=1960.0
+899	29.967	EV rift dir=  | hp=102.9 st=130.0 sh=1 bhp=1960.0
+899	29.967	EV boss_idle far=false  | hp=102.9 st=130.0 sh=1 bhp=1960.0
+900	30.000	SCREEN duel.gd run={}
+905	30.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=ashen_sentinel.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+909	30.300	EV relic_ready  | hp=102.9 st=130.0 sh=1 bhp=1960.0
+930	31.000	SCREEN duel.gd run={}
+943	31.433	EV boss_combo id=rise punish=false  | hp=102.9 st=130.0 sh=1 bhp=1960.0
+943	31.433	EV boss_telegraph windup=1.2 index=0 count=1  | hp=102.9 st=130.0 sh=1 bhp=1960.0
+960	32.000	SCREEN duel.gd run={}
+979	32.633	EV shield_charges left=0 max=3 spent=false  | hp=102.9 st=130.0 sh=0 bhp=1960.0
+979	32.633	EV block cost=11.5 left=0  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+979	32.633	EV boss_strike result=blocked perfect=false  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+979	32.633	EV poise frac=0.64133333333332 from=blocked  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+979	32.633	EV boss_recover time=0.588 far=false  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+979	32.633	EV rift dir=UR  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+990	33.000	SCREEN duel.gd run={}
+999	33.300	EV rift dir=  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+999	33.300	EV boss_press  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+999	33.300	EV boss_idle far=false  | hp=102.9 st=118.5 sh=0 bhp=1960.0
+1007	33.567	EV boss_combo id=drill_cross punish=false  | hp=102.9 st=123.5 sh=0 bhp=1960.0
+1007	33.567	EV boss_telegraph windup=1.15 index=0 count=2  | hp=102.9 st=123.5 sh=0 bhp=1960.0
+1020	34.000	SCREEN duel.gd run={}
+1042	34.733	EV shield_charges left=0 max=3 spent=true  | hp=102.9 st=130.0 sh=0 bhp=1960.0
+1042	34.733	EV player_hurt dmg=8.3969465648855 hp=94.5038167938931  | hp=94.5 st=104.0 sh=0 bhp=1960.0
+1042	34.733	EV guard_break why=shield dmg=8.3969465648855  | hp=94.5 st=104.0 sh=0 bhp=1960.0
+1042	34.733	EV boss_strike result=guard_break perfect=false  | hp=94.5 st=104.0 sh=0 bhp=1960.0
+1042	34.733	EV boss_telegraph windup=1.0 index=1 count=2  | hp=94.5 st=104.0 sh=0 bhp=1960.0
+1050	35.000	SCREEN duel.gd run={}
+1072	35.733	EV shield_charges left=3 max=3  | hp=94.5 st=110.0 sh=3 bhp=1960.0
+1075	35.833	EV shield_charges left=2 max=3 spent=false  | hp=94.5 st=110.8 sh=2 bhp=1960.0
+1075	35.833	EV block cost=13.0 left=2  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1075	35.833	EV boss_strike result=blocked perfect=false  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1075	35.833	EV poise frac=0.58666666666666 from=blocked  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1075	35.833	EV boss_recover time=0.672 far=false  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1075	35.833	EV rift dir=UL  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1080	36.000	SCREEN duel.gd run={}
+1098	36.600	EV rift dir=  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1098	36.600	EV boss_press  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1098	36.600	EV boss_idle far=false  | hp=94.5 st=97.8 sh=2 bhp=1960.0
+1110	37.000	SCREEN duel.gd run={}
+1112	37.067	EV boss_combo id=give_ground punish=false  | hp=94.5 st=111.8 sh=2 bhp=1960.0
+1112	37.067	EV boss_telegraph windup=1.0 index=0 count=1  | hp=94.5 st=111.8 sh=2 bhp=1960.0
+1140	38.000	SCREEN duel.gd run={}
+1143	38.100	EV shield_charges left=1 max=3 spent=false  | hp=94.5 st=129.2 sh=1 bhp=1960.0
+1143	38.100	EV block cost=11.5 left=1  | hp=94.5 st=117.8 sh=1 bhp=1960.0
+1143	38.100	EV boss_strike result=blocked perfect=false  | hp=94.5 st=117.8 sh=1 bhp=1960.0
+1143	38.100	EV poise frac=0.53599999999999 from=blocked  | hp=94.5 st=117.8 sh=1 bhp=1960.0
+1143	38.100	EV boss_retreat  | hp=94.5 st=117.8 sh=1 bhp=1960.0
+1143	38.100	EV boss_recover time=0.5 far=true  | hp=94.5 st=117.8 sh=1 bhp=1960.0
+1160	38.667	EV boss_idle far=true  | hp=94.5 st=117.8 sh=1 bhp=1960.0
+1170	39.000	SCREEN duel.gd run={}
+1194	39.800	EV boss_combo id=gate_thrust punish=false  | hp=94.5 st=130.0 sh=1 bhp=1960.0
+1194	39.800	EV boss_telegraph windup=1.0 index=0 count=1  | hp=94.5 st=130.0 sh=1 bhp=1960.0
+1200	40.000	SCREEN duel.gd run={}

@@ -1,0 +1,359 @@
+5	0.167	MODELS GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+5	0.167	MODELS_NOW GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+30	1.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+60	2.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+90	3.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+120	4.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+150	5.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+180	6.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+210	7.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+240	8.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+270	9.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+300	10.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+330	11.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+360	12.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+390	13.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+420	14.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+450	15.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+455	15.167	MODELS_NOW GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+480	16.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+510	17.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+540	18.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+570	19.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+600	20.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+630	21.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+660	22.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+690	23.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+720	24.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+750	25.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+780	26.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+810	27.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+840	28.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+870	29.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+900	30.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+905	30.167	MODELS_NOW GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+930	31.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+960	32.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+990	33.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1020	34.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1050	35.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1080	36.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1110	37.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1140	38.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1170	39.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1200	40.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1230	41.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1260	42.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1290	43.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1320	44.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1350	45.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1355	45.167	MODELS_NOW GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+1380	46.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1410	47.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1440	48.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1470	49.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1500	50.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1530	51.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1560	52.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1590	53.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1616	53.867	RUN0 courtyard stage=2 cp=0 hp=160.0 gold=0 xp=0 level=1 deaths=0 inv=6 defeated={  } flags=1
+1616	53.867	CHOOSE fight banneret
+1620	54.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1650	55.000	SCREEN explore.gd run=courtyard stage=2 cp=0 hp=160.0
+1677	55.900	DUEL foe=banneret
+1677	55.900	BOT attached (first fight only)
+1680	56.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1710	57.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1723	57.433	EV boss_combo id=three punish=false  | hp=160.0 st=130.0 sh=3 bhp=392.0
+1723	57.433	EV boss_telegraph windup=0.7 index=0 count=3  | hp=160.0 st=130.0 sh=3 bhp=392.0
+1740	58.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1743	58.100	EV player_parry_swing dir=R  | hp=160.0 st=124.0 sh=3 bhp=392.0
+1745	58.167	EV boss_strike result=parried perfect=true  | hp=160.0 st=130.0 sh=3 bhp=392.0
+1745	58.167	EV poise frac=0.1 from=parried  | hp=160.0 st=130.0 sh=3 bhp=392.0
+1745	58.167	EV boss_recover time=1.0 far=false  | hp=160.0 st=130.0 sh=3 bhp=392.0
+1745	58.167	EV rift dir=UR  | hp=160.0 st=130.0 sh=3 bhp=392.0
+1746	58.200	EV player_swing dir=UR time=0.26 finish= tired=false open=true  | hp=160.0 st=119.0 sh=3 bhp=392.0
+1754	58.467	EV boss_hit dir=UR crit=false combo=1 weak=false rift=true counter=true tired=false same=1 read=false named= combo_id= dmg=32.0506542921066 hp=359.949345707893  | hp=160.0 st=119.0 sh=3 bhp=359.9
+1754	58.467	EV poise frac=0.04 from=cut  | hp=160.0 st=119.0 sh=3 bhp=359.9
+1754	58.467	EV rift dir=DL  | hp=160.0 st=119.0 sh=3 bhp=359.9
+1759	58.633	EV player_swing dir=DL time=0.26 finish= tired=false open=true  | hp=160.0 st=108.0 sh=3 bhp=359.9
+1764	58.800	EV boss_hit dir=DL crit=false combo=2 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=27.130535533905 hp=332.818810173988  | hp=160.0 st=108.0 sh=3 bhp=332.8
+1764	58.800	EV poise frac=0.0 from=cut  | hp=160.0 st=108.0 sh=3 bhp=332.8
+1764	58.800	EV poise_break from=cut  | hp=160.0 st=108.0 sh=3 bhp=332.8
+1764	58.800	EV boss_stagger time=3.2 break=true  | hp=160.0 st=108.0 sh=3 bhp=332.8
+1764	58.800	EV rift dir=DR  | hp=160.0 st=108.0 sh=3 bhp=332.8
+1764	58.800	EV rift dir=L  | hp=160.0 st=108.0 sh=3 bhp=332.8
+1770	59.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1770	59.000	EV player_swing dir=L time=0.26 finish= tired=false open=true  | hp=160.0 st=97.0 sh=3 bhp=332.8
+1779	59.300	EV boss_hit dir=L crit=true combo=3 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=45.7494416470528 hp=287.069368526936  | hp=160.0 st=97.0 sh=3 bhp=287.1
+1779	59.300	EV rift dir=UL  | hp=160.0 st=97.0 sh=3 bhp=287.1
+1782	59.400	EV player_swing dir=UL time=0.26 finish= tired=false open=true  | hp=160.0 st=86.0 sh=3 bhp=287.1
+1787	59.567	EV boss_hit dir=UL crit=true combo=4 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=50.4864521455765 hp=236.582916381359  | hp=160.0 st=86.0 sh=3 bhp=236.6
+1787	59.567	EV rift dir=D  | hp=160.0 st=86.0 sh=3 bhp=236.6
+1790	59.667	EV player_swing dir=D time=0.26 finish= tired=false open=true  | hp=160.0 st=75.0 sh=3 bhp=236.6
+1795	59.833	EV boss_hit dir=D crit=true combo=5 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=56.903835559845 hp=179.679080821514  | hp=160.0 st=75.0 sh=3 bhp=179.7
+1795	59.833	EV rift dir=DR  | hp=160.0 st=75.0 sh=3 bhp=179.7
+1798	59.933	EV player_swing dir=DR time=0.26 finish= tired=false open=true  | hp=160.0 st=64.0 sh=3 bhp=179.7
+1800	60.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1803	60.100	EV boss_hit dir=DR crit=true combo=6 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=59.8426051712036 hp=119.836475650311  | hp=160.0 st=64.0 sh=3 bhp=119.8
+1803	60.100	EV rift dir=D  | hp=160.0 st=64.0 sh=3 bhp=119.8
+1805	60.167	MODELS_NOW GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+1806	60.200	EV player_swing dir=D time=0.26 finish= tired=false open=true  | hp=160.0 st=53.0 sh=3 bhp=119.8
+1811	60.367	EV boss_hit dir=D crit=true combo=6 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=60.0831449890137 hp=59.7533306612968  | hp=160.0 st=53.0 sh=3 bhp=59.8
+1811	60.367	EV rift dir=DL  | hp=160.0 st=53.0 sh=3 bhp=59.8
+1814	60.467	EV player_swing dir=DL time=0.26 finish= tired=false open=true  | hp=160.0 st=42.0 sh=3 bhp=59.8
+1819	60.633	EV boss_hit dir=DL crit=true combo=6 weak=false rift=true counter=false tired=false same=1 read=false named= combo_id= dmg=61.8949765777588 hp=0.0  | hp=160.0 st=42.0 sh=3 bhp=0.0
+1819	60.633	EV boss_dead dir=DL  | hp=160.0 st=42.0 sh=3 bhp=0.0
+1830	61.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1860	62.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1890	63.000	SCREEN duel.gd run=courtyard stage=2 cp=0 hp=160.0
+1917	63.900	PRESS 'CONTINUE'
+1920	64.000	SCREEN duel.gd run=courtyard stage=3 cp=3 hp=160.0
+1940	64.667	MODELS GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+1950	65.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+1980	66.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2010	67.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2040	68.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2070	69.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2100	70.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2130	71.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2160	72.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2190	73.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2220	74.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2250	75.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2255	75.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+2280	76.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2310	77.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2340	78.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2370	79.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2400	80.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2430	81.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2460	82.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2480	82.667	RUN3 courtyard stage=3 cp=3 hp=160.0 gold=50 xp=75 level=1 deaths=0 inv=6 defeated={ "banneret": 1 } flags=2
+2490	83.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2520	84.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2550	85.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2580	86.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2610	87.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2640	88.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+2670	89.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2700	90.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2705	90.167	MODELS GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+2705	90.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+2730	91.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2760	92.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2790	93.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2820	94.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2850	95.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2880	96.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2910	97.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2940	98.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+2970	99.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3000	100.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3030	101.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3060	102.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3090	103.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3120	104.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3150	105.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3155	105.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+3180	106.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3193	106.433	RUN4 courtyard stage=4 cp=3 hp=160.0 gold=50 xp=75 level=1 deaths=0 inv=6 defeated={ "banneret": 1 } flags=3
+3193	106.433	CHOOSE fight rampart_brute (player will not act)
+3210	107.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3240	108.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+3263	108.767	DUEL foe=rampart_brute
+3270	109.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3300	110.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3309	110.300	EV boss_combo id=quake punish=false  | hp=160.0 st=130.0 sh=3 bhp=720.0
+3309	110.300	EV boss_telegraph windup=1.5 index=0 count=1  | hp=160.0 st=130.0 sh=3 bhp=720.0
+3309	110.300	EV unblockable_warning windup=1.5  | hp=160.0 st=130.0 sh=3 bhp=720.0
+3330	111.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3354	111.800	EV player_hurt dmg=20.1526717557252 hp=139.847328244275  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3354	111.800	EV boss_strike result=hit perfect=false  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3354	111.800	EV boss_recover time=0.798 far=false  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3354	111.800	EV rift dir=U  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3360	112.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3381	112.700	EV rift dir=  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3381	112.700	EV boss_press  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3381	112.700	EV boss_idle far=false  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3390	113.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3390	113.000	EV boss_combo id=haul_r punish=false  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3390	113.000	EV boss_telegraph windup=1.2 index=0 count=1  | hp=139.8 st=130.0 sh=3 bhp=720.0
+3420	114.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3426	114.200	EV player_hurt dmg=16.793893129771 hp=123.053435114504  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3426	114.200	EV boss_strike result=hit perfect=false  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3426	114.200	EV boss_recover time=0.672 far=false  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3426	114.200	EV rift dir=D  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3450	115.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3450	115.000	EV rift dir=  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3450	115.000	EV boss_press  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3450	115.000	EV boss_idle far=false  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3461	115.367	EV boss_combo id=haul_l punish=false  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3461	115.367	EV boss_telegraph windup=1.2 index=0 count=1  | hp=123.1 st=130.0 sh=3 bhp=720.0
+3480	116.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3497	116.567	EV player_hurt dmg=16.793893129771 hp=106.259541984733  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3497	116.567	EV boss_strike result=hit perfect=false  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3497	116.567	EV boss_recover time=0.672 far=false  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3497	116.567	EV rift dir=DR  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3510	117.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3521	117.367	EV rift dir=  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3521	117.367	EV boss_idle far=false  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3540	118.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3555	118.500	EV boss_combo id=held punish=false  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3555	118.500	EV boss_telegraph windup=1.9 index=0 count=1  | hp=106.3 st=130.0 sh=3 bhp=720.0
+3570	119.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3600	120.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3605	120.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+3612	120.400	EV player_hurt dmg=20.9923664122137 hp=85.2671755725191  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3612	120.400	EV boss_strike result=hit perfect=false  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3612	120.400	EV boss_recover time=0.756 far=false  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3612	120.400	EV rift dir=UL  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3630	121.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3638	121.267	EV rift dir=  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3638	121.267	EV boss_idle far=false  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3660	122.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3689	122.967	EV boss_combo id=haul_r punish=false  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3689	122.967	EV boss_telegraph windup=1.2 index=0 count=1  | hp=85.3 st=130.0 sh=3 bhp=720.0
+3690	123.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3720	124.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3725	124.167	EV player_hurt dmg=16.793893129771 hp=68.4732824427481  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3725	124.167	EV boss_strike result=hit perfect=false  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3725	124.167	EV boss_recover time=0.672 far=false  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3725	124.167	EV rift dir=UL  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3749	124.967	EV rift dir=  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3749	124.967	EV boss_idle far=false  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3750	125.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3780	126.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3794	126.467	EV boss_combo id=haul_l punish=false  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3794	126.467	EV boss_telegraph windup=1.2 index=0 count=1  | hp=68.5 st=130.0 sh=3 bhp=720.0
+3810	127.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3830	127.667	EV player_hurt dmg=16.793893129771 hp=51.6793893129771  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3830	127.667	EV boss_strike result=hit perfect=false  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3830	127.667	EV boss_recover time=0.672 far=false  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3830	127.667	EV rift dir=R  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3840	128.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3854	128.467	EV rift dir=  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3854	128.467	EV boss_idle far=false  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3870	129.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3900	130.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3903	130.100	EV boss_combo id=breaker punish=false  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3903	130.100	EV boss_telegraph windup=1.25 index=0 count=1  | hp=51.7 st=130.0 sh=3 bhp=720.0
+3930	131.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3941	131.367	EV player_hurt dmg=10.9160305343511 hp=40.763358778626  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3941	131.367	EV boss_strike result=hit perfect=false  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3941	131.367	EV boss_recover time=0.63 far=false  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3941	131.367	EV rift dir=R  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3960	132.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+3963	132.100	EV rift dir=  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3963	132.100	EV boss_press  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3963	132.100	EV boss_idle far=false  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3975	132.500	EV boss_combo id=held punish=false  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3975	132.500	EV boss_telegraph windup=1.9 index=0 count=1  | hp=40.8 st=130.0 sh=3 bhp=720.0
+3990	133.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4020	134.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4032	134.400	EV player_hurt dmg=20.9923664122137 hp=19.7709923664122  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4032	134.400	EV boss_strike result=hit perfect=false  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4032	134.400	EV boss_recover time=0.756 far=false  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4032	134.400	EV rift dir=DR  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4050	135.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4055	135.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+4058	135.267	EV rift dir=  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4058	135.267	EV boss_idle far=false  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4080	136.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4095	136.500	EV boss_combo id=haul_l punish=false  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4095	136.500	EV boss_telegraph windup=1.2 index=0 count=1  | hp=19.8 st=130.0 sh=3 bhp=720.0
+4110	137.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4131	137.700	EV player_hurt dmg=16.793893129771 hp=2.97709923664123  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4131	137.700	EV boss_strike result=hit perfect=false  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4131	137.700	EV boss_recover time=0.672 far=false  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4131	137.700	EV rift dir=UL  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4140	138.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4155	138.500	EV rift dir=  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4155	138.500	EV boss_press  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4155	138.500	EV boss_idle far=false  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4167	138.900	EV boss_combo id=breaker punish=false  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4167	138.900	EV boss_telegraph windup=1.25 index=0 count=1  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4170	139.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4170	139.000	EV relic_ready  | hp=3.0 st=130.0 sh=3 bhp=720.0
+4200	140.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4205	140.167	EV player_hurt dmg=10.9160305343511 hp=0.0  | hp=0.0 st=130.0 sh=3 bhp=720.0
+4205	140.167	EV player_dead  | hp=0.0 st=130.0 sh=3 bhp=720.0
+4205	140.167	EV boss_strike result=hit perfect=false  | hp=0.0 st=130.0 sh=3 bhp=720.0
+4206	140.200	DIED courtyard stage=4 cp=3 hp=160.0 gold=50 xp=75 level=1 deaths=0 inv=6 defeated={ "banneret": 1 } flags=3
+4230	141.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4260	142.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4290	143.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4320	144.000	SCREEN duel.gd run=courtyard stage=4 cp=3 hp=160.0
+4350	145.000	SCREEN duel.gd run=courtyard stage=3 cp=3 hp=160.0
+4371	145.700	PRESS 'RETRY FROM CHECKPOINT'
+4380	146.000	SCREEN duel.gd run=courtyard stage=3 cp=3 hp=160.0
+4410	147.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4416	147.200	RESPAWN courtyard stage=3 cp=3 hp=160.0 gold=50 xp=75 level=1 deaths=1 inv=6 defeated={ "banneret": 1 } flags=3
+4440	148.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4470	149.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4500	150.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4505	150.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+4530	151.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4560	152.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4590	153.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4620	154.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4650	155.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4680	156.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4710	157.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4740	158.000	SCREEN explore.gd run=courtyard stage=3 cp=3 hp=160.0
+4770	159.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+4796	159.867	AFTER courtyard stage=4 cp=3 hp=160.0 options=["fight:rampart_brute", "treasure:"] gold=50 xp=75 level=1 deaths=1 inv=6 defeated={ "banneret": 1 } flags=3
+4800	160.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+4830	161.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+4860	162.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+4890	163.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+4920	164.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+4950	165.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+4955	165.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+4980	166.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5010	167.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5040	168.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5070	169.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5100	170.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5130	171.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5160	172.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5190	173.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5220	174.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5250	175.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5280	176.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5310	177.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5340	178.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5370	179.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5400	180.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5405	180.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+5430	181.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5460	182.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5490	183.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5520	184.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5550	185.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5580	186.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5610	187.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5640	188.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5670	189.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5700	190.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5730	191.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5760	192.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5790	193.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5820	194.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5850	195.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5855	195.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_heavy.glb parts= helm=great  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+5880	196.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5910	197.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5940	198.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+5970	199.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6000	200.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6030	201.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6060	202.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6090	203.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6120	204.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6150	205.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6180	206.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6210	207.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6240	208.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6270	209.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0
+6300	210.000	SCREEN explore.gd run=courtyard stage=4 cp=3 hp=160.0

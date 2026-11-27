@@ -1,0 +1,38 @@
+5	0.167	MODELS GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+5	0.167	MODELS_NOW GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+30	1.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+60	2.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+90	3.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+120	4.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+150	5.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+180	6.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+210	7.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+240	8.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+270	9.000	SCREEN approach.gd run=courtyard stage=0 cp=0 hp=160.0
+300	10.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+330	11.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+360	12.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+390	13.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+420	14.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+450	15.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+455	15.167	MODELS_NOW GLB knight_m_v4.glb  ;  GLB w_knight_sword.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_humanoid.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+480	16.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+510	17.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+540	18.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+540	18.000	WALK choose pass at courtyard stage=0 cp=0 hp=160.0
+570	19.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+600	20.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+630	21.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+660	22.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+690	23.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+720	24.000	SCREEN explore.gd run=courtyard stage=0 cp=0 hp=160.0
+750	25.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0
+770	25.667	MODELS GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_double_weapon.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+780	26.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0
+810	27.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0
+840	28.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0
+870	29.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0
+900	30.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0
+905	30.167	MODELS_NOW GLB knight_m_v4.glb  ;  PART part_arms m_crownless_arms.res  ;  PART part_boots m_crownless_boots.res  ;  PART part_chest m_crownless_chest.res  ;  PART part_helm m_crownless_helm.res  ;  PART part_legs m_crownless_legs.res  ;  PART part_shoulders m_crownless_shoulders.res  ;  PART part_under m_under.res  ;  RIG mirror=-1 skin=cls_double_weapon.glb parts= helm=kettle  ;  RIG mirror=1 skin=knight_m_v4.glb parts={ "helm": "crownless", "chest": "crownless", "shoulders": "crownless", "arms": "crownless", "legs": "crownless", "boots": "crownless" } helm=kettle
+930	31.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0
+960	32.000	SCREEN explore.gd run=courtyard stage=1 cp=0 hp=160.0

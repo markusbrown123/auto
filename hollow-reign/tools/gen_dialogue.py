@@ -33,7 +33,8 @@ def scene(sid, *lines, once=True, new=False, title="", kind="", essential=False)
         S[sid]["essential"] = True
 N, LY, P, OR, AR, W = "narrator", "lyra", "player", "orren", "archivist", "witness"
 # Generation III's own scenes: the knight's lines in them are the Last Heir's (cast heir_m / heir_f), not the second generation's.
-HEIR_SCENES = ["gen3_arrive", "kept_approach", "kept_intro", "kept_beat", "monarch_g3_intro", "monarch_g3_death", "facility"]
+HEIR_SCENES = ["gen3_arrive", "kept_approach", "kept_intro", "kept_beat", "monarch_g3_intro", "monarch_g3_death", "facility",
+               "ending_silence", "ending_steward", "ending_cities"]
 ONE_BODY = {"gen2_arrive_m": "m", "gen2_arrive_f": "f"}
 
 # ---------------------------------------------------------------- opening
@@ -136,6 +137,27 @@ scene("facility",
  (LY, "This was never merely a kingdom.", "hushed"),
  (P, "Then what was it?", "low"),
  (LY, "A means of keeping one alive.", "plain"), once=False, new=True)
+# The three endings, as directed scenes (src/cine/ending_scene.gd). Written for the campaign fix pass from the three
+# epilogues the game already had as text; subtitles only, nothing recorded, nobody has reviewed them.
+scene("ending_silence",
+ (LY, "You know what this ends. I am asking you to do it anyway.", "steady; she has decided"),
+ (P, "Three of us came to this door. I will not ask a fourth.", "low"),
+ (LY, "Then thank you. It was a long time to be kept.", "almost light"),
+ (W, "It is very quiet. I had forgotten that it could be.", "after a silence"),
+ (N, "The bells of Vaelora rang that morning for no sovereign at all.", "elegiac"),
+ (N, "Outside, the sun came up on people who would die one day, and knew it.", "plain"), once=False, new=True)
+scene("ending_steward",
+ (P, "Then it answers to me. And I answer to them.", "steady"),
+ (LY, "I will be watching. Somebody has to.", "after a long time"),
+ (W, "I have seen this seat taken before. Do it differently. I shall be writing it down.", "dry, not unkind"),
+ (N, "The third of that house took the seat the first had come to question.", "elegiac"),
+ (N, "The lights of the kingdom came on, one district at a time.", "plain"), once=False, new=True)
+scene("ending_cities",
+ (P, "No one rules it. Not him. Not me.", "steady"),
+ (LY, "Then each of us must be asked. Some will stay. Some will ask, very politely, to stop.", "wondering"),
+ (W, "A hundred small crowns, none of which can command the others. I did not think I would live to record it.", "moved, hiding it"),
+ (N, "They did not break the Crown, and they did not wear it. They divided it.", "elegiac"),
+ (LY, "So this is what standing feels like.", "from a doorway, not from the air"), once=False, new=True)
 # Generation III's road: a line where the heir first sets foot on each road. Written for this pass, not from the brief;
 # nobody has reviewed them. (`<region>_<stop>_g3` is what the companion looks for in the third generation.)
 scene("courtyard_0_g3", (LY, "The plate on these is new. He has been replacing what your house broke.", "dry"), new=True)

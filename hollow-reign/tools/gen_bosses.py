@@ -612,7 +612,7 @@ for f in B:
 # about half a minute with most of their health left. Guardians of the late roads last longer and hit harder, the
 # Monarch most of all; the soldiers on those roads a little. (region: [guardian hp, guardian dmg, soldier hp, soldier dmg])
 LATE = {"crypt": [1.4, 1.5, 1.15, 1.2], "roost": [1.5, 1.6, 1.2, 1.25], "citadel": [1.7, 1.9, 1.25, 1.35],
-        "deep": [1.8, 2.0, 1.3, 1.4], "throne": [2.0, 2.5, 1.35, 1.5]}
+        "deep": [1.8, 2.0, 1.3, 1.4], "throne": [2.0, 2.3, 1.35, 1.5]}
 def _harder(a, k):
     a["dmg"] = round(a["dmg"] * k)
     a["guard"] = round(a["guard"] * k)
@@ -680,13 +680,13 @@ V = [
       mortal=True, region="blackwood", staged=False),
  # Generation I: a brief clash. Phase one only, blows that wound but do not kill; the story ends it, not a health bar.
  dict(id="monarch_i", base="forgotten_monarch", gen=1, monarch=1, name="The Forgotten Monarch", title="Sovereign of Vaelora", boss=True,
-      hp=0.5, dmg=0.16, speed=0.92, xp=0.0, gold=0.0, phases=[0], immortal=True, reason="He does not age.", carry="w_monarch", region="throne",
+      hp=0.5, dmg=0.174, speed=0.92, xp=0.0, gold=0.0, phases=[0], immortal=True, reason="He does not age.", carry="w_monarch", region="throne",
       clash=dict(min_time=9.0, cuts=4, release=32.0), traits={}),
  # Generation III: the last meeting, in three named phases. Phase three is the restoration machinery: he falls and is
  # stood up again (`revive`), and feeds on what he takes (`lifesteal`). Both are weakened at run time by the inheritance
  # records the family gathered (Generations.monarch_final): the figures here are the worst case, with none.
  dict(id="monarch_iii", base="forgotten_monarch", gen=3, monarch=3, name="The Forgotten Monarch", title="The Last Defense of the Crown", boss=True,
-      hp=1.7, dmg=1.4, speed=1.0, xp=1.6, gold=2.2, immortal=True, reason="The network restores him while it runs.", carry="w_monarch", region="throne",
+      hp=1.7, dmg=1.2, speed=1.0, xp=1.6, gold=2.2, immortal=True, reason="The network restores him while it runs.", carry="w_monarch", region="throne",
       intro="The floor of the hall stands open. What kept him is no longer hidden under it.",
       traits={"marks": 4, "mark_mult": 1.5, "parry_open": 1.15, "lifesteal": 0.3},
       records=dict(revive=[0.6, 0.2], lifesteal=[0.3, 0.0], parry_open=[1.15, 1.45]),
@@ -704,7 +704,7 @@ V = [
       ]),
  # Generation III guardians: what stands in a post whose first keeper is gone.
  dict(id="awakened_beast", base="maulbeast", gen=3, name="The Awakened Beast", title="What the Blackwood Kept Asleep", boss=True,
-      hp=38.0, dmg=4.4, speed=1.1, xp=13.0, gold=15.0, mortal=True, region="blackwood", traits={"frenzy": 0.25},
+      hp=36.0, dmg=4.0, speed=1.1, xp=13.0, gold=15.0, mortal=True, region="blackwood", traits={"frenzy": 0.25},
       replaces="hollow_executioner", reason="The Executioner's block stood empty for twenty-four years. Something older took the clearing.",
       rig=dict(scale=1.45), intro="The stumps have been pulled up like teeth. Whatever did it is still hungry.",
       # its own fight, not the Maulbeast's with bigger numbers (figures are in the Maulbeast's units; hp/dmg above scale

@@ -1004,6 +1004,9 @@ func _layout_throne() -> void:
 ## wall, a block the sword was left in, and one door (at -Z) that the story scene opens. Named nodes for that scene:
 ## "Door" (the panel), "DoorGlow" (the light beyond it), "Rack" (where the sword stands), "Lyra" (the light she speaks through).
 const CHAMBER_R := 6.2
+const CRADLE_AT := Vector3(-0.38, 0, -0.25)      # where the cradle model stands (its bed over the room's middle)
+const CRADLE_TALL := 1.75
+const CRADLE_YAW := 0.0
 func _layout_chamber() -> void:
 	var metal := Look.flat(Color("#2a2c2e"), 0.45, 0.85)
 	var amber := Look.glow(Color(theme.fire), 2.2)
@@ -1049,14 +1052,20 @@ func _layout_chamber() -> void:
 	dg.shadow_enabled = true
 	dg.position = Vector3(0, 2.2, dz - 2.2)
 	add_child(dg)
-	# the cradle: a stone bed in a metal frame, its cover long since slid off
-	box(Vector3(1.3, 0.5, 2.6), Vector3(0, 0.25, 0), null)
-	box(Vector3(1.5, 0.12, 2.8), Vector3(0, 0.52, 0), metal)
-	box(Vector3(1.1, 0.06, 2.4), Vector3(0, 0.6, 0), Look.flat(Color("#1c1e20"), 0.7, 0.3))
-	box(Vector3(1.4, 0.1, 2.7), Vector3(1.45, 0.3, 0.5), metal, Vector3(0, 14, -68))
-	for sz: float in [-1.0, 1.0]:
-		box(Vector3(0.05, 0.05, 0.9), Vector3(-0.76, 0.5, sz * 0.7), teal)
-		box(Vector3(0.05, 0.05, 0.9), Vector3(0.76, 0.5, sz * 0.7), teal)
+	# the cradle: the stasis cradle model (assets/models/env_fu_cradle.glb, node "Cradle"), its cover slid off beside
+	# it; without the model (or with --oldworld) a stone bed in a metal frame, built here
+	set_meta("future_look", "chamber")
+	var cradle: Node3D = null if Future.old_world else Future.prop(self, "fu_cradle", CRADLE_TALL, CRADLE_AT, CRADLE_YAW, 0.03, 1)
+	if cradle:
+		cradle.name = "Cradle"
+	else:
+		box(Vector3(1.3, 0.5, 2.6), Vector3(0, 0.25, 0), null)
+		box(Vector3(1.5, 0.12, 2.8), Vector3(0, 0.52, 0), metal)
+		box(Vector3(1.1, 0.06, 2.4), Vector3(0, 0.6, 0), Look.flat(Color("#1c1e20"), 0.7, 0.3))
+		box(Vector3(1.4, 0.1, 2.7), Vector3(1.45, 0.3, 0.5), metal, Vector3(0, 14, -68))
+		for sz: float in [-1.0, 1.0]:
+			box(Vector3(0.05, 0.05, 0.9), Vector3(-0.76, 0.5, sz * 0.7), teal)
+			box(Vector3(0.05, 0.05, 0.9), Vector3(0.76, 0.5, sz * 0.7), teal)
 	cyl(0.07, 0.07, 4.7, Vector3(0, 2.95, -1.25), metal, 6)
 	cyl(0.5, 0.2, 0.3, Vector3(0, 5.1, -1.25), metal, 8)
 	# machine pylons between the wall panels, with conduits where the kit has them
@@ -1072,7 +1081,7 @@ func _layout_chamber() -> void:
 		box(Vector3(0.74, 0.05, 0.74), at + Vector3(0, 1.1, 0), lit, Vector3(0, rad_to_deg(a2), 0))
 		cyl(0.06, 0.06, 2.6, at * 1.02 + Vector3(0, 4.2, 0), metal, 6)
 		_glow(at * 0.86 + Vector3(0, 1.8, 0), Color(theme.fire) if i % 2 == 1 else Color("#5fe0c8"), 0.55, 4.5)
-	_chamber_machine(metal, amber, teal)
+	_chamber_machine(metal, amber, teal, cradle == null)
 	# the voice in the walls: a grille over the cradle's head with a light behind it
 	var ly := OmniLight3D.new()
 	ly.name = "Lyra"
@@ -1097,7 +1106,7 @@ func _layout_chamber() -> void:
 ## conduits, the cradle's hoops and its head unit, cables
 ## across the floor from the cradle to every pylon and to the block, banks of small lit readouts on the wall, and a
 ## band of metal let into the floor round the cradle. The merged pieces are one draw each.
-func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
+func _chamber_machine(metal: Material, amber: Material, teal: Material, built_cradle: bool = true) -> void:
 	var dark := Look.flat(Color("#17191b"), 0.6, 0.6)
 	# ribs up the wall and over onto the ceiling, a channel of light in the face of each: the room is the inside of a machine
 	var ribs: Array = []
@@ -1122,19 +1131,20 @@ func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
 	var hoops: Array = []
 	var lit_teal: Array = []
 	var lit_amber: Array = []
-	for k in 3:
-		var z := -0.9 + k * 0.75
-		for sx: float in [-1.0, 1.0]:
-			hoops.append([Vector3(0.05, 0.62, 0.06), Vector3(sx * 0.76, 0.86, z)])
-		hoops.append([Vector3(1.57, 0.05, 0.06), Vector3(0, 1.17, z)])
-	solid.append([Vector3(1.7, 1.7, 0.5), Vector3(0, 0.85, -1.62)])
-	solid.append([Vector3(1.2, 0.4, 0.6), Vector3(0, 1.9, -1.6)])
-	lit_teal.append([Vector3(1.1, 0.5, 0.04), Vector3(0, 1.2, -1.36)])
-	lit_amber.append([Vector3(0.9, 0.06, 0.04), Vector3(0, 0.78, -1.36)])
-	for sx2: float in [-1.0, 1.0]:
-		for sz: float in [-1.0, 1.0]:
-			solid.append([Vector3(0.22, 0.2, 0.3), Vector3(sx2 * 0.7, 0.1, sz * 1.15)])
-	Highland._solid(self, "Hoops", hoops, metal, false)
+	if built_cradle:
+		for k in 3:
+			var z := -0.9 + k * 0.75
+			for sx: float in [-1.0, 1.0]:
+				hoops.append([Vector3(0.05, 0.62, 0.06), Vector3(sx * 0.76, 0.86, z)])
+			hoops.append([Vector3(1.57, 0.05, 0.06), Vector3(0, 1.17, z)])
+		solid.append([Vector3(1.7, 1.7, 0.5), Vector3(0, 0.85, -1.62)])
+		solid.append([Vector3(1.2, 0.4, 0.6), Vector3(0, 1.9, -1.6)])
+		lit_teal.append([Vector3(1.1, 0.5, 0.04), Vector3(0, 1.2, -1.36)])
+		lit_amber.append([Vector3(0.9, 0.06, 0.04), Vector3(0, 0.78, -1.36)])
+		for sx2: float in [-1.0, 1.0]:
+			for sz: float in [-1.0, 1.0]:
+				solid.append([Vector3(0.22, 0.2, 0.3), Vector3(sx2 * 0.7, 0.1, sz * 1.15)])
+		Highland._solid(self, "Hoops", hoops, metal, false)
 	# readouts: banks of small lights on the wall panels, some of them out
 	for i in 22:
 		var a2 := TAU * (i + 0.5) / 22.0
@@ -1204,6 +1214,9 @@ func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
 ## material (seven draws for the room).
 const COMMAND_SEAT := Vector3(0, 0, -8.6)       # where the Monarch sits (Prologue.MONARCH_AT)
 const COMMAND_SEAT_SCALE := 1.5
+const THRONE_TALL := 6.0                         # the throne model, dais and halo included
+const THRONE_SINK := 0.14                        # of its height: its dais goes under the floor, so the seat is 0.9 m up
+const THRONE_OFF := Vector3(0, 0, -0.84)         # from COMMAND_SEAT to the middle of the model
 func _layout_command() -> void:
 	sun.directional_shadow_max_distance = 60.0
 	var alloy := Highland.built(Color("#5a6068"), 0.6, 0.45, 0.22)
@@ -1271,26 +1284,33 @@ func _layout_command() -> void:
 		Highland._beam(lines, Vector3(sx4 * 6.78, 0.95, 2.8), Vector3(sx4 * 6.78, 0.95, 5.2), 0.1, 0.05)
 	# the throne: a seat cut square out of the machine, its back running up into the spine behind it. Sized for the
 	# Monarch (half as tall again as a knight); the opening seats him on it (Prologue._enthrone)
-	var seat := Highland._flat_tool()
-	var seat_pale := Highland._flat_tool()
-	var k2 := COMMAND_SEAT_SCALE
-	var at := COMMAND_SEAT
-	for b: Array in [[Vector3(1.05, 0.52, 0.9), Vector3(0, 0.26, -0.44)], [Vector3(1.2, 3.2, 0.24), Vector3(0, 1.6, -0.9)],
-			[Vector3(0.18, 0.9, 0.95), Vector3(-0.62, 0.45, -0.44)], [Vector3(0.18, 0.9, 0.95), Vector3(0.62, 0.45, -0.44)],
-			[Vector3(2.2, 0.2, 0.7), Vector3(0, 0.1, -1.1)], [Vector3(0.5, 1.4, 0.3), Vector3(0, 3.7, -0.95)]]:
-		var bm := BoxMesh.new()
-		bm.size = (b[0] as Vector3) * k2
-		seat.append_from(bm, 0, Transform3D(Basis.IDENTITY, at + (b[1] as Vector3) * k2))
-	for b2: Array in [[Vector3(0.86, 0.07, 0.74), Vector3(0, 0.55, -0.38)], [Vector3(0.84, 1.7, 0.06), Vector3(0, 1.5, -0.76)],
-			[Vector3(0.24, 0.07, 1.0), Vector3(-0.62, 0.93, -0.44)], [Vector3(0.24, 0.07, 1.0), Vector3(0.62, 0.93, -0.44)]]:
-		var bm2 := BoxMesh.new()
-		bm2.size = (b2[0] as Vector3) * k2
-		seat_pale.append_from(bm2, 0, Transform3D(Basis.IDENTITY, at + (b2[1] as Vector3) * k2))
-	for sx5: float in [-1.0, 1.0]:
-		Highland._beam(lights, at + Vector3(sx5 * 0.52, 2.5, -0.76) * k2, at + Vector3(sx5 * 0.52, 3.15, -0.76) * k2, 0.06 * k2, 0.04)
-		Highland._beam(lines, at + Vector3(sx5 * 0.72, 0.5, 0.02) * k2, at + Vector3(sx5 * 0.72, 0.86, 0.02) * k2, 0.05 * k2, 0.04)
-	Highland._commit(self, "Throne", seat, plate, true)
-	Highland._commit(self, "ThronePale", seat_pale, pale, false)
+	# With the machine throne model (assets/models/env_fu_throne.glb, node "Throne") it is that: stood so that its seat
+	# is where the built seat's was and its own dais is sunk flush with the floor. Without it (or with --oldworld), boxes.
+	set_meta("future_look", "command")
+	var throne: Node3D = null if Future.old_world else Future.prop(self, "fu_throne", THRONE_TALL, COMMAND_SEAT + THRONE_OFF, 0.0, THRONE_SINK, 1)
+	if throne:
+		throne.name = "Throne"
+	else:
+		var seat := Highland._flat_tool()
+		var seat_pale := Highland._flat_tool()
+		var k2 := COMMAND_SEAT_SCALE
+		var at := COMMAND_SEAT
+		for b: Array in [[Vector3(1.05, 0.52, 0.9), Vector3(0, 0.26, -0.44)], [Vector3(1.2, 3.2, 0.24), Vector3(0, 1.6, -0.9)],
+				[Vector3(0.18, 0.9, 0.95), Vector3(-0.62, 0.45, -0.44)], [Vector3(0.18, 0.9, 0.95), Vector3(0.62, 0.45, -0.44)],
+				[Vector3(2.2, 0.2, 0.7), Vector3(0, 0.1, -1.1)], [Vector3(0.5, 1.4, 0.3), Vector3(0, 3.7, -0.95)]]:
+			var bm := BoxMesh.new()
+			bm.size = (b[0] as Vector3) * k2
+			seat.append_from(bm, 0, Transform3D(Basis.IDENTITY, at + (b[1] as Vector3) * k2))
+		for b2: Array in [[Vector3(0.86, 0.07, 0.74), Vector3(0, 0.55, -0.38)], [Vector3(0.84, 1.7, 0.06), Vector3(0, 1.5, -0.76)],
+				[Vector3(0.24, 0.07, 1.0), Vector3(-0.62, 0.93, -0.44)], [Vector3(0.24, 0.07, 1.0), Vector3(0.62, 0.93, -0.44)]]:
+			var bm2 := BoxMesh.new()
+			bm2.size = (b2[0] as Vector3) * k2
+			seat_pale.append_from(bm2, 0, Transform3D(Basis.IDENTITY, at + (b2[1] as Vector3) * k2))
+		for sx5: float in [-1.0, 1.0]:
+			Highland._beam(lights, at + Vector3(sx5 * 0.52, 2.5, -0.76) * k2, at + Vector3(sx5 * 0.52, 3.15, -0.76) * k2, 0.06 * k2, 0.04)
+			Highland._beam(lines, at + Vector3(sx5 * 0.72, 0.5, 0.02) * k2, at + Vector3(sx5 * 0.72, 0.86, 0.02) * k2, 0.05 * k2, 0.04)
+		Highland._commit(self, "Throne", seat, plate, true)
+		Highland._commit(self, "ThronePale", seat_pale, pale, false)
 	# the spine up the back of the ring, which the throne's own back runs into
 	Highland._beam(ribs, Vector3(0, 0.6, -10.6), Vector3(0, 12.8, -10.6), 1.6, 0.9)
 	Highland._beam(lights, Vector3(0, 6.2, -10.1), Vector3(0, 12.2, -10.1), 0.2, 0.1)

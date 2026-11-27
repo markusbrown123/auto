@@ -36,14 +36,17 @@ const LINKED := {
 const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.7, "rough_lift": 0.17, "metal_max": 0.72, "spec": 0.3,
 	"cloth": 1.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1)}
 const FINISH := {
-	"black": {"rough_pivot": 0.31, "rough_lift": 0.2, "metal_max": 0.5, "cloth_dark": 0.02},      # lacquer: satin, not wet
-	"garrison": {"rough_pivot": 0.34, "rough_lift": 0.2},
-	"frost": {"rough_pivot": 0.34, "rough_lift": 0.18, "cloth": 0.0, "tone": Color(0.86, 0.88, 0.92)},
-	"hollow": {"rough_pivot": 0.37, "rough_lift": 0.2, "metal_max": 0.6},
-	"vigil": {"rough_pivot": 0.5, "rough_lift": 0.08, "rough_gain": 1.2},
-	"wyrm": {"rough_pivot": 0.5, "rough_lift": 0.06, "rough_gain": 1.2},
-	"regal": {"rough_pivot": 0.44, "rough_lift": 0.12},
-	"ash": {"rough_pivot": 0.42, "rough_lift": 0.12},
+	# third pass ("too spiky, excessively shiny... generic"): every older family sits a step rougher and a step less
+	# mirror-like than the study left it; the benchmark knights ("crownless") keep the default
+	"base": {"rough_lift": 0.21, "metal_max": 0.68},
+	"black": {"rough_pivot": 0.31, "rough_lift": 0.24, "metal_max": 0.46, "cloth_dark": 0.02},      # lacquer: satin, not wet
+	"garrison": {"rough_pivot": 0.34, "rough_lift": 0.23, "metal_max": 0.68},
+	"frost": {"rough_pivot": 0.34, "rough_lift": 0.23, "metal_max": 0.64, "cloth": 0.0, "tone": Color(0.86, 0.88, 0.92)},
+	"hollow": {"rough_pivot": 0.37, "rough_lift": 0.23, "metal_max": 0.56},
+	"vigil": {"rough_pivot": 0.5, "rough_lift": 0.14, "rough_gain": 1.2, "metal_max": 0.62},
+	"wyrm": {"rough_pivot": 0.5, "rough_lift": 0.13, "rough_gain": 1.2, "metal_max": 0.6},
+	"regal": {"rough_pivot": 0.44, "rough_lift": 0.18, "metal_max": 0.62},
+	"ash": {"rough_pivot": 0.42, "rough_lift": 0.18, "metal_max": 0.64},
 }
 ## What the game uses today on whole-suit models (Look.SURFACE.character through pbr_clamp): for before/after captures.
 const FINISH_OLD := {"rough_min": 0.33, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.0, "rough_lift": 0.0, "metal_max": 0.85, "spec": 0.35,

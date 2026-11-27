@@ -78,7 +78,7 @@ func _ready() -> void:
 		Story._skip = true
 		await get_tree().process_frame
 	ok(had_relic and ew.relic == null and Companion.witness_found() and bool(ew.backdrop.rig.cfg.get("witness", false)),
-		"witness: after the scene the mask is off the stones and on the knight")
+		"witness: after the scene the instrument has left its hatch and keeps station at the knight's shoulder")
 	await get_tree().create_timer(2.0).timeout
 	ok(ew.layer.get_child(0).modulate.a > 0.5, "witness: the choices return")
 	ew.queue_free()
@@ -244,6 +244,13 @@ func _ready() -> void:
 	Overlays.victory(d2, Db.foes.hollow_soldier, Game.on_victory("hollow_soldier", 10.0), d2.sim, func(): pass)
 	await get_tree().process_frame
 	d2.queue_free()
+	# --- the campaign fix pass (tests/fix_pass.gd; also runs alone as tests/fix_pass.tscn)
+	var fp: Node = load("res://tests/fix_pass.gd").new()
+	fp.embedded = true
+	add_child(fp)
+	await fp.run()
+	failed += int(fp.failed)
+	fp.queue_free()
 	print("\nintegration: %s" % ("PASS" if failed == 0 else "%d FAILED" % failed))
 	get_tree().quit(1 if failed > 0 else 0)
 
@@ -311,12 +318,14 @@ func _gear_on_rig() -> void:
 	ok(hidden == 0, "the body's own mesh is hidden under the parts")
 	var head0: float = plain.skin.extent("Head", Vector3.UP)
 	var sh0: float = float(plain.skin.ball("LeftArm")[1])
-	_wear(["a_frost_helm", "a_wyrm_shoulders"])
+	# (the crowned and horned families are trimmed when the parts are built, see tools/armor_split.gd
+	# DESPIKE_DEFAULT, so they no longer stand taller than the plain helm: a crested helm and layered pauldrons instead)
+	_wear(["a_garrison_helm", "a_ash_shoulders"])
 	var spiky := FighterRig.new()
 	add_child(spiky)
 	spiky.build(Duel.player_look(), false)
-	ok(spiky.skin.extent("Head", Vector3.UP) > head0 + 0.02 and float(spiky.skin.ball("LeftArm")[1]) > sh0 + 0.01,
-		"rig bounds include the worn parts (crowned helm %.2f > %.2f, horned pauldron %.2f > %.2f)" % [spiky.skin.extent("Head", Vector3.UP), head0, float(spiky.skin.ball("LeftArm")[1]), sh0])
+	ok(spiky.skin.extent("Head", Vector3.UP) > head0 + 0.01 and float(spiky.skin.ball("LeftArm")[1]) > sh0 + 0.002,
+		"rig bounds include the worn parts (crested helm %.3f > %.3f, layered pauldron %.3f > %.3f)" % [spiky.skin.extent("Head", Vector3.UP), head0, float(spiky.skin.ball("LeftArm")[1]), sh0])
 	ok(plain.wear_parts(spiky.cfg.parts) and is_equal_approx(plain.skin.extent("Head", Vector3.UP), spiky.skin.extent("Head", Vector3.UP)), "a piece swapped on a standing knight is measured again")
 	plain.skin.flash(1.0)
 	ok(plain.parts._params.has(&"flash"), "flash reaches the worn parts")

@@ -410,6 +410,105 @@
    "text": "A means of keeping one alive.",
    "dir": "plain"
   },
+  "ending_silence_01": {
+   "speaker": "lyra",
+   "text": "You know what this ends. I am asking you to do it anyway.",
+   "dir": "steady; she has decided",
+   "recorded": false
+  },
+  "ending_silence_02": {
+   "speaker": "player",
+   "text": "Three of us came to this door. I will not ask a fourth.",
+   "dir": "low",
+   "cast": "heir",
+   "recorded": false
+  },
+  "ending_silence_03": {
+   "speaker": "lyra",
+   "text": "Then thank you. It was a long time to be kept.",
+   "dir": "almost light",
+   "recorded": false
+  },
+  "ending_silence_04": {
+   "speaker": "witness",
+   "text": "It is very quiet. I had forgotten that it could be.",
+   "dir": "after a silence",
+   "recorded": false
+  },
+  "ending_silence_05": {
+   "speaker": "narrator",
+   "text": "The bells of Vaelora rang that morning for no sovereign at all.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "ending_silence_06": {
+   "speaker": "narrator",
+   "text": "Outside, the sun came up on people who would die one day, and knew it.",
+   "dir": "plain",
+   "recorded": false
+  },
+  "ending_steward_01": {
+   "speaker": "player",
+   "text": "Then it answers to me. And I answer to them.",
+   "dir": "steady",
+   "cast": "heir",
+   "recorded": false
+  },
+  "ending_steward_02": {
+   "speaker": "lyra",
+   "text": "I will be watching. Somebody has to.",
+   "dir": "after a long time",
+   "recorded": false
+  },
+  "ending_steward_03": {
+   "speaker": "witness",
+   "text": "I have seen this seat taken before. Do it differently. I shall be writing it down.",
+   "dir": "dry, not unkind",
+   "recorded": false
+  },
+  "ending_steward_04": {
+   "speaker": "narrator",
+   "text": "The third of that house took the seat the first had come to question.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "ending_steward_05": {
+   "speaker": "narrator",
+   "text": "The lights of the kingdom came on, one district at a time.",
+   "dir": "plain",
+   "recorded": false
+  },
+  "ending_cities_01": {
+   "speaker": "player",
+   "text": "No one rules it. Not him. Not me.",
+   "dir": "steady",
+   "cast": "heir",
+   "recorded": false
+  },
+  "ending_cities_02": {
+   "speaker": "lyra",
+   "text": "Then each of us must be asked. Some will stay. Some will ask, very politely, to stop.",
+   "dir": "wondering",
+   "recorded": false
+  },
+  "ending_cities_03": {
+   "speaker": "witness",
+   "text": "A hundred small crowns, none of which can command the others. I did not think I would live to record it.",
+   "dir": "moved, hiding it",
+   "recorded": false
+  },
+  "ending_cities_04": {
+   "speaker": "narrator",
+   "text": "They did not break the Crown, and they did not wear it. They divided it.",
+   "dir": "elegiac",
+   "recorded": false
+  },
+  "ending_cities_05": {
+   "speaker": "lyra",
+   "text": "So this is what standing feels like.",
+   "dir": "from a doorway, not from the air",
+   "recorded": false
+  },
   "courtyard_0_g3_01": {
    "speaker": "lyra",
    "text": "The plate on these is new. He has been replacing what your house broke.",
@@ -1704,6 +1803,37 @@
     "facility_01",
     "facility_02",
     "facility_03"
+   ],
+   "once": false
+  },
+  "ending_silence": {
+   "lines": [
+    "ending_silence_01",
+    "ending_silence_02",
+    "ending_silence_03",
+    "ending_silence_04",
+    "ending_silence_05",
+    "ending_silence_06"
+   ],
+   "once": false
+  },
+  "ending_steward": {
+   "lines": [
+    "ending_steward_01",
+    "ending_steward_02",
+    "ending_steward_03",
+    "ending_steward_04",
+    "ending_steward_05"
+   ],
+   "once": false
+  },
+  "ending_cities": {
+   "lines": [
+    "ending_cities_01",
+    "ending_cities_02",
+    "ending_cities_03",
+    "ending_cities_04",
+    "ending_cities_05"
    ],
    "once": false
   },

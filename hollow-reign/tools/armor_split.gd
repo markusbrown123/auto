@@ -9,11 +9,18 @@ extends SceneTree
 ## Writes assets/models/parts/<body>_<suit>_<slot>.res (ArrayMesh, no material), <body>_<suit>_mat.res (material)
 ## and <body>_under.res (the base body without its helmet: a dark undersuit shown under mixed parts).
 ## Run:  Godot --headless --path . -s tools/armor_split.gd -- [--only=m_frost,f_ash] [--margin=0.22] [--out=dir] [--despike=all] [--tag=_ds]
+##       [--spikes: no default trimming] [--heels: female boots as generated] [--nofauld: the host suit without its hip plates] [--v]
+## Third pass (2026-11-27): the host suit's legs carry a fauld (_fauld), female boots are made flat (_flatten_heels),
+## and the families in DESPIKE_DEFAULT are trimmed by default.
 const SUITS := ["crownless", "base", "garrison", "ash", "black", "vigil", "frost", "regal", "wyrm", "hollow"]
 ## The suit whose skeleton and body every other suit is fitted to (--host=base restores the first study's choice).
 ## "crownless" is the sleek benchmark knight (knight_<body>_v3.glb): flat boots, compact visored helm, undersuit gaps.
 var host_suit := "crownless"
 const SLOTS := ["helm", "chest", "shoulders", "arms", "legs", "boots"]
+## Families whose crests, horns, fins, blades and spurs are pulled in whenever the parts are built (the owner: "too
+## spiky"). `--spikes` builds them as generated. Not the hooded Gravekeeper (its mantle is the design), nor the plain
+## suits. The paint is untouched, so a trimmed fin can leave its dark underside on the plate (docs/MODULAR_ARMOR.md).
+const DESPIKE_DEFAULT := ["black", "ash", "frost", "wyrm", "regal", "hollow"]
 const CHILD := {"Spine": "Spine1", "Spine1": "Spine2", "Spine2": "Neck", "Neck": "Head",
 	"LeftShoulder": "LeftArm", "LeftArm": "LeftForeArm", "LeftForeArm": "LeftHand", "RightShoulder": "RightArm", "RightArm": "RightForeArm", "RightForeArm": "RightHand",
 	"LeftUpLeg": "LeftLeg", "LeftLeg": "LeftFoot", "RightUpLeg": "RightLeg", "RightLeg": "RightFoot"}
@@ -76,7 +83,7 @@ func _init() -> void:
 			if not wanted:
 				continue
 			var moved := 0
-			if spike.has("all") or spike.has(id) or spike.has(suit):
+			if spike.has("all") or spike.has(id) or spike.has(suit) or (tag == "" and DESPIKE_DEFAULT.has(suit) and not args.has("spikes")):
 				moved = _despike(m, host, float(args.get("spike_k", "1.0")))
 			var total := 0
 			var line := ""

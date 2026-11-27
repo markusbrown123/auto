@@ -17,3 +17,8 @@ assets/models/*.png.import
 !assets/models/knight_*.png
 !assets/models/knight_*.jpg.import
 !assets/models/knight_*.png.import
+# Exception: the far-future environment kit (src/world/future.gd) keeps its textures and their import settings in the repository too.
+!assets/models/env_fu_*.jpg
+!assets/models/env_fu_*.png
+!assets/models/env_fu_*.jpg.import
+!assets/models/env_fu_*.png.import

@@ -552,16 +552,20 @@ def _halo(axis, dist, fins=()):
 # Each variant: `build` {mesh name: function}, `parts` [how each mesh is placed and how it moves], and
 #   aim   "halo": the body turns slowly and the halo (group "halo") tips toward the target
 #         "body": the whole thing turns its front (-Z) to the target
+#   glow  how bright its light is drawn (1 = the lantern);  lamp_range: reach of its small real light (m);
+#   flare the width (m) of the soft bloom on the lamp;  tilt [degrees the body tips to look, degrees it banks]
+#   lo, hi  the bulk the game keeps clear of things, when that is not simply the box round every part
 #   size  how much over life size the game draws it;  lie, lie_rot: the height of its centre and its turn
 #         (degrees) when it lies dormant
 # A part: mesh, at [m], rot [degrees, YXZ], scale [x, y, z] (a mirrored twin), under (another part's mesh name: it
 # rides on that part), group, lit ("dash": its light surface is the second light, lit after the seam on waking), and
 # its motion, all in its own frame: slide [m] x attention, breathe [m] x a slow idle wave, talk [m] x voice level,
-# turn [degrees] x attention.
+# turn [degrees] x attention, talk_turn [degrees] x voice level, look [yaw, pitch limits in degrees]: the part turns
+# by itself to what the Witness looks at (the lamp), ahead of the body.
 VARIANTS = {
     "gnomon": dict(build=dict(core=gnomon_core, brow=gnomon_brow, flank_r=gnomon_flank_r, flank_l=gnomon_flank_l, keel=gnomon_keel, lamp=gnomon_lamp,
                               vane=gnomon_vane, stub=gnomon_stub, weight=gnomon_weight),
-                   aim="body", size=1.35, lie=0.062, lie_rot=[78, 0, 14], glow=1.7, lamp_range=1.5, flare=0.20,
+                   aim="body", size=1.35, lie=0.062, lie_rot=[78, 0, 14], glow=1.7, lamp_range=1.5, flare=0.20, tilt=[9.0, 8.0],
                    lo=[-0.08, -0.17, -0.06], hi=[0.08, 0.17, 0.06], parts=[
                        dict(mesh="core", lit="dash"),
                        dict(mesh="brow", slide=[0, 0.0075, 0.0015], breathe=[0, 0.0016, 0], talk=[0, 0.0040, 0]),
@@ -614,7 +618,7 @@ def main():
     relic_textures()
     manifest = {"_chosen": CHOSEN, "_front": "-Z", "_origin": "centre of the body"}
     for name, V in VARIANTS.items():
-        info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y", "glow", "lamp_range", "flare") if k in V}
+        info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y", "glow", "lamp_range", "flare", "tilt") if k in V}
         lo, hi = np.ones(3) * 9, np.ones(3) * -9
         tris = {"": 0, "_lod": 0}
         for part, fn in V["build"].items():

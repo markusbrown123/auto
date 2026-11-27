@@ -130,3 +130,11 @@ Higgsfield balance read before: **1,030.83** credits. Read after: **850.54**. Th
 | Total for this pass (ceiling set for it: 220) | | **171.29** | about $7.03 |
 
 One Witness line (`w_gravewarden_approach_01`) was refused twice by the service's content filter (once in this pass, once before it); the line was reworded ("kill you" to "end you") and then recorded. Refused jobs show as refunded or uncharged. No job was paid for twice: every job id is in `assets/audio/vo/jobs.json`. Nothing here has been listened to: recorded, unauditioned.
+
+## Far-future environment kit (2026-11-27, task ceilings: $16 of Tripo, 40 Higgsfield credits)
+Owner direction: "Environment more new and space but land like futuristic not medieval at all."
+- Twelve concept images (`art/concept/env_fu_*_v1.png`, GPT Image 2.6, 0.75 credits each as billed) = **9.0 Higgsfield credits**.
+- Eleven prop models (`assets/models/env_fu_{pylon,tower,wall,colossus,engine,wreck,core,husk,throne,cradle,pod}.glb`, 30 Tripo credits each) = 330 credits = **$3.30**.
+- The twelfth, `env_fu_beacon`, failed inside Tripo ("Internal processing error", task `1a7b517e-ec87-4dc1-a485-41bfd2eaed1b`) and was not charged; it was not sent again. The beacon is built in code instead (`Future.beacon`).
+- Balances: Tripo 6,565 credits before, 6,235 after (the account's balance endpoint; nothing frozen). Higgsfield 1,030.83 before; the other agents' speech jobs were being billed to it at the same time, so its balance after is not a measure of this task: the twelve image charges are listed singly in the account's transactions (08:28 to 08:29 UTC).
+- Tripo graphics allocation spent so far: $28.20 + $3.30 = **$31.50** of $100.

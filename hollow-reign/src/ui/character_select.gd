@@ -168,7 +168,7 @@ func _fill() -> void:
 	for slot: String in Db.SLOTS:
 		if eq.get(slot) != null:
 			names.append(str(Db.item(str(eq[slot])).get("name", eq[slot])))
-	_v.add_child(UI.wrapped("  ·  ".join(names), 18, UI.BONE, 600))
+	_v.add_child(UI.wrapped("  ·  ".join(names), 22, UI.BONE, 600))
 	_v.add_child(UI.spacer(2))
 	# the name and the cloak side by side, so every control keeps a full-height touch target on a short screen
 	var pair := HBoxContainer.new()

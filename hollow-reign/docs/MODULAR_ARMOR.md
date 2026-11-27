@@ -19,6 +19,24 @@
 >   **197.5 MB -> 106.4 MB**; one suit 101.3 -> 90.1 MB; an extra suit worn costs about 2.7 MB instead of 16.
 > - `--oldlook` (or `FighterRig.old_look = true`) restores the whole-suit swap and the first weapon models.
 
+> **Gap pass (2026-11-27).** All in `tools/armor_split.gd` (parts rebuilt) and `ArmorParts.FINISH`; no model was regenerated. Sheets: `marketing/armor_gap_pass/`.
+> - **Hip plates on the starting kit.** The benchmark knights were generated with a bare black undersuit over the pelvis. The
+>   host suit's `legs` part now carries a fauld (`_fauld`): two lames with rolled rims from the waist to the crease of the
+>   legs, a short tongue in front, lower over the seat. It is measured off the body (just outside the undersuit, under the
+>   side tassets), rides on the Hips bone alone and is painted from one plain patch of the suit's own plate, found in its
+>   texture (`_plain_uv`). 720 triangles. Because it is rigid on the pelvis, a thigh raised high passes into its lower edge
+>   in front; it has no trim line painted on it. `--nofauld` builds the legs without it.
+> - **Flat boots on every female suit** (`_flatten_heels`). All nine older female suits were generated in 4-6 cm heels. Each
+>   foot is sheared down behind the ball until the shank lies on the floor and the heel block is pressed flat; the ankle and
+>   lower shin come down with it, so the mesh ankle sits up to about that much below the ankle joint. Frost keeps a small
+>   stub. Pointed toes are untouched. `--heels` builds them as generated. The host's boots were flat already.
+> - **Trimmed by default:** black, ash, frost, wyrm, regal, hollow go through the de-spike below whenever parts are built
+>   (`DESPIKE_DEFAULT`; `--spikes` for the generated shapes). Its limits are as the study says: stubs remain on pauldrons,
+>   the frost and wyrm helms become compact but lumpy, the paint is not corrected.
+> - **Finish:** every older family is a step rougher and less mirror-like (`FINISH`); the benchmark suit is unchanged.
+> - Not done: no family was regenerated, so "mix of original and future" is only approached by trimming and finish.
+>   The black ankle band between the benchmark knights' greaves and shoes is still there.
+
 Study and working prototype for Addendum 3 ("real equipment, not skins"). Nothing here is wired into the live game.
 Everything below was measured or looked at in engine captures (`marketing/parts_bench/`); where something was not
 checked it says so. Nothing has run on a phone.

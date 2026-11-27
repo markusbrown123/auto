@@ -206,7 +206,7 @@ func _build() -> void:
 	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.82), Color(0.3, 0.27, 0.2))
 	case.get_theme_stylebox("panel").set_content_margin_all(1)
 	case.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	case.custom_minimum_size.y = 170
+	case.custom_minimum_size.y = 120      # the least it can be while a spoken line lifts the hub's bottom edge on a phone
 	left.add_child(case)
 	carousel = ItemCarousel.new()
 	carousel.body = str(Game.profile.get("body", "m"))

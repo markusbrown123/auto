@@ -33,6 +33,18 @@ func _ready() -> void:
 	hall.env.ambient_light_energy = 1.7
 	hall.env.tonemap_exposure = 1.35
 	_seal = FinalHall.seal_panel(hall, SEAL)
+	# the seal's housing: a frame of the old make round the panel, pipe runs up the wall from it, and a light on the
+	# knight's side of it so that what is done there is seen (it was a dark figure at a wall panel)
+	var frame := OldMake.portal(hall, SEAL + Vector3(1.2, 0, 0), 1.9, 3.0, FinalHall.lamp(FinalHall.TEAL, 1.2))
+	frame.rotation.y = deg_to_rad(-70.0)
+	for k in 4:
+		OldMake.pipe(hall, SEAL + Vector3(1.5, 3.9, -0.4 + k * 0.28), SEAL + Vector3(2.2 + k * 0.2, 9.0, -1.2 + k * 0.4), 0.07, OldMake.metal())
+	var fill := OmniLight3D.new()
+	fill.light_color = Color("#ffe2c0")
+	fill.light_energy = 1.5
+	fill.omni_range = 7.0
+	fill.position = SEAL + Vector3(-2.2, 2.4, 2.2)
+	hall.add_child(fill)
 	# under the paving, what keeps him: dark here, and seen only when it wakes
 	for i in 7:
 		var m := FinalHall.lamp(FinalHall.TEAL, 0.0)
@@ -122,8 +134,9 @@ func _run() -> void:
 	flare.tween_property(_seal, "light_energy", 5.0, 3.0)
 	# the knight at the seal, and the Monarch coming between it and us
 	walk(monarch, SEAL + Vector3(-4.3, 0, 3.4), 1.05)
-	cam.cut(Vector3(-0.2, 1.25, 4.6), SEAL + Vector3(-0.6, 1.3, 0.6), 40.0)
-	cam.move(Vector3(0.5, 1.2, 3.9), SEAL + Vector3(-0.6, 1.3, 0.6), 7.0)
+	# (from the seal's own side of the hall: the Monarch crosses the left of the frame and does not hide the knight)
+	cam.cut(Vector3(3.6, 1.3, 3.0), SEAL + Vector3(-0.6, 1.3, 0.6), 40.0)
+	cam.move(Vector3(3.9, 1.25, 2.0), SEAL + Vector3(-0.6, 1.3, 0.6), 7.0)
 	if _held("seal"):
 		return
 	Story.play("gen2_seal", true)

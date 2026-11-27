@@ -70,7 +70,7 @@ func _ready() -> void:
 	stage = ItemStage.new()
 	stage.body = str(Game.profile.get("body", "m"))
 	stage.upright = true
-	stage.custom_minimum_size = Vector2(270, 250)
+	stage.custom_minimum_size = Vector2(270, 190)
 	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_mid.add_child(stage)
 	UI.corners(p, UI.GOLD_DIM, 12.0)

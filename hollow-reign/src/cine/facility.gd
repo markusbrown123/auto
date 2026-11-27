@@ -25,6 +25,7 @@ var _leaves: Array = []
 var _crown: Node3D
 var _crown_mat: StandardMaterial3D
 var _crown_light: OmniLight3D
+var _crown_inner: Node3D
 var _descending := false
 
 func _ready() -> void:
@@ -50,14 +51,7 @@ func _ready() -> void:
 		shaft.add_child(ring)
 		ring.position.y = -3.0 - k * RING_GAP
 		var mat := FinalHall.lamp(TEAL if k % 4 != 3 else VIOLET, 0.0)
-		for s in 14:
-			var a := TAU * s / 14.0
-			if (s + k) % 7 == 3:
-				continue          # a gap in each, so the rings are seen to turn
-			var dir := Vector3(sin(a), 0, cos(a))
-			var seg := _box(ring, Vector3(TAU * RING_R / 14.0 + 0.1, 1.5, 0.7), dir * RING_R, metal, a)
-			seg.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			_box(ring, Vector3(TAU * RING_R / 14.0 - 0.5, 0.12, 0.1), dir * (RING_R - 0.4) + Vector3(0, 0.25, 0), mat, a)
+		OldMake.ring(ring, RING_R, 0.62, mat, 11, false, metal)
 		for s2 in 4:
 			var a2 := TAU * s2 / 4.0 + k * 0.5
 			_box(ring, Vector3(0.5, RING_GAP, 0.5), Vector3(sin(a2), 0, cos(a2)) * (RING_R + 0.6) + Vector3(0, -RING_GAP * 0.5, 0), metal, a2)
@@ -100,23 +94,26 @@ func _ready() -> void:
 		var z := -17.0 - row * 6.5
 		var m := FinalHall.lamp(TEAL if row % 3 != 2 else Color("#ffb45a"), 0.0)
 		for sx3: float in [-1.0, 1.0]:
-			_box(arena, Vector3(1.2, 11.0, 4.6), Vector3(sx3 * (7.5 + row * 0.5), 5.5, z), metal, 0.0)
-			for line in 9:
-				_box(arena, Vector3(0.08, 0.1, 4.0), Vector3(sx3 * (6.86 + row * 0.5), 1.0 + line * 1.1, z), m, 0.0)
+			OldMake.rack(arena, Vector3(sx3 * (7.5 + row * 0.5), 0, z), Vector3(1.3, 11.0, 4.6), m, 9, -sx3, row * 2 + int(sx3))
 		_racks.append(m)
-	# the Crown: a ring the height of a tower at the end of it, and the light in the middle of it
+	# the Crown: a ring the height of a tower at the end of the racks, a second ring turning inside it the other way,
+	# spokes between them, and the light in the middle of it
 	_crown = Node3D.new()
 	arena.add_child(_crown)
-	_crown.position = Vector3(0, 13.0, -80.0)
+	_crown.position = Vector3(0, 13.5, -74.0)
 	_crown_mat = FinalHall.lamp(Color("#ffd890"), 0.0)
-	for s4 in 28:
-		var a4 := TAU * s4 / 28.0
-		var p := Vector3(sin(a4), cos(a4), 0) * 11.0
-		var seg2 := _box(_crown, Vector3(2.7, 1.5, 1.6), p, metal, 0.0)
-		seg2.rotation.z = -a4
-		if s4 % 2 == 0:
-			var lamp := _box(_crown, Vector3(1.6, 0.25, 0.2), p * 0.93 + Vector3(0, 0, 0.9), _crown_mat, 0.0)
-			lamp.rotation.z = -a4
+	OldMake.ring(_crown, 12.0, 1.0, _crown_mat, 15, true, metal)
+	_crown_inner = OldMake.ring(_crown, 7.2, 0.55, _crown_mat, 9, true, metal)
+	for s4 in 12:
+		var a4 := TAU * s4 / 12.0
+		OldMake.pipe(_crown, Vector3(sin(a4), cos(a4), 0) * 7.6, Vector3(sin(a4), cos(a4), 0) * 11.2, 0.16, metal)
+	var heart := MeshInstance3D.new()
+	var hs := SphereMesh.new()
+	hs.radius = 1.5
+	hs.height = 3.0
+	heart.mesh = hs
+	heart.material_override = _crown_mat
+	_crown.add_child(heart)
 	_crown_light = OmniLight3D.new()
 	_crown_light.light_color = Color("#ffd890")
 	_crown_light.light_energy = 0.0
@@ -151,6 +148,8 @@ func _process(delta: float) -> void:
 				Sfx.play("ui_tap", -16.0, 0.5)
 	if _crown:
 		_crown.rotation.z += delta * 0.05
+		if _crown_inner:
+			_crown_inner.rotation.z -= delta * 0.16
 
 func _run() -> void:
 	# 1: behind the heir, the shaft below
@@ -210,8 +209,8 @@ func _run() -> void:
 		tw.tween_property(_racks[i2], "emission_energy_multiplier", 2.4, 0.6)
 	var wake := create_tween()
 	wake.tween_interval(0.38 * _racks.size())
-	wake.tween_property(_crown_mat, "emission_energy_multiplier", 5.0, 2.4)
-	wake.parallel().tween_property(_crown_light, "light_energy", 7.0, 2.4)
+	wake.tween_property(_crown_mat, "emission_energy_multiplier", 7.0, 2.4)
+	wake.parallel().tween_property(_crown_light, "light_energy", 11.0, 2.4)
 	cam.move(Vector3(0.6, 4.2, 1.6), Vector3(0.0, 9.0, -50.0), 10.0, 42.0)
 	walk(hero, Vector3(0, 0, -3.4), 1.0)
 	if not await _w(6.4):

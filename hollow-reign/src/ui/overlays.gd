@@ -366,7 +366,7 @@ static func death(parent: Node, foe: Dictionary, summary: Dictionary, done: Call
 		var r := UI.button("Set out again", 20, 230)
 		r.pressed.connect(func(): close.call(actions.retry))
 		h.add_child(r)
-	var b := UI.button("Return to sanctuary" if not actions.is_empty() else "Rise", 19 if not actions.is_empty() else 22, 260)
+	var b := UI.button("Return to sanctuary" if not actions.is_empty() else "Rise", 20 if not actions.is_empty() else 22, 300)
 	b.pressed.connect(func(): close.call(done))
 	h.add_child(b)
 	if actions.has("equipment"):

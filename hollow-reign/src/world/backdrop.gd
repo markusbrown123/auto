@@ -210,8 +210,10 @@ func add_prop(kind: String, at: Vector3) -> Node3D:
 	var n := Node3D.new()
 	props.add_child(n)
 	n.position = at
-	var wood := Look.flat(Color("#3a2a1c"), 0.85)
-	var iron := Look.flat(Color("#2a2826"), 0.5, 0.8)
+	# (with the far-future kit a chest is a ceramic case with alloy bands and a shrine a small terminal: the same
+	# shapes in the kit's materials; --oldworld keeps wood and stone)
+	var wood := Look.flat(Color("#3a2a1c"), 0.85) if Future.old_world else Look.flat(Color("#8f918a"), 0.7, 0.1)
+	var iron := Look.flat(Color("#2a2826"), 0.5, 0.8) if Future.old_world else Look.flat(Color("#33383d"), 0.5, 0.6)
 	var gold := Look.glow(Color(arena.theme.fire), 2.5)
 	match kind:
 		"treasure":
@@ -225,9 +227,10 @@ func add_prop(kind: String, at: Vector3) -> Node3D:
 				_box(n, Vector3(0.06, 0.54, 0.58), Vector3(x, 0.26, 0), iron)
 			_box(n, Vector3(0.1, 0.12, 0.04), Vector3(0, 0.44, 0.29), gold)
 		"shrine":
-			_box(n, Vector3(0.9, 0.9, 0.5), Vector3(0, 0.45, 0), Look.stone(Color("#5a564e")))
-			_box(n, Vector3(0.5, 1.3, 0.25), Vector3(0, 1.4, -0.1), Look.stone(Color("#5a564e")))
-			_box(n, Vector3(0.04, 0.2, 0.04), Vector3(0, 1.0, 0.1), Look.flat(Color("#d8cfb8")))
+			var body: Material = Look.stone(Color("#5a564e")) if Future.old_world else iron
+			_box(n, Vector3(0.9, 0.9, 0.5), Vector3(0, 0.45, 0), body)
+			_box(n, Vector3(0.5, 1.3, 0.25), Vector3(0, 1.4, -0.1), body if Future.old_world else wood)
+			_box(n, Vector3(0.04, 0.2, 0.04), Vector3(0, 1.0, 0.1), Look.flat(Color("#d8cfb8")) if Future.old_world else gold)
 			_box(n, Vector3(0.025, 0.05, 0.025), Vector3(0, 1.13, 0.1), gold)
 			var l := OmniLight3D.new()
 			l.light_color = Color(arena.theme.fire)

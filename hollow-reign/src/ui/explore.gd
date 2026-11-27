@@ -484,7 +484,7 @@ func _card(o: Dictionary, index: int = 0) -> Button:
 		tag += "  ·  " + str(Db.foes[o.foe].get("cls", ""))
 	var b := UI.button("", 18, 0)
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	b.custom_minimum_size.y = 104
+	b.custom_minimum_size.y = 114
 	var v := VBoxContainer.new()
 	UI.full(v)
 	v.offset_left = 16
@@ -822,7 +822,7 @@ func _tick_secrets(dt: float) -> void:
 		e.button.position = backdrop.cam.unproject_position(p) - e.button.size * 0.5 - e.button.get_parent().global_position
 		if e.lamp != null and not e.has("lit"):
 			e.lamp.light_energy = float(e.lamp.get_meta("base")) * (0.65 + 0.35 * sin(_clock * 1.3 + float(e.index)))
-	if not _quiet():
+	if not _quiet() or Game.run.is_empty():      # (the road has just been left: Turn Back empties the run while this stop fades out)
 		return
 	_idle += dt
 	# some places only answer someone who stays

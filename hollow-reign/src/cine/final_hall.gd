@@ -116,24 +116,21 @@ func _build() -> void:
 			var b := Basis(Vector3.UP, deg_to_rad(-24.0 * sx4))
 			_part(Vector3(3.9 * (0.4 + arena.rng.randf() * 0.6), 0.08, 0.06), Vector3(sx4 * 7.4, 0.8 + row * 0.66, -15.4) + b * Vector3(0, 0, 0.3), m3, Vector3(0, -24.0 * sx4, 0))
 			_racks.append(m3)
-	# the restoration engines at the foot of the dais: dark until they are needed
+	# the restoration engines at the foot of the dais (OldMake): dark until they are needed. Each carries six rings of
+	# light on its shaft, a flywheel and two rams; pipe runs go from each up the dais to the seat they feed.
+	var built: Array = []
 	for e: Vector3 in ENGINE_AT:
-		arena.cyl(0.55, 0.75, 0.5, e + Vector3(0, 0.25, 0), metal, 10)
-		arena.cyl(0.22, 0.22, 5.2, e + Vector3(0, 2.9, 0), metal, 8)
-		arena.cyl(0.6, 0.3, 0.4, e + Vector3(0, 5.6, 0), metal, 10)
-		var l2 := OmniLight3D.new()
-		l2.light_color = VIOLET
-		l2.light_energy = 0.0
-		l2.omni_range = 9.0
-		l2.position = e + Vector3(0, 2.6, 0.9)
-		arena.add_child(l2)
-		_engine_lights.append(l2)
+		var eng: Dictionary = OldMake.engine(arena, e, VIOLET, 6, 5.6)
+		built.append(eng)
+		_engine_lights.append(eng.light)
+		var sx5 := signf(e.x)
+		for k3 in 3:
+			OldMake.pipe(arena, e + Vector3(-sx5 * 0.5, 0.5 + k3 * 0.45, -0.3), Vector3(sx5 * (1.5 - k3 * 0.35), 1.6 + k3 * 0.5, -13.4), 0.07 + 0.02 * k3, metal)
 	for k2 in 6:
-		for e2: Vector3 in ENGINE_AT:
-			var m4 := _glow_mat(VIOLET, 0.0)
-			var ring := arena.cyl(0.46 - k2 * 0.02, 0.46 - k2 * 0.02, 0.14, e2 + Vector3(0, 1.0 + k2 * 0.72, 0), m4, 14)
-			ring.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			_rings.append(m4)
+		for eng2: Dictionary in built:
+			_rings.append(eng2.rings[k2])
+	# the hall is roofed: ribs of the old make spring from the walls, and above them is dark, not sky
+	OldMake.vault(arena, 19.0, 6.5, 12.5, 13.0, -19.0, 8)
 	if PropModel.exists("res://assets/models/env_de_conduit.glb"):
 		arena.prop("de_conduit", 6.5, Vector3(-10.5, 0, -11.5), 30.0)
 		arena.prop("de_conduit", 5.5, Vector3(10.8, 0, -3.0), 205.0)

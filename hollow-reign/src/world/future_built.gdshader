@@ -12,6 +12,7 @@ uniform sampler2D noise_tex : filter_linear_mipmap, repeat_enable;
 uniform vec3 tint : source_color = vec3(0.7, 0.71, 0.69);
 uniform float metal = 0.12;
 uniform float rough = 0.6;
+uniform float plate = 0.85;                    // how much one plate differs in tone from the next
 uniform float scale = 0.16;                     // panel sheets a metre
 uniform vec3 grime : source_color = vec3(0.2, 0.25, 0.12);
 uniform float grime_h = 1.4;                    // how far up from the ground the region's grime climbs
@@ -52,7 +53,7 @@ void fragment() {
 	float n = texture(noise_tex, vec2(side, up) * 0.055 + vec2(0.3, 0.1)).r;
 	float st = texture(noise_tex, vec2(side * 0.42, up * 0.018)).r;
 	float upright = 1.0 - tw.y;
-	vec3 c = tint * pt * (0.8 + 0.4 * n);
+	vec3 c = tint * mix(vec3(0.9), pt, plate) * (0.8 + 0.4 * n);
 	// rain streaks, and broad stains
 	c *= 1.0 - streak * upright * smoothstep(0.5, 0.78, st) * 0.55;
 	c *= mix(0.78, 1.0, smoothstep(0.35, 0.6, n));

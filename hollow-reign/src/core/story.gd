@@ -87,12 +87,36 @@ func seen(id: String) -> bool:
 func pending(id: String) -> bool:
 	return has_scene(id) and not (bool(data.scenes[id].get("once", true)) and seen(id))
 
+const VO := "res://assets/audio/vo/"
+
+## The take a line is spoken with. The knight's lines (and the forebear's and the heir's, which are the knight's by
+## another cast) and any line marked `by_body` (the Kept, who was the player's own second knight) have one take for
+## each lineage: <line>_m / <line>_f. A `by_body` line whose take for this body is missing falls back to <line>.ogg.
+## In the third generation a take suffixed `_g3` is used where one exists (<line>_g3[_m|_f].ogg), so the Last Heir
+## can be given their own readings of the shared scenes later with no change here; until then the shared take plays.
 func audio_path(line_id: String) -> String:
+	var c := take_candidates(line_id)
+	for path: String in c:
+		if ResourceLoader.exists(path):
+			return path
+	return c[c.size() - 2] if bool(data.lines[line_id].get("by_body", false)) else c[c.size() - 1]
+
+## Every file that could hold this line now, best first.
+func take_candidates(line_id: String) -> Array:
 	var line: Dictionary = data.lines[line_id]
+	var by_body: bool = bool(line.get("by_body", false))
 	var suffix := ""
-	if line.speaker == "player":
+	if line.speaker == "player" or by_body:
 		suffix = "_" + str(Game.profile.get("body", "m"))
-	return "res://assets/audio/vo/%s%s.ogg" % [line_id, suffix]
+	var out: Array = []
+	if not Game.profile.is_empty() and Game.generation() >= 3:
+		out.append("%s%s_g3%s.ogg" % [VO, line_id, suffix])
+		if suffix != "":
+			out.append("%s%s_g3.ogg" % [VO, line_id])
+	out.append("%s%s%s.ogg" % [VO, line_id, suffix])
+	if by_body:
+		out.append("%s%s.ogg" % [VO, line_id])
+	return out
 
 func stop() -> void:
 	_token += 1

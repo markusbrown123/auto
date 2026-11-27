@@ -34,6 +34,9 @@ func run() -> void:
 	await _slice_road()
 	await _slice_save()
 	await _slice_camera()
+	_voices()
+	await _campaign()
+	await _scenes()
 	Story.stop()
 	Game.run = {}
 
@@ -301,3 +304,242 @@ func _slice_camera() -> void:
 	ok(Duel.FINISH_HOLD < 3.0, "the pause between the blow and the first of the last words is shorter")
 	d.queue_free()
 	await frames()
+
+# ---------------------------------------------------------------- which take a line plays
+func _voices() -> void:
+	Game.new_game("#3d0f0f", "f")
+	var kept_line := ""
+	var heir_line := ""
+	var shared := ""
+	for id: String in Story.data.lines:
+		var l: Dictionary = Story.data.lines[id]
+		if bool(l.get("by_body", false)) and kept_line == "":
+			kept_line = id
+		if str(l.get("cast", "")) == "heir" and heir_line == "":
+			heir_line = id
+		if str(l.speaker) == "lyra" and shared == "" and ResourceLoader.exists(Story.VO + id + ".ogg"):
+			shared = id
+	ok(kept_line != "" and Story.audio_path(kept_line).ends_with("_f.ogg") and ResourceLoader.exists(Story.audio_path(kept_line)), "voices: in a woman's lineage the Kept speaks with her take (%s)" % Story.audio_path(kept_line).get_file())
+	Game.profile.body = "m"
+	ok(Story.audio_path(kept_line).ends_with("_m.ogg"), "voices: and in a man's with his")
+	Game.profile.body = "x"
+	ok(Story.audio_path(kept_line) == Story.VO + kept_line + ".ogg", "voices: a by_body line with no take for the body falls back to the plain file")
+	Game.profile.body = "f"
+	ok(heir_line != "" and Story.audio_path(heir_line).ends_with("_f.ogg") and ResourceLoader.exists(Story.audio_path(heir_line)), "voices: the heir's own lines resolve by body (%s)" % Story.audio_path(heir_line).get_file())
+	var fore := ""
+	for id: String in Story.data.lines:
+		if str(Story.data.lines[id].get("cast", "")) == "forebear" and fore == "":
+			fore = id
+	ok(fore != "" and Story.audio_path(fore).ends_with("_f.ogg") and ResourceLoader.exists(Story.audio_path(fore)), "voices: and the forebear's (%s)" % Story.audio_path(fore).get_file())
+	# the third generation looks for its own take first, and plays the shared one until there is one
+	ok(Game.generation() == 2 and Story.take_candidates(shared) == [Story.VO + shared + ".ogg"], "voices: before the third generation a shared line has one place to be")
+	Game.profile.campaign.generation = 3
+	var c: Array = Story.take_candidates(shared)
+	ok(Game.generation() == 3 and c[0] == Story.VO + shared + "_g3.ogg" and Story.audio_path(shared) == Story.VO + shared + ".ogg", "voices: the last heir's generation asks for <line>_g3 first and falls back to the shared take")
+	var cp: Array = Story.take_candidates(heir_line)
+	ok(cp[0].ends_with("_g3_f.ogg") and cp[1].ends_with("_g3.ogg") and cp[2].ends_with("_f.ogg"), "voices: for the knight's lines, <line>_g3_<body>, then <line>_g3, then the shared take")
+	Game.new_game()
+
+# ---------------------------------------------------------------- Generation III: the choice, the Kept, the late roads
+func _heir() -> void:
+	Game.new_game()
+	Game.profile.tutorial_done = true
+	Game.fall(2, "saved_the_records", {"choice": "records"})
+	Game.inherit({"name": "Test", "body": "m"})
+
+func _campaign() -> void:
+	_heir()
+	ok(Game.generation() == 3 and Generations.canon_open(Game.profile), "(the last heir, the story open)")
+	# the ending choice cannot be skipped from the sanctuary
+	Game.profile.cleared = ["courtyard", "blackwood", "cathedral", "throne"]
+	Game.add_fact("monarch_felled:3")
+	ok(Game.road_complete() and not Game.game_complete(), "the Monarch felled and \"Not yet\" answered: the road is done, the story is not, and nothing offers the next cycle")
+	var before := JSON.stringify([Game.profile.ng, Game.profile.cleared, Game.profile.campaign])
+	ok(not Game.start_ng_plus() and not Game.start_legacy_journey() and JSON.stringify([Game.profile.ng, Game.profile.cleared, Game.profile.campaign]) == before,
+		"asking for the next cycle with no ending chosen is refused and changes nothing")
+	var s := Sanctuary.new()
+	add_child(s)
+	await frames(2)
+	s.show_tab("Journey")
+	await frames(2)
+	var again := false
+	for b: Button in s.find_children("*", "Button", true, false):
+		again = again or b.text.begins_with("Return Again")
+	ok(not again, "the sanctuary's Journey tab has no \"Return Again\" while the Crown is undecided")
+	s.queue_free()
+	await frames()
+	Game.choose_ending("steward")
+	ok(Game.game_complete() and Game.start_legacy_journey() and Game.on_legacy_journey(), "once an ending is chosen the legacy journey is offered and begins")
+	# a second-generation knight who beats the Monarch cannot skip the third generation either
+	Game.new_game()
+	Game.profile.cleared = ["courtyard", "blackwood", "cathedral", "crypt", "citadel", "throne"]
+	ok(Game.road_complete() and not Game.game_complete() and not Game.start_ng_plus() and Game.profile.ng == 0, "nor can the second generation turn the world over past the heir")
+	# the Kept, once let go, does not stand again
+	_heir()
+	Game.echo_foe()
+	var last: Array = Encounters.options(3, "courtyard", 6)
+	ok(last.size() == 1 and str(last[0].get("foe", "")) == "the_kept", "the Kept stands in the Inner Ward")
+	Game.profile.defeated["the_kept"] = 1
+	Game.profile.flags["kept_released"] = true
+	Game.save()                    # (as KeptScene.grant_edge does: the fact is written with the save)
+	ok(Game.has_fact("released:the_kept"), "letting the Kept go is a fact of the world")
+	last = Encounters.options(3, "courtyard", 6)
+	ok(last.size() == 1 and str(last[0].type) == "pass" and not last[0].has("foe"), "walked again, the post is empty: the Kept does not reappear (%s)" % str(last[0].get("hint", "")))
+	Game.start_run("courtyard")
+	Game.run.stage = 6
+	ok(Game.stage_options().size() == 1 and str(Game.stage_options()[0].type) == "pass" and Encounters.guardian(3, "courtyard").is_empty(), "and the road offers only the way on")
+	Game.run = {}
+	Game.profile = {}
+	ok(Game.load_game() and Game.has_fact("released:the_kept") and str(Encounters.options(3, "courtyard", 6)[0].type) == "pass", "it stays so after a load")
+	# King's Remnant is the one-handed sword its model is
+	var kr: Dictionary = Db.item("w_throneshard")
+	ok(str(kr.cls) == "sword" and not bool(Db.classes[kr.cls].two_handed) and str(kr.get("gear_id", "")) == "kings_remnant", "King's Remnant is classed as the one-handed sword it is modelled as")
+	Game.new_game()
+	Game.grant_item("w_throneshard")
+	Game.profile.attrs.strength = 20
+	Game.profile.attrs.dex = 20
+	var shield = Game.profile.equipped.shield
+	ok(Game.equip("w_throneshard") and Game.profile.equipped.shield == shield and shield != null, "and wielding it leaves the shield on the arm")
+	var between: bool = int(Db.item("w_rime_sword").damage) < int(kr.damage) and int(kr.damage) < int(Db.item("w_monarch").damage)
+	ok(between, "its edge sits between the Rimeglass Sabre and the Monarch's own (%d)" % int(kr.damage))
+	# the Awakened Beast has its own fight
+	var beast: Dictionary = Encounters.foe("awakened_beast")
+	var base: Dictionary = Db.foes["maulbeast"]
+	var mine := {}
+	var theirs := {}
+	for ph: Dictionary in beast.phases:
+		for c: Dictionary in ph.combos:
+			mine[str(c.id)] = true
+	for c: Dictionary in base.phases[0].combos:
+		theirs[str(c.id)] = true
+	var own := 0
+	for cid: String in mine:
+		own += 0 if theirs.has(cid) else 1
+	ok(beast.phases.size() == 3 and float(beast.phases[1].at) < 1.0 and float(beast.phases[2].at) < float(beast.phases[1].at) and own >= 7,
+		"the Awakened Beast fights in three phases with %d patterns the Maulbeast never had" % own)
+	var fair := true
+	var quick := 9.0
+	for ph: Dictionary in beast.phases:
+		for c: Dictionary in ph.combos:
+			for a: Dictionary in c.attacks:
+				fair = fair and (bool(a.parry) or str(a.dodge) != "none" or not bool(a.unblockable))
+				quick = minf(quick, float(a.windup) / float(ph.speed))
+	ok(fair and quick >= 0.33, "every blow of it has an answer and can be read (quickest %.2f s)" % quick)
+	ok(str(beast.phases[1].get("roar", "")) != "" and beast.boss, "its change of temper is told")
+	# late-game balance: a careless but competent player (the sloppy bot) neither walks through the late guardians nor is
+	# walled by them; the skilled bot always can win. Same seeds every run: the rules are deterministic.
+	_heir()
+	var builds := {}
+	for gen: int in [2, 3]:
+		# what the house holds late in each generation (tools/econ_sim.sh --generations): the heir has had longer at the forge
+		var late := Game.default_profile()
+		late.level = 14 if gen == 2 else 17
+		late.attrs = {"health": 14, "strength": 12, "dex": 9, "endurance": 9, "defense": 8, "crit": 2, "resist": 2} if gen == 2 else {"health": 19, "strength": 15, "dex": 11, "endurance": 11, "defense": 12, "crit": 3, "resist": 3}
+		for id: String in ["w_monarch", "s_rime", "a_wyrm_helm", "a_hollow_chest", "a_wyrm_gauntlets", "a_hollow_legs"]:
+			if Db.items.has(id):
+				late.inventory.append(id)
+				late.equipped[str(Db.item(id).slot)] = id
+				late.upgrades[id] = 4 if gen == 2 else 5
+		builds[gen] = Stats.compute(late, Db.items, Db.classes)
+	for foe_id: String in ["forgotten_monarch", "frostbound_king", "monarch_iii", "awakened_beast", "laboratory_guardian"]:
+		var f: Dictionary = Encounters.foe(foe_id) if not Db.foes.has(foe_id) else Db.foes[foe_id]
+		var st: Dictionary = builds[3 if int(f.get("gen", 2)) == 3 else 2]
+		var t_sum := 0.0
+		var wins := 0
+		var hurt := 0.0
+		for sd: int in [21, 22, 23, 24]:
+			var sim := DuelSim.new()
+			sim.setup(st, f, sd, {"combos": Db.combos})
+			var bot := DuelBot.new(sim, DuelBot.Style.SLOPPY, sd)
+			for i: int in 400 * 60:
+				bot.tick(1.0 / 60.0)
+				sim.tick(1.0 / 60.0)
+				if sim.over:
+					break
+			t_sum += sim.time
+			wins += 1 if sim.b_state == DuelSim.B.DEAD else 0
+			hurt += float(sim.stats.taken) / float(sim.pl.max_hp)
+		var skilled := DuelSim.new()
+		skilled.setup(st, f, 31, {"combos": Db.combos})
+		var sb := DuelBot.new(skilled, DuelBot.Style.SKILLED, 31)
+		for i: int in 400 * 60:
+			sb.tick(1.0 / 60.0)
+			skilled.tick(1.0 / 60.0)
+			if skilled.over:
+				break
+		ok(t_sum / 4.0 >= 40.0 and t_sum / 4.0 <= 240.0 and hurt / 4.0 >= 0.25 and wins >= 1 and skilled.b_state == DuelSim.B.DEAD,
+			"balance, %s: a late knight's fight lasts %.0f s on average, costs %.0f%% of their health, is won %d times in 4 carelessly, and always with care" % [foe_id, t_sum / 4.0, 100.0 * hurt / 4.0, wins])
+	Game.new_game()
+
+# ---------------------------------------------------------------- the endings and the built machinery
+func _scenes() -> void:
+	_heir()
+	for id: String in ["silence", "steward", "cities"]:
+		ok(Story.has_scene("ending_" + id) and Story.data.scenes["ending_" + id].lines.size() >= 5, "ending %s: its lines exist, each with a voice id" % id)
+		var unrec := true
+		for lid: String in Story.data.scenes["ending_" + id].lines:
+			unrec = unrec and Story.data.lines[lid].get("recorded", true) == false and str(Story.data.lines[lid].text) != ""
+		ok(unrec, "ending %s: subtitles only for now (marked not recorded, so no stale take plays)" % id)
+		var e := EndingScene.make(id)
+		add_child(e)
+		var done := [false]
+		e.finished.connect(func(): done[0] = true)
+		var t := 0.0
+		while t < 200.0 and not done[0]:
+			if Story.busy:
+				Story._skip = true
+			await get_tree().process_frame
+			t += get_process_delta_time()
+		var distinct := {}
+		for sname: String in e.shots:
+			distinct[sname] = true
+		ok(done[0] and distinct.size() >= 5 and is_instance_valid(e.hero), "ending %s plays through as a scene: %d camera set-ups (%s), the heir in it" % [id, distinct.size(), str(e.shots)])
+		ok(id != "silence" or e.set_b is HighRoad, "The Final Silence ends on the high road") if id == "silence" else null
+		ok(e.set_b is Arena and (e.set_b as Arena)._theme_id == "throne", "The Last Steward ends in the throne hall") if id == "steward" else null
+		ok(is_instance_valid(e._figure) and e._door_light != null, "The Free Cities ends on a doorway with someone standing in it") if id == "cities" else null
+		e.queue_free()
+		Story.stop()
+		await frames(3)
+	# a skipped ending still ends once
+	var e2 := EndingScene.make("cities")
+	add_child(e2)
+	var n := [0]
+	e2.finished.connect(func(): n[0] += 1)
+	await frames(2)
+	e2.skip()
+	e2.skip()
+	ok(n[0] == 1, "an ending skipped ends once")
+	e2.queue_free()
+	await frames(2)
+	# the machinery is built, not boxed
+	var host := Node3D.new()
+	add_child(host)
+	var lamp := FinalHall.lamp(Color("#5fe0c8"), 1.0)
+	var ring := OldMake.ring(host, 6.0, 0.5, lamp)
+	var tori := 0
+	for mi: MeshInstance3D in ring.find_children("*", "MeshInstance3D", true, false):
+		tori += 1 if mi.mesh is TorusMesh else 0
+	var eng: Dictionary = OldMake.engine(host, Vector3.ZERO, Color("#b07aff"))
+	var rack := OldMake.rack(host, Vector3(3, 0, 0), Vector3(1.3, 9.0, 4.4), lamp)
+	var vault := OldMake.vault(host, 19.0, 6.5, 12.5, 13.0, -19.0, 8)
+	var shadows := 0
+	for mi: MeshInstance3D in vault.find_children("*", "MeshInstance3D", true, false):
+		shadows += 1 if mi.cast_shadow != GeometryInstance3D.SHADOW_CASTING_SETTING_OFF else 0
+	ok(tori >= 2 and eng.rings.size() == 6 and eng.light is OmniLight3D and rack.get_child_count() > 40 and vault.get_child_count() > 80 and shadows == 0,
+		"old-make machinery: rings are true rings, an engine carries six lamp rings, a rack has its cells, the vault's ribs cast no shadow on the fight")
+	host.queue_free()
+	var a := Arena.new()
+	add_child(a)
+	a.build("throne")
+	var hall := FinalHall.dress(a)
+	ok(hall._rings.size() == 12 and hall._engine_lights.size() == 2, "the final hall's engines still carry the seal's twelve rings")
+	hall.show_seal(2, 4)
+	ok(hall._ring_on == 3, "and still count the seal down")
+	a.queue_free()
+	for scene: Node in [Facility.new(), Aftermath.new(), SecondFall.new()]:
+		add_child(scene)
+		await frames(3)
+		ok(scene.cam != null and scene.cam.current, "%s builds with the new dressing" % scene.get_script().get_global_name())
+		scene.queue_free()
+		await frames(2)
+	Game.new_game()

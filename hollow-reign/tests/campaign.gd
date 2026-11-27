@@ -263,7 +263,13 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 	await saved_and_loaded("at the start of Generation III")
 	m.resume()
 	await frames(3)
-	ok(m.current is Sanctuary, "Continue on the road: the sanctuary, as always")
+	# (O5) the road is saved at every stop reached: Continue takes it up there, with nothing given and nothing lost
+	ok((m.current is Explore or m.current is CineRoad) and str(Game.run.get("region", "")) == "courtyard" and int(Game.run.get("stage", -1)) == 0, "Continue on the road: back at the stop that was reached")
+	m.show_sanctuary()
+	await frames(3)
+	Game.run = {}
+	Game.save()
+	ok(m.current is Sanctuary and not Game.resume_road(), "and a road that was left is the sanctuary on Continue, as always")
 	# ---- Generation III: the map, the roads, the Kept
 	var wm := WorldMap.new()
 	add_child(wm)
@@ -436,8 +442,9 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 		ok(press(str(m.ENDINGS[id][1])), "the last heir chooses: %s" % str(m.ENDINGS[id][0]))
 		await frames(3)
 		ok(str(Game.profile.campaign.ending) == id and Game.has_fact("ending:" + id) and Game.profile.endings.has(id) and not Generations.canon_open(Game.profile), "%s is the canon's ending" % id)
-		press("Continue")
-		await frames(3)
+		ok(m.current is EndingScene and m.current.id == id, "%s is played as a scene, not a panel" % id)
+		await skip_scene()
+		ok(m.current is Sanctuary and button("Rest") != null, "and it ends at the sanctuary, with the last word on what is elsewhere")
 		press("Rest")
 		await frames(3)
 		if id != "cities":

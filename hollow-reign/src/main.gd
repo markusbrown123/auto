@@ -664,12 +664,21 @@ func _ending() -> void:
 		if id == "":
 			return                      # the last heir may come back to it: the Deep's road and the Throne's both end here
 		Game.choose_ending(id)
-		Overlays.message(current, ENDINGS[id][0], ENDINGS[id][3], "Continue", func():
-			Overlays.message(current, "Elsewhere", [
-				"A far fortress, under a sky with the wrong stars. A machine wakes.",
-				"\"Local network disconnected. Searching for external systems.\"",
-				["Something answers.", UI.GOLD],
-				"The kingdom may be walked again, and it will be crueller."], "Rest", func(): pass)))
+		show_ending(id))
+
+## The ending chosen, as a directed scene (src/cine/ending_scene.gd; it was a text panel), then the sanctuary and the
+## last word on what is elsewhere.
+func show_ending(id: String) -> void:
+	var e := EndingScene.make(id)
+	e.hold_at = str(_args.get("hold", ""))
+	e.finished.connect(func():
+		show_sanctuary()
+		Overlays.message(current, "Elsewhere", [
+			"A far fortress, under a sky with the wrong stars. A machine wakes.",
+			"\"Local network disconnected. Searching for external systems.\"",
+			["Something answers.", UI.GOLD],
+			"The kingdom may be walked again, and it will be crueller."], "Rest", func(): pass))
+	_swap(e, 0.0)
 
 # ================================================================ dev / capture
 func _dev_boot() -> void:
@@ -841,7 +850,10 @@ func _dev_boot() -> void:
 			if _args.has("all"):
 				Game.profile.defeated["devourer"] = 1
 				Game.profile.cleared.append("roost")
-			_ending()
+			if _args.has("id"):
+				show_ending(str(_args.id))        # dev: --screen=ending --id=silence|steward|cities [--hold=coupling|crown|last]
+			else:
+				_ending()
 		"slice":
 			# the first-boss slice played by touch from the launch screen (src/dev/slice_bot.gd)
 			add_child(SliceBot.new(self, _args))

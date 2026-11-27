@@ -41,9 +41,11 @@ func _ready() -> void:
 	arena.box(Vector3(3.6, 5.2, 0.5), DOOR + Vector3(0, 2.6, -0.5), Look.glow(Color("#fff4e0"), 4.5))
 	for sx: float in [-1.0, 1.0]:
 		var leaf := arena.box(Vector3(1.7, 5.0, 0.4), DOOR + Vector3(sx * 0.85, 2.5, 0), metal)
+		OldMake.box(leaf, Vector3(1.3, 0.08, 0.06), Vector3(0, 1.2, 0.22), metal)
+		OldMake.box(leaf, Vector3(1.3, 0.08, 0.06), Vector3(0, -1.2, 0.22), metal)
+		OldMake.torus(leaf, 0.42, 0.05, Vector3(-sx * 0.55, 0, 0.2), metal, 24, 6).rotation.x = PI * 0.5
 		_leaves.append(leaf)
-		arena.box(Vector3(0.5, 5.6, 0.7), DOOR + Vector3(sx * 2.0, 2.8, 0), metal)
-	arena.box(Vector3(4.5, 0.5, 0.7), DOOR + Vector3(0, 5.4, 0), metal)
+	OldMake.portal(arena, DOOR + Vector3(0, 0, 0.1), 3.5, 5.0, FinalHall.lamp(FinalHall.TEAL, 0.5), metal)
 	_door_light = OmniLight3D.new()
 	_door_light.light_color = Color("#fff0d8")
 	_door_light.light_energy = 0.0

@@ -24,6 +24,7 @@ const ROAD_FROM := {"courtyard": "sanctuary", "deep": "throne"}
 var selected := ""
 var sheet: Control
 var card: VBoxContainer
+var _card_btns: VBoxContainer
 var _buttons := {}
 var _clock := 0.0
 
@@ -55,9 +56,21 @@ func _ready() -> void:
 	p.custom_minimum_size.x = 380
 	h.add_child(p)
 	UI.corners(p, UI.GOLD_DIM.lightened(0.2))
+	# the words scroll when a road has much to say; the buttons under them never move
+	var pv := VBoxContainer.new()
+	pv.add_theme_constant_override("separation", 8)
+	p.add_child(pv)
+	var csc := ScrollContainer.new()
+	csc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	csc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	pv.add_child(csc)
 	card = VBoxContainer.new()
-	card.add_theme_constant_override("separation", 7)
-	p.add_child(card)
+	card.add_theme_constant_override("separation", 5)
+	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	csc.add_child(card)
+	_card_btns = VBoxContainer.new()
+	_card_btns.add_theme_constant_override("separation", 8)
+	pv.add_child(_card_btns)
 	for r in Db.regions:
 		if Game.region_unlocked(r.id):
 			var b := Button.new()
@@ -121,9 +134,10 @@ func records(id: String) -> Vector2i:
 	return Vector2i(have, all)
 
 func _fill_card() -> void:
-	for c in card.get_children():
-		card.remove_child(c)
-		c.queue_free()
+	for holder: Control in [card, _card_btns]:
+		for c in holder.get_children():
+			holder.remove_child(c)
+			c.queue_free()
 	var r: Dictionary = Db.region_by_id.get(selected, {})
 	if r.is_empty():
 		return
@@ -166,18 +180,15 @@ func _fill_card() -> void:
 		card.add_child(UI.label("OFF THE ROAD", 15, UI.GOLD_DIM.lightened(0.3), "head"))
 		for s: String in side:
 			card.add_child(UI.wrapped(s, 18, UI.BONE, 340))
-	var fill := UI.spacer(0)
-	fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	card.add_child(fill)
 	if Game.shortcut_open(str(r.id)):
-		var sc := UI.button("By %s" % str(r.shortcut.label), 17, 340)
+		var sc := UI.button("By %s" % str(r.shortcut.label), 18, 340)
 		sc.pressed.connect(func(): set_out.emit(str(r.id), true))
-		card.add_child(sc)
+		_card_btns.add_child(sc)
 	var go := UI.button("Set out", 22, 340)
 	go.pressed.connect(func():
 		Sfx.play("ui_confirm", -3.0)
 		set_out.emit(str(r.id), false))
-	card.add_child(go)
+	_card_btns.add_child(go)
 	UI.stagger(card, 0.03, 0.25)
 
 # ---------------------------------------------------------------- the sheet

@@ -217,3 +217,65 @@ Courtyard's own arena plus one foe: 587k primitives and 335 MB at its first shot
 figure by the weight of that one rig.
 The High preset was not measured. The kit props the road no longer loads are why its video memory is under half
 what the first version of the road used (274 MB).
+
+## The duel regions as the far future left them (`src/world/future.gd`, 2026-11-27)
+
+Owner's direction: "Environment more new and space but land like futuristic not medieval at all." The same rule as the
+high road now holds in the duel arenas: **the land is natural, everything built on it is far-future, and it is old.**
+Seven arenas are rebuilt (Fallen Courtyard, Blackwood, Cathedral of Ash and its steps, Sunken Crypt, Frozen Citadel,
+Hollow Throne). The Wyrm's Roost, the Hollow Deep and the Sanctuary are as they were. `--oldworld` (dev flag) loads the
+earlier medieval layouts; they also load by themselves if the kit's models are missing.
+Judged on software-rendered captures only (`marketing/world_future_pass/`); nothing has been seen on a device.
+
+What did not change: the arena's size, the duelling ring (4.38 m), the flat floor, the theme table (`Arena.THEMES`:
+every light, fog and grade value above still applies), the hooks other code uses (`theme`, `env`, `sun`, `fires`,
+`tint()`), and the rule that nothing stands nearer the ring's centre than about 7 m (the camera keeps inside 6.4 m).
+
+### The shared kit
+- **Eleven generated props** (`assets/models/env_fu_*.glb`): `pylon` (a leaning monolith with a seam of light),
+  `tower` (a watch spire), `wall` (a length of bulkhead, torn at one end), `colossus` (a guardian machine that knelt
+  and never got up), `engine` (a turbine in the ground), `wreck` (a fallen arc of ring), `core` (a machine core: a
+  sphere held in an upright ring), `husk` (a dead walker by a slab), `pod` (an upright stasis pod), `throne` and
+  `cradle`. 2,300 to 5,700 triangles each. They come facing +X; `Future.prop` turns them so yaw 0 faces the camera's
+  side, sinks their own skirt of turf a few centimetres, and gives them `future_prop.gdshader`.
+- **`future_prop.gdshader`**: the clamped PBR read (roughness >= 0.55, metal <= 0.45: weathered, never chrome) plus
+  three things that let one model serve every region: `tint`; `seam`, the region's own light, put wherever the
+  texture has a painted light line (found by colour: cyan in most props, amber in the throne); and `snow` on faces
+  turned up.
+- **Built in code and merged by material** (`Future.Kit`; four structural meshes and up to five of light an arena):
+  `bulkhead` (leaning plates between ribs with a cap, a kerb, buttress feet, a line of light), `plates` and `door`
+  (interior walls), `ribs` (a pair of leaning ribs meeting overhead, a column of light in each), `ring` (a ring of
+  ceramic on end with a light channel), `monolith`, `spire`, `column`, `mast` and `beacon` (the lamp post that replaces
+  every brazier, lantern and candelabra), `conduit`, `console`; and the land's own: `trunk` (the Blackwood's colossal
+  trees), `crystals` (ice), `drift` (snow), `tufts` (grass).
+- **`future_built.gdshader`**: the high road's panel sheet laid on in world space from three sides, with age added in
+  the shader: rain streaks down upright faces, broad stains, the region's grime climbing from the ground (moss, soot,
+  rime), snow on top faces. Two tints a region: `pale` (matte ceramic, metal 0.12) and `alloy` (brushed, metal 0.5).
+- **`future_ground.gdshader`** (replaces the flagstone floor): a deck of plates round the duelling ring (the ring is an
+  inlaid alloy band with a broken line of light), joints in rings and spokes, a second band at the deck's edge, and
+  beyond the deck the region's land from its ground texture: turf, leaf mould, ash, wet rock, ice. The land takes
+  the deck back at its edge and in patches (`lost`); indoors the deck is the whole floor and the patches are what
+  has come through it.
+- **Outside** (`Future.ranges`, `Future.sky`): two ranges of hills and the planet and orbital arc of the high road,
+  brought inside the duel camera's 120 m far plane; drawn by their own light (`highland_far`, `highland_planet`,
+  `highland_skyline`), three draws.
+
+### Region by region (`Future.LOOKS`)
+| Region | What it is now | Land | Light in the seams | Deck |
+|---|---|---|---|---|
+| Fallen Courtyard | the landing court of a hill fortress: blast door between leaning bulkheads, spires, the kneeling guardian, an engine in the grass, beacons | turf, one dead tree | pale cyan, amber beacons | 8.4 m, pale |
+| Blackwood | the forest has had it a long time: colossal trunks, a machine shrine still giving off its sick light, a guardian among the trees | leaf mould, trees | sickly yellow-green | 6.6 m, mostly lost |
+| Cathedral of Ash | an archive hall that burned: leaning ribs with ember columns, half the roof gone, the core in a ring let into the end wall | ash through the deck | ember orange | whole floor |
+| Cathedral steps | the deck climbs in treads to a blast door in a bulkhead front | ash | ember orange | whole floor |
+| Sunken Crypt | a stasis vault, flooded: columns with a band of corpse-light, pods along the walls, cradles open on the floor | wet rock through the deck | teal | whole floor, wet |
+| Frozen Citadel | a hall of monoliths open to the snow, the seat iced into its machine, a guardian under a drift | ice, drifts, crystals | cold cyan | 9 m, snowed |
+| Hollow Throne | the last hall: whole ribs, dull gold light, the machine's ring on end behind the seat | none | dull gold | whole floor, dark |
+
+Material rule added to the table above: **far-future scenery** (class of the kit): roughness 0.55 - 1.0, metallic
+<= 0.45 on props, 0.12 (ceramic) or 0.5 (alloy) on built surfaces; emission only in seams, beacons and channels.
+
+### The opening's two interiors
+`env_fu_throne.glb` is the command hall's throne (node `Throne`; `Arena.THRONE_TALL`, `THRONE_SINK`, `THRONE_OFF`: 6 m
+tall with its own dais sunk under the floor, so the seat is 0.9 m up and where the built seat was) and
+`env_fu_cradle.glb` is the Engine room's cradle (node `Cradle`; `Arena.CRADLE_AT`, `CRADLE_TALL`, `CRADLE_YAW`).
+Both fall back to the earlier boxes under `--oldworld` or without the model.

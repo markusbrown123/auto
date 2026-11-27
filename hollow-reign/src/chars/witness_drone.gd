@@ -44,6 +44,8 @@ var _core: Node3D             # the body: spins slowly (aim "halo") or turns its
 var _ring: Node3D             # the parts of group "halo": tip toward the target when the aim is "halo"
 var _aim_body := false
 var _moving: Array = []       # [node, rest Transform3D, slide, breathe, talk, turn (degrees), talk_turn, look, look q] per part that moves
+var _pitch_max := deg_to_rad(30.0)   # how far the body itself tips to look up or down (manifest "tilt": an upright body stays upright)
+var _bank_max := 0.3
 var _glow_k := 1.0            # how bright this variant's light is drawn (manifest "glow")
 var _flare: MeshInstance3D    # a soft bloom on the lamp, seen only from where the lamp points
 var _flare_mat: StandardMaterial3D
@@ -127,6 +129,10 @@ func build(variant: String = "") -> void:
 			if look != Vector2.ZERO:
 				_looker = n
 	_glow_k = float(_info.get("glow", 1.0))
+	var tl = _info.get("tilt")
+	if tl is Array and tl.size() == 2:
+		_pitch_max = deg_to_rad(float(tl[0]))
+		_bank_max = deg_to_rad(float(tl[1]))
 	lamp = OmniLight3D.new()
 	lamp.light_color = AMBER
 	lamp.omni_range = float(_info.get("lamp_range", 0.9))
@@ -381,7 +387,7 @@ func _process(delta: float) -> void:
 			bq = Quaternion(Vector3.UP, rig.global_rotation.y) if rig != null else _body_q
 		elif target != Vector3.INF:
 			var d := target - global_position
-			var pitch := clampf(atan2(d.y, maxf(Vector2(d.x, d.z).length(), 0.01)), deg_to_rad(-30.0), deg_to_rad(30.0))
+			var pitch := clampf(atan2(d.y, maxf(Vector2(d.x, d.z).length(), 0.01)), -_pitch_max, _pitch_max)
 			bq = Quaternion(Vector3.UP, atan2(-d.x, -d.z)) * Quaternion(Vector3.RIGHT, pitch)
 		elif Vector2(_vel.x, _vel.z).length() > 0.7:
 			bq = Quaternion(Vector3.UP, atan2(-_vel.x, -_vel.z))      # under way: nose first
@@ -391,7 +397,7 @@ func _process(delta: float) -> void:
 			bq = Quaternion(Vector3.UP, rig.global_rotation.y + sway) * Quaternion(Vector3.RIGHT, 0.0 if calm else sin(_clock * 0.31) * 0.1)
 		_body_q = _body_q.slerp(bq, 1.0 - exp(-dt * (6.0 if target != Vector3.INF else 2.2)))
 		# it banks a little into the way it is travelling
-		var bank := 0.0 if calm else clampf(-_vel.dot(Basis(_body_q).x) * 0.12, -0.3, 0.3)
+		var bank := 0.0 if calm else clampf(-_vel.dot(Basis(_body_q).x) * 0.12, -_bank_max, _bank_max)
 		_core.quaternion = _body_q * Quaternion(Vector3.FORWARD, bank)
 	else:
 		var want := Quaternion.IDENTITY
@@ -686,8 +692,10 @@ func _clear_lens(p: Vector3, cam: Camera3D, free: bool) -> Vector3:
 	off.y = 0.0
 	var fwd := -cam.global_transform.basis.z
 	fwd.y = 0.0
-	var front := 1.2
-	if free:
+	var front := 1.5
+	# (when the knight has fallen it lies low beside them, where a close camera would find it filling the frame:
+	# that, at hip height, is the likeliest "large thing on the hip" in a close shot, so it keeps the wide berth then too)
+	if free or (rig != null and is_instance_valid(rig) and rig.get("mode") != null and int(rig.get("mode")) == FighterRig.Mode.DEAD):
 		front = clampf(2.6 * radius * _presence / (LENS_MAX * 2.0 * tan(deg_to_rad(cam.fov) * 0.5)), 1.2, 4.6)      # (2.6: vanes and weight stand outside `radius`)
 	var d := off.length()
 	var facing := off.dot(fwd.normalized()) / maxf(d, 0.001) if fwd.length() > 0.05 else 1.0

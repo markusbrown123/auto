@@ -866,6 +866,37 @@ var _last_world := Vector3.ZERO
 var _prev_world := Vector3.ZERO
 var _step_dir := Vector3(0, 0, -1)   # which way the feet are travelling, in the rig's own space
 var footsteps := false                # play a footfall as each foot lands
+var surface_id := ""                 # what is underfoot where this rig does not ask the ground (stone, metal, grass, snow, water); "" = ask `ground`, else stone
+static var foot_log: Array = []      # dev: [frame, side] for every footfall, when `log_feet`
+static var log_feet := false
+var _last_fall := {"Left": -9.0, "Right": -9.0}
+var _last_fall_any := -9.0
+
+## One sound for one foot put down: never two for a plant, never two feet inside a tenth of a second, none unless it was
+## walking. The surface is what the foot is on; the weight is the armour's (a fighter in the open is heavier than one
+## circling in a duel).
+func _footfall(side: String) -> void:
+	var now := _clock
+	if now - float(_last_fall[side]) < 0.3 or now - _last_fall_any < 0.12:
+		return
+	_last_fall[side] = now
+	_last_fall_any = now
+	_impact = clampf(_walk_amount, 0.4, 1.0)
+	if log_feet:
+		foot_log.append([Engine.get_process_frames(), side])
+	if not footsteps:
+		return
+	var weight := (0.62 if combat_steps else 0.85 + 0.3 * (bulk - 1.0)) * clampf(_walk_amount + 0.25, 0.4, 1.0)
+	var surface := _surface_now()
+	if Sfx.has_method("footstep"):
+		Sfx.call("footstep", surface, weight)
+	else:
+		Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
+
+func _surface_now() -> String:
+	if ground.is_valid() and ground.get_method() == &"height":
+		return Highland.surface_at(global_position)
+	return surface_id if surface_id != "" else "stone"
 var _step_i := 0
 var combat_steps := false            # in a duel: short steps in any direction, guard kept up
 const STRIDE := 0.78          # metres per step
@@ -901,15 +932,13 @@ func _process(delta: float) -> void:
 			if local.length() > 0.00001:
 				_step_dir = _step_dir.lerp(local.normalized(), 0.25).normalized()
 	_prev_world = global_position
-	# a footfall each time a foot comes down, heard on the frame it lands
+	# a footfall is heard when a foot is put down (`_footfall`, called by the feet passes), never on a timer or a distance;
+	# a rig with no skeleton to read the feet from (the boxed figure) keeps the stride's phase for it
 	var step_i := int(floor(_walk_phase / PI))
 	if step_i != _step_i:
 		_step_i = step_i
-		if _walk_amount > 0.35 and not combat_steps and mode == Mode.GUARD:
-			_impact = _walk_amount
-		if footsteps and _walk_amount > 0.35 and mode != Mode.DODGE and moved < 0.12:
-			Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
-			Sfx.play("armor", -17.0 + 4.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x), 0.12)      # plates shift with every step
+		if not (polish and skin != null and skin.ok) and _walk_amount > 0.35 and mode != Mode.DODGE and moved < 0.12:
+			_footfall("Left" if step_i % 2 == 0 else "Right")
 	_walk_amount = lerpf(_walk_amount, _walk_want(moved, dt), 1.0 - exp(-dt * 7.0))
 	_impact = maxf(0.0, _impact - dt * 5.0)
 	_solve(dt)
@@ -2699,6 +2728,7 @@ func _feet_step(dt: float) -> void:
 			lift = pow(sin(PI * u), 0.6) * float(f.lift)
 			if u >= 1.0:
 				f.step = false
+				_footfall(side)
 		var at_b: Vector3 = inv * (f.at as Vector3)
 		at_b.y = (inv * Vector3((f.at as Vector3).x, float(ground.call((f.at as Vector3).x, (f.at as Vector3).z)), (f.at as Vector3).z)).y if ground.is_valid() else 0.0
 		need = maxf(need, -at_b.y)
@@ -2737,7 +2767,13 @@ func _feet_walk(dt: float) -> void:
 		# (a figure turned on the spot, as in a menu, is not held by its feet: they lock only while it travels or stands on terrain)
 		# (while the stride is only beginning or dying away the pose is part stance, part walk: both feet count as down)
 		var down := up < 0.035 + 0.1 * (1.0 - smoothstep(0.3, 0.8, _walk_amount))
+		if not down:
+			f["air"] = maxf(float(f.get("air", 0.0)), up)
 		if down and not f.lock:
+			# the foot has come down after being up: that is the step, and the one place it is heard
+			if float(f.get("air", 0.0)) > 0.025 and _walk_amount > 0.3:
+				_footfall(side.trim_suffix("")) 
+			f["air"] = 0.0
 			f.lock = true
 			f.at = w + (f.off as Vector3)
 			f.off = Vector3.ZERO

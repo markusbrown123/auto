@@ -8,7 +8,7 @@
    -1,
    0
   ],
-  "open_dist": 0.005,
+  "open_dist": 0.0032,
   "ring_y": 0.005,
   "fins": [
    {
@@ -39,7 +39,7 @@
     "lean": 17.5
    }
   ],
-  "fin_open": 26.0,
+  "fin_open": 13.0,
   "parts": [
    "shell_a",
    "shell_b",

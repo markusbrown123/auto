@@ -8,8 +8,10 @@ extends Node3D
 ##       [--witness] [--poses=guard,cut_R,...] [--t=0.1,0.2] [--clip=<authored clip>] [--zoom=1.0] [--aim=x,y,z] [--tag=name]
 ##   --versus=<foe id> [--dirs=R,D] [--gap=m] [--nobite]   two fighters at the duel's striking distance, frames round contact
 ##   --relic                                              the old Witness relic (the mask) alone from four sides
-##   --drone[=plumb,reed,lens] [--attend] [--dark]        the Witness drone: one row per variant, beside the knight and
-##                                                        close (front, side, top); attentive / unlit on request
+##   --drone[=plumb,reed,lens] [--attend] [--speak] [--dark]   the Witness drone: one row per variant, beside the knight
+##                                                        and close (front, side, top); attentive / speaking / unlit
+##   --dronecheck                                         prints the drone's least distance to blade, shield and body
+##                                                        through every cut, a block, a sidestep, rolls (headless is fine)
 ## With --headless and --noshots it only prints the measurements (not for --versus or --relic).
 ## A line per state: worst value @ time. `low`/`float` lowest skinned vertex (min / max over the state), `tip` `rim` weapon
 ## and shield against the floor, `blade` `blade_l` body vertices within 3.5 cm of a blade, `shield` body vertices inside
@@ -295,9 +297,12 @@ func _drone_sheet() -> void:
 		d.attach(rig)
 		if _args.has("attend"):
 			d.look_at_point(Vector3(0.3, 1.6, -3.0))
+		if _args.has("speak"):
+			d.speaking(true)
 		if _args.has("dark"):
 			d.stowed(true)
 			d.rig = null
+			d.global_position = rig.global_transform * WitnessDrone.HOME
 		for i in 50:
 			await get_tree().process_frame
 		var at := d.global_position

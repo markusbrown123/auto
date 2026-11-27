@@ -27,7 +27,7 @@ CHOSEN = "plumb"
 
 G.MATERIALS.update({
     "ceramic": ((0.80, 0.785, 0.75), 0.0, 0.62, None, "fine_n", None, 0.18, None),
-    "alloy": ((0.86, 0.87, 0.90), 1.0, 0.40, "steel_a", "steel_n", "steel_orm", 0.3, None),
+    "alloy": ((0.80, 0.81, 0.84), 0.62, 0.40, "steel_a", "steel_n", "steel_orm", 0.3, None),
     "seam": ((0.07, 0.075, 0.085), 0.6, 0.55, None, None, None, 1.0, None),
     "light": ((1.0, 0.93, 0.82), 0.0, 0.5, None, None, None, 1.0, ((1.0, 0.80, 0.50), 1.6)),
 })
@@ -208,7 +208,7 @@ def _fin_mounts():
 
 VARIANTS = {
     "plumb": dict(parts=dict(shell_a=plumb_shell_a, shell_b=plumb_shell_b, light=plumb_light, ring=plumb_ring, fin=plumb_fin),
-                  open_axis=[0, -1, 0], open_dist=0.0050, ring_y=0.0050, fins=_fin_mounts(), fin_open=26.0),
+                  open_axis=[0, -1, 0], open_dist=0.0032, ring_y=0.0050, fins=_fin_mounts(), fin_open=13.0),
     "reed": dict(parts=dict(shell_a=reed_shell_a, shell_b=reed_shell_b, light=reed_light, ring=reed_ring),
                  open_axis=[1, 0, 0], open_dist=0.0030, ring_y=0.0, fins=[], fin_open=0.0),
     "lens": dict(parts=dict(shell_a=lens_shell_a, shell_b=lens_shell_b, light=lens_light, ring=lens_ring),

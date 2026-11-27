@@ -132,9 +132,9 @@ func _greet() -> void:
 	if Game.just_died:
 		Game.just_died = false
 		# the returns are written as a progression: play them in order, then stay on the last
-		Story.play("rebirth_%d" % clampi(int(Game.profile.deaths) - 1, 0, 5))
+		Story.play("rebirth_%d" % clampi(int(Game.profile.deaths) - 1, 0, 5), false, true)
 	elif Game.profile.cleared.has("courtyard"):
-		Story.play("sanctuary_return")
+		Story.play("sanctuary_return", false, true)
 
 func _on_profile() -> void:
 	if _forging:
@@ -332,10 +332,10 @@ func _orren_remark() -> void:
 		mark += int(Game.profile.defeated[f])
 	if Story.pending("orren_intro"):
 		Game.profile.flags["orren_spoke"] = mark
-		Story.play("orren_intro")
+		Story.play("orren_intro", false, true)
 	elif Story.has_scene("orren_idle") and mark >= int(Game.profile.flags.get("orren_spoke", -2)) + 2:
 		Game.profile.flags["orren_spoke"] = mark
-		Story.play("orren_idle")
+		Story.play("orren_idle", false, true)
 
 func _tab_blacksmith() -> void:
 	_orren_remark()

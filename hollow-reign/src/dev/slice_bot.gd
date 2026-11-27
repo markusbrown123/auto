@@ -657,6 +657,8 @@ func _stop(e: Explore) -> bool:
 			var before: int = Game.profile.get("secrets", {}).size() if Game.profile.get("secrets") is Dictionary else 0
 			await tap(sb, "something odd (%s)" % str(sp.secret.get("id", "a clue")))
 			await _wait(2.5)
+			await _until(func(): return not is_instance_valid(e) or (not e._staging and not Story.busy), 60.0, "the discovery to play out")
+			await _wait(1.0)
 			var b1 := _find("Onward")
 			if b1 == null:
 				b1 = _find("Continue")
@@ -815,6 +817,40 @@ func _sanctuary(s: Sanctuary) -> void:
 	say("  equipped before %s" % str(worn))
 	say("  equipped after  %s" % str(Game.profile.equipped))
 	_snap("armory2")
+	if args.has("forge_first"):
+		await _forge_visit(s)
+		await _shop_visit(s)
+	else:
+		await _shop_visit(s)
+		await _forge_visit(s)
+	# ---- leave by the menu and come back by Continue
+	if not args.has("no_quit"):
+		step("sanctuary: Settings, quit to the menu")
+		await tap(s.tab_buttons["Settings"])
+		await _wait(2.0)
+		audit("settings")
+		_snap("settings")
+		var q := _find("Return to title")
+		if q == null:
+			say("  DEFECT no way to the main menu from the sanctuary. On screen: %s" % ", ".join(_texts()))
+		else:
+			await tap(q)
+			await _until(func(): return main.current is TitleScreen, 10.0, "the main menu")
+			step("main menu again")
+			await _wait(2.0)
+			audit("returning")
+			_snap("menu2")
+			say("  menu: %s  ·  status line: %s" % [", ".join(_texts()), (main.current as TitleScreen).status_line()])
+			await press("Continue")
+			await _until(func(): return main.current is Sanctuary, 15.0, "the sanctuary after Continue")
+			step("sanctuary after Continue")
+			await _wait(2.0)
+			if main.current is Sanctuary:
+				await _set_out(main.current)
+			return
+	await _set_out(s)
+
+func _shop_visit(s: Sanctuary) -> void:
 	# ---- Shop: buy the dearest thing the purse reaches
 	step("sanctuary: Shop")
 	await tap(s.tab_buttons["Shop"])
@@ -856,6 +892,8 @@ func _sanctuary(s: Sanctuary) -> void:
 					await tap(e2)
 					await _wait(1.0)
 					say("  equipped now: %s" % str(Game.profile.equipped))
+
+func _forge_visit(s: Sanctuary) -> void:
 	# ---- Forge: one piece of work if it can be paid for
 	step("sanctuary: Forge")
 	await tap(s.tab_buttons["Blacksmith"])
@@ -879,34 +917,6 @@ func _sanctuary(s: Sanctuary) -> void:
 	if not done_work:
 		say("  nothing at the forge could be paid for (gold %d, shards %d, materials %s)" % [int(Game.profile.gold), int(Game.profile.shards), str(Game.profile.get("materials", {}))])
 	await _until(func(): return s.frame.visible and not s._forging, 30.0, "the forge to finish")
-	# ---- leave by the menu and come back by Continue
-	if not args.has("no_quit"):
-		step("sanctuary: Settings, quit to the menu")
-		await tap(s.tab_buttons["Settings"])
-		await _wait(2.0)
-		audit("settings")
-		_snap("settings")
-		var q := _find("Quit", true)
-		if q == null:
-			q = _find("menu", true)
-		if q == null:
-			say("  DEFECT no way to the main menu from the sanctuary. On screen: %s" % ", ".join(_texts()))
-		else:
-			await tap(q)
-			await _until(func(): return main.current is TitleScreen, 10.0, "the main menu")
-			step("main menu again")
-			await _wait(2.0)
-			audit("returning")
-			_snap("menu2")
-			say("  menu: %s  ·  status line: %s" % [", ".join(_texts()), (main.current as TitleScreen).status_line()])
-			await press("Continue")
-			await _until(func(): return main.current is Sanctuary, 15.0, "the sanctuary after Continue")
-			step("sanctuary after Continue")
-			await _wait(2.0)
-			if main.current is Sanctuary:
-				await _set_out(main.current)
-			return
-	await _set_out(s)
 
 func _set_out(s: Sanctuary) -> void:
 	if s.tab != "Journey":

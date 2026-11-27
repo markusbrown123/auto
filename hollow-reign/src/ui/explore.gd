@@ -85,7 +85,9 @@ func _ready() -> void:
 	back.custom_minimum_size.y = 40
 	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	back.offset_left = -150
-	back.pressed.connect(func(): turned_back.emit())
+	back.pressed.connect(func():
+		if _shown():
+			turned_back.emit())
 	frame.add_child(back)
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -420,8 +422,16 @@ func _card(o: Dictionary, index: int = 0) -> Button:
 	v.add_child(UI.label(tag.to_upper(), 13, UI.BLOOD.lightened(0.3) if o.type in ["fight", "boss"] else UI.GOLD_DIM, "bold"))
 	v.add_child(UI.title(o.label, 20, UI.BONE))
 	v.add_child(UI.label(o.hint, 17, UI.DIM))
-	b.pressed.connect(func(): _choose(o, index))
+	b.pressed.connect(func():
+		if _shown():
+			_choose(o, index))
 	return b
+
+## The choices are on screen: not faded out for a line being spoken or a staged moment. A faded control still takes
+## touches, so a tap low on the screen during the Witness's scene or a discovery would otherwise pick a way unseen.
+func _shown() -> bool:
+	var ui: Control = layer.get_child(0)
+	return ui.visible and ui.modulate.a > 0.5 and not _staging and not _leaving
 
 func _choose(o: Dictionary, index: int = 0) -> void:
 	_idle = 0.0

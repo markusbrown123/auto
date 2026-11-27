@@ -13,6 +13,7 @@ var speaker := ""             ## who is speaking now ("" between lines and when 
 var _layer: CanvasLayer
 var _name: Label
 var _text: Label
+var _catcher: Control             # takes the tap that passes over a line; out of the way for a line spoken as an aside
 var _player: AudioStreamPlayer
 var _skip := false
 var _token := 0
@@ -30,6 +31,7 @@ func _ready() -> void:
 	_layer.visible = false
 	add_child(_layer)
 	var catcher := UI.full(Control.new())
+	_catcher = catcher
 	catcher.mouse_filter = Control.MOUSE_FILTER_STOP
 	catcher.gui_input.connect(func(e):
 		if (e is InputEventScreenTouch or e is InputEventMouseButton) and e.pressed:
@@ -107,12 +109,16 @@ func _duck(on: bool) -> void:
 			tw.tween_method(func(v: float): AudioServer.set_bus_volume_db(idx, v), from, to, 0.18 if on else 0.6)
 
 ## Plays a scene line by line. Await it to block, or call without await to let it run alongside play.
-func play(id: String, force: bool = false) -> void:
+## `aside`: a remark made while the player is doing something else (a greeting in the sanctuary, a taunt as a
+## fight starts). It cannot be tapped past and it takes no touches: otherwise the first press on Buy, or the first
+## cut, would be spent on the line instead.
+func play(id: String, force: bool = false, aside: bool = false) -> void:
 	if not has_scene(id) or (not force and not pending(id)):
 		return
 	if busy:
 		stop()
 	busy = true
+	_catcher.mouse_filter = Control.MOUSE_FILTER_IGNORE if aside else Control.MOUSE_FILTER_STOP
 	_token += 1
 	var mine := _token
 	if not Game.profile.is_empty() and bool(data.scenes[id].get("once", true)):

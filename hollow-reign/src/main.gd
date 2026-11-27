@@ -444,6 +444,7 @@ func _approach_done(ap: Approach) -> void:
 	_swap_live(e)
 
 func show_sanctuary(tab: String = "") -> void:
+	Story.stop()                   # a line begun on the road is not carried into the hub (it would lie over the tabs and take the first tap)
 	var s := Sanctuary.new()
 	s.set_out.connect(_set_out)
 	s.quit_to_title.connect(func(): _fade_then(show_title))

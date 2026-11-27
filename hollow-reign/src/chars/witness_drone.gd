@@ -396,42 +396,51 @@ func _push(p: Vector3, from: Vector3, clear: float) -> Vector3:
 	dir = (dir + Vector3.UP * 0.5).normalized()      # when it must give way it goes up, not down into the arc
 	return from + dir * clear
 
-## In a duel: not between the camera and the foe, and not behind the pads at the corners of the screen.
+## Kept in the picture's clear part. Always: under the bars and tabs along the top of the screen. In a duel also:
+## not between the camera and the foe, and not behind the pads at the corners.
 func _clear_view(p: Vector3) -> Vector3:
-	if foe == null or not is_inside_tree():
+	if not is_inside_tree():
 		return p
 	var cam := get_viewport().get_camera_3d()
 	if cam == null:
 		return p
 	var c := cam.global_position
-	var fs: float = foe.scale.y
-	for h: float in [0.5, 1.1, 1.7]:
-		var f: Vector3 = foe.global_position + Vector3(0, h * fs, 0)
-		var d := f - c
-		var len := d.length()
-		if len < 0.2:
-			continue
-		d /= len
-		var t := (p - c).dot(d)
-		if t < 0.05 or t > len:
-			continue
-		var near := c + d * t
-		var need := 0.5 * fs * t / len + 0.12
-		var off := p - near
-		if off.length() < need:
-			var dir := off.normalized() if off.length() > 0.005 else Vector3.UP
-			p = near + (dir + Vector3.UP * 0.4).normalized() * need
-	if cam.is_position_behind(p):
+	if foe != null:
+		var fs: float = foe.scale.y
+		for h: float in [0.5, 1.1, 1.7]:
+			var f: Vector3 = foe.global_position + Vector3(0, h * fs, 0)
+			var d := f - c
+			var len := d.length()
+			if len < 0.2:
+				continue
+			d /= len
+			var t := (p - c).dot(d)
+			if t < 0.05 or t > len:
+				continue
+			var near := c + d * t
+			var need := 0.5 * fs * t / len + 0.12
+			var off := p - near
+			if off.length() < need:
+				var dir := off.normalized() if off.length() > 0.005 else Vector3.UP
+				p = near + (dir + Vector3.UP * 0.4).normalized() * need
+	if cam.is_position_behind(p) or cam.projection != Camera3D.PROJECTION_PERSPECTIVE:
 		return p
 	var size := get_viewport().get_visible_rect().size
 	var s := cam.unproject_position(p)
+	if s.x < 0.0 or s.x > size.x:
+		return p
 	var depth := (p - c).dot(-cam.global_transform.basis.z)
 	var per_px := 2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5) / maxf(size.y, 1.0)
-	var m := 34.0
+	var m := 56.0                                                    # the halo's own radius on screen, and a little air
+	var top := 64.0 + m + 12.0 if foe != null else minf(44.0 + m, size.y * 0.14)      # the duel's bars; a screen's row of tabs (less in a small preview)
+	if s.y < top and s.y > -200.0:
+		p -= cam.global_transform.basis.y * (top - s.y) * per_px
+	if foe == null:
+		return p
+	s = cam.unproject_position(p)
 	if s.x < 168.0 + m and s.y > 52.0 - m and s.y < 130.0 + m:       # the two charge pads, top left
 		p += cam.global_transform.basis.x * (168.0 + m - s.x) * per_px
-	if s.y < 64.0 + m + 12.0:                                          # the bars along the top
-		p -= cam.global_transform.basis.y * (64.0 + m + 12.0 - s.y) * per_px
+		s = cam.unproject_position(p)
 	if s.y > size.y - 112.0 - m:                                       # the row of pads along the bottom
 		p += cam.global_transform.basis.y * (s.y - (size.y - 112.0 - m)) * per_px
 	return p

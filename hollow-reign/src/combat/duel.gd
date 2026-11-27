@@ -479,7 +479,7 @@ func _begin_intro(skip: bool) -> void:
 		_speak_then_fight()
 		return
 	if Story.has_scene(_voice_key + "_retry"):
-		Story.play(_voice_key + "_retry")
+		Story.play(_voice_key + "_retry", false, true)
 	_intro_card = UI.full(Control.new())
 	_intro_card.mouse_filter = Control.MOUSE_FILTER_STOP
 	_intro_card.gui_input.connect(func(e):

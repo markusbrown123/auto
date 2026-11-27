@@ -110,8 +110,8 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 		var gap := UI.spacer(0)
 		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		other.add_child(gap)
-		var quit := UI.button("Return to title", 14, 0)
-		quit.custom_minimum_size.y = 42
+		var quit := UI.button("Return to title", 18, 0)
+		quit.custom_minimum_size.y = 56
 		quit.pressed.connect(to_title)
 		other.add_child(quit)
 

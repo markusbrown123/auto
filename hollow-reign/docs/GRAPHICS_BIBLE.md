@@ -113,3 +113,85 @@ Anti-aliasing, render scale and shadow resolution belong to the Game's graphics 
 See the end of the pass report; in short: armour still reads a little bright in the two daylight regions, the
 Throne is slightly hazy, the dragon's fireball is an untextured disc, there are no reflections of any kind, and
 none of this has been seen on a phone screen.
+
+## High road (the opening's place; `src/world/highland.gd`, 2026-11-27)
+
+Art direction from the owner: **the land is natural, everything built on it is futuristic, and the sky is not Earth's.**
+Nothing on the road, in the gate court, or in the opening's two interiors uses the medieval kit models
+(`env_gate`, `env_wall`, `env_statue*`, `env_banner`, `env_brazier`, `env_pillar`, `env_peak`, `env_th_*`, `env_cr_*`);
+the first generated gatehouse (`env_road_gatehouse.glb`) is left unused. What is used: `env_road_gate_future.glb`
+(the blast-door bulkhead at the gate) and `env_road_dead_tree.glb` (nature). Everything else is built in code.
+Judged on software-rendered captures only (`marketing/road_pass/`).
+
+### The land
+- **Height field** 4 m cells, built once and cached: a calm crown for the road, two rock steps across the climb,
+  ground tipping east to a banded sea cliff with a rock shelf at its foot, a 50 degree rock wall behind the gate.
+- **Ground shader** (`highland_ground.gdshader`): turf in two tones with a large-scale colour drift and heather
+  patches; slope decides turf, then earth and scree, then rock (triplanar `floor_deep`, soft beds, dark and wet near
+  the sea). `floor_blackwood` and its normal map are the detail layer at two scales so neither repeat shows.
+- **Light on the land** is custom (`light()` in the ground, rock and grass shaders, shared in
+  `highland_common.gdshaderinc`): the directional light is multiplied by (1) the land's own shadow, baked per
+  generation on the CPU from the height field (one 66 x 91 R8 texture each, about a quarter of a second), (2) the
+  Ring-Gate's shadow, computed analytically, (3) cloud shadow, a scrolling noise that moves with the wind.
+  The real shadow map only covers 85 m and is for the figure and props.
+- **Grass**: clumps of three crossed cards in MultiMeshes per 40 m of road (fine near the road, coarser to 40 m,
+  tussocks to 130 m, heather and gorse in their own batches where the ground shader paints heather). Blade texture
+  is generated (120 thin blades, seed heads). Each clump stands square to its ground and is lit with that normal;
+  roots dark, tips pale; gusts are fronts in a scrolling noise; far clumps sink into ground of the same colour.
+  Density follows `Game.particle_scale()` (0.5 / 0.8 / 1.0).
+  **Renderer trap found here:** on the Mobile renderer a non-constant `ALPHA_SCISSOR_THRESHOLD` rendered the whole
+  material black once the specialised pipeline replaced the ubershader (lavapipe). Keep the threshold constant and
+  scale `ALPHA` with distance instead.
+- **Crags** (`highland_rock.gdshader`): three faceted meshes in MultiMeshes: outcrops, the lip of the cliff, sea
+  stacks, the shoulders of the gate. Turf or snow lies on upward faces.
+- **Sea** (`highland_sea.gdshader`): reads the height field as a texture to find its shore; surf bands, a paler
+  shelf, a path of light toward the sun.
+- **Far country** (`highland_far.gdshader`): six ranges in one mesh, each with a crest, shoulder and foot so its
+  faces take the sun, each thinner in the air than the last (vertex alpha), all standing in sea haze. Fog is off for
+  them and for the landmarks: recession is done by hand, in layers, so nothing washes out.
+- **Cloud** (`highland_cloud.gdshader`): two sheets bowed down to the horizon (a low broken deck, high streaks),
+  lit edge and dark belly from a second sample toward the sun. Light shafts are additive cards laid along the sun's
+  direction (`highland_shaft.gdshader`).
+
+### The sky that is not Earth's
+`Highland._sky`: a pale banded planet low in the north-west (`highland_planet.gdshader`, lit from the sun's side,
+gone to sky colour on the other), the arc of an orbital ring crossing the sky plate by plate, stars near the zenith
+by day, aurora curtains, and in Generation II the trails of what is falling from the arc
+(`highland_skyline.gdshader`). Five draws, all additive or alpha cards beyond the hills; they need a camera far
+plane of 6000 (CineCam and the menu's vista set it).
+
+### What is built (`Highland.built`, `_panels`, `_arc`, `_prism`, `_beam`)
+- **Materials**: one generated panel-line sheet (plates of slightly different tone with grooves; albedo and normal),
+  world-triplanar. `built(tint, metal, rough, scale)` gives matte pale ceramic (metal 0.1-0.2, roughness 0.5) or
+  brushed alloy and gunmetal (metal 0.5-0.6). Lights are their own unshaded emissive materials so a generation can
+  recolour or kill them (`_set_lamp`).
+- **Ring-Gate**: 24 curved ceramic segments with seams, a darker spine showing in the seams, a channel of light in
+  the inner face, fins cantilevered off the rim, plates hovering over the crown, stays to the rock, angled housings
+  at its feet. Two segments are down by Generation II.
+- **Citadel**: seven tapering hexagonal towers in three setbacks with lines of light, thin spans, terraces.
+- **Gate court**: `env_road_gate_future.glb` (14.5 m) with an emissive strip laid over its seam so generations can
+  switch it; leaning bulkhead walls with ribs, alcoves and a top line of light; lamp posts; pennants of light on
+  masts; a landing ring inlaid in the pad. Without the model the same court builds its own frame and two door leaves.
+- **Road**: laid slabs (joint every 3 m, kerb line, a lit guide strip down the middle) drawn in the ground shader
+  from a two-channel mask; marker pylons with lit heads; a gantry at the head of the climb; signal masts; a conduit
+  along the verge; half-buried pipes, hoops and a sensor dome in the turf.
+
+### The three generations (`Highland.generation(arena, 1|2|3)`; values in `SEASONS` and `SKY`)
+| | I, kept | II, breached | III, waking |
+|---|---|---|---|
+| Sun | dawn gold from the sea (east), 15 degrees up | amber dusk from behind the moor (west), 7 degrees | pale, from behind the ring |
+| Ambient | cool blue 0.72 | blue 1.1 (warm sun against cool shadow) | steel 0.8 |
+| Fog density | 0.00028 | 0.00045 | 0.0005 |
+| Structure lights | amber, fed | dead | the Engine's teal |
+| Ring | whole, halo plates up | two segments down, a gantry at the break | seam alight (emission 6) |
+| Gate | square, seam amber | settled, dark, ivy, plates down | seam and landing ring teal |
+| Road | clear, guide strip dim | half taken back by turf, strip dead | snow at the edges, strip lit |
+| Sky | serene, planet pale | amber planet, debris trails | orbital arc lit, strong aurora |
+
+### The opening's interiors
+- **Command hall** (`Arena` theme `command`, `_layout_command`): the first generation's throne room. Leaning alloy
+  ribs with a column of light in each, plated walls, guide lines in the floor, and at the head a ceramic ring on end
+  with the throne in its mouth. The Generation I scenes and both Generation I duels use it (the duels by lending the
+  foe record another `arena` for their length); the gothic `throne` theme is untouched for the later game.
+- **Engine room** (`chamber`): ribs up the wall with light channels, a cradle with hoops and a head unit, cables
+  across the floor, banks of readouts, a metal band in the floor, ground mist.

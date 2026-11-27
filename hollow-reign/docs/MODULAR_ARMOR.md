@@ -19,6 +19,22 @@
 >   **197.5 MB -> 106.4 MB**; one suit 101.3 -> 90.1 MB; an extra suit worn costs about 2.7 MB instead of 16.
 > - `--oldlook` (or `FighterRig.old_look = true`) restores the whole-suit swap and the first weapon models.
 
+> **Finish pass (2026-11-27, the owner's reference: matte white plate over a dark suit).** Material only; no mesh changed.
+> - The benchmark suit is no longer mirror-bright chrome. `ArmorParts.FINISH_COAT` (merged into the `crownless` finish)
+>   coats every texel that is not undersuit in warm off-white (`coat_color`), nearly non-metal (`coat_metal` 0.06), matte
+>   (`coat_rough` 0.62), and wears it dark (`wear` 0.7) where the suit's own maps show a crease or an edge: the occlusion
+>   channel, the painted panel lines, and the steep parts of the normal map, where the coat is chipped in small patches
+>   (`wear_edge`). The undersuit stays dark; the hips' flex layer was darkened and made matte to sit with it, and keeps
+>   its one seam of cold light. The shader is `src/fx/armor_part.gdshader` (`coat`, `wear`... all 0 by default, so every
+>   other suit is as it was).
+> - **To nudge it** change one number in `FINISH_COAT`: whiter `coat_color` (0.92, 0.91, 0.88), greyer (0.74, 0.74, 0.73);
+>   `wear` 0 clean .. 1 heavy; `wear_edge` 0 no chipping; `coat_rough` 0.55 satin .. 0.7 chalky.
+> - **`--chrome`** (or `ArmorParts.chrome = true` before a knight is dressed) puts the generated chrome back.
+> - Known: where the generated texture painted a dark reflection onto a plate (a patch on the male abdomen), the shader
+>   cannot tell it from undersuit and leaves it dark. There is no cloak on the skinned knight (the cape exists only on
+>   the old procedural rig), so no pale cloak was added.
+> - Sheets: `marketing/armor_finish_pass/`.
+
 > **Gap pass (2026-11-27).** All in `tools/armor_split.gd` (parts rebuilt) and `ArmorParts.FINISH`; no model was regenerated. Sheets: `marketing/armor_gap_pass/`.
 > - **The starting kit's bare hips: flex-armour, not plates.** The benchmark knights were generated with a bare black
 >   undersuit over the pelvis. A plated skirt (a fauld) was built first and rejected by the owner: it changed the

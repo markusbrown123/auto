@@ -34,7 +34,16 @@ const LINKED := {
 ## roughness maps sit in one narrow glossy band and paint the undersuit as glossy as the plate: roughness is spread
 ## and lifted, metal capped, near-black albedo turned into matt cloth. `tone` multiplies the colour.
 const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.7, "rough_lift": 0.17, "metal_max": 0.72, "spec": 0.3,
-	"cloth": 1.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1)}
+	"cloth": 1.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1),
+	"coat": 0.0, "coat_color": Color(0.86, 0.84, 0.79), "coat_metal": 0.06, "coat_rough": 0.62, "wear": 0.0, "wear_edge": 1.0, "wear_color": Color(0.075, 0.07, 0.066)}
+## The benchmark suit's refinish (owner's reference, 2026-11-27): no longer mirror-bright chrome but matte off-white
+## ceramic-coated plate, worn dark in its creases and chipped at its edges, over the dark undersuit. Material only.
+## To nudge it:  coat_color  whiter (0.92, 0.91, 0.88) or greyer (0.74, 0.74, 0.73);  wear  0 clean .. 1 heavy;
+## wear_edge  how much the edges are chipped (0 none);  coat_rough  0.55 satin .. 0.7 chalky;  coat_metal  0 .. 0.2.
+## `--chrome` (or ArmorParts.chrome = true before a knight is dressed) puts the generated chrome back.
+const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.91, 0.885, 0.83), "coat_metal": 0.06, "coat_rough": 0.62, "wear": 0.7, "wear_edge": 1.0,
+	"wear_color": Color(0.075, 0.07, 0.066), "spec": 0.4}
+static var chrome: bool = OS.get_cmdline_user_args().has("--chrome")
 const FINISH := {
 	# third pass ("too spiky, excessively shiny... generic"): every older family sits a step rougher and a step less
 	# mirror-like than the study left it; the benchmark knights ("crownless") keep the default
@@ -124,6 +133,8 @@ static func skin_of(b: String) -> Skin:
 static func finish_of(suit: String) -> Dictionary:
 	var f: Dictionary = FINISH_DEFAULT.duplicate()
 	f.merge(FINISH.get(suit.get_slice("_", 0), {}), true)
+	if suit.get_slice("_", 0) == "crownless" and not chrome:
+		f.merge(FINISH_COAT, true)
 	return f
 
 static func _material(b: String, suit: String) -> ShaderMaterial:
@@ -199,9 +210,9 @@ func wear(slot: String, suit: String) -> bool:
 const FLEX_CODE := "shader_type spatial;
 render_mode diffuse_burley, specular_schlick_ggx, cull_disabled;
 uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap;
-uniform vec3 base : source_color = vec3(0.31, 0.32, 0.345);      // dark steel: a step under the plate, well above the bare undersuit
+uniform vec3 base : source_color = vec3(0.115, 0.12, 0.135);      // dark steel: a step under the plate, well above the bare undersuit
 uniform vec3 seam : source_color = vec3(0.55, 0.8, 1.0);
-uniform float seam_energy = 0.55;
+uniform float seam_energy = 0.7;
 uniform float pitch = 0.0125;        // height of one lame, in body heights
 uniform vec3 flash : source_color = vec3(0.0);
 uniform vec3 rim_color : source_color = vec3(0.0);
@@ -216,8 +227,8 @@ void fragment() {
 	// each lame is a little lighter toward its upper edge
 	float shade = mix(0.75, 1.25, cell);
 	ALBEDO = base * shade * (1.0 - 0.8 * groove);
-	ROUGHNESS = mix(0.4, 0.8, groove);
-	METALLIC = 0.5 * (1.0 - groove);
+	ROUGHNESS = mix(0.52, 0.85, groove);
+	METALLIC = 0.3 * (1.0 - groove);
 	SPECULAR = 0.4;
 	NORMAL_MAP = texture(normal_tex, UV).rgb;
 	NORMAL_MAP_DEPTH = 0.25;

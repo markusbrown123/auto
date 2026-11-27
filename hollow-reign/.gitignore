@@ -22,3 +22,4 @@ assets/models/*.png.import
 !assets/models/env_fu_*.png
 !assets/models/env_fu_*.jpg.import
 !assets/models/env_fu_*.png.import
+import_pass_*.log

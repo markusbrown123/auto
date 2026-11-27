@@ -35,14 +35,28 @@ const LINKED := {
 ## and lifted, metal capped, near-black albedo turned into matt cloth. `tone` multiplies the colour.
 const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.7, "rough_lift": 0.17, "metal_max": 0.72, "spec": 0.3,
 	"cloth": 1.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1),
-	"coat": 0.0, "coat_color": Color(0.86, 0.84, 0.79), "coat_metal": 0.06, "coat_rough": 0.62, "wear": 0.0, "wear_edge": 1.0, "wear_color": Color(0.075, 0.07, 0.066)}
-## The benchmark suit's refinish (owner's reference, 2026-11-27): no longer mirror-bright chrome but matte off-white
-## ceramic-coated plate, worn dark in its creases and chipped at its edges, over the dark undersuit. Material only.
-## To nudge it:  coat_color  whiter (0.92, 0.91, 0.88) or greyer (0.74, 0.74, 0.73);  wear  0 clean .. 1 heavy;
-## wear_edge  how much the edges are chipped (0 none);  coat_rough  0.55 satin .. 0.7 chalky;  coat_metal  0 .. 0.2.
-## `--chrome` (or ArmorParts.chrome = true before a knight is dressed) puts the generated chrome back.
-const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.91, 0.885, 0.83), "coat_metal": 0.06, "coat_rough": 0.62, "wear": 0.7, "wear_edge": 1.0,
-	"wear_color": Color(0.075, 0.07, 0.066), "spec": 0.4}
+	"coat": 0.0, "coat_color": Color(0.86, 0.84, 0.79), "coat_metal": 0.06, "coat_rough": 0.62, "wear": 0.0, "wear_edge": 1.0, "wear_color": Color(0.075, 0.07, 0.066),
+	"motif": 0.0, "visor": 0.0}
+## The benchmark suit's refinish (owner's reference, 2026-11-27): no longer mirror-bright chrome but SLEEK, CLEAN,
+## matte-to-satin off-white ceramic plate over the dark undersuit, with a few inlaid designs and a lit visor.
+## Material only; the meshes are as generated. Everything the owner may want nudged is here:
+##   coat_color    the plate: whiter (0.95, 0.94, 0.91), greyer (0.76, 0.76, 0.75), warmer (0.92, 0.87, 0.78)
+##   coat_rough    0.45 satin .. 0.7 chalky;   coat_metal 0 .. 0.2
+##   wear          0 spotless .. 1 heavy: dark in the deepest creases and panel lines
+##   wear_edge     0 none .. 1: chipped edges, scuffs and mottling (off: the brief is clean)
+##   motif         0 none .. 1: the inlaid designs (breast emblem, crown line, spine line);  motif_dark their metal;
+##                 motif_light / motif_energy their lines of light
+##   visor         brightness of the lit eye slot (0 off);  visor_color its colour
+## `--chrome` (or ArmorParts.chrome = true before a knight is dressed) puts the generated chrome back, all of it.
+const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.90, 0.885, 0.845), "coat_metal": 0.05, "coat_rough": 0.5, "wear": 0.3, "wear_edge": 0.0,
+	"wear_color": Color(0.11, 0.105, 0.1), "spec": 0.45,
+	"motif": 1.0, "motif_dark": Color(0.17, 0.16, 0.15), "motif_light": Color(0.55, 0.85, 1.0), "motif_energy": 1.6,
+	"visor": 3.2, "visor_color": Color(0.6, 0.92, 1.0)}
+## Where the designs sit on each body (heights as a share of the body's height; printed by tools/armor_split.gd --v).
+const BODY_MARKS := {
+	"m": {"chest_y": 0.745, "back_span": Vector2(0.665, 0.825), "visor_y": 0.931, "visor_half": 0.011},
+	"f": {"chest_y": 0.798, "back_span": Vector2(0.735, 0.845), "visor_y": 0.935, "visor_half": 0.013},
+}
 static var chrome: bool = OS.get_cmdline_user_args().has("--chrome")
 const FINISH := {
 	# third pass ("too spiky, excessively shiny... generic"): every older family sits a step rougher and a step less
@@ -275,6 +289,9 @@ func _own_material(suit: String) -> ShaderMaterial:
 	var f := finish_of(suit) if _finish else FINISH_OLD
 	for k: String in f:
 		m.set_shader_parameter("tint" if k == "tone" else k, f[k])
+	var marks: Dictionary = BODY_MARKS.get(body, {})
+	for k2: String in marks:
+		m.set_shader_parameter(k2, marks[k2])
 	for k3: StringName in _params:
 		if k3 != &"tint":
 			m.set_shader_parameter(k3, _params[k3])

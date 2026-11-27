@@ -19,21 +19,28 @@
 >   **197.5 MB -> 106.4 MB**; one suit 101.3 -> 90.1 MB; an extra suit worn costs about 2.7 MB instead of 16.
 > - `--oldlook` (or `FighterRig.old_look = true`) restores the whole-suit swap and the first weapon models.
 
-> **Finish pass (2026-11-27, the owner's reference: matte white plate over a dark suit).** Material only; no mesh changed.
-> - The benchmark suit is no longer mirror-bright chrome. `ArmorParts.FINISH_COAT` (merged into the `crownless` finish)
->   coats every texel that is not undersuit in warm off-white (`coat_color`), nearly non-metal (`coat_metal` 0.06), matte
->   (`coat_rough` 0.62), and wears it dark (`wear` 0.7) where the suit's own maps show a crease or an edge: the occlusion
->   channel, the painted panel lines, and the steep parts of the normal map, where the coat is chipped in small patches
->   (`wear_edge`). The undersuit stays dark; the hips' flex layer was darkened and made matte to sit with it, and keeps
->   its one seam of cold light. The shader is `src/fx/armor_part.gdshader` (`coat`, `wear`... all 0 by default, so every
->   other suit is as it was).
-> - **To nudge it** change one number in `FINISH_COAT`: whiter `coat_color` (0.92, 0.91, 0.88), greyer (0.74, 0.74, 0.73);
->   `wear` 0 clean .. 1 heavy; `wear_edge` 0 no chipping; `coat_rough` 0.55 satin .. 0.7 chalky.
-> - **`--chrome`** (or `ArmorParts.chrome = true` before a knight is dressed) puts the generated chrome back.
-> - Known: where the generated texture painted a dark reflection onto a plate (a patch on the male abdomen), the shader
->   cannot tell it from undersuit and leaves it dark. There is no cloak on the skinned knight (the cape exists only on
->   the old procedural rig), so no pale cloak was added.
-> - Sheets: `marketing/armor_finish_pass/`.
+> **Finish pass (2026-11-27; the owner: "sleek clean armor with cool designs in it maybe led in face glowing").** Material
+> only: no mesh changed, the silhouette is the generated suit's. Sheets: `marketing/armor_finish_pass/`.
+> - **Plate.** The benchmark suit is no longer mirror-bright chrome. `ArmorParts.FINISH_COAT` (merged into the `crownless`
+>   finish) coats every texel that is not undersuit in clean satin off-white, nearly non-metal, with only light dark wear
+>   in the deepest creases and panel lines (`wear` 0.3; chipping and scuffs exist behind `wear_edge`, which is 0). The
+>   undersuit stays dark; the hips' flex layer was darkened and made matte to sit with it.
+> - **Designs.** Inlaid in the plate by the shader, placed on the standing body (every part now carries UV2 = sideways
+>   and height on the body, written by `tools/armor_split.gd`; `ArmorParts.BODY_MARKS` says where the breast, spine and
+>   visor are on each body): the house's open ring on the breast in dark metal, a diamond at its heart and a line of
+>   cold light falling from its gap, two ticks and two strokes; one dark line over the helm's crown; a line of light with
+>   three dark-rimmed nodes down the spine. Nothing on pauldrons or greaves (in this projection a line there would not
+>   follow the limb).
+> - **Visor.** The eye slot's own dark texels on the helm's front are lit cold white-cyan (`visor`, `visor_color`). It is
+>   steady: `ArmorParts` has no per-frame hook, so it does not pulse with speech.
+> - **Tunables, all in `FINISH_COAT`:** `coat_color`, `coat_rough`, `coat_metal`, `wear`, `wear_edge`, `motif`,
+>   `motif_dark`, `motif_light`, `motif_energy`, `visor`, `visor_color`. The shader is `src/fx/armor_part.gdshader`;
+>   every new parameter is 0 by default, so the other suits are as they were.
+> - **`--chrome`** (or `ArmorParts.chrome = true` before a knight is dressed) puts the generated chrome back, all of it.
+> - Known: where the generated texture painted a near-black reflection onto a plate (two patches on the male abdomen)
+>   the shader cannot tell it from undersuit and leaves it dark. There is no cloak on the skinned knight (the cape
+>   exists only on the old procedural rig, `fighter_rig.gd`), so no pale cloak was added; the swatches only set the
+>   heraldry colour, whose palest is "Bone".
 
 > **Gap pass (2026-11-27).** All in `tools/armor_split.gd` (parts rebuilt) and `ArmorParts.FINISH`; no model was regenerated. Sheets: `marketing/armor_gap_pass/`.
 > - **The starting kit's bare hips: flex-armour, not plates.** The benchmark knights were generated with a bare black

@@ -104,3 +104,50 @@ Software renderer, 1280 x 720, one frame each (`tools/shoot.sh … --quality=0|1
 - What is left after the change is mostly render targets and shadow atlases, which grow with the window: the same duel in a 2796 x 1290 window reports 241 MB on Balanced.
 - Geometry was not reduced. The Courtyard duel holds 60 visible meshes, 486,000 triangles at full detail: about 9,600 each for `env_peak` (8 copies, no shadows), `env_rubble` (4), `env_banner` (3), 31,500 for the foe, 34,000 for the knight's under-layer and arms. The Armory's 292 draw calls are the carousel's pieces and the armour parts.
 - Shadows: on Performance the spot and omni shadow atlas is 0, so only the sun casts; Balanced allocates a 2048 atlas for positional lights. How many lights use it was not counted in this pass.
+
+## Far-future environment pass (2026-11-27): the duel arenas rebuilt, and their geometry
+
+Software renderer, 1280 x 720, **Performance preset** (`--quality=0`), one frame at t = 8 s of a bot-played boss duel
+(`tools/shoot.sh <dir> 8 --demo=<foe> --skip_intro --bot=3 --quality=0`; "before" adds `--oldworld`). Not device
+figures. The fight is not frame-identical between runs: treat differences under about 5% as noise.
+
+| Arena (boss) | Draw calls before | after | Primitives before | after | change | Video mem MB before | after | Balanced after (primitives) |
+|---|---|---|---|---|---|---|---|---|
+| Fallen Courtyard (Ashen Sentinel) | 134 | 116 | 443,099 | 205,384 | -54% | 124.6 | 107.2 | 242,098 |
+| Blackwood (Hollow Executioner) | 175 | 131 | 695,151 | 200,318 | -71% | 122.2 | 105.3 | 254,916 |
+| Cathedral steps (Crimson Widow) | 145 | 113 | 159,271 | 169,560 | +6% | 85.1 | 95.6 | 260,632 |
+| Cathedral of Ash (Cathedral Beast) | 144 | 124 | 350,763 | 173,806 | -50% | 102.3 | 95.9 | 205,754 |
+| Sunken Crypt (Gravewarden) | 145 | 127 | 351,231 | 202,568 | -42% | 105.6 | 97.0 | 230,020 |
+| Frozen Citadel (Frostbound King) | 132 | 123 | 324,472 | 205,186 | -37% | 106.2 | 101.0 | 231,730 |
+| Hollow Throne (Forgotten Monarch) | 141 | 124 | 299,082 | 167,688 | -44% | 107.0 | 93.6 | 232,380 |
+
+The Courtyard's second frame (t = 4 s): 408,601 before, 208,094 after.
+
+- **The target of 200,000 on Performance was not reached in the Courtyard: it reads 205,000 to 208,000.** What is left
+  is the two fighters. With the scenery reduced to a row of eleven props the same duel read 226,000; the knight's
+  under-layer (22,729 triangles), arms, legs and shoulders (28,300 together), the Sentinel (32,943) and his sword
+  (5,602) are about 100,000 triangles, and most of them are drawn a second time for the sun's shadow: about 175,000
+  primitives a frame before any scenery. The arena itself is now about 30,000 (it was about 250,000). Going lower
+  means cutting the fighters' meshes or their shadow pass, which is `src/chars`, not this pass.
+- **Where the cut came from.** The medieval kit was 60 generated meshes of about 9,600 triangles. The far-future kit
+  is eleven generated props of 2,300 to 5,700 triangles, used 10 to 15 times an arena, and everything else (walls,
+  ribs, spires, columns, rings, masts, beacons, trunks, hills) is built in code and merged into four to nine meshes of
+  a few thousand triangles in all. The nine `env_peak` mountains (86,000 triangles) are one 770-triangle mesh.
+- **Shadow casters** (`Future.prop`): a prop casts only if it stands within 14 m of the ring's centre (10.5 m on
+  Performance) and is at least 2.5 m tall; built pieces away from the ring are in the kit's no-shadow meshes.
+- **Detail levels**: props use the importer's levels with `lod_bias` 0.4 near the ring and 0.2 away from it (0.18 and
+  0.09 on Performance); the gate, the two spires and the Blackwood's giant trees 0.1 (0.05). Lower than that the gate
+  visibly melts (tried at 0.02 and 0.001 and put back).
+- **Left out on Performance only**: the Courtyard's dead tree (8,300 triangles) and its second engine; 40% of the grass tufts.
+- **Cathedral steps went up 6%**: the old steps were boxes and three towers with no models at all; the new ones
+  carry the blast door (10,000 triangles), a guardian, two pylons and a wreck.
+- **Lights**: no arena has more omni lights than before (Courtyard 4, Blackwood 6, Cathedral 3, steps 2, Crypt 5,
+  Citadel 6, Throne 5); the Crypt had 14 and the Blackwood 6.
+- **Shaders added**: `future_ground` (floor: 3 noise, 3 land, 2 panel reads), `future_built` (6 panel, 2 noise),
+  `future_prop` (3 reads, the same as `pbr_clamp`). Their cost on a phone GPU is not measured.
+- Video memory fell in six arenas because fewer distinct models are loaded; the steps rose because they now load some.
+- The opening: the Engine room with the cradle model reads 81,000 to 115,000 primitives in the awakening (three
+  frames); the command hall with the throne model 87,000 to 164,000 in the throne beat.
+
+Not measured: the High preset; any arena outside a boss duel (exploration stops, the road walk, the story scenes that
+borrow the throne hall); anything on a device.

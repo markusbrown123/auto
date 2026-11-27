@@ -263,7 +263,7 @@ every light, fog and grade value above still applies), the hooks other code uses
 ### Region by region (`Future.LOOKS`)
 | Region | What it is now | Land | Light in the seams | Deck |
 |---|---|---|---|---|
-| Fallen Courtyard | the landing court of a hill fortress: blast door between leaning bulkheads, spires, the kneeling guardian, an engine in the grass, beacons | turf, one dead tree | pale cyan, amber beacons | 8.4 m, pale |
+| Fallen Courtyard | the landing court of a hill fortress: blast door between leaning bulkheads, spires, the kneeling guardian, an engine in the grass, beacons | turf, one dead tree (not on Performance) | pale cyan, amber beacons | 8.4 m, grey |
 | Blackwood | the forest has had it a long time: colossal trunks, a machine shrine still giving off its sick light, a guardian among the trees | leaf mould, trees | sickly yellow-green | 6.6 m, mostly lost |
 | Cathedral of Ash | an archive hall that burned: leaning ribs with ember columns, half the roof gone, the core in a ring let into the end wall | ash through the deck | ember orange | whole floor |
 | Cathedral steps | the deck climbs in treads to a blast door in a bulkhead front | ash | ember orange | whole floor |

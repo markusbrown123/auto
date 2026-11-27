@@ -609,6 +609,24 @@ func _flex(m: Dictionary, h: Dictionary, mat: BaseMaterial3D) -> Dictionary:
 		if args.has("v"):
 			_flex_hist[clampi(int(c.get_luminance() * 10.0), 0, 9)] += 1
 	if args.has("v"):
+		# where things are on this body, for ArmorParts.BODY_MARKS
+		var vy: Array = []
+		var vz := 0.0
+		var neck: Vector3 = (h.rest["Neck"] as Transform3D).origin
+		var headj: Vector3 = (h.rest["Head"] as Transform3D).origin
+		for v in n:
+			if names[m.top[v]] == "Head" and (m.nrm[v] as Vector3).x * front > 0.3 and pos[v].y > headj.y + 0.02:
+				var uv3: Vector2 = m.uv[v]
+				if img.get_pixel(clampi(int(fposmod(uv3.x, 1.0) * S), 0, S - 1), clampi(int(fposmod(uv3.y, 1.0) * S), 0, S - 1)).get_luminance() < dark_at:
+					vy.append(pos[v].y)
+					vz = maxf(vz, absf(pos[v].z - hips.z))
+		vy.sort()
+		var top := 0.0
+		for v in n:
+			top = maxf(top, pos[v].y)
+		print("  marks: hips %s  neck y %.3f  head joint y %.3f  top %.3f  spine2 y %.3f  dark front-of-helm vertices %d: y %.3f..%.3f (middle %.3f), reach z %.3f" % [
+			str(hips.snapped(Vector3.ONE * 0.001)), neck.y, headj.y, top, (h.rest["Spine2"] as Transform3D).origin.y, vy.size(),
+			float(vy[int(vy.size() * 0.1)]) if vy.size() > 0 else 0.0, float(vy[int(vy.size() * 0.9)]) if vy.size() > 0 else 0.0, float(vy[vy.size() / 2]) if vy.size() > 0 else 0.0, vz])
 		print("  flex: luminance of the pelvis vertices in tenths ", _flex_hist, " image ", img.get_format(), " ", img.get_size())
 		_flex_hist.fill(0)
 	var o := {"pos": PackedVector3Array(), "nrm": PackedVector3Array(), "tan": PackedFloat32Array(), "uv": PackedVector2Array(), "uv2": PackedVector2Array(),
@@ -773,6 +791,15 @@ func _save(p: Dictionary, path: String, id: String) -> void:
 	arr[Mesh.ARRAY_TEX_UV] = p.uv
 	if p.has("uv2"):
 		arr[Mesh.ARRAY_TEX_UV2] = p.uv2
+	else:
+		# where a vertex is on the standing body, for what the material draws ON the plates (ArmorParts: inlaid
+		# motifs, the visor's light): x = sideways from the middle, plus 10 on what faces backward; y = height.
+		# (Every suit faces +X and stands 1 tall in this space.)
+		var uv2 := PackedVector2Array()
+		uv2.resize(p.pos.size())
+		for v in p.pos.size():
+			uv2[v] = Vector2((p.pos[v] as Vector3).z + (10.0 if (p.nrm[v] as Vector3).x < 0.0 else 0.0), (p.pos[v] as Vector3).y)
+		arr[Mesh.ARRAY_TEX_UV2] = uv2
 	arr[Mesh.ARRAY_BONES] = p.bones
 	arr[Mesh.ARRAY_WEIGHTS] = p.weights
 	arr[Mesh.ARRAY_INDEX] = p.idx

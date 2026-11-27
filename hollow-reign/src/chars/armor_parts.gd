@@ -63,6 +63,8 @@ var body := "m"
 var worn := {}                        # slot -> suit id
 var nodes := {}                       # slot -> MeshInstance3D
 var under: MeshInstance3D             # dark undersuit: the base body from the neck down, drawn slightly shrunk
+var flex: MeshInstance3D              # flex-armour over the host suit's bare hips, shown while the host's legs are worn
+var _flex_mat: ShaderMaterial
 var _mats := {}                       # suit id -> this knight's own ShaderMaterial
 var _params := {}                     # shader parameters set on every part (tint, flash, rim_color)
 var _hidden: Array = []               # the skeleton's own meshes, hidden while parts are worn
@@ -168,6 +170,8 @@ func wear(slot: String, suit: String) -> bool:
 	if mesh == null:
 		if nodes.has(slot):
 			(nodes[slot] as MeshInstance3D).visible = false
+		if slot == "legs":
+			_show_flex(false)
 		worn[slot] = ""
 		return suit == ""
 	var mi: MeshInstance3D = nodes.get(slot)
@@ -183,7 +187,74 @@ func wear(slot: String, suit: String) -> bool:
 	mi.visible = true
 	mi.set_surface_override_material(0, _own_material(suit))
 	worn[slot] = suit
+	if slot == "legs":
+		_show_flex(suit == host)
 	return true
+
+# ---------------------------------------------------------------- flex armour over the host suit's hips
+## The benchmark suit leaves the pelvis as bare black undersuit. Where its legs are worn, a copy of exactly that region
+## of the body (cut and lifted 2 mm by tools/armor_split.gd, same skin weights, so the silhouette is the body's) is
+## drawn as dark segmented flex-armour: graphite lames that follow the body, a slight sheen, fine grooves between
+## them, and one thin seam of cold light along the belt line. No plate, no skirt, nothing that stands off.
+const FLEX_CODE := "shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx, cull_disabled;
+uniform sampler2D normal_tex : hint_normal, filter_linear_mipmap;
+uniform vec3 base : source_color = vec3(0.31, 0.32, 0.345);      // dark steel: a step under the plate, well above the bare undersuit
+uniform vec3 seam : source_color = vec3(0.55, 0.8, 1.0);
+uniform float seam_energy = 0.55;
+uniform float pitch = 0.0125;        // height of one lame, in body heights
+uniform vec3 flash : source_color = vec3(0.0);
+uniform vec3 rim_color : source_color = vec3(0.0);
+void fragment() {
+	// lames run round the body and dip toward the front, like the lines of the plates round them
+	float f = UV2.x;
+	float b = UV2.y / pitch + 1.1 * f * f * sign(f) * 0.5 + 0.9 * f;
+	float cell = fract(b);
+	float w = fwidth(b) * 1.2 + 0.03;
+	float groove = 1.0 - smoothstep(0.0, w, min(cell, 1.0 - cell));
+	float lit = 1.0 - smoothstep(0.0, w * 0.45, abs(b - 2.0));
+	// each lame is a little lighter toward its upper edge
+	float shade = mix(0.75, 1.25, cell);
+	ALBEDO = base * shade * (1.0 - 0.8 * groove);
+	ROUGHNESS = mix(0.4, 0.8, groove);
+	METALLIC = 0.5 * (1.0 - groove);
+	SPECULAR = 0.4;
+	NORMAL_MAP = texture(normal_tex, UV).rgb;
+	NORMAL_MAP_DEPTH = 0.25;
+	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+	EMISSION = seam * seam_energy * lit + flash + rim_color * rim;
+}"
+static var _flex_shader: Shader
+
+func _show_flex(on: bool) -> void:
+	if not on:
+		if flex != null:
+			flex.visible = false
+		return
+	if flex == null:
+		var path := "%s%s_%s_flex.res" % [dir, body, host]
+		if not ResourceLoader.exists(path):
+			return
+		if _flex_shader == null:
+			_flex_shader = Shader.new()
+			_flex_shader.code = FLEX_CODE
+		flex = MeshInstance3D.new()
+		flex.name = "flex_hips"
+		flex.mesh = load(path)
+		flex.skin = skin_of(body)
+		flex.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		skel.add_child(flex)
+		flex.skeleton = flex.get_path_to(skel)
+		_flex_mat = ShaderMaterial.new()
+		_flex_mat.shader = _flex_shader
+		var src := _material(body, host)
+		if src:
+			_flex_mat.set_shader_parameter("normal_tex", src.get_shader_parameter("normal_tex"))
+		for k: StringName in _params:
+			if k != &"tint":
+				_flex_mat.set_shader_parameter(k, _params[k])
+		flex.set_surface_override_material(0, _flex_mat)
+	flex.visible = true
 
 func _own_material(suit: String) -> ShaderMaterial:
 	if _mats.has(suit):
@@ -202,6 +273,8 @@ func _own_material(suit: String) -> ShaderMaterial:
 ## Same meaning as Look.set_param for a whole-suit model: tint, flash, rim_color on every worn part.
 func set_param(param: StringName, value: Variant) -> void:
 	_params[param] = value
+	if _flex_mat != null and param != &"tint":
+		_flex_mat.set_shader_parameter(param, value)
 	for suit: String in _mats:
 		var v: Variant = value
 		if param == &"tint" and _finish:
@@ -215,6 +288,9 @@ func remove() -> void:
 		(nodes[slot] as MeshInstance3D).queue_free()
 	nodes.clear()
 	worn.clear()
+	if flex:
+		flex.queue_free()
+		flex = null
 	if under:
 		under.queue_free()
 		under = null

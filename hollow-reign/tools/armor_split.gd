@@ -9,9 +9,10 @@ extends SceneTree
 ## Writes assets/models/parts/<body>_<suit>_<slot>.res (ArrayMesh, no material), <body>_<suit>_mat.res (material)
 ## and <body>_under.res (the base body without its helmet: a dark undersuit shown under mixed parts).
 ## Run:  Godot --headless --path . -s tools/armor_split.gd -- [--only=m_frost,f_ash] [--margin=0.22] [--out=dir] [--despike=all] [--tag=_ds]
-##       [--spikes: no default trimming] [--heels: female boots as generated] [--nofauld: the host suit without its hip plates] [--v]
-## Third pass (2026-11-27): the host suit's legs carry a fauld (_fauld), female boots are made flat (_flatten_heels),
-## and the families in DESPIKE_DEFAULT are trimmed by default.
+##       [--spikes: no default trimming] [--heels: female boots as generated] [--noflex: no <body>_<host>_flex.res] [--v]
+## Third pass (2026-11-27): the host suit's bare hips get a skin of flex-armour (_flex, <body>_<host>_flex.res; the host's
+## own six parts are exactly as generated), female boots are made flat (_flatten_heels), and the families in
+## DESPIKE_DEFAULT are trimmed by default.
 const SUITS := ["crownless", "base", "garrison", "ash", "black", "vigil", "frost", "regal", "wyrm", "hollow"]
 ## The suit whose skeleton and body every other suit is fitted to (--host=base restores the first study's choice).
 ## "crownless" is the sleek benchmark knight (knight_<body>_v3.glb): flat boots, compact visored helm, undersuit gaps.
@@ -89,11 +90,13 @@ func _init() -> void:
 			var line := ""
 			for r in SLOTS.size():
 				var part := _part(m, r, margin)
-				if suit == host_suit and SLOTS[r] == "legs" and not args.has("nofauld"):
-					_fauld(m, host, part, src.material)
 				total += part.idx.size() / 3
 				line += "%s %d  " % [SLOTS[r], part.idx.size() / 3]
 				_save(part, "%s%s%s_%s.res" % [out_dir, id, tag, SLOTS[r]], id)
+			if suit == host_suit and tag == "" and not args.has("noflex"):
+				var fx := _flex(m, host, src.material)
+				_save(fx, "%s%s_flex.res" % [out_dir, id], id + "_flex")
+				line += "flex %d  " % [fx.idx.size() / 3]
 			if suit == host_suit and tag == "":
 				# the Skin every part is bound with: the base skeleton's own rest pose, bone by name
 				var sk := Skin.new()
@@ -569,179 +572,68 @@ func _renormal(m: Dictionary) -> void:
 			var nn := n.normalized()
 			m.nrm[v] = nn if nn.dot(m.nrm[v]) >= 0.0 else -nn
 
-# ---------------------------------------------------------------- hip plates for the host suit
-## The benchmark knights were generated with a bare undersuit over the pelvis (black hips and groin between the
-## breastplate's rim and the thigh plates). This adds what a harness has there: a fauld, two lames of plate round the
-## pelvis from the waist to the crease of the legs, dipping to a short tongue in front and lower over the seat. It is
-## measured off the body itself (so it lies just outside the undersuit and under the side tassets), rides on the Hips
-## bone, and is painted from a plain patch of the suit's own plate. It goes into the host's "legs" part.
-const FAULD_SECTORS := 40
-const FAULD_BIN := 0.008
-
-func _fauld(m: Dictionary, h: Dictionary, part: Dictionary, mat: BaseMaterial3D) -> void:
+# ---------------------------------------------------------------- flex armour over the host suit's bare hips
+## The benchmark knights were generated with a bare black undersuit over the pelvis. A plated skirt was tried and
+## rejected (it made the sleek suit read medieval). This instead re-skins exactly that bare region: the body's own
+## triangles there (pelvis height, painted near-black) are copied and lifted about 2 mm along their normals, with the
+## body's own skin weights, so the silhouette and the way it moves are the body's. ArmorParts draws the copy as dark
+## segmented flex-armour while the host's legs are worn (FLEX_CODE there). UV2 carries what its pattern needs:
+## x = how far round to the front (1 straight ahead, -1 behind), y = height above the hips in body heights.
+var _flex_hist := PackedInt32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+func _flex(m: Dictionary, h: Dictionary, mat: BaseMaterial3D) -> Dictionary:
 	var names: Array = h.names
 	var hips: Vector3 = (h.rest["Hips"] as Transform3D).origin
 	var leg: Vector3 = (h.rest["LeftUpLeg"] as Transform3D).origin
 	var toe: Vector3 = (h.rest["LeftToeBase"] as Transform3D).origin - (h.rest["LeftFoot"] as Transform3D).origin
 	var front := signf(toe.x) if toe.x != 0.0 else 1.0      # these models face +X
-	var pos: PackedVector3Array = m.pos
-	# the body round the pelvis: radius from the upright through the hips, per height band and sector
-	var cells := {}
-	var crotch := 1e9
-	for v in pos.size():
-		var b: String = names[m.top[v]]
-		if not (b == "Hips" or b == "Spine" or b.ends_with("UpLeg")):
-			continue
-		var d := pos[v] - hips
-		if absf(d.z) < 0.012 and pos[v].y > leg.y - 0.12 and pos[v].y < hips.y:
-			crotch = minf(crotch, pos[v].y)
-		var key := Vector2i(int(floor(pos[v].y / FAULD_BIN)), int(floor((atan2(d.z, d.x * front) + PI) / TAU * FAULD_SECTORS)) % FAULD_SECTORS)
-		if not cells.has(key):
-			cells[key] = []
-		(cells[key] as Array).append(Vector2(d.x, d.z).length())
-	var rad := {}
-	for key: Vector2i in cells:
-		var rs: Array = cells[key]
-		rs.sort()
-		# under the side tassets (the inner part of what is there), but over the whole seat behind
-		var ang := absf((float(key.y) + 0.5) / FAULD_SECTORS * TAU - PI)
-		rad[key] = float(rs[int((rs.size() - 1) * lerpf(float(args.get("fauld_pct", "0.15")), 0.97, smoothstep(1.7, 2.3, ang)))])
-		rad[key + Vector2i(100000, 0)] = float(rs[int(rs.size() * 0.04)])      # the innermost surface there: the waist the top edge tucks in to
-	var y_top := hips.y + float(args.get("fauld_top", "0.056"))
-	var crease := leg.y + float(args.get("fauld_crease", "0.004"))
-	var off := float(args.get("fauld_off", "0.0055"))
-	if args.has("v"):
-		print("  fauld: hips y %.3f, leg joint y %.3f z %.3f, crotch y %.3f, top %.3f" % [hips.y, leg.y, leg.z - hips.z, crotch, y_top])
-	# the surface the plates follow: the measured radius, smoothed, with gaps filled from the nearest band that has one
-	var surf := func(y: float, sec: int, inner: bool) -> float:
-		var sum := 0.0
-		var cnt := 0.0
-		var band := int(floor(y / FAULD_BIN)) + (100000 if inner else 0)
-		for reach: int in [0, 1, 2, 3, 5, 8]:
-			for db: int in range(-reach - 1, reach + 2):
-				for ds: int in [-1, 0, 1]:
-					var k2 := Vector2i(band + db, (sec + ds + FAULD_SECTORS) % FAULD_SECTORS)
-					if rad.has(k2):
-						var w := 2.0 if (db == 0 and ds == 0) else 1.0
-						sum += float(rad[k2]) * w
-						cnt += w
-			if cnt > 0.0:
-				break
-		return sum / cnt if cnt > 0.0 else 0.08
-	# strips of rows [how far down (0 top .. 1 lower edge), how far off the body]: two lames, the second starting
-	# under the first, each ending in a rolled rim. Strips do not share vertices, so their edges stay crisp.
-	var o1 := off * 1.5
-	var o2 := off * 1.6
-	var strips := [
-		[[0.0, -1.0], [0.14, off * 0.9], [0.46, o1]],
-		[[0.40, o1], [0.425, o1 + 0.0032], [0.485, o1 + 0.0032], [0.50, o1 - 0.004]],
-		[[0.44, off * 0.55], [0.96, o2]],
-		[[0.90, o2], [0.925, o2 + 0.0032], [1.0, o2 + 0.0032], [1.015, o2 - 0.006]]]
-	var uv0 := _plain_uv(m, h, mat)
-	var hb := (names as Array).find("Hips")
-	var N := FAULD_SECTORS
-	for rows: Array in strips:
-		var base: int = part.pos.size()
-		for r in rows.size():
-			for i in N:
-				var th := (float(i) + 0.5) / N * TAU - PI           # 0 = straight ahead
-				var a := absf(th)
-				# the lower edge: a tongue to the crotch in front, the crease of the leg, lower round the side and the seat
-				var y_bot := lerpf(crotch + 0.006, crease, smoothstep(0.16, 0.5, a))
-				y_bot = lerpf(y_bot, leg.y - 0.03, smoothstep(0.75, 1.5, a))
-				y_bot = lerpf(y_bot, crotch + 0.012, smoothstep(1.7, 2.7, a))
-				var back := smoothstep(1.7, 2.3, a)
-				var y := lerpf(y_top + 0.026 * back, y_bot, float(rows[r][0]))      # (the backplate's rim sits higher than the breastplate's)
-				var rr := 0.0
-				if float(rows[r][1]) < 0.0:
-					rr = float(surf.call(y, i, true)) + 0.002         # the top edge lies on the waist, under the breastplate's rim
-				else:
-					# never inside the body at its own height, nor tighter than the lame is half way down (so a lame is one
-					# plain surface and not a cast of what is under it)
-					rr = maxf(float(surf.call(y, i, false)), float(surf.call(y - FAULD_BIN, i, false)) * 0.985)
-					rr = lerpf(rr, maxf(rr, float(surf.call(lerpf(y_top, y_bot, 0.5), i, false))), 0.6) + float(rows[r][1]) + 0.011 * back
-				var dir := Vector3(cos(th) * front, 0, sin(th))
-				part.pos.append(Vector3(hips.x, y, hips.z) + dir * rr)
-				part.nrm.append(dir)
-				part.uv.append(uv0 + Vector2((float(i) / N - 0.5) * 0.01, (float(r) / rows.size() - 0.5) * 0.01))
-				var tg := Vector3.UP.cross(dir).normalized()
-				part.tan.append(tg.x); part.tan.append(tg.y); part.tan.append(tg.z); part.tan.append(1.0)
-				for j in 4:
-					part.bones.append(hb if j == 0 else 0)
-					part.weights.append(1.0 if j == 0 else 0.0)
-		var first: int = part.idx.size()
-		for r in rows.size() - 1:
-			for i in N:
-				var a0 := base + r * N + i
-				var a1 := base + r * N + (i + 1) % N
-				var b0 := a0 + N
-				var b1 := a1 + N
-				for t: Array in [[a0, a1, b1], [a0, b1, b0]]:
-					var pa: Vector3 = part.pos[t[0]]
-					var pb: Vector3 = part.pos[t[1]]
-					var pc: Vector3 = part.pos[t[2]]
-					# front faces as the source winds them: (c - a) x (b - a) points out; the rim's last face turns under
-					var fn0 := (pc - pa).cross(pb - pa)
-					var out_dir: Vector3 = part.nrm[t[0]] if r < rows.size() - 2 or rows.size() < 4 else Vector3.DOWN
-					if fn0.dot(out_dir) < 0.0:
-						part.idx.append(t[0]); part.idx.append(t[2]); part.idx.append(t[1])
-					else:
-						part.idx.append(t[0]); part.idx.append(t[1]); part.idx.append(t[2])
-		# normals from the plates themselves
-		var acc := PackedVector3Array()
-		acc.resize(rows.size() * N)
-		for t2 in range(first, part.idx.size(), 3):
-			var pa2: Vector3 = part.pos[part.idx[t2]]
-			var fn := ((part.pos[part.idx[t2 + 2]] as Vector3) - pa2).cross((part.pos[part.idx[t2 + 1]] as Vector3) - pa2)
-			for e in 3:
-				acc[part.idx[t2 + e] - base] += fn
-		for v2 in acc.size():
-			if acc[v2].length_squared() > 1e-16:
-				part.nrm[base + v2] = acc[v2].normalized()
-
-## The middle of a plain patch of plate in the suit's texture: bright, even, and really used by the breastplate.
-func _plain_uv(m: Dictionary, h: Dictionary, mat: BaseMaterial3D) -> Vector2:
 	var img := mat.albedo_texture.get_image()
 	if img.is_compressed():
 		img.decompress()
-	const S := 256
+	const S := 512
 	img.resize(S, S, Image.INTERPOLATE_BILINEAR)
-	var names: Array = h.names
-	var used := {}
-	for v in (m.pos as PackedVector3Array).size():
-		if str(names[m.top[v]]).begins_with("Spine"):
-			var uv: Vector2 = m.uv[v]
-			var c := Vector2i(int(fposmod(uv.x, 1.0) * S) / 8, int(fposmod(uv.y, 1.0) * S) / 8)
-			used[c] = int(used.get(c, 0)) + 1
-	var wins: Array = []
-	for c: Vector2i in used:
-		if int(used[c]) < 4:
+	var pos: PackedVector3Array = m.pos
+	var n := pos.size()
+	var lo := leg.y - float(args.get("flex_lo", "0.115"))
+	var hi := hips.y + float(args.get("flex_hi", "0.075"))
+	var dark_at := float(args.get("flex_dark", "0.3"))       # sRGB luminance under which a texel is undersuit
+	var dark := PackedByteArray()
+	dark.resize(n)
+	for v in n:
+		var b: String = names[m.top[v]]
+		if pos[v].y < lo or pos[v].y > hi or not (b == "Hips" or b.begins_with("Spine") or b.ends_with("UpLeg")):
 			continue
-		var lo := 9.0
-		var hi := 0.0
-		var sum := 0.0
-		for y in range(c.y * 8 - 2, c.y * 8 + 10):
-			for x in range(c.x * 8 - 2, c.x * 8 + 10):
-				var l := img.get_pixel(clampi(x, 0, S - 1), clampi(y, 0, S - 1)).get_luminance()
-				lo = minf(lo, l); hi = maxf(hi, l); sum += l
-		wins.append([sum / 144.0, hi - lo, c])
-	if wins.is_empty():
-		return Vector2(0.5, 0.5)
-	var means: Array = []
-	for w: Array in wins:
-		means.append(w[0])
-	means.sort()
-	var want: float = means[int(means.size() * 0.7)]
-	var best: Array = wins[0]
-	var best_s := 9.0
-	for w2: Array in wins:
-		var sc := float(w2[1]) + absf(float(w2[0]) - want) * 0.6
-		if sc < best_s:
-			best_s = sc
-			best = w2
+		var uv: Vector2 = m.uv[v]
+		var c := img.get_pixel(clampi(int(fposmod(uv.x, 1.0) * S), 0, S - 1), clampi(int(fposmod(uv.y, 1.0) * S), 0, S - 1))
+		if c.get_luminance() < dark_at:
+			dark[v] = 1
+		if args.has("v"):
+			_flex_hist[clampi(int(c.get_luminance() * 10.0), 0, 9)] += 1
 	if args.has("v"):
-		print("  fauld paint: cell %s mean %.2f spread %.2f (plate typical %.2f)" % [str(best[2]), best[0], best[1], want])
-	return (Vector2(best[2]) * 8.0 + Vector2(4, 4)) / float(S)
+		print("  flex: luminance of the pelvis vertices in tenths ", _flex_hist, " image ", img.get_format(), " ", img.get_size())
+		_flex_hist.fill(0)
+	var o := {"pos": PackedVector3Array(), "nrm": PackedVector3Array(), "tan": PackedFloat32Array(), "uv": PackedVector2Array(), "uv2": PackedVector2Array(),
+		"bones": PackedInt32Array(), "weights": PackedFloat32Array(), "idx": PackedInt32Array()}
+	var map := {}
+	var idx: PackedInt32Array = m.idx
+	var lift := float(args.get("flex_lift", "0.0011"))
+	for t in range(0, idx.size(), 3):
+		if int(dark[idx[t]]) + int(dark[idx[t + 1]]) + int(dark[idx[t + 2]]) < 1:      # (one dark corner is enough: no black fringe is left at the plates' edges)
+			continue
+		for e in 3:
+			var v: int = idx[t + e]
+			if not map.has(v):
+				map[v] = o.pos.size()
+				var d := pos[v] - hips
+				o.pos.append(pos[v] + (m.nrm[v] as Vector3) * lift)
+				o.nrm.append(m.nrm[v])
+				o.uv.append(m.uv[v])
+				o.uv2.append(Vector2(d.x * front / maxf(Vector2(d.x, d.z).length(), 0.0001), d.y))
+				for j in 4:
+					o.tan.append(m.tan[v * 4 + j])
+					o.bones.append(m.bones[v * 4 + j])
+					o.weights.append(m.weights[v * 4 + j])
+			o.idx.append(map[v])
+	return o
 
 # ---------------------------------------------------------------- split
 func _part(m: Dictionary, r: int, margin: float) -> Dictionary:
@@ -879,6 +771,8 @@ func _save(p: Dictionary, path: String, id: String) -> void:
 	arr[Mesh.ARRAY_NORMAL] = p.nrm
 	arr[Mesh.ARRAY_TANGENT] = p.tan
 	arr[Mesh.ARRAY_TEX_UV] = p.uv
+	if p.has("uv2"):
+		arr[Mesh.ARRAY_TEX_UV2] = p.uv2
 	arr[Mesh.ARRAY_BONES] = p.bones
 	arr[Mesh.ARRAY_WEIGHTS] = p.weights
 	arr[Mesh.ARRAY_INDEX] = p.idx

@@ -26,6 +26,7 @@ const LOD_AT := 3.2                              # metres from the camera where 
 const WAKE_TIME := 2.6
 const RISE := 1.25                               # metres it lifts from where it lay (wake() can ask for another height)
 const AMBER := Color(1.0, 0.78, 0.48)
+const HALO := Color(1.0, 0.72, 0.34)
 
 static var _manifest := {}
 
@@ -46,6 +47,11 @@ var _aim_body := false
 var _moving: Array = []       # [node, rest Transform3D, slide, breathe, talk, turn (degrees), talk_turn, look, look q] per part that moves
 var _pitch_max := deg_to_rad(30.0)   # how far the body itself tips to look up or down (manifest "tilt": an upright body stays upright)
 var _bank_max := 0.3
+var _flare_all := false
+var _flare_d := 0.2
+const HALO_MIN_PX := 0.062       # a ball's halo is never drawn narrower than this share of the picture's height
+var _presence_max := DUEL_PRESENCE
+var _trail_cfg := [1.7, 3.6, 0.42, 0.30]      # speed where the wisp begins, where it is full, width in radii, opacity (manifest "trail")
 var _glow_k := 1.0            # how bright this variant's light is drawn (manifest "glow")
 var _flare: MeshInstance3D    # a soft bloom on the lamp, seen only from where the lamp points
 var _flare_mat: StandardMaterial3D
@@ -129,6 +135,11 @@ func build(variant: String = "") -> void:
 			if look != Vector2.ZERO:
 				_looker = n
 	_glow_k = float(_info.get("glow", 1.0))
+	_flare_all = bool(_info.get("flare_all", false))
+	_presence_max = float(_info.get("presence", DUEL_PRESENCE))
+	var tc = _info.get("trail")
+	if tc is Array and tc.size() == 4:
+		_trail_cfg = tc
 	var tl = _info.get("tilt")
 	if tl is Array and tl.size() == 2:
 		_pitch_max = deg_to_rad(float(tl[0]))
@@ -161,18 +172,20 @@ func _build_flare(d: float) -> void:
 	_flare_mat = StandardMaterial3D.new()
 	_flare_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_flare_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	_flare_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	# (a ball's halo is mixed, not added: added light vanishes against a bright sky, and the halo is what finds it)
+	_flare_mat.blend_mode = BaseMaterial3D.BLEND_MODE_MIX if _flare_all else BaseMaterial3D.BLEND_MODE_ADD
 	_flare_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
 	_flare_mat.billboard_keep_scale = true
 	_flare_mat.albedo_texture = tex
 	_flare_mat.albedo_color = Color(AMBER, 0.0)
+	_flare_d = d
 	var q := QuadMesh.new()
 	q.size = Vector2(d, d)
 	_flare = MeshInstance3D.new()
 	_flare.mesh = q
 	_flare.material_override = _flare_mat
 	_flare.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	_flare.position = Vector3(0, 0, -0.045)
+	_flare.position = Vector3.ZERO if _flare_all else Vector3(0, 0, -0.045)
 	(_looker if _looker != null else _core).add_child(_flare)
 
 ## A faint ribbon behind it when it darts (never with reduced motion): its last few positions, fading.
@@ -195,7 +208,7 @@ const TRAIL_N := 16
 
 func _draw_trail(dt: float, calm: bool) -> void:
 	var speed := _vel.length()
-	var want := 0.0 if (calm or state != State.FOLLOW) else smoothstep(1.7, 3.6, speed)
+	var want := 0.0 if (calm or state != State.FOLLOW) else smoothstep(float(_trail_cfg[0]), float(_trail_cfg[1]), speed)
 	_trail_on = lerpf(_trail_on, want, 1.0 - exp(-dt * (10.0 if want > _trail_on else 2.5)))
 	if _trail_pts.is_empty() or (_trail_pts[0] as Vector3).distance_to(global_position) > 0.05:
 		_trail_pts.push_front(global_position)
@@ -213,8 +226,8 @@ func _draw_trail(dt: float, calm: bool) -> void:
 		var along: Vector3 = ((_trail_pts[maxi(i - 1, 0)] as Vector3) - (_trail_pts[mini(i + 1, n - 1)] as Vector3))
 		var side := along.cross(cam.global_position - p).normalized()
 		var u := float(i) / float(n - 1)
-		var w := radius * 0.42 * (1.0 - u) * (0.35 + 0.65 * minf(1.0, u * 5.0))
-		var c := Color(AMBER, 0.30 * _trail_on * (1.0 - u) * (1.0 - u))
+		var w := radius * float(_trail_cfg[2]) * (1.0 - u) * (0.35 + 0.65 * minf(1.0, u * 5.0))
+		var c := Color(AMBER, float(_trail_cfg[3]) * _trail_on * (1.0 - u) * (1.0 - u))
 		_trail_mesh.surface_set_color(c)
 		_trail_mesh.surface_add_vertex(p + side * w)
 		_trail_mesh.surface_set_color(c)
@@ -417,7 +430,7 @@ func _process(delta: float) -> void:
 			_core.rotation.y = wrapf(_core.rotation.y + dt * (0.35 + 0.5 * attention), 0.0, TAU)
 	_wave = 0.0 if (calm or state != State.FOLLOW) else 0.5 + 0.5 * sin(_clock * 1.5)
 	# at the far edge of a fight it is drawn a third larger, so that it still reads at that distance
-	_presence = lerpf(_presence, DUEL_PRESENCE if (foe != null and rig != null and _free_now()) else 1.0, 1.0 - exp(-dt * 2.0))
+	_presence = lerpf(_presence, _presence_max if (foe != null and rig != null and _free_now()) else 1.0, 1.0 - exp(-dt * 2.0))
 	_core.scale = Vector3.ONE * _presence
 	var base := 0.0
 	if state != State.STOWED:
@@ -471,10 +484,17 @@ func _apply(_dt: float) -> void:
 	if _flare != null:
 		var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
 		var facing := 0.0
-		if cam != null:
+		if _flare_all:
+			facing = 1.0
+			if cam != null and cam.projection == Camera3D.PROJECTION_PERSPECTIVE:
+				# far away the halo keeps its width on screen (the ball does not grow: the light does)
+				var depth := maxf((global_position - cam.global_position).dot(-cam.global_transform.basis.z), 0.3)
+				var want := HALO_MIN_PX * 2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5)
+				_flare.scale = Vector3.ONE * maxf(1.0, want / maxf(_flare_d * _flare.get_parent_node_3d().global_transform.basis.get_scale().x, 0.001))
+		elif cam != null:
 			var fwd := -_flare.get_parent_node_3d().global_transform.basis.z.normalized()
 			facing = clampf(fwd.dot((cam.global_position - _flare.global_position).normalized()), 0.0, 1.0)
-		_flare_mat.albedo_color = Color(AMBER, clampf(0.55 * glow * facing * facing, 0.0, 0.9))
+		_flare_mat.albedo_color = Color(HALO if _flare_all else AMBER, clampf(0.55 * glow * facing * facing, 0.0, 0.9))
 		_flare.visible = glow > 0.05 and facing > 0.02
 	# the panels: parted by attention, breathing when idle, nudged by the voice
 	for m: Array in _moving:
@@ -911,8 +931,37 @@ func _clear_view(p: Vector3) -> Vector3:
 				var sq := cam.unproject_position(q)
 				if to.distance_to(sq) < m + 30.0:                              # something that can be touched: above it, not on it
 					to.y = sq.y - (m + 30.0)
+	if not duel:
+		# a menu's panel is opaque: beside it, on the side with more room, never behind it
+		for r: Rect2 in _menu_rects(view):
+			var g := r.grow(m)
+			if g.has_point(to):
+				var left := g.position.x
+				var right := view.x - g.end.x
+				if left >= right and left > 2.0 * m:
+					to.x = g.position.x
+				elif right > 2.0 * m:
+					to.x = g.end.x
+				elif g.position.y > 2.0 * m:
+					to.y = g.position.y
 	var shift := (cam.global_transform.basis.x * (to.x - s.x) - cam.global_transform.basis.y * (to.y - s.y)) * per_px
 	return p + shift.limit_length(3.0)
+
+## The large opaque panels on screen now (a menu's page: a tenth of the picture or more, and at least a third of its
+## height), looked up twice a second. Small cards and bars are not counted: the margins above already keep it off them.
+var _ui_rects: Array = []
+var _ui_next := 0.0
+func _menu_rects(view: Vector2) -> Array:
+	if _clock >= _ui_next:
+		_ui_next = _clock + 0.5
+		_ui_rects.clear()
+		for c: Node in get_tree().root.find_children("*", "PanelContainer", true, false):
+			var pc := c as Control
+			if pc != null and pc.is_visible_in_tree():
+				var r := pc.get_global_rect()
+				if r.size.x * r.size.y > view.x * view.y * 0.1 and r.size.y > view.y * 0.33:
+					_ui_rects.append(r)
+	return _ui_rects
 
 ## Dev: HR_WITNESS_LOG=<file> writes ten lines a second: t, mood, drone x y z, knight x z, foe x z, camera x z,
 ## screen x y, view w h, on-screen half-width (tools/witness_plot.py draws them).

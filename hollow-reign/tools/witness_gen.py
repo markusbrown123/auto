@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gear_gen as G
 
 OUT = os.path.join(G.ROOT, "assets", "models", "witness")
-CHOSEN = "gnomon"
+CHOSEN = "mote"
 
 G.MATERIALS.update({
     "ceramic": ((0.80, 0.785, 0.75), 0.0, 0.62, None, "fine_n", None, 0.18, None),
@@ -35,6 +35,8 @@ G.MATERIALS.update({
     "core": ((0.055, 0.058, 0.066), 0.5, 0.55, None, None, None, 1.0, None),
     "glass": ((0.012, 0.014, 0.018), 0.0, 0.07, None, None, None, 1.0, None),
     "accent": ((0.86, 0.62, 0.28), 1.0, 0.36, "steel_a", "steel_n", "steel_orm", 0.3, None),
+    # fourth pass: a small clean ball. A satin shell the colour of old ivory, a core that is all light
+    "shell": ((0.86, 0.85, 0.82), 0.0, 0.38, None, "fine_n", None, 0.10, None),
     # third pass: an old instrument. Pitted pale plates that have lost their glaze, dark bronze gone brown, a few
     # fittings turned green; nothing polished, nothing gold
     # (their textures are this tool's own: assets/models/witness/tex/, written by relic_textures())
@@ -532,6 +534,53 @@ def gnomon_weight(B, q):
     solid(B, [[np.array((x * r, y, z * r * 0.8)) for x, z in d] for y, r in ((-0.0135, 0.0165), (-0.0185, 0.0165))], "light")
 
 
+
+# ============================================================================ fourth pass: the mote (chosen)
+# The owner's note on the gnomon: "a shitty space ship", and far too big: it should be a small ball one could hold in
+# one hand. The mote is a ball 8.4 cm across: a core that is nothing but soft light inside a thin smooth shell in two
+# pieces, which meet in one seam that runs round it off the level, above the middle. A single slim ring, 10.4 cm
+# across, floats round it and tips to what the Witness looks at; a short lit dash on the ring is where it is facing.
+# Nothing else: no plates, no vanes, no weight, no lens, no face. It is found by its light, not its size.
+MOTE_R = 0.042
+MOTE_SEAM = 0.0105         # the seam's height above the middle
+MOTE_GAP = 0.0016          # half the seam's width at rest
+
+
+def _arc(a0, a1, n, r=MOTE_R):
+    """Profile points (y, radius) of a sphere from polar angle a0 to a1 (degrees from the top)."""
+    return [(r * math.cos(math.radians(a0 + (a1 - a0) * i / n)), max(0.0001, r * math.sin(math.radians(a0 + (a1 - a0) * i / n)))) for i in range(n + 1)]
+
+
+def mote_core(B, q):
+    s = seg_for(q, 20)
+    prof = _arc(180.0, 0.0, 8 if q < 1.0 else 12, MOTE_R * 0.9)
+    turned(B, prof, "light", s)
+
+
+def mote_cap(B, q):
+    """The smaller upper piece of the shell, with the dark lip that turns in at the seam."""
+    s = seg_for(q, 28)
+    a = math.degrees(math.acos((MOTE_SEAM + MOTE_GAP) / MOTE_R))
+    arc = _arc(a, 0.0, 5 if q < 1.0 else 9)
+    y0, r0 = arc[0]
+    prof = [(y0, r0 - 0.0045), (y0, r0)] + arc[1:]
+    turned(B, prof, ["seam"] + ["shell"] * (len(prof) - 2), s, hard=(1,))
+
+
+def mote_bowl(B, q):
+    """The larger lower piece."""
+    s = seg_for(q, 28)
+    a = math.degrees(math.acos((MOTE_SEAM - MOTE_GAP) / MOTE_R))
+    arc = _arc(180.0, a, 7 if q < 1.0 else 12)
+    y1, r1 = arc[-1]
+    prof = arc[:-1] + [(y1, r1), (y1, r1 - 0.0045)]
+    turned(B, prof, ["shell"] * (len(prof) - 2) + ["seam"], s, hard=(len(prof) - 2,))
+
+
+def mote_ring(B, q):
+    band(B, 0.0520, 0.0009, 0.0021, seg_for(q, 40), "alloy", dash=math.radians(34))
+
+
 def _fin_mounts():
     """Where the three vanes hang on the plumb's lower half: hinge point, and (YXZ degrees) a turn about Y to
     their place and a lean that lays them along the taper. None is at the front: the dash on the ring is."""
@@ -554,6 +603,9 @@ def _halo(axis, dist, fins=()):
 #         "body": the whole thing turns its front (-Z) to the target
 #   glow  how bright its light is drawn (1 = the lantern);  lamp_range: reach of its small real light (m);
 #   flare the width (m) of the soft bloom on the lamp;  tilt [degrees the body tips to look, degrees it banks]
+#   flare_all  the bloom is seen from every side (a ball), not only from where a lamp points
+#   presence   how much larger it is drawn at the far edge of a fight (default 1.32; 1 = found by its light instead)
+#   trail [speed where the wisp begins, speed where it is full (m/s), width in radii, opacity]
 #   lo, hi  the bulk the game keeps clear of things, when that is not simply the box round every part
 #   size  how much over life size the game draws it;  lie, lie_rot: the height of its centre and its turn
 #         (degrees) when it lies dormant
@@ -563,6 +615,13 @@ def _halo(axis, dist, fins=()):
 # turn [degrees] x attention, talk_turn [degrees] x voice level, look [yaw, pitch limits in degrees]: the part turns
 # by itself to what the Witness looks at (the lamp), ahead of the body.
 VARIANTS = {
+    "mote": dict(build=dict(core=mote_core, cap=mote_cap, bowl=mote_bowl, ring=mote_ring),
+                 aim="halo", size=1.0, lie=0.042, lie_rot=[0, 0, 24], ring_y=0.0, glow=2.4, lamp_range=1.9, flare=0.30, flare_all=True,
+                 presence=1.0, trail=[0.45, 1.6, 0.9, 0.42], lo=[-0.052, -0.045, -0.052], hi=[0.052, 0.045, 0.052], parts=[
+                     dict(mesh="core"),
+                     dict(mesh="bowl", rot=[0, 0, 13.0], slide=[0, -0.0012, 0]),
+                     dict(mesh="cap", rot=[0, 0, 13.0], slide=[0, 0.0034, 0], breathe=[0, 0.0007, 0], talk=[0, 0.0026, 0]),
+                     dict(mesh="ring", group="halo", lit="dash")]),
     "gnomon": dict(build=dict(core=gnomon_core, brow=gnomon_brow, flank_r=gnomon_flank_r, flank_l=gnomon_flank_l, keel=gnomon_keel, lamp=gnomon_lamp,
                               vane=gnomon_vane, stub=gnomon_stub, weight=gnomon_weight),
                    aim="body", size=1.35, lie=0.062, lie_rot=[78, 0, 14], glow=1.7, lamp_range=1.5, flare=0.20, tilt=[9.0, 8.0],
@@ -618,7 +677,7 @@ def main():
     relic_textures()
     manifest = {"_chosen": CHOSEN, "_front": "-Z", "_origin": "centre of the body"}
     for name, V in VARIANTS.items():
-        info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y", "glow", "lamp_range", "flare", "tilt") if k in V}
+        info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y", "glow", "lamp_range", "flare", "tilt", "flare_all", "presence", "trail") if k in V}
         lo, hi = np.ones(3) * 9, np.ones(3) * -9
         tris = {"": 0, "_lod": 0}
         for part, fn in V["build"].items():

@@ -20,12 +20,14 @@
 > - `--oldlook` (or `FighterRig.old_look = true`) restores the whole-suit swap and the first weapon models.
 
 > **Gap pass (2026-11-27).** All in `tools/armor_split.gd` (parts rebuilt) and `ArmorParts.FINISH`; no model was regenerated. Sheets: `marketing/armor_gap_pass/`.
-> - **Hip plates on the starting kit.** The benchmark knights were generated with a bare black undersuit over the pelvis. The
->   host suit's `legs` part now carries a fauld (`_fauld`): two lames with rolled rims from the waist to the crease of the
->   legs, a short tongue in front, lower over the seat. It is measured off the body (just outside the undersuit, under the
->   side tassets), rides on the Hips bone alone and is painted from one plain patch of the suit's own plate, found in its
->   texture (`_plain_uv`). 720 triangles. Because it is rigid on the pelvis, a thigh raised high passes into its lower edge
->   in front; it has no trim line painted on it. `--nofauld` builds the legs without it.
+> - **The starting kit's bare hips: flex-armour, not plates.** The benchmark knights were generated with a bare black
+>   undersuit over the pelvis. A plated skirt (a fauld) was built first and rejected by the owner: it changed the
+>   silhouette and made the sleek suit read medieval. What is there now changes nothing but the surface. `_flex` copies
+>   exactly the bare region of the body (pelvis height, painted near-black: 638 triangles male, 653 female), lifts it
+>   about 2 mm along its normals and keeps the body's own skin weights (`<body>_crownless_flex.res`). `ArmorParts`
+>   draws it, while the host's legs are worn, as dark segmented flex-armour (`FLEX_CODE`): graphite lames that follow
+>   the body, a slight sheen, fine grooves, one thin seam of cold light on the belt line. The six host parts themselves
+>   are exactly as generated; de-spike and the finish table do not touch the host suit. `--noflex` skips the file.
 > - **Flat boots on every female suit** (`_flatten_heels`). All nine older female suits were generated in 4-6 cm heels. Each
 >   foot is sheared down behind the ball until the shank lies on the floor and the heel block is pressed flat; the ankle and
 >   lower shin come down with it, so the mesh ankle sits up to about that much below the ankle joint. Frost keeps a small

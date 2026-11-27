@@ -1,7 +1,87 @@
 {
- "_chosen": "gnomon",
+ "_chosen": "mote",
  "_front": "-Z",
  "_origin": "centre of the body",
+ "mote": {
+  "aim": "halo",
+  "size": 1.0,
+  "lie": 0.042,
+  "lie_rot": [
+   0,
+   0,
+   24
+  ],
+  "parts": [
+   {
+    "mesh": "core"
+   },
+   {
+    "mesh": "bowl",
+    "rot": [
+     0,
+     0,
+     13.0
+    ],
+    "slide": [
+     0,
+     -0.0012,
+     0
+    ]
+   },
+   {
+    "mesh": "cap",
+    "rot": [
+     0,
+     0,
+     13.0
+    ],
+    "slide": [
+     0,
+     0.0034,
+     0
+    ],
+    "breathe": [
+     0,
+     0.0007,
+     0
+    ],
+    "talk": [
+     0,
+     0.0026,
+     0
+    ]
+   },
+   {
+    "mesh": "ring",
+    "group": "halo",
+    "lit": "dash"
+   }
+  ],
+  "ring_y": 0.0,
+  "glow": 2.4,
+  "lamp_range": 1.9,
+  "flare": 0.3,
+  "flare_all": true,
+  "presence": 1.0,
+  "trail": [
+   0.45,
+   1.6,
+   0.9,
+   0.42
+  ],
+  "tris": 2240,
+  "tris_lod": 904,
+  "lo": [
+   -0.052,
+   -0.045,
+   -0.052
+  ],
+  "hi": [
+   0.052,
+   0.045,
+   0.052
+  ]
+ },
  "gnomon": {
   "aim": "body",
   "size": 1.35,

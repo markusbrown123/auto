@@ -324,6 +324,11 @@ const DOOR_AT := Vector3(-7.6, 0, 1.6)      # in the chamber wall on the near si
 
 func _doorway() -> void:
 	var to_heir := hero.position - DOOR_AT
+	# nothing of the Deep's own (rock, crystal, growth) stands in the doorway or between it and the heir
+	for mi: MeshInstance3D in arena.find_children("*", "MeshInstance3D", true, false):
+		var at: Vector3 = mi.global_position
+		if Vector2(at.x - DOOR_AT.x, at.z - DOOR_AT.z).length() < 4.2 and at.y > -0.5 and at.y < 6.0 and mi.get_aabb().size.y * mi.global_basis.get_scale().y > 0.35:
+			mi.visible = false
 	var frame := OldMake.portal(arena, DOOR_AT, 2.2, 3.6, FinalHall.lamp(PARTS[0], 1.6))
 	frame.rotation.y = atan2(to_heir.x, to_heir.z)
 	var day := OldMake.box(frame, Vector3(2.2, 3.6, 0.2), Vector3(0, 1.8, -0.5), Look.glow(Color("#fff2dc"), 5.0))

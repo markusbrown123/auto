@@ -86,3 +86,4 @@ Only **Father = Gideon** and **Mother = Celine** are chosen. The table above is 
 
 ## FINAL CAST chosen by the owner (2026-11-27, third message) — see `tools/cast_final.json`
 Grandson Blake (lowered 3), granddaughter Olivia, Lyra Claire (lowered 2; the owner also floated the deep male voice Caspian for her), Crimson Widow Elodie (and she must look older to suit the voice), Orren Callum (lowered 3), Monarch Hades (lowered 3), Frostbound King Josef (lowered 3), Pale Huntsman Victor (lowered 3), Gravewarden Dominus (lowered 3: "slightly less deep" than the audition). Father Gideon, Mother Celine. Existing takes for Lyra, Orren and the Monarch were lowered in place (`assets/audio/vo/lowered.json` records which, so it is never applied twice).
+- **Crimson Widow: Giselle**, mean and aggressive delivery (owner, 2026-11-27; replaces Elodie). Rewrite her lines harsher, mocking and commanding; record at low stability for emotion. She keeps her current younger look.

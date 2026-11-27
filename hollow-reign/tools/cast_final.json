@@ -1,14 +1,70 @@
 {
  "_note": "Owner's final casting, 2026-11-27. 'pitch' is semitones applied after generation (tempo and formants kept). Apply in tools/gen_dialogue.py VOICES and tools/voices.py when the generations pass has finished editing the generator. Approved earlier and unchanged: witness Hamish, narrator Graham, player_m (son) Malcolm, player_f (daughter) Victoria with the clarity treatment, sentinel/executioner Mortimer.",
- "forebear_m": {"voice": "Gideon", "model": "eleven", "pitch": 0, "who": "Father, first generation"},
- "forebear_f": {"voice": "Celine", "model": "eleven", "pitch": 0, "who": "Mother, first generation"},
- "heir_m": {"voice": "Blake (en)", "model": "inworld", "pitch": -3, "who": "Grandson, last heir"},
- "heir_f": {"voice": "Olivia (en)", "model": "inworld", "pitch": 0, "who": "Granddaughter, last heir (higher than the mother)"},
- "lyra": {"voice": "Claire (en)", "model": "inworld", "pitch": -2, "who": "Lyra. Owner also named a deep male voice (Caspian) as an alternative; Claire lowered used unless the owner confirms otherwise. Existing takes lowered in place."},
- "widow": {"voice": "Elodie", "model": "eleven", "pitch": 0, "who": "The Crimson Widow. Owner: she must LOOK older to match this older voice (model redesign needed)."},
- "orren": {"voice": "Callum (en)", "model": "inworld", "pitch": -3, "who": "Orren. Existing takes lowered in place."},
- "monarch": {"voice": "Hades (en)", "model": "inworld", "pitch": -3, "who": "The Forgotten Monarch. Existing takes lowered in place."},
- "frostking": {"voice": "Josef (de)", "model": "inworld", "pitch": -3, "who": "The Frostbound King"},
- "huntsman": {"voice": "Victor (en)", "model": "inworld", "pitch": -3, "who": "The Pale Huntsman"},
- "gravewarden": {"voice": "Dominus (en)", "model": "inworld", "pitch": -3, "who": "The Gravewarden. Owner asked for slightly less deep than the audition (-4), so -3."}
+ "forebear_m": {
+  "voice": "Gideon",
+  "model": "eleven",
+  "pitch": 0,
+  "who": "Father, first generation"
+ },
+ "forebear_f": {
+  "voice": "Celine",
+  "model": "eleven",
+  "pitch": 0,
+  "who": "Mother, first generation"
+ },
+ "heir_m": {
+  "voice": "Blake (en)",
+  "model": "inworld",
+  "pitch": -3,
+  "who": "Grandson, last heir"
+ },
+ "heir_f": {
+  "voice": "Olivia (en)",
+  "model": "inworld",
+  "pitch": 0,
+  "who": "Granddaughter, last heir (higher than the mother)"
+ },
+ "lyra": {
+  "voice": "Claire (en)",
+  "model": "inworld",
+  "pitch": -2,
+  "who": "Lyra. Owner also named a deep male voice (Caspian) as an alternative; Claire lowered used unless the owner confirms otherwise. Existing takes lowered in place."
+ },
+ "widow": {
+  "voice": "Giselle",
+  "model": "eleven",
+  "pitch": 0,
+  "stability": 0.15,
+  "who": "The Crimson Widow. Owner chose the mean, aggressive delivery (widow_round2/widow_evil__5_Giselle.mp3). Her lines must be rewritten harsher to suit; she keeps her younger look. Treatment: bass +2 at 160 Hz, presence +2.5 at 2.8 kHz, light room."
+ },
+ "orren": {
+  "voice": "Callum (en)",
+  "model": "inworld",
+  "pitch": -3,
+  "who": "Orren. Existing takes lowered in place."
+ },
+ "monarch": {
+  "voice": "Hades (en)",
+  "model": "inworld",
+  "pitch": -3,
+  "who": "The Forgotten Monarch. Existing takes lowered in place."
+ },
+ "frostking": {
+  "voice": "Josef (de)",
+  "model": "inworld",
+  "pitch": -3,
+  "who": "The Frostbound King"
+ },
+ "huntsman": {
+  "voice": "Victor (en)",
+  "model": "inworld",
+  "pitch": -3,
+  "who": "The Pale Huntsman"
+ },
+ "gravewarden": {
+  "voice": "Dominus (en)",
+  "model": "inworld",
+  "pitch": -3,
+  "who": "The Gravewarden. Owner asked for slightly less deep than the audition (-4), so -3."
+ }
 }

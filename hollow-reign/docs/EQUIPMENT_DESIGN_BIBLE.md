@@ -184,72 +184,76 @@ clipping. One surface per material; swords have 6 - 8 surfaces, shields 6 - 7.
 | Blade metal (ore) and edge polish | Gloss beyond the 0.30 floor |
 | Light channel: only rare and above have one; dark until awakened | The number of channels: one |
 
-## Hybrid swords: our blade in a generated hilt (trial, 2026-11-27)
+## Hybrid swords: our blade in a generated hilt (live since 2026-11-27)
 
-The owner found the flat plate guards too plain. Trial: keep the code-built blade (profile, engraving, forge tiers,
-ore, light channel) and replace guard + grip + pommel with one **image-to-3D hilt** made from a concept image.
-Two exist as separate ids, **not used by the live game**: `wayfarer_h` and `eternal_edge_h` (manifest `hybrid: true`,
-`base`, `hilt_source`). `GearModel.spawn("wayfarer_h", ...)` loads them; `GearModel.ids()` leaves hybrids out unless
-asked (`ids("sword", true)`). Captures: `marketing/gear_bench/v3_hybrid/`.
+The owner found the flat plate guards too plain. Every sword is now drawn as a **hybrid**: the code-built blade
+(profile, engraving, forge tiers, ore, light channel) seated in one **image-to-3D hilt** (guard + grip + pommel) made
+from a concept image. Ids do not change for callers: `GearModel.spawn("wayfarer")`, `info()`, `hold()` and `reach()`
+answer with the hybrid (manifest entry `wayfarer_h`: `hybrid`, `base`, `hilt_source`). The code-built swords are
+still built and are reached with the dev arg `--oldhilts` (every sword) or `{"old_hilt": true}` in a spawn's mod.
+Captures: `marketing/gear_bench/v3_hybrid/` (the two-sword trial, code-built beside hybrid) and `v4_hybrid_all/`.
 
-**Verdict.** Clearly better against the owner's taste: the generated hilts are sculpted in the round (fluted
-sockets, pierced flowing arms, prongs, chevron collars, inlaid gems and gold lines) where the plates are outlines.
-The silhouettes are also stronger. What it costs is listed under "Defects and cost".
+**Files per sword.** `<id>_h__hilt0.glb` + `_lod` (baked hilt and its clustered low model), `<id>_h__blade<n>.glb` +
+`_lod` (the blade at the hybrid's seat: tiers 0 - 3 for the four basic swords, the default tier for the rest),
+`<id>_h__rings2/3.glb` (basic swords), and three 1K textures in `gear/hilts/` (`<src>_color|normal|orm.jpg`, VRAM
+compressed like the knights' textures). The generated sources are kept outside the imported tree in
+`art/gear_hilts_src/`, so their embedded 2K textures are not imported again.
 
-**Alignment recipe** (`HYBRIDS` and `bake_hilt()` in `tools/gear_gen.py`; run `python3 tools/gear_gen.py --hybrids`):
-1. The generated model arrives 1 unit long, pommel at -Y, guard along Z, depth along X. Slice it along Y and read off:
-   pommel, grip (the long run of constant radius), collar (where the radius first widens), guard, and the top of the
-   socket or collar the blade leaves from.
-2. `scale` = 0.0150 m / grip radius in model units (a grip about 30 mm across). Wayfarer 0.255, Eternal Edge 0.3375.
-3. `y_hand` = collar height - 0.05 / scale: the hand sits half a palm under the guard. That point becomes the origin.
-4. Turn it a quarter round Y so the guard runs along X and the thin axis is Z. If the guard came out too deep front to
-   back (Eternal Edge's prongs were 6.6 cm deep), `flatten` squeezes the depth above the grip (x 0.62).
-5. `seat`: the blade starts 13 mm below the top of the socket, so its foot is inside the hilt: no gap and nothing
-   coplanar to z-fight. Where the blade's foot is wider than the socket, narrow the first control point of its width
-   profile (`P` override; Wayfarer 23.8 -> 21.2 mm).
-6. Metal match: average the hilt's albedo and roughness over its metal texels and set `tint` (blade x 0.66 - 0.72,
-   slightly warm) and `rough_max` 0.42 so blade and hilt read as one piece of steel. Ore tints multiply on top.
-7. The bake writes `<id>__hilt0.glb` (geometry only; it points at the textures Godot extracted beside the source),
-   `<id>__blade<0-3>.glb` at the new seat, `<id>__rings<2,3>.glb`, and manifest numbers measured from the result
-   (`tip`, `pommel`, `grip_clear`, `guard_span`).
+**Alignment recipe** (`HYBRIDS` and `bake_hilt()` in `tools/gear_gen.py`; `python3 tools/gear_gen.py --hybrids [id ...]`):
+1. A generated hilt arrives 1 unit long, pommel at -Y, guard along Z, depth along X. Slice it along Y and read off the
+   pommel, the grip (the long run of near-constant radius: `grip`, `rg`), the collar where it widens, the guard, and
+   the cup the blade leaves from (`seat`, the top unless the model includes a blade stub).
+2. Scale. `r / rg` makes the grip a hand's thickness (`r` 12.8 - 15.8 mm by role). Where the generated grip is fat for
+   its guard, give a larger `sc` instead: the guard is sized by it and everything below the collar is slimmed about the
+   grip's axis back to `r` (Ashbrand, Oathbreaker, King's Remnant, Cold Resolve, Nightward, Twin Relics).
+3. `grip_len`: the grip span alone is stretched or squeezed along Y to the length the role wants (one palm 0.10 for
+   the light sword, 0.30 for the greatsword). The hand's centre, the origin, is 5 cm under the collar.
+4. `axis_z` for one-sided guards whose bounding box is not centred on the grip (Veilcutter, Nightward, Twin Relics);
+   `turn = -1` where the knuckle side has to be turned to the manifest's convention (Veilcutter's long arm at -X;
+   Nightward's half-disc and Twin Relics' knuckle bar at +X; the left twin is the same model with `scale.x = -1`).
+5. `flatten`: guards that came out too deep front to back are squeezed in depth above the grip (x 0.62 - 0.7).
+   `blunt`: pulls in the last part of the guard arms (Wayfarer).
+6. Seat: the blade starts 13 mm below the top of the cup, so its foot is inside the hilt: no gap, nothing coplanar.
+   If the foot is wider than the cup, narrow the first width control point (`P`; Wayfarer 23.8 -> 21.2 mm).
+7. Metal match: the bake averages the hilt's albedo over its metal texels and writes `blade_tint` (a near-neutral
+   grey x 0.58 - 0.79, so gold inlays do not turn blades bronze) and `blade_rough_max` 0.42. Ore tints multiply on top.
+8. Low model: vertex clustering on an 8.5 mm grid, same textures.
+
+| Sword | Scale | Grip (m) | Guard span | Hilt tris / low | Sword tris / low | Notes |
+|---|---|---|---|---|---|---|
+| Wayfarer | 0.255 | 0.125 | 0.200 | 4,938 / 1,232 | 5,962 / 1,616 | arm tips pulled in 50%, still pointed |
+| Silver Vow | 0.312 | 0.100 | 0.163 | 4,768 / 1,131 | 5,824 / 1,547 | depth x 0.65 |
+| Ashbrand | 0.260 | 0.148 | 0.177 | 4,946 / 1,366 | 5,970 / 1,782 | slimmed grip, depth x 0.62 |
+| Veilcutter | 0.260 | 0.118 | 0.200 | 4,896 / 1,375 | 6,648 / 1,783 | knuckle bow at -X |
+| Oathbreaker | 0.360 | 0.300 | 0.216 | 4,888 / 2,318 | 6,200 / 2,750 | grip stretched 1.5x for two hands; off-hand at -0.165 |
+| Eternal Edge | 0.3375 | 0.135 | 0.128 | 4,862 / 1,297 | 6,190 / 1,713 | model includes a collar stub: seat at 0.44 |
+| King's Remnant | 0.300 | 0.130 | 0.169 | 4,720 / 1,417 | 6,064 / 1,833 | slimmed grip |
+| Cold Resolve | 0.220 | 0.115 | 0.101 | 4,862 / 1,294 | 5,854 / 1,702 | collar is a solid block: weakest of the ten |
+| Nightward | 0.240 | 0.112 | 0.107 | 4,774 / 993 | 5,600 / 1,433 | turned; half-disc on the edge side |
+| Twin Relics | 0.200 | 0.110 | 0.142 | 4,876 / 1,218 | 6,172 / 1,634 | turned; knuckle bar outward |
 
 **Forge mods on a hybrid.** `blade_tier`, `ore` and `sharpened` work unchanged. A generated grip cannot change form,
 so `grip_tier` 2 and 3 lay two or four thin gold rings over it (`__rings` parts, sized from the hilt's own radius at
-each height); tiers 0 and 1 look the same. The alternative, if handle upgrades must be more visible, is to generate
-only guard and pommel and keep the code-built grip between them (cord -> fine wrap -> twisted bar): two generated
-parts per sword instead of one.
+each height); tiers 0 and 1 look the same. If handle upgrades must show more, generate only guard and pommel and keep
+the code-built grip between them.
 
-**Defects and cost (measured on the two trial pieces).**
-- Grips are soft: the concept's cord wrap comes back as lumpy leather. Fine at fighting distance, poor in a close-up.
-- Wayfarer's guard arms end in sharp hooked points; the first brief asked for less spiky. It follows its concept.
-- The generated metal is glossier than ours (roughness 0.21 - 0.30 before the 0.30 clamp) and blooms on thin edges.
-- Eternal Edge's hybrid grip is 10.8 cm (one hand) against 16.1 cm code-built: `hands` 1 instead of 1.5.
-- Triangles: hilt 4,938 / 4,862 against about 1,100 for a code-built hilt; whole sword about 6,000 - 6,200. There is
-  no hand-made low model for the hilt (only Godot's automatic LOD).
-- Draw calls: the hilt is one surface, so a hybrid is 5 - 7 draws, one or two fewer than code-built.
-- Disk: 3.3 - 3.7 MB of 2K textures per hilt (colour, normal, ORM) against 0 new bytes for a code-built hilt, plus the
-  3.6 - 4 MB source GLB that still embeds the same textures. Halving the textures to 1K would be the first saving.
+**Cost, before and after the phone pass.**
+- Textures: 2K colour / normal / ORM per hilt (3.3 - 3.7 MB each as files) -> 1K JPEG (0.40 - 0.54 MB each, 4.7 MB
+  for all ten), a quarter of the texels in memory, VRAM compressed.
+- Disk in the imported tree: `gear/hilts/` was 76 MB (ten source GLBs with embedded textures plus the extracted
+  copies) and is now 4.7 MB; each baked hilt GLB is about 160 kB and its low model 25 - 70 kB.
+- Triangles at the 9 m switch: hilt 4,700 - 4,950 -> 720 - 2,320; whole sword 5,600 - 6,650 -> 1,430 - 2,750.
+- Draw calls: the hilt is one surface; a hybrid is 5 - 7 draws, one or two fewer than a code-built sword.
 
-**Producing the other eight this way.** One concept image per sword (hilt only, straight-on, plain grey ground, an
-empty socket or collar where the blade enters, no blade), then image-to-3D at about 5k triangles, then the recipe
-above. Cost each: **30 Tripo credits + about 1.25 image credits**; eight swords: 240 Tripo + 10 image credits.
-Nothing has been spent on these; they need the owner's approval. Prompts, in the same language as the two trial hilts
-("sculpted futuristic sword hilt, satin brushed steel, tiny antique-gold inlays, black cord grip, jewellery
-precision, no blade"), each keeping its role silhouette:
+**Known weaknesses.** Grips are soft (cord comes back as banded leather); the generated metal is glossier than our
+steel and blooms on thin edges; Wayfarer's arms still end in points; Cold Resolve's crystal collar came back as a
+solid faceted block; Oathbreaker's centre ornament is stretched with its grip; the low models are clustered, so
+their UV seams are rough close up (they are only drawn beyond 9 m).
 
-| Sword | Hilt concept |
-|---|---|
-| Silver Vow (light) | small open lens-shaped frame guard with two pierced leaf windows, very slender grip, faceted bead pommel |
-| Ashbrand (heavy) | broad blocky anvil guard with stepped shoulders and two rectangular windows, tall fluted collar, long grip, heavy slotted block pommel |
-| Veilcutter (precision) | asymmetric guard: one short arm leaning forward, one long arm sweeping back past the knuckles as an open ribbon, slim grip, spike pommel |
-| Oathbreaker (greatsword) | wide tiered architectural guard with windows and slots, tall clamp up the ricasso, long two-hand grip with a centre ring, keystone pommel |
-| King's Remnant | guard whose upper edge is a row of small merlons like a broken crown over a long pierced window, disc pommel pierced by a square |
-| Cold Resolve | open hexagonal collar the blade stands in with a faceted window each side, pale-blue light line, four-sided crystal pommel |
-| Nightward | half-disc guard on one side only, pierced by three graduated ports, blackened steel, tab pommel with a lanyard eye |
-| Twin Relics (one of a pair) | angular C-frame guard returning to the pommel as a knuckle bar, short grip, hexagonal cap |
-
-Check each result as the trial pieces were checked: slices, grip radius against a 9 cm palm, silhouette beside the
-other nine, in the knight's hand, and the triangle and texture cost.
+**A new sword this way.** One hilt concept (hilt only, straight-on, plain grey ground, an empty cup where the blade
+enters, rounded ends, no blade), image-to-3D at about 5k triangles into `art/gear_hilts_src/`, one `HYBRIDS` line from
+the slices, then look at it: hilt close-up, silhouette beside the others, in the hand. 30 Tripo credits + about 1.25
+image credits each.
 
 ## Known limits (second pass)
 

@@ -386,7 +386,8 @@ static func prop(a: Arena, id: String, height: float, pos: Vector3, yaw: float =
 	root.position = -Vector3((lo2.x + hi2.x) * 0.5, lo2.y, (lo2.z + hi2.z) * 0.5) * s - Vector3(0, sink * height, 0)
 	var d := Vector2(pos.x, pos.z).length()
 	var perf := low()
-	var shadows := cast == 1 or (cast == -1 and d < (10.5 if perf else 14.0) and height >= 2.5)
+	# (on Performance the sun's shadow reaches 16 m from the camera: a piece standing further out than 12 m is not asked to cast)
+	var shadows := (cast == 1 and (not perf or d < 12.0)) or (cast == -1 and d < (10.5 if perf else 14.0) and height >= 2.5)
 	if not kit:
 		Look.sanitise(root, PropModel.scenery_class(path))
 	for mi: MeshInstance3D in root.find_children("*", "MeshInstance3D", true, false):

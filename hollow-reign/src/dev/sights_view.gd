@@ -20,9 +20,13 @@ func _ready() -> void:
 	cam.make_current()
 	var rx := Highland._road_x(HighlandSights.FALL_Z)
 	var sc := Highland.road_at_z(HighlandSights.FALL_Z)
+	var end: Vector2 = Highland.stream[Highland.stream.size() - 1] if not Highland.stream.is_empty() else Vector2.ZERO
+	var lipv: Vector2 = Highland.stream[maxi(Highland.stream.size() - 25, 0)] if not Highland.stream.is_empty() else Vector2.ZERO
+	print("stream: %d points, ends at (%.0f, %.0f), starts falling near (%.0f, %.0f)" % [Highland.stream.size(), end.x, end.y, lipv.x, lipv.y])
 	var shots := {
 		"bridge": [Highland.road(sc - 9.0) + Vector3(2.5, 2.0, 0), Highland.road(sc) + Vector3(0, 0.5, 0)],
-		"fall": [Highland.on_ground(rx + 20.0, HighlandSights.FALL_Z + 30.0) + Vector3(0, 3, 0), Highland.on_ground(rx + 62.0, HighlandSights.FALL_Z + 2.0) + Vector3(0, -6, 0)],
+		"fall": [Vector3(end.x + 70.0, Highland.SEA + 25.0, end.y + 10.0), Vector3(end.x - 10.0, Highland.SEA + 22.0, end.y)],
+		"fall_top": [Vector3(lipv.x - 25.0, Highland.height(lipv.x - 25.0, lipv.y) + 6.0, lipv.y + 8.0), Vector3(lipv.x + 12.0, Highland.height(lipv.x + 12.0, lipv.y) - 8.0, lipv.y)],
 		"tether": [Highland.road(Highland.road_at_z(420.0)) + Vector3(0, 1.7, 0), Vector3(HighlandSights.TETHER_AT.x, 300.0, HighlandSights.TETHER_AT.y)],
 		"colossus": [Highland.road(Highland.road_at_z(300.0)) + Vector3(0, 1.7, 0), Highland.on_ground(rx - 82.0, HighlandSights.COLOSSUS_Z) + Vector3(0, 25, 0)],
 	}

@@ -2,7 +2,7 @@
 
 **Goal:** a polished, playable first-boss build (Generation I opening → road → Ashen Sentinel) on the owner's iPhone, without burning usage. The game imports and runs on the owner's Mac.
 
-**Usage rules from the owner (2026-11-27):** Sonnet for implementation, UI, visual polish, testing and routine fixes. The top model only for complex animation problems, combat architecture, major bugs and hard technical decisions. Group related changes; do not re-review the whole project; reuse assets and code; avoid paid asset generation (ask first). At most two background agents at once, started with `model: sonnet`, each with strict file ownership and told not to run git. Never resume an agent with a very large context for a small job: start a fresh one.
+**Usage rules from the owner (2026-11-27, revised same day):** Use Opus for everything, agents included; the owner does not want Sonnet and does not want switch-to-Sonnet suggestions. Group related changes; do not re-review the whole project; reuse assets and code; avoid paid asset generation (ask first). At most two background agents at once, each with strict file ownership and told not to run git. Never resume an agent with a very large context for a small job: start a fresh one.
 
 **Do not break:** texture import settings are frozen (detect-3D off, compressed, mipmapped; `[importer_defaults]` in project.godot). Never hand-edit `.import` files. `tools/clone_test.sh` must show 0 import errors and `git status` clean after import. `marketing/`, `art/`, `shots/` have `.gdignore`. No FBX in git (`git ls-files | grep -ci "\.fbx$"` = 0).
 

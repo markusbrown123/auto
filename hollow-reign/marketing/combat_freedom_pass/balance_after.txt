@@ -1,0 +1,26 @@
+player: hp 160 sta 130 regen 30.0 atk 15.8 swing 0.26 cost 11.0 block_eff 0.00 shield 3/4.0s
+foe              bot       win%    time    hp%   cuts  cut/s blocks   gbrk
+hollow_soldier   skilled    100     6.7    100   10.7   0.00    0.0    0.0
+hollow_soldier   sloppy     100    13.2     90   14.2   0.00    0.0    0.0
+hollow_soldier   turtle     100    20.7     95   18.4   0.00    8.3    1.4
+hollow_soldier   spam         0     0.0      0    6.5   0.00    0.0    0.0
+banneret         skilled    100     4.2    100    8.1   0.00    0.0    0.0
+banneret         sloppy     100     7.6     96   11.5   0.00    0.0    0.0
+banneret         turtle     100    31.5     79   15.2   0.00   18.8    5.2
+banneret         spam         0     0.0      0    1.5   0.00    0.0    0.0
+pike_sergeant    skilled    100     7.1    100   11.6   0.00    0.0    0.0
+pike_sergeant    sloppy     100    15.0     92   16.3   0.00    0.0    0.0
+pike_sergeant    turtle      85    49.4     42   20.4   0.00   27.4   10.2
+pike_sergeant    spam         0     0.0      0    8.2   0.00    0.0    0.0
+rampart_brute    skilled    100     9.6    100   15.0   0.00    0.0    0.0
+rampart_brute    sloppy     100    26.1     84   25.2   0.00    0.0    0.0
+rampart_brute    turtle     100    36.8     73   30.2   0.00    9.2    1.4
+rampart_brute    spam         0     0.0      0    4.0   0.00    0.0    0.0
+gate_colossus    skilled    100    20.7    100   23.2   0.00    0.0    0.0
+gate_colossus    sloppy     100    37.5     72   35.1   0.00    0.0    0.0
+gate_colossus    turtle      85    59.9     20   39.4   0.00   10.1    0.8
+gate_colossus    spam         0     0.0      0    3.9   0.00    0.0    0.0
+ashen_sentinel   skilled    100    39.6    100   49.5   0.00    0.7    0.0
+ashen_sentinel   sloppy      95    78.5     56   74.1   0.00    1.0    0.0
+ashen_sentinel   turtle       0     0.0      0   52.8   0.00   31.8    7.5
+ashen_sentinel   spam         0     0.0      0    3.0   0.00    0.0    0.0

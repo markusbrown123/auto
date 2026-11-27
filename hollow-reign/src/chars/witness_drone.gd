@@ -43,7 +43,15 @@ var _tilt: Node3D             # the whole model: scale, and the pose it lies in 
 var _core: Node3D             # the body: spins slowly (aim "halo") or turns its front to the target (aim "body")
 var _ring: Node3D             # the parts of group "halo": tip toward the target when the aim is "halo"
 var _aim_body := false
-var _moving: Array = []       # [node, rest Transform3D, slide, breathe, talk, turn (degrees)] per part that moves
+var _moving: Array = []       # [node, rest Transform3D, slide, breathe, talk, turn (degrees), talk_turn, look, look q] per part that moves
+var _glow_k := 1.0            # how bright this variant's light is drawn (manifest "glow")
+var _flare: MeshInstance3D    # a soft bloom on the lamp, seen only from where the lamp points
+var _flare_mat: StandardMaterial3D
+var _looker: Node3D           # the part that turns by itself to what it looks at (manifest "look"), if any
+var _trail: MeshInstance3D
+var _trail_mesh: ImmediateMesh
+var _trail_pts: Array = []
+var _trail_on := 0.0
 var _mat_seam: StandardMaterial3D
 var _mat_dash: StandardMaterial3D
 var _vel := Vector3.ZERO
@@ -112,15 +120,100 @@ func build(variant: String = "") -> void:
 		n.transform = rest
 		_part(variant, str(p.mesh), n, str(p.get("lit", "")) == "dash", rest.basis.determinant() < 0.0)
 		by_mesh[p.mesh] = n
-		if p.has("slide") or p.has("breathe") or p.has("talk") or p.has("turn"):
-			_moving.append([n, rest, _v3(p.get("slide")), _v3(p.get("breathe")), _v3(p.get("talk")), _v3(p.get("turn"))])
+		if p.has("slide") or p.has("breathe") or p.has("talk") or p.has("turn") or p.has("talk_turn") or p.has("look"):
+			var lk = p.get("look")
+			var look := Vector2(deg_to_rad(float(lk[0])), deg_to_rad(float(lk[1]))) if lk is Array and lk.size() == 2 else Vector2.ZERO
+			_moving.append([n, rest, _v3(p.get("slide")), _v3(p.get("breathe")), _v3(p.get("talk")), _v3(p.get("turn")), _v3(p.get("talk_turn")), look, Quaternion.IDENTITY])
+			if look != Vector2.ZERO:
+				_looker = n
+	_glow_k = float(_info.get("glow", 1.0))
 	lamp = OmniLight3D.new()
 	lamp.light_color = AMBER
-	lamp.omni_range = 0.9
+	lamp.omni_range = float(_info.get("lamp_range", 0.9))
 	lamp.light_energy = 0.0
 	lamp.shadow_enabled = false
 	add_child(lamp)
+	if _info.has("flare"):
+		_build_flare(float(_info.flare))
+	_build_trail()
 	_apply(0.0)
+
+## The lamp's bloom: a soft disc in front of the pane that always faces the camera and fades as the lamp turns away,
+## so that at the far edge of a fight one can still tell where the Witness is looking.
+func _build_flare(d: float) -> void:
+	var g := Gradient.new()
+	g.set_color(0, Color(1, 1, 1, 1))
+	g.set_color(1, Color(1, 1, 1, 0))
+	g.add_point(0.25, Color(1, 1, 1, 0.42))
+	var tex := GradientTexture2D.new()
+	tex.gradient = g
+	tex.fill = GradientTexture2D.FILL_RADIAL
+	tex.fill_from = Vector2(0.5, 0.5)
+	tex.fill_to = Vector2(1.0, 0.5)
+	tex.width = 64
+	tex.height = 64
+	_flare_mat = StandardMaterial3D.new()
+	_flare_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	_flare_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	_flare_mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	_flare_mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	_flare_mat.billboard_keep_scale = true
+	_flare_mat.albedo_texture = tex
+	_flare_mat.albedo_color = Color(AMBER, 0.0)
+	var q := QuadMesh.new()
+	q.size = Vector2(d, d)
+	_flare = MeshInstance3D.new()
+	_flare.mesh = q
+	_flare.material_override = _flare_mat
+	_flare.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_flare.position = Vector3(0, 0, -0.045)
+	(_looker if _looker != null else _core).add_child(_flare)
+
+## A faint ribbon behind it when it darts (never with reduced motion): its last few positions, fading.
+func _build_trail() -> void:
+	_trail_mesh = ImmediateMesh.new()
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	m.vertex_color_use_as_albedo = true
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	_trail = MeshInstance3D.new()
+	_trail.mesh = _trail_mesh
+	_trail.material_override = m
+	_trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_trail.top_level = true
+	add_child(_trail)
+
+const TRAIL_N := 16
+
+func _draw_trail(dt: float, calm: bool) -> void:
+	var speed := _vel.length()
+	var want := 0.0 if (calm or state != State.FOLLOW) else smoothstep(1.7, 3.6, speed)
+	_trail_on = lerpf(_trail_on, want, 1.0 - exp(-dt * (10.0 if want > _trail_on else 2.5)))
+	if _trail_pts.is_empty() or (_trail_pts[0] as Vector3).distance_to(global_position) > 0.05:
+		_trail_pts.push_front(global_position)
+		if _trail_pts.size() > TRAIL_N:
+			_trail_pts.resize(TRAIL_N)
+	_trail_mesh.clear_surfaces()
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if _trail_on < 0.02 or _trail_pts.size() < 3 or cam == null:
+		return
+	_trail.global_transform = Transform3D.IDENTITY
+	_trail_mesh.surface_begin(Mesh.PRIMITIVE_TRIANGLE_STRIP)
+	var n := _trail_pts.size()
+	for i: int in n:
+		var p: Vector3 = _trail_pts[i]
+		var along: Vector3 = ((_trail_pts[maxi(i - 1, 0)] as Vector3) - (_trail_pts[mini(i + 1, n - 1)] as Vector3))
+		var side := along.cross(cam.global_position - p).normalized()
+		var u := float(i) / float(n - 1)
+		var w := radius * 0.42 * (1.0 - u) * (0.35 + 0.65 * minf(1.0, u * 5.0))
+		var c := Color(AMBER, 0.30 * _trail_on * (1.0 - u) * (1.0 - u))
+		_trail_mesh.surface_set_color(c)
+		_trail_mesh.surface_add_vertex(p + side * w)
+		_trail_mesh.surface_set_color(c)
+		_trail_mesh.surface_add_vertex(p - side * w)
+	_trail_mesh.surface_end()
 
 func _light_mat() -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
@@ -331,7 +424,26 @@ func _process(delta: float) -> void:
 		base = 1.0
 	glow = base * seam_on + 1.3 * _flash
 	_dash = base * dash_on + 1.3 * _flash
+	_aim_lookers(dt, target, calm)
 	_apply(dt)
+	_draw_trail(dt, calm)
+
+## The lamp leads: it turns to the target before the body has come round, and looks about by itself when idle.
+func _aim_lookers(dt: float, target: Vector3, calm: bool) -> void:
+	for m: Array in _moving:
+		var lim: Vector2 = m[7]
+		if lim == Vector2.ZERO:
+			continue
+		var want := Quaternion.IDENTITY
+		if state == State.FOLLOW or state == State.WAKING:
+			if target != Vector3.INF:
+				var d: Vector3 = _core.global_transform.basis.orthonormalized().inverse() * (target - (m[0] as Node3D).global_position)
+				var yaw := clampf(atan2(-d.x, -d.z), -lim.x, lim.x)
+				var pitch := clampf(atan2(d.y, maxf(Vector2(d.x, d.z).length(), 0.01)), -lim.y, lim.y)
+				want = Quaternion(Vector3.UP, yaw) * Quaternion(Vector3.RIGHT, pitch)
+			elif not calm and state == State.FOLLOW:
+				want = Quaternion(Vector3.UP, sin(_clock * 0.53 + 0.8) * 0.5 * lim.x) * Quaternion(Vector3.RIGHT, sin(_clock * 0.37) * 0.3 * lim.y)
+		m[8] = (m[8] as Quaternion).slerp(want, 1.0 - exp(-dt * (11.0 if target != Vector3.INF else 2.0)))
 
 var _dash := 0.0
 var _presence := 1.0
@@ -342,18 +454,28 @@ var _rise := RISE
 func _apply(_dt: float) -> void:
 	if state == State.DORMANT:
 		_dash = 0.0
-	_mat_seam.emission_energy_multiplier = glow * 2.2
-	_mat_dash.emission_energy_multiplier = _dash * 2.2
+	_mat_seam.emission_energy_multiplier = glow * 2.2 * _glow_k
+	_mat_dash.emission_energy_multiplier = _dash * 2.2 * _glow_k
 	_mat_seam.albedo_color = Color(0.16, 0.14, 0.12).lerp(Color(1.0, 0.9, 0.74), clampf(glow, 0.0, 1.0))
 	_mat_dash.albedo_color = Color(0.16, 0.14, 0.12).lerp(Color(1.0, 0.9, 0.74), clampf(_dash, 0.0, 1.0))
-	lamp.light_energy = 0.3 * glow
+	lamp.light_energy = 0.3 * glow * _glow_k
 	lamp.visible = glow > 0.05
+	if _looker != null:
+		lamp.position = to_local(_looker.global_transform * Vector3(0, 0, -0.07)) if is_inside_tree() else Vector3.ZERO
+	if _flare != null:
+		var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+		var facing := 0.0
+		if cam != null:
+			var fwd := -_flare.get_parent_node_3d().global_transform.basis.z.normalized()
+			facing = clampf(fwd.dot((cam.global_position - _flare.global_position).normalized()), 0.0, 1.0)
+		_flare_mat.albedo_color = Color(AMBER, clampf(0.55 * glow * facing * facing, 0.0, 0.9))
+		_flare.visible = glow > 0.05 and facing > 0.02
 	# the panels: parted by attention, breathing when idle, nudged by the voice
 	for m: Array in _moving:
 		var rest: Transform3D = m[1]
 		var off: Vector3 = (m[2] as Vector3) * attention + (m[3] as Vector3) * _wave + (m[4] as Vector3) * _level
-		var turn: Vector3 = (m[5] as Vector3) * (attention * PI / 180.0)
-		(m[0] as Node3D).transform = Transform3D(rest.basis * Basis.from_euler(turn, EULER_ORDER_YXZ), rest.origin + rest.basis * off)
+		var turn: Vector3 = ((m[5] as Vector3) * attention + (m[6] as Vector3) * _level) * (PI / 180.0)
+		(m[0] as Node3D).transform = Transform3D(rest.basis * Basis.from_euler(turn, EULER_ORDER_YXZ) * Basis(m[8] as Quaternion), rest.origin + rest.basis * off)
 	if not _aim_body:
 		_ring.quaternion = _ring_q
 
@@ -460,6 +582,14 @@ func _follow(dt: float, calm: bool) -> void:
 	_vel += ((to - global_position) * stiff - _vel * 2.0 * sqrt(stiff)) * dt
 	global_position += _vel * dt
 	global_position = _clear_body(global_position, k)
+	var lens := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if lens != null and lens.projection == Camera3D.PROJECTION_PERSPECTIVE:
+		var q := _clear_lens(global_position, lens, _free_now())
+		if q != global_position:
+			# a cut put the lens on top of it, or its way led past it: out at once, and it keeps no speed toward the lens
+			var push := (q - global_position).normalized()
+			_vel -= push * minf(_vel.dot(push), 0.0)
+			global_position = q
 	_log()
 
 ## At the sword-side shoulder (the first behaviour): held there for directed shots, and where it goes when the knight falls.
@@ -526,10 +656,46 @@ func _roam_station(dt: float, calm: bool) -> Array:
 					_flash = maxf(_flash, 0.35 + 0.3 * sin(_clock * 6.0))      # its light works over the thing
 		_:
 			_orbit_a += dt * (0.16 if calm else 0.3) * _orbit_dir
-			_goal = here * (Vector3(sin(_orbit_a), 0, -cos(_orbit_a)) * (1.5 + 0.25 * sin(_clock * 0.37)) + Vector3(0, 1.95, 0))
+			var ring := 1.7 + 0.25 * sin(_clock * 0.37)
+			var away := _away_from_lens()
+			if away != Vector3.ZERO:
+				# the lens is watching: it sweeps to and fro round the side of the knight the camera is NOT on, and
+				# never crosses between the knight and the lens (a full circle put it in the camera's face each lap)
+				_goal = rig.global_position + away.rotated(Vector3.UP, sin(_orbit_a) * 1.95) * ring * rig.scale.y + Vector3(0, 1.95 * rig.scale.y, 0)
+			else:
+				_goal = here * (Vector3(sin(_orbit_a), 0, -cos(_orbit_a)) * ring + Vector3(0, 1.95, 0))
 	if _goal.distance_to(rig.global_position) > 7.0:
 		_beat_t = 0.0
 	return [_goal + bob, 3.2 if calm else 5.5]
+
+## The level direction from the lens to the knight (zero when there is no perspective camera, or it is overhead).
+func _away_from_lens() -> Vector3:
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	if cam == null or cam.projection != Camera3D.PROJECTION_PERSPECTIVE or rig == null:
+		return Vector3.ZERO
+	var d := rig.global_position - cam.global_position
+	d.y = 0.0
+	return d.normalized() if d.length() > 0.4 else Vector3.ZERO
+
+## Never in the camera's face: kept out of an upright cylinder round the lens, wide where the lens looks (so that
+## it is never more than LENS_MAX of the picture's height tall) and narrow behind it. It slides round, it does not jump.
+const LENS_MAX := 0.14
+func _clear_lens(p: Vector3, cam: Camera3D, free: bool) -> Vector3:
+	var c := cam.global_position
+	var off := p - c
+	off.y = 0.0
+	var fwd := -cam.global_transform.basis.z
+	fwd.y = 0.0
+	var front := 1.2
+	if free:
+		front = clampf(2.6 * radius * _presence / (LENS_MAX * 2.0 * tan(deg_to_rad(cam.fov) * 0.5)), 1.2, 4.6)      # (2.6: vanes and weight stand outside `radius`)
+	var d := off.length()
+	var facing := off.dot(fwd.normalized()) / maxf(d, 0.001) if fwd.length() > 0.05 else 1.0
+	var need := lerpf(0.9, front, smoothstep(-0.3, 0.5, facing))
+	if absf(p.y - c.y) > need or d >= need:
+		return p
+	var dir := (off / d) if d > 0.01 else fwd.normalized()
+	return Vector3(c.x, p.y, c.z) + dir * need
 
 func _next_beat(calm: bool) -> void:
 	var pts: Array = []
@@ -678,10 +844,11 @@ func _clear_view(p: Vector3) -> Vector3:
 	var cam := get_viewport().get_camera_3d()
 	if cam == null or cam.projection != Camera3D.PROJECTION_PERSPECTIVE:
 		return p
-	var c := cam.global_position
 	var view := get_viewport().get_visible_rect().size
 	var duel := foe != null
 	var free := _free_now()
+	p = _clear_lens(p, cam, free)
+	var c := cam.global_position
 	if duel:
 		# out of the lines from the lens to the fighters (beyond them it cannot cover them: only nearer counts)
 		var home := p

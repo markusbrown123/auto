@@ -7916,7 +7916,8 @@
    "gear_id": "kings_remnant",
    "gear_ready": true,
    "req": {
-    "strength": 11
+    "strength": 7,
+    "dex": 7
    },
    "mat": "m_glass",
    "advanced": true,
@@ -7926,6 +7927,11 @@
    },
    "unlock_text": "Unlocks when the guardian of The Hollow Throne falls.",
    "price": 9500,
+   "cls": "sword",
+   "damage": 48,
+   "crit": 6,
+   "role": "balanced",
+   "role_text": "Balanced: a late sword with nothing given up. It leaves the shield arm free.",
    "mods": {
     "grip": [
      {
@@ -8020,7 +8026,7 @@
      {
       "at": 6,
       "type": "combo",
-      "ref": "greatsword",
+      "ref": "sword",
       "text": "A technique for its class, and swings with it cost 3% less"
      },
      {

@@ -10,8 +10,12 @@ static func _shell(parent: Node, dim: float = 0.72) -> VBoxContainer:
 	var bg := UI.full(ColorRect.new())
 	bg.color = Color(0.01, 0.01, 0.015, dim)
 	layer.add_child(bg)
-	var center := UI.full(CenterContainer.new())
-	layer.add_child(center)
+	# centred inside the safe area, so nothing is under the notch or the home indicator
+	var m := UI.margin(parent.get_viewport() if parent.is_inside_tree() else null, -8.0)
+	layer.add_child(m)
+	var center := CenterContainer.new()
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	m.add_child(center)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 10)
 	v.custom_minimum_size.x = 560
@@ -191,7 +195,7 @@ static func victory(parent: Node, foe: Dictionary, r: Dictionary, sim: DuelSim, 
 		var grand: bool = Db.rarity_rank(it) >= 3
 		var card := _item_card(layer, it, grand)
 		low.add_child(card)
-		low_h += 195.0 if grand else 79.0
+		low_h += 195.0 if grand else 91.0
 		if not still:
 			card.modulate.a = 0.0
 			var tw2: Tween = run.call(delay + (0.4 if grand else 0.0))
@@ -226,7 +230,8 @@ static func victory(parent: Node, foe: Dictionary, r: Dictionary, sim: DuelSim, 
 	if low.get_child_count() > 0:
 		var sc := ScrollContainer.new()
 		sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		sc.custom_minimum_size = Vector2(560, minf(low_h + 4.0, 318.0))
+		var safe := UI.safe_margins(layer.get_viewport())
+		sc.custom_minimum_size = Vector2(560, minf(low_h + 4.0, 318.0 - maxf(0.0, float(safe.t) + float(safe.b) - 48.0)))
 		sc.add_child(low)
 		mid.add_child(sc)
 	# ------------------------------------------------ right: the gold won, counting into the purse
@@ -317,8 +322,7 @@ static func _item_card(layer: CanvasLayer, it: Dictionary, grand: bool) -> Contr
 	grid.add_theme_constant_override("v_separation", -3)
 	grid.visible = false
 	outer.add_child(grid)
-	var cmp := UI.button("Compare", 17, 126)
-	cmp.custom_minimum_size.y = 48
+	var cmp := UI.button("Compare", 18, 136)
 	cmp.pressed.connect(func():
 		grid.visible = not grid.visible
 		cmp.add_theme_color_override("font_color", UI.GOLD if grid.visible else UI.BONE)
@@ -329,8 +333,7 @@ static func _item_card(layer: CanvasLayer, it: Dictionary, grand: bool) -> Contr
 			if grid.get_child_count() == 0:
 				grid.add_child(UI.label("No change against what you wear", 22, UI.DIM)))
 	btns.add_child(cmp)
-	var ins := UI.button("Inspect", 17, 126)
-	ins.custom_minimum_size.y = 48
+	var ins := UI.button("Inspect", 18, 136)
 	ins.pressed.connect(func():
 		var view := ArmoryInspect.new(GearUI.inspect_entry(id), str(Game.profile.get("body", "m")), str(it.get("desc", "")))
 		layer.add_child(view))
@@ -341,7 +344,7 @@ static func _item_card(layer: CanvasLayer, it: Dictionary, grand: bool) -> Contr
 ## same road again) and "equipment" (go and look at what is worn); each is shown only if given.
 static func death(parent: Node, foe: Dictionary, summary: Dictionary, done: Callable, actions: Dictionary = {}) -> void:
 	var v := _shell(parent, 0.84)
-	v.custom_minimum_size.x = 640
+	v.custom_minimum_size.x = 820
 	v.add_child(_centered("THE REIGN ENDURES", 42, UI.BLOOD.lightened(0.18), "title"))
 	v.add_child(_centre(UI.ornament(420, UI.CRIMSON)))
 	# an ordinary defeat, in every generation: the Inheritance Engine restores the one on the road. It is not one of
@@ -360,21 +363,21 @@ static func death(parent: Node, foe: Dictionary, summary: Dictionary, done: Call
 		v.get_meta("layer").queue_free()
 		f.call()
 	if actions.has("retry"):
-		var r := UI.button("Set out again", 19, 210)
+		var r := UI.button("Set out again", 20, 230)
 		r.pressed.connect(func(): close.call(actions.retry))
 		h.add_child(r)
 	var b := UI.button("Return to sanctuary" if not actions.is_empty() else "Rise", 19 if not actions.is_empty() else 22, 260)
 	b.pressed.connect(func(): close.call(done))
 	h.add_child(b)
 	if actions.has("equipment"):
-		var e := UI.button("Review equipment", 19, 230)
+		var e := UI.button("Review equipment", 20, 260)
 		e.pressed.connect(func(): close.call(actions.equipment))
 		h.add_child(e)
 
 static func pause(parent: Node, resume: Callable, abandon: Callable) -> void:
 	parent.get_tree().paused = true
 	var v := _shell(parent, 0.8)
-	v.custom_minimum_size.x = 640
+	v.custom_minimum_size.x = 840
 	_pause_fill(v, parent, resume, abandon)
 
 static func _pause_fill(v: VBoxContainer, parent: Node, resume: Callable, abandon: Callable) -> void:
@@ -419,7 +422,7 @@ static func choice(parent: Node, heading: String, lines: Array, options: Array, 
 			v.get_meta("layer").queue_free()
 			chosen.call(i))
 		v.add_child(b)
-		v.add_child(_centered(str(o[2]), 15, UI.DIM))
+		v.add_child(_centered(str(o[2]), 18, UI.DIM))
 
 static func message(parent: Node, heading: String, lines: Array, button: String, done: Callable, heading_color: Color = UI.GOLD) -> void:
 	var v := _shell(parent, 0.66)

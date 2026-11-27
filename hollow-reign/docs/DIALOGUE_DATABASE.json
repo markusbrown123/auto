@@ -128,376 +128,317 @@
   "gen1_open_01": {
    "speaker": "narrator",
    "text": "For centuries the bells of Vaelora rang beneath the same sovereign.",
-   "dir": "slow, grave",
-   "recorded": false
+   "dir": "slow, grave"
   },
   "gen1_open_02": {
    "speaker": "narrator",
    "text": "Harvests failed and were mended. Villages fell silent and were forgotten. Upon the throne, nothing changed.",
-   "dir": "measured",
-   "recorded": false
+   "dir": "measured"
   },
   "gen1_open_03": {
    "speaker": "narrator",
    "text": "One warden of the low road dared to ask what such permanence had cost.",
-   "dir": "quieter",
-   "recorded": false
+   "dir": "quieter"
   },
   "gen1_throne_01": {
    "speaker": "player",
    "text": "Three villages have fallen silent. Their names are struck from your records.",
    "dir": "level, not afraid",
-   "cast": "forebear",
-   "recorded": false
+   "cast": "forebear"
   },
   "gen1_throne_02": {
    "speaker": "monarch",
    "text": "Their silence has bought another winter for thousands.",
-   "dir": "regal, unhurried",
-   "recorded": false
+   "dir": "regal, unhurried"
   },
   "gen1_throne_03": {
    "speaker": "player",
    "text": "You speak of people as though they were coin.",
    "dir": "hard",
-   "cast": "forebear",
-   "recorded": false
+   "cast": "forebear"
   },
   "gen1_throne_04": {
    "speaker": "monarch",
    "text": "A ruler must count what others refuse to count.",
-   "dir": "patient",
-   "recorded": false
+   "dir": "patient"
   },
   "gen1_guard_01": {
    "speaker": "monarch",
    "text": "Show the warden to the gate.",
-   "dir": "bored, final",
-   "recorded": false
+   "dir": "bored, final"
   },
   "gen1_records_01": {
    "speaker": "player",
    "text": "The count is behind that seal. I did not climb this far to be told the sum.",
    "dir": "moving already",
-   "cast": "forebear",
-   "recorded": false
+   "cast": "forebear"
   },
   "gen1_records_02": {
    "speaker": "monarch",
    "text": "Then you climbed for nothing.",
-   "dir": "rising",
-   "recorded": false
+   "dir": "rising"
   },
   "gen1_seal_01": {
    "speaker": "monarch",
    "text": "Enough. Seal the hall.",
-   "dir": "cold",
-   "recorded": false
+   "dir": "cold"
   },
   "gen1_seal_02": {
    "speaker": "monarch",
    "text": "You have done nothing but leave this burden to another.",
-   "dir": "almost pity",
-   "recorded": false
+   "dir": "almost pity"
   },
   "gen1_seal_03": {
    "speaker": "player",
    "text": "Then another will come better prepared.",
    "dir": "failing, certain",
-   "cast": "forebear",
-   "recorded": false
+   "cast": "forebear"
   },
   "gen1_close_m_01": {
    "speaker": "narrator",
    "text": "His name disappeared from the royal histories.",
-   "dir": "elegiac",
-   "recorded": false
+   "dir": "elegiac"
   },
   "gen1_close_m_02": {
    "speaker": "narrator",
    "text": "But not from those of his house.",
-   "dir": "near whisper",
-   "recorded": false
+   "dir": "near whisper"
   },
   "gen1_close_f_01": {
    "speaker": "narrator",
    "text": "Her name disappeared from the royal histories.",
-   "dir": "elegiac",
-   "recorded": false
+   "dir": "elegiac"
   },
   "gen1_close_f_02": {
    "speaker": "narrator",
    "text": "But not from those of her house.",
-   "dir": "near whisper",
-   "recorded": false
+   "dir": "near whisper"
   },
   "gen2_arrive_m_01": {
    "speaker": "player",
    "text": "I know where you died, Father. I would know why.",
    "dir": "low, to the gate",
-   "body": "m",
-   "recorded": false
+   "body": "m"
   },
   "gen2_arrive_f_01": {
    "speaker": "player",
    "text": "I know where you died, Mother. I would know why.",
    "dir": "low, to the gate",
-   "body": "f",
-   "recorded": false
+   "body": "f"
   },
   "monarch_blade_01": {
    "speaker": "monarch",
    "text": "That blade. I had wondered when I would see it again.",
-   "dir": "quiet, to the sword, not to its bearer",
-   "recorded": false
+   "dir": "quiet, to the sword, not to its bearer"
   },
   "gen2_seal_burns_01": {
    "speaker": "lyra",
    "text": "The seal behind the throne is burning. What the first of your house could not carry out is still in it.",
-   "dir": "urgent, held down",
-   "recorded": false
+   "dir": "urgent, held down"
   },
   "monarch_restored_01": {
    "speaker": "monarch",
    "text": "You see the difficulty. I am not the thing that is keeping me.",
-   "dir": "rising, almost apologetic",
-   "recorded": false
+   "dir": "rising, almost apologetic"
   },
   "gen2_seal_01": {
    "speaker": "player",
    "text": "All these years I thought I had come for your life.",
-   "dir": "at the seal, back to him",
-   "recorded": false
+   "dir": "at the seal, back to him"
   },
   "gen2_seal_02": {
    "speaker": "monarch",
    "text": "And what have you found instead?",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "gen2_seal_03": {
    "speaker": "player",
    "text": "The means to end your reign.",
-   "dir": "certain",
-   "recorded": false
+   "dir": "certain"
   },
   "gen2_close_01": {
    "speaker": "narrator",
    "text": "The second of that house fell beneath the same throne.",
-   "dir": "elegiac",
-   "recorded": false
+   "dir": "elegiac"
   },
   "gen2_close_02": {
    "speaker": "narrator",
    "text": "But where the first had left a question, this one left an answer.",
-   "dir": "near whisper",
-   "recorded": false
+   "dir": "near whisper"
   },
   "gen3_arrive_01": {
    "speaker": "lyra",
    "text": "Three of your house have stood before those gates.",
-   "dir": "far off, through old machinery",
-   "recorded": false
+   "dir": "far off, through old machinery"
   },
   "gen3_arrive_02": {
    "speaker": "player",
    "text": "And how many returned?",
    "dir": "young, flat",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "gen3_arrive_03": {
    "speaker": "lyra",
    "text": "Not enough.",
-   "dir": "plain",
-   "recorded": false
+   "dir": "plain"
   },
   "gen3_arrive_04": {
    "speaker": "player",
    "text": "Then show me another way.",
    "dir": "quiet",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "gen3_engine_01": {
    "speaker": "lyra",
    "text": "I kept all of it. I could not keep them.",
-   "dir": "low",
-   "recorded": false
+   "dir": "low"
   },
   "kept_approach_01": {
    "speaker": "witness",
    "text": "Stop. Do not go in yet.",
-   "dir": "sharp, for once",
-   "recorded": false
+   "dir": "sharp, for once"
   },
   "kept_approach_02": {
    "speaker": "player",
    "text": "It is one guardian.",
    "dir": "impatient",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "kept_approach_03": {
    "speaker": "witness",
    "text": "It is the walk. I kept station at that shoulder for a year.",
-   "dir": "very quiet",
-   "recorded": false
+   "dir": "very quiet"
   },
   "kept_intro_01": {
    "speaker": "kept",
    "text": "State your... no. That was his question.",
    "dir": "a closed helm; a voice the player knows, slowed",
-   "by_body": true,
-   "recorded": false
+   "by_body": true
   },
   "kept_intro_02": {
    "speaker": "player",
    "text": "Who were you?",
    "dir": "careful",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "kept_intro_03": {
    "speaker": "kept",
    "text": "Late. I was late home.",
    "dir": "as if reading it off something",
-   "by_body": true,
-   "recorded": false
+   "by_body": true
   },
   "kept_beat_01": {
    "speaker": "kept",
    "text": "You stand the way I stood.",
    "dir": "mid-fight, without heat",
-   "by_body": true,
-   "recorded": false
+   "by_body": true
   },
   "kept_beat_02": {
    "speaker": "player",
    "text": "Someone taught me how you stood.",
    "dir": "breathing hard",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "kept_after_01": {
    "speaker": "kept",
    "text": "You kept the edge on it.",
    "dir": "looking at the heir's sword",
-   "by_body": true,
-   "recorded": false
+   "by_body": true
   },
   "kept_after_02": {
    "speaker": "kept",
    "text": "Go on. I have held this gate as long as I was able.",
    "dir": "tired, courteous",
-   "by_body": true,
-   "recorded": false
+   "by_body": true
   },
   "kept_after_03": {
    "speaker": "witness",
    "text": "I will set that down as it happened. All of it. Both times.",
-   "dir": "barely audible",
-   "recorded": false
+   "dir": "barely audible"
   },
   "monarch_g3_intro_01": {
    "speaker": "monarch",
    "text": "Your family has spent two lifetimes at my gates.",
-   "dir": "regal, unhurried",
-   "recorded": false
+   "dir": "regal, unhurried"
   },
   "monarch_g3_intro_02": {
    "speaker": "player",
    "text": "Three. You are keeping one of them.",
    "dir": "cold",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "monarch_g3_intro_03": {
    "speaker": "monarch",
    "text": "I keep everything. It is the whole of my office.",
-   "dir": "without shame",
-   "recorded": false
+   "dir": "without shame"
   },
   "monarch_g3_intro_04": {
    "speaker": "player",
    "text": "And you have mistaken survival for the right to rule.",
    "dir": "steady",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "monarch_g3_intro_05": {
    "speaker": "monarch",
    "text": "When these machines fall silent, they will remember whom to blame.",
-   "dir": "a warning, not a threat",
-   "recorded": false
+   "dir": "a warning, not a threat"
   },
   "monarch_g3_intro_06": {
    "speaker": "player",
    "text": "Then let them remember a choice was made.",
    "dir": "final",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "final_door_01": {
    "speaker": "witness",
    "text": "There is a door. Not from this side of the wall.",
-   "dir": "remembering as it speaks",
-   "recorded": false
+   "dir": "remembering as it speaks"
   },
   "facility_01": {
    "speaker": "lyra",
    "text": "This was never merely a kingdom.",
-   "dir": "hushed",
-   "recorded": false
+   "dir": "hushed"
   },
   "facility_02": {
    "speaker": "player",
    "text": "Then what was it?",
    "dir": "low",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   },
   "facility_03": {
    "speaker": "lyra",
    "text": "A means of keeping one alive.",
-   "dir": "plain",
-   "recorded": false
+   "dir": "plain"
   },
   "courtyard_0_g3_01": {
    "speaker": "lyra",
    "text": "The plate on these is new. He has been replacing what your house broke.",
-   "dir": "dry",
-   "recorded": false
+   "dir": "dry"
   },
   "blackwood_0_g3_01": {
    "speaker": "witness",
    "text": "The lanterns were lit when I last came this way. I was at another shoulder.",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "cathedral_0_g3_01": {
    "speaker": "lyra",
    "text": "The door under the crossing was on no plan I was given. Neither was I.",
-   "dir": "uneasy",
-   "recorded": false
+   "dir": "uneasy"
   },
   "citadel_0_g3_01": {
    "speaker": "witness",
    "text": "A king who gave up his crown, and the hall is still kept. Habit outlives everything.",
-   "dir": "wry",
-   "recorded": false
+   "dir": "wry"
   },
   "throne_0_g3_01": {
    "speaker": "lyra",
    "text": "Twice this door has opened for your house. Nobody came back through it.",
-   "dir": "quiet",
-   "recorded": false
+   "dir": "quiet"
   },
   "deep_0_g3_01": {
    "speaker": "lyra",
    "text": "Everything he kept is under here. So am I.",
-   "dir": "very quiet",
-   "recorded": false
+   "dir": "very quiet"
   },
   "sentinel_death_01": {
    "speaker": "sentinel",
@@ -727,26 +668,22 @@
   "devourer_intro_01": {
    "speaker": "devourer",
    "text": "...a daughter... I had...",
-   "dir": "a man, lost, under other voices",
-   "recorded": false
+   "dir": "a man, lost, under other voices"
   },
   "devourer_intro_02": {
    "speaker": "devourer",
    "text": "...the sea... the sea...",
-   "dir": "a woman, far away",
-   "recorded": false
+   "dir": "a woman, far away"
   },
   "devourer_intro_03": {
    "speaker": "devourer",
    "text": "...my name... what was... my name...",
-   "dir": "a child, whispering",
-   "recorded": false
+   "dir": "a child, whispering"
   },
   "devourer_death_01": {
    "speaker": "devourer",
    "text": "...someone... there...?",
-   "dir": "a woman, very small",
-   "recorded": false
+   "dir": "a woman, very small"
   },
   "devourer_death_02": {
    "speaker": "player",
@@ -756,8 +693,7 @@
   "devourer_death_03": {
    "speaker": "devourer",
    "text": "...say us... any of us... once...",
-   "dir": "many, fading",
-   "recorded": false
+   "dir": "many, fading"
   },
   "devourer_death_04": {
    "speaker": "player",
@@ -1021,9 +957,8 @@
   },
   "w_gravewarden_approach_01": {
    "speaker": "witness",
-   "text": "The keeper. He is the gentlest thing down here, and he will kill you for a careless word.",
-   "dir": "low",
-   "recorded": false
+   "text": "The keeper. He is the gentlest thing down here, and he will end you for a careless word.",
+   "dir": "low"
   },
   "w_gravewarden_approach_02": {
    "speaker": "player",
@@ -1243,8 +1178,7 @@
   "w_monarch_approach_03": {
    "speaker": "witness",
    "text": "And here I drift at your shoulder. What is decided in there is yours to decide. I shall only witness it.",
-   "dir": "level",
-   "recorded": false
+   "dir": "level"
   },
   "w_monarch_victory_01": {
    "speaker": "witness",
@@ -1518,8 +1452,7 @@
    "speaker": "player",
    "text": "Tell me about it.",
    "dir": "soft",
-   "cast": "heir",
-   "recorded": false
+   "cast": "heir"
   }
  },
  "scenes": {

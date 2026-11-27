@@ -69,7 +69,11 @@ const LESSONS := [
 	["BLOCK", "Hold the shield and let the blow land on it.", [], "block"],
 	["THREE CUTS", "Longer patterns hit harder. This one cracks its poise.", [], "combo:armor_splitter"],
 	["STAMINA", "Every cut, parry and dodge spends the green bar. Cut until it runs low, then let it return.", ["L", "R"], "stamina"],
+	# the two rings beside the bars fill and light during the lesson: they are named here, each with one tap
+	["SURGE", "The amber ring fills as you fight. It is full now: tap it, and your foe is thrown open.", [], "surge"],
+	["RELIC", "The blue ring is your relic. When it is full and you are hurt, tap it to close your wounds.", [], "relic"],
 ]
+const LESSON_PAD_WAIT := 9.0     # seconds a ring's step waits for its tap before the lesson moves on by itself
 ## What the defence just bought, said the moment it works, so cause and effect are unmistakable.
 const LESSON_PAYOFF := {"parry": ["PARRIED", "Each parry wears its poise down. Break it for a long opening."], "dodge": ["IT MISSED", "A clean dodge leaves it off balance for a moment."], "block": ["BLOCKED", "The shield holds, at a cost in stamina. Answer quickly."]}
 var _lesson_strike := false      # the defence worked; now the lesson waits for the answering cut
@@ -106,6 +110,8 @@ func _lesson_demo(step: int) -> Array:
 			return [[], {"block": "hold"}]
 		"stamina":
 			return [LESSONS[step][2], {"stamina": "watch"}]
+		"surge", "relic":
+			return [[], {kind: "tap"}]
 	if kind.begins_with("combo:"):
 		for c in Db.combos:
 			if str(c.id) == kind.trim_prefix("combo:"):
@@ -124,6 +130,7 @@ func _lesson_show() -> void:
 	_lesson_t = 0.0
 	_lesson_low = false
 	sim.lesson_hold(not _lesson_kind() in ["parry", "dodge", "roll", "block"])
+	sim.lesson_charge(_lesson_kind())      # the ring being named is full for its step (and the knight a little hurt for the relic's)
 	var demo := _lesson_demo(_lesson)
 	hud.lesson_text(str(LESSONS[_lesson][0]), str(LESSONS[_lesson][1]), demo[0], false, demo[1])
 
@@ -138,6 +145,7 @@ func _lesson_watch() -> void:
 		if not is_inside_tree() or _lesson < 0:
 			return
 		_lesson_stamina_tick(get_process_delta_time())
+		_lesson_pad_tick(get_process_delta_time())
 		# the taught blow slows as it arrives, so the moment to swipe can be seen (lesson only)
 		if _lesson_kind() == "parry" and not _lesson_strike and sim.b_state == DuelSim.B.WINDUP and sim.b_t <= 0.6:
 			_slow = maxf(_slow, 0.1)
@@ -153,6 +161,14 @@ func _lesson_stamina_tick(dt: float) -> void:
 	if f < 0.4:
 		_lesson_low = true
 	if (_lesson_low and f > 0.7) or _lesson_t >= 10.0:
+		_lesson_done(_lesson)
+
+## The surge and relic steps: done by the tap itself (`_on_ev`), or passed over after LESSON_PAD_WAIT.
+func _lesson_pad_tick(dt: float) -> void:
+	if not _lesson_kind() in ["surge", "relic"]:
+		return
+	_lesson_t += dt
+	if _lesson_t >= LESSON_PAD_WAIT:
 		_lesson_done(_lesson)
 
 func _lesson_defended(step: int) -> void:
@@ -890,6 +906,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		&"relic_ready":
 			Sfx.play("loot", -8.0, 1.3)
 		&"surge":
+			if _lesson_kind() == "surge":
+				_lesson_done(_lesson)
 			hud.toast("SURGE", Color("#ffb347"), 0.9)
 			Sfx.play("ember_burst", -1.0)
 			Sfx.play("parry_perfect", -4.0, 0.8)
@@ -900,6 +918,8 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			_slow = 0.4
 			Game.haptic(80, 1.0)
 		&"relic":
+			if _lesson_kind() == "relic":
+				_lesson_done(_lesson)
 			hud.toast("MENDED", Color("#7fd4ff"), 0.8)
 			Sfx.play("levelup", -6.0, 1.2)
 			sparks(player_rig.chest_point(), Vector3.UP, 30, Color(0.5, 0.85, 1.0), 3.0)

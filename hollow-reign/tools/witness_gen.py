@@ -37,10 +37,46 @@ G.MATERIALS.update({
     "accent": ((0.86, 0.62, 0.28), 1.0, 0.36, "steel_a", "steel_n", "steel_orm", 0.3, None),
     # third pass: an old instrument. Pitted pale plates that have lost their glaze, dark bronze gone brown, a few
     # fittings turned green; nothing polished, nothing gold
-    "bone": ((0.86, 0.80, 0.69), 0.0, 1.0, "worn_a", "worn_n", "matte_orm", 1.0, None),
-    "bronze": ((0.50, 0.38, 0.25), 0.9, 1.0, "worn_a", "worn_n", "worn_orm", 1.0, None),
-    "verdigris": ((0.34, 0.56, 0.50), 0.25, 1.0, "worn_a", "worn_n", "matte_orm", 1.0, None),
+    # (their textures are this tool's own: assets/models/witness/tex/, written by relic_textures())
+    "bone": ((0.92, 0.89, 0.82), 0.0, 1.0, "relic_bone_a", "relic_bone_n", "relic_bone_orm", 1.0, None),
+    "bronze": ((1.0, 1.0, 1.0), 1.0, 1.0, "relic_bronze_a", "relic_bone_n", "relic_bronze_orm", 0.8, None),
+    "verdigris": ((0.36, 0.62, 0.55), 0.0, 1.0, "relic_bone_a", "relic_bone_n", "relic_bone_orm", 1.0, None),
 })
+
+
+def relic_textures():
+    """The gnomon's own surfaces, tiling, 256 px (one tile covers 6.25 cm): an unglazed pale ceramic that has
+    pitted, stained in the hollows and crazed; and a bronze gone brown with green in its low places."""
+    from PIL import Image
+    rng = np.random.default_rng(31)
+    S = 256
+    out = os.path.join(OUT, "tex")
+    os.makedirs(out, exist_ok=True)
+
+    def save(name, arr):
+        Image.fromarray(arr).save(os.path.join(out, name + ".png"), optimize=True)
+    blur, n01 = G._blur_wrap, G._norm01
+    grain = n01(blur(rng.random((S, S)), 1.1, 1.1))
+    mott = n01(blur(rng.random((S, S)), 22, 22))
+    stain = np.clip((n01(blur(rng.random((S, S)), 12, 9) + 0.5 * blur(rng.random((S, S)), 4, 4)) - 0.52) * 3.0, 0, 1)
+    pits = np.clip((n01(blur(rng.random((S, S)), 2.2, 2.2)) - 0.74) * 5, 0, 1)
+    # crazing: the thin ridges where two smooth noise fields cross their middle
+    c1, c2 = n01(blur(rng.random((S, S)), 9, 9)), n01(blur(rng.random((S, S)), 7, 7))
+    crack = np.clip(1.0 - np.minimum(np.abs(c1 - 0.5), np.abs(c2 - 0.5)) * 70, 0, 1) * 0.5
+    scr = np.clip((n01(blur(rng.random((S, S)), 0.7, 9)) - 0.9) * 10, 0, 1) * 0.5
+    val = 0.84 + 0.07 * (mott - 0.5) + 0.04 * (grain - 0.5) - 0.30 * stain - 0.22 * pits - 0.30 * crack + 0.05 * scr
+    warm = 0.10 * stain + 0.05 * crack
+    save("relic_bone_a", (np.clip(np.stack([val * (1.0 + warm * 0.3), val * (1.0 - warm * 0.3), val * (1.0 - warm * 1.3)], axis=-1), 0, 1) * 255).astype(np.uint8))
+    save("relic_bone_n", G._normal_from(n01(grain * 0.25 - pits * 0.9 - crack * 0.8 - scr * 0.3 + mott * 0.2), 1.8))
+    save("relic_bone_orm", G._orm(0.86 + 0.08 * (grain - 0.5) + 0.08 * stain - 0.10 * scr, 0.0))
+    # bronze: brown metal, darker and rougher where the green sits
+    green = np.clip((n01(blur(rng.random((S, S)), 10, 10) + 0.6 * blur(rng.random((S, S)), 3, 3)) - 0.55) * 3.2, 0, 1)
+    b = 0.36 + 0.10 * (mott - 0.5) + 0.06 * (grain - 0.5) - 0.10 * pits
+    rgb = np.stack([b * 1.18, b * 0.86, b * 0.56], axis=-1)
+    gcol = np.stack([0.22 + 0.1 * grain, 0.40 + 0.1 * grain, 0.34 + 0.1 * grain], axis=-1)
+    rgb = rgb * (1 - green[..., None] * 0.8) + gcol * green[..., None] * 0.8
+    save("relic_bronze_a", (np.clip(rgb, 0, 1) * 255).astype(np.uint8))
+    save("relic_bronze_orm", G._orm(0.60 + 0.10 * (grain - 0.5) + 0.30 * green + 0.1 * pits, 0.85 - 0.8 * green))
 
 
 def seg_for(q, n):
@@ -382,7 +418,7 @@ GN = [(0.150, 0.030, 0.038, 0.030, 0.022, 0.006, 0.55),
       (0.000, 0.058, 0.066, 0.054, 0.038, 0.000, 0.0),
       (-0.078, 0.038, 0.044, 0.040, 0.027, -0.006, 0.0),
       (-0.150, 0.012, 0.015, 0.016, 0.010, -0.014, 0.0)]
-GN_LAMP = (0.010, 0.040, -0.050)       # where the lamp turns (the manifest places it)
+GN_LAMP = (0.010, 0.040, -0.046)       # where the lamp turns (the manifest places it)
 
 
 def gn_ring(i, k=1.0, dy=0.0):
@@ -476,17 +512,17 @@ def _blade(B, outline, t, mat):
 
 def gnomon_vane(B, q):
     """The tall left vane: hinge at the origin, standing up +Y, its outer face toward -X."""
-    out = [(-0.052, 0.004), (0.0, -0.014), (0.105, -0.022), (0.232, -0.006), (0.256, 0.012), (0.125, 0.030), (0.0, 0.022)]
-    _blade(B, out, 0.0034, "bronze")
-    inlay = [(0.012, -0.008), (0.100, -0.015), (0.200, -0.004), (0.118, 0.022), (0.012, 0.016)]
+    out = [(-0.050, 0.006), (0.0, -0.020), (0.090, -0.032), (0.176, -0.016), (0.204, 0.014), (0.110, 0.040), (0.0, 0.030)]
+    _blade(B, out, 0.0045, "bronze")
+    inlay = [(0.012, -0.012), (0.088, -0.022), (0.160, -0.010), (0.104, 0.030), (0.012, 0.022)]
     for sx in (-1.0, 1.0):
-        slab(B, [np.array((sx * 0.0034, y, z)) for y, z in inlay], "bone", q=q, gap=0.0, thick=0.0026, bev=0.0010, away=(0, 0.1, 0.004))
+        slab(B, [np.array((sx * 0.0045, y, z)) for y, z in inlay], "bone", q=q, gap=0.0, thick=0.0030, bev=0.0012, away=(0, 0.1, 0.004))
 
 
 def gnomon_stub(B, q):
     """What is left of the right vane: snapped off on a slant."""
-    _blade(B, [(-0.030, 0.004), (0.0, -0.012), (0.052, -0.018), (0.088, 0.006), (0.058, 0.024), (0.0, 0.020)], 0.0034, "bronze")
-    solid(B, [[np.array((x, y, z)) for y, z in ((0.050, -0.016), (0.086, 0.006), (0.058, 0.022))] for x in (-0.0042, 0.0042)], "verdigris")
+    _blade(B, [(-0.030, 0.004), (0.0, -0.016), (0.050, -0.024), (0.084, 0.006), (0.056, 0.030), (0.0, 0.026)], 0.0045, "bronze")
+    solid(B, [[np.array((x, y, z)) for y, z in ((0.048, -0.022), (0.083, 0.006), (0.056, 0.028))] for x in (-0.0055, 0.0055)], "verdigris")
 
 
 def gnomon_weight(B, q):
@@ -533,8 +569,8 @@ VARIANTS = {
                        dict(mesh="flank_l", slide=[-0.0075, 0, 0.0020], talk=[-0.0034, 0, 0]),
                        dict(mesh="keel", slide=[0, -0.0070, -0.0012], breathe=[0, -0.0010, 0]),
                        dict(mesh="lamp", at=list(GN_LAMP), look=[62.0, 34.0], slide=[0, 0, -0.0060], talk=[0, 0, -0.0020]),
-                       dict(mesh="vane", at=[-0.066, -0.020, 0.010], rot=[0, 0, 5.0], turn=[0, 0, 13.0], talk_turn=[0, 0, 5.0], breathe=[0, 0.0015, 0]),
-                       dict(mesh="stub", at=[0.074, 0.004, 0.012], rot=[0, 0, -7.0], turn=[0, 0, -11.0], talk_turn=[0, 0, -4.0]),
+                       dict(mesh="vane", at=[-0.070, -0.020, 0.012], rot=[0, -52.0, 7.0], turn=[0, 0, 13.0], talk_turn=[0, 0, 5.0], breathe=[0, 0.0015, 0]),
+                       dict(mesh="stub", at=[0.078, 0.004, 0.012], rot=[0, 48.0, -8.0], turn=[0, 0, -11.0], talk_turn=[0, 0, -4.0]),
                        dict(mesh="weight", at=[0.004, -0.172, -0.016], slide=[0, -0.012, 0], breathe=[0, -0.0050, 0], talk=[0, 0.0040, 0])]),
     "lantern": dict(build=dict(core=lantern_core, crown=lantern_crown, keel=lantern_keel, cheek=lantern_cheek, visor=lantern_visor),
                     aim="body", size=1.12, lie=0.076, lie_rot=[80, 0, 0], parts=[
@@ -562,7 +598,7 @@ def retex(path):
     """The shared detail textures live with the gear: point this file's image URIs there."""
     raw = open(path, "rb").read()
     jl = struct.unpack("<I", raw[12:16])[0]
-    js = raw[20:20 + jl].decode().rstrip().replace('"tex/', '"../gear/tex/').encode()
+    js = raw[20:20 + jl].decode().rstrip().replace('"tex/', '"../gear/tex/').replace('"../gear/tex/relic_', '"tex/relic_').encode()
     while len(js) % 4:
         js += b" "
     rest = raw[20 + jl:]
@@ -575,6 +611,7 @@ def retex(path):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
+    relic_textures()
     manifest = {"_chosen": CHOSEN, "_front": "-Z", "_origin": "centre of the body"}
     for name, V in VARIANTS.items():
         info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y", "glow", "lamp_range", "flare") if k in V}

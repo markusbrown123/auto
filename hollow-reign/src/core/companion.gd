@@ -181,18 +181,34 @@ func pick_victory(foe_id: String) -> Array:
 	return out
 
 # ================================================================ events
-func _say(ids: Array) -> void:
+## `aside`: said while the player is free to act (the road's choices are already up). Such a remark takes no
+## touches, sits `lift` units above the foot of the screen, and counts as heard only if it was heard to its end:
+## one cut off by the player walking on is said again another time.
+func _say(ids: Array, aside: bool = false, lift: float = 0.0) -> void:
 	for id: String in ids:
 		if in_combat() or (Story.busy and not essential(id)):
 			continue
-		mark_heard(id)
-		await Story.play(id, true)
+		if not aside:
+			mark_heard(id)
+			await Story.play(id, true)
+			continue
+		var mine := Story._token + 1
+		Story.last_finished = ""
+		await Story.play(id, true, true, lift, true)
+		if Story.last_finished == id:
+			mark_heard(id)
+		elif Story._token != mine:
+			return                    # something else took the screen: the rest is not said over it
 	if not ids.is_empty():
 		note_spoken()
 
 ## Arriving at a stop on a region's road. Await it to hold the choices back until the words are done.
 func on_stage(region_id: String, stage: int) -> void:
 	await _say(pick_stage(region_id, stage))
+
+## The same remarks, made while the ways onward are already offered (Explore): nothing waits on them.
+func on_stage_aside(region_id: String, stage: int, lift: float) -> void:
+	await _say(pick_stage(region_id, stage), true, lift)
 
 ## Before a guardian's own first words (or instead of them, for a creature). Await it.
 func on_boss_approach(foe_id: String) -> void:

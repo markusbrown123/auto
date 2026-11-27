@@ -119,3 +119,14 @@ Two concept images (about 2.5 Higgsfield credits) and two prop models, `env_road
 - Casting round 2 (owner asked for deeper, East Asian and anime-style voices): 44 new speech takes, 28 on the Inworld model (about 56 credits) and 16 on the second model (about 7 credits).
 - Casting rounds 3 to 5 (owner's correction: anime-dub style, no accent): 35 second-model takes (about 16 credits), 12 Inworld takes (about 24 credits), 1 second-model take; most of round 5 is earlier takes lowered in pitch at no cost.
 - Eight sculpted hilt concepts (about 10 Higgsfield credits) and eight hilt models (30 Tripo credits each = **$2.40**). Tripo graphics allocation spent so far: **$28.20** of $100.
+
+## Final cast recorded for the three-generation campaign (2026-11-27)
+Higgsfield balance read before: **1,030.83** credits. Read after: **850.54**. The account fell by 180.29 in that window; the transaction list shows 171.29 of it is this recording and 9.00 is twelve image jobs (GPT Image 2.6, 0.75 each) run by other work at the same time, logged by whoever ran them.
+
+| Item | Service | Credits | Cost |
+|---|---|---|---|
+| 84 takes on the Inworld speech model, 2 each (the account shows 84 charges and 1 refund): narrator 9, Monarch 12, Lyra 10, grandson 10, granddaughter 10, the Kept 10 (5 lines x 2 bodies), Witness 8, son 3, daughter 3, Frostbound King 4, Huntsman 2, Gravewarden 2 | Higgsfield speech | 166.00 | about $6.81 |
+| 16 takes on the second speech model (9 at 0.23, 7 at 0.46): Father 4, Mother 4, Crimson Widow 3 (stability 0.15), Devourer 5 (provisional voice) | Higgsfield speech | 5.29 | about $0.22 |
+| Total for this pass (ceiling set for it: 220) | | **171.29** | about $7.03 |
+
+One Witness line (`w_gravewarden_approach_01`) was refused twice by the service's content filter (once in this pass, once before it); the line was reworded ("kill you" to "end you") and then recorded. Refused jobs show as refunded or uncharged. No job was paid for twice: every job id is in `assets/audio/vo/jobs.json`. Nothing here has been listened to: recorded, unauditioned.

@@ -171,7 +171,6 @@ func _fill_card() -> void:
 	card.add_child(fill)
 	if Game.shortcut_open(str(r.id)):
 		var sc := UI.button("By %s" % str(r.shortcut.label), 17, 340)
-		sc.custom_minimum_size.y = 46
 		sc.pressed.connect(func(): set_out.emit(str(r.id), true))
 		card.add_child(sc)
 	var go := UI.button("Set out", 22, 340)

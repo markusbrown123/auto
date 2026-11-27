@@ -257,7 +257,14 @@
       "label": "The Inner Ward",
       "hint": "A guardian stands in the Sentinel's post. You know the way it stands.",
       "foe": "the_kept",
-      "optional": false
+      "optional": false,
+      "unless": "released:the_kept"
+     },
+     {
+      "type": "pass",
+      "label": "The Inner Ward",
+      "hint": "The post is empty. Two sets of footprints, and one blade's mark in the stone.",
+      "when": "released:the_kept"
      }
     ]
    },
@@ -705,58 +712,58 @@
   "3": {
    "regions": {
     "courtyard": {
-     "hp": 7.01,
-     "dmg": 3.51,
+     "hp": 16.57,
+     "dmg": 5.88,
      "xp": 7.89,
      "gold": 12.8
     },
     "blackwood": {
-     "hp": 6.22,
-     "dmg": 3.2,
+     "hp": 14.7,
+     "dmg": 5.36,
      "xp": 5.31,
      "gold": 9.08
     },
     "cathedral": {
-     "hp": 4.15,
-     "dmg": 2.11,
+     "hp": 9.8,
+     "dmg": 3.54,
      "xp": 3.3,
      "gold": 5.71
     },
     "crypt": {
-     "hp": 4.06,
-     "dmg": 2.11,
+     "hp": 8.33,
+     "dmg": 2.94,
      "xp": 2.71,
      "gold": 4.69
     },
     "roost": {
-     "hp": 2.94,
-     "dmg": 1.6,
+     "hp": 5.78,
+     "dmg": 2.14,
      "xp": 2.01,
      "gold": 3.54
     },
     "citadel": {
-     "hp": 2.95,
-     "dmg": 1.56,
+     "hp": 5.57,
+     "dmg": 1.93,
      "xp": 1.79,
      "gold": 3.17
     },
     "deep": {
-     "hp": 2.53,
-     "dmg": 1.34,
+     "hp": 4.6,
+     "dmg": 1.59,
      "xp": 1.48,
      "gold": 2.61
     },
     "throne": {
-     "hp": 2.4,
-     "dmg": 1.3,
+     "hp": 4.2,
+     "dmg": 1.45,
      "xp": 1.25,
      "gold": 2.2
     }
    },
-   "boss_hp_target": 13000,
+   "boss_hp_target": 26000,
    "boss_hp_range": [
     1.4,
-    4.6
+    9.0
    ],
    "boss_dmg_share": 0.7,
    "shards": 2.0

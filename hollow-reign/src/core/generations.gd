@@ -13,8 +13,8 @@ extends RefCounted
 ## In these three subtrees a whole number is always stored as an integer, in memory as on disk (_norm), so a save
 ## read back is the save that was written.
 
-const ECHO_BLOWS := 0.115         # share of the kept one's own health a plain cut of the echo takes, after armour
-const ECHO_SECONDS := 90.0        # how long the kept one's own blade would need, cutting without pause
+const ECHO_BLOWS := 0.14          # share of the kept one's own health a plain cut of the echo takes, after armour
+const ECHO_SECONDS := 115.0       # how long the kept one's own blade would need, cutting without pause
 
 static func data() -> Dictionary:
 	return Encounters.data()
@@ -258,6 +258,9 @@ static func sync(p: Dictionary) -> void:
 				r.body = rec.body
 		_credit(p)
 		_gather(p)
+		# the Kept was let go (KeptScene): a fact of the world from then on, so the road stops posting it (Encounters)
+		if p.flags.has("kept_released") and not p.world.facts.has("released:the_kept"):
+			p.world.facts["released:the_kept"] = gen(p)
 	_norm(p)
 
 static func ever_cleared(region: String, p: Dictionary = Game.profile) -> bool:
@@ -566,8 +569,8 @@ static func echo_foe(p: Dictionary = Game.profile) -> Dictionary:
 	var first := 1.05 if heavy else (0.8 if dual else 0.9)
 	var follow := 0.72 if heavy else (0.55 if dual else 0.62)
 	var weight := 1.25 if heavy else (0.82 if dual else 1.0)
-	var blow: float = clampf(float(st.max_hp) * ECHO_BLOWS / maxf(0.35, 1.0 - float(st.mitigation)), 12.0, 64.0) * weight
-	var hp: float = clampf(float(st.attack) / (float(st.swing_time) + 0.12) * ECHO_SECONDS, 2400.0, 17000.0)
+	var blow: float = clampf(float(st.max_hp) * ECHO_BLOWS / maxf(0.35, 1.0 - float(st.mitigation)), 12.0, 150.0) * weight
+	var hp: float = clampf(float(st.attack) / (float(st.swing_time) + 0.12) * ECHO_SECONDS, 2400.0, 28000.0)
 	# what it throws: two plain cuts everyone can read, then the player's own favourites, most used first
 	var favourites: Array = []
 	for row: Array in s.combos:

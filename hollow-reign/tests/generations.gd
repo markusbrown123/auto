@@ -119,7 +119,7 @@ func t_data() -> void:
 	var d: Dictionary = Generations.data()
 	ok(d.generations.size() == 3 and d.generations[0].year == 0 and d.generations[1].year == 22 and d.generations[2].year == 46, "three generations at +0, +22 and +46 years")
 	ok(d.generations.map(func(g): return g.role) == ["first", "second", "heir"], "the roles are first, second, heir")
-	ok(Game.SAVE_VERSION == 3, "the save is version 3")
+	ok(Game.SAVE_VERSION == 4, "the save is version 4 (3 brought the generations; 4 the road in progress and the pouches taken)")
 	ok(Db.foes.size() >= 52, "the roster is whole")
 	var roster := 0
 	for id: String in Db.foes:
@@ -145,7 +145,7 @@ func t_migration() -> void:
 		var old := fixture(name)
 		var m := Game._migrate(fixture(name))
 		var finished: bool = not old.get("endings", []).is_empty() or int(old.get("ng", 0)) > 0
-		ok(int(m.version) == 3, "%s: version 3" % name)
+		ok(int(m.version) == Game.SAVE_VERSION, "%s: brought to the current version" % name)
 		ok(m.campaign.generation == (3 if finished else 2), "%s: lands in generation %d" % [name, 3 if finished else 2])
 		ok(m.generations.size() == m.campaign.generation and m.generations[0].fate == "fallen" and m.generations[0].authored, "%s: the first is recorded as fallen" % name)
 		ok(m.flags.has("gen1_complete") and m.campaign.monarch.has("1"), "%s: the first generation's opening is marked seen" % name)
@@ -669,7 +669,7 @@ func t_campaign() -> void:
 		econ.play_region(r)
 		deaths += int(econ.row.deaths)
 		ok(Game.generation() == 2 and Game.transition_pending().is_empty(), "II: %s cleared (%d fights, %d defeats); still the second generation" % [r, econ.row.fights, econ.row.deaths])
-	ok(Game.game_complete() and Game.monarch_won(2), "II: the skilled player beat the Monarch, and it is recorded")
+	ok(Game.road_complete() and Game.monarch_won(2), "II: the skilled player beat the Monarch, and it is recorded")
 	ok(Game.profile.deaths == deaths, "II: %d ordinary defeats, none of which advanced anything" % deaths)
 	var rec2 := Game.generation_record(2)
 	print("    II: guardians %d, regions %d, routes %d, wins %d" % [rec2.deeds.guardians.size(), rec2.deeds.regions.size(), rec2.deeds.routes.size(), rec2.stats.wins])
@@ -728,7 +728,7 @@ func t_campaign() -> void:
 		econ.play_region(r)
 		fights3 += int(econ.row.fights)
 		ok(Game.generation() == 3, "III: %s cleared (%d fights, %d defeats)" % [r, econ.row.fights, econ.row.deaths])
-	ok(Game.monarch_won(3) and Game.profile.defeated.has("the_kept") and Game.game_complete(), "III: the Kept and the Monarch are beaten")
+	ok(Game.monarch_won(3) and Game.profile.defeated.has("the_kept") and Game.road_complete(), "III: the Kept and the Monarch are beaten")
 	ok(fights3 < int(rec2.stats.fights), "III: a faster pass (%d fights against %d)" % [fights3, rec2.stats.fights])
 	var seen := {}
 	var dup := false

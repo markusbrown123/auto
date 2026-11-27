@@ -84,8 +84,13 @@ func build(theme_id: String) -> void:
 	mat_stone = Look.stone(Color(theme.stone))
 	mat_dark = Look.flat(Color(theme.stone).darkened(0.3 if theme.get("day", false) else 0.7), 1.0)
 	_environment()
-	_floor()
-	call("_layout_" + theme.layout)
+	# the far-future kit (src/world/future.gd) lays its own floor and builds the region; `--oldworld` keeps the earlier look
+	if Future.handles(theme.layout, theme_id):
+		Future.floor(self, theme_id)
+		Future.build(self, theme_id)
+	else:
+		_floor()
+		call("_layout_" + theme.layout)
 	_particles(theme.particles)
 
 # ---------------------------------------------------------------- environment

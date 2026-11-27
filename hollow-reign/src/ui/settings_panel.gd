@@ -42,7 +42,7 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 	if not (v.get_parent() is ScrollContainer):
 		# a caller that gave a plain column gets a scrolling one inside it: the list is taller than a screen
 		var sc := ScrollContainer.new()
-		sc.custom_minimum_size = Vector2(620, 400)
+		sc.custom_minimum_size = Vector2(820, 380)
 		sc.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		sc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 		v.add_child(sc)
@@ -61,9 +61,10 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 		var names := VBoxContainer.new()
 		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		names.add_theme_constant_override("separation", -4)
-		names.add_child(UI.label(r[1], 19, UI.BONE, "bold"))
+		names.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		names.add_child(UI.label(r[1], 22, UI.BONE, "bold"))
 		if r[3] != "":
-			var hint := UI.label(r[3], 16, UI.DIM)
+			var hint := UI.label(r[3], 18, UI.DIM)
 			hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 			names.add_child(hint)
 		row.add_child(names)
@@ -74,8 +75,8 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 			var buttons: Array = []
 			for i in opts.size():
 				var val = i if BY_INDEX.has(key) else opts[i]
-				var b := UI.button(str(opts[i]), 13, 0 if opts.size() > 2 and str(opts[i]).length() > 4 else 80)
-				b.custom_minimum_size.y = 40
+				var b := UI.button(str(opts[i]), 18, 0 if opts.size() > 2 and str(opts[i]).length() > 4 else 84)
+				b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				b.set_meta("val", val)
 				buttons.append(b)
 				b.pressed.connect(func():
@@ -85,8 +86,8 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 				b.add_theme_color_override("font_color", UI.GOLD if Game.settings[key] == val else UI.BONE)
 				row.add_child(b)
 		elif r[2] == "toggle":
-			var b := UI.button("On" if Game.settings[key] else "Off", 14, 96)
-			b.custom_minimum_size.y = 40
+			var b := UI.button("On" if Game.settings[key] else "Off", 20, 120)
+			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			b.add_theme_color_override("font_color", UI.GOLD if Game.settings[key] else UI.BONE)
 			b.pressed.connect(func():
 				_apply(key, not Game.settings[key])
@@ -102,8 +103,7 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 	other.add_theme_constant_override("separation", 8)
 	v.add_child(other)
 	for doc in [["Privacy policy", "privacy"], ["Credits", "credits"]]:
-		var b := UI.button(doc[0], 14, 0)
-		b.custom_minimum_size.y = 42
+		var b := UI.button(doc[0], 18, 0)
 		b.pressed.connect(func(): show_text(v, doc[0], legal(doc[1])))
 		other.add_child(b)
 	if to_title.is_valid():
@@ -111,19 +111,19 @@ static func fill(v: VBoxContainer, _refresh: Callable = Callable(), to_title: Ca
 		gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		other.add_child(gap)
 		var quit := UI.button("Return to title", 18, 0)
-		quit.custom_minimum_size.y = 56
 		quit.pressed.connect(to_title)
 		other.add_child(quit)
 
 static func _header(v: VBoxContainer, text: String) -> void:
 	if v.get_child_count() > 0:
 		v.add_child(UI.spacer(6))
-	v.add_child(UI.title(text, 17, UI.GOLD))
+	v.add_child(UI.title(text, 20, UI.GOLD))
 	v.add_child(UI.rule())
 
 static func _slider(row: HBoxContainer, key: String, lo: float, hi: float) -> void:
 	var val := UI.label("", 17, UI.DIM)
-	val.custom_minimum_size.x = 52
+	val.custom_minimum_size.x = 62
+	val.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	val.text = "%d%%" % roundi(float(Game.settings[key]) * 100.0)
 	var s := HSlider.new()
@@ -131,7 +131,8 @@ static func _slider(row: HBoxContainer, key: String, lo: float, hi: float) -> vo
 	s.max_value = hi
 	s.step = 0.05
 	s.value = Game.settings[key]
-	s.custom_minimum_size = Vector2(220, 40)
+	s.custom_minimum_size = Vector2(240, UI.TAP)
+	s.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	s.value_changed.connect(func(x: float):
 		_apply(key, x)
 		val.text = "%d%%" % roundi(x * 100.0))
@@ -176,7 +177,7 @@ static func show_text(from: Node, heading: String, body: String) -> void:
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	sc.add_child(text)
-	var close := UI.button("Close", 16, 200)
+	var close := UI.button("Close", 20, 200)
 	close.size_flags_horizontal = Control.SIZE_SHRINK_END
 	close.pressed.connect(layer.queue_free)
 	col.add_child(close)

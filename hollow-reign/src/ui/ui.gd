@@ -33,11 +33,22 @@ static func font(kind: String) -> Font:
 		_fonts[kind] = load(path)
 	return _fonts[kind]
 
+## Sizes for a phone held at arm's length (720-unit-high design space): nothing is drawn under CAPTION, and what
+## was asked for a little under BODY is body text and is drawn at BODY. Callers keep their own larger sizes.
+const CAPTION := 18
+const BODY := 22
+const TAP := 60.0          # the least height of anything that is pressed
+
+static func text_size(size: int) -> int:
+	if size <= CAPTION:
+		return CAPTION
+	return maxi(size, BODY)
+
 static func label(text: String, size: int = 22, color: Color = BONE, kind: String = "body") -> Label:
 	var l := Label.new()
 	l.text = text
 	l.add_theme_font_override("font", font(kind))
-	l.add_theme_font_size_override("font_size", maxi(size, 16))
+	l.add_theme_font_size_override("font_size", text_size(size))
 	l.add_theme_color_override("font_color", color)
 	# a soft shadow keeps text readable over bright daylight scenes
 	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.75))
@@ -69,14 +80,14 @@ static func button(text: String, size: int = 22, min_w: float = 240.0) -> Button
 	var b := Button.new()
 	b.text = text.to_upper()
 	b.add_theme_font_override("font", font("head"))
-	b.add_theme_font_size_override("font_size", maxi(size, 15))
+	b.add_theme_font_size_override("font_size", maxi(size, CAPTION))
 	b.add_theme_color_override("font_color", BONE)
 	b.add_theme_color_override("font_hover_color", GOLD)
 	b.add_theme_color_override("font_pressed_color", GOLD)
 	b.add_theme_color_override("font_disabled_color", Color(0.35, 0.34, 0.32))
 	for state: String in ["normal", "hover", "pressed", "disabled", "focus"]:
 		b.add_theme_stylebox_override(state, _button_box(state))
-	b.custom_minimum_size = Vector2(min_w, 52)
+	b.custom_minimum_size = Vector2(min_w, TAP)
 	b.pressed.connect(func(): Sfx.play("ui_tap", -6.0))
 	return b
 
@@ -172,18 +183,18 @@ static func theme() -> Theme:
 		return _theme
 	var t := Theme.new()
 	t.default_font = font("body")
-	t.default_font_size = 20
+	t.default_font_size = 22
 	# --- text
 	t.set_color("font_color", "Label", BONE)
 	t.set_font("normal_font", "RichTextLabel", font("body"))
 	t.set_font("bold_font", "RichTextLabel", font("bold"))
 	t.set_color("default_color", "RichTextLabel", BONE)
-	t.set_font_size("normal_font_size", "RichTextLabel", 19)
+	t.set_font_size("normal_font_size", "RichTextLabel", 22)
 	# --- buttons
 	for state: String in ["normal", "hover", "pressed", "disabled", "focus"]:
 		t.set_stylebox(state, "Button", _button_box(state))
 	t.set_font("font", "Button", font("head"))
-	t.set_font_size("font_size", "Button", 20)
+	t.set_font_size("font_size", "Button", 22)
 	t.set_color("font_color", "Button", BONE)
 	t.set_color("font_hover_color", "Button", GOLD)
 	t.set_color("font_pressed_color", "Button", GOLD)
@@ -239,7 +250,7 @@ static func theme() -> Theme:
 	t.set_color("caret_color", "LineEdit", GOLD)
 	t.set_color("selection_color", "LineEdit", Color(GOLD_DIM, 0.6))
 	t.set_font("font", "LineEdit", font("body"))
-	t.set_font_size("font_size", "LineEdit", 21)
+	t.set_font_size("font_size", "LineEdit", 24)
 	# --- bars and rules
 	var bar_bg := StyleBoxFlat.new()
 	bar_bg.bg_color = Color(0, 0, 0, 0.65)
@@ -349,7 +360,7 @@ static func menu_item(text: String, size: int = 22, min_w: float = 300.0) -> But
 	b.text = text.to_upper()
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	b.add_theme_font_override("font", font("head"))
-	b.add_theme_font_size_override("font_size", size)
+	b.add_theme_font_size_override("font_size", maxi(size, BODY))
 	b.add_theme_color_override("font_color", BONE)
 	b.add_theme_color_override("font_hover_color", GOLD.lightened(0.15))
 	b.add_theme_color_override("font_pressed_color", GOLD)
@@ -366,7 +377,7 @@ static func menu_item(text: String, size: int = 22, min_w: float = 300.0) -> But
 	b.add_theme_stylebox_override("hover", hot)
 	b.add_theme_stylebox_override("pressed", hot)
 	b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-	b.custom_minimum_size = Vector2(min_w, 44)
+	b.custom_minimum_size = Vector2(min_w, TAP)
 	b.pressed.connect(func(): Sfx.play("ui_tap", -6.0))
 	return b
 
@@ -382,8 +393,7 @@ static func wrapped(text: String, size: int = 19, color: Color = DIM, width: flo
 static func header(text: String, on_back: Callable, note: String = "") -> HBoxContainer:
 	var h := HBoxContainer.new()
 	h.add_theme_constant_override("separation", 18)
-	var back := button("Back", 17, 120)
-	back.custom_minimum_size.y = 44
+	var back := button("Back", 20, 140)
 	back.pressed.connect(on_back)
 	h.add_child(back)
 	var t := title(text, 30)
@@ -418,18 +428,18 @@ static func confirm(host: Node, heading: String, text: String, yes: String, on_y
 	head.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(head)
 	v.add_child(rule())
-	var body := wrapped(text, 20, BONE, 480)
+	var body := wrapped(text, 22, BONE, 480)
 	body.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(body)
 	v.add_child(spacer(4))
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
-	row.add_theme_constant_override("separation", 14)
+	row.add_theme_constant_override("separation", 28)      # far enough apart that a thumb takes one or the other
 	v.add_child(row)
-	var n := button(no, 19, 200)
+	var n := button(no, 20, 220)
 	n.pressed.connect(root.queue_free)
 	row.add_child(n)
-	var y := button(yes, 19, 200)
+	var y := button(yes, 20, 220)
 	if danger:
 		y.add_theme_color_override("font_color", BLOOD.lightened(0.35))
 	y.pressed.connect(func():

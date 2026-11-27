@@ -269,7 +269,9 @@ STOPS = {
    1: [keep("The Guardhouse"), quiet("The Rampart Stair", "Nobody walks the stair now.")],
    2: [quiet("The Barbican", "The banner is down. The one who stood under it was not replaced.")],
    4: [fight("The Gate Passage", "Something larger has been posted where the Breaker stood.", "gate_colossus"), keep("The Murder Hole")],
-   6: [boss("The Inner Ward", "A guardian stands in the Sentinel's post. You know the way it stands.", "the_kept")],
+   # once the Kept has yielded and been let go it does not stand again: the post is empty on every later walk
+   6: [unless(boss("The Inner Ward", "A guardian stands in the Sentinel's post. You know the way it stands.", "the_kept"), "released:the_kept"),
+       when(quiet("The Inner Ward", "The post is empty. Two sets of footprints, and one blade's mark in the stone."), "released:the_kept")],
   },
   "blackwood": {
    0: [fight("The Lantern Road", "The lanterns are out. Something moves between them anyway.", "veil_dancer")],
@@ -357,8 +359,8 @@ def _mean(region, f):
 def _dmg(x):
     d = [a["dmg"] for ph in x["phases"] for c in ph["combos"] for a in c["attacks"]]
     return sum(d) / len(d)
-G3 = dict(hp=2.4, dmg=1.3, xp=1.25, gold=2.2)          # against the Hollow Throne's own road; tuned with tools/econ_sim.sh --generations
-TUNING = {"3": dict(regions={}, boss_hp_target=13000, boss_hp_range=[1.4, 4.6], boss_dmg_share=0.7, shards=2.0)}
+G3 = dict(hp=4.2, dmg=1.45, xp=1.25, gold=2.2)          # against the Hollow Throne's own road; tuned with tools/econ_sim.sh --generations
+TUNING = {"3": dict(regions={}, boss_hp_target=26000, boss_hp_range=[1.4, 9.0], boss_dmg_share=0.7, shards=2.0)}
 for r in R:
     rid = r["id"]
     TUNING["3"]["regions"][rid] = dict(

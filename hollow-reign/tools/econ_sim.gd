@@ -62,7 +62,7 @@ func _ready() -> void:
 	print("held at the end: %d gold, %d shards, %s" % [Game.profile.gold, Game.profile.shards, str(Game.profile.materials)])
 	print("owned %d of %d items; discovered %d" % [Game.profile.inventory.size(), Db.item_list.size(), Game.profile.discovered.size()])
 	# one region of the next cycle, to show that New Game Plus still pays and still costs
-	Game.start_ng_plus()
+	Game.start_ng_plus(true)
 	print("\nNEW GAME PLUS")
 	play_region("courtyard")
 	print("\nFLAGS")
@@ -288,7 +288,8 @@ func duel(foe: String, attempt: int) -> bool:
 	tick_clock("fights", 1)
 	tick_clock("fight_s", s.time)
 	if OS.get_cmdline_user_args().has("--fights"):
-		print("    %-4s %-22s %5.0fs  %s  health left %3.0f%%  hits taken %d" % [clock_key, foe, s.time, "won " if s.b_state == DuelSim.B.DEAD else "LOST", 100.0 * float(s.pl.hp) / float(s.pl.max_hp), int(s.stats.hits_taken)])
+		print("    %-4s %-22s %5.0fs  %s  health left %3.0f%%  hits taken %d  (took %3.0f%% of %d health in all, mended %d times, armour stops %2.0f%%, began at %3.0f%%)" % [clock_key, foe, s.time, "won " if s.b_state == DuelSim.B.DEAD else "LOST", 100.0 * float(s.pl.hp) / float(s.pl.max_hp), int(s.stats.hits_taken),
+			100.0 * float(s.stats.taken) / float(s.pl.max_hp), int(s.pl.max_hp), int(s.stats.get("relics", 0)), 100.0 * float(s.pl.mitigation), 100.0 * float(Game.run.hp) / float(s.pl.max_hp)])
 	if track:
 		Generations.note_duel(Game.profile, s.b_state == DuelSim.B.DEAD, s)
 	if s.b_state != DuelSim.B.DEAD:

@@ -141,7 +141,6 @@ func leave() -> void:
 # ================================================================ building
 func _btn(text: String, w: float, size: int = 20) -> Button:
 	var b := UI.button(text, size, w)
-	b.custom_minimum_size.y = 58
 	b.focus_mode = Control.FOCUS_NONE
 	return b
 
@@ -169,12 +168,15 @@ func _build() -> void:
 	UI.full(row)
 	add_child(row)
 	# --- the slot rail
-	var rail := VBoxContainer.new()
-	rail.add_theme_constant_override("separation", 4)
+	# two columns of five: ten slots in one column cannot each be a full touch height on a phone
+	var rail := GridContainer.new()
+	rail.columns = 2
+	rail.add_theme_constant_override("h_separation", 4)
+	rail.add_theme_constant_override("v_separation", 4)
 	row.add_child(rail)
 	for s: String in RAIL:
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(66, 46)
+		b.custom_minimum_size = Vector2(62, UI.TAP)
 		b.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		b.focus_mode = Control.FOCUS_NONE
 		b.tooltip_text = str(TITLE[s])
@@ -228,7 +230,6 @@ func _build() -> void:
 	_count.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	head.add_child(_count)
 	_sort = UI.button("", 17, 0)
-	_sort.custom_minimum_size.y = 48
 	_sort.focus_mode = Control.FOCUS_NONE
 	_sort.pressed.connect(func():
 		var mode := str(Game.profile.get("inv_sort", "equipped"))
@@ -236,7 +237,6 @@ func _build() -> void:
 		_enter_slot(slot, _centre_id()))
 	head.add_child(_sort)
 	_grid_btn = UI.button("Grid", 17, 84)
-	_grid_btn.custom_minimum_size.y = 48
 	_grid_btn.focus_mode = Control.FOCUS_NONE
 	_grid_btn.pressed.connect(func(): _show_grid(_grid == null))
 	head.add_child(_grid_btn)

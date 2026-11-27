@@ -69,7 +69,8 @@ func _init() -> void:
 				continue
 			var t0 := Time.get_ticks_msec()
 			var src := host if suit == host_suit else _read(body, suit)
-			var m := _conform(src, host)
+			# every female suit but the host's was generated in heels; the brief is flat practical boots (--heels keeps them)
+			var m := _conform(src, host, body == "f" and suit != host_suit and not args.has("heels"))
 			if tag == "" and not args.has("nohull"):
 				_hull_add(hull, m, host)
 			if not wanted:
@@ -81,6 +82,8 @@ func _init() -> void:
 			var line := ""
 			for r in SLOTS.size():
 				var part := _part(m, r, margin)
+				if suit == host_suit and SLOTS[r] == "legs" and not args.has("nofauld"):
+					_fauld(m, host, part, src.material)
 				total += part.idx.size() / 3
 				line += "%s %d  " % [SLOTS[r], part.idx.size() / 3]
 				_save(part, "%s%s%s_%s.res" % [out_dir, id, tag, SLOTS[r]], id)
@@ -174,8 +177,12 @@ func _bone_map(b: String, s: Dictionary, h: Dictionary, k: float) -> Transform3D
 		m = Basis(Vector3.UP, yaw) * Basis.IDENTITY.scaled(Vector3(k, clampf(jh.y / maxf(jd.y, 0.0001), 0.7, 1.4), k))
 	return Transform3D(m, jh - m * jd)
 
-func _conform(s: Dictionary, h: Dictionary) -> Dictionary:
+func _conform(s: Dictionary, h: Dictionary, flat: bool = false) -> Dictionary:
 	var k: float = (h.rest["Neck"] as Transform3D).origin.y / (s.rest["Neck"] as Transform3D).origin.y
+	var floor_y := 1e9
+	if flat:
+		for hp: Vector3 in h.pos:
+			floor_y = minf(floor_y, hp.y)
 	var maps: Array = []
 	var rots: Array = []
 	var reg := PackedInt32Array()
@@ -224,7 +231,86 @@ func _conform(s: Dictionary, h: Dictionary) -> Dictionary:
 		tt = tt.normalized()
 		o.tan[v * 4] = tt.x; o.tan[v * 4 + 1] = tt.y; o.tan[v * 4 + 2] = tt.z; o.tan[v * 4 + 3] = stn[v * 4 + 3]
 		o.top[v] = remap[sb[v * 4 + best]]
+	if flat:
+		_flatten_heels(o, h, floor_y)
 	return o
+
+## Flat boots. A heeled boot stands on a block under the heel, with the shank rising from the ball of the foot to the
+## top of that block. Each foot is sheared down behind the ball until the shank lies on the floor (the ankle and the
+## lower shin come down with it, fading out up the shin), and what was the heel block is pressed flat onto the floor.
+## A boot that is already flat (shank under about a centimetre) is left alone.
+func _flatten_heels(o: Dictionary, h: Dictionary, floor_y: float) -> void:
+	var names: Array = h.names
+	var n: int = o.pos.size()
+	var both := 0.0          # a pair of boots has one heel height: the taller measurement serves both feet
+	for pass_i: String in ["LeftM", "RightM", "Left", "Right"]:
+		var side := pass_i.trim_suffix("M")
+		var foot: Vector3 = (h.rest[side + "Foot"] as Transform3D).origin
+		var ball: Vector3 = (h.rest[side + "ToeBase"] as Transform3D).origin
+		var fdir := Vector3(ball.x - foot.x, 0, ball.z - foot.z).normalized()
+		var wleg := PackedFloat32Array()
+		var wfoot := PackedFloat32Array()
+		wleg.resize(n)
+		wfoot.resize(n)
+		var heel_end := 0.0
+		for v in n:
+			for j in 4:
+				var w: float = o.weights[v * 4 + j]
+				if w <= 0.0:
+					continue
+				var b: String = names[o.bones[v * 4 + j]]
+				if not b.begins_with(side):
+					continue
+				if b.contains("Foot") or b.contains("Toe"):
+					wfoot[v] += w
+					wleg[v] += w
+				elif b.ends_with("Leg") and not b.ends_with("UpLeg"):
+					wleg[v] += w
+			if wfoot[v] > 0.5:
+				heel_end = minf(heel_end, ((o.pos[v] as Vector3) - ball).dot(fdir))
+		var lh := -heel_end
+		if lh < 0.01:
+			continue
+		# the underside from heel to ball: the lowest of the boot in ten steps along the foot. On a heeled boot it
+		# leaves the floor in front of the block and comes back to it at the ball.
+		var bins: Array = []
+		for i in 10:
+			bins.append([])
+		for v in n:
+			if wfoot[v] > 0.5:
+				var sv := ((o.pos[v] as Vector3) - ball).dot(fdir)
+				if sv < 0.0:
+					(bins[clampi(int((sv - heel_end) / lh * 10.0), 0, 9)] as Array).append((o.pos[v] as Vector3).y)
+		var rise := 0.0
+		var s_b := heel_end + 0.5 * lh
+		for i in range(2, 8):
+			var ys: Array = bins[i]
+			if ys.size() < 8:
+				continue
+			ys.sort()
+			var low: float = float(ys[int(ys.size() * 0.04)]) - floor_y
+			if low > rise:
+				rise = low
+				s_b = heel_end + (float(i) + 0.5) / 10.0 * lh
+		if pass_i.ends_with("M"):
+			both = maxf(both, rise)
+			if args.has("v"):
+				print("  %s foot: shank %.3f above the floor at %.0f%% from the heel, heel to ball %.3f" % [side, rise, (s_b - heel_end) / lh * 100.0, lh])
+			continue
+		if both <= 0.006:
+			continue
+		if rise < both * 0.5:
+			s_b = heel_end + 0.4 * lh
+		rise = both
+		for v in n:
+			if wleg[v] <= 0.0:
+				continue
+			var p: Vector3 = o.pos[v]
+			var sv2 := (p - ball).dot(fdir)
+			var drop := rise * clampf(sv2 / s_b, 0.0, 1.9)
+			var fade := 1.0 - smoothstep(foot.y, foot.y + 0.1, p.y)
+			p.y = maxf(floor_y, p.y - drop * fade * minf(1.0, wleg[v] * 2.5))
+			o.pos[v] = p
 
 # ---------------------------------------------------------------- inner hull (undersuit)
 const HULL_BIN := 0.0125
@@ -475,6 +561,180 @@ func _renormal(m: Dictionary) -> void:
 			# keep the old normal's side: the winding convention is whatever the source used
 			var nn := n.normalized()
 			m.nrm[v] = nn if nn.dot(m.nrm[v]) >= 0.0 else -nn
+
+# ---------------------------------------------------------------- hip plates for the host suit
+## The benchmark knights were generated with a bare undersuit over the pelvis (black hips and groin between the
+## breastplate's rim and the thigh plates). This adds what a harness has there: a fauld, two lames of plate round the
+## pelvis from the waist to the crease of the legs, dipping to a short tongue in front and lower over the seat. It is
+## measured off the body itself (so it lies just outside the undersuit and under the side tassets), rides on the Hips
+## bone, and is painted from a plain patch of the suit's own plate. It goes into the host's "legs" part.
+const FAULD_SECTORS := 40
+const FAULD_BIN := 0.008
+
+func _fauld(m: Dictionary, h: Dictionary, part: Dictionary, mat: BaseMaterial3D) -> void:
+	var names: Array = h.names
+	var hips: Vector3 = (h.rest["Hips"] as Transform3D).origin
+	var leg: Vector3 = (h.rest["LeftUpLeg"] as Transform3D).origin
+	var toe: Vector3 = (h.rest["LeftToeBase"] as Transform3D).origin - (h.rest["LeftFoot"] as Transform3D).origin
+	var front := signf(toe.x) if toe.x != 0.0 else 1.0      # these models face +X
+	var pos: PackedVector3Array = m.pos
+	# the body round the pelvis: radius from the upright through the hips, per height band and sector
+	var cells := {}
+	var crotch := 1e9
+	for v in pos.size():
+		var b: String = names[m.top[v]]
+		if not (b == "Hips" or b == "Spine" or b.ends_with("UpLeg")):
+			continue
+		var d := pos[v] - hips
+		if absf(d.z) < 0.012 and pos[v].y > leg.y - 0.12 and pos[v].y < hips.y:
+			crotch = minf(crotch, pos[v].y)
+		var key := Vector2i(int(floor(pos[v].y / FAULD_BIN)), int(floor((atan2(d.z, d.x * front) + PI) / TAU * FAULD_SECTORS)) % FAULD_SECTORS)
+		if not cells.has(key):
+			cells[key] = []
+		(cells[key] as Array).append(Vector2(d.x, d.z).length())
+	var rad := {}
+	for key: Vector2i in cells:
+		var rs: Array = cells[key]
+		rs.sort()
+		# under the side tassets (the inner part of what is there), but over the whole seat behind
+		var ang := absf((float(key.y) + 0.5) / FAULD_SECTORS * TAU - PI)
+		rad[key] = float(rs[int((rs.size() - 1) * lerpf(float(args.get("fauld_pct", "0.15")), 0.97, smoothstep(1.7, 2.3, ang)))])
+		rad[key + Vector2i(100000, 0)] = float(rs[int(rs.size() * 0.04)])      # the innermost surface there: the waist the top edge tucks in to
+	var y_top := hips.y + float(args.get("fauld_top", "0.056"))
+	var crease := leg.y + float(args.get("fauld_crease", "0.004"))
+	var off := float(args.get("fauld_off", "0.0055"))
+	if args.has("v"):
+		print("  fauld: hips y %.3f, leg joint y %.3f z %.3f, crotch y %.3f, top %.3f" % [hips.y, leg.y, leg.z - hips.z, crotch, y_top])
+	# the surface the plates follow: the measured radius, smoothed, with gaps filled from the nearest band that has one
+	var surf := func(y: float, sec: int, inner: bool) -> float:
+		var sum := 0.0
+		var cnt := 0.0
+		var band := int(floor(y / FAULD_BIN)) + (100000 if inner else 0)
+		for reach: int in [0, 1, 2, 3, 5, 8]:
+			for db: int in range(-reach - 1, reach + 2):
+				for ds: int in [-1, 0, 1]:
+					var k2 := Vector2i(band + db, (sec + ds + FAULD_SECTORS) % FAULD_SECTORS)
+					if rad.has(k2):
+						var w := 2.0 if (db == 0 and ds == 0) else 1.0
+						sum += float(rad[k2]) * w
+						cnt += w
+			if cnt > 0.0:
+				break
+		return sum / cnt if cnt > 0.0 else 0.08
+	# strips of rows [how far down (0 top .. 1 lower edge), how far off the body]: two lames, the second starting
+	# under the first, each ending in a rolled rim. Strips do not share vertices, so their edges stay crisp.
+	var o1 := off * 1.5
+	var o2 := off * 1.6
+	var strips := [
+		[[0.0, -1.0], [0.14, off * 0.9], [0.46, o1]],
+		[[0.40, o1], [0.425, o1 + 0.0032], [0.485, o1 + 0.0032], [0.50, o1 - 0.004]],
+		[[0.44, off * 0.55], [0.96, o2]],
+		[[0.90, o2], [0.925, o2 + 0.0032], [1.0, o2 + 0.0032], [1.015, o2 - 0.006]]]
+	var uv0 := _plain_uv(m, h, mat)
+	var hb := (names as Array).find("Hips")
+	var N := FAULD_SECTORS
+	for rows: Array in strips:
+		var base: int = part.pos.size()
+		for r in rows.size():
+			for i in N:
+				var th := (float(i) + 0.5) / N * TAU - PI           # 0 = straight ahead
+				var a := absf(th)
+				# the lower edge: a tongue to the crotch in front, the crease of the leg, lower round the side and the seat
+				var y_bot := lerpf(crotch + 0.006, crease, smoothstep(0.16, 0.5, a))
+				y_bot = lerpf(y_bot, leg.y - 0.03, smoothstep(0.75, 1.5, a))
+				y_bot = lerpf(y_bot, crotch + 0.012, smoothstep(1.7, 2.7, a))
+				var back := smoothstep(1.7, 2.3, a)
+				var y := lerpf(y_top + 0.026 * back, y_bot, float(rows[r][0]))      # (the backplate's rim sits higher than the breastplate's)
+				var rr := 0.0
+				if float(rows[r][1]) < 0.0:
+					rr = float(surf.call(y, i, true)) + 0.002         # the top edge lies on the waist, under the breastplate's rim
+				else:
+					# never inside the body at its own height, nor tighter than the lame is half way down (so a lame is one
+					# plain surface and not a cast of what is under it)
+					rr = maxf(float(surf.call(y, i, false)), float(surf.call(y - FAULD_BIN, i, false)) * 0.985)
+					rr = lerpf(rr, maxf(rr, float(surf.call(lerpf(y_top, y_bot, 0.5), i, false))), 0.6) + float(rows[r][1]) + 0.011 * back
+				var dir := Vector3(cos(th) * front, 0, sin(th))
+				part.pos.append(Vector3(hips.x, y, hips.z) + dir * rr)
+				part.nrm.append(dir)
+				part.uv.append(uv0 + Vector2((float(i) / N - 0.5) * 0.01, (float(r) / rows.size() - 0.5) * 0.01))
+				var tg := Vector3.UP.cross(dir).normalized()
+				part.tan.append(tg.x); part.tan.append(tg.y); part.tan.append(tg.z); part.tan.append(1.0)
+				for j in 4:
+					part.bones.append(hb if j == 0 else 0)
+					part.weights.append(1.0 if j == 0 else 0.0)
+		var first: int = part.idx.size()
+		for r in rows.size() - 1:
+			for i in N:
+				var a0 := base + r * N + i
+				var a1 := base + r * N + (i + 1) % N
+				var b0 := a0 + N
+				var b1 := a1 + N
+				for t: Array in [[a0, a1, b1], [a0, b1, b0]]:
+					var pa: Vector3 = part.pos[t[0]]
+					var pb: Vector3 = part.pos[t[1]]
+					var pc: Vector3 = part.pos[t[2]]
+					# front faces as the source winds them: (c - a) x (b - a) points out; the rim's last face turns under
+					var fn0 := (pc - pa).cross(pb - pa)
+					var out_dir: Vector3 = part.nrm[t[0]] if r < rows.size() - 2 or rows.size() < 4 else Vector3.DOWN
+					if fn0.dot(out_dir) < 0.0:
+						part.idx.append(t[0]); part.idx.append(t[2]); part.idx.append(t[1])
+					else:
+						part.idx.append(t[0]); part.idx.append(t[1]); part.idx.append(t[2])
+		# normals from the plates themselves
+		var acc := PackedVector3Array()
+		acc.resize(rows.size() * N)
+		for t2 in range(first, part.idx.size(), 3):
+			var pa2: Vector3 = part.pos[part.idx[t2]]
+			var fn := ((part.pos[part.idx[t2 + 2]] as Vector3) - pa2).cross((part.pos[part.idx[t2 + 1]] as Vector3) - pa2)
+			for e in 3:
+				acc[part.idx[t2 + e] - base] += fn
+		for v2 in acc.size():
+			if acc[v2].length_squared() > 1e-16:
+				part.nrm[base + v2] = acc[v2].normalized()
+
+## The middle of a plain patch of plate in the suit's texture: bright, even, and really used by the breastplate.
+func _plain_uv(m: Dictionary, h: Dictionary, mat: BaseMaterial3D) -> Vector2:
+	var img := mat.albedo_texture.get_image()
+	if img.is_compressed():
+		img.decompress()
+	const S := 256
+	img.resize(S, S, Image.INTERPOLATE_BILINEAR)
+	var names: Array = h.names
+	var used := {}
+	for v in (m.pos as PackedVector3Array).size():
+		if str(names[m.top[v]]).begins_with("Spine"):
+			var uv: Vector2 = m.uv[v]
+			var c := Vector2i(int(fposmod(uv.x, 1.0) * S) / 8, int(fposmod(uv.y, 1.0) * S) / 8)
+			used[c] = int(used.get(c, 0)) + 1
+	var wins: Array = []
+	for c: Vector2i in used:
+		if int(used[c]) < 4:
+			continue
+		var lo := 9.0
+		var hi := 0.0
+		var sum := 0.0
+		for y in range(c.y * 8 - 2, c.y * 8 + 10):
+			for x in range(c.x * 8 - 2, c.x * 8 + 10):
+				var l := img.get_pixel(clampi(x, 0, S - 1), clampi(y, 0, S - 1)).get_luminance()
+				lo = minf(lo, l); hi = maxf(hi, l); sum += l
+		wins.append([sum / 144.0, hi - lo, c])
+	if wins.is_empty():
+		return Vector2(0.5, 0.5)
+	var means: Array = []
+	for w: Array in wins:
+		means.append(w[0])
+	means.sort()
+	var want: float = means[int(means.size() * 0.7)]
+	var best: Array = wins[0]
+	var best_s := 9.0
+	for w2: Array in wins:
+		var sc := float(w2[1]) + absf(float(w2[0]) - want) * 0.6
+		if sc < best_s:
+			best_s = sc
+			best = w2
+	if args.has("v"):
+		print("  fauld paint: cell %s mean %.2f spread %.2f (plate typical %.2f)" % [str(best[2]), best[0], best[1], want])
+	return (Vector2(best[2]) * 8.0 + Vector2(4, 4)) / float(S)
 
 # ---------------------------------------------------------------- split
 func _part(m: Dictionary, r: int, margin: float) -> Dictionary:

@@ -607,6 +607,25 @@ for f in B:
     if "cls" not in f:
         f["cls"] = "Wyrm" if f["rig"].get("kind") == "dragon" else ("Soul-Eater" if f["rig"].get("wraith") else "Guardian")
     f["hp"] = round(f["hp"] * (3.5 if f["boss"] else 2.0))
+# The late roads (balance pass, tools/econ_sim.sh --generations). By the Crypt the knight's blade, armour and level have
+# outgrown the figures above: a careless player ended the Gravewarden, the Frostbound King and the Monarch himself in
+# about half a minute with most of their health left. Guardians of the late roads last longer and hit harder, the
+# Monarch most of all; the soldiers on those roads a little. (region: [guardian hp, guardian dmg, soldier hp, soldier dmg])
+LATE = {"crypt": [1.4, 1.5, 1.15, 1.2], "roost": [1.5, 1.6, 1.2, 1.25], "citadel": [1.7, 1.9, 1.25, 1.35],
+        "deep": [1.8, 2.0, 1.3, 1.4], "throne": [2.0, 2.5, 1.35, 1.5]}
+def _harder(a, k):
+    a["dmg"] = round(a["dmg"] * k)
+    a["guard"] = round(a["guard"] * k)
+for f in B:
+    if f["region"] in LATE:
+        hp_k, dmg_k = LATE[f["region"]][0:2] if f["boss"] else LATE[f["region"]][2:4]
+        f["hp"] = round(f["hp"] * hp_k)
+        for ph in f["phases"]:
+            for c in ph["combos"]:
+                for a in c["attacks"]:
+                    _harder(a, dmg_k)
+        if isinstance(f.get("punish"), dict):
+            _harder(f["punish"], dmg_k)
 # generated dragon models, where they exist (the rig falls back to its built-in body otherwise)
 DRAGON_SKIN = {"cinder_wyrm": "dragon_veyrath", "cinder_whelp": "dragon_veyrath", "rimewyrm": "dragon_skeldra", "frost_drake": "dragon_skeldra", "azhurion": "dragon_azhurion"}
 for f in B:
@@ -620,22 +639,54 @@ for f in B:
 #   hp/dmg/speed/xp/gold  multipliers on the base        phases   base phase indexes kept, or a full list of phases
 #   immortal + reason     why this one may stand again   carry    the item whose model it holds
 #   monarch               which of the three meetings    clash    Generation I's story-ended fight (seconds, cuts)
+def _beast_phases():
+    d = 16
+    rake = lambda dir, w, **k: A(dir, w, d, kind="sweep", **k)
+    one = [
+        C("rake_l",3,[rake("L",0.9)],1.3),
+        C("rake_r",3,[rake("R",0.9)],1.3),
+        C("cross_rake",3,[rake("DL",0.85),rake("DR",0.6)],1.4,tags=("anti_dodge",)),
+        C("worry",2,[A("U",1.0,round(d*0.8),guard=d*3,kind="thrust"),A("U",0.6,round(d*0.8),guard=d*3,kind="thrust")],1.4,tags=("anti_block",)),
+        C("spring_back",3,[rake("U",0.75)],0.45,retreat=True),
+        C("pounce",4,[A("D",1.0,round(d*1.3),kind="lunge",guard=d*3)],1.5,range="far"),
+    ]
+    two = [
+        C("rake_l",2,[rake("L",0.85)],1.2),
+        C("rake_r",2,[rake("R",0.85)],1.2),
+        C("maul",4,[rake("L",0.85),rake("R",0.55),rake("L",0.55),A("D",0.7,round(d*1.2),kind="slam")],1.6,tags=("anti_dodge",)),
+        C("uproot",3,[A("D",1.5,round(d*1.7),unblockable=True,parry=False,dodge="any",kind="slam")],1.9,tags=("anti_block","anti_parry")),
+        C("gore",3,[A("U",1.05,round(d*1.4),kind="lunge",guard=d*4)],1.4,range="far",tags=("anti_block",)),
+        C("antler_sweep",3,[A("R",1.1,round(d*1.2),kind="sweep"),A("L",0.6,round(d*1.2),kind="sweep")],1.5),
+        C("spring_back",2,[rake("U",0.7)],0.45,retreat=True),
+        C("pounce",3,[A("D",0.95,round(d*1.3),kind="lunge",guard=d*3)],1.4,range="far"),
+    ]
+    three = [
+        C("savage",4,[rake("L",0.8),rake("R",0.45),rake("DL",0.45),rake("DR",0.45),A("D",0.6,round(d*1.3),kind="slam")],1.9,tags=("anti_dodge",)),
+        C("maul",3,[rake("R",0.8),rake("L",0.5),rake("R",0.5)],1.4,tags=("anti_dodge",)),
+        C("drag_down",3,[A("D",1.9,round(d*1.5),swing=0.22,kind="lunge")],1.5,range="far",tags=("anti_parry",)),
+        C("trample",3,[A("D",1.2,round(d*1.3),kind="slam"),A("D",0.8,round(d*1.6),unblockable=True,parry=False,dodge="any",kind="slam")],2.0,tags=("anti_block",)),
+        C("gore",3,[A("U",0.95,round(d*1.4),kind="lunge",guard=d*4)],1.3,range="far",tags=("anti_block",)),
+        C("worry",2,[A("U",0.9,round(d*0.8),guard=d*3,kind="thrust"),A("U",0.5,round(d*0.8),guard=d*3,kind="thrust"),A("U",0.5,round(d*0.8),guard=d*3,kind="thrust")],1.5,tags=("anti_block",)),
+    ]
+    return [dict(at=1.0, speed=1.05, name="The Clearing", combos=one),
+            dict(at=0.62, speed=1.1, name="Roused", roar="It puts its head down. The antlers come round like a gate swinging.", combos=two),
+            dict(at=0.3, speed=1.17, name="Starved", roar="It stops circling. It has decided you are food.", combos=three)]
 def _monarch_phase(i): return [f for f in B if f["id"] == "forgotten_monarch"][0]["phases"][i]["combos"]
 V = [
  dict(id="royal_gatekeeper", base="throne_guard", gen=1, name="Royal Gatekeeper", title="Of the King's Own Door", boss=False,
-      hp=0.42, dmg=0.5, speed=0.9, xp=0.0, gold=0.0, mortal=True, region="throne",
+      hp=0.31, dmg=0.333, speed=0.9, xp=0.0, gold=0.0, mortal=True, region="throne",
       intro="He was posted at the door the day the hall was finished. He has shown many wardens to the gate."),
  dict(id="royal_patrol", base="pike_sergeant", gen=1, name="Royal Patrol", title="", boss=False, hp=1.0, dmg=1.0, speed=1.0, xp=0.0, gold=0.0,
       mortal=True, region="blackwood", staged=False),
  # Generation I: a brief clash. Phase one only, blows that wound but do not kill; the story ends it, not a health bar.
  dict(id="monarch_i", base="forgotten_monarch", gen=1, monarch=1, name="The Forgotten Monarch", title="Sovereign of Vaelora", boss=True,
-      hp=1.0, dmg=0.4, speed=0.92, xp=0.0, gold=0.0, phases=[0], immortal=True, reason="He does not age.", carry="w_monarch", region="throne",
+      hp=0.5, dmg=0.16, speed=0.92, xp=0.0, gold=0.0, phases=[0], immortal=True, reason="He does not age.", carry="w_monarch", region="throne",
       clash=dict(min_time=9.0, cuts=4, release=32.0), traits={}),
  # Generation III: the last meeting, in three named phases. Phase three is the restoration machinery: he falls and is
  # stood up again (`revive`), and feeds on what he takes (`lifesteal`). Both are weakened at run time by the inheritance
  # records the family gathered (Generations.monarch_final): the figures here are the worst case, with none.
  dict(id="monarch_iii", base="forgotten_monarch", gen=3, monarch=3, name="The Forgotten Monarch", title="The Last Defense of the Crown", boss=True,
-      hp=1.7, dmg=1.22, speed=1.0, xp=1.6, gold=2.2, immortal=True, reason="The network restores him while it runs.", carry="w_monarch", region="throne",
+      hp=1.7, dmg=1.4, speed=1.0, xp=1.6, gold=2.2, immortal=True, reason="The network restores him while it runs.", carry="w_monarch", region="throne",
       intro="The floor of the hall stands open. What kept him is no longer hidden under it.",
       traits={"marks": 4, "mark_mult": 1.5, "parry_open": 1.15, "lifesteal": 0.3},
       records=dict(revive=[0.6, 0.2], lifesteal=[0.3, 0.0], parry_open=[1.15, 1.45]),
@@ -653,15 +704,20 @@ V = [
       ]),
  # Generation III guardians: what stands in a post whose first keeper is gone.
  dict(id="awakened_beast", base="maulbeast", gen=3, name="The Awakened Beast", title="What the Blackwood Kept Asleep", boss=True,
-      hp=20.0, dmg=3.2, speed=1.1, xp=13.0, gold=15.0, mortal=True, region="blackwood", traits={"frenzy": 0.25},
+      hp=38.0, dmg=4.4, speed=1.1, xp=13.0, gold=15.0, mortal=True, region="blackwood", traits={"frenzy": 0.25},
       replaces="hollow_executioner", reason="The Executioner's block stood empty for twenty-four years. Something older took the clearing.",
-      rig=dict(scale=1.45), intro="The stumps have been pulled up like teeth. Whatever did it is still hungry."),
+      rig=dict(scale=1.45), intro="The stumps have been pulled up like teeth. Whatever did it is still hungry.",
+      # its own fight, not the Maulbeast's with bigger numbers (figures are in the Maulbeast's units; hp/dmg above scale
+      # them). One: a wary animal that rakes and springs away. Two: roused, it uses its weight (the ground blow that
+      # cannot be blocked, the antlers from range). Three: starving, it stops giving ground and throws long flurries
+      # with one slow, held pounce among them to catch a parry thrown early.
+      phases=_beast_phases()),
  dict(id="laboratory_guardian", base="gate_colossus", gen=3, name="The Laboratory Guardian", title="Bolted Into Its Post", boss=True,
-      hp=12.0, dmg=3.3, speed=1.0, xp=13.0, gold=14.0, mortal=True, region="cathedral", traits={"block_tax": 1.5, "parry_open": 1.2},
+      hp=27.0, dmg=5.2, speed=1.0, xp=13.0, gold=14.0, mortal=True, region="cathedral", traits={"block_tax": 1.5, "parry_open": 1.2},
       replaces="cathedral_beast", reason="The Beast's fall uncovered the lower door. This was behind it.",
       rig=dict(metal="#7f8a8c", cloth="#1c2a2e", eye="#9fe8ff"), intro="A door under the crossing, and the thing that was built to stand in it."),
  dict(id="white_brood", base="frost_drake", gen=3, name="The White Brood", title="Skeldra's Get", boss=True,
-      hp=6.6, dmg=1.6, speed=1.05, xp=6.0, gold=7.0, mortal=True, region="citadel", traits={"frenzy": 0.15},
+      hp=13.0, dmg=2.0, speed=1.05, xp=6.0, gold=7.0, mortal=True, region="citadel", traits={"frenzy": 0.15},
       replaces="rimewyrm", reason="Skeldra died in the pit. What she left there grew."),
 ]
 for v in V:

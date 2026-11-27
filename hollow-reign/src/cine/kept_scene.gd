@@ -57,6 +57,7 @@ static func grant_edge() -> String:
 	if int(w.get("edge", 0)) > 0:
 		Game.profile.edge[EDGE] = int(w.edge)
 	Game.profile.flags["kept_released"] = true
+	Game.add_fact("released:the_kept")
 	Game.save()
 	return EDGE
 

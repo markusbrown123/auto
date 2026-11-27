@@ -108,7 +108,6 @@ func _ready() -> void:
 	ttl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	top.add_child(ttl)
 	var close := UI.button("Close", 20, 130)
-	close.custom_minimum_size.y = 58
 	close.pressed.connect(queue_free)
 	top.add_child(close)
 	var kind := HBoxContainer.new()

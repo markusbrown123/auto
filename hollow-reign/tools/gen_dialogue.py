@@ -298,7 +298,7 @@ wstage("crypt", 3, "sluice", "The Sluice",
 wstage("crypt", 4, "door", "The Ledger",
  (W, "That door. I have stood before it with a ledger. Names down one column. I cannot see the heading of the other.", "a memory, troubled"), kind="memory")
 wboss("gravewarden", "approach", "gravewarden", "The Keeper",
- (W, "The keeper. He is the gentlest thing down here, and he will kill you for a careless word.", "low"),
+ (W, "The keeper. He is the gentlest thing down here, and he will end you for a careless word.", "low"),   # "kill you" was refused twice by the speech service's filter
  (P, "What does he keep?", "quiet"),
  (W, "Ask him. He has waited long enough to be asked.", "gentle"))
 wboss("gravewarden", "victory", "gravewarden", "Every Name",

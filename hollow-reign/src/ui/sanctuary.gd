@@ -68,11 +68,10 @@ func _ready() -> void:
 	frame = m
 	# --- top navigation
 	var nav := HBoxContainer.new()
-	nav.add_theme_constant_override("separation", 6)
+	nav.add_theme_constant_override("separation", 8)
 	v.add_child(nav)
 	for t in TABS:
-		var b := UI.button(str(TAB_LABEL.get(t, t)), 17, 122)
-		b.custom_minimum_size.y = 44
+		var b := UI.button(str(TAB_LABEL.get(t, t)), 18, 96)
 		b.pressed.connect(func(): show_tab(t))
 		nav.add_child(b)
 		tab_buttons[t] = b
@@ -82,6 +81,7 @@ func _ready() -> void:
 	nav.add_child(gap)
 	purse = UI.label("", 22, UI.GOLD, "bold")
 	purse.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	purse.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	nav.add_child(purse)
 	# --- body: the knight stands on the left, the panel is on the right
 	var body := HBoxContainer.new()
@@ -172,7 +172,7 @@ func _purse() -> void:
 
 func _purse_text(gold: float) -> void:
 	_gold_shown = gold
-	purse.text = "%d GOLD      %d SHARDS" % [int(roundf(gold)), int(Game.profile.shards)]
+	purse.text = "%d GOLD\n%d SHARDS" % [int(roundf(gold)), int(Game.profile.shards)]
 
 ## From the armoury's Upgrade: the forge, with that item at the head of the list.
 func open_forge(id: String) -> void:
@@ -256,17 +256,22 @@ func _tab_journey() -> void:
 	var cols := _row()
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content.add_child(cols)
+	# the roads scroll: eight of them at a full touch height are taller than a phone with a home indicator
+	var lsc := ScrollContainer.new()
+	lsc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	lsc.custom_minimum_size.x = 322
+	cols.add_child(lsc)
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation", 5)
-	list.custom_minimum_size.x = 290
-	cols.add_child(list)
+	list.custom_minimum_size.x = 310
+	lsc.add_child(list)
 	var i := 0
 	for r in Db.regions:
 		i += 1
 		var open: bool = Game.region_unlocked(r.id)
 		var done: bool = Game.profile.cleared.has(r.id)
-		var b := UI.button(("%s  %s" % [["I", "II", "III", "IV", "V", "VI", "VII", "VIII"][i - 1], r.name]) if open else "—  Unknown", 15, 290)
-		b.custom_minimum_size.y = 40
+		var b := UI.button(("%s  %s" % [["I", "II", "III", "IV", "V", "VI", "VII", "VIII"][i - 1], r.name]) if open else "—  Unknown", 18, 310)
+		b.clip_text = true
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.disabled = not open
 		if done:
@@ -278,7 +283,7 @@ func _tab_journey() -> void:
 			show_tab("Journey"))
 		list.add_child(b)
 	if Game.game_complete():
-		var again := UI.button("Return Again  (NG+%d)" % (ng + 1), 15, 290)
+		var again := UI.button("Return Again  (NG+%d)" % (ng + 1), 18, 310)
 		again.pressed.connect(func():
 			Game.start_ng_plus()
 			sel_region = "courtyard"
@@ -290,8 +295,14 @@ func _tab_journey() -> void:
 	det.add_theme_constant_override("separation", 8)
 	cols.add_child(det)
 	var r: Dictionary = Db.region_by_id[sel_region]
-	det.add_child(UI.title(r.name, 22, UI.BONE))
-	det.add_child(_wrap(r.blurb, 20))
+	var rn := UI.title(r.name, 24, UI.BONE)
+	rn.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	det.add_child(rn)
+	var dsc := ScrollContainer.new()
+	dsc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	dsc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	det.add_child(dsc)
+	dsc.add_child(_wrap(r.blurb, 22))
 	det.add_child(UI.rule())
 	var boss_id := ""
 	for o in r.stages[-1].options:
@@ -300,14 +311,12 @@ func _tab_journey() -> void:
 	var beaten: bool = Game.profile.defeated.has(boss_id)
 	det.add_child(UI.label("Guardian:  %s" % (Db.foes[boss_id].name if beaten else "unknown"), 18, UI.BONE if beaten else UI.DIM))
 	det.add_child(UI.label("Cleared" if Game.profile.cleared.has(r.id) else "Uncleared", 18, UI.GOLD if Game.profile.cleared.has(r.id) else UI.DIM))
-	var sp := Control.new()
-	sp.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	det.add_child(sp)
-	var go := UI.button("Set Out", 22, 260)
+	var go := UI.button("Set Out", 24, 260)
+	go.custom_minimum_size.y = 68
 	go.pressed.connect(func(): set_out.emit(sel_region, false))
 	det.add_child(go)
 	if Game.shortcut_open(sel_region):
-		var sc := UI.button("By " + r.shortcut.label, 16, 260)
+		var sc := UI.button("By " + r.shortcut.label, 18, 260)
 		sc.pressed.connect(func(): set_out.emit(sel_region, true))
 		det.add_child(sc)
 
@@ -452,41 +461,45 @@ func _tab_character() -> void:
 	var cols := _row()
 	cols.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content.add_child(cols)
+	var asc := ScrollContainer.new()
+	asc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	asc.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	cols.add_child(asc)
 	var attrs := VBoxContainer.new()
 	attrs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	attrs.add_theme_constant_override("separation", 4)
-	cols.add_child(attrs)
+	attrs.add_theme_constant_override("separation", 6)
+	asc.add_child(attrs)
 	for a in Db.ATTRS:
 		var row := _row()
 		var names := VBoxContainer.new()
 		names.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		names.add_theme_constant_override("separation", -4)
-		names.add_child(UI.label(Db.ATTR_NAME[a], 19, UI.BONE, "bold"))
-		names.add_child(UI.label(Db.ATTR_DESC[a], 14, UI.DIM))
+		names.add_child(UI.label(Db.ATTR_NAME[a], 22, UI.BONE, "bold"))
+		names.add_child(_wrap(Db.ATTR_DESC[a], 18))
 		row.add_child(names)
 		var val := UI.label(str(p.attrs[a]), 22, UI.GOLD, "bold")
 		val.custom_minimum_size.x = 40
 		val.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		row.add_child(val)
-		var plus := UI.button("+", 20, 46)
-		plus.custom_minimum_size.y = 42
+		var plus := UI.button("+", 26, 72)
+		plus.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		plus.disabled = pts <= 0
 		plus.pressed.connect(func(): Game.spend_attr(a))
 		row.add_child(plus)
 		attrs.add_child(row)
 	var st := Game.stats()
 	var derived := VBoxContainer.new()
-	derived.custom_minimum_size.x = 230
-	derived.add_theme_constant_override("separation", 3)
+	derived.custom_minimum_size.x = 270
+	derived.add_theme_constant_override("separation", 0)
 	cols.add_child(derived)
 	for d in [["Health", "%.0f" % st.max_hp], ["Stamina", "%.0f" % st.max_stamina], ["Attack", "%.1f" % st.attack], ["Swing", "%.2fs" % st.swing_time],
 			["Damage guarded", "%.0f%%" % (st.mitigation * 100.0)], ["Stagger damage", "×%.2f" % st.crit_mult], ["Resistance", "%.0f" % st.resist],
 			["Falls", str(p.deaths)], ["Guardians slain", str(_bosses_slain())]]:
 		var row := _row()
-		var k := UI.label(d[0], 17, UI.DIM)
+		var k := UI.label(d[0], 20, UI.DIM)
 		k.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(k)
-		row.add_child(UI.label(d[1], 17, UI.BONE, "bold"))
+		row.add_child(UI.label(d[1], 20, UI.BONE, "bold"))
 		derived.add_child(row)
 
 func _bosses_slain() -> int:
@@ -513,8 +526,7 @@ func _tab_journal() -> void:
 			flow.add_theme_constant_override("v_separation", 6)
 			content.add_child(flow)
 			for tp in topics:
-				var b := UI.button(str(tp.title), 14, 0)
-				b.custom_minimum_size.y = 38
+				var b := UI.button(str(tp.title), 18, 0)
 				if not bool(tp.heard):
 					b.add_theme_color_override("font_color", UI.GOLD)
 				b.pressed.connect(func():
@@ -533,7 +545,7 @@ func _tab_journal() -> void:
 		if p.combos.has(c.id):
 			found += 1
 	head.add_child(UI.label("%d of %d found" % [found, Db.combos.size()], 18, UI.DIM))
-	var tr := UI.button("Train with Orren", 16, 220)
+	var tr := UI.button("Train with Orren", 18, 220)
 	tr.pressed.connect(func(): train.emit())
 	head.add_child(tr)
 	content.add_child(_wrap("Sequences are found by cutting. End an opening with the right pattern and the last blow lands as something more.", 16))
@@ -570,6 +582,7 @@ func _tab_journal() -> void:
 				bits.append("needs: " + ", ".join(c.cls))
 			names.add_child(UI.label("  ·  ".join(bits), 14, UI.BONE))
 			row.add_child(SeqView.new(c.seq, 30.0, UI.BONE if usable else UI.DIM))
+			row.add_child(UI.spacer(0, 12))      # clear of the scroll bar
 		else:
 			names.add_child(UI.label("Unfound", 20, UI.DIM, "bold"))
 			var hint := "%d cuts  ·  %s" % [c.seq.size(), str(c.kind).to_lower()]
@@ -600,7 +613,7 @@ func _tab_journal() -> void:
 		qv.add_child(_wrap(str(q.done_text if done else q.text), 15))
 		qv.add_child(UI.label(Game.quest_progress(q.id), 14, UI.BONE))
 		if not done and Game.quest_ready(q.id):
-			var claim := UI.button("Claim", 16, 120)
+			var claim := UI.button("Claim", 20, 140)
 			claim.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			claim.pressed.connect(func(): Game.claim_quest(q.id))
 			qrow.add_child(claim)

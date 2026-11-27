@@ -7,7 +7,7 @@ const SAVE_PATH := "user://save.json"
 const SAVE_TMP := "user://save.tmp"
 const SAVE_BAK := "user://save.bak"
 const SETTINGS_PATH := "user://settings.json"
-const SAVE_VERSION := 3           # 0: no version field · 1: flat lists · 2: per-item records, materials, cosmetics, reward state · 3: generations, world, campaign
+const SAVE_VERSION := 4           # 0: no version field · 1: flat lists · 2: per-item records, materials, cosmetics, reward state · 3: generations, world, campaign
 const SLOT_COUNT := 3          # slot 1 keeps the original file names, so an old single save simply is slot 1
 const LORE_FOR_DIVIDE := 30   # records needed before the Crown can be divided
 
@@ -58,6 +58,10 @@ func _base_profile() -> Dictionary:
 		"cosmetics": {}, "rewards": {"seed": 0, "pity": 0, "recent": [], "cores": {}},
 		# secrets, side missions and completion (src/core/secrets.gd). Additive: a save without them is credited by Secrets.backfill
 		"secrets": {}, "secret_lore": [], "feats": {}, "completion": Secrets.blank(),
+		# the road (save version 4). `road`: the journey in progress as of the last stop reached ({} when not on one),
+		# so an app ended in the background takes the road up again at that stop. `pouches`: the coin already picked
+		# up, {"<generation>|<ng>|<region>|<stop>": [index, ...]}: a pouch taken once is not found again.
+		"road": {}, "pouches": {},
 	}
 
 func has_save() -> bool:
@@ -177,6 +181,7 @@ func save() -> bool:
 	if profile.is_empty():
 		return false
 	profile["last_played"] = Time.get_unix_time_from_system()
+	profile["road"] = run.duplicate(true) if _road_ok(run) else {}
 	Secrets.sync(profile)          # a completion milestone reached since the last save is paid here, once
 	Generations.sync(profile)      # deeds, world facts and inheritance records are credited here
 	var f := FileAccess.open(slot_file(slot, "tmp"), FileAccess.WRITE)
@@ -200,6 +205,26 @@ func load_game() -> bool:
 	profile = v
 	run = {}
 	profile_changed.emit()
+	return true
+
+## A road in progress that can be stood on: a region the data knows and a stop it has.
+func _road_ok(r: Dictionary) -> bool:
+	if not (r.get("region") is String) or not Db.region_by_id.has(r.region):
+		return false
+	var n: int = Db.region_by_id[r.region].stages.size()
+	return int(r.get("stage", -1)) >= 0 and int(r.get("stage", -1)) < n
+
+## Continue: puts the knight back on the road at the last stop reached, if the journey was saved on one (the app
+## was ended while they were out). True when there is a stop to show. Nothing is granted by this: what was earned on
+## the way was saved as it was earned, and health is what it was on reaching the stop.
+func resume_road() -> bool:
+	var r: Dictionary = profile.get("road", {}) if profile.get("road") is Dictionary else {}
+	if not _road_ok(r) or not region_unlocked(str(r.region)):
+		return false
+	var st := stats()
+	run = {"region": str(r.region), "stage": int(r.stage), "hp": clampf(float(r.get("hp", st.max_hp)), 1.0, st.max_hp),
+		"found": (r.get("found", []) as Array).duplicate() if r.get("found") is Array else [], "xp": int(r.get("xp", 0)), "gold": int(r.get("gold", 0)),
+		"seed": int(r.get("seed", 0))}
 	return true
 
 func _parse(txt: String) -> Variant:
@@ -371,6 +396,21 @@ func _migrate(v: Dictionary) -> Dictionary:
 		var look: String = str(v.cosmetics[slot_name].get("look_as", "")) if v.cosmetics[slot_name] is Dictionary else ""
 		if look != "" and (not v.inventory.has(look) or Db.item(look).get("slot", "") != slot_name):
 			v.cosmetics[slot_name].erase("look_as")
+	# version 4: the road in progress and the pouches taken. An older save has neither (it resumes in the sanctuary,
+	# as it always did, and its pouches are all still to find); a stored one has its numbers made whole again
+	if not (v.get("road") is Dictionary) or not _road_ok(v.road):
+		v["road"] = {}
+	else:
+		for k: String in ["stage", "xp", "gold", "seed"]:
+			v.road[k] = int(v.road.get(k, 0))
+	if not (v.get("pouches") is Dictionary):
+		v["pouches"] = {}
+	for k in v.pouches.keys():
+		var taken: Array = []
+		for i in (v.pouches[k] if v.pouches[k] is Array else []):
+			if not taken.has(int(i)):
+				taken.append(int(i))
+		v.pouches[k] = taken
 	Secrets.tidy(v)
 	for foe_id in v.defeated:
 		if not Db.foes.has(foe_id) and Secrets.challenger(str(foe_id)).is_empty():      # a hidden challenger this journey has beaten: known again
@@ -826,8 +866,24 @@ func open_treasure(o: Dictionary) -> Dictionary:
 	save()
 	return out
 
-## Loose coin found by a sharp eye on the road. Returns the amount.
-func take_pouch() -> int:
+func _pouch_key() -> String:
+	return "%d|%d|%s|%d" % [generation(), int(profile.get("ng", 0)), str(run.get("region", "")), int(run.get("stage", 0))]
+
+## Whether pouch `index` of the stop the knight stands at has been picked up already (by this heir, on this journey).
+func pouch_taken(index: int) -> bool:
+	return not run.is_empty() and (profile.get("pouches", {}).get(_pouch_key(), []) as Array).has(index)
+
+## Loose coin found by a sharp eye on the road. Returns the amount. With `index` (which pouch of the stop) it is
+## paid once only: 0 for one already taken, however often the road is walked.
+func take_pouch(index: int = -1) -> int:
+	if index >= 0:
+		if pouch_taken(index):
+			return 0
+		if not profile.has("pouches"):
+			profile["pouches"] = {}
+		if not profile.pouches.has(_pouch_key()):
+			profile.pouches[_pouch_key()] = []
+		profile.pouches[_pouch_key()].append(index)
 	var tier: int = Db.regions.find(run_region()) + 1
 	var amount: int = rng.randi_range(8, 16) * tier * (1 + int(profile.ng))
 	profile.gold += amount
@@ -955,8 +1011,16 @@ func on_death() -> Dictionary:
 	save()
 	return summary
 
+## The main road has been walked to its end (the throne; the Roost and the Deep are optional).
+func road_complete() -> bool:
+	return profile.cleared.has(Db.regions[-1].id)
+
+## The story is over: the road is finished AND the family's story is closed (an ending chosen, or this is already a
+## legacy journey). While the canon is open the throne can be cleared with the story unfinished (a second-generation
+## win over the Monarch; the last heir answering "Not yet" at the Crown), and nothing that asks this may then offer
+## the next cycle: that would close the canon with no ending chosen.
 func game_complete() -> bool:
-	return profile.cleared.has(Db.regions[-1].id)      # the throne; the Roost and the Deep are optional
+	return road_complete() and not Generations.canon_open(profile)
 
 ## The third ending needs the side roads walked: the Devourer ended and the wyrm of the Roost faced,
 ## and enough of the record recovered to know what is being divided.
@@ -1042,15 +1106,21 @@ func choose_ending(id: String) -> void:
 
 ## A legacy journey (the old New Game Plus): the roads again, harder, with everything kept. It is outside the three
 ## generations: from here on nothing is written to the lineage, the world's facts or the canon's ending.
-func start_ng_plus() -> void:
+## Refused (false, nothing changed) while the family's story is still open: the ending choice cannot be skipped.
+## `force` is for tools and tests that turn the world over without playing the story.
+func start_ng_plus(force: bool = false) -> bool:
+	if Generations.canon_open(profile) and not force:
+		return false
 	Generations.seal(profile)                   # the canon is credited one last time, then it is closed
 	profile.ng += 1
 	profile.campaign.legacy = int(profile.ng)
 	profile.cleared = []
 	var keep := {}
 	profile.flags = keep
+	run = {}
 	save()
 	profile_changed.emit()
+	return true
 
 # ================================================================ settings
 ## The graphics preset a device starts on, before the player has chosen one: Performance on a phone or tablet
@@ -1889,5 +1959,5 @@ func lineage() -> Dictionary:
 func on_legacy_journey() -> bool:
 	return int(profile.get("ng", 0)) > 0
 
-func start_legacy_journey() -> void:
-	start_ng_plus()
+func start_legacy_journey() -> bool:
+	return start_ng_plus()

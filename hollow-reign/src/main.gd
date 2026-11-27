@@ -219,6 +219,9 @@ func resume() -> void:
 		if Game.has_fact("monarch_felled:3") and not p.flags.has("facility_seen"):
 			show_aftermath()
 			return
+	if Game.resume_road():
+		show_stage()                # the app was ended on the road: back at the last stop reached (Game.save keeps it)
+		return
 	show_sanctuary()
 
 ## Which of the story's own fights this is, for the family's canon only: "monarch2" (the second meeting), "kept",

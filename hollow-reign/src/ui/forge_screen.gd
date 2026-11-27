@@ -114,7 +114,7 @@ func select(id: String) -> void:
 func refresh() -> void:
 	GearUI.clear(_modes)
 	for m: String in ["Work", "Patterns"]:
-		var b := GearUI.chip(m, m == mode, 160)
+		var b := GearUI.chip(m, m == mode, 150)
 		b.pressed.connect(func():
 			mode = m
 			refresh())
@@ -334,7 +334,7 @@ func _ore_picker(current: String) -> Control:
 			sb.content_margin_right = 4
 			b.add_theme_stylebox_override(state, sb)
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		b.custom_minimum_size.y = 46
+		b.custom_minimum_size.y = UI.TAP
 		if have <= 0 and id != current:
 			b.add_theme_color_override("font_color", UI.DIM)
 		var sw := ColorRect.new()

@@ -63,7 +63,7 @@ static func plain_row(label: String, a: String, b: String, better: int = 1) -> D
 static func item_row(it: Dictionary, selected: bool, dim: bool = false, title: String = "") -> Button:
 	var b := Button.new()
 	b.focus_mode = Control.FOCUS_NONE
-	b.custom_minimum_size.y = 56
+	b.custom_minimum_size.y = UI.TAP
 	b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	b.clip_text = true
 	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
@@ -130,7 +130,7 @@ static func inspect_entry(id: String) -> Dictionary:
 ## A mode / filter chip.
 static func chip(text: String, on: bool, w: float = 0.0, size: int = 17) -> Button:
 	var b := UI.button(text, size, w)
-	b.custom_minimum_size.y = 48
+	b.custom_minimum_size.y = UI.TAP
 	b.focus_mode = Control.FOCUS_NONE
 	if on:
 		b.add_theme_color_override("font_color", UI.GOLD)

@@ -796,7 +796,7 @@ func lesson_demo() -> Dictionary:
 ## Take every demonstration off the screen at once (the moment the thing is done).
 func lesson_demo_clear() -> void:
 	_demo_pads = {}
-	for p: Pad in [pad_l, pad_r, pad_block]:
+	for p: Pad in [pad_l, pad_r, pad_block, pad_surge, pad_relic]:
 		p.teach = ""
 		p.queue_redraw()
 	st_bar.modulate = Color.WHITE
@@ -832,7 +832,7 @@ func lesson_text(t: String, sub: String = "", stroke: Array = [], good: bool = f
 	_stroke._t = 0.0
 	_stroke.queue_redraw()
 	_demo_pads = pads.duplicate()
-	var by_name := {"left": pad_l, "right": pad_r, "block": pad_block}
+	var by_name := {"left": pad_l, "right": pad_r, "block": pad_block, "surge": pad_surge, "relic": pad_relic}
 	for k: String in by_name:
 		var p: Pad = by_name[k]
 		p.teach = str(pads.get(k, ""))

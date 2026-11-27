@@ -31,7 +31,6 @@ func _ready() -> void:
 	var head := UI.header("Credits", func(): closed.emit())
 	col.add_child(head)
 	var lic := UI.button("Licences", 17, 160)
-	lic.custom_minimum_size.y = 44
 	lic.pressed.connect(func(): show_licences() if _rolling else show_roll())
 	head.add_child(lic)
 	col.add_child(UI.rule())

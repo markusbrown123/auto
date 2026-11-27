@@ -20,10 +20,10 @@ func _ready() -> void:
 	var dim: ColorRect = UI.full(ColorRect.new())
 	dim.color = Color(0.01, 0.01, 0.015, 0.74)
 	add_child(dim)
-	var m := UI.margin(get_viewport(), 28)
+	var m := UI.margin(get_viewport(), 14)
 	add_child(m)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 18)
+	v.add_theme_constant_override("separation", 10)
 	m.add_child(v)
 	v.add_child(UI.header("Legacies" if mode == "load" else "Choose a place for the new legacy", func(): closed.emit(),
 		"Three may be kept." if mode == "load" else "An occupied place is overwritten."))
@@ -47,7 +47,7 @@ func _fill() -> void:
 func _card(n: int, s: Dictionary, latest: bool) -> Control:
 	var used := not s.is_empty()
 	var p := UI.panel(Color(0.045, 0.047, 0.056, 0.95), UI.GOLD if latest else UI.GOLD_DIM)
-	p.custom_minimum_size = Vector2(340, 500)
+	p.custom_minimum_size = Vector2(384, 440)
 	var v := VBoxContainer.new()
 	v.add_theme_constant_override("separation", 1)
 	p.add_child(v)
@@ -65,14 +65,14 @@ func _card(n: int, s: Dictionary, latest: bool) -> Control:
 		var e := UI.title("Empty", 28, UI.DIM)
 		e.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(e)
-		var note := UI.wrapped("Nobody has woken here yet.", 19, UI.DIM, 300)
+		var note := UI.wrapped("Nobody has woken here yet.", 22, UI.DIM, 340)
 		note.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		v.add_child(note)
 		var fill := UI.spacer(0)
 		fill.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		v.add_child(fill)
 		if mode == "new":
-			var b := UI.button("Begin here", 19, 300)
+			var b := UI.button("Begin here", 22, 340)
 			b.pressed.connect(func(): chosen.emit(n))
 			v.add_child(b)
 		return p
@@ -91,36 +91,46 @@ func _card(n: int, s: Dictionary, latest: bool) -> Control:
 	if int(s.ng) > 0:
 		sub += "  ·  Journey +%d" % int(s.ng)
 	v.add_child(UI.label(sub, 20, UI.GOLD, "bold"))
-	v.add_child(UI.spacer(8))
+	v.add_child(UI.spacer(4))
 	v.add_child(UI.rule())
-	v.add_child(UI.spacer(8))
+	v.add_child(UI.spacer(4))
+	# the facts as a table (name left, value right): five of them stacked were taller than a phone
+	var facts := GridContainer.new()
+	facts.columns = 2
+	facts.add_theme_constant_override("h_separation", 10)
+	facts.add_theme_constant_override("v_separation", -2)
+	v.add_child(facts)
 	# whose journey it is: the house, which of its three generations is on the road, and how far along
 	var gen_line := "%s  ·  %s" % [UI.roman(int(s.get("generation", 2))), str(s.get("generation_title", ""))]
 	var house := ("House %s" % str(s.family)) if str(s.get("family", "")) != "" else ""
 	for pair: Array in [["Generation", gen_line + (("\n" + house) if house != "" else "")], ["Road", str(s.chapter)], ["Weapon", str(s.weapon)], ["Time walked", UI.playtime(float(s.playtime))], ["Last played", UI.when(float(s.last_played))]]:
-		v.add_child(UI.label(str(pair[0]).to_upper(), 14, UI.DIM, "head"))
-		var val := UI.wrapped(str(pair[1]), 20, UI.BONE, 300)
-		v.add_child(val)
-		v.add_child(UI.spacer(2))
+		var key := UI.label(str(pair[0]).to_upper(), 18, UI.DIM, "head")
+		key.custom_minimum_size.x = 122
+		key.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+		facts.add_child(key)
+		facts.add_child(UI.wrapped(str(pair[1]), 22, UI.BONE, 222))
 	var fill2 := UI.spacer(0)
 	fill2.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	v.add_child(fill2)
-	var go := UI.button("Resume" if mode == "load" else "Overwrite", 19, 300)
+	# Resume wide, Delete narrow and apart from it; Delete asks before it does anything
+	var acts := HBoxContainer.new()
+	acts.add_theme_constant_override("separation", 16)
+	var go := UI.button("Resume" if mode == "load" else "Overwrite", 22, 0)
+	go.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	go.pressed.connect(func():
 		if mode == "load":
 			chosen.emit(n)
 		else:
 			UI.confirm(self, "Overwrite this journey?", "%s, level %d, will be gone for good. A new journey begins in its place." % [who, int(s.level)],
 				"Overwrite", func(): chosen.emit(n), "Keep it", true))
-	v.add_child(go)
-	v.add_child(UI.spacer(6))
-	var del := UI.button("Delete", 16, 300)
-	del.custom_minimum_size.y = 44
+	acts.add_child(go)
+	v.add_child(acts)
+	var del := UI.button("Delete", 18, 104)
 	del.add_theme_color_override("font_color", UI.BLOOD.lightened(0.3))
 	del.pressed.connect(func():
 		UI.confirm(self, "Delete this journey?", "%s, level %d, %s walked. This cannot be undone." % [who, int(s.level), UI.playtime(float(s.playtime))],
 			"Delete", func():
 				Game.delete_slot(n)
 				_fill(), "Keep it", true))
-	v.add_child(del)
+	acts.add_child(del)
 	return p

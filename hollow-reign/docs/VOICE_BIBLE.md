@@ -87,3 +87,28 @@ Only **Father = Gideon** and **Mother = Celine** are chosen. The table above is 
 ## FINAL CAST chosen by the owner (2026-11-27, third message) — see `tools/cast_final.json`
 Grandson Blake (lowered 3), granddaughter Olivia, Lyra Claire (lowered 2; the owner also floated the deep male voice Caspian for her), Crimson Widow Elodie (and she must look older to suit the voice), Orren Callum (lowered 3), Monarch Hades (lowered 3), Frostbound King Josef (lowered 3), Pale Huntsman Victor (lowered 3), Gravewarden Dominus (lowered 3: "slightly less deep" than the audition). Father Gideon, Mother Celine. Existing takes for Lyra, Orren and the Monarch were lowered in place (`assets/audio/vo/lowered.json` records which, so it is never applied twice).
 - **Crimson Widow: Giselle**, mean and aggressive delivery (owner, 2026-11-27; replaces Elodie). Rewrite her lines harsher, mocking and commanding; record at low stability for emotion. She keeps her current younger look.
+
+## Final cast applied and recorded (2026-11-27) — recorded, unauditioned
+`tools/cast_final.json` is now read by `tools/gen_dialogue.py` (tables `voices`, `voice_pitch`, `voice_stability` in `data/dialogue.json`) and `tools/voices.py` records from those tables. Nobody has listened to any of these takes.
+
+| Role key | Voice | Model | Pitch (semitones) | Treatment |
+|---|---|---|---|---|
+| `forebear_m` / `forebear_f` (Generation I) | Gideon / Celine | second model | 0 | light room |
+| `player_m` / `player_f` (Generation II) | Malcolm / Victoria | Inworld | 0 | light room / clarity |
+| `heir_m` / `heir_f` (Generation III) | Blake / Olivia | Inworld | -3 / 0 | light room |
+| `kept_m` / `kept_f` (the Kept = the second generation) | Malcolm / Victoria | Inworld | 0 | as the knight, slowed 7% (developer's reading of "a voice the player knows, slowed"; not an owner choice) |
+| `lyra` | Claire | Inworld | -2 | light room |
+| `widow` | Giselle, stability 0.15 | second model | 0 | bass +2 at 160 Hz, presence +2.5 at 2.8 kHz, light room |
+| `orren`, `monarch`, `frostking`, `huntsman`, `gravewarden` | Callum, Hades, Josef, Victor, Dominus | Inworld | -3 each | light room |
+| `witness`, `narrator`, `sentinel`/`executioner` | Hamish, Graham, Mortimer | Inworld | 0 | unchanged |
+| `archivist`, `devourer` | Onyx, Luna | second model | 0 | **provisional, not chosen by the owner** |
+
+- **Who speaks with which protagonist voice.** A knight's line carries `"cast"` in the data: `forebear` for Generation I's four lines, `heir` for the knight's lines in Generation III's own scenes (`gen3_arrive`, `kept_*`, `monarch_g3_intro`, `monarch_g3_death`, `facility`); everything else is the second generation. The forebear's lines now have speaker `player` so the game picks `<line>_m` / `<line>_f` by the lineage's body, as it does for the knight.
+- **Not solved, needs a code decision:** scenes shared by Generations II and III (road remarks, guardian challenges, sanctuary talks, `devourer_death`) have one take per body, in the second generation's voice. The Last Heir therefore speaks those lines as Malcolm / Victoria. Fixing it needs either `_g3` copies of those scenes (about 35 lines x 2 bodies, about 140 credits) or a per-generation file suffix in `src/core/story.gd`.
+- **The Kept** has takes per body (`<line>_m.ogg`, `<line>_f.ogg`, lines marked `"by_body"`), but the game plays `<line>.ogg` for any speaker other than the knight, so `<line>.ogg` is a copy of the male take: a woman's lineage hears the wrong voice until `Story.audio_path` honours `by_body`.
+- **Pitch** is applied once, at recording, by `tools/voices.py` (rubberband, tempo and formants kept) and written to `assets/audio/vo/lowered.json`. Never lower a file listed there again.
+- **Loudness** is set by measurement to the median of the earlier takes (-18.4 LUFS integrated, peaks held under about -1.8 dBFS).
+- **Ledger:** `assets/audio/vo/jobs.json` holds the job id, voice and cost of every take this tool paid for; a run that is interrupted collects the paid job instead of paying again.
+- **The Witness is a free-roaming drone.** The sanctuary topic "The Mask" (`w_talk_mask`) was removed and `w_monarch_approach_03` now reads "And here I drift at your shoulder." Still mask-flavoured and left as written, for the owner to rule on: `witness_discovery_07` ("a happier ornament. Lift me down. I weigh very little"), `w_talk_smith_02` ("trusting nobody in a mask"), `w_talk_smith_03` ("looking at my rivets").
+- **The Crimson Widow** was rewritten for the mean, commanding delivery (three lines, in `tools/gen_dialogue.py`). She still yields at the end; Lyra's and the Witness's lines about that are unchanged.
+- **Text only by design:** the thirteen secret lines (`sx_*`); `tests/secrets.gd` requires that they have no audio.

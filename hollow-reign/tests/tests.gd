@@ -306,7 +306,7 @@ func t_phases() -> void:
 	var phases: Array = []
 	s.ev.connect(func(n, d): if n == &"phase_change": phases.append(d.phase))
 	s.b_state = DuelSim.B.RECOVER; s.b_t = 99.0
-	s.pl.attack = 5000.0
+	s.pl.attack = s.b_hp_max * 0.7       # one blow worth more than two of its phases, whatever its health is tuned to
 	s.input_swipe("L"); run_for(s, 0.4)
 	ok(phases == [1], "one big hit cannot skip a phase")
 	ok(is_equal_approx(s.b_hp, s.b_hp_max * 0.66), "hp clamps at the phase threshold")
@@ -644,7 +644,7 @@ func t_endings() -> void:
 		by[r.id] = r
 	ok(by.throne.requires == "citadel" and by.citadel.requires == "crypt" and by.roost.get("optional", false) and by.deep.get("optional", false), "the Roost and the Deep are side roads")
 	Game.profile.cleared = ["courtyard", "blackwood", "cathedral", "crypt", "citadel", "throne"]
-	ok(Game.game_complete() and not Game.can_divide_crown(), "the main road alone finishes the game but cannot divide the Crown")
+	ok(Game.road_complete() and not Game.can_divide_crown(), "the main road alone finishes the game but cannot divide the Crown")
 	Game.profile.cleared.append("roost")
 	Game.profile.defeated["devourer"] = 1
 	ok(not Game.can_divide_crown(), "the side roads alone are not enough without the records")
@@ -725,9 +725,9 @@ func t_runs() -> void:
 	for r in Db.regions:
 		if not Game.profile.cleared.has(r.id):
 			Game.profile.cleared.append(r.id)
-	ok(Game.game_complete(), "all regions cleared")
+	ok(Game.road_complete(), "all regions cleared")
 	var inv: int = Game.profile.inventory.size()
-	Game.start_ng_plus()
+	Game.start_ng_plus(true)
 	ok(Game.profile.ng == 1 and Game.profile.cleared.is_empty() and Game.profile.inventory.size() == inv, "NG+ keeps gear, resets the world")
 
 # ------------------------------------------------------------------ records and tasks
@@ -1618,7 +1618,7 @@ func t_lesson() -> void:
 	var cut := func(dir: String) -> void:
 		s.input_swipe(dir); run_for(s, 0.45)
 	var kinds: Array = Duel.LESSONS.map(func(l): return str(l[3]))
-	ok(kinds == ["cuts", "combo:double_slash", "parry", "dodge", "roll", "block", "combo:armor_splitter", "stamina"], "the lesson teaches cuts, a pair, parry, dodge, roll, block, three cuts and stamina")
+	ok(kinds == ["cuts", "combo:double_slash", "parry", "dodge", "roll", "block", "combo:armor_splitter", "stamina", "surge", "relic"], "the lesson teaches cuts, a pair, parry, dodge, roll, block, three cuts, stamina, and names the surge and the relic")
 	var three: Dictionary = {}
 	for c in Db.combos:
 		if c.id == "armor_splitter":
@@ -1632,7 +1632,7 @@ func t_lesson() -> void:
 			break
 		var demo: Dictionary = d.hud.lesson_demo()
 		ok(not demo.stroke.is_empty() or not demo.pads.is_empty(), "%s has a demonstration on screen (%s)" % [kind, str(demo)])
-		ok(s.b_state != DuelSim.B.STRUGGLE and s.pl.hp == s.pl.max_hp, "%s: nobody is hurt" % kind)
+		ok(s.b_state != DuelSim.B.STRUGGLE and (s.pl.hp == s.pl.max_hp or kind == "relic"), "%s: nobody is hurt" % kind)
 		match kind:
 			"cuts":
 				ok(demo.stroke == ["R"], "cuts: a stroke is drawn")
@@ -1667,7 +1667,7 @@ func t_lesson() -> void:
 				ok(d._lesson == step, "stamina: not done while the bar is full")
 				d._lesson_t = 9.95
 				d._lesson_stamina_tick(0.1)
-				ok(d._lesson == -1, "stamina: ten seconds is enough")
+				ok(d._lesson == step + 1, "stamina: ten seconds is enough")
 				d._lesson = step; d._lesson_show()
 				s.pl.stamina = s.pl.max_stamina * 0.3
 				d._lesson_stamina_tick(0.1)
@@ -1676,7 +1676,18 @@ func t_lesson() -> void:
 				ok(d._lesson == step, "stamina: low, but not yet recovered")
 				s.pl.stamina = s.pl.max_stamina * 0.75
 				d._lesson_stamina_tick(0.1)
-				ok(d._lesson == -1, "stamina: done once it has run low and come back")
+				ok(d._lesson == step + 1, "stamina: done once it has run low and come back")
+			"surge":
+				# O8: the ring is named, lit and full; the tap itself completes the step, and waiting passes it too
+				ok(demo.pads == {"surge": "tap"} and d.hud.pad_surge.teach == "tap" and s.surge >= DuelSim.SURGE_MAX and d.hud._train_head.text == "SURGE", "surge: the amber ring is named, full, and marked for a tap")
+				d._lesson_pad_tick(Duel.LESSON_PAD_WAIT + 0.1)
+				ok(d._lesson == step + 1, "surge: the step does not wait for ever")
+				d._lesson = step; d._lesson_show()
+				ok(s.input_surge() and d._lesson == step + 1, "surge: tapping it is the step")
+			"relic":
+				ok(demo.pads == {"relic": "tap"} and d.hud.pad_relic.teach == "tap" and s.relic >= DuelSim.RELIC_MAX and s.pl.hp < s.pl.max_hp and s.pl.hp > 0.0, "relic: the blue ring is named, full, and there is a wound to close")
+				var hurt: float = s.pl.hp
+				ok(s.input_relic() and s.pl.hp > hurt and d._lesson == -1, "relic: tapping it mends, and the lesson is over")
 		if kind in ["parry", "dodge", "block"]:
 			# the defence worked: its indicator is gone at once, the payoff is up, and the stroke invites the answering cut
 			var after: Dictionary = d.hud.lesson_demo()
@@ -1689,6 +1700,11 @@ func t_lesson() -> void:
 		var now: Dictionary = d.hud.lesson_demo()
 		ok(d._lesson != step and (d._lesson == -1 or now != demo), "%s: completing the step clears its demonstration" % kind)
 	var last: Dictionary = d.hud.lesson_demo()
-	ok(d._lesson == -1 and last.stroke.is_empty() and last.pads.is_empty() and d.hud.pad_l.teach == "" and d.hud.pad_block.teach == "", "when the lesson ends nothing is left on screen")
+	ok(d._lesson == -1 and last.stroke.is_empty() and last.pads.is_empty() and d.hud.pad_l.teach == "" and d.hud.pad_block.teach == "" and d.hud.pad_surge.teach == "" and d.hud.pad_relic.teach == "", "when the lesson ends nothing is left on screen")
+	var plain := DuelSim.new()
+	plain.setup(Game.stats(), Db.foes["hollow_soldier"], 3, {})
+	plain.lesson_charge("surge")
+	plain.lesson_charge("relic")
+	ok(plain.surge == 0.0 and plain.relic == 0.0 and plain.pl.hp == plain.pl.max_hp, "outside the lesson nothing fills a ring or hurts the knight")
 	d.queue_free()
 	Game.profile = saved

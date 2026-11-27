@@ -178,7 +178,7 @@ func t_find_once() -> void:
 	Game.profile = {}
 	ok(Game.load_game() and Game.secret_found("cy_loose_stone") and Game.profile.secret_lore.size() == 1 and Game.profile.gold == gold + int(s.reward.gold), "it survives save and load")
 	ok(Game.find_secret("cy_loose_stone").is_empty(), "and still cannot be claimed again")
-	Game.start_ng_plus()
+	Game.start_ng_plus(true)
 	ok(Game.secret_found("cy_loose_stone") and Secrets.at_stop("courtyard", 2).is_empty(), "New Game Plus keeps what was found")
 	# every secret pays exactly once
 	fresh()
@@ -357,7 +357,7 @@ func t_completion() -> void:
 	Game.profile = {}
 	ok(Game.load_game() and JSON.stringify(Game.profile.completion) == held, "milestones are paid once and survive a load")
 	ok(float(Game.completion().pct) == 100.0, "100 survives a load")
-	Game.start_ng_plus()
+	Game.start_ng_plus(true)
 	ok(float(Game.completion().pct) == 100.0, "and a New Game Plus")
 	# the walk itself is what marks a stop
 	fresh()
@@ -506,7 +506,7 @@ func t_story_untouched() -> void:
 	ok(not Game.game_complete() and not Game.region_unlocked("blackwood") and not Game.can_divide_crown() and Game.profile.cleared.is_empty() and Game.profile.lore.is_empty(), "finding every secret opens no road and no ending")
 	fresh()
 	Game.profile.cleared = ["courtyard", "blackwood", "cathedral", "crypt", "citadel", "throne"]
-	ok(Game.game_complete() and Game.profile.secrets.is_empty(), "the story ends with no secret found")
+	ok(Game.road_complete() and Game.profile.secrets.is_empty(), "the story ends with no secret found")
 
 # ------------------------------------------------------------------ on the road itself
 ## Lets a staged moment play out (lines skipped as a tap would), for at most twenty seconds.

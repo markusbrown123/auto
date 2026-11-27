@@ -13,6 +13,7 @@ const BODIES := [
 ]
 const SPOT := {"m": Vector3(-2.4, 0, 0.6), "f": Vector3(2.4, 0, 0.6)}
 const FACING := PI * 0.94
+const BLADE_TURN := 0.9
 
 var body := "m"
 var heraldry := "#3d0f0f"
@@ -35,6 +36,7 @@ var _clock := 0.0
 
 func setup(b: Backdrop) -> void:
 	backdrop = b
+	_held = weapon
 	start_weapon = "w_rusted_sword"
 	if backdrop.rig:
 		backdrop.rig.visible = false
@@ -53,10 +55,30 @@ func _look(b: String) -> Dictionary:
 	var p := Game.default_profile()
 	p.body = b
 	p.heraldry = heraldry
+	p.equipped.weapon = weapon
 	Game.profile = p
 	var look: Dictionary = Duel.player_look()
 	Game.profile = keep
 	return look
+
+## The knights take up the sword in the middle of the row (O6): only the hands are changed, so the pose is kept.
+var _held := "w_rusted_sword"
+func _hold_weapon() -> void:
+	if _held == weapon:
+		return
+	_held = weapon
+	for b: String in rigs:
+		var rig: FighterRig = rigs[b]
+		if is_instance_valid(rig):
+			var look := _look(b)
+			rig.cfg = look
+			rig.set_weapon(str(look.weapon), look)
+			rig.set_shield(look.get("shield"))
+
+## Height left for a column inside the safe area with `extra` units of margin.
+func _room(extra: float) -> float:
+	var s := UI.safe_margins(get_viewport())
+	return 720.0 - float(s.t) - float(s.b) - extra * 2.0
 
 func _frame(snap: bool = false) -> void:
 	var at: Vector3 = SPOT[body]
@@ -71,13 +93,13 @@ func _ready() -> void:
 	var drag: Control = UI.full(Control.new())
 	drag.gui_input.connect(_on_drag)
 	add_child(drag)
-	var m := UI.margin(get_viewport(), 30)
+	var m := UI.margin(get_viewport(), 12)
 	add_child(m)
 	_v = VBoxContainer.new()
 	_v.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	_v.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_v.add_theme_constant_override("separation", 8)
-	_v.custom_minimum_size.x = 440
+	_v.add_theme_constant_override("separation", 6)
+	_v.custom_minimum_size.x = 600
 	m.add_child(_v)
 	var hint := UI.label("Drag to turn", 17, Color(1, 1, 1, 0.45))
 	hint.size_flags_horizontal = Control.SIZE_SHRINK_END
@@ -108,25 +130,25 @@ func _process(delta: float) -> void:
 	for b: String in rigs:
 		var rig: FighterRig = rigs[b]
 		if is_instance_valid(rig):
-			rig.rotation.y = lerp_angle(rig.rotation.y, FACING + float(_turn[b]), 1.0 - exp(-delta * 10.0))
+			# at the sword row the knight stands a little side-on, so the flat of the blade it holds can be seen
+			rig.rotation.y = lerp_angle(rig.rotation.y, FACING + float(_turn[b]) + (BLADE_TURN if step == 1 else 0.0), 1.0 - exp(-delta * 10.0))
 
 func _fill() -> void:
 	for c in _v.get_children():
 		_v.remove_child(c)
 		c.queue_free()
 	carousel = null
-	_v.custom_minimum_size.x = 440 if step == 0 else 600
 	if step == 1:
 		_fill_blade()
 		return
 	_v.add_child(UI.title("Who Wakes", 32))
-	_v.add_child(UI.ornament(440))
+	_v.add_child(UI.ornament(600))
 	var forms := HBoxContainer.new()
 	forms.add_theme_constant_override("separation", 10)
 	_v.add_child(forms)
 	var desc := ""
 	for row: Array in BODIES:
-		var fb := UI.button(row[1], 19, 215)
+		var fb := UI.button(row[1], 22, 295)
 		if row[0] == body:
 			fb.add_theme_color_override("font_color", UI.GOLD)
 			fb.add_theme_stylebox_override("normal", UI._button_box("hover"))
@@ -137,33 +159,42 @@ func _fill() -> void:
 				_frame()
 				_fill())
 		forms.add_child(fb)
-	_v.add_child(UI.wrapped(desc, 20, UI.BONE, 440))
-	_v.add_child(UI.wrapped("Both wake with the same strength, the same reach and the same chances. Only the body differs.", 18, UI.SILVER, 440))
+	_v.add_child(UI.wrapped(desc, 22, UI.BONE, 600))
+	_v.add_child(UI.wrapped("Both wake with the same strength, the same reach and the same chances. Only the body differs.", 18, UI.SILVER, 600))
 	_v.add_child(UI.spacer(2))
-	_v.add_child(UI.label("BURIED WITH", 15, UI.GOLD_DIM.lightened(0.3), "head"))
+	_v.add_child(UI.label("BURIED WITH", 18, UI.GOLD_DIM.lightened(0.3), "head"))
 	var eq: Dictionary = Game.default_profile().equipped
 	var names: Array = []
 	for slot: String in Db.SLOTS:
 		if eq.get(slot) != null:
 			names.append(str(Db.item(str(eq[slot])).get("name", eq[slot])))
-	_v.add_child(UI.wrapped("  ·  ".join(names), 18, UI.BONE, 440))
+	_v.add_child(UI.wrapped("  ·  ".join(names), 18, UI.BONE, 600))
 	_v.add_child(UI.spacer(2))
-	_v.add_child(UI.label("A NAME, IF YOU REMEMBER ONE", 15, UI.GOLD_DIM.lightened(0.3), "head"))
+	# the name and the cloak side by side, so every control keeps a full-height touch target on a short screen
+	var pair := HBoxContainer.new()
+	pair.add_theme_constant_override("separation", 16)
+	_v.add_child(pair)
+	var name_col := VBoxContainer.new()
+	name_col.add_theme_constant_override("separation", 4)
+	pair.add_child(name_col)
+	name_col.add_child(UI.label("YOUR NAME", 18, UI.GOLD_DIM.lightened(0.3), "head"))
 	_name = LineEdit.new()
 	_name.placeholder_text = "Unbound"
 	_name.max_length = 16
 	_name.text = _typed
-	_name.custom_minimum_size = Vector2(440, 46)
+	_name.custom_minimum_size = Vector2(240, UI.TAP)
 	_name.text_changed.connect(func(t: String): _typed = t)
-	_v.add_child(_name)
-	_v.add_child(UI.spacer(2))
-	_v.add_child(UI.label("THE CLOAK YOU WERE BURIED IN", 15, UI.GOLD_DIM.lightened(0.3), "head"))
+	name_col.add_child(_name)
+	var cloak_col := VBoxContainer.new()
+	cloak_col.add_theme_constant_override("separation", 4)
+	pair.add_child(cloak_col)
+	cloak_col.add_child(UI.label("THE CLOAK YOU WERE BURIED IN", 18, UI.GOLD_DIM.lightened(0.3), "head"))
 	var row2 := HBoxContainer.new()
-	row2.add_theme_constant_override("separation", 10)
-	_v.add_child(row2)
+	row2.add_theme_constant_override("separation", 8)
+	cloak_col.add_child(row2)
 	for h: Array in HERALDRY:
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(80, 48)
+		b.custom_minimum_size = Vector2(62, UI.TAP)
 		var on: bool = h[1] == heraldry
 		b.add_theme_stylebox_override("normal", UI.box(Color(h[1]), UI.GOLD if on else UI.GOLD_DIM, 2 if on else 1, 1))
 		b.add_theme_stylebox_override("hover", UI.box(Color(h[1]).lightened(0.1), UI.GOLD, 2, 1))
@@ -177,14 +208,14 @@ func _fill() -> void:
 			Sfx.play("ui_tap", -6.0)
 			_fill())
 		row2.add_child(b)
-	_v.add_child(UI.spacer(8))
+	_v.add_child(UI.spacer(6))
 	var btns := HBoxContainer.new()
-	btns.add_theme_constant_override("separation", 10)
+	btns.add_theme_constant_override("separation", 20)
 	_v.add_child(btns)
-	var back := UI.button("Back", 18, 140)
+	var back := UI.button("Back", 20, 160)
 	back.pressed.connect(func(): closed.emit())
 	btns.add_child(back)
-	var go := UI.button("Choose a Blade", 22, 290)
+	var go := UI.button("Choose a Blade", 22, 420)
 	go.pressed.connect(func():
 		step = 1
 		_fill())
@@ -201,10 +232,10 @@ func _stats_for(id: String) -> Dictionary:
 
 func _fill_blade() -> void:
 	var swords: Array = Db.equipment.basic_swords
-	_v.add_child(UI.title("The Blade You Wake Holding", 28))
+	_v.add_child(UI.title("The Blade You Wake Holding", 26))
 	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.8), Color(0.3, 0.27, 0.2))
 	case.get_theme_stylebox("panel").set_content_margin_all(1)
-	case.custom_minimum_size = Vector2(600, 280)
+	case.custom_minimum_size = Vector2(600, clampf(_room(12.0) - 372.0, 150.0, 280.0))     # what the rest leaves
 	_v.add_child(case)
 	carousel = ItemCarousel.new()
 	carousel.zoom = 1.3
@@ -216,7 +247,9 @@ func _fill_blade() -> void:
 	case.add_child(carousel)
 	carousel.set_entries(entries, maxi(swords.find(weapon), 0))
 	carousel.centred.connect(func(_i: int): _blade_detail())
-	carousel.settled.connect(func(_i: int): _blade_detail())
+	carousel.settled.connect(func(_i: int):
+		_blade_detail()
+		_hold_weapon())
 	UI.corners(case, UI.GOLD_DIM, 12.0)
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 12)
@@ -227,12 +260,12 @@ func _fill_blade() -> void:
 	var role := UI.label("", 22, UI.GOLD, "head")
 	head.add_child(role)
 	var text := UI.wrapped("", 22, UI.BONE, 600)
-	text.custom_minimum_size.y = 58
+	text.custom_minimum_size.y = 56
 	_v.add_child(text)
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 24)
-	grid.add_theme_constant_override("v_separation", 6)
+	grid.add_theme_constant_override("v_separation", 2)
 	_v.add_child(grid)
 	var bars := {}
 	for k: Array in [["attack", "Damage"], ["swing_time", "Speed"], ["swing_cost", "Economy"], ["crit_mult", "Stagger"]]:
@@ -251,17 +284,17 @@ func _fill_blade() -> void:
 		cell.add_child(bar)
 		grid.add_child(cell)
 		bars[k[0]] = [bar, val]
-	var extra := UI.label("", 22, UI.GOLD_DIM.lightened(0.25))
+	var extra := UI.wrapped("", 22, UI.GOLD_DIM.lightened(0.25), 600)
 	_v.add_child(extra)
 	var btns := HBoxContainer.new()
-	btns.add_theme_constant_override("separation", 10)
+	btns.add_theme_constant_override("separation", 20)
 	_v.add_child(btns)
-	var back := UI.button("Back", 18, 140)
+	var back := UI.button("Back", 20, 160)
 	back.pressed.connect(func():
 		step = 0
 		_fill())
 	btns.add_child(back)
-	var go := UI.button("Rise", 22, 300)
+	var go := UI.button("Rise", 22, 420)
 	go.pressed.connect(func():
 		Sfx.play("ui_confirm", -3.0)
 		start_weapon = weapon
@@ -269,6 +302,7 @@ func _fill_blade() -> void:
 	btns.add_child(go)
 	_blade = {"name": nm, "role": role, "text": text, "bars": bars, "extra": extra}
 	_blade_detail()
+	_hold_weapon()
 
 ## The bars are each sword against the best of the four, fuller always the better: every figure is one the duel reads.
 func _blade_detail() -> void:

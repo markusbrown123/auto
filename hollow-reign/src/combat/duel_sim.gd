@@ -241,6 +241,17 @@ func lesson_attack() -> Dictionary:
 			return c.attacks[0]
 	return {}
 
+## Lesson only: the ring a step is about to name is full when the step begins, and for the relic's step the knight
+## is a little hurt so that mending shows. Does nothing outside the lesson.
+func lesson_charge(what: String) -> void:
+	if not lesson:
+		return
+	if what == "surge":
+		surge = SURGE_MAX
+	elif what == "relic":
+		relic = RELIC_MAX
+		pl.hp = minf(pl.hp, float(pl.max_hp) * 0.7)
+
 ## Lesson only: stand the foe open for cutting practice, or set it attacking again.
 func lesson_hold(open: bool) -> void:
 	if not lesson or b_state == B.STRUGGLE:

@@ -10,6 +10,9 @@ signal open_screen(which: String)          # "character", "equipment", "training
 signal set_out(region_id: String, use_shortcut: bool)
 
 const HERALDRY := CharacterSelect.HERALDRY
+## The plate under Continue, in reading order (two columns). Whatever `entries()` does not offer is left out.
+const SECONDARY := ["World Map", "Legacies", "Character", "Equipment", "Chronicle", "Training", "Settings", "Credits"]
+const PLATE_W := 500.0
 const CAM_POS := Vector3(-0.6, 1.0, 4.4)
 const CAM_LOOK := Vector3(0.2, 1.75, -3.0)
 ## Backdrop mode (off by default): the menu over the high road, the knight small on it, looking up at the Ring-Gate.
@@ -24,6 +27,7 @@ var knight_name := ""
 var _menu_root: Control
 var _panel: Control                # the screen open over the menu, if any
 var _shade: TextureRect
+var _new_confirmed := false
 var _target_slot := 1              # where a new journey will be written, once it is confirmed
 
 func _ready() -> void:
@@ -45,14 +49,14 @@ func _ready() -> void:
 	add_child(layer)
 	_shade = UI.shade(0.88, 0.66)
 	layer.add_child(_shade)
-	_menu_root = UI.margin(get_viewport(), 36)
+	_menu_root = UI.margin(get_viewport(), 20)
 	layer.add_child(_menu_root)
 	menu = VBoxContainer.new()
 	menu.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
 	menu.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	menu.add_theme_constant_override("separation", 0)
 	_menu_root.add_child(menu)
-	var ver := UI.label("v" + str(ProjectSettings.get_setting("application/config/version")), 14, Color(1, 1, 1, 0.3))
+	var ver := UI.label("v" + str(ProjectSettings.get_setting("application/config/version")), 18, Color(1, 1, 1, 0.3))
 	ver.size_flags_horizontal = Control.SIZE_SHRINK_END
 	ver.size_flags_vertical = Control.SIZE_SHRINK_END
 	_menu_root.add_child(ver)
@@ -129,7 +133,7 @@ func _logo() -> void:
 	t.add_theme_constant_override("outline_size", 0)
 	menu.add_child(t)
 	menu.add_child(UI.ornament(470, UI.GOLD_DIM.lightened(0.15)))
-	menu.add_child(UI.title("Three hundred years of silence", 16, UI.GOLD))
+	menu.add_child(UI.title("Three hundred years of silence", 18, UI.GOLD))
 
 ## The small line under the logo: who is waiting, and where they had got to.
 func status_line() -> String:
@@ -185,18 +189,52 @@ func _main() -> void:
 	menu.add_child(UI.spacer(10))
 	if line != "":
 		menu.add_child(UI.label(line, 18, UI.SILVER))
-	menu.add_child(UI.spacer(14))
+	menu.add_child(UI.spacer(10))
 	var list := entries()
-	# a short list (the first launch has three entries) gets rows a thumb can find; the full list of ten keeps 44
-	var row_h: int = clampi(int(430.0 / list.size()), 44, 62)
-	for i in list.size():
-		var e: Array = list[i]
-		var b := UI.menu_item(e[0], 25 if i == 0 else 20, 330)
-		b.custom_minimum_size.y = row_h + 6 if i == 0 else row_h
-		if i == 0:
-			b.add_theme_color_override("font_color", UI.GOLD.lightened(0.2))
-		b.pressed.connect(e[1])
-		menu.add_child(b)
+	if list.size() <= 4:
+		# the first launch: three entries, each a row a thumb can find
+		for i in list.size():
+			var e: Array = list[i]
+			var b := UI.menu_item(e[0], 26 if i == 0 else 22, 330)
+			b.custom_minimum_size.y = 68 if i == 0 else 62
+			if i == 0:
+				b.add_theme_color_override("font_color", UI.GOLD.lightened(0.2))
+			b.pressed.connect(e[1])
+			menu.add_child(b)
+		return
+	# a journey exists. Continue stands alone and large; the rest of the journey's screens are a plate of two columns
+	# under it; New Legacy is last, apart from both and dimmer, and asks before it does anything (O3).
+	var by_name := {}
+	for e: Array in list:
+		by_name[str(e[0])] = e[1]
+	var go := UI.button("Continue", 28, PLATE_W)
+	go.custom_minimum_size.y = 76
+	go.add_theme_color_override("font_color", UI.GOLD.lightened(0.2))
+	go.add_theme_stylebox_override("normal", UI._button_box("hover"))
+	go.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	go.pressed.connect(by_name["Continue"])
+	menu.add_child(go)
+	menu.add_child(UI.spacer(10))
+	var plate := UI.panel(Color(0.03, 0.03, 0.036, 0.6), Color(UI.GOLD_DIM, 0.55))
+	plate.get_theme_stylebox("panel").set_content_margin_all(6)
+	plate.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	menu.add_child(plate)
+	var grid := GridContainer.new()
+	grid.columns = 2
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 2)
+	plate.add_child(grid)
+	for label: String in SECONDARY:
+		if by_name.has(label):
+			var b := UI.menu_item(label, 22, (PLATE_W - 18.0) * 0.5)
+			b.pressed.connect(by_name[label])
+			grid.add_child(b)
+	menu.add_child(UI.spacer(12))
+	var fresh := UI.menu_item("New Legacy", 22, 0)
+	fresh.add_theme_color_override("font_color", UI.DIM.lightened(0.15))
+	fresh.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	fresh.pressed.connect(by_name["New Legacy"])
+	menu.add_child(fresh)
 
 # ---------------------------------------------------------------- screens over the menu
 ## Opens one of the front-end screens by name. Used by the menu and by the dev `--screen=` switch.
@@ -252,6 +290,12 @@ func _slots(mode: String) -> void:
 
 ## New Journey: with a free place it goes straight to who wakes; with none the player picks what to overwrite.
 func _new() -> void:
+	if Game.has_save() and not Game.profile.is_empty() and not _new_confirmed:
+		UI.confirm(layer, "A new legacy", "A legacy is already under way. Starting another does not end it: it takes a place of its own, and yours can be taken up again from Legacies." if Game.free_slot() != 0 else "A legacy is already under way and every place is taken. Starting another means choosing one to overwrite.", "Begin anew", func():
+			_new_confirmed = true
+			_new()
+			_new_confirmed = false, "Keep my legacy")
+		return
 	var free := Game.free_slot()
 	if free == 0:
 		_slots("new")
@@ -285,7 +329,7 @@ func _settings() -> void:
 	root.add_child(m)
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 12)
-	col.custom_minimum_size.x = 820
+	col.custom_minimum_size.x = 900
 	col.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	m.add_child(col)
 	col.add_child(UI.header("Settings", _main))

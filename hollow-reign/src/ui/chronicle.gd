@@ -69,8 +69,7 @@ func show_tab(t: String) -> void:
 		_tabs.remove_child(c)
 		c.queue_free()
 	for name_: String in tabs():
-		var b := UI.button(name_, 17, 120)
-		b.custom_minimum_size.y = 44
+		var b := UI.button(name_, 18, 110)
 		if name_ == tab:
 			b.add_theme_color_override("font_color", UI.GOLD)
 			b.add_theme_stylebox_override("normal", UI._button_box("hover"))
@@ -385,6 +384,18 @@ func _tab_completion() -> void:
 		_head("Kept in the sanctuary", "%d" % held.size())
 		for id: String in held:
 			_entry(Secrets.label_of("trophy", id), str(Secrets.data().trophies.get(id, {}).get("text", "")), UI.BONE)
+	# what else the roads have given: the finishes earned (worn from the armoury) and the names the knight may go by
+	var done: Dictionary = Game.profile.get("completion", {})
+	var fin: Array = done.get("finishes", [])
+	if not fin.is_empty():
+		_head("Finishes earned", "%d" % fin.size())
+		_body.add_child(UI.wrapped("   ·   ".join(fin.map(func(id): return Secrets.label_of("finish", str(id)))), 22, UI.BONE, 820))
+		_body.add_child(UI.spacer(4))
+	var names: Array = done.get("titles", [])
+	if not names.is_empty():
+		_head("Titles earned", "%d" % names.size())
+		_body.add_child(UI.wrapped("   ·   ".join(names.map(func(id): return Secrets.label_of("title", str(id)))), 22, UI.BONE, 820))
+		_body.add_child(UI.spacer(4))
 
 ## "Stops walked 21 / 56" and the rest, each kept whole on its line.
 func _counts(cats: Dictionary, size: int) -> Control:

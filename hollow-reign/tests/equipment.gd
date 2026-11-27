@@ -649,7 +649,7 @@ func t_rewards() -> void:
 	# New Game Plus still pays, and a guardian gives its core again
 	fresh(13)
 	Game.on_victory("ashen_sentinel", 50.0)
-	Game.start_ng_plus()
+	Game.start_ng_plus(true)
 	var ngr := Game.on_victory("ashen_sentinel", 50.0)
 	ok(int(ngr.materials.get("m_core", 0)) == 1 and not ngr.items.has("s_tower") and int(ngr.gold) > int(Db.foes.ashen_sentinel.gold), "the next cycle pays more and gives one more core")
 
@@ -1289,5 +1289,5 @@ func t_shop() -> void:
 	ok(int(by_stage[0]) <= 400 and early < 2000 and late >= 5000 and late >= 15 * int(by_stage[0]), "prices climb steeply along the road (%s)" % str(by_stage))
 	# the next cycle's blades
 	ok(not Game.shop_catalog().any(func(e): return e.id == "w_oath_axe"), "Oathbreaker is not offered the first time round")
-	Game.start_ng_plus()
+	Game.start_ng_plus(true)
 	ok(Game.shop_catalog().any(func(e): return e.id == "w_oath_axe" and e.available), "it is in the shop for those who return")

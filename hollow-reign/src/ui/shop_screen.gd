@@ -249,7 +249,6 @@ func _fill_materials() -> void:
 			continue
 		for n: int in [1, 5]:
 			var b := UI.button("%d for %d" % [n, price * n], 17, 150)
-			b.custom_minimum_size.y = 56
 			b.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 			b.focus_mode = Control.FOCUS_NONE
 			b.disabled = int(Game.profile.gold) < price * n

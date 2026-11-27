@@ -24,6 +24,7 @@ var spots: Array = []         # hidden things at this stop: {node, button, secre
 var _idle := 0.0              # seconds stood here without doing anything (some places answer that)
 var _order: Dictionary = {}   # secret id -> the inscriptions touched so far, in order
 var _clock := 0.0
+var witness_shots: Array = []   # the set-ups the Witness's first scene has cut to, in order (tests, captures)
 
 const CAM_POS := Vector3(1.3, 1.7, 4.2)
 const CAM_LOOK := Vector3(-0.3, 1.25, -4.0)
@@ -36,6 +37,7 @@ func _ready() -> void:
 	var region := Game.run_region()
 	var stage: int = Game.run.stage
 	angle = bearing(stage)
+	Game.save()                   # the road is saved at every stop reached: an app ended in the background comes back here
 	if adopted:
 		# the knight has just walked in, in this very place: keep it, and let the camera settle from where it is
 		backdrop = adopted
@@ -82,12 +84,13 @@ func _ready() -> void:
 	for l in Game.find_lore(region.id, stage):
 		head.add_child(UI.label("Record found  ·  " + str(l.title), 15, UI.GOLD))
 	var back := UI.button("Turn Back", 14, 150)
-	back.custom_minimum_size.y = 40
 	back.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	back.offset_left = -150
 	back.pressed.connect(func():
 		if _shown():
-			turned_back.emit())
+			turned_back.emit()
+			if Game.run.is_empty():
+				Game.save())          # the road was left: it is not taken up again on Continue
 	frame.add_child(back)
 	var bottom := VBoxContainer.new()
 	bottom.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
@@ -108,6 +111,8 @@ func _ready() -> void:
 	for i in opts.size():
 		# each way onward is marked on the ground ahead, left to right
 		var x := (float(i) - (opts.size() - 1) * 0.5) * 3.2
+		if opts[i].has("foe"):
+			x = clear_x(x - 0.3) + 0.3
 		var at := _at(angle, Vector3(x - 0.3, 0, -4.6))
 		backdrop.add_prop("marker", at)
 		markers.append(at)
@@ -128,14 +133,49 @@ func _ready() -> void:
 			return
 		if said.has(Companion.discovery_id()) and _monument() != Vector3.INF:
 			await _find_witness(str(region.id), stage)
-		else:
+		elif said.any(func(id: String): return Companion.essential(id)):
 			await Companion.on_stage(str(region.id), stage)
+		else:
+			# a remark on the place does not hold the road up: the ways onward come up under it after a moment, the
+			# words sit above them, and choosing a way ends the remark (it is said again another time)
+			_aside = true
+			_say_aside(str(region.id), stage)
+			await get_tree().create_timer(CHOICES_AFTER).timeout
 		if not is_inside_tree():
 			return
 	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.3)
+	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--choose="):          # dev captures: take a way onward by its index, as a tap would
+			await get_tree().create_timer(2.0).timeout
+			var o: Array = Game.stage_options()
+			var i := int(arg.trim_prefix("--choose="))
+			if is_inside_tree() and i < o.size():
+				_choose(o[i], i)
+
+const CHOICES_AFTER := 1.6      # seconds of a companion's remark before the ways onward appear under it
+const ASIDE_LIFT := 236.0       # how far above the foot of the screen its words sit: clear of the prompt and the cards
+var _aside := false             # a remark is being made over the choices
+
+func _say_aside(region_id: String, stage: int) -> void:
+	await Companion.on_stage_aside(region_id, stage, ASIDE_LIFT)
+	_aside = false
 
 func _at(a: float, v: Vector3) -> Vector3:
 	return v.rotated(Vector3.UP, a)
+
+## Where across the road a way's marker may be so that whoever waits on it (1.6 m beyond the marker) is not hidden
+## behind the knight: seen from the stop's camera, the two must be at least CLEAR_DEG apart. With two ways onward the
+## left one used to stand exactly on the line from the lens through the knight's back. Moved outward, never across.
+const CLEAR_DEG := 9.5
+const FOE_BEYOND := 1.6
+static func clear_x(x: float) -> float:
+	var z := -4.6 - FOE_BEYOND
+	var knight := rad_to_deg(atan2(0.0 - CAM_POS.x, CAM_POS.z))
+	var foe := rad_to_deg(atan2(x - CAM_POS.x, CAM_POS.z - z))
+	if absf(foe - knight) >= CLEAR_DEG:
+		return x
+	var side := -1.0 if foe <= knight + 0.5 else 1.0
+	return CAM_POS.x + tan(deg_to_rad(knight + side * CLEAR_DEG)) * (CAM_POS.z - z)
 
 # ---------------------------------------------------------------- what waits on the road
 ## The foe of a fight stands at its marker, so the way onward shows what is on it. Guardians keep their entrance
@@ -156,7 +196,7 @@ func _stand_foe(o: Dictionary, at: Vector3) -> void:
 		var f := FighterRig.new()
 		backdrop.props.add_child(f)
 		f.build(CineActor.foe_look(str(o.foe)), true)
-		f.position = at + _at(angle, Vector3(0, 0, -1.6))
+		f.position = at + _at(angle, Vector3(0, 0, -FOE_BEYOND))
 		f.rotation.y = angle + PI
 		f.time_scale = 0.6
 		foes[index] = f)
@@ -284,11 +324,38 @@ func _find_witness(region_id: String, stage: int) -> void:
 	tw.tween_property(hatch, "position:x", 0.66, 1.3).set_trans(Tween.TRANS_SINE)
 	tw.parallel().tween_property(lamp, "light_energy", 0.5, 1.3)
 	# it wakes on its own first word, not before: "from the dark"
+	# four set-ups, cut on each change of voice (one shot used to hold for the whole conversation, 48 s): the hatch
+	# (Lyra finds it), the instrument (its own lines), the knight past it (their questions), and the two of them
+	# with the fallen monument (Lyra again, and the last word). All from one side of the line between them.
+	var knight := backdrop.rig.position
+	var to_k := (knight - rest).normalized()
+	var perp := to_k.rotated(Vector3.UP, PI * 0.5)
+	var mid := rest.lerp(knight, 0.5)
+	if (keep_pos - mid).dot(perp) < 0.0:
+		perp = -perp
+	var span := (knight - rest).length()
+	var shots := {
+		"instrument": [rest + to_k * 1.5 + perp * 0.65 + Vector3(0, 1.0, 0), rest + Vector3(0, 0.72, 0)],      # the open hatch and the risen instrument both in frame
+		"knight": [rest - to_k * 0.95 + perp * 0.6 + Vector3(0, 1.3, 0), knight + Vector3(0, 1.45, 0)],
+		"pair": [mid + perp * (2.6 + span * 0.45) + Vector3(0, 1.2, 0), mid + Vector3(0, 1.0, 0)],
+	}
+	witness_shots = ["hatch"]
+	var last_who := [""]
 	var on_line := func(who: String, _lid: String):
 		if who == "witness" and is_instance_valid(d0) and d0.state == WitnessDrone.State.DORMANT:
 			d0.wake(0.95)
 			d0.look_at_point(backdrop.rig.position + Vector3(0, 1.7, 0))
 			create_tween().tween_property(lamp, "light_energy", 1.5, 1.2)
+		if who == last_who[0]:
+			return
+		var take := "pair" if who == "lyra" or (who == "witness" and last_who[0] == "lyra" and witness_shots.size() > 2) else ("knight" if who == "player" else "instrument")
+		last_who[0] = who
+		if witness_shots.size() == 1 and who == "lyra":
+			return                    # the first line is hers, over the hatch opening
+		witness_shots.append(take)
+		backdrop.move_camera(shots[take][0], shots[take][1], true)
+		if take == "pair":
+			backdrop.move_camera(shots[take][0] - perp * 0.5, shots[take][1])      # a slow push while they talk
 	Story.line_started.connect(on_line)
 	await Companion.on_stage(region_id, stage)
 	Story.line_started.disconnect(on_line)
@@ -318,13 +385,17 @@ func _find_witness(region_id: String, stage: int) -> void:
 		relic = null
 	_staging = false
 
-## Hidden coin: small, off the path, and only yours if you spot and tap it.
+## Hidden coin: small, off the path, and only yours if you spot and tap it. Where each lies depends on the stop
+## alone (never on how often the knight has fallen), and one that has been taken is gone for that heir: walking the
+## road again after a defeat does not put it back (Game.pouch_taken).
 func _scatter_pouches(frame: Control, n: int) -> void:
 	var rng := RandomNumberGenerator.new()
-	rng.seed = hash("%s%d%d" % [Game.run.region, Game.run.stage, Game.profile.deaths])
+	rng.seed = hash("%s|%d" % [Game.run.region, Game.run.stage])
 	for i in n:
 		var side := -1.0 if rng.randf() < 0.5 else 1.0
 		var at := _at(angle, Vector3(side * rng.randf_range(2.2, 4.2) - 0.3, 0, rng.randf_range(-6.5, -2.0)))
+		if Game.pouch_taken(i):
+			continue
 		var prop := backdrop.add_prop("pouch", at)
 		var b := Button.new()
 		b.flat = true
@@ -333,12 +404,14 @@ func _scatter_pouches(frame: Control, n: int) -> void:
 		b.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 		frame.add_child(b)
 		frame.move_child(b, 0)
-		b.pressed.connect(func(): _take_pouch(prop, b))
+		b.pressed.connect(func(): _take_pouch(prop, b, i))
 		pouches.append([prop, b])
 
-func _take_pouch(prop: Node3D, b: Button) -> void:
+func _take_pouch(prop: Node3D, b: Button, index: int = 0) -> void:
 	_idle = 0.0
-	var amount := Game.take_pouch()
+	var amount := Game.take_pouch(index)
+	if amount <= 0:
+		return
 	Sfx.play("loot", -2.0)
 	var l := UI.label("+%d gold" % amount, 22, UI.GOLD, "bold")
 	l.position = b.position + Vector2(10, 10)
@@ -436,6 +509,9 @@ func _shown() -> bool:
 
 func _choose(o: Dictionary, index: int = 0) -> void:
 	_idle = 0.0
+	if _aside:
+		_aside = false
+		Story.stop()              # the player has heard enough: the remark gives way to what they chose
 	match o.type:
 		"fight", "boss":
 			if index < foes.size() and foes[index] != null:
@@ -450,9 +526,12 @@ func _choose(o: Dictionary, index: int = 0) -> void:
 func _interact(o: Dictionary) -> void:
 	layer.get_child(0).visible = false
 	var spot := _at(angle, Vector3(0.9, 0, -2.4))
-	var prop := backdrop.add_prop(o.type, spot)
+	var prop: Node3D = _shrine(spot) if o.type == "shrine" else backdrop.add_prop(o.type, spot)
 	prop.rotation.y = angle
-	backdrop.move_camera(_at(angle, Vector3(2.6, 1.3, 0.4)), spot + Vector3(0, 0.6, 0))
+	if o.type == "shrine":
+		backdrop.move_camera(_at(angle, Vector3(2.9, 1.25, 1.3)), spot + Vector3(0, 1.25, 0))      # the whole monument, ring and all
+	else:
+		backdrop.move_camera(_at(angle, Vector3(2.6, 1.3, 0.4)), spot + Vector3(0, 0.6, 0))
 	var verb: String = {"treasure": "Open", "shrine": "Rest", "lever": "Pull"}[o.type]
 	var l2 := CanvasLayer.new()
 	add_child(l2)
@@ -466,6 +545,90 @@ func _interact(o: Dictionary) -> void:
 	b.pressed.connect(func():
 		l2.queue_free()
 		_resolve(o, prop))
+
+## The wayside shrine: a monument of this kingdom's own, built here from turned stone. Three worn steps, a leaning
+## six-sided stele banded where hands have polished it, the kingdom's ring cut from one stone and set in its head
+## (the Ring-Gate, small enough to pray to), and inside the ring the light that Lyra says is not a candle: a rod of
+## the old make that has burned for three hundred years. An offering bowl and the stones people left stand before it.
+func _shrine(at: Vector3) -> Node3D:
+	var n := Node3D.new()
+	backdrop.props.add_child(n)
+	n.position = at
+	n.name = "Shrine"
+	var stone := Look.stone(Color("#6a655c"))
+	var worn := Look.stone(Color("#8a8478"), 0.5, 0.7)
+	var dark := Look.stone(Color("#3c3a36"))
+	var alloy := Look.flat(Color("#9aa0a8"), 0.3, 0.9)
+	var fire := Color(backdrop.arena.theme.fire)
+	var cyl := func(r_top: float, r_bot: float, h: float, pos: Vector3, mat: Material, sides: int = 12, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+		var m := CylinderMesh.new()
+		m.top_radius = r_top
+		m.bottom_radius = r_bot
+		m.height = h
+		m.radial_segments = sides
+		m.rings = 1
+		var mi := MeshInstance3D.new()
+		mi.mesh = m
+		mi.position = pos
+		mi.rotation = rot
+		mi.material_override = mat
+		n.add_child(mi)
+		return mi
+	# the steps, each a little off true
+	cyl.call(0.98, 1.05, 0.14, Vector3(0, 0.07, 0), stone, 14)
+	cyl.call(0.76, 0.8, 0.14, Vector3(0.02, 0.21, -0.02), worn, 14, Vector3(0, 0.3, 0))
+	cyl.call(0.56, 0.6, 0.13, Vector3(0, 0.345, -0.05), stone, 12, Vector3(0, 0.7, 0))
+	# the stele: six-sided, tapering, leaning a hand's width out of true
+	var lean := Vector3(0.035, 0.52, -0.02)
+	cyl.call(0.2, 0.3, 1.55, Vector3(0, 1.18, -0.12), stone, 6, lean)
+	for band: Array in [[0.62, 0.3], [1.05, 0.262], [1.5, 0.235]]:
+		cyl.call(float(band[1]), float(band[1]) + 0.012, 0.07, Vector3(0.0, float(band[0]), -0.12), worn if band[0] > 1.0 else dark, 6, lean)
+	cyl.call(0.26, 0.21, 0.09, Vector3(0.03, 1.99, -0.12), dark, 6, lean)
+	# the ring in its head, and a chip out of it where something struck
+	var ring := TorusMesh.new()
+	ring.inner_radius = 0.25
+	ring.outer_radius = 0.37
+	ring.rings = 28
+	ring.ring_segments = 8
+	var rm := MeshInstance3D.new()
+	rm.mesh = ring
+	rm.rotation = Vector3(PI * 0.5, 0, 0)
+	rm.scale = Vector3(1, 0.55, 1)
+	rm.position = Vector3(0.04, 2.36, -0.12)
+	rm.material_override = worn
+	n.add_child(rm)
+	_tbox(n, Vector3(0.12, 0.1, 0.16), Vector3(0.3, 2.56, -0.12), dark, Vector3(0.3, 0.2, 0.7))
+	# the light that is not a candle: a rod of the old make standing in the ring
+	cyl.call(0.012, 0.016, 0.3, Vector3(0.04, 2.27, -0.12), alloy, 8)
+	var flame := SphereMesh.new()
+	flame.radius = 0.035
+	flame.height = 0.11
+	var fm := MeshInstance3D.new()
+	fm.mesh = flame
+	fm.position = Vector3(0.04, 2.46, -0.12)
+	fm.material_override = Look.glow(fire.lerp(Color(1, 0.95, 0.85), 0.4), 4.0)
+	n.add_child(fm)
+	# what people left: a shallow bowl on the second step, and stones set down beside it
+	cyl.call(0.2, 0.09, 0.1, Vector3(0.0, 0.33, 0.52), dark, 12)
+	cyl.call(0.17, 0.17, 0.012, Vector3(0.0, 0.375, 0.52), Look.flat(Color("#1a1612"), 0.3, 0.2), 12)
+	for st: Array in [[-0.42, 0.6, 0.09], [-0.3, 0.68, 0.06], [0.38, 0.62, 0.08], [0.5, 0.5, 0.05], [0.28, 0.72, 0.045]]:
+		var sm := SphereMesh.new()
+		sm.radius = float(st[2])
+		sm.height = float(st[2]) * 1.3
+		sm.radial_segments = 8
+		sm.rings = 4
+		var si := MeshInstance3D.new()
+		si.mesh = sm
+		si.position = Vector3(float(st[0]), 0.28 + float(st[2]) * 0.5, float(st[1]))
+		si.material_override = worn if float(st[2]) > 0.07 else dark
+		n.add_child(si)
+	var l := OmniLight3D.new()
+	l.light_color = fire.lerp(Color(1, 0.96, 0.9), 0.55)      # a small warm light, not a wash: the stone keeps its own grey
+	l.light_energy = 0.7
+	l.omni_range = 3.2
+	l.position = Vector3(0.04, 2.4, 0.5)
+	n.add_child(l)
+	return n
 
 func _resolve(o: Dictionary, prop: Node3D) -> void:
 	var lines: Array = []
@@ -647,7 +810,7 @@ func _tell(kind: String, at: Vector3) -> Node3D:
 
 func _quiet() -> bool:
 	var ui: Control = layer.get_child(0)
-	return ui.visible and ui.modulate.a > 0.95 and not _leaving and not _staging and not Story.busy
+	return ui.visible and ui.modulate.a > 0.95 and not _leaving and not _staging and (not Story.busy or _aside)
 
 func _tick_secrets(dt: float) -> void:
 	_clock += dt
@@ -727,6 +890,9 @@ func _discover(s: Dictionary, at: Vector3, close: bool = true) -> void:
 	if _staging or _leaving:
 		return
 	_staging = true
+	if _aside:
+		_aside = false
+		Story.stop()
 	_idle = 0.0
 	var ui: Control = layer.get_child(0)
 	create_tween().tween_property(ui, "modulate:a", 0.0, 0.3)
@@ -820,6 +986,9 @@ func _challenge(s: Dictionary, at: Vector3) -> void:
 	if _staging or _leaving:
 		return
 	_staging = true
+	if _aside:
+		_aside = false
+		Story.stop()
 	create_tween().tween_property(layer.get_child(0), "modulate:a", 0.0, 0.3)
 	var from := backdrop.cam_pos - at
 	from.y = 0.0

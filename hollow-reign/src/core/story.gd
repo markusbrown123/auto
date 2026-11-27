@@ -17,6 +17,11 @@ var _catcher: Control             # takes the tap that passes over a line; out o
 var _player: AudioStreamPlayer
 var _skip := false
 var _token := 0
+var _box: VBoxContainer           # the name and the words
+var _shade: Control
+var last_finished := ""           ## the scene that last played to its end (one cut short by stop() is not it)
+const BOX_TOP := -150.0
+const BOX_BOTTOM := -34.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -62,6 +67,8 @@ func _ready() -> void:
 	v.add_theme_constant_override("separation", 2)
 	v.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_layer.add_child(v)
+	_box = v
+	_shade = shade
 	_name = UI.title("", 15, UI.GOLD)
 	_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(_name)
@@ -112,16 +119,26 @@ func _duck(on: bool) -> void:
 ## `aside`: a remark made while the player is doing something else (a greeting in the sanctuary, a taunt as a
 ## fight starts). It cannot be tapped past and it takes no touches: otherwise the first press on Buy, or the first
 ## cut, would be spent on the line instead.
-func play(id: String, force: bool = false, aside: bool = false) -> void:
+## `lift`: the words sit this many units higher than usual, outlined instead of on the dark band, clear of
+## controls at the foot of the screen (the road's choices are offered while a companion is still talking).
+## `late`: a once-only scene is recorded as seen when it ends, not as it begins (one cut short can be said again).
+func play(id: String, force: bool = false, aside: bool = false, lift: float = 0.0, late: bool = false) -> void:
 	if not has_scene(id) or (not force and not pending(id)):
 		return
 	if busy:
 		stop()
 	busy = true
+	_box.offset_top = BOX_TOP - lift
+	_box.offset_bottom = BOX_BOTTOM - lift
+	_shade.visible = lift <= 0.0
+	_text.add_theme_constant_override("outline_size", 7 if lift > 0.0 else 0)
+	_text.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_name.add_theme_constant_override("outline_size", 5 if lift > 0.0 else 0)
+	_name.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_catcher.mouse_filter = Control.MOUSE_FILTER_IGNORE if aside else Control.MOUSE_FILTER_STOP
 	_token += 1
 	var mine := _token
-	if not Game.profile.is_empty() and bool(data.scenes[id].get("once", true)):
+	if not late and not Game.profile.is_empty() and bool(data.scenes[id].get("once", true)):
 		Game.profile.flags["scene_" + id] = true
 	_layer.visible = true
 	_duck(true)
@@ -156,4 +173,7 @@ func play(id: String, force: bool = false, aside: bool = false) -> void:
 	busy = false
 	speaker = ""
 	_duck(false)
+	last_finished = id
+	if late and not Game.profile.is_empty() and bool(data.scenes[id].get("once", true)):
+		Game.profile.flags["scene_" + id] = true
 	scene_finished.emit(id)

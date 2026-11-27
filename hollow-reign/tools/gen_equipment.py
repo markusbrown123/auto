@@ -37,7 +37,11 @@ OVERRIDE = {
                        "role_text": "Precision: modest cuts that punish a staggered foe hard, light on stamina for long sequences."},
     # the shop is where blades come from: prices for what guardians used to drop
     "w_ashen_great": {"price": 900}, "w_headsman": {"price": 1900}, "w_crypt_great": {"price": 2800}, "w_rime_sword": {"price": 4800},
-    "w_wyrmfang": {"price": 9000}, "w_throneshard": {"price": 9500}, "w_hunger": {"price": 14000}, "w_vigil_edge": {"price": 900},
+    "w_wyrmfang": {"price": 9000},
+    # King's Remnant is a one-handed balanced sword (its model, the design bible and the hilt all say so); the base list
+    # had it as a greatsword, which took the shield away and swung it with two hands on a short grip
+    "w_throneshard": {"price": 9500, "cls": "sword", "damage": 48, "crit": 6, "role": "balanced",
+                      "role_text": "Balanced: a late sword with nothing given up. It leaves the shield arm free."}, "w_hunger": {"price": 14000}, "w_vigil_edge": {"price": 900},
     "w_oath_axe": {"price": 20000}, "w_ember_fangs": {"price": 20000},
 }
 for _id, _o in OVERRIDE.items():

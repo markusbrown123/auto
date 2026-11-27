@@ -673,6 +673,10 @@ func _dev_boot() -> void:
 	Game.save_dir_override = OS.get_cache_dir() + "/hollow_reign_dev" + str(_args.get("savedir", ""))   # parallel captures keep apart
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	Game.profile = Game.default_profile()
+	if _args.has("quality"):
+		# dev: --quality=0|1|2 measures a scene on a given graphics preset without touching the settings file
+		Game.settings.quality = int(_args.quality)
+		Game.apply_settings()
 	if _args.has("rich"):
 		Game.profile.gold = 4200
 		Game.profile.shards = 30
@@ -1140,5 +1144,37 @@ func _process(delta: float) -> void:
 			Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME), Performance.get_monitor(Performance.RENDER_TOTAL_PRIMITIVES_IN_FRAME),
 			Performance.get_monitor(Performance.RENDER_TOTAL_OBJECTS_IN_FRAME), Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
 			Performance.get_monitor(Performance.OBJECT_NODE_COUNT)])
+		if _args.has("meshes"):
+			_dump_cost()
 		if _shots.is_empty():
 			get_tree().quit()
+
+## Dev (`--meshes` with --shots): what the frame is made of. The heaviest meshes by triangle count (and whether they
+## cast shadows, which draws them again), and the textures in video memory by size and format.
+func _dump_cost() -> void:
+	var rows: Array = []
+	var total := 0
+	for mi: MeshInstance3D in find_children("*", "MeshInstance3D", true, false):
+		if mi.mesh == null or not mi.is_visible_in_tree():
+			continue
+		var tris := 0
+		for i in mi.mesh.get_surface_count():
+			var arr_len: int = mi.mesh.surface_get_array_index_len(i) if mi.mesh is ArrayMesh else 0
+			tris += (arr_len / 3) if arr_len > 0 else (mi.mesh.get_faces().size() / 3 if i == 0 else 0)
+		total += tris
+		var path: String = mi.mesh.resource_path.get_file() if mi.mesh.resource_path != "" else str(mi.owner.scene_file_path.get_file() if mi.owner else mi.get_parent().name)
+		rows.append([tris, "%s/%s shadows=%d" % [path, mi.name, mi.cast_shadow]])
+	rows.sort_custom(func(a, b): return a[0] > b[0])
+	print("meshes: %d visible, %d triangles at full detail" % [rows.size(), total])
+	for r: Array in rows.slice(0, 18):
+		print("  %7d  %s" % r)
+	var tex: Array = RenderingServer.texture_debug_usage()
+	tex.sort_custom(func(a, b): return int(a.bytes) > int(b.bytes))
+	var sum := 0
+	var by_fmt := {}
+	for t: Dictionary in tex:
+		sum += int(t.bytes)
+		by_fmt[int(t.format)] = int(by_fmt.get(int(t.format), 0)) + int(t.bytes)
+	print("textures: %d, %.1f MB; by format (Image.Format -> MB): %s" % [tex.size(), sum / 1048576.0, str(by_fmt.keys().map(func(k): return "%d: %.1f" % [k, by_fmt[k] / 1048576.0]))])
+	for t: Dictionary in tex.slice(0, 14):
+		print("  %6.1f MB  %dx%d fmt %d  %s" % [int(t.bytes) / 1048576.0, int(t.width), int(t.height), int(t.format), str(t.path).get_file()])

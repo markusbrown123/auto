@@ -8,8 +8,10 @@ extends Node
 ##   --body=m|f        who wakes                       --weapon=<id>     one of Db.equipment.basic_swords
 ##   --die=1,boss      lose the first ordinary fight and/or the Sentinel once, then set out again
 ##   --fast            press SKIP on every story beat (the duels on the road are still fought)
-##   --until=<step>    stop after: menu | arrival | road | sanctuary | boss
-##   --resume          a second launch: Continue from the save the last run left (checks that it persisted)
+##   --until=<step>    stop after: menu | arrival | quit (back at the main menu after the sanctuary visit)
+##   --forge_first     visit the forge before the shop (the purse reaches one piece of work or one purchase, not both)
+##   --resume          a second launch: Continue from the save the last run left (checks that it persisted), then
+##                     the rest of the road and the guardian
 ##   --log=<file>      where the step log goes (default: <save dir>/slice.log)
 ##   --snaps=<dir>     save a frame every --snap_every seconds (default 4) of game time
 ##   --audit           list small touch targets, small text and controls outside the safe area for each screen
@@ -588,13 +590,16 @@ func _story_to_road() -> void:
 	say("  the knight holds %s; profile generation %d; opening seen=%s" % [str(Game.profile.equipped.weapon), Game.generation(), str(Opening.seen_before())])
 
 var _turned_back := false
+var _halt := false               # --until=quit: the run ends at the main menu, for a second launch to take up
 var _boss_done := false
 
 ## The Courtyard's road by touch: the first leg, a visit to the sanctuary, the rest, the guardian.
 func _road() -> void:
 	var last := ""
 	var idle := 0.0
-	while not _boss_done:
+	while not (_boss_done and main.current is Sanctuary):
+		if _halt:
+			return
 		await _wait(0.3)
 		idle += 0.3
 		var c: Node = main.current
@@ -623,6 +628,8 @@ func _road() -> void:
 				if b != null:
 					await tap(b)
 					break
+	if _halt:
+		return
 	step("after the guardian")
 	await _after_boss()
 
@@ -841,6 +848,9 @@ func _sanctuary(s: Sanctuary) -> void:
 			audit("returning")
 			_snap("menu2")
 			say("  menu: %s  ·  status line: %s" % [", ".join(_texts()), (main.current as TitleScreen).status_line()])
+			if str(args.get("until", "")) == "quit":
+				_halt = true
+				return
 			await press("Continue")
 			await _until(func(): return main.current is Sanctuary, 15.0, "the sanctuary after Continue")
 			step("sanctuary after Continue")
@@ -965,6 +975,12 @@ func _resume() -> void:
 	var p: Dictionary = Game.profile
 	say("  landed on %s. cleared %s, defeated %s, gold %d, level %d, weapon %s, body %s, name %s" % [_screen(), str(p.cleared), str(p.defeated), int(p.gold), int(p.level), str(p.equipped.weapon), str(p.body), str(p.get("name", ""))])
 	_snap("resumed")
+	if main.current is Sanctuary and not p.cleared.has("courtyard"):
+		# the second half of the slice, from the save: out by the short way, the rest of the road, the guardian
+		_visited = true
+		_turned_back = true
+		await _set_out(main.current)
+		await _road()
 
 func _end() -> void:
 	_meter_report()

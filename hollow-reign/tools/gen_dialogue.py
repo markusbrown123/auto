@@ -99,7 +99,7 @@ scene("gen3_engine", (LY, "I kept all of it. I could not keep them.", "low"), on
 scene("kept_approach",
  (W, "Stop. Do not go in yet.", "sharp, for once"),
  (P, "It is one guardian.", "impatient"),
- (W, "It is the walk. I was carried at that hip for a year.", "very quiet"), new=True, title="The Walk", kind="guardian", essential=True)
+ (W, "It is the walk. I kept station at that shoulder for a year.", "very quiet"), new=True, title="The Walk", kind="guardian", essential=True)
 scene("kept_intro",
  ("kept", "State your... no. That was his question.", "a closed helm; a voice the player knows, slowed"),
  (P, "Who were you?", "careful"),
@@ -126,7 +126,7 @@ scene("facility",
 # Generation III's road: a line where the heir first sets foot on each road. Written for this pass, not from the brief;
 # nobody has reviewed them. (`<region>_<stop>_g3` is what the companion looks for in the third generation.)
 scene("courtyard_0_g3", (LY, "The plate on these is new. He has been replacing what your house broke.", "dry"), new=True)
-scene("blackwood_0_g3", (W, "The lanterns were lit when I last came this way. I was on another hip.", "level"), new=True, title="Another Hip", kind="landmark")
+scene("blackwood_0_g3", (W, "The lanterns were lit when I last came this way. I was at another shoulder.", "level"), new=True, title="Another Shoulder", kind="landmark")
 scene("cathedral_0_g3", (LY, "The door under the crossing was on no plan I was given. Neither was I.", "uneasy"), new=True)
 scene("citadel_0_g3", (W, "A king who gave up his crown, and the hall is still kept. Habit outlives everything.", "wry"), new=True, title="Habit", kind="landmark")
 scene("throne_0_g3", (LY, "Twice this door has opened for your house. Nobody came back through it.", "quiet"), new=True)

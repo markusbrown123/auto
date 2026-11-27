@@ -1,5 +1,5 @@
 extends Node
-## The companions on the road: the Witness (the mask at the knight's belt) and
+## The companions on the road: the Witness (the instrument at the knight's shoulder) and
 ## Lyra. Chooses which of their lines an event deserves and plays it through
 ## Story. The lines and the tables that place them are in data/dialogue.json
 ## under "companion", "speech" and "foe_voice" (written by tools/gen_dialogue.py).

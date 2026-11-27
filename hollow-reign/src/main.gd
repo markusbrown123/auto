@@ -41,6 +41,20 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_WM_CLOSE_REQUEST:
 		Game.save()
 		Game.save_settings()
+	# a call, a notification pulled down, the app switcher: a fight in progress stops and waits (phones only, so a
+	# desktop capture that loses focus is not paused)
+	if (what == NOTIFICATION_APPLICATION_PAUSED or what == NOTIFICATION_APPLICATION_FOCUS_OUT) and OS.has_feature("mobile"):
+		pause_fight()
+
+## Opens the pause screen over a fight in progress, exactly as its pause button does. Nothing happens anywhere else.
+func pause_fight() -> bool:
+	if current == null or not is_instance_valid(current) or get_tree().paused:
+		return false
+	var d = current if current is Duel else current.get("duel")
+	if d == null or not is_instance_valid(d) or not d is Duel or d.stage != Duel.Stage.FIGHT or d.sim.over:
+		return false
+	d.hud.pause_pressed.emit()
+	return get_tree().paused
 
 const FADE_BLACK := Color(0.01, 0.01, 0.012)
 const FADE_WHITE := Color(1.0, 0.97, 0.9)
@@ -511,6 +525,13 @@ func start_duel(o: Dictionary) -> void:
 		var l := Duel.new()
 		_swap(l)
 		l.setup(o.foe, {"lesson": true, "skip_intro": true})
+		l.hud.pause_pressed.connect(func():
+			# (the pause button was dead in the lesson) leaving it unfinished leaves it to be offered again
+			Overlays.pause(l, func(): pass, func():
+				Game.profile.tutorial_done = false
+				Game.save()
+				Game.run = {}
+				_fade_then(show_sanctuary)))
 		l.finished.connect(func(_w, _s): _fade_then(func(): start_duel(o)))
 		return
 	var d := Duel.new()

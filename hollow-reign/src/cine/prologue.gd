@@ -502,6 +502,11 @@ func _fight(foe_id: String, opts: Dictionary) -> void:
 		opts["bot_style"] = DuelBot.Style.SKILLED
 	opts["skip_intro"] = true
 	duel.setup(foe_id, opts)
+	# the duel's own pause button (it did nothing here): Resume, or Yield, which passes over this beat as SKIP does
+	var paused_duel := duel
+	duel.hud.pause_pressed.connect(func():
+		if is_instance_valid(paused_duel) and paused_duel.stage == Duel.Stage.FIGHT:
+			Overlays.pause(paused_duel, func(): pass, skip_beat))
 	weather(duel.player_rig)
 	_fight_t = 0.0
 	_cuts = 0

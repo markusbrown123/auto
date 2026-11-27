@@ -3,7 +3,7 @@ extends CineScene
 ## The Kept (Generation III, the Inner Ward of the Fallen Courtyard): the guardian standing in the Ashen Sentinel's old
 ## post is the second generation, kept by the Monarch's machinery. It wears what the player wore and carries what the
 ## player carried (Db.foes["the_kept"].rig, built from the snapshot taken at the second fall).
-##   mode "reveal"  before the duel: a figure across the ward with its back to us; the Witness at the heir's hip knows
+##   mode "reveal"  before the duel: a figure across the ward with its back to us; the Witness at the heir's shoulder knows
 ##                  the walk; the figure turns; the card; the few words it has. Then the duel's own intro.
 ##   mode "after"   after it is beaten (the duel ends on a yield, not a killing blow): level, no camera move. It
 ##                  lowers the sword and holds it out, hilt first. Its light goes out standing up.
@@ -101,11 +101,11 @@ func _reveal() -> void:
 		return
 	if _held("back"):
 		return
-	# K2: the mask at the heir's hip
+	# K2: the Witness at the heir's shoulder (the close shot goes to the drone; the old hip point if there is none)
 	Story.play("kept_approach", true)
 	Companion.mark_heard("kept_approach")
 	hero.walking = false
-	var hip := hero.position + Vector3(0.24, 0.72, 0.06)
+	var hip: Vector3 = hero.drone.global_position if hero.drone != null else hero.position + Vector3(0.24, 0.72, 0.06)
 	cam.cut(hip + Vector3(0.95, 0.12, 0.75), hip, 30.0)
 	cam.move(hip + Vector3(0.85, 0.16, 0.6), hip, 8.0)
 	var ember := OmniLight3D.new()

@@ -5,7 +5,7 @@ extends CineScene
 ## seam of light opens in the wall beside the throne.
 ##   1  wide, low, the length of the hall: the heir standing, the Monarch down, the engines dark   (silence)
 ##   2  the empty throne, held
-##   3  the mask at the heir's hip: "There is a door. Not from this side of the wall."
+##   3  the Witness at the heir's shoulder: "There is a door. Not from this side of the wall."
 ##   4  the wall beside the dais parts on white; the heir walks into it
 ## It ends on white, which is where the Facility begins.
 ## Dev: hold_at = "hall" | "throne" | "door".
@@ -74,7 +74,7 @@ func _run() -> void:
 	if not await _w(5.0):
 		return
 	# 3: the Witness
-	var hip := hero.position + Vector3(0.24, 0.72, 0.06)
+	var hip: Vector3 = hero.drone.global_position if hero.drone != null else hero.position + Vector3(0.24, 0.72, 0.06)
 	cam.cut(hip + Vector3(0.95, 0.12, 0.75), hip, 30.0)
 	if not await _w(0.8):
 		return

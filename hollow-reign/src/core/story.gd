@@ -4,9 +4,12 @@ extends Node
 ## is always subtitled, voiced or not.
 
 signal scene_finished(id: String)
+## A line has begun (the Witness drone pulses its light with its own lines).
+signal line_started(speaker: String, line_id: String)
 
 var data := {}
 var busy := false
+var speaker := ""             ## who is speaking now ("" between lines and when nothing plays)
 var _layer: CanvasLayer
 var _name: Label
 var _text: Label
@@ -87,6 +90,7 @@ func stop() -> void:
 	_player.stop()
 	_layer.visible = false
 	busy = false
+	speaker = ""
 	_duck(false)
 
 func _duck(on: bool) -> void:
@@ -118,6 +122,8 @@ func play(id: String, force: bool = false) -> void:
 	for lid in data.scenes[id].lines:
 		var line: Dictionary = data.lines[lid]
 		var who: String = line.speaker
+		speaker = who
+		line_started.emit(who, lid)
 		_name.text = str(data.names.get(who, "")).to_upper()
 		_name.visible = _name.text != ""
 		_text.text = line.text
@@ -142,5 +148,6 @@ func play(id: String, force: bool = false) -> void:
 		_player.stop()
 	_layer.visible = false
 	busy = false
+	speaker = ""
 	_duck(false)
 	scene_finished.emit(id)

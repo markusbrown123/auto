@@ -123,7 +123,7 @@ From white, behind the walking knight at the same offset as A8, across the first
 | G4 | Twenty-four years | J1 to J3 with Generations II and III | `TimeJump.make(24, 2, 3)` (exists) |
 | G5 | The Last Heir | the vista, Generation III | `Arrival` with `gen = 3` (exists; needs the heir's body and line) |
 | K1 | The Kept, seen | LS across the Inner Ward to the Sentinel's post, snow | a figure with its back to us, in armour the player knows. Hold. No music. |
-| K2 | The Witness | CU on the mask at the heir's hip, its light guttering | "It is the walk." |
+| K2 | The Witness | CU on the Witness at the heir's shoulder (the drone), its light guttering | "It is the walk." |
 | K3 | The Kept turns | low angle, the same framing T4 used for the Throne Guard in Generation I | the turn; the card says "The Crownless Champion"; then the duel's own intro |
 | K4 | After | two-shot, level, no camera move | the sword held out hilt first; the Kept's light goes out standing up |
 | M1 | The last meeting | the hall with the floor open | three phases; `monarch_death`; no overlay; hold on the empty throne |

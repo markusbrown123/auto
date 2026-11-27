@@ -427,7 +427,7 @@ The master requirements list New Game Plus. Items marked "Only offered to those 
 ## The Witness and who speaks (added 2026-11-26)
 The Witness is the second companion (`STORY_BIBLE.md`, "The Witness"). All of the lines below exist in `data/dialogue.json` as text only: none is recorded, and the game shows them as subtitles. `src/core/companion.gd` (autoload `Companion`) decides what plays: each scene once per save, never again after a death; a 20 second gap between unprompted remarks; at most two remarks at a stop (Lyra's first); nothing during a fight; nothing from the Witness before it is found; with the `chatter` setting off, only the scenes marked essential.
 
-**Discovery.** Chapter I, the Fallen Courtyard, stage 1 (the stop after The Breach, where the path divides). The monument of the thirteen kings has fallen; under the plinth is a walled chamber, and the mask hangs in it. Scene `witness_discovery` (essential) plays on arrival, before the choices appear:
+**Discovery.** Chapter I, the Fallen Courtyard, stage 1 (the stop after The Breach, where the path divides). The monument of the thirteen kings has fallen; at its foot is a machined hatch on no plan, and the Witness lies dormant under it (a small floating instrument since 2026-11-27, no longer a mask: `CHARACTER_BIBLE.md`). Scene `witness_discovery` (essential) plays on arrival, before the choices appear:
 
 - Lyra: "Wait. Under the fallen plinth. There is a door there that is on no plan I hold."
 - The Witness: "Ah. At last. I had begun to suspect the dead were better company."

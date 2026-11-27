@@ -19,7 +19,7 @@ var _leaving := false
 var adopted: Backdrop         # a place already built and on screen (the Approach hands its own over): no rebuild, no cut
 var foes: Array = []          # the figure standing at each fight's marker, or null
 var _staging := false         # a staged moment has the camera; the choices wait
-var relic: Node3D             # the Witness's mask on the stones, while it is being found
+var relic: Node3D             # the Witness lying dormant in its plinth, while it is being found (a WitnessDrone)
 var spots: Array = []         # hidden things at this stop: {node, button, secret, index, lamp}
 var _idle := 0.0              # seconds stood here without doing anything (some places answer that)
 var _order: Dictionary = {}   # secret id -> the inscriptions touched so far, in order
@@ -183,47 +183,136 @@ func _monument() -> Vector3:
 		return Vector3(6.4, 0, -2.4)
 	return Vector3.INF
 
-## The camera goes to the fallen monument, a light kindles under it, they talk, and the mask is lifted down:
-## after this it is on the knight's belt, not on the stones.
+## The camera goes to the fallen monument. A hatch in the plinth beside it, shut since before the road was laid,
+## slides back in its own dust; the instrument lying inside lights (seam, then halo), rises, turns its halo to the
+## knight and speaks; when they are done it crosses to the knight's shoulder, where it stays from here on.
 func _find_witness(region_id: String, stage: int) -> void:
 	_staging = true
 	var m := _monument()
 	var from := (backdrop.rig.position - m).normalized()
 	var side := from.rotated(Vector3.UP, -0.9)
-	var rest := m + side * 1.25 + Vector3(0, 0.12, 0)
-	relic = PropModel.scenery(backdrop.props, "res://assets/models/witness_relic.glb", 0.36, rest, rad_to_deg(atan2(side.x, side.z)))
+	var rest := m + side * 1.7 + from * 0.25      # clear of the fallen stone, on open paving
+	var yaw := atan2(side.x, side.z)
+	# the door Lyra finds: a machined hatch set flush in the paving at the monument's foot. Never medieval: a dark
+	# plate in a thin bright frame, over a shallow lined recess.
+	var plinth := Node3D.new()
+	plinth.position = rest
+	plinth.rotation.y = yaw
+	backdrop.props.add_child(plinth)
+	var alloy := StandardMaterial3D.new()
+	alloy.albedo_color = Color(0.62, 0.63, 0.66)
+	alloy.metallic = 0.9
+	alloy.roughness = 0.42
+	var plate := StandardMaterial3D.new()
+	plate.albedo_color = Color(0.13, 0.135, 0.15)
+	plate.metallic = 0.8
+	plate.roughness = 0.5
+	var dark := StandardMaterial3D.new()
+	dark.albedo_color = Color(0.03, 0.03, 0.035)
+	dark.metallic = 0.6
+	dark.roughness = 0.4
+	for spec: Array in [[Vector3(0.66, 0.02, 0.42), Vector3(0, 0.01, 0), alloy], [Vector3(0.6, 0.006, 0.36), Vector3(0, 0.021, 0), dark], [Vector3(0.6, 0.022, 0.36), Vector3(0, 0.07, 0), plate]]:
+		var bm := BoxMesh.new()
+		bm.size = spec[0]
+		var mi := MeshInstance3D.new()
+		mi.mesh = bm
+		mi.material_override = spec[2]
+		mi.position = spec[1]
+		plinth.add_child(mi)
+	var hatch: MeshInstance3D = plinth.get_child(2)
+	var d0 := WitnessDrone.new()
+	backdrop.props.add_child(d0)
+	d0.build()
+	d0.dormant(rest + Vector3(0, 0.024, 0), yaw + 0.5)
+	relic = d0
+	var dust := CPUParticles3D.new()
+	dust.emitting = false
+	dust.one_shot = true
+	dust.amount = 28
+	dust.lifetime = 1.6
+	dust.explosiveness = 0.7
+	dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+	dust.emission_box_extents = Vector3(0.3, 0.02, 0.2)
+	dust.direction = Vector3(0, 1, 0)
+	dust.spread = 60.0
+	dust.initial_velocity_min = 0.15
+	dust.initial_velocity_max = 0.5
+	dust.gravity = Vector3(0, -0.5, 0)
+	dust.scale_amount_min = 0.5
+	dust.scale_amount_max = 1.2
+	var puff := QuadMesh.new()
+	puff.size = Vector2(0.09, 0.09)
+	var pm := StandardMaterial3D.new()
+	pm.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	pm.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	pm.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	pm.albedo_color = Color(0.62, 0.58, 0.52, 0.3)
+	var soft := GradientTexture2D.new()      # a round, soft-edged mote, not a square
+	soft.fill = GradientTexture2D.FILL_RADIAL
+	soft.fill_from = Vector2(0.5, 0.5)
+	soft.fill_to = Vector2(0.5, 0.0)
+	soft.width = 32
+	soft.height = 32
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 1))
+	fade.set_color(1, Color(1, 1, 1, 0))
+	soft.gradient = fade
+	pm.albedo_texture = soft
+	puff.material = pm
+	dust.mesh = puff
+	dust.position = Vector3(0, 0.08, 0)
+	plinth.add_child(dust)
 	var lamp := OmniLight3D.new()
-	lamp.light_color = Color("#ffb347")
+	lamp.light_color = Color("#ffc98a")
 	lamp.light_energy = 0.0
-	lamp.omni_range = 3.4
-	lamp.position = rest + side * 0.35 + Vector3(0, 0.45, 0)
+	lamp.omni_range = 2.6
+	lamp.position = rest + Vector3(0, 0.3, 0)
 	backdrop.props.add_child(lamp)
 	var keep_pos := backdrop.cam_pos
 	var keep_look := backdrop.cam_look
-	backdrop.move_camera(rest + side * 1.55 + from * 0.25 + Vector3(0, 0.5, 0), rest + Vector3(0, 0.22, 0))
+	backdrop.move_camera(rest + side * 1.05 + from * 0.7 + Vector3(0, 0.75, 0), rest + Vector3(0, 0.5, 0))
 	var d := m - backdrop.rig.position
 	create_tween().tween_property(backdrop.rig, "rotation:y", atan2(-d.x, -d.z), 0.8).set_trans(Tween.TRANS_SINE)
 	var tw := create_tween()
 	tw.tween_interval(1.1)
-	tw.tween_callback(func(): Sfx.play("levelup", -12.0, 0.7))
-	tw.tween_property(lamp, "light_energy", 2.6, 1.4)
+	tw.tween_callback(func():
+		Sfx.play("levelup", -12.0, 0.7)
+		dust.emitting = true)
+	tw.tween_property(hatch, "position:x", 0.66, 1.3).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(lamp, "light_energy", 0.5, 1.3)
+	# it wakes on its own first word, not before: "from the dark"
+	var on_line := func(who: String, _lid: String):
+		if who == "witness" and is_instance_valid(d0) and d0.state == WitnessDrone.State.DORMANT:
+			d0.wake(0.95)
+			d0.look_at_point(backdrop.rig.position + Vector3(0, 1.7, 0))
+			create_tween().tween_property(lamp, "light_energy", 1.5, 1.2)
+	Story.line_started.connect(on_line)
 	await Companion.on_stage(region_id, stage)
+	Story.line_started.disconnect(on_line)
 	if not is_inside_tree():
 		return
-	# lifted down: gone from the stones, and worn from here on
-	if relic:
-		relic.queue_free()
-		relic = null
 	Sfx.play("loot", -4.0)
 	var out := create_tween()
 	out.tween_property(lamp, "light_energy", 0.0, 0.6)
 	out.tween_callback(lamp.queue_free)
+	backdrop.move_camera(keep_pos, keep_look)
 	if Companion.witness_found():
+		# it crosses to the shoulder; the knight is then rebuilt with the Witness as its own
+		if d0.state == WitnessDrone.State.DORMANT:
+			d0.wake()
+		d0.idle()
+		d0.state = WitnessDrone.State.FOLLOW
+		d0.attach(backdrop.rig)
+		await get_tree().create_timer(1.2).timeout
+		if not is_inside_tree():
+			return
 		var pos := backdrop.rig.position
 		backdrop.refresh_knight()
 		backdrop.rig.position = pos
 		backdrop.rig.rotation.y = angle
-	backdrop.move_camera(keep_pos, keep_look)
+	if relic:
+		relic.queue_free()
+		relic = null
 	_staging = false
 
 ## Hidden coin: small, off the path, and only yours if you spot and tap it.

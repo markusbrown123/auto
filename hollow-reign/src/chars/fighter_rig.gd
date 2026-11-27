@@ -81,9 +81,10 @@ var hunch := 0.0
 var arm_scale := 1.0
 
 
-const RELIC_YAW := -35.0                              # degrees: the mask's front (+X) turned to face right and a little back
-const RELIC_EYES := Vector3(0.079, 0.187, 0.0235)     # midpoint between the mask's eye slits, in the relic's own space
-const RELIC_EYE_GAP := 0.0465                         # half the distance between them
+const RELIC_YAW := -35.0                              # degrees: the old mask's front (+X) turned to face right and a little back
+## Dev: `--oldrelic` hangs the first Witness (the mask at the hip) in place of the drone, for comparison.
+static var old_relic: bool = OS.get_cmdline_user_args().has("--oldrelic")
+var drone: WitnessDrone       # the Witness, when this look has one (look flag "witness")
 
 # ================================================================ construction
 func build(config: Dictionary, as_foe: bool) -> void:
@@ -99,41 +100,15 @@ func build(config: Dictionary, as_foe: bool) -> void:
 	pelvis = Node3D.new()
 	body.add_child(pelvis)
 	if cfg.get("witness", false):
-		# the Witness hangs at the right hip, face outward and a little to the rear, where the duel camera sees it
-		# (a child of the body, not of the pelvis node: the primitive pelvis is hidden when a generated model is worn).
-		# The model's own front is +X (its strap loop is on -X); it stands 0.4 m with the strap, the mask itself about 0.28 m.
-		var relic := PropModel.scenery(body, "res://assets/models/witness_relic.glb", 0.4, Vector3(0.24, 0.66, 0.06), RELIC_YAW)
-		_relic = relic
-		if relic:
-			var eye := OmniLight3D.new()
-			eye.light_color = Color("#ffb347")
-			eye.light_energy = 0.4
-			eye.omni_range = 0.9
-			eye.position = Vector3(0.14, 0.19, 0.02)      # in front of the face, not inside the mask
-			relic.add_child(eye)
-			# the mask itself is lifted out of shadow and its eyes burn amber: an artefact, not a dark lump
-			for mi in relic.find_children("*", "MeshInstance3D", true, false):
-				var ov := StandardMaterial3D.new()
-				ov.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-				ov.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-				ov.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-				ov.albedo_color = Color(1.0, 0.72, 0.35, 0.035)
-				(mi as MeshInstance3D).material_overlay = ov
-			for ez: float in [RELIC_EYES.z - RELIC_EYE_GAP, RELIC_EYES.z + RELIC_EYE_GAP]:
-				var e := MeshInstance3D.new()
-				var sm := SphereMesh.new()
-				sm.radius = 0.011
-				sm.height = 0.022
-				e.mesh = sm
-				var em := StandardMaterial3D.new()
-				em.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-				em.albedo_color = Color(1.0, 0.75, 0.3)
-				em.emission_enabled = true
-				em.emission = Color(1.0, 0.7, 0.25)
-				em.emission_energy_multiplier = 3.0
-				e.material_override = em
-				e.position = Vector3(RELIC_EYES.x, RELIC_EYES.y, ez)      # on the mask's own eye slits (measured on the model)
-				relic.add_child(e)
+		if old_relic:
+			# dev comparison only: the first Witness, a mask hung at the right hip (the model's own front is +X)
+			_relic = PropModel.scenery(body, "res://assets/models/witness_relic.glb", 0.4, Vector3(0.24, 0.66, 0.06), RELIC_YAW)
+		else:
+			# the Witness keeps station at the sword-side shoulder: its own node, which follows and looks after itself
+			drone = WitnessDrone.new()
+			add_child(drone)
+			drone.build()
+			drone.attach(self)
 	_box(pelvis, Vector3(0.36 * bulk, 0.18, 0.24 * bulk), Vector3(0, 0.02, 0), mat_metal)
 	_fauld()
 	chest = Node3D.new()

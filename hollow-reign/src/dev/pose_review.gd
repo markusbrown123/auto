@@ -7,7 +7,9 @@ extends Node3D
 ##       res://src/dev/pose_review.tscn -- --out=<dir> [--model=<glb>] [--body=f] [--gear=w_x,s_y] [--foe=<foe id>]
 ##       [--witness] [--poses=guard,cut_R,...] [--t=0.1,0.2] [--clip=<authored clip>] [--zoom=1.0] [--aim=x,y,z] [--tag=name]
 ##   --versus=<foe id> [--dirs=R,D] [--gap=m] [--nobite]   two fighters at the duel's striking distance, frames round contact
-##   --relic                                              the Witness relic alone from four sides
+##   --relic                                              the old Witness relic (the mask) alone from four sides
+##   --drone[=plumb,reed,lens] [--attend] [--dark]        the Witness drone: one row per variant, beside the knight and
+##                                                        close (front, side, top); attentive / unlit on request
 ## With --headless and --noshots it only prints the measurements (not for --versus or --relic).
 ## A line per state: worst value @ time. `low`/`float` lowest skinned vertex (min / max over the state), `tip` `rim` weapon
 ## and shield against the floor, `blade` `blade_l` body vertices within 3.5 cm of a blade, `shield` body vertices inside
@@ -45,6 +47,12 @@ func _ready() -> void:
 		_relic_sheet()
 		return
 	_make_look()
+	if _args.has("drone"):
+		_drone_sheet()
+		return
+	if _args.has("dronecheck"):
+		_drone_check()
+		return
 	if _args.has("versus"):
 		_versus()
 		return
@@ -223,6 +231,100 @@ func _relic_sheet() -> void:
 		sheet.blit_rect(tiles[i], Rect2i(0, 0, w, h), Vector2i(i * w, 0))
 	sheet.save_png("%s/relic.png" % _out)
 	print("relic ", r)
+	get_tree().quit()
+
+## The Witness drone against the knight's own motion (works with --headless): every cut, a block, a sidestep and a
+## roll are played, and each frame the drone's centre is measured against the blade (hand to tip), the shield and
+## the body's axis. Prints the least distance of each per state; `!!` under 0.16 m (the halo's radius plus a margin).
+func _drone_check() -> void:
+	_look["witness"] = true
+	_fresh()
+	var r: FighterRig = rig
+	var d: WitnessDrone = r.drone
+	if d == null:
+		print("dronecheck: no drone on this look")
+		get_tree().quit()
+		return
+	var acts: Array = [["guard", func(): r.guard(), 1.5]]
+	for k: String in DIRS:
+		acts.append(["cut_" + k, func(): r.swing(DIRS[k], 0.3), 1.0])
+	acts.append(["block", func(): r.blocking = true, 1.2])
+	acts.append(["dodge_r", func(): r.dodge(1.0), 0.9])
+	acts.append(["roll_r", func(): r.roll(1.0), 1.1])
+	acts.append(["roll_l", func(): r.roll(-1.0), 1.1])
+	acts.append(["hurt", func(): r.hurt(), 0.9])
+	var worst := 9.0
+	for a: Array in acts:
+		r.blocking = false
+		r.guard()
+		for i in 20:
+			await get_tree().process_frame
+		(a[1] as Callable).call()
+		var lo := [9.0, 9.0, 9.0]
+		var far := 0.0
+		var t := 0.0
+		while t < float(a[2]):
+			await get_tree().process_frame
+			t += get_process_delta_time()
+			var p := d.global_position
+			lo[0] = minf(lo[0], p.distance_to(Geometry3D.get_closest_point_to_segment(p, r.weapon_r.global_position, r.blade_tip())))
+			if r.shield != null and r.shield.is_visible_in_tree():
+				lo[1] = minf(lo[1], p.distance_to(r.shield.global_position))
+			lo[2] = minf(lo[2], Vector2(p.x - r.body.global_position.x, p.z - r.body.global_position.z).length() if p.y < 1.9 else 9.0)
+			far = maxf(far, p.distance_to(r.global_transform * WitnessDrone.HOME))
+		worst = minf(worst, minf(lo[0], minf(lo[1], lo[2])))
+		print("  %-9s blade %.2f  shield %.2f  body %.2f  strayed %.2f%s" % [a[0], lo[0], lo[1], lo[2], far, "  !!" if minf(lo[0], minf(lo[1], lo[2])) < 0.16 else ""])
+	print("dronecheck: least clearance %.2f m" % worst)
+	get_tree().quit()
+
+## The Witness drone, a row per variant: at the knight's shoulder (three-quarter view from the front), then alone
+## from the front (-Z), the side (+X) and above. Written to <out>/drone[_<tag>].png.
+func _drone_sheet() -> void:
+	var names: PackedStringArray = str(_args.drone).split(",", false)
+	if names.size() == 0 or names[0] == "1":
+		names = PackedStringArray(["plumb", "reed", "lens"])
+	_look["witness"] = false
+	_fresh()
+	if rig is FighterRig:
+		rig.guard()
+	var rows: Array = []
+	for v: String in names:
+		var d := WitnessDrone.new()
+		add_child(d)
+		d.build(v)
+		d.attach(rig)
+		if _args.has("attend"):
+			d.look_at_point(Vector3(0.3, 1.6, -3.0))
+		if _args.has("dark"):
+			d.stowed(true)
+			d.rig = null
+		for i in 50:
+			await get_tree().process_frame
+		var at := d.global_position
+		var tiles: Array = []
+		var shots := [[Vector3(-0.55, 0.12, -1.0), Vector3(0.15, 1.1, 0), 2.3], [Vector3(0, 0, -1), at, 0.24], [Vector3(1, 0, 0), at, 0.24], [Vector3(0, 1, -0.001), at, 0.24]]
+		for sh: Array in shots:
+			rig.visible = sh[2] > 1.0
+			_floor.visible = sh[2] > 1.0
+			cam.size = sh[2]
+			cam.position = (sh[1] as Vector3) + (sh[0] as Vector3).normalized() * (5.0 if sh[2] > 1.0 else 2.0)      # close shots inside the detail model's range
+			cam.look_at(sh[1])
+			await RenderingServer.frame_post_draw
+			await RenderingServer.frame_post_draw
+			var img := get_viewport().get_texture().get_image()
+			img.convert(Image.FORMAT_RGB8)
+			tiles.append(img)
+		rows.append(tiles)
+		rig.visible = true
+		d.free()
+	var w: int = rows[0][0].get_width()
+	var h: int = rows[0][0].get_height()
+	var sheet := Image.create(w * 4, h * rows.size(), false, Image.FORMAT_RGB8)
+	for r in rows.size():
+		for i in 4:
+			sheet.blit_rect(rows[r][i], Rect2i(0, 0, w, h), Vector2i(i * w, r * h))
+	sheet.save_png("%s/drone%s.png" % [_out, ("_" + str(_args.tag)) if _args.has("tag") else ""])
+	print("drone sheet ", names)
 	get_tree().quit()
 
 func _room() -> void:

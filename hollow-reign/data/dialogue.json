@@ -331,7 +331,7 @@
   },
   "kept_approach_03": {
    "speaker": "witness",
-   "text": "It is the walk. I was carried at that hip for a year.",
+   "text": "It is the walk. I kept station at that shoulder for a year.",
    "dir": "very quiet",
    "recorded": false
   },
@@ -451,7 +451,7 @@
   },
   "blackwood_0_g3_01": {
    "speaker": "witness",
-   "text": "The lanterns were lit when I last came this way. I was on another hip.",
+   "text": "The lanterns were lit when I last came this way. I was at another shoulder.",
    "dir": "level",
    "recorded": false
   },
@@ -1772,7 +1772,7 @@
     "blackwood_0_g3_01"
    ],
    "once": true,
-   "title": "Another Hip",
+   "title": "Another Shoulder",
    "kind": "landmark"
   },
   "cathedral_0_g3": {

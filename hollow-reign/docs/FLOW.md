@@ -132,10 +132,13 @@ Awakening ended on. On arrival the camera eases to the road screen's view; if `f
 knight waits for it (at most 14 s), then the road screen adopts the place.
 
 ### The Witness (Courtyard, second stop)
-`Companion` picks `witness_discovery` for the stop. On the real-time road the scene is staged: the knight turns to the
-fallen statue head, the camera eases down to it, the mask (`witness_relic.glb`) lies against it and an amber light
-kindles, the dialogue plays, the mask and light go, the knight is rebuilt wearing it (`flags.witness_found`, set by
-`Companion.mark_heard`), the camera returns and the choices fade in. The filmed road plays the dialogue only, as before.
+`Companion` picks `witness_discovery` for the stop. On the real-time road the scene is staged (`Explore._find_witness`):
+the knight turns to the fallen statue head and the camera eases down to its foot, where a machined hatch lies flush in
+the paving. During Lyra's line the hatch slides back in its own dust; the Witness (a `WitnessDrone`, dormant, on its
+side) wakes on its own first word: seam, then the dash on its halo, then the vanes, then it rises, rights itself and
+turns the halo to the knight. The dialogue plays (its light follows its voice), it crosses to the knight's shoulder,
+the knight is rebuilt with the Witness as its own (`flags.witness_found`, set by `Companion.mark_heard`), the camera
+returns and the choices fade in. The filmed road plays the dialogue only, as before.
 Other regions have no monument: a save that meets the Witness late gets the dialogue without the staging.
 
 ## Continue

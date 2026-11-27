@@ -83,8 +83,9 @@ func _run() -> void:
 	if not await _say("final_door"):
 		return
 	# 4: the wall beside the dais
-	cam.cut(Vector3(-4.0, 1.6, -8.4), DOOR + Vector3(0, 2.3, 0), 50.0)
-	cam.move(Vector3(-4.3, 1.6, -9.0), DOOR + Vector3(0, 2.3, 0), 8.0)
+	# (between the engine and the wall pylon: the engines are full machines now and would fill the old set-up)
+	cam.cut(Vector3(-5.4, 1.6, -6.4), DOOR + Vector3(0, 2.3, 0), 50.0)
+	cam.move(Vector3(-5.5, 1.6, -7.2), DOOR + Vector3(0, 2.3, 0), 8.0)
 	Sfx.play("guard_break", -8.0, 0.5)
 	Sfx.play("shield_scrape", -9.0, 0.5)
 	for i in 2:

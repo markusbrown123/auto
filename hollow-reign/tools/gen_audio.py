@@ -185,10 +185,6 @@ def clash(name, base, dur, ring, nparts=9, bright=1.0):
     y += 0.5 * sweep_bp(r.standard_normal(n), 800 + 6000 * (1 - np.exp(-t / .03)), 1.5) * np.exp(-t / .05)
     return y
 
-def sfx_clashes():
-    for i, (b, d, ring) in enumerate([(1120, .8, .34), (1380, .7, .30), (960, .9, .38)], 1):
-        save_sfx(f"clash_{i}", clash(f"clash_{i}", b, d, ring), fade_out_ms=80)
-
 def sfx_parry():
     r = rng("parry_perfect"); n = int(1.2 * SR); t = tt(n)
     y = clash("parry_perfect", 1750, 1.2, .55, nparts=10, bright=2.5)
@@ -200,29 +196,6 @@ def sfx_parry():
         y += a * np.sin(2 * np.pi * np.cumsum(f * vib) / SR) * np.exp(-t / .6)
     y += 0.8 * sweep_bp(r.standard_normal(n), 2500 * 4 ** np.clip(t / .12, 0, 1), 2) * np.exp(-t / .07)
     save_sfx("parry_perfect", y, fade_out_ms=200)
-
-def sfx_hits():
-    for i, (f, cb, tau) in enumerate([(105, 620, .10), (88, 480, .12)], 1):
-        name = f"hit_armor_{i}"; r = rng(name); n = int(.45 * SR)
-        y = 1.3 * sine_drop(n, f * 1.9, f * .6, .025, tau)
-        y += .9 * modal(n, cb * np.array([1, 2.31, 3.72, 5.13, 7.4]), [1, .7, .6, .4, .3], [.14, .1, .07, .05, .04], r)
-        y += .8 * noise_burst(r, n, .012, 800, 5000) + .4 * noise_burst(r, n, .05, None, 500)
-        save_sfx(name, y, fade_out_ms=40)
-    for i, (f, tau) in enumerate([(80, .14), (68, .17)], 1):
-        name = f"hit_flesh_{i}"; r = rng(name); n = int(.35 * SR)
-        y = 1.4 * sine_drop(n, f * 1.6, f * .55, .05, tau)
-        y += .9 * noise_burst(r, n, .045, None, 650) + .35 * noise_burst(r, n, .02, 200, 900)
-        y += .25 * noise_burst(r, n, .01, 1500, 3500)
-        save_sfx(name, y, fade_out_ms=40)
-
-def sfx_blocks():
-    for i, (wf, mf) in enumerate([(240, 1850), (190, 2300)], 1):
-        name = f"block_{i}"; r = rng(name); n = int(.4 * SR)
-        y = modal(n, [wf, wf * 2.4, wf * 3.9], [1, .6, .4], [.08, .05, .03], r)
-        y += 1.2 * sine_drop(n, wf * 1.5, wf * .6, .02, .07)
-        y += .45 * modal(n, mf * np.array([1, 2.7, 4.2]), [1, .6, .4], [.1, .06, .04], r)
-        y += .7 * noise_burst(r, n, .01, 400, 4000)
-        save_sfx(name, y, fade_out_ms=40)
 
 def sfx_guard_break():
     r = rng("guard_break"); n = int(1.1 * SR)
@@ -409,9 +382,10 @@ def build_sfx():
     for n_, a in [("swing_1", (.33, 500, 2800, 900, 2.2, .45)), ("swing_2", (.37, 400, 2400, 700, 1.8, .5)),
                   ("swing_3", (.30, 700, 3500, 1100, 2.5, .4))]: swing(n_, *a)
     swing("swing_heavy", .68, 150, 1100, 200, 1.2, .55, low=1.0)
-    sfx_clashes(); sfx_parry(); sfx_hits(); sfx_blocks(); sfx_guard_break(); sfx_dodge(); sfx_roars()
+    sfx_parry(); sfx_guard_break(); sfx_dodge(); sfx_roars()      # clash/block/hit/whoosh/step families: gen_audio_combat.py
     sfx_telegraph(); sfx_stagger(); sfx_finisher(); sfx_frost(); sfx_ember(); sfx_bell(); sfx_footsteps()
     sfx_ui(); sfx_levelup(); sfx_death(); sfx_victory(); sfx_loot()
+    import gen_audio_combat; gen_audio_combat.build()      # clash_1-6, block_1-4, hit_*, parry_1-3, guard_break_1-3, whoosh_*, step_*, layers
 
 
 # =============================================================== AMBIENCE

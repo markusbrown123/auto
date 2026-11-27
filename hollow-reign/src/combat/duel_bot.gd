@@ -73,7 +73,8 @@ func tick(dt: float) -> void:
 			sim.input_surge()
 		if sim.relic >= DuelSim.RELIC_MAX and sim.pl.hp < sim.pl.max_hp * 0.55:
 			sim.input_relic()
-	var want_block := style == Style.TURTLE and not sim.boss_open()
+	# the turtle keeps the guard up whenever a blow is coming, and lowers it between strings so the shield can recover
+	var want_block := style == Style.TURTLE and sim.b_state == DuelSim.B.WINDUP
 	if not _plan.is_empty():
 		if _plan.kind == "block":
 			want_block = sim.time >= float(_plan.at) and sim.b_state == DuelSim.B.WINDUP
@@ -86,15 +87,23 @@ func tick(dt: float) -> void:
 				sim.input_dodge(_plan.side)
 			_plan = {}
 	sim.input_block(want_block)
-	if sim.boss_open() and sim.p_state == DuelSim.P.FREE and sim.time >= _next_attack:
+	# free cutting: any line lands in an opening, as fast as the weapon allows. The next swipe is made while the
+	# last cut is still recovering, so it is queued and fires on the cancel frame, as a quick hand's would.
+	var can_cut: bool = sim.p_state == DuelSim.P.FREE or (sim.p_state == DuelSim.P.SWING and sim.p_swing.get("landed", false) and sim.p_buffer.is_empty())
+	if sim.boss_open() and can_cut and sim.time >= _next_attack:
 		if sim.pl.stamina > sim.pl.swing_cost:
 			_alt = (_alt + 1) % CUTS.size()
 			var cut: String = CUTS[_alt]
 			if sim.rift_dir != "" and style == Style.SKILLED:
-				cut = sim.rift_dir
+				cut = sim.rift_dir            # the shown line: the counter, the telling blow
+			elif style == Style.SLOPPY and rng.randf() < 0.25:
+				cut = sim.p_last_dir if sim.p_last_dir != "" else cut      # a hurried hand repeats itself
 			elif cut == sim.p_last_dir:
 				cut = CUTS[(_alt + 1) % CUTS.size()]
 			sim.input_swipe(cut)
 			_next_attack = sim.time + 0.02
-	elif sim.b_far and sim.b_state == DuelSim.B.IDLE and sim.p_state == DuelSim.P.FREE and style != Style.TURTLE:
-		pass   # wait for the lunge rather than walk into it
+	elif style == Style.SLOPPY and sim.b_state == DuelSim.B.IDLE and not sim.b_far and sim.p_state == DuelSim.P.FREE and sim.time >= _next_attack and sim.pl.stamina > sim.pl.max_stamina * 0.6:
+		# pressing a foe that is not open: the cut is real, and is turned on its guard
+		_next_attack = sim.time + 0.5
+		if rng.randf() < 0.2:
+			sim.input_swipe(CUTS[rng.randi() % CUTS.size()])

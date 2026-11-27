@@ -10,7 +10,7 @@ extends SceneTree
 ## and <body>_under.res (the base body without its helmet: a dark undersuit shown under mixed parts).
 ## Run:  Godot --headless --path . -s tools/armor_split.gd -- [--only=m_frost,f_ash] [--margin=0.22] [--out=dir] [--despike=all] [--tag=_ds]
 ##       [--spikes: no default trimming] [--heels: female boots as generated] [--noflex: no <body>_<host>_flex.res]
-##       [--nohood: no <body>_<host>_hood.res] [--v]
+##       [--nohood: no <body>_<host>_hood.res] [--bodies=m] [--v]
 ## Third pass (2026-11-27): the host suit's bare hips get a skin of flex-armour (_flex, <body>_<host>_flex.res; the host's
 ## own six parts are exactly as generated), female boots are made flat (_flatten_heels), and the families in
 ## DESPIKE_DEFAULT are trimmed by default.
@@ -69,6 +69,8 @@ func _init() -> void:
 	var margin := float(args.get("margin", "0.22"))
 	var tag := str(args.get("tag", ""))
 	for body: String in ["m", "f"]:
+		if args.has("bodies") and not str(args.bodies).contains(body):
+			continue
 		var host := _read(body, host_suit)
 		_cur_host = host
 		var hull := {}

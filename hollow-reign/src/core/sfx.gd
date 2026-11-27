@@ -2,7 +2,42 @@ extends Node
 ## Sound effects, ambience and crossfading music, mixed on six buses. All audio is original:
 ## effects are synthesised by tools/gen_audio.py; four music cues and all speech are generated.
 
-const VARIANTS := {"swing": 3, "clash": 3, "hit_armor": 2, "hit_flesh": 2, "block": 2, "roar": 3, "footstep": 4, "armor": 3}
+## Flat variant sets for the sounds that have no pool of their own (picked without repeating the last one).
+const VARIANTS := {"roar": 3, "armor": 3}
+## Combat and footstep one-shots. Every file in these pools starts with PREROLL seconds of silence (tools/gen_audio_combat.py),
+## so a start offset of 0..PREROLL is sample-accurate and costs no attack. pool -> [file format, variants,
+## pitch jitter (+/- fraction), volume jitter (+/- dB), voice family].
+const PREROLL := 0.004
+const POOLS := {
+	"clash": ["clash_%d", 6, 0.025, 1.0, "metal"], "block": ["block_%d", 4, 0.025, 1.0, "metal"],
+	"parry": ["parry_%d", 3, 0.02, 0.8, "parry"], "guard_break": ["guard_break_%d", 3, 0.025, 1.0, "break"],
+	"hit_armor": ["hit_armor_%d", 4, 0.03, 1.0, "hit"], "hit_flesh": ["hit_flesh_%d", 4, 0.04, 1.0, "flesh"],
+	"whoosh_light": ["whoosh_light_%d", 3, 0.07, 1.5, "whoosh"], "whoosh_med": ["whoosh_med_%d", 3, 0.07, 1.5, "whoosh"],
+	"whoosh_heavy": ["whoosh_heavy_%d", 3, 0.06, 1.5, "whoosh"],
+	"thump": ["thump_%d", 3, 0.04, 1.0, "layer"], "crack": ["crack_%d", 3, 0.03, 1.0, "layer"],
+	"rattle": ["rattle_%d", 3, 0.04, 1.5, "layer"], "swell": ["swell_%d", 3, 0.03, 1.0, "layer"],
+	"jingle": ["jingle_%d", 4, 0.05, 2.0, "layer"],
+	"step_stone": ["step_stone_%d", 6, 0.05, 1.0, "step"], "step_metal": ["step_metal_%d", 6, 0.05, 1.0, "step"],
+	"step_grass": ["step_grass_%d", 6, 0.05, 1.0, "step"], "step_snow": ["step_snow_%d", 6, 0.05, 1.0, "step"],
+	"step_water": ["step_water_%d", 6, 0.05, 1.0, "step"],
+}
+## Voice families: [most voices at once (the oldest is stolen), minimum seconds between event starts].
+## Rapid swipes therefore cannot stack into a wall, and one footstep call cannot become two steps.
+const FAMILIES := {"metal": [4, 0.04], "parry": [2, 0.12], "break": [2, 0.2], "hit": [4, 0.04], "flesh": [4, 0.04],
+	"whoosh": [3, 0.07], "layer": [8, 0.0], "step": [2, 0.08]}
+## Named events: the first layer is the sound itself (it takes the retrigger gap), the rest are added with an
+## optional delay "at" (s), a "vol" trim (dB), a minimum "min" intensity and a "chance".
+const EVENTS := {
+	"clash": [{"pool": "clash"}, {"pool": "thump", "vol": -8.0, "min": 0.6}],
+	"block": [{"pool": "block"}],
+	"parry": [{"pool": "parry"}, {"pool": "swell", "vol": -5.0, "at": 0.03, "chance": 0.85}],
+	"guard_break": [{"pool": "guard_break"}, {"pool": "crack", "vol": -2.0}, {"pool": "rattle", "vol": -4.0, "at": 0.09}],
+	"hit_armor": [{"pool": "hit_armor"}, {"pool": "thump", "vol": -9.0, "min": 0.9, "chance": 0.6}],
+	"hit_flesh": [{"pool": "hit_flesh"}],
+	"swing": [{"pool": "@whoosh"}],
+}
+const SURFACES := {"stone": "stone", "rock": "stone", "metal": "metal", "metal_deck": "metal", "deck": "metal", "grass": "grass",
+	"earth": "grass", "dirt": "grass", "grass_earth": "grass", "snow": "snow", "water": "water", "water_shallow": "water", "shallow": "water"}
 ## Mix buses and the setting that scales each, with a fixed trim so the layers sit in order:
 ## dialogue on top, then combat, interface, music, ambience underneath.
 const BUSES := ["Music", "Dialogue", "Combat", "Ambience", "Interface", "Cinematics"]
@@ -15,7 +50,12 @@ const AMBIENT_SOUNDS := ["bell"]
 const CINEMATIC_SOUNDS := ["victory", "death", "finisher"]      # stingers that belong to the staged moments
 var _cache := {}
 var _pool: Array = []
-var _next := 0
+var _last := {}                 # pool or sound -> last variant played
+var _voices: Array = []         # {p, fam, t0, end} for every voice believed to be sounding (ms)
+var _gate_at := {}              # voice family -> ms of the last event start
+var _pan_side := 1.0
+## Surface under the characters' feet for `play("footstep")` and `footstep("")`; set by whoever owns the scene.
+var default_surface := "stone"
 var _music: Array = []
 var _music_i := 0
 var _music_name := ""
@@ -36,7 +76,17 @@ func _ready() -> void:
 		lim.ceiling_db = -1.0
 		lim.threshold_db = -6.0
 		AudioServer.add_bus_effect(0, lim)
-	for i in 12:
+	# whooshes are panned by sending them through two side buses that feed Combat
+	for side: Array in [["CombatL", -0.35], ["CombatR", 0.35]]:
+		if AudioServer.get_bus_index(side[0]) < 0:
+			AudioServer.add_bus()
+			var bi := AudioServer.bus_count - 1
+			AudioServer.set_bus_name(bi, side[0])
+			AudioServer.set_bus_send(bi, "Combat")
+			var pn := AudioEffectPanner.new()
+			pn.pan = side[1]
+			AudioServer.add_bus_effect(bi, pn)
+	for i in 24:
 		var p := AudioStreamPlayer.new()
 		p.bus = "Combat"
 		add_child(p)
@@ -65,20 +115,167 @@ func _stream(path: String, loop: bool = false) -> AudioStream:
 		_cache[path] = s
 	return _cache[path]
 
-func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float = 0.06) -> void:
+## Public entry point used everywhere. Old names keep working: combat names go through `event`, "footstep" through
+## `footstep`. jitter < 0 uses the pool's own pitch jitter (0.06 for flat sounds).
+func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float = -1.0) -> void:
+	if sound == "footstep":
+		footstep("", 1.0, vol_db, pitch, false)
+		return
+	if sound == "swing" or sound == "swing_heavy":
+		# the caller's pitch said how hard the swing was (fast and thin or slow and heavy); the whoosh tier carries that now
+		var inten := 1.4 if sound == "swing_heavy" else (0.4 if pitch >= 1.15 else (1.4 if pitch < 0.78 else 1.0))
+		event("swing", inten, vol_db, pow(pitch, 0.5), jitter)
+		return
+	if sound == "parry_perfect":
+		sound = "parry"
+	if EVENTS.has(sound):
+		event(sound, 1.0, vol_db, pitch, jitter)
+		return
 	var file := sound
 	if VARIANTS.has(sound):
-		file = "%s_%d" % [sound, randi_range(1, VARIANTS[sound])]
+		file = "%s_%d" % [sound, _pick(sound, VARIANTS[sound])]
 	var s := _stream("res://assets/audio/sfx/%s.wav" % file)
 	if s == null:
 		return
-	var p: AudioStreamPlayer = _pool[_next]
-	_next = (_next + 1) % _pool.size()
+	var j := 0.06 if jitter < 0.0 else jitter
+	var pt := pitch * randf_range(1.0 - j, 1.0 + j)
+	var p := _voice("misc", _now(), int(s.get_length() / pt * 1000.0) + 30)
 	p.stream = s
 	p.bus = "Interface" if INTERFACE_SOUNDS.has(sound) else ("Ambience" if AMBIENT_SOUNDS.has(sound) else ("Cinematics" if CINEMATIC_SOUNDS.has(sound) else "Combat"))
 	p.volume_db = vol_db
-	p.pitch_scale = pitch * randf_range(1.0 - jitter, 1.0 + jitter)
+	p.pitch_scale = pt
 	p.play()
+
+## A named combat event: `intensity` 0.1-2 (1 is a normal strike) scales level, nudges pitch down when harder and
+## decides which layers and, for "swing", which whoosh weight (under 0.6 light, over 1.25 heavy) play. Returns false
+## when the retrigger gap of its voice family swallowed it.
+func event(sound: String, intensity: float = 1.0, vol_db: float = 0.0, pitch: float = 1.0, jitter: float = -1.0) -> bool:
+	if not EVENTS.has(sound):
+		return false
+	intensity = clampf(intensity, 0.1, 2.0)
+	var layers: Array = EVENTS[sound]
+	var pool := _resolve(layers[0].pool, intensity)
+	if not _gate(POOLS[pool][4], _now()):
+		return false
+	var whoosh := str(layers[0].pool) == "@whoosh"
+	var v := vol_db + clampf(linear_to_db(intensity), -18.0, 6.0)
+	var pt := pitch if whoosh else pitch * pow(intensity, -0.1)
+	var pan := 0.0
+	if whoosh:
+		_pan_side = -_pan_side
+		pan = _pan_side * randf_range(0.2, 0.7)
+	for k in layers.size():
+		var lay: Dictionary = layers[k]
+		if k > 0 and (intensity < float(lay.get("min", 0.0)) or randf() > float(lay.get("chance", 1.0))):
+			continue
+		var lp_name := pool if k == 0 else _resolve(lay.pool, intensity)
+		var idx := _pick(lp_name, POOLS[lp_name][1])
+		var lv := v + float(lay.get("vol", 0.0))
+		var at := float(lay.get("at", 0.0))
+		if at > 0.0:
+			get_tree().create_timer(at).timeout.connect(_launch.bind(lp_name, idx, lv, pt, jitter, pan))
+		else:
+			_launch(lp_name, idx, lv, pt, jitter, pan)
+	return true
+
+## One footstep: heel thud, scuff and surface texture are in the file; an armoured (heavy) character may add a quiet
+## armour jingle. Exactly one step sound per call: a call inside the step family's retrigger gap is dropped.
+## surface: stone, metal (deck), grass (earth), snow, water (shallow); "" uses `default_surface`.
+## weight: 1 is a normal armoured knight, bigger is heavier (louder, lower, jingles more).
+func footstep(surface: String = "", weight: float = 1.0, vol_db: float = 0.0, pitch: float = 1.0, jingle: bool = true) -> bool:
+	var key := surface.to_lower().replace(" ", "_").replace("/", "_").replace("-", "_")
+	var sf: String = SURFACES.get(key, SURFACES.get(default_surface, "stone"))
+	var pool := "step_" + sf
+	if not _gate("step", _now()):
+		return false
+	weight = clampf(weight, 0.4, 2.5)
+	var v := vol_db + 6.0 * (weight - 1.0)
+	var pt := pitch * pow(weight, -0.35)
+	_launch(pool, _pick(pool, POOLS[pool][1]), v, pt, -1.0, 0.0)
+	if jingle and weight >= 0.9 and randf() < clampf(0.2 + 0.4 * (weight - 0.9), 0.0, 0.6):
+		_launch("jingle", _pick("jingle", POOLS["jingle"][1]), v - 20.0, pitch * randf_range(0.9, 1.1), -1.0, 0.0)
+	return true
+
+func _now() -> int:
+	return Time.get_ticks_msec()
+
+func _resolve(pool: String, intensity: float) -> String:
+	if pool == "@whoosh":
+		return "whoosh_light" if intensity < 0.6 else ("whoosh_heavy" if intensity > 1.25 else "whoosh_med")
+	return pool
+
+## A variant number 1..count that is never the one played last for this key.
+func _pick(key: String, count: int) -> int:
+	var last := int(_last.get(key, 0))
+	var i := randi_range(1, count)
+	if count > 1 and last >= 1 and last <= count:
+		i = randi_range(1, count - 1)
+		if i >= last:
+			i += 1
+	_last[key] = i
+	return i
+
+## True when the family may start another event now; records the start.
+func _gate(fam: String, now: int) -> bool:
+	var gap := int(float(FAMILIES[fam][1]) * 1000.0) if FAMILIES.has(fam) else 0
+	if now - int(_gate_at.get(fam, -1000000)) < gap:
+		return false
+	_gate_at[fam] = now
+	return true
+
+func _active(fam: String, now: int) -> int:
+	var n := 0
+	for v: Dictionary in _voices:
+		if v.end > now and v.fam == fam:
+			n += 1
+	return n
+
+## Hands out a player for a new voice. A family at its limit loses its oldest voice; with no free player the oldest
+## voice of any family goes.
+func _voice(fam: String, now: int, dur_ms: int) -> AudioStreamPlayer:
+	var live: Array = []
+	for v: Dictionary in _voices:
+		if v.end > now:
+			live.append(v)
+	_voices = live
+	var cap := int(FAMILIES[fam][0]) if FAMILIES.has(fam) else 999
+	while _active(fam, now) >= cap:
+		_steal(fam)
+	var used := {}
+	for v: Dictionary in _voices:
+		used[v.p] = true
+	var p: AudioStreamPlayer = null
+	for q: AudioStreamPlayer in _pool:
+		if not used.has(q):
+			p = q
+			break
+	if p == null:
+		p = _steal("")
+	_voices.append({"p": p, "fam": fam, "t0": now, "end": now + dur_ms})
+	return p
+
+func _steal(fam: String) -> AudioStreamPlayer:
+	for i in _voices.size():
+		var v: Dictionary = _voices[i]
+		if fam == "" or v.fam == fam:
+			v.p.stop()
+			_voices.remove_at(i)
+			return v.p
+	return _pool[0]
+
+func _launch(pool: String, idx: int, vol_db: float, pitch: float, jitter: float, pan: float) -> void:
+	var spec: Array = POOLS[pool]
+	var s := _stream("res://assets/audio/sfx/%s.wav" % (str(spec[0]) % idx))
+	if s == null:
+		return
+	var j: float = float(spec[2]) if jitter < 0.0 else jitter
+	var pt := pitch * randf_range(1.0 - j, 1.0 + j)
+	var p := _voice(spec[4], _now(), int(s.get_length() / pt * 1000.0) + 30)
+	p.stream = s
+	p.bus = "CombatL" if pan < -0.15 else ("CombatR" if pan > 0.15 else "Combat")
+	p.volume_db = vol_db + randf_range(-float(spec[3]), float(spec[3]))
+	p.pitch_scale = pt
+	p.play(randf() * PREROLL * 0.9)
 
 ## Picks a bespoke track when one has been produced, else the fallback.
 func music_for(preferred: String, fallback: String, fade: float = 1.5) -> void:

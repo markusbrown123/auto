@@ -29,6 +29,23 @@ const ROLL_EXTRA_COST := 8.0
 const HURT_TIME := 0.42
 const STUN_TIME := 1.3
 const BUFFER_TIME := 0.18
+## Free cutting. A cut's time is the weapon's swing stat; its blade lands at CONTACT_FRAC of it, and from CANCEL_FRAC
+## on, the rest (the recovery) is cut short by a queued swipe or dodge, or by the shield going up: so a flurry lands
+## one cut every swing_time * CANCEL_FRAC seconds (0.22 s with a 0.26 s sword, 0.39 s with a 0.46 s greatsword).
+## One input is queued, the latest wins, and one queued during a cut never goes stale before that cut's cancel frame.
+const CONTACT_FRAC := 0.6
+const CANCEL_FRAC := 0.85
+const BUFFER_SWING := 0.75
+const COMBO_PAUSE := 0.9         # seconds without a cut landing after which the variety count starts over
+const COMBO_POISE := 0.15        # more poise wear per cut for each step of the variety count
+const TIRED_MULT := 0.5          # a cut thrown without the stamina for it still lands, at this share of its damage,
+const TIRED_SLOW := 1.4          # and takes this much longer
+const COUNTER_MULT := 2.0        # the first cut along the shown line in an opening a parry earned (in place of RIFT_MULT)
+const WHIFF_CHIP := 0.06         # share of attack a parry cut that met no blade still scores off the foe's guard
+const GUARD_BREAK_STUN := 0.9    # seconds the knight reels when the guard is broken
+const GUARD_BREAK_DMG := 0.5     # share of the blow that lands through a broken guard
+const BLOCK_SHIELD_COST := 0.5   # share of a block's stamina cost paid while the shield still has a charge to take the blow
+const BLOCK_LATE := 0.25         # a shield raised this soon after a blow has landed was raised too late
 const STAMINA_DELAY := 0.7
 const ADVANCE_TIME := 0.35
 const STAGGER_PARRY := 1.9
@@ -44,7 +61,7 @@ const POISE_PARRY_PERFECT := 45.0
 const POISE_PARRY := 28.0
 const POISE_DODGE_PERFECT := 22.0
 const POISE_DODGE := 12.0
-const POISE_BLOCK_TIMED := 18.0
+const POISE_BLOCK_TIMED := 25.0
 const POISE_BLOCK := 6.0
 const POISE_CUT := 3.0           # each cut landed in an opening
 const POISE_REGEN := 2.0         # per second, only while it stands unpressed (IDLE)
@@ -82,6 +99,10 @@ var p_buffer := {}       # {kind, arg, t}
 var p_regen_wait := 0.0
 var p_combo := 0
 var p_last_dir := ""
+var p_same := 0          # cuts thrown along the same line running
+var _countered := false  # the counter of this opening has been taken
+var _last_hit_t := -9.0  # when a blow last landed on the knight
+var _shield_reset := false   # a shield beaten down comes back whole once the knight has recovered from the break
 var p_counter := false   # next hit boosted (earned by perfect dodge)
 var p_frost := 0.0
 var p_frostbite := 0.0
@@ -151,9 +172,15 @@ var _last_combo_id := ""
 var p_block_dropped := -9.0
 var p_block_fresh := true
 var p_block_since := -9.0     # when the shield went up, for timed blocks
-## A shield stops `shield_blocks` blows (player stat; 0 = no count, as with a two-handed blade) and is then spent:
-## a blow caught on a spent shield costs more stamina and part of it gets through. One charge returns for every
-## `shield_regen` seconds the guard is down. A timed block costs no charge. Announced as `shield_charges {left, max}`.
+## Blocking. A blockable blow caught on a raised guard costs NO health: it costs stamina (`guard` of the blow, less
+## `block_eff`; BLOCK_SHIELD_COST of that behind a shield with a charge left) and one of the shield's charges (`shield_blocks`, player stat; 0 = no count, as with a two-handed
+## blade). One charge returns for every `shield_regen` seconds the guard is down. A guard raised within PERFECT_BLOCK
+## of the blow (from rest) is a perfect block: no cost at all, more poise wear, a longer opening after the string.
+## With no charge left, or not the stamina to pay, the guard BREAKS: GUARD_BREAK_DMG of the blow lands and the knight
+## reels for GUARD_BREAK_STUN (a shield beaten down this way is whole again when the knight recovers). An unblockable blow ignores the guard and is announced when it is wound up.
+## Events: `block {attack, cost, left}`, `perfect_block {attack}`, `guard_break {attack, why: "shield"|"stamina", dmg}`,
+## `block_failed {why: "unblockable"|"busy"|"late"}`, `parry_failed {why: "dir"|"late"|"unparryable"}`,
+## `unblockable_warning {attack, windup}`, and `shield_charges {left, max}`.
 var p_shield := 0
 var p_shield_max := 0
 var p_shield_idle := 0.0
@@ -348,6 +375,8 @@ func input_block(down: bool) -> void:
 		# only a raise from rest can be a timed block: fluttering the shield earns nothing
 		p_block_fresh = time - p_block_dropped >= 0.4
 		p_block_since = time
+		if time - _last_hit_t <= BLOCK_LATE and not over:
+			_emit(&"block_failed", {"why": "late"})
 	elif not down and p_block:
 		p_block_dropped = time
 	p_block = down
@@ -412,19 +441,24 @@ func input_swipe(dir: String) -> void:
 		_set_p(P.ADVANCE, ADVANCE_TIME)
 		_emit(&"player_advance")
 		return
-	if pl.stamina < pl.swing_cost:
+	# a cut is always thrown: without the stamina for it, it is a tired one (slower, weaker), never a refusal
+	var tired: bool = pl.stamina < pl.swing_cost
+	var st: float = float(pl.swing_time) * (TIRED_SLOW if tired else 1.0)
+	if tired:
 		_emit(&"exhausted")
-		return
-	_spend(pl.swing_cost)
-	p_swing = {"dir": dir, "contact": pl.swing_time * 0.6, "landed": false}
-	_set_p(P.SWING, pl.swing_time)
+		if pl.stamina > 0.0:
+			_spend(pl.stamina)
+	else:
+		_spend(pl.swing_cost)
+	p_swing = {"dir": dir, "contact": st * CONTACT_FRAC, "cancel": st * CANCEL_FRAC, "landed": false, "tired": tired}
+	_set_p(P.SWING, st)
 	# if this cut would complete a combo, say which kind, so the body can throw its signature finish
 	var finish := ""
 	if boss_open():
 		p_hist.append(dir)
 		finish = str(_completed_combo().get("kind", ""))
 		p_hist.pop_back()
-	_emit(&"player_swing", {"dir": dir, "time": pl.swing_time, "finish": finish})
+	_emit(&"player_swing", {"dir": dir, "time": st, "finish": finish, "tired": tired, "open": boss_open()})
 
 func _gain_surge(v: float) -> void:
 	var was := surge
@@ -548,19 +582,32 @@ func _tick_player(dt: float) -> void:
 	if p_state == P.SWING and not p_swing.landed and p_elapsed >= p_swing.contact:
 		p_swing.landed = true
 		_resolve_player_hit(p_swing.dir)
+	if p_state == P.SWING and p_swing.landed and p_elapsed >= float(p_swing.cancel) and (p_block or not p_buffer.is_empty()):
+		p_t = 0.0                     # the cancel frame: what is queued (or the shield) cuts the recovery short
 	if p_t <= 0.0:
 		var was := p_state
 		if was == P.PARRY and not p_parry.is_empty():
-			# the parry swing ended without meeting a blade: overcommitted
+			# the parry cut ended without meeting a blade: overcommitted. It is still a cut: it rings off the foe's guard.
+			var wdir := str(p_parry.dir)
 			p_parry = {}
 			_spend(4.0)
 			_set_p(P.HURT, PARRY_WHIFF)
-			_emit(&"parry_whiff")
+			_emit(&"parry_whiff", {"dir": wdir})
+			if b_state == B.WINDUP or b_state == B.IDLE:
+				var wchip: float = pl.attack * WHIFF_CHIP * p_guard_dmg
+				_emit(&"deflected", {"dir": wdir, "dmg": wchip, "whiff": true})
+				_damage_boss(wchip, {"dir": wdir, "chip": true})
 			return
 		if was == P.ADVANCE:
 			b_far = false
+		if was == P.STUN and _shield_reset:
+			# the board is back on the arm after a break: the break itself was the price
+			_shield_reset = false
+			p_shield = p_shield_max
+			p_shield_idle = 0.0
+			_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max})
 		_set_p(P.FREE, 0.0)
-		if not p_buffer.is_empty() and time - p_buffer.t <= BUFFER_TIME:
+		if not p_buffer.is_empty() and time - p_buffer.t <= (BUFFER_SWING if was == P.SWING else BUFFER_TIME):
 			var b := p_buffer
 			p_buffer = {}
 			if b.kind == "swipe":
@@ -573,12 +620,23 @@ func _resolve_player_hit(dir: String) -> void:
 	if b_state == B.DEAD:
 		return
 	if boss_open():
-		var mult := 1.0
-		if p_last_dir != "" and dir == p_last_dir and not _continues_combo(dir):
-			mult = 0.45   # predictable: the same cut twice glances off, unless a combo calls for it
-		else:
+		# every cut in an opening lands at least its plain damage, whatever its line. Variety is the bonus: each cut
+		# along a new line raises the count; the same line a second time holds it; a third time running (or a pause)
+		# starts it over. A known combo may call for a repeated line without losing anything.
+		if p_combo > 0 and time - _last_cut_t > COMBO_PAUSE:
+			p_combo = 0
+			p_same = 0
+			p_last_dir = ""
+		p_same = p_same + 1 if dir == p_last_dir else 1
+		if p_same == 1 or p_last_dir == "" or _continues_combo(dir):
 			p_combo = mini(p_combo + 1, COMBO_MAX)
-			mult = 1.0 + COMBO_STEP * (p_combo - 1)
+		elif p_same > 2:
+			p_combo = 1
+		p_combo = maxi(p_combo, 1)
+		var mult := 1.0 + COMBO_STEP * (p_combo - 1)
+		var tired: bool = p_swing.get("tired", false)
+		if tired:
+			mult *= TIRED_MULT
 		p_last_dir = dir
 		stats.max_combo = maxi(stats.max_combo, p_combo)
 		var crit := b_opening_crit
@@ -616,9 +674,15 @@ func _resolve_player_hit(dir: String) -> void:
 			stats.named += 1
 			if not _could_extend(done):
 				p_hist.clear()        # finished: the same tail cannot be cashed in again
+		# the shown line is the special chance, never the only way in: along it the cut is a telling blow, and the first
+		# such cut of an opening that a parry earned is the counter
 		var on_rift := rift_dir != "" and dir == rift_dir
+		var counter := on_rift and not _countered and opening_from in ["parry", "perfect"]
 		if on_rift:
-			mult *= RIFT_MULT
+			mult *= COUNTER_MULT if counter else RIFT_MULT
+			if counter:
+				_countered = true
+				stats["counters"] = int(stats.get("counters", 0)) + 1
 			stats.rifts += 1
 			_seal_hit(int(seal_now().get("rift", 1)), "rift")
 		var elem: bool = pl.element != null and pl.element == bd.get("weak")
@@ -626,7 +690,7 @@ func _resolve_player_hit(dir: String) -> void:
 			mult *= 1.25
 		var dmg: float = pl.attack * mult * (1.0 - (0.0 if pierce else float(bd.get("armor", 0.0)))) * rng.randf_range(0.95, 1.05)
 		_gain_surge(7.0 + (6.0 if named != "" else 0.0))
-		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "named": named, "combo_id": combo_id})
+		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "counter": counter, "tired": tired, "same": p_same, "named": named, "combo_id": combo_id})
 		if extra_posture > 0.0 and b_state == B.RECOVER and _wear_poise(extra_posture, "cut"):
 			_poise_break("cut")
 		if on_rift and boss_open():
@@ -655,7 +719,7 @@ func _damage_boss(dmg: float, info: Dictionary) -> void:
 	if not info.get("chip", false):
 		cuts_landed += 1
 		_emit(&"boss_hit", info)
-		if b_state == B.RECOVER and _wear_poise(POISE_CUT * p_guard_dmg, "cut"):
+		if b_state == B.RECOVER and _wear_poise(POISE_CUT * p_guard_dmg * (1.0 + COMBO_POISE * maxi(0, p_combo - 1)), "cut"):
 			_poise_break("cut")
 	if b_hp <= floor_hp and b_phase + 1 < bd.phases.size():
 		b_phase += 1
@@ -767,6 +831,8 @@ func _end_opening() -> void:
 	opening_from = ""
 	p_combo = 0
 	p_last_dir = ""
+	p_same = 0
+	_countered = false
 	b_opening_crit = false
 
 
@@ -898,6 +964,8 @@ func _start_attack() -> void:
 	b_t = w
 	b_windup_total = w
 	_emit(&"boss_telegraph", {"attack": b_attack, "windup": w, "index": b_idx, "count": b_combo.attacks.size()})
+	if b_attack.unblockable:
+		_emit(&"unblockable_warning", {"attack": b_attack, "windup": w})
 
 func _resolve_strike() -> void:
 	var a := b_attack
@@ -951,37 +1019,57 @@ func _resolve_strike() -> void:
 			# a block raised at the last instant turns the blow for free and rattles the attacker
 			var timed: bool = p_block_fresh and time - p_block_since <= PERFECT_BLOCK * assist
 			var cost: float = 0.0 if timed else float(a.guard) * (1.0 - float(pl.block_eff)) * maxf(1.0, trait_v("block_tax"))
+			if p_shield_max > 0 and p_shield > 0:
+				cost *= BLOCK_SHIELD_COST     # the board takes the blow; the arm behind it takes less
+			# what breaks a guard: no charge left on the shield, or not the stamina to hold the blow
+			var why := ""
+			if not timed:
+				if p_shield_max > 0 and p_shield <= 0:
+					why = "shield"
+				elif pl.stamina - cost <= 0.0:
+					why = "stamina"
 			if timed:
 				perfect = true
 				stats["perfect_blocks"] = int(stats.get("perfect_blocks", 0)) + 1
 				_gain_surge(8.0)
-			# the shield's count: an untimed block uses one; with none left the blow is dearer and part of it gets through
-			var spent := false
-			if p_shield_max > 0 and not timed:
-				spent = p_shield <= 0
+			elif p_shield_max > 0:
+				# the shield's count: an untimed block uses one
 				p_shield = maxi(0, p_shield - 1)
 				p_shield_idle = 0.0
-				if spent:
-					cost *= float(pl.get("shield_spent_cost", 2.0))
-					stats["spent_blocks"] = int(stats.get("spent_blocks", 0)) + 1
-				_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max, "spent": spent})
-			var broke: bool = not timed and pl.stamina - cost <= 0.0
+				_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max, "spent": why == "shield"})
 			_spend(cost)
-			_apply_element(a, 0.5)
 			if a.get("drain", false):
 				_drain(dmg * 0.4)
-			if broke:
+			if why != "":
+				# guard break: part of the blow lands, and the knight reels
 				result = "guard_break"
-				_damage_player(dmg * 0.5)
+				stats["guard_breaks"] = int(stats.get("guard_breaks", 0)) + 1
+				_apply_element(a, 0.5)
+				var before: float = pl.hp
+				_last_hit_t = time
+				_damage_player(dmg * GUARD_BREAK_DMG)
+				_emit(&"guard_break", {"attack": a, "why": why, "dmg": before - float(pl.hp)})
 				if p_state != P.DEAD:
-					_set_p(P.STUN, STUN_TIME)
+					_set_p(P.STUN, GUARD_BREAK_STUN)
+					_shield_reset = why == "shield"
 			else:
-				if spent:
-					_damage_player(dmg * float(pl.get("shield_spent_leak", 0.35)))
-				elif not timed:
-					_damage_player(dmg * 0.08 * (1.0 - float(pl.block_eff)), true)
+				# a held guard costs no health: frost still creeps through the board, fire does not catch
+				if a.get("element") == "frost":
+					_apply_element(a, 0.5)
+				if timed:
+					_emit(&"perfect_block", {"attack": a})
+				else:
+					_emit(&"block", {"attack": a, "cost": cost, "left": p_shield})
 		"hit":
 			_gain_surge(9.0)
+			# what was tried and did not serve, said plainly
+			if p_block and a.unblockable:
+				_emit(&"block_failed", {"why": "unblockable"})
+			elif p_block and p_state != P.FREE and p_state != P.DODGE:
+				_emit(&"block_failed", {"why": "busy"})
+			elif p_state == P.PARRY and not p_parry.is_empty():
+				_emit(&"parry_failed", {"why": "unparryable" if not a.parry else ("dir" if parry_quality(str(p_parry.dir), str(a.dir)) == 0 else "late")})
+			_last_hit_t = time
 			p_parry = {}
 			stats.hits_taken += 1
 			_apply_element(a, 1.0)
@@ -1035,7 +1123,7 @@ func _resolve_strike() -> void:
 	# not broken: only a short recovery, scaled by the string's own (the lesson foe keeps its full, patient one)
 	var full: float = float(b_combo.recover) / speed()
 	var rec: float = full if lesson else minf(full, maxf(SHORT_RECOVER_MIN, full * SHORT_RECOVER))
-	if result == "dodged" and perfect:
+	if result in ["dodged", "blocked"] and perfect:
 		rec += 0.35
 	if result == "parried" and trait_v("parry_open") > 0.0:
 		rec *= trait_v("parry_open")

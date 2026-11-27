@@ -2728,7 +2728,8 @@ func _feet_step(dt: float) -> void:
 			lift = pow(sin(PI * u), 0.6) * float(f.lift)
 			if u >= 1.0:
 				f.step = false
-				_footfall(side)
+				if _ft_still < 0.3:
+					_footfall(side)      # (a foot set down to square the stance of a figure that is standing is not a step)
 		var at_b: Vector3 = inv * (f.at as Vector3)
 		at_b.y = (inv * Vector3((f.at as Vector3).x, float(ground.call((f.at as Vector3).x, (f.at as Vector3).z)), (f.at as Vector3).z)).y if ground.is_valid() else 0.0
 		need = maxf(need, -at_b.y)

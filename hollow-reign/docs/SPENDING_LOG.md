@@ -147,3 +147,6 @@ Three samples on one line (elevenlabs_v4, stability 0.5): Caspian, Barrett, Hold
 
 ## 2026-11-27: protagonist voice round 2
 Owner rejected round 1 ("more Kratos like"). Four samples (elevenlabs_v4, stability 0.7, slowed 6%, pitch lowered where marked): Vlad, Alistair −3, Caspian −4, Sterling −4, in marketing/audition/protagonist_round2/. About 0.46 credits each (about 1.9 credits). Unauditioned.
+
+## 2026-11-27: protagonist voice round 3
+Owner sent a reference clip (a real actor's performance from a published game) and asked to replicate it: not cloned, not uploaded; pitch measured locally (about 99 Hz median). Three closest licensed voices recorded dry at stability 0.85: Alistair, Bob, Vlad, in marketing/audition/protagonist_round3/. About 1.4 credits. Unauditioned.

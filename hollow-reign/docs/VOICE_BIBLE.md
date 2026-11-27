@@ -83,3 +83,6 @@ Unchanged and approved earlier: Witness Hamish, narrator Graham, son Malcolm, gu
 
 ## Correction from the owner (2026-11-27, later)
 Only **Father = Gideon** and **Mother = Celine** are chosen. The table above is NOT locked: the owner said they liked voices *like* those numbers. Round 5 (`marketing/audition/final_cast5/`) gives four options per remaining character with the liked voice as option 1 and three similar new ones (natural English, lowered or deep, no Asian accent); the granddaughter set is all higher than the mother. Awaiting the owner's picks. Do not record new lines for these characters until they are chosen.
+
+## FINAL CAST chosen by the owner (2026-11-27, third message) — see `tools/cast_final.json`
+Grandson Blake (lowered 3), granddaughter Olivia, Lyra Claire (lowered 2; the owner also floated the deep male voice Caspian for her), Crimson Widow Elodie (and she must look older to suit the voice), Orren Callum (lowered 3), Monarch Hades (lowered 3), Frostbound King Josef (lowered 3), Pale Huntsman Victor (lowered 3), Gravewarden Dominus (lowered 3: "slightly less deep" than the audition). Father Gideon, Mother Celine. Existing takes for Lyra, Orren and the Monarch were lowered in place (`assets/audio/vo/lowered.json` records which, so it is never applied twice).

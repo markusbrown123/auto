@@ -49,7 +49,7 @@ func _ready() -> void:
 		var ring := Node3D.new()
 		shaft.add_child(ring)
 		ring.position.y = -3.0 - k * RING_GAP
-		var mat := Look.glow(TEAL if k % 4 != 3 else VIOLET, 0.0)
+		var mat := FinalHall.lamp(TEAL if k % 4 != 3 else VIOLET, 0.0)
 		for s in 14:
 			var a := TAU * s / 14.0
 			if (s + k) % 7 == 3:
@@ -98,7 +98,7 @@ func _ready() -> void:
 	# racks of stored light, row behind row, into the dark
 	for row in 9:
 		var z := -17.0 - row * 6.5
-		var m := Look.glow(TEAL if row % 3 != 2 else Color("#ffb45a"), 0.0)
+		var m := FinalHall.lamp(TEAL if row % 3 != 2 else Color("#ffb45a"), 0.0)
 		for sx3: float in [-1.0, 1.0]:
 			_box(arena, Vector3(1.2, 11.0, 4.6), Vector3(sx3 * (7.5 + row * 0.5), 5.5, z), metal, 0.0)
 			for line in 9:
@@ -108,7 +108,7 @@ func _ready() -> void:
 	_crown = Node3D.new()
 	arena.add_child(_crown)
 	_crown.position = Vector3(0, 13.0, -80.0)
-	_crown_mat = Look.glow(Color("#ffd890"), 0.0)
+	_crown_mat = FinalHall.lamp(Color("#ffd890"), 0.0)
 	for s4 in 28:
 		var a4 := TAU * s4 / 28.0
 		var p := Vector3(sin(a4), cos(a4), 0) * 11.0

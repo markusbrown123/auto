@@ -1659,83 +1659,47 @@ def export(name, build, variant=None):
 
 # ============================================================================ hybrids: our blade in a generated hilt
 # A hybrid is a code-built blade seated in an image-to-3D hilt (guard + grip + pommel). The generated model comes
-# normalised (1 unit long, guard along Z, pommel at -Y); bake_hilt() turns it into the gear convention.
-#   src      the generated GLB under gear/hilts/
-#   scale    metres per model unit, chosen so the grip is a hand's thickness (about 15 mm radius)
-#   y_hand   model height of the centre of the main hand: 5 cm (half a palm, at `scale`) under the guard's collar
-#   seat     model height where the blade leaves the hilt (top of the socket or collar); the blade starts 13 mm inside
-#   flatten  (from_y, factor): generated guards come out too deep front to back; squeeze the depth above from_y
-#   P        changes to the base sword's blade so its foot is hidden by the socket
-#   tint, rough_max: the blade's steel brought to the hilt's metal (measured from its textures)
+# normalised (1 unit long, guard along Z, pommel at -Y); bake_hilt() turns it into the gear convention, writes a
+# low model and 1K textures. Sources live outside the Godot project tree (art/gear_hilts_src/) so their embedded
+# 2K textures are not imported a second time.
+#   src       generated GLB name
+#   rg        grip radius in model units (measured from slices); r the radius it should have in metres -> scale
+#   sc        optional larger scale where a generated grip is fat for its guard: the guard is sized by sc and
+#             everything below the collar (grip, pommel) is slimmed about the grip's axis back to radius r
+#   grip      (y0, y1) model heights of the wrapped grip; collar = y1. The hand's centre is 5 cm under the collar
+#   grip_len  metres the grip should be: the grip span alone is stretched or squeezed along Y to reach it
+#   axis_z    model Z of the grip's axis when the bounding box is not centred on it (one-sided guards)
+#   turn      -1 turns the hilt half round so its knuckle side matches the manifest's side convention
+#   flatten   depth factor above the grip where a guard came out too deep front to back
+#   blunt     (z_from, factor): pulls in the last part of the guard arms, rounding hooked points
+#   seat      model height where the blade leaves the hilt (default the top); the blade starts 13 mm inside
+#   P         changes to the base sword's blade so its foot is hidden by the socket
+HILT_SRC = os.path.join(ROOT, "art", "gear_hilts_src")
 HYBRIDS = {
-    "wayfarer_h": dict(base="wayfarer", src="hilt_wayfarer", scale=0.255, y_hand=-0.016, seat=0.500, collar=0.18, grip=(-0.38, 0.18),
-                       flatten=None, P=dict(w=[(0, 0.0212), (0.14, 0.0216), (0.50, 0.0250), (0.84, 0.0165)]),
-                       tint=[0.66, 0.645, 0.62], rough_max=0.42, hands=1.5),
-    "eternal_edge_h": dict(base="eternal_edge", src="hilt_eternal", scale=0.3375, y_hand=-0.088, seat=0.440, collar=0.06, grip=(-0.26, 0.06),
-                           flatten=(0.05, 0.62), P={}, tint=[0.72, 0.68, 0.62], rough_max=0.42, hands=1),
+    "wayfarer_h": dict(base="wayfarer", src="hilt_wayfarer", rg=0.0588, r=0.0150, grip=(-0.38, 0.18), grip_len=0.125, blunt=(0.33, 0.5),
+                       P=dict(w=[(0, 0.0212), (0.14, 0.0216), (0.50, 0.0250), (0.84, 0.0165)]), hands=1),
+    "silver_vow_h": dict(base="silver_vow", src="hilt_silver_vow", rg=0.041, r=0.0128, grip=(-0.30, 0.23), grip_len=0.100, flatten=0.65, hands=1),
+    "ashbrand_h": dict(base="ashbrand", src="hilt_ashbrand", rg=0.073, r=0.0155, sc=0.26, grip=(-0.33, 0.27), grip_len=0.148, flatten=0.62, hands=1.5),
+    "veilcutter_h": dict(base="veilcutter", src="hilt_veilcutter", rg=0.050, r=0.0130, grip=(-0.38, 0.19), grip_len=0.118, axis_z=0.035, flatten=0.7, hands=1),
+    "oathbreaker_h": dict(base="oathbreaker", src="hilt_oathbreaker", rg=0.053, r=0.0158, sc=0.36, grip=(-0.36, 0.21), grip_len=0.300, hands=2, off_hand=-0.165),
+    "eternal_edge_h": dict(base="eternal_edge", src="hilt_eternal", rg=0.040, r=0.0135, grip=(-0.26, 0.06), grip_len=0.135, flatten=0.62, seat=0.440, hands=1.5),
+    "kings_remnant_h": dict(base="kings_remnant", src="hilt_kings_remnant", rg=0.062, r=0.0142, sc=0.30, grip=(-0.28, 0.19), grip_len=0.130, hands=1.5),
+    "cold_resolve_h": dict(base="cold_resolve", src="hilt_cold_resolve", rg=0.077, r=0.0130, sc=0.22, grip=(-0.30, 0.13), grip_len=0.115, hands=1),
+    "nightward_h": dict(base="nightward", src="hilt_nightward", rg=0.076, r=0.0142, sc=0.24, grip=(-0.42, 0.12), grip_len=0.112, axis_z=0.048, turn=-1, hands=1),
+    "twin_relics_h": dict(base="twin_relics", src="hilt_twin_relics", rg=0.083, r=0.0132, sc=0.20, grip=(-0.31, 0.22), grip_len=0.110, axis_z=0.077, turn=-1, hands=1),
 }
 
 
-def bake_hilt(spec, dst):
-    """Rewrites a generated hilt into the gear convention (origin at the hand, +Y to the tip, guard along X,
-    metres) and drops its embedded textures in favour of the files Godot already extracted beside the source."""
-    d = open(os.path.join(OUT, "hilts", spec["src"] + ".glb"), "rb").read()
+def _glb_read(path):
+    d = open(path, "rb").read()
     jl = struct.unpack("<I", d[12:16])[0]
-    j = json.loads(d[20:20 + jl])
-    b0 = 20 + jl + 8
-    prim = j["meshes"][0]["primitives"][0]
+    return d, json.loads(d[20:20 + jl]), 20 + jl + 8
 
-    def read(ai, dtype, comps):
-        a = j["accessors"][ai]
-        bv = j["bufferViews"][a["bufferView"]]
-        off = b0 + bv.get("byteOffset", 0) + a.get("byteOffset", 0)
-        return np.frombuffer(d, dtype=dtype, count=a["count"] * comps, offset=off).reshape(-1, comps).copy()
 
-    pos = read(prim["attributes"]["POSITION"], np.float32, 3)
-    nrm = read(prim["attributes"]["NORMAL"], np.float32, 3)
-    uv = read(prim["attributes"]["TEXCOORD_0"], np.float32, 2)
-    idx = read(prim["indices"], np.uint32 if j["accessors"][prim["indices"]]["componentType"] == 5125 else np.uint16, 1).astype(np.uint32)
-    depth = np.ones(len(pos))
-    if spec.get("flatten"):
-        y_from, k = spec["flatten"]
-        t = np.clip((pos[:, 1] - y_from) / 0.06, 0, 1)
-        depth = 1 - (1 - k) * t * t * (3 - 2 * t)
-    sc = spec["scale"]
-    out_p = np.stack([pos[:, 2], pos[:, 1] - spec["y_hand"], -pos[:, 0] * depth], axis=1) * sc
-    out_n = np.stack([nrm[:, 2], nrm[:, 1], -nrm[:, 0] / depth], axis=1)
-    out_n /= np.linalg.norm(out_n, axis=1)[:, None]
-    buf = bytearray()
-    views, accs = [], []
-
-    def add(arr, target, ctype, typ, minmax=False):
-        while len(buf) % 4:
-            buf.append(0)
-        views.append({"buffer": 0, "byteOffset": len(buf), "byteLength": arr.nbytes, "target": target})
-        buf.extend(arr.tobytes())
-        a = {"bufferView": len(views) - 1, "componentType": ctype, "count": len(arr), "type": typ}
-        if minmax:
-            a["min"] = arr.min(axis=0).tolist()
-            a["max"] = arr.max(axis=0).tolist()
-        accs.append(a)
-        return len(accs) - 1
-
-    p2 = {"attributes": {"POSITION": add(out_p.astype(np.float32), 34962, 5126, "VEC3", True), "NORMAL": add(out_n.astype(np.float32), 34962, 5126, "VEC3"),
-                         "TEXCOORD_0": add(uv, 34962, 5126, "VEC2")}, "indices": add(idx.reshape(-1), 34963, 5125, "SCALAR"), "material": 0}
-    mat = dict(j["materials"][0])
-    mat["name"] = "hilt"
-    images = []
-    for im in j["images"]:
-        ext = ".png" if im.get("mimeType") == "image/png" else ".jpg"
-        images.append({"uri": "hilts/%s_%s%s" % (spec["src"], im["name"], ext)})
-    name = os.path.basename(dst)[:-4]
-    g = {"asset": {"version": "2.0", "generator": "hollow-reign gear_gen (baked hilt)"}, "scene": 0, "scenes": [{"nodes": [0]}],
-         "nodes": [{"name": name, "mesh": 0}], "meshes": [{"name": name, "primitives": [p2]}], "materials": [mat],
-         "textures": j["textures"], "images": images, "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": 10497, "wrapT": 10497}],
-         "buffers": [{"byteLength": len(buf)}], "bufferViews": views, "accessors": accs}
-    for t in g["textures"]:
-        t["sampler"] = 0
+def _glb_write(dst, g, buf):
     while len(buf) % 4:
         buf.append(0)
+    g["buffers"] = [{"byteLength": len(buf)}]
     js = json.dumps(g, separators=(",", ":")).encode()
     while len(js) % 4:
         js += b" "
@@ -1745,62 +1709,186 @@ def bake_hilt(spec, dst):
         f.write(js)
         f.write(struct.pack("<II", len(buf), 0x004E4942))
         f.write(buf)
-    return {"tris": len(idx) // 3, "verts": len(out_p), "bytes": os.path.getsize(dst), "lo": out_p.min(axis=0), "hi": out_p.max(axis=0), "pos": out_p}
 
 
-def build_hybrids(manifest):
+def _decimate(pos, nrm, uv, idx, cell):
+    """Vertex clustering on a `cell` metre grid: the low model for a generated hilt."""
+    key = np.floor(pos / cell).astype(np.int64)
+    _, inv, cnt = np.unique(key, axis=0, return_inverse=True, return_counts=True)
+    inv = inv.reshape(-1)
+    n = len(cnt)
+    p2 = np.zeros((n, 3)); n2 = np.zeros((n, 3)); u2 = np.zeros((n, 2))
+    np.add.at(p2, inv, pos); np.add.at(n2, inv, nrm)
+    p2 /= cnt[:, None]
+    first = np.full(n, -1)
+    for i, c in enumerate(inv):
+        if first[c] < 0:
+            first[c] = i
+    u2 = uv[first]
+    ln = np.linalg.norm(n2, axis=1)[:, None]
+    n2 = np.where(ln > 1e-6, n2 / np.maximum(ln, 1e-6), nrm[first])
+    t = inv[idx.reshape(-1, 3)]
+    keep = (t[:, 0] != t[:, 1]) & (t[:, 1] != t[:, 2]) & (t[:, 0] != t[:, 2])
+    t = t[keep]
+    t = t[np.unique(np.sort(t, axis=1), axis=0, return_index=True)[1]]
+    return p2.astype(np.float32), n2.astype(np.float32), u2.astype(np.float32), t.astype(np.uint32)
+
+
+def bake_hilt(spec, dst):
+    """Rewrites a generated hilt into the gear convention (origin at the hand, +Y to the tip, guard along X,
+    metres), with its textures re-encoded at 1K beside it and a clustered low model as <dst>_lod."""
+    import io
+    src = os.path.join(HILT_SRC, spec["src"] + ".glb")
+    d, j, b0 = _glb_read(src)
+    prim = j["meshes"][0]["primitives"][0]
+
+    def read(ai, dtype, comps):
+        a = j["accessors"][ai]
+        bv = j["bufferViews"][a["bufferView"]]
+        off = b0 + bv.get("byteOffset", 0) + a.get("byteOffset", 0)
+        return np.frombuffer(d, dtype=dtype, count=a["count"] * comps, offset=off).reshape(-1, comps).copy()
+
+    pos = read(prim["attributes"]["POSITION"], np.float32, 3).astype(float)
+    nrm = read(prim["attributes"]["NORMAL"], np.float32, 3).astype(float)
+    uv = read(prim["attributes"]["TEXCOORD_0"], np.float32, 2)
+    idx = read(prim["indices"], np.uint32 if j["accessors"][prim["indices"]]["componentType"] == 5125 else np.uint16, 1).astype(np.uint32)
+    sc = spec.get("sc", spec["r"] / spec["rg"])
+    g0, g1 = spec["grip"]
+    x, y, z = pos[:, 0].copy(), pos[:, 1], pos[:, 2] - spec.get("axis_z", 0.0)
+    slim = spec["r"] / (spec["rg"] * sc)
+    if slim < 0.999:
+        t = np.clip((y - g1) / 0.04, 0, 1)
+        f = slim + (1 - slim) * t * t * (3 - 2 * t)
+        x, z = x * f, z * f
+    # the grip alone is brought to length; what is below it moves with its lower end
+    k = spec["grip_len"] / ((g1 - g0) * sc)
+    y = np.where(y >= g1, y, np.where(y <= g0, g1 - (g1 - g0) * k - (g0 - y), g1 - (g1 - y) * k))
+    depth = np.ones(len(pos))
+    if spec.get("flatten"):
+        t = np.clip((pos[:, 1] - (g1 - 0.01)) / 0.06, 0, 1)
+        depth = 1 - (1 - spec["flatten"]) * t * t * (3 - 2 * t)
+    if spec.get("blunt"):
+        zf, f = spec["blunt"]
+        z = np.sign(z) * np.where(np.abs(z) > zf, zf + (np.abs(z) - zf) * f, np.abs(z))
+    y_hand = g1 - 0.05 / sc
+    turn = float(spec.get("turn", 1))
+    out_p = np.stack([turn * z, y - y_hand, -turn * x * depth], axis=1) * sc
+    y_src = pos[:, 1]
+    out_n = np.stack([turn * nrm[:, 2], nrm[:, 1] / np.where((pos[:, 1] > g0) & (pos[:, 1] < g1), k, 1.0), -turn * nrm[:, 0] / depth], axis=1)
+    out_n /= np.linalg.norm(out_n, axis=1)[:, None]
+    # textures: 1K copies beside the bake (the sources embed 2K ones)
+    tdir = os.path.join(OUT, "hilts")
+    os.makedirs(tdir, exist_ok=True)
+    images, stats_tex, lin = [], 0, None
+    pm = j["materials"][0]["pbrMetallicRoughness"]
+    role = {j["textures"][pm["baseColorTexture"]["index"]]["source"]: "color", j["textures"][pm["metallicRoughnessTexture"]["index"]]["source"]: "orm",
+            j["textures"][j["materials"][0]["normalTexture"]["index"]]["source"]: "normal"}
+    arrs = {}
+    for i, im in enumerate(j["images"]):
+        bv = j["bufferViews"][im["bufferView"]]
+        pic = Image.open(io.BytesIO(d[b0 + bv.get("byteOffset", 0): b0 + bv.get("byteOffset", 0) + bv["byteLength"]])).convert("RGB")
+        pic = pic.resize((1024, 1024), Image.LANCZOS)
+        name = "%s_%s.jpg" % (spec["src"], role[i])
+        pic.save(os.path.join(tdir, name), quality=92 if role[i] == "normal" else 88)
+        stats_tex += os.path.getsize(os.path.join(tdir, name))
+        images.append({"uri": "hilts/" + name})
+        arrs[role[i]] = np.asarray(pic.resize((256, 256)), dtype=float) / 255
+    sel = (arrs["orm"][..., 2] > 0.6) & (arrs["color"].mean(-1) > 0.35)
+    lin = (((arrs["color"][sel] + 0.055) / 1.055) ** 2.4).mean(axis=0)
+    tint = [round(float(min(1.0, max(0.5, c / 0.448 * 1.03))), 3) for c in lin]
+    mat = dict(j["materials"][0])
+    mat["name"] = "hilt"
+    out = {}
+    for suffix, (P_, N_, U_, I_) in (("", (out_p.astype(np.float32), out_n.astype(np.float32), uv, idx.reshape(-1, 3))),
+                                    ("_lod", _decimate(out_p, out_n, uv, idx, 0.0085))):
+        buf = bytearray()
+        views, accs = [], []
+
+        def add(arr, target, ctype, typ, minmax=False):
+            while len(buf) % 4:
+                buf.append(0)
+            views.append({"buffer": 0, "byteOffset": len(buf), "byteLength": arr.nbytes, "target": target})
+            buf.extend(arr.tobytes())
+            a = {"bufferView": len(views) - 1, "componentType": ctype, "count": len(arr), "type": typ}
+            if minmax:
+                a["min"] = arr.min(axis=0).tolist()
+                a["max"] = arr.max(axis=0).tolist()
+            accs.append(a)
+            return len(accs) - 1
+
+        p2 = {"attributes": {"POSITION": add(P_, 34962, 5126, "VEC3", True), "NORMAL": add(N_, 34962, 5126, "VEC3"), "TEXCOORD_0": add(U_, 34962, 5126, "VEC2")},
+              "indices": add(I_.reshape(-1), 34963, 5125, "SCALAR"), "material": 0}
+        path = dst[:-4] + suffix + ".glb"
+        name = os.path.basename(path)[:-4]
+        g = {"asset": {"version": "2.0", "generator": "hollow-reign gear_gen (baked hilt)"}, "scene": 0, "scenes": [{"nodes": [0]}],
+             "nodes": [{"name": name, "mesh": 0}], "meshes": [{"name": name, "primitives": [p2]}], "materials": [mat],
+             "textures": [dict(t, sampler=0) for t in j["textures"]], "images": images,
+             "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": 10497, "wrapT": 10497}], "bufferViews": views, "accessors": accs}
+        _glb_write(path, g, buf)
+        out["tris" + suffix] = len(I_)
+        out["verts" + suffix] = len(P_)
+        out["bytes" + suffix] = os.path.getsize(path)
+    out.update({"lo": out_p.min(axis=0), "hi": out_p.max(axis=0), "pos": out_p, "tint": tint, "tex_bytes": stats_tex, "scale": sc,
+                "src_bytes": os.path.getsize(src), "seat_y": (spec.get("seat", 0.5) - y_hand) * sc, "grip_y": (-(spec["grip_len"]) + 0.05, 0.05)})
+    return out
+
+
+def build_hybrids(manifest, only=None):
     for hid, spec in HYBRIDS.items():
+        if only and hid not in only and spec["base"] not in only:
+            continue
         base = spec["base"]
-        sc, yh = spec["scale"], spec["y_hand"]
-        y0 = (spec["seat"] - yh) * sc - 0.013
-        P = dict(spec["P"], y0=round(y0, 4))
         hilt = bake_hilt(spec, os.path.join(OUT, hid + "__hilt0.glb"))
-        parts = {"hilt0": {k: hilt[k] for k in ("tris", "verts", "bytes")}}
+        y0 = hilt["seat_y"] - 0.013
+        P = dict(spec.get("P", {}), y0=round(y0, 4))
+        parts = {"hilt0": {k: hilt[k] for k in ("tris", "verts", "bytes", "tris_lod", "verts_lod", "bytes_lod")}}
+        bt = DEFAULT_MOD[base][0]
         info = {}
-        for t in range(4):
+        for t in (range(4) if base in BASIC else (bt,)):
             info_t, st = export("%s__blade%d" % (hid, t), lambda B, q: SWORDS[base](B, q, {"blade_tier": t, "grip_tier": 0, "P": P}, ("blade",)))
             parts["blade%d" % t] = st
-            info = info_t if t == DEFAULT_MOD[base][0] else info
-        # <id>.glb must exist for GearModel.exists(): it is the default blade alone; spawn() always joins the parts
-        bt = DEFAULT_MOD[base][0]
-        _, st = export(hid, lambda B, q: SWORDS[base](B, q, {"blade_tier": bt, "grip_tier": 0, "P": P}, ("blade",)))
-        g0, g1 = [(y - yh) * sc for y in spec["grip"]]
-        # optional ring overlays for the handle tiers a generated grip cannot change itself
+            info = info_t if t == bt else info
+        g0, g1 = hilt["grip_y"]
         pos = hilt["pos"]
-        for tier, ys in ((2, (0.3, 0.7)), (3, (0.2, 0.4, 0.6, 0.8))):
+        # ring overlays for the handle tiers a generated grip cannot change itself
+        for tier, ys in (((2, (0.3, 0.7)), (3, (0.2, 0.4, 0.6, 0.8))) if base in BASIC else ()):
             def rings(B, q, ys=ys):
                 for u in ys:
                     y = g0 + (g1 - g0) * u
                     near = pos[np.argsort(np.abs(pos[:, 1] - y))[:16]]
-                    rx = float(np.abs(near[:, 0]).max()) + 0.0012
+                    cx = float(near[:, 0].mean())
+                    rx = float(np.abs(near[:, 0] - cx).max()) + 0.0012
                     rz = float(np.abs(near[:, 2]).max()) + 0.0012
                     collar(B, y - 0.0016, y + 0.0016, rx, rz, "gold", 12 if q >= 1 else 6, 0.0008)
                 return {}
             _, st = export("%s__rings%d" % (hid, tier), rings)
             parts["rings%d" % tier] = st
-        blade_stats = parts["blade%d" % bt]
-        info.update({"name": manifest.get(base, {}).get("name", base) + " (hybrid)", "hybrid": True, "base": base, "hilt_source": "hilts/%s.glb" % spec["src"],
-                     "tris": blade_stats["tris"] + hilt["tris"], "tris_lod": blade_stats["tris_lod"] + hilt["tris"], "verts": blade_stats["verts"] + hilt["verts"],
-                     "bytes": blade_stats["bytes"] + hilt["bytes"], "parts": parts,
-                     "tip": round(y0 + info["blade"], 4), "pommel": round(-float(hilt["lo"][1]), 4), "grip_clear": round(g1 - g0, 4),
+        bs = parts["blade%d" % bt]
+        info.update({"name": manifest.get(base, {}).get("name", info.get("name", base)), "hybrid": True, "base": base, "hilt_source": "art/gear_hilts_src/%s.glb" % spec["src"],
+                     "tris": bs["tris"] + hilt["tris"], "tris_lod": bs["tris_lod"] + hilt["tris_lod"], "verts": bs["verts"] + hilt["verts"],
+                     "bytes": bs["bytes"] + hilt["bytes"], "bytes_lod": bs["bytes_lod"] + hilt["bytes_lod"], "hilt_texture_bytes": hilt["tex_bytes"], "parts": parts,
+                     "tip": round(y0 + info["blade"], 4), "pommel": round(-float(hilt["lo"][1]), 4), "grip_clear": round(spec["grip_len"], 4),
                      "guard_span": round(float(hilt["hi"][0] - hilt["lo"][0]), 4), "hands": spec["hands"],
                      "lo": [round(float(min(hilt["lo"][i], info["lo"][i])), 4) for i in range(3)],
                      "hi": [round(float(max(hilt["hi"][i], info["hi"][i])), 4) for i in range(3)],
-                     "materials": info["materials"] + ["hilt"], "blade_tint": spec["tint"], "blade_rough_max": spec["rough_max"],
+                     "materials": info["materials"] + ["hilt"], "blade_tint": hilt["tint"], "blade_rough_max": 0.42,
                      "default_mod": {"blade_tier": bt, "grip_tier": 0, "ore": "steel", "sharpened": True}, "rig_scale": 1.15})
+        if "off_hand" in spec:
+            info["off_hand"] = spec["off_hand"]
+        else:
+            info.pop("off_hand", None)
         manifest[hid] = info
-        print("%-14s blade %d + hilt %d tris, hilt %.0f kB (+ %d kB shared textures), grip %.3f m, guard %.3f m, tip %.3f" % (
-            hid, blade_stats["tris"], hilt["tris"], hilt["bytes"] / 1024,
-            sum(os.path.getsize(os.path.join(OUT, "hilts", f)) for f in os.listdir(os.path.join(OUT, "hilts")) if f.startswith(spec["src"] + "_") and not f.endswith(".import")) // 1024,
-            g1 - g0, info["guard_span"], info["tip"]))
+        print("%-16s scale %.3f  hilt %d / %d tris, glb %3.0f kB, textures %4.0f kB (source %.1f MB)  grip %.3f  guard %.3f  seat %.3f  tip %.3f  pommel %.3f  tint %s" % (
+            hid, hilt["scale"], hilt["tris"], hilt["tris_lod"], hilt["bytes"] / 1024, hilt["tex_bytes"] / 1024, hilt["src_bytes"] / 1e6,
+            spec["grip_len"], info["guard_span"], hilt["seat_y"], info["tip"], info["pommel"], hilt["tint"]))
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    if sys.argv[1:] == ["--hybrids"]:
+    if sys.argv[1:2] == ["--hybrids"]:
         mpath = os.path.join(OUT, "gear_manifest.json")
         manifest = json.load(open(mpath))
-        build_hybrids(manifest)
+        build_hybrids(manifest, sys.argv[2:])
         json.dump(manifest, open(mpath, "w"), indent=1)
         return
     want = sys.argv[1:] or (list(SWORDS) + list(SHIELDS))

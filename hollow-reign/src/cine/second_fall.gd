@@ -35,7 +35,7 @@ func _ready() -> void:
 	_seal = FinalHall.seal_panel(hall, SEAL)
 	# under the paving, what keeps him: dark here, and seen only when it wakes
 	for i in 7:
-		var m := Look.glow(FinalHall.TEAL, 0.0)
+		var m := FinalHall.lamp(FinalHall.TEAL, 0.0)
 		var strip := hall.box(Vector3(5.6, 0.03, 0.05), Vector3(0, 0.02, 4.0 - i * 2.2), m)
 		strip.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		_floor.append(m)

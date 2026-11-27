@@ -15,6 +15,15 @@ extends RefCounted
 
 const DIR := "res://assets/models/gear/"
 static var _manifest := {}
+## Every sword is drawn as its hybrid (our blade in a generated, sculpted hilt: manifest entry "<id>_h") under its
+## own id. `old_hilts` (dev arg --oldhilts, or mod {"old_hilt": true} for one piece) gives the code-built hilts back.
+static var old_hilts := "--oldhilts" in OS.get_cmdline_user_args()
+
+## The manifest key a sword id is drawn from: its hybrid where there is one.
+static func _key(id: String) -> String:
+	if not old_hilts and not id.ends_with("_h") and manifest().has(id + "_h"):
+		return id + "_h"
+	return id
 
 static func manifest() -> Dictionary:
 	if _manifest.is_empty():
@@ -30,7 +39,7 @@ static func manifest() -> Dictionary:
 static func ids(kind: String = "", hybrids: bool = false) -> Array:
 	var out: Array = []
 	for k: String in manifest():
-		if k.begins_with("_") or (not hybrids and bool(manifest()[k].get("hybrid", false))):
+		if k.begins_with("_") or (not hybrids and k.ends_with("_h") and bool(manifest()[k].get("hybrid", false))):
 			continue
 		var cls := str(manifest()[k].get("class", ""))
 		if kind == "" or (kind == "shield") == (cls == "shield"):
@@ -88,8 +97,9 @@ static func hold(id: String) -> Dictionary:
 static func exists(id: String) -> bool:
 	return ResourceLoader.exists(DIR + id + ".glb")
 
+## What the manifest says of a piece as it is drawn: a sword's numbers (tip, pommel, grip) are its hybrid's.
 static func info(id: String) -> Dictionary:
-	return manifest().get(id, {})
+	return manifest().get(_key(id), {})
 
 static func _add(root: Node3D, file: String, lod_at: float, force_lod: bool) -> void:
 	var has_lod := ResourceLoader.exists(DIR + file + "_lod.glb")
@@ -119,14 +129,18 @@ static func spawn(id: String, lod_at: float = 9.0, force_lod: bool = false, mod:
 	var def: Dictionary = info(id).get("default_mod", {})
 	var bt := clampi(int(mod.get("blade_tier", def.get("blade_tier", 0))), 0, 3)
 	var gt := clampi(int(mod.get("grip_tier", def.get("grip_tier", 0))), 0, 3)
-	var hybrid := bool(info(id).get("hybrid", false))
+	var hid := id if bool(mod.get("old_hilt", false)) else _key(id)
+	var hybrid := bool(manifest().get(hid, {}).get("hybrid", false))
 	if hybrid:
+		def = manifest()[hid].get("default_mod", def)
+		if not mod.has("blade_tier") or not ResourceLoader.exists("%s%s__blade%d.glb" % [DIR, hid, bt]):
+			bt = int(def.get("blade_tier", 0))
 		# a modelled blade seated in a generated hilt: always joined from parts; the hilt has one form, and the
 		# upper handle tiers are gold rings laid over its grip
-		_add(root, "%s__blade%d" % [id, bt], lod_at, force_lod)
-		_add(root, id + "__hilt0", lod_at, force_lod)
-		if gt >= 2 and ResourceLoader.exists("%s%s__rings%d.glb" % [DIR, id, gt]):
-			_add(root, "%s__rings%d" % [id, gt], lod_at, force_lod)
+		_add(root, "%s__blade%d" % [hid, bt], lod_at, force_lod)
+		_add(root, hid + "__hilt0", lod_at, force_lod)
+		if gt >= 2 and ResourceLoader.exists("%s%s__rings%d.glb" % [DIR, hid, gt]):
+			_add(root, "%s__rings%d" % [hid, gt], lod_at, force_lod)
 	elif parts and ResourceLoader.exists("%s%s__blade%d.glb" % [DIR, id, bt]):
 		_add(root, "%s__blade%d" % [id, bt], lod_at, force_lod)
 		_add(root, "%s__hilt%d" % [id, gt], lod_at, force_lod)
@@ -134,7 +148,7 @@ static func spawn(id: String, lod_at: float = 9.0, force_lod: bool = false, mod:
 		_add(root, id, lod_at, force_lod)
 	Look.sanitise(root, "weapon")
 	if hybrid:
-		_match_blade(root, info(id))
+		_match_blade(root, manifest()[hid])
 	awaken(root, false)
 	if not mod.is_empty():
 		apply_mod(root, mod)

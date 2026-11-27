@@ -46,8 +46,18 @@ static func seal_panel(a: Arena, at: Vector3) -> OmniLight3D:
 	a.add_child(l)
 	return l
 
+## A lamp whose brightness can be turned: dark when its energy is 0 (Look.glow is unshaded, and is lit at any energy).
+static func lamp(c: Color, e: float) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = Color(c.r * 0.06, c.g * 0.06, c.b * 0.06)
+	m.roughness = 0.6
+	m.emission_enabled = true
+	m.emission = c
+	m.emission_energy_multiplier = e
+	return m
+
 func _glow_mat(c: Color, e: float) -> StandardMaterial3D:
-	return Look.glow(c, e)
+	return FinalHall.lamp(c, e)
 
 func _part(size: Vector3, pos: Vector3, mat: Material, rot: Vector3 = Vector3.ZERO) -> MeshInstance3D:
 	var m := arena.box(size, pos, mat, rot)

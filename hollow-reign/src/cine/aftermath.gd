@@ -81,15 +81,16 @@ func _run() -> void:
 	if not await _say("final_door"):
 		return
 	# 4: the wall beside the dais
-	cam.cut(Vector3(1.6, 1.5, -6.0), DOOR + Vector3(0, 2.2, 0), 40.0)
-	cam.move(Vector3(1.0, 1.5, -7.2), DOOR + Vector3(0, 2.2, 0), 8.0)
+	cam.cut(Vector3(-4.0, 1.6, -8.4), DOOR + Vector3(0, 2.3, 0), 50.0)
+	cam.move(Vector3(-4.3, 1.6, -9.0), DOOR + Vector3(0, 2.3, 0), 8.0)
 	Sfx.play("guard_break", -8.0, 0.5)
 	Sfx.play("shield_scrape", -9.0, 0.5)
 	for i in 2:
 		var leaf: MeshInstance3D = _leaves[i]
 		leaf.create_tween().tween_property(leaf, "position:x", leaf.position.x + (-1.75 if i == 0 else 1.75), 3.4).set_trans(Tween.TRANS_SINE)
 	create_tween().tween_property(_door_light, "light_energy", 7.0, 3.4)
-	walk(hero, DOOR + Vector3(0.6, 0, 3.2), 1.35)
+	hero.position = Vector3(-2.6, 0, -6.6)
+	walk(hero, DOOR + Vector3(-0.4, 0, 2.6), 1.2)
 	if not await _w(3.6):
 		return
 	if _held("door"):

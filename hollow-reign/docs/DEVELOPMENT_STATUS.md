@@ -15,9 +15,11 @@ Authored whole-body swings (purchased packs, baked library; source files never c
 1. Visual pass on the opening road, throne and Engine rooms (gatehouse and dead-tree props already generated).
 2. Wiring Generations II and III into play: second Monarch fight with the records choice, second fall, 24-year jump, the Kept, three-phase final Monarch, facility reveal, endings, lineage page.
 
+## Slice QA for the first phone test (2026-11-27)
+The first-boss slice (launch to the Ashen Sentinel's fall) has been played end to end by an automated player that presses the real buttons and fights by synthetic touch (`--screen=slice`, `docs/FLOW.md`): 883 s of game time, seven fights, two deliberate defeats, pause, sanctuary purchase. Fifteen defects fixed, eleven open (`docs/BUG_REGISTER.md`, "Slice QA"); model textures now VRAM-compressed (Courtyard duel 339 → 148 MB video memory in the software renderer); a phone starts on the Performance preset; the export preset's privacy reasons are filled in (`docs/IOS_BUILD.md`, last section). All eleven suites passed after these changes. Still not run on a phone.
+
 ## Not true yet / known open
-- Touch suite: 2 swipe cases fail under machine load; not yet rerun on a quiet machine.
-- All suites have not been run together since the equipment, screens, secrets, opening and generation passes landed.
+- Touch targets (44 to 58 units against a 60 target) and text sizes (179 labels under 22) are below phone guidance throughout the UI; about 400k to 500k primitives a frame in the Courtyard.
 - Nothing has run on an iPhone. Nobody has listened to music, effects or most voices. Most animation was judged from stills.
 - New story lines are subtitles only: 19 in data, 41 proposed. Casting needed for father, mother, grandson, granddaughter; Lyra, Orren and Monarch samples still owed to the owner.
 - King's Remnant is classed greatsword but modelled as a smaller sword. Awakened Beast needs authored patterns. Late-game power curve needs a balance pass.

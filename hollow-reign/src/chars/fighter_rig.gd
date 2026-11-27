@@ -2111,9 +2111,9 @@ func _au_other() -> void:
 			skin.arm_r = 0.0
 		"bhit":
 			skin.arm_l = 0.0 if _brace_t > 0.0 else 1.0
-			skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
+			skin.arm_r = 0.0 if (_pin_t > 0.0 or _block_guard()) else 1.0
 		"block":
-			skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
+			skin.arm_r = 0.0 if (_pin_t > 0.0 or _block_guard()) else 1.0
 		"dodge":
 			skin.arm_r = 0.0            # the sword stays in its guard through a sidestep; the clip has it trailing level
 		"roll":
@@ -2699,7 +2699,7 @@ var _dock_lift := 0.0         # metres the body is raised so that it rolls over 
 
 ## The blade of a sword carried on the walk: low, point forward and down, swinging a little with the arm that holds it.
 func _carry_dir(clip_dir: Vector3) -> Vector3:
-	var d := Vector3(0.1, -0.4, -0.91).normalized()
+	var d := Vector3(0.16, -0.3, -0.94).normalized()      # (clear of the thigh that swings past the hand)
 	return d.slerp(clip_dir, 0.12).normalized() if d.dot(clip_dir) > -0.9 else d
 
 ## For a roll a strapped shield is slung onto the back (between the shoulders, face outward) so that nothing of it
@@ -2715,3 +2715,7 @@ func _dock(held: Transform3D, caps: Array) -> Transform3D:
 	var b := Basis(up.cross(fwd).normalized(), up, fwd)
 	var c: Vector3 = skin.point("Spine1") - fwd * (float(caps[1][2]) + 0.15) + up * 0.02
 	return held.interpolate_with(Transform3D(b, c - b * _sh_c), smoothstep(0.0, 1.0, _dock_w))
+
+## Behind a raised shield the sword keeps its own guard (the pack's block holds it low and level across the body).
+func _block_guard() -> bool:
+	return _stance_on() and has_shield

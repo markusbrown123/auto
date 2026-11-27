@@ -303,6 +303,8 @@ sections of `src/chars/skin_driver.gd`. `--oldanim` (or `FighterRig.polish = fal
   on IK and the gear's grip points stay exact). Sword hand at chest height with the blade up and angled at the opponent
   (`_guard_pose`), a strapped shield at the ribs angled across the body, the greatsword in a middle guard with both hands
   on the grip, the pair offset (off blade lower, point at the belly). Slow breathing and a drift of the point.
+  Behind a raised shield (`ss_block_idle`, `ss_block_hit`) the sword arm keeps that guard: the pack's block holds the
+  sword low and level across the body, which from the duel camera was a blade lying sideways.
 - **Feet in a fight (`_feet_step`).** Each foot is planted in the world. When the body has moved 17 cm off a foot (5 cm
   once it has stood still for 0.3 s) that foot steps to where the stance wants it, one foot at a time, travelling while it
   is off the floor. This replaces the sine footwork cycle for circling, shoves, steps in and back; the hips drop if a leg
@@ -314,7 +316,9 @@ sections of `src/chars/skin_driver.gd`. `--oldanim` (or `FighterRig.polish = fal
   along the line of travel is scaled by the same factor (`_feet_dodge`), so a foot planted in the clip is planted in the
   world. The packs have no forward dodge; `ss_dodge_b` is baked but the game has no back-step input, so it is unused.
 - **Roll.** `th_roll_l/r` for every weapon set (the only authored combat roll in the packs: sword and shield has flips,
-  not rolls), over the rig's 0.84 s, travel scaled from about 5 m to what is left of the duel's 2.55 m. Grounded by the
+  not rolls). The tumble takes the first 66% of the rig's 0.84 s (`ROLL_UP`) and the rest is the rise into guard, so the
+  knight stands ready when the rules free them; travel is scaled from about 5 m to what is left of the duel's 2.55 m,
+  and the body keeps half-way between the clip's curve and where the duel has the rig (the camera follows the rig). Grounded by the
   lowest body point. A strapped shield is slung onto the back for the roll (`_dock`: on the mid-spine, face outward, the
   body raised up to 6 cm to roll over it) and comes back onto the arm as the knight rises; the feet that land in the
   last third are scaled like a sidestep's.

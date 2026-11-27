@@ -29,7 +29,9 @@ func _ready() -> void:
 	begin()
 	hall = Arena.new()
 	add_child(hall)
+	Future.throne_beacon_east = Vector3(5.9, 0, -3.0)   # at (4.4, -6) it stood between the camera and the knight at the seal
 	hall.build("throne")
+	Future.throne_beacon_east = Vector3(4.4, 0, -6.0)
 	hall.env.ambient_light_energy = 1.7
 	hall.env.tonemap_exposure = 1.35
 	_seal = FinalHall.seal_panel(hall, SEAL)

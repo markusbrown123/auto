@@ -1511,7 +1511,7 @@ MATERIALS = {
     "fuller": ((0.62, 0.63, 0.66), 1.0, 0.5, "steel_a", "steel_n", "steel_orm", 0.5, None),
     "edge": ((0.80, 0.81, 0.83), 1.0, 0.30, None, None, None, 1.0, None),
     "graphite": ((0.085, 0.09, 0.105), 0.8, 0.5, "fine_a", "fine_n", "satin_orm", 0.4, None),
-    "enamel": ((0.075, 0.095, 0.135), 0.8, 0.5, "fine_a", "fine_n", "satin_orm", 0.5, None),
+    "enamel": ((0.105, 0.108, 0.115), 0.8, 0.5, "fine_a", "fine_n", "satin_orm", 0.5, None),
     "gold": ((0.95, 0.66, 0.27), 1.0, 0.45, "steel_a", "steel_n", "steel_orm", 0.5, None),
     "grip": ((0.20, 0.21, 0.24), 0.0, 0.85, "wrap_a", "wrap_n", "wrap_orm", 1.0, None),
     "grip_fine": ((0.15, 0.155, 0.175), 0.0, 0.85, "wrap_a", "wrap_n", "wrap_orm", 0.8, None),

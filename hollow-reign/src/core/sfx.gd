@@ -204,6 +204,7 @@ func footstep(surface: String = "", weight: float = 1.0, vol_db: float = 0.0, pi
 	var v := vol_db + 6.0 * (weight - 1.0)
 	var pt := pitch * pow(weight, -0.35)
 	_launch(pool, _pick(pool, _n(pool)), v, pt, -1.0, 0.0)
+	_gate_at["step"] = _now()   # a cold stream load inside _launch must not count against the retrigger gap
 	if jingle and weight >= 0.9 and randf() < clampf(0.2 + 0.4 * (weight - 0.9), 0.0, 0.6):
 		_launch("jingle", _pick("jingle", _n("jingle")), v - 20.0, pitch * randf_range(0.9, 1.1), -1.0, 0.0)
 	return true

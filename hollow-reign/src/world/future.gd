@@ -944,6 +944,9 @@ static func _hall(a: Arena, k: Kit) -> void:
 	ranges(a, 1.0)
 	sky(a, 0.6, -150.0, 24.0)
 
+## The throne hall's north-east beacon. SecondFall films the seal beside it and moves it off the camera's line for that scene.
+static var throne_beacon_east := Vector3(4.4, 0, -6.0)
+
 ## The Hollow Throne: the last hall. Whole ribs with columns of dull gold light, the machine's ring on end behind the
 ## seat, the seat itself on a dais in its mouth, two guardians that never left their posts.
 static func _throne(a: Arena, k: Kit) -> void:
@@ -976,6 +979,6 @@ static func _throne(a: Arena, k: Kit) -> void:
 		Highland._beam(k.alloy(true), Vector3(sx3 * 3.4, 2.0, -21.0), Vector3(sx3 * 10.6, 7.0, -23.0), 0.5)
 	prop(a, "fu_wreck", 3.0, Vector3(-7.9, 0, 5.0), 40.0, 0.06)
 	prop(a, "fu_wreck", 2.4, Vector3(8.6, 0, -0.9), 160.0, 0.06)
-	for b: Vector3 in [Vector3(-4.4, 0, -6.0), Vector3(4.4, 0, -6.0), Vector3(-4.4, 0, 5.0), Vector3(4.4, 0, 5.0)]:
+	for b: Vector3 in [Vector3(-4.4, 0, -6.0), throne_beacon_east, Vector3(-4.4, 0, 5.0), Vector3(4.4, 0, 5.0)]:
 		beacon(k, b, 2.6, 0.0)
 		lamp(a, b + Vector3(0, 2.2, 0), fire, 1.8, 8.5, true)

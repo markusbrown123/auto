@@ -423,9 +423,14 @@ static func _sword_mark() -> Control:
 		c.draw_circle(Vector2(x, 61), 3.0, col))
 	return c
 
+static var _pause_layer: CanvasLayer     # the pause panel on screen, if any: one at a time (a second one outlived Resume)
+
 static func pause(parent: Node, resume: Callable, abandon: Callable) -> void:
+	if is_instance_valid(_pause_layer) and _pause_layer.is_inside_tree() and not _pause_layer.is_queued_for_deletion():
+		return
 	parent.get_tree().paused = true
 	var v := _shell(parent, 0.8)
+	_pause_layer = v.get_meta("layer")
 	v.custom_minimum_size.x = 840
 	_pause_fill(v, parent, resume, abandon)
 

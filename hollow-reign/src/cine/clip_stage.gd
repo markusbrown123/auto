@@ -232,6 +232,12 @@ func _script_take() -> void:
 			cam_mode = "road"
 			var from: Array = _road_pose(road_i - 1)
 			var to: Array = _road_pose(road_i)
+			# walk at FighterRig.ROAD_SPEED (it was 2-5 m/s): the walk covers only what that pace allows in the clip, so the
+			# clip opens part-way along the path, camera carried with the knight
+			var reach := FighterRig.ROAD_SPEED * (length * 0.8 - WALK_RAMP)
+			if (to[0] as Vector3).distance_to(from[0]) > reach:
+				var shift: Vector3 = (to[0] as Vector3) - ((to[0] as Vector3) - (from[0] as Vector3)).normalized() * reach - (from[0] as Vector3)
+				from = [from[0] + shift, from[1], from[2] + shift, from[3] + shift]
 			knight.position = from[0]
 			knight.rotation.y = atan2(-from[1].x, -from[1].z)
 			knight.walking = true
@@ -285,11 +291,23 @@ func _sparks(pos: Vector3, color: Color, amount: int) -> void:
 	tw.tween_property(l, "light_energy", 0.0, 0.18)
 	tw.tween_callback(l.queue_free)
 
+const WALK_RAMP := 0.6    # seconds to get up to, and down from, walking pace
+
+## Distance fraction for a walk of constant speed with a WALK_RAMP ease at each end; w is the fraction of the walk's time.
+func _trapezoid(w: float) -> float:
+	var af := WALK_RAMP / (length * 0.8)
+	var vmax := 1.0 / (1.0 - af)
+	if w < af:
+		return 0.5 * vmax * w * w / af
+	if w < 1.0 - af:
+		return 0.5 * vmax * af + vmax * (w - af)
+	return 1.0 - 0.5 * vmax * (1.0 - w) * (1.0 - w) / af
+
 func _camera(dt: float) -> void:
 	var u := clampf((t - PRE) / length, 0.0, 1.0)
 	if _walk_to != Vector3.ZERO:
 		var wu := clampf((t - PRE - 0.3) / (length * 0.8), 0.0, 1.0)
-		knight.position = _walk_from.lerp(_walk_to, smoothstep(0.0, 1.0, wu))
+		knight.position = _walk_from.lerp(_walk_to, _trapezoid(wu))
 		if cam_mode == "road":
 			# turn to the way being walked, then to what this stop looks at
 			var heading := (_walk_to - _walk_from).normalized()

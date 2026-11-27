@@ -195,3 +195,25 @@ plane of 6000 (CineCam and the menu's vista set it).
   foe record another `arena` for their length); the gothic `throne` theme is untouched for the later game.
 - **Engine room** (`chamber`): ribs up the wall with light channels, a cradle with hoops and a head unit, cables
   across the floor, banks of readouts, a metal band in the floor, ground mist.
+
+### Measured cost (software renderer, 1280x720, engine monitors after 4 s; not a device measurement)
+The envelope is the Balanced courtyard duel in `PERFORMANCE_REPORT.md`: 133 draws, 549k primitives, 351 MB.
+
+| Shot (Generation I) | Balanced draws | primitives | video MB | Performance draws | primitives | video MB |
+|---|---|---|---|---|---|---|
+| 1 vista | 96 | 380,707 | 143 | 96 | 308,193 | 120 |
+| 2 low, beside the walker | 50 | 389,365 | 143 | 51 | 315,858 | 120 |
+| 3 the switchback (heaviest) | 102 | 478,423 | 143 | 102 | 339,083 | 120 |
+| 4 over the shoulder | 94 | 467,443 | 143 | 93 | 356,733 | 120 |
+| 5 the dead tree | 80 | 418,657 | 143 | 80 | 296,165 | 120 |
+| 6 the gate court | 73 | 322,341 | 143 | 68 | 264,077 | 120 |
+
+Those six were taken without the story overlay; through the game's own capture path (overlay and SKIP on) the same
+shots read 5 draws and about 30 MB higher. Generation II's vista is the heaviest vista (105 draws, 431,701
+primitives). The menu over the vista: 133 draws, 432,705 primitives, 167 MB. Command hall scenes: 33-57 draws,
+93k-205k primitives; the guardian duel in it 126 draws, 218k. The Engine room in the fall: 74-144 draws (it is many
+separate boxes; the peak is while the dust and sparks are live), 137k-174k primitives, 131 MB. The Approach is the
+Courtyard's own arena plus one foe: 587k primitives and 335 MB at its first shot, which is over the courtyard duel's
+figure by the weight of that one rig.
+The High preset was not measured. The kit props the road no longer loads are why its video memory is under half
+what the first version of the road used (274 MB).

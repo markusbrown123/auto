@@ -187,10 +187,12 @@ func _main() -> void:
 		menu.add_child(UI.label(line, 18, UI.SILVER))
 	menu.add_child(UI.spacer(14))
 	var list := entries()
+	# a short list (the first launch has three entries) gets rows a thumb can find; the full list of ten keeps 44
+	var row_h: int = clampi(int(430.0 / list.size()), 44, 62)
 	for i in list.size():
 		var e: Array = list[i]
 		var b := UI.menu_item(e[0], 25 if i == 0 else 20, 330)
-		b.custom_minimum_size.y = 50 if i == 0 else 44
+		b.custom_minimum_size.y = row_h + 6 if i == 0 else row_h
 		if i == 0:
 			b.add_theme_color_override("font_color", UI.GOLD.lightened(0.2))
 		b.pressed.connect(e[1])

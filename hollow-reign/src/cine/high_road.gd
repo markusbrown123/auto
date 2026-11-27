@@ -88,7 +88,7 @@ func shot(i: int) -> void:
 		3:  # the climb: in profile on a leg of the switchback, the slope folding up behind and the ring over it
 			var s3 := Highland.road_at_z(196.0)
 			stride(s3 - 20.0, s3 - 6.0)
-			cam.ride(hero, Vector3(-5.4, 1.5, -0.6), Vector3(1.0, 2.3, -0.9))
+			cam.ride(hero, Vector3(-5.6, 1.25, -1.6), Vector3(0.6, 1.75, -0.4))
 			cam.fov = 44.0
 		4:  # over the shoulder, topping the rise: the gate's foot comes up out of the ground
 			var s4 := Highland.road_at_z(108.0)

@@ -61,7 +61,7 @@ const SEASONS := [
 		"deep": "#0d2a3a", "shelf": "#2a6c6c", "shafts": 0.2,
 		"wind": 1.0, "seam": 0.25, "weather": "", "wear": 1.0, "whole": true},
 	{"sky": "#18224a", "horizon": "#d8763c", "fog": "#4c4a60", "fog_d": 0.00045, "sun": "#ff8e4a", "sun_e": 2.6, "sun_rot": Vector3(-7, 208, 0),
-		"amb": "#3c4e80", "amb_e": 1.1, "fill": 0.75, "exp": 0.95, "sat": 1.0, "con": 1.14,
+		"amb": "#3c4e80", "amb_e": 1.3, "fill": 0.9, "exp": 1.08, "sat": 1.0, "con": 1.14,
 		"grass_a": "#3c4a26", "grass_b": "#7a5e2c", "heather": "#4c2d2a", "heather_amt": 0.6, "straw": "#a07a40", "dry": 0.8, "snow": 0.0,
 		"rock_a": "#201d1e", "rock_b": "#766252", "earth": "#3a2a1c", "wet": 0.7,
 		"cloud": 0.49, "cloud_lit": "#d89468", "cloud_dark": "#262b44", "cloud_shadow": 0.55,

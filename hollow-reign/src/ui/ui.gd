@@ -115,11 +115,17 @@ static func full(c: Control) -> Control:
 	return c
 
 ## Margins that keep content clear of the notch / home indicator.
+static var fake_insets: Array = []
 static func safe_margins(vp: Viewport) -> Dictionary:
 	var out := {"l": 24.0, "r": 24.0, "t": 16.0, "b": 16.0}
+	if fake_insets.size() == 4:
+		# dev (`-- --notch=l,t,r,b`, in 720-high units): a phone's insets on a desktop, to look for what they would cover
+		return {"l": maxf(out.l, fake_insets[0] + 8.0), "t": maxf(out.t, fake_insets[1] + 8.0), "r": maxf(out.r, fake_insets[2] + 8.0), "b": maxf(out.b, fake_insets[3] + 8.0)}
 	var win := DisplayServer.window_get_size()
 	if win.x <= 0 or not OS.has_feature("mobile"):
 		return out
+	if vp == null:
+		vp = (Engine.get_main_loop() as SceneTree).root
 	var safe := DisplayServer.get_display_safe_area()
 	var k: float = vp.get_visible_rect().size.x / float(win.x)
 	out.l = maxf(out.l, safe.position.x * k + 8.0)

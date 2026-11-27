@@ -48,10 +48,13 @@ func build(theme: String, with_knight: bool = true) -> void:
 ## The look dictionary for what is equipped, or for `preview` (a what-if profile) when one is given.
 func knight_look(preview: Dictionary = {}, tint: String = "") -> Dictionary:
 	var look := {"metal": "#4a4038", "cloth": "#3d0f0f", "cape": true, "weapon": "sword", "helm": "kettle", "eye": "#000000", "shield": {"color": "#4a3a2a"}}
-	if not Game.profile.is_empty():
+	if true:
+		# (with no journey yet, the first launch, the knight shown is the one who will wake: never the bare procedural figure)
 		var real: Dictionary = Game.profile
 		if not preview.is_empty():
 			Game.profile = preview
+		elif real.is_empty():
+			Game.profile = Game.default_profile()
 		look = Duel.player_look()
 		Game.profile = real
 		if tint != "" and look.has("skin_tint"):      # a suit with its own model keeps its own colours

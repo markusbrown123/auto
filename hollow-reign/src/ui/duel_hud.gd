@@ -502,9 +502,10 @@ func _ready() -> void:
 		elif a == "--hud_keen":
 			set_keen(true)
 
-	var pause := UI.button("II", 18, 52)
+	var pause := UI.button("II", 18, 64)
+	pause.custom_minimum_size.y = 64
 	pause.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	pause.offset_left = -52
+	pause.offset_left = -64
 	pause.pressed.connect(func(): pause_pressed.emit())
 	frame.add_child(pause)
 

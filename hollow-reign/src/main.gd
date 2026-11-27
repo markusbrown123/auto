@@ -22,6 +22,9 @@ func _ready() -> void:
 	_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fl.add_child(_fader)
 	UI.apply(self)
+	if _args.has("notch"):
+		for v: String in str(_args.notch).split(","):
+			UI.fake_insets.append(float(v))
 	if _args.has("shots"):
 		# capture harness: --shots=dir --at=1.0,2.5 [--demo=foe | --screen=name]
 		_shot_dir = _args.shots
@@ -808,6 +811,9 @@ func _dev_boot() -> void:
 				Game.profile.defeated["devourer"] = 1
 				Game.profile.cleared.append("roost")
 			_ending()
+		"slice":
+			# the first-boss slice played by touch from the launch screen (src/dev/slice_bot.gd)
+			add_child(SliceBot.new(self, _args))
 		"partsbench":
 			# dev: modular armour viewer and seam measurements (src/dev/parts_bench.gd)
 			var pb := PartsBench.new()

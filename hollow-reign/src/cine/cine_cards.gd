@@ -39,11 +39,11 @@ func _init() -> void:
 	card.offset_top = -190
 	card.offset_right = 1000
 	card.offset_bottom = -120
-	hint = UI.title("", 20, UI.GOLD)
+	hint = UI.title("", 24, UI.GOLD)
 	hint.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	hint.offset_left = -420
-	hint.offset_right = 420
-	hint.offset_top = 132
+	hint.offset_left = -520
+	hint.offset_right = 520
+	hint.offset_top = 150                 # under the duel's own toasts ("DOUBLE SLASH"), which sit at 96 to 136
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	for l: Label in [card, hint]:
 		l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
@@ -67,10 +67,12 @@ func _init() -> void:
 	skip.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
 	skip.add_theme_constant_override("outline_size", 5)
 	skip.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	skip.offset_left = -170
-	skip.offset_top = 66
-	skip.offset_right = -24
-	skip.offset_bottom = 110
+	# clear of a phone's notch and rounded corner, and tall enough for a thumb (the word stays small)
+	var inset: float = float(UI.safe_margins(null).r)
+	skip.offset_left = -146 - inset
+	skip.offset_top = 86                 # below a duel's pause button, which is in this corner
+	skip.offset_right = -inset
+	skip.offset_bottom = 146
 	skip.modulate.a = 0.0
 	skip.pressed.connect(func(): skip_pressed.emit())
 	add_child(skip)

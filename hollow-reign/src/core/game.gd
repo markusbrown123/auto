@@ -1053,7 +1053,14 @@ func start_ng_plus() -> void:
 	profile_changed.emit()
 
 # ================================================================ settings
+## The graphics preset a device starts on, before the player has chosen one: Performance on a phone or tablet
+## (three-quarter resolution, no MSAA, no spot or omni shadows), Balanced elsewhere. Nothing has been measured on a
+## phone, so the first launch errs toward a steady frame; Settings offers Balanced and High.
+static func default_quality(mobile: bool) -> int:
+	return 0 if mobile else 1
+
 func load_settings() -> void:
+	settings.quality = default_quality(OS.has_feature("mobile"))
 	if FileAccess.file_exists(_p(SETTINGS_PATH)):
 		var v = _parse(FileAccess.get_file_as_string(_p(SETTINGS_PATH)))
 		if v is Dictionary:

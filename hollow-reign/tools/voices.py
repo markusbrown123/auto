@@ -39,7 +39,13 @@ ROOM = "bass=g=2.5:f=150,aecho=0.9:0.35:55|110:0.16|0.08"
 # the female knight (owner's choice): presence up, low-mids down, lighter room
 CLEAR = "highpass=f=90,equalizer=f=3500:t=q:w=1.2:g=4.5,equalizer=f=250:t=q:w=1.0:g=-2,treble=g=1.5:f=7000,aecho=0.9:0.22:45|95:0.10|0.05"
 SLOW = ",atempo=0.93"                        # the Kept: "a voice the player knows, slowed"
-STERLING_FX = json.load(open("tools/cast_final.json"))["player_m"]["fx"]   # bass + room + loudnorm, as the approved audition
+# The male knight's post chain (bass + room + loudnorm, as the approved audition). The pre-treatment master of every take of
+# these roles (after pitch and tempo, before this chain) is kept in MASTERS, so a changed chain is applied by
+# `tools/voices.py --post` alone: no paid job is ever repeated for it.
+PLAYER_M_FX = json.load(open("tools/cast_final.json"))["player_m"]["fx"]
+STERLING_FX = PLAYER_M_FX
+MASTER_ROLES = ("player_m", "kept_m", "effort_m")
+MASTERS = "art/vo_masters/player_m"          # lossless wav, gitignored
 ROLE_FX = {
  "player_f": CLEAR, "witness": ROOM + ",aecho=0.9:0.25:11:0.12", "narrator": "bass=g=2:f=150,aecho=0.9:0.4:80|170:0.18|0.1",
  "player_m": STERLING_FX, "kept_m": STERLING_FX + SLOW, "kept_f": CLEAR + SLOW,   # male knight: Sterling (cast_final.json), the Kept's extra 7% on top
@@ -143,13 +149,16 @@ def lufs(path):
     i = re.findall(r"I:\s+(-?[\d.]+) LUFS", r); pk = re.findall(r"Peak:\s+(-?[\d.]+) dBFS", r)
     return (float(i[-1]) if i else -70.0), (float(pk[-1]) if pk else 0.0)
 
-def master(raw, out, role, base):
-    """pitch (once) -> the role's room -> loudness by measurement -> ogg, as the earlier takes are."""
+def pre_chain(role):
     st = D.get("voice_pitch", {}).get(role, 0)
     tempo = D.get("voice_tempo", {}).get(role, 1.0)
-    chain = (["rubberband=pitch=%.5f:tempo=%.4f:formant=preserved" % (2 ** (st / 12.0), tempo)] if st or tempo != 1.0 else []) + [ROLE_FX.get(role, ROLE_FX.get(base, ROOM))]
+    return ["rubberband=pitch=%.5f:tempo=%.4f:formant=preserved" % (2 ** (st / 12.0), tempo)] if st or tempo != 1.0 else []
+
+def finish(src, out, role, base):
+    """src (wav) -> the role's room/fx -> loudness by measurement -> ogg, as the earlier takes are."""
+    fx = ROLE_FX.get(role, ROLE_FX.get(base, ROOM))
     wav = out + ".wav"
-    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-af", ",".join(chain), "-ac", "1", "-ar", "44100", wav], check=True)
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", src, "-af", fx, "-ac", "1", "-ar", "44100", wav], check=True)
     i, pk = lufs(wav)
     if i < -60:                                   # too short for a gated measurement: level it by its peak instead
         gain = (PEAK_DB - 3.0) - pk
@@ -164,13 +173,25 @@ def master(raw, out, role, base):
             break
         gain += TARGET_LUFS - got
     os.remove(wav)
+    return lufs(out)
+
+def master(raw, out, role, base):
+    """pitch + tempo (once) -> [master kept] -> the role's fx -> loudness by measurement -> ogg."""
+    st = D.get("voice_pitch", {}).get(role, 0)
+    pre = out + ".pre.wav"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw] + (["-af", ",".join(pre_chain(role))] if pre_chain(role) else []) + ["-ac", "1", "-ar", "44100", pre], check=True)
+    if role in MASTER_ROLES:
+        os.makedirs(MASTERS, exist_ok=True)
+        shutil.copy(pre, os.path.join(MASTERS, os.path.basename(out)[:-4] + ".wav"))
+    res = finish(pre, out, role, base)
+    os.remove(pre)
     if st:
         LOWERED[os.path.basename(out)] = st
         save("lowered.json", LOWERED)
     elif os.path.basename(out) in LOWERED:
         del LOWERED[os.path.basename(out)]
         save("lowered.json", LOWERED)
-    return lufs(out)
+    return res
 
 # ---------------------------------------------------------------- what is wanted
 def priority(sid):
@@ -182,6 +203,10 @@ def priority(sid):
         return 3
     early = sid.startswith(("opening", "awakening", "first_road", "gen2_arrive", "courtyard", "sentinel", "witness_discovery", "w_courtyard", "w_sentinel"))
     return 1 if early else 2
+
+def model_of(role):
+    c = D["voices"][role]
+    return ("inworld", c[8:]) if c.startswith("inworld:") else ("eleven", c)
 
 jobs = []          # (line id, role, base speaker, file)
 wanted = [a for a in sys.argv[1:] if not a.startswith("--")] or list(D["scenes"])
@@ -207,10 +232,6 @@ for sid in sorted(wanted, key=lambda s: (priority(s), list(D["scenes"]).index(s)
             if not os.path.exists(os.path.join(VO, f)) or TAKES.get(f) != text_hash(line) or recast:
                 jobs.append((lid, role, sp, f, sid))
 
-def model_of(role):
-    c = D["voices"][role]
-    return ("inworld", c[8:]) if c.startswith("inworld:") else ("eleven", c)
-
 def paid():
     recs = [j for k, j in JOBS.items() if k != "_superseded"] + list(JOBS.get("_superseded", []))
     return sum(float(j.get("credits", 0)) for j in recs if j.get("status") != "failed")
@@ -223,6 +244,18 @@ print("%d takes wanted; about %.1f credits still to pay; %.1f paid so far by thi
 if PLAN:
     for lid, role, sp, f, sid in jobs:
         print("  %-28s %-12s %-18s %s" % (f, role, D["voices"][role], D["lines"][lid]["text"][:70]))
+    sys.exit(0)
+
+if "--post" in ARGS:
+    # re-run only the post chain (ROLE_FX) over the kept masters: no CLI, no paid job. Efforts take their role from the file name.
+    for w in sorted(os.listdir(MASTERS)) if os.path.isdir(MASTERS) else []:
+        f = w[:-4] + ".ogg"
+        role = "effort_m" if f.startswith("efforts_m_") else ("kept_m" if f.startswith("kept_") else "player_m")
+        i, pk = finish(os.path.join(MASTERS, w), os.path.join(VO, f), role, role)
+        if f in JOBS:
+            JOBS[f]["lufs"], JOBS[f]["peak"] = i, pk
+        print("%s post %.1f LUFS peak %.1f" % (f, i, pk), flush=True)
+    save("jobs.json", JOBS)
     sys.exit(0)
 
 if "--remaster" in ARGS:

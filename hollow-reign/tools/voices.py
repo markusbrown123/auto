@@ -39,9 +39,10 @@ ROOM = "bass=g=2.5:f=150,aecho=0.9:0.35:55|110:0.16|0.08"
 # the female knight (owner's choice): presence up, low-mids down, lighter room
 CLEAR = "highpass=f=90,equalizer=f=3500:t=q:w=1.2:g=4.5,equalizer=f=250:t=q:w=1.0:g=-2,treble=g=1.5:f=7000,aecho=0.9:0.22:45|95:0.10|0.05"
 SLOW = ",atempo=0.93"                        # the Kept: "a voice the player knows, slowed"
+STERLING_FX = json.load(open("tools/cast_final.json"))["player_m"]["fx"]   # bass + room + loudnorm, as the approved audition
 ROLE_FX = {
  "player_f": CLEAR, "witness": ROOM + ",aecho=0.9:0.25:11:0.12", "narrator": "bass=g=2:f=150,aecho=0.9:0.4:80|170:0.18|0.1",
- "kept_m": ROOM + SLOW, "kept_f": CLEAR + SLOW,
+ "player_m": STERLING_FX, "kept_m": STERLING_FX + SLOW, "kept_f": CLEAR + SLOW,   # male knight: Sterling (cast_final.json), the Kept's extra 7% on top
  # the Widow (tools/cast_final.json): bass +2 at 160 Hz, presence +2.5 at 2.8 kHz, light room
  "widow": "bass=g=2:f=160,equalizer=f=2800:t=q:w=1.2:g=2.5,aecho=0.9:0.35:55|110:0.16|0.08",
  "devourer": "aecho=0.8:0.8:60|130|210:0.4|0.3|0.2,chorus=0.6:0.9:55|70:0.4|0.3:0.25|0.4:2|1.3",
@@ -145,7 +146,8 @@ def lufs(path):
 def master(raw, out, role, base):
     """pitch (once) -> the role's room -> loudness by measurement -> ogg, as the earlier takes are."""
     st = D.get("voice_pitch", {}).get(role, 0)
-    chain = (["rubberband=pitch=%.5f:formant=preserved" % (2 ** (st / 12.0))] if st else []) + [ROLE_FX.get(role, ROLE_FX.get(base, ROOM))]
+    tempo = D.get("voice_tempo", {}).get(role, 1.0)
+    chain = (["rubberband=pitch=%.5f:tempo=%.4f:formant=preserved" % (2 ** (st / 12.0), tempo)] if st or tempo != 1.0 else []) + [ROLE_FX.get(role, ROLE_FX.get(base, ROOM))]
     wav = out + ".wav"
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", raw, "-af", ",".join(chain), "-ac", "1", "-ar", "44100", wav], check=True)
     i, pk = lufs(wav)
@@ -201,7 +203,8 @@ for sid in sorted(wanted, key=lambda s: (priority(s), list(D["scenes"]).index(s)
             if role not in D["voices"] or f in seen or (ONLY and role not in ONLY):
                 continue
             seen.add(f)
-            if not os.path.exists(os.path.join(VO, f)) or TAKES.get(f) != text_hash(line):
+            recast = bool(ONLY) and JOBS.get(f, {}).get("voice") != model_of(role)[1]   # --only=: a take made with another voice is redone
+            if not os.path.exists(os.path.join(VO, f)) or TAKES.get(f) != text_hash(line) or recast:
                 jobs.append((lid, role, sp, f, sid))
 
 def model_of(role):

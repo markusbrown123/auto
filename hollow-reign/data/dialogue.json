@@ -2806,9 +2806,9 @@
  "voices": {
   "witness": "inworld:Hamish (en)",
   "narrator": "inworld:Graham (en)",
-  "player_m": "inworld:Malcolm (en)",
+  "player_m": "Sterling",
   "player_f": "inworld:Victoria (en)",
-  "kept_m": "inworld:Malcolm (en)",
+  "kept_m": "Sterling",
   "kept_f": "inworld:Victoria (en)",
   "sentinel": "inworld:Mortimer (en)",
   "executioner": "inworld:Mortimer (en)",
@@ -2833,10 +2833,18 @@
   "monarch": -3,
   "frostking": -3,
   "huntsman": -3,
-  "gravewarden": -3
+  "gravewarden": -3,
+  "player_m": -4,
+  "kept_m": -4
  },
  "voice_stability": {
-  "widow": 0.15
+  "widow": 0.15,
+  "player_m": 0.7,
+  "kept_m": 0.7
+ },
+ "voice_tempo": {
+  "player_m": 0.94,
+  "kept_m": 0.94
  },
  "names": {
   "narrator": "",

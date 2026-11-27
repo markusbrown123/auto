@@ -503,13 +503,21 @@ VOICES = {
  "archivist": "Onyx", "devourer": "Luna"}
 PITCH = {}        # semitones, applied after generation with tempo and formants kept (tools/voices.py)
 STABILITY = {}    # second model only
+TEMPO = {}        # rubberband tempo applied with the pitch (1.0 = none)
 for _role, _c in json.load(open("tools/cast_final.json")).items():
     if isinstance(_c, dict):
-        VOICES[_role] = ("inworld:" if _c["model"] == "inworld" else "") + _c["voice"]
+        VOICES[_role] = ("inworld:" if _c.get("model", _c.get("provider")) == "inworld" else "") + _c["voice"]
         if _c.get("pitch"):
             PITCH[_role] = _c["pitch"]
         if "stability" in _c:
             STABILITY[_role] = _c["stability"]
+        if _c.get("tempo"):
+            TEMPO[_role] = _c["tempo"]
+# the male Kept is the male knight's voice (Sterling, same treatment; tools/voices.py adds the Kept's extra slowing)
+VOICES["kept_m"] = VOICES["player_m"]
+for _d in (PITCH, STABILITY, TEMPO):
+    if "player_m" in _d:
+        _d["kept_m"] = _d["player_m"]
 # A line written after its speaker was last recorded is text-only until tools/voices.py records it: that tool keeps
 # assets/audio/vo/takes.json (file -> hash of the text it was recorded from). A new line counts as recorded when a
 # take of exactly its current text exists (for the knight's lines, the male take).
@@ -523,7 +531,7 @@ for _lid, _l in L.items():
 NAMES = {"narrator": "", "lyra": "Lyra", "player": "", "orren": "Orren", "archivist": "The Archivist", "sentinel": "Ashen Sentinel", "executioner": "Hollow Executioner",
  "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness", "forebear": ""}
 NAMES["kept"] = "The Crownless Champion"
-OUT = {"lines": L, "scenes": S, "voices": VOICES, "voice_pitch": PITCH, "voice_stability": STABILITY, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}
+OUT = {"lines": L, "scenes": S, "voices": VOICES, "voice_pitch": PITCH, "voice_stability": STABILITY, "voice_tempo": TEMPO, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}
 for path in ["data/dialogue.json", "docs/DIALOGUE_DATABASE.json"]:   # the docs copy is the same file, kept for readers
     json.dump(OUT, open(path, "w"), indent=1)
 wl = [l for l in L.values() if l["speaker"] == "witness"]

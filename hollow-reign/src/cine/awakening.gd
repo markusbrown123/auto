@@ -11,7 +11,7 @@ signal finished
 const SEAT := Vector3(0, 0, 1.78)
 const STAND := Vector3(0, 0, 2.15)
 const GRILLE := Vector3(-2.6, 2.4, -4.2)
-const WALK := 1.35               # metres a second
+const WALK := FighterRig.ROAD_SPEED   # metres a second
 
 var auto := false                # dev captures: the prompt answers itself
 var start_at := ""               # dev captures: "sword" opens on the standing knight and the prompt

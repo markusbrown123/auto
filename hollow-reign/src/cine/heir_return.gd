@@ -10,7 +10,7 @@ extends CineScene
 ## (grandson or granddaughter); only a name is asked.
 ## Dev: hold_at = "enter" | "sword" | "taken".
 
-const WALK := 1.35
+const WALK := FighterRig.ROAD_SPEED
 
 var arena: Arena
 var knight: CineActor

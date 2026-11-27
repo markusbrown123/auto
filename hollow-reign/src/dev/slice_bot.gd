@@ -730,7 +730,7 @@ func _in_duel(d: Duel) -> bool:
 		step("duel %d: %s%s%s" % [fights, str(d.foe.get("name", "")), " (the lesson)" if d.sim.lesson else "", " — meaning to lose" if _die_now else ""])
 		_fight_watch(d)
 		return true
-	if d.stage == Duel.Stage.FIGHT and not _paused_once and not d.sim.lesson and d.sim.time > 6.0 and not get_tree().paused:
+	if d.stage == Duel.Stage.FIGHT and not _paused_once and not args.has("road") and not d.sim.lesson and d.sim.time > 6.0 and not get_tree().paused:
 		_paused_once = true
 		say("  pausing mid-fight")
 		audit("fight")

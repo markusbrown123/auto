@@ -4,9 +4,9 @@ extends Node3D
 ## six designed shots of the climb. The prologue, the time jump and the heir's arrival are all filmed on it, so the
 ## same compositions come back in every generation with what is in them changed.
 
-const WALK := 1.38
-## How long each shot is worth, in seconds (index = shot).
-const HOLD := [0.0, 11.0, 9.5, 9.0, 10.5, 7.5, 9.0]
+const WALK := FighterRig.ROAD_SPEED
+## How long each shot is worth, in seconds (index = shot); the walking shots were 1.38 m/s lengths, stretched by 1.38 / ROAD_SPEED.
+const HOLD := [0.0, 11.0, 11.7, 11.1, 12.9, 9.2, 11.1]
 
 var arena: Arena
 var cam: CineCam

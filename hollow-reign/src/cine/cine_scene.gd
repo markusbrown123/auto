@@ -58,7 +58,7 @@ func _held(moment: String) -> bool:
 	cards.veil.color.a = 0.0
 	return true
 
-func walk(who: FighterRig, to: Vector3, speed: float = 1.35) -> Tween:
+func walk(who: FighterRig, to: Vector3, speed: float = FighterRig.ROAD_SPEED) -> Tween:
 	var d := to - who.position
 	who.rotation.y = atan2(-d.x, -d.z)
 	who.walking = true

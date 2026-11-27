@@ -97,7 +97,7 @@ func _reveal() -> void:
 	cam.cut(Vector3(2.6, 1.5, 12.2), POST + Vector3(0, 1.2, 0), 36.0)
 	cam.move(Vector3(2.2, 1.45, 11.0), POST + Vector3(0, 1.25, 0), 9.0)
 	cards.fade(0.0, 1.4)
-	walk(hero, Vector3(0.7, 0, 5.6), 1.2)
+	walk(hero, Vector3(0.7, 0, 5.6), FighterRig.ROAD_SPEED)
 	if not await _w(3.6):
 		return
 	if _held("back"):

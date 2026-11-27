@@ -127,7 +127,7 @@ func _run() -> void:
 	_shot("chamber", Vector3(2.6, 1.5, 9.0), Vector3(0.0, 5.0, -30.0), 46.0)
 	cam.move(Vector3(2.0, 1.7, 7.4), Vector3(0.0, 5.6, -30.0), 9.0)
 	cards.fade(0.0, 1.6)
-	walk(hero, COUPLING + Vector3(0.05, 0, 0.95), 1.3)
+	walk(hero, COUPLING + Vector3(0.05, 0, 0.95), FighterRig.ROAD_SPEED)
 	if not await _w(4.2):
 		return
 	Story.play("ending_" + id, true)
@@ -269,7 +269,7 @@ func _steward() -> void:
 	cam.move(Vector3(1.8, 1.4, 6.0), Vector3(0.0, 3.6, -14.0), 16.0)
 	Sfx.music_for("theme", "menu", 3.0)
 	cards.fade(0.0, 1.6)
-	var up := walk(hero, Vector3(0, 0, -7.5), 1.25)
+	var up := walk(hero, Vector3(0, 0, -7.5), FighterRig.ROAD_SPEED)
 	if not await _w(1.6):
 		return
 	hall.set_level(1)              # the pylons wake one after another down the hall

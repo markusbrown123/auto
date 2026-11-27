@@ -95,8 +95,6 @@ func _travel() -> void:
 	hint.offset_top = -40
 	ui.add_child(hint)
 	player.show_clip(str(stop.clip), false)
-	for i in 5:
-		get_tree().create_timer(0.6 + i * 0.85).timeout.connect(func(): if _travelling: Sfx.play("footstep", -5.0))
 
 func _on_travel_time(dt: float) -> void:
 	if not _travelling:

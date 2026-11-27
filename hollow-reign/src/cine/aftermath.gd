@@ -93,13 +93,13 @@ func _run() -> void:
 		leaf.create_tween().tween_property(leaf, "position:x", leaf.position.x + (-1.75 if i == 0 else 1.75), 3.4).set_trans(Tween.TRANS_SINE)
 	create_tween().tween_property(_door_light, "light_energy", 7.0, 3.4)
 	hero.position = Vector3(-2.6, 0, -6.6)
-	walk(hero, DOOR + Vector3(-0.4, 0, 2.6), 1.2)
+	walk(hero, DOOR + Vector3(-0.4, 0, 2.6), FighterRig.ROAD_SPEED)
 	if not await _w(3.6):
 		return
 	if _held("door"):
 		return
 	cards.fade(1.0, 2.6, true)
-	await walk(hero, DOOR + Vector3(0, 0, -0.4), 1.35).finished
+	await walk(hero, DOOR + Vector3(0, 0, -0.4), FighterRig.ROAD_SPEED).finished
 	if _over:
 		return
 	_end()

@@ -61,7 +61,7 @@ const SEASONS := [
 		"deep": "#0d2a3a", "shelf": "#2a6c6c", "shafts": 0.2,
 		"wind": 1.0, "seam": 0.25, "weather": "", "wear": 1.0, "whole": true},
 	{"sky": "#18224a", "horizon": "#d8763c", "fog": "#4c4a60", "fog_d": 0.00045, "sun": "#ff8e4a", "sun_e": 2.6, "sun_rot": Vector3(-7, 208, 0),
-		"amb": "#3c4e80", "amb_e": 1.1, "fill": 0.5, "exp": 0.95, "sat": 1.0, "con": 1.14,
+		"amb": "#3c4e80", "amb_e": 1.1, "fill": 0.75, "exp": 0.95, "sat": 1.0, "con": 1.14,
 		"grass_a": "#3c4a26", "grass_b": "#7a5e2c", "heather": "#4c2d2a", "heather_amt": 0.6, "straw": "#a07a40", "dry": 0.8, "snow": 0.0,
 		"rock_a": "#201d1e", "rock_b": "#766252", "earth": "#3a2a1c", "wet": 0.7,
 		"cloud": 0.49, "cloud_lit": "#d89468", "cloud_dark": "#262b44", "cloud_shadow": 0.55,
@@ -81,7 +81,7 @@ const SEASONS := [
 ## trails show, and the colour of the road's slabs. I serene; II hazy amber, with debris coming down; III cold, the
 ## orbital structure lit.
 const SKY := [
-	{"planet": "#f6ead6", "band": "#b98f78", "planet_e": 0.95, "arc": 1.0, "aurora": 0.16, "stars": 0.5, "trails": 0.0, "slab": "#a6aaa8"},
+	{"planet": "#ffe6c2", "band": "#a8705c", "planet_e": 1.0, "arc": 1.0, "aurora": 0.16, "stars": 0.5, "trails": 0.0, "slab": "#a6aaa8"},
 	{"planet": "#f0b98a", "band": "#9a5a48", "planet_e": 0.75, "arc": 0.5, "aurora": 0.08, "stars": 0.6, "trails": 0.9, "slab": "#7c7772"},
 	{"planet": "#d6e2f0", "band": "#8a9cb4", "planet_e": 0.85, "arc": 1.0, "aurora": 0.5, "stars": 0.9, "trails": 0.0, "slab": "#98a0a8"},
 ]
@@ -1808,7 +1808,7 @@ static func generation(a: Arena, g: int) -> void:
 	var model: Node3D = st.get("gate_model")
 	if model:
 		model.rotation_degrees = Vector3(0, GATE_YAW, 0) if whole else Vector3(1.4, GATE_YAW, 0.9)
-		Look.set_param(model, &"tint", Color(1, 1, 1) if whole else (Color(0.5, 0.47, 0.43) if g == 2 else Color(0.62, 0.66, 0.72)))
+		Look.set_param(model, &"tint", Color(1, 1, 1) if whole else (Color(0.68, 0.64, 0.6) if g == 2 else Color(0.66, 0.7, 0.76)))
 	# every light that is part of a structure: fed while the road is kept, dead after, and the Engine's colour when it wakes
 	for l: Array in st.lamps:
 		_set_lamp(l[0], l[1] if whole else engine, float(l[2]) if whole else (float(l[2]) * 0.8 if woke else 0.0))
@@ -1874,7 +1874,7 @@ static func generation(a: Arena, g: int) -> void:
 		m.set_shader_parameter("cloud_shadow", float(s.cloud_shadow))
 	var ground: ShaderMaterial = st.ground
 	ground.set_shader_parameter("slab", Color(str(sk.slab)))
-	ground.set_shader_parameter("guide", Color(0.1, 0.42, 0.38) * 0.7 if whole else (Color(0.3, 1.4, 1.2) if woke else Color.BLACK))
+	ground.set_shader_parameter("guide", Color(0.1, 0.42, 0.38) * 0.7 if whole else (Color(0.14, 0.7, 0.6) if woke else Color.BLACK))
 	ground.set_shader_parameter("wear", float(s.wear))
 	ground.set_shader_parameter("wet", float(s.wet))
 	for m in st.sunlit:

@@ -64,7 +64,7 @@ void fragment() {
 	float bed = wpos.y * 0.9 + n2 * 3.0 + n1 * 14.0;
 	float strata = 0.5 + 0.5 * sin(bed * 6.2832);
 	strata = mix(strata, 0.5 + 0.5 * sin(wpos.y * 5.3 + n3 * 4.0), 0.3);
-	vec3 rock = mix(rock_a, rock_b, clamp(rl * 1.7 - 0.12 + (strata - 0.5) * 0.24 + (n3 - 0.5) * 0.2, 0.0, 1.0));
+	vec3 rock = mix(rock_a, rock_b, clamp(rl * 1.2 + 0.1 + (strata - 0.5) * 0.2 + (n3 - 0.5) * 0.16, 0.0, 1.0));
 	rock *= 0.8 + 0.4 * n2;
 	// the foot of the sea cliff is dark and wet
 	rock *= mix(0.45, 1.0, smoothstep(sea_level + 1.0, sea_level + 9.0, wpos.y));
@@ -87,7 +87,7 @@ void fragment() {
 		float along = texture(path_mask, muv).g;
 		float joint = smoothstep(0.9, 0.97, along);
 		float kerb = smoothstep(0.5, 0.54, pm0) * (1.0 - smoothstep(0.6, 0.64, pm0));
-		float strip = smoothstep(0.8, 0.86, pm0);
+		float strip = smoothstep(0.84, 0.89, pm0);
 		vec3 road = slab * (0.84 + 0.3 * n2) * (0.92 + 0.3 * (n3 - 0.5));
 		road = mix(road, road * 0.3, max(joint, kerb) * 0.85);
 		road = mix(road, slab * 0.38, strip * (1.0 - joint));

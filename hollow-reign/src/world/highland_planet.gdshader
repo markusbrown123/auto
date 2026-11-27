@@ -17,9 +17,9 @@ void fragment() {
 	float day = smoothstep(-0.12, 0.45, dot(n, normalize(light)));
 	float swirl = texture(noise_tex, vec2(p.x * 0.12 + n.z * 0.05, p.y * 0.55 + 0.3)).r;
 	float bands = 0.5 + 0.5 * sin(p.y * 13.0 + swirl * 7.0);
-	vec3 c = mix(lit, band, bands * 0.55 + (swirl - 0.5) * 0.4);
+	vec3 c = mix(lit, band, clamp(bands * 0.7 + (swirl - 0.5) * 0.5, 0.0, 1.0));
 	// a thin bright limb, as an atmosphere has
 	c += lit * pow(r, 6.0) * 0.25;
 	ALBEDO = c;
-	ALPHA = (1.0 - smoothstep(0.985, 1.0, r)) * mix(0.07, 1.0, day) * strength;
+	ALPHA = (1.0 - smoothstep(0.985, 1.0, r)) * mix(0.1, 1.0, day) * strength;
 }

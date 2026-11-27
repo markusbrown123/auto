@@ -662,6 +662,7 @@ func _run() -> void:
 					if e[1] == c[1]:
 						best = mini(best, absi(int(e[0]) - int(c[0])))
 				worst = maxi(worst, best)
+			print("  sounds ", FighterRig.foot_log, "\n  contacts ", _contacts)
 			var span := maxf(float(pose[2]) - 1.0, 0.1)
 			print("  footfalls: %d sounds, %d feet down, worst offset %d frame(s) = %.0f ms at 30 fps (the audit reads a frame after the rig), %.2f sounds a second" % [FighterRig.foot_log.size(), _contacts.size(), worst, worst * 1000.0 / 30.0, FighterRig.foot_log.size() / span])
 		if not strips.is_empty():

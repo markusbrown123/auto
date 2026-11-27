@@ -1978,22 +1978,20 @@ func t_block_rules() -> void:
 	ok(pe.has(&"perfect_block") and not pe.has(&"block") and int(p.stats.get("perfect_blocks", 0)) == 1, "and is announced as one")
 	ok(is_equal_approx(poise - p.b_poise, DuelSim.POISE_BLOCK_TIMED) and DuelSim.POISE_BLOCK_TIMED > DuelSim.POISE_BLOCK * 3.0, "it wears four times the poise of a plain block")
 	ok(rec.size() == 1 and is_equal_approx(float(rec[0]), maxf(DuelSim.SHORT_RECOVER_MIN, 1.5 * DuelSim.SHORT_RECOVER) + 0.35), "and leaves the foe open longer")
-	# guard break: no charge left
+	# no charge left: the guard still holds while the stamina can pay, at a heavier price (owner, 2026-11-27)
 	var b := _with_attack("ashen_sentinel", [cut])
 	var be: Array = []
 	b.ev.connect(func(n, d): be.append([n, d]))
 	b.p_shield = 0
 	b.input_block(true); hp = b.pl.hp
+	var bst: float = b.pl.stamina
 	_strike(b)
-	var gb: Array = be.filter(func(e): return e[0] == &"guard_break")
-	var full: float = 20.0 * (1.0 - float(b.pl.mitigation))
-	ok(gb.size() == 1 and gb[0][1].why == "shield" and int(b.stats.get("guard_breaks", 0)) == 1, "with no charge left the guard breaks")
-	ok(absf((hp - b.pl.hp) - full * DuelSim.GUARD_BREAK_DMG) < 0.01 and b.pl.hp < hp, "part of the blow lands (%.1f of %.1f)" % [hp - b.pl.hp, full])
-	ok(b.p_state == DuelSim.P.STUN and absf(b.p_t - DuelSim.GUARD_BREAK_STUN) < 0.05 and DuelSim.GUARD_BREAK_STUN < 1.0, "and the knight reels, briefly")
-	b.b_state = DuelSim.B.RECOVER; b.b_t = 30.0
-	b.input_block(false)
-	run_for(b, DuelSim.GUARD_BREAK_STUN + 0.1)
-	ok(b.p_state == DuelSim.P.FREE and b.p_shield == b.p_shield_max and b.p_shield_max > 0, "the shield is whole again once the knight has recovered")
+	var bc := _with_attack("ashen_sentinel", [cut])
+	bc.input_block(true)
+	var cst: float = bc.pl.stamina
+	_strike(bc)
+	ok(be.filter(func(e): return e[0] == &"guard_break").is_empty() and int(b.stats.get("guard_breaks", 0)) == 0 and b.pl.hp == hp, "with no charge left the guard still holds and costs no health")
+	ok(bst - b.pl.stamina > (cst - bc.pl.stamina) * 2.0, "but the bare arm pays far more stamina than the board (%.1f against %.1f)" % [bst - b.pl.stamina, cst - bc.pl.stamina])
 	# guard break: no stamina to hold the blow
 	var b2 := _with_attack("ashen_sentinel", [cut])
 	var be2: Array = []

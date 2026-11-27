@@ -1059,10 +1059,11 @@ func _resolve_strike() -> void:
 				stats["perfect_blocks"] = int(stats.get("perfect_blocks", 0)) + 1
 				_gain_surge(8.0)
 			elif p_shield_max > 0:
-				# the shield's count: an untimed block uses one
+				# the shield's count: an untimed block uses one ("spent": this blow found none left)
+				var had := p_shield > 0
 				p_shield = maxi(0, p_shield - 1)
 				p_shield_idle = 0.0
-				_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max, "spent": p_shield == 0})
+				_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max, "spent": not had})
 			_spend(cost)
 			if a.get("drain", false):
 				_drain(dmg * 0.4)

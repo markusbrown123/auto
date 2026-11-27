@@ -10,6 +10,102 @@
    "role": "witness",
    "status": "failed",
    "voice": "Hamish (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "gen2_arrive_m_01_m.ogg",
+   "hash": "f25daf4a0130",
+   "id": "f09ee015-1346-416d-a545-8b5531a99eb4",
+   "lufs": -18.8,
+   "model": "inworld",
+   "peak": -1.6,
+   "role": "player_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "gen2_seal_01_m.ogg",
+   "hash": "fdbd520e637b",
+   "id": "394cfd43-3aba-49dd-a0ab-3d43337cadae",
+   "lufs": -18.5,
+   "model": "inworld",
+   "peak": -1.7,
+   "role": "player_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "gen2_seal_03_m.ogg",
+   "hash": "1e7c78351dcc",
+   "id": "d1e0968f-de0a-4103-94a8-e9796a15e9d0",
+   "lufs": -18.4,
+   "model": "inworld",
+   "peak": -1.8,
+   "role": "player_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "kept_intro_01_m.ogg",
+   "hash": "9fade2197a76",
+   "id": "ccb6dd82-07f2-4958-b1c0-583056877470",
+   "lufs": -18.8,
+   "model": "inworld",
+   "peak": -1.8,
+   "role": "kept_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "kept_intro_03_m.ogg",
+   "hash": "0e47cb6aa9c6",
+   "id": "e4abba31-8ae5-461e-b62a-9e42fb4e2799",
+   "lufs": -18.7,
+   "model": "inworld",
+   "peak": -1.8,
+   "role": "kept_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "kept_beat_01_m.ogg",
+   "hash": "f0cb8e693284",
+   "id": "cabc2c48-91a8-48e9-96bd-2f4eb18e45c6",
+   "lufs": -18.5,
+   "model": "inworld",
+   "peak": -2.5,
+   "role": "kept_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "kept_after_01_m.ogg",
+   "hash": "f633b2d3baa0",
+   "id": "edb924c7-bcb4-4391-8fd3-6b8b13c43660",
+   "lufs": -18.5,
+   "model": "inworld",
+   "peak": -2.1,
+   "role": "kept_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 2.0,
+   "file": "kept_after_02_m.ogg",
+   "hash": "17a85bf249ac",
+   "id": "d70c7444-44d7-440d-a24c-3543c6b1d69c",
+   "lufs": -18.7,
+   "model": "inworld",
+   "peak": -1.8,
+   "role": "kept_m",
+   "status": "done",
+   "voice": "Malcolm (en)"
   }
  ],
  "awakening_02_m.ogg": {
@@ -27,9 +123,33 @@
   "credits": 0.46,
   "hash": "7cbed41f812a",
   "id": "a20976ef-2ae6-4a4e-bbad-234b99fc0a03",
+  "lufs": -18.4,
   "model": "eleven",
+  "peak": -2.8,
   "role": "player_m",
-  "status": "created",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "awakening_06_m.ogg": {
+  "credits": 0.46,
+  "hash": "095aac39d763",
+  "id": "81320a20-e918-4cbd-b91f-f384bfad554a",
+  "lufs": -18.5,
+  "model": "eleven",
+  "peak": -1.7,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "beast_death_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "df0f5e492b91",
+  "id": "32e60af4-ba93-4fa4-b249-48e35e6db568",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -1.7,
+  "role": "player_m",
+  "status": "done",
   "voice": "Sterling"
  },
  "blackwood_0_g3_01.ogg": {
@@ -98,6 +218,17 @@
   "status": "done",
   "voice": "Luna"
  },
+ "devourer_death_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "c53c562dab4b",
+  "id": "4b6c3934-6a57-4e2d-ada3-a3fed6065102",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -2.3,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
  "devourer_death_03.ogg": {
   "credits": 0.46,
   "hash": "800e56a29ac4",
@@ -108,6 +239,17 @@
   "role": "devourer",
   "status": "done",
   "voice": "Luna"
+ },
+ "devourer_death_04_m.ogg": {
+  "credits": 0.46,
+  "hash": "bd50f4f6fc56",
+  "id": "eb53472c-ca94-4d8a-86f9-93d70744e345",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -2.7,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  },
  "devourer_intro_01.ogg": {
   "credits": 0.46,
@@ -141,6 +283,17 @@
   "role": "devourer",
   "status": "done",
   "voice": "Luna"
+ },
+ "executioner_intro_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "65ef1815ce88",
+  "id": "9c012403-b819-4d20-898a-b4e648920559",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -1.8,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  },
  "facility_01.ogg": {
   "credits": 2.0,
@@ -218,6 +371,17 @@
   "role": "frostking",
   "status": "done",
   "voice": "Josef (de)"
+ },
+ "frostking_intro_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "c0329361e0e0",
+  "id": "8a191680-dddd-492b-8356-eb5f8d0428bf",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -4.3,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  },
  "frostking_intro_03.ogg": {
   "credits": 2.0,
@@ -484,15 +648,15 @@
   "voice": "Victoria (en)"
  },
  "gen2_arrive_m_01_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "f25daf4a0130",
-  "id": "f09ee015-1346-416d-a545-8b5531a99eb4",
-  "lufs": -18.8,
-  "model": "inworld",
-  "peak": -1.6,
+  "id": "fd792f25-7629-43d2-a2b4-f99403859ebe",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -3.1,
   "role": "player_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "gen2_close_01.ogg": {
   "credits": 2.0,
@@ -528,15 +692,15 @@
   "voice": "Victoria (en)"
  },
  "gen2_seal_01_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "fdbd520e637b",
-  "id": "394cfd43-3aba-49dd-a0ab-3d43337cadae",
-  "lufs": -18.5,
-  "model": "inworld",
-  "peak": -1.7,
+  "id": "5af3fd07-aa10-4373-a043-2cbf3c5c07d6",
+  "lufs": -18.2,
+  "model": "eleven",
+  "peak": -2.8,
   "role": "player_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "gen2_seal_02.ogg": {
   "credits": 2.0,
@@ -561,15 +725,15 @@
   "voice": "Victoria (en)"
  },
  "gen2_seal_03_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "1e7c78351dcc",
-  "id": "d1e0968f-de0a-4103-94a8-e9796a15e9d0",
-  "lufs": -18.4,
-  "model": "inworld",
-  "peak": -1.8,
+  "id": "d2968b8d-a097-470e-95a7-92ca00f76b46",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -2.7,
   "role": "player_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "gen2_seal_burns_01.ogg": {
   "credits": 2.0,
@@ -670,6 +834,17 @@
   "status": "done",
   "voice": "Dominus (en)"
  },
+ "gravewarden_intro_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "b7986a2ba0cf",
+  "id": "c1c2a168-9088-43ec-9ff1-c61bef3db794",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -4.1,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
  "gravewarden_intro_03.ogg": {
   "credits": 2.0,
   "hash": "63a854493a1a",
@@ -691,6 +866,17 @@
   "role": "huntsman",
   "status": "done",
   "voice": "Victor (en)"
+ },
+ "huntsman_intro_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "03ee622a82a1",
+  "id": "0cecf128-e9de-4163-a7d9-c885acc13ad8",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -5.0,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  },
  "huntsman_intro_03.ogg": {
   "credits": 2.0,
@@ -715,15 +901,15 @@
   "voice": "Victoria (en)"
  },
  "kept_after_01_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "f633b2d3baa0",
-  "id": "edb924c7-bcb4-4391-8fd3-6b8b13c43660",
-  "lufs": -18.5,
-  "model": "inworld",
-  "peak": -2.1,
+  "id": "aa86c18b-c23e-4f66-a21d-596de10b14fd",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -1.8,
   "role": "kept_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "kept_after_02_f.ogg": {
   "credits": 2.0,
@@ -737,15 +923,15 @@
   "voice": "Victoria (en)"
  },
  "kept_after_02_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "17a85bf249ac",
-  "id": "d70c7444-44d7-440d-a24c-3543c6b1d69c",
-  "lufs": -18.7,
-  "model": "inworld",
-  "peak": -1.8,
+  "id": "ac786fc6-a242-4a35-b673-c28bf002f802",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -2.7,
   "role": "kept_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "kept_after_03.ogg": {
   "credits": 2.0,
@@ -814,15 +1000,15 @@
   "voice": "Victoria (en)"
  },
  "kept_beat_01_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "f0cb8e693284",
-  "id": "cabc2c48-91a8-48e9-96bd-2f4eb18e45c6",
-  "lufs": -18.5,
-  "model": "inworld",
-  "peak": -2.5,
+  "id": "e29e65ae-8caf-40e1-8b7d-dee262053092",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -4.5,
   "role": "kept_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "kept_beat_02_f.ogg": {
   "credits": 2.0,
@@ -858,15 +1044,15 @@
   "voice": "Victoria (en)"
  },
  "kept_intro_01_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "9fade2197a76",
-  "id": "ccb6dd82-07f2-4958-b1c0-583056877470",
-  "lufs": -18.8,
-  "model": "inworld",
-  "peak": -1.8,
+  "id": "0e3abb3d-674b-48be-8d4a-4a438c6bbb3c",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -3.5,
   "role": "kept_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "kept_intro_02_f.ogg": {
   "credits": 2.0,
@@ -902,15 +1088,15 @@
   "voice": "Victoria (en)"
  },
  "kept_intro_03_m.ogg": {
-  "credits": 2.0,
+  "credits": 0.46,
   "hash": "0e47cb6aa9c6",
-  "id": "e4abba31-8ae5-461e-b62a-9e42fb4e2799",
-  "lufs": -18.7,
-  "model": "inworld",
-  "peak": -1.8,
+  "id": "aeb546b0-55c6-497f-8090-308758706a98",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -2.6,
   "role": "kept_m",
   "status": "done",
-  "voice": "Malcolm (en)"
+  "voice": "Sterling"
  },
  "monarch_blade_01.ogg": {
   "credits": 2.0,
@@ -922,6 +1108,17 @@
   "role": "monarch",
   "status": "done",
   "voice": "Hades (en)"
+ },
+ "monarch_death_03_m.ogg": {
+  "credits": 0.46,
+  "hash": "eb61e0d3c26b",
+  "id": "a24a6889-aead-4ffb-96f8-09f127c158dc",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -3.1,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  },
  "monarch_g3_death_03_f.ogg": {
   "credits": 2.0,
@@ -1044,6 +1241,28 @@
   "status": "done",
   "voice": "Blake (en)"
  },
+ "monarch_intro_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "32d47be99cf2",
+  "id": "dec2f259-8243-489c-8d46-6f3513c4e879",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -2.4,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "monarch_intro_04_m.ogg": {
+  "credits": 0.46,
+  "hash": "efbecd5c7386",
+  "id": "212f0889-d1d8-4994-8756-549e1020f315",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -3.5,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
  "monarch_restored_01.ogg": {
   "credits": 2.0,
   "hash": "46681142620d",
@@ -1054,6 +1273,28 @@
   "role": "monarch",
   "status": "done",
   "voice": "Hades (en)"
+ },
+ "sentinel_death_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "19f7b197d092",
+  "id": "5d3a3098-7102-4e04-b6c4-d1fa9655ef77",
+  "lufs": -18.6,
+  "model": "eleven",
+  "peak": -1.6,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "sentinel_intro_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "4d0d14a6b989",
+  "id": "dd55e5f9-143e-46a9-a0bb-24fe17d25f10",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -3.8,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  },
  "throne_0_g3_01.ogg": {
   "credits": 2.0,
@@ -1066,6 +1307,61 @@
   "status": "done",
   "voice": "Claire (en)"
  },
+ "w_azhurion_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "0acb7416da05",
+  "id": "7524bfb6-5c14-455b-a9c7-391538bc083b",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -2.5,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_beast_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "7fb677d3ec7a",
+  "id": "d7a4c9f1-bb0e-416a-81b4-6a91c61c8b02",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -2.5,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_devourer_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "ce5438abb2da",
+  "id": "4c497626-90cd-4ef7-a511-73c9f091628f",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -2.2,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_executioner_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "c3a0715e01df",
+  "id": "54839f29-a54e-4ab9-966e-6989c0439c57",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -5.4,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_frostking_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "b7c515bb0c5c",
+  "id": "0e54e33e-a3b4-4f28-ac78-f64cbc623d38",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -2.8,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
  "w_gravewarden_approach_01.ogg": {
   "credits": 2.0,
   "hash": "e66a4f5c1b91",
@@ -1077,6 +1373,28 @@
   "status": "done",
   "voice": "Hamish (en)"
  },
+ "w_gravewarden_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "229b41bd6e40",
+  "id": "f75f657c-4ea8-4161-882e-aff700960969",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -1.8,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_monarch_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "7bf7b12daf74",
+  "id": "970edaf5-373c-49ed-9337-593e1c986c24",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -4.5,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
  "w_monarch_approach_03.ogg": {
   "credits": 2.0,
   "hash": "42d17a10845a",
@@ -1087,6 +1405,138 @@
   "role": "witness",
   "status": "done",
   "voice": "Hamish (en)"
+ },
+ "w_rimewyrm_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "56c5b4c19ce5",
+  "id": "5989450c-022c-41cc-a56c-b2e69d253d02",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -3.8,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_sentinel_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "34586399ef9c",
+  "id": "6ab41fe7-7eb3-456e-93d9-c342498b140c",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -2.4,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_choice_01_m.ogg": {
+  "credits": 0.46,
+  "hash": "8ec6377e4c93",
+  "id": "58e18a07-f605-4472-902a-dbddd44ea174",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -3.2,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_kings_01_m.ogg": {
+  "credits": 0.46,
+  "hash": "66ef90e1bd92",
+  "id": "90e2b0ff-6e29-4e6c-83e7-b38c17a5977f",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -3.4,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_kings_03_m.ogg": {
+  "credits": 0.46,
+  "hash": "f9b0a11478e5",
+  "id": "ceccaf7a-4885-4780-a853-db6a39addd36",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -4.7,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_prayer_01_m.ogg": {
+  "credits": 0.46,
+  "hash": "2044f950afd3",
+  "id": "9f60eef9-04fa-4876-ae8f-f066ac3b453c",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -3.1,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_refusal_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "b5e35ed1f115",
+  "id": "7e4a7269-0cb4-4e86-b9bc-e488df2c3173",
+  "lufs": -18.6,
+  "model": "eleven",
+  "peak": -5.4,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_return_01_m.ogg": {
+  "credits": 0.46,
+  "hash": "9e6bba2c8721",
+  "id": "1bf26e2a-9a35-42bd-bc93-87119dc00eca",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -3.2,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_smith_01_m.ogg": {
+  "credits": 0.46,
+  "hash": "75b8dee829b5",
+  "id": "4ce04c6f-36a0-402e-bff5-6fe07bb095ea",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -3.3,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_talk_sword_01_m.ogg": {
+  "credits": 0.46,
+  "hash": "8ffd546bd93f",
+  "id": "6d4e4602-6698-4bda-a0b8-15afc76c48d2",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -2.9,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_widow_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "f5455dc58042",
+  "id": "c4acc50d-8195-4e2d-8fb1-d6f587aaf636",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -4.5,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "w_wyrm_approach_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "875fb16d8bb2",
+  "id": "a26ac487-94bb-4fe3-b9ff-72d1e8b9cdf7",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -3.4,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  },
  "widow_death_01.ogg": {
   "credits": 0.46,
@@ -1110,6 +1560,17 @@
   "status": "done",
   "voice": "Giselle"
  },
+ "widow_intro_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "26142b19e668",
+  "id": "c4f76b14-068c-4e6c-b661-2a81873a36a4",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -5.8,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
  "widow_intro_03.ogg": {
   "credits": 0.46,
   "hash": "21e6ff86698c",
@@ -1120,5 +1581,27 @@
   "role": "widow",
   "status": "done",
   "voice": "Giselle"
+ },
+ "witness_discovery_03_m.ogg": {
+  "credits": 0.46,
+  "hash": "11e84c992704",
+  "id": "e4d0b8cf-f9fe-466f-8910-2e14ab413855",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -4.6,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "witness_discovery_06_m.ogg": {
+  "credits": 0.46,
+  "hash": "535e9698d509",
+  "id": "30456ebd-56c2-4452-8ccf-653e5a618c92",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -1.9,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
  }
 }

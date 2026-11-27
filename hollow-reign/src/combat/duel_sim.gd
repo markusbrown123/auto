@@ -38,6 +38,7 @@ const CANCEL_FRAC := 0.85
 const BUFFER_SWING := 0.75
 const COMBO_PAUSE := 0.9         # seconds without a cut landing after which the variety count starts over
 const COMBO_POISE := 0.15        # more poise wear per cut for each step of the variety count
+const READ_MULT := 0.6           # the same line more than twice running is read by the foe: the cut lands, but glancing
 const TIRED_MULT := 0.5          # a cut thrown without the stamina for it still lands, at this share of its damage,
 const TIRED_SLOW := 1.4          # and takes this much longer
 const COUNTER_MULT := 2.0        # the first cut along the shown line in an opening a parry earned (in place of RIFT_MULT)
@@ -633,10 +634,12 @@ func _resolve_player_hit(dir: String) -> void:
 		p_same = p_same + 1 if dir == p_last_dir else 1
 		if p_same == 1 or p_last_dir == "" or _continues_combo(dir):
 			p_combo = mini(p_combo + 1, COMBO_MAX)
-		elif p_same > 2:
+		var read := false
+		if p_same > 2 and not _continues_combo(dir):
 			p_combo = 1
+			read = true                   # the same line a third time running: it is seen coming, and half turned
 		p_combo = maxi(p_combo, 1)
-		var mult := 1.0 + COMBO_STEP * (p_combo - 1)
+		var mult := (1.0 + COMBO_STEP * (p_combo - 1)) * (READ_MULT if read else 1.0)
 		var tired: bool = p_swing.get("tired", false)
 		if tired:
 			mult *= TIRED_MULT
@@ -693,7 +696,7 @@ func _resolve_player_hit(dir: String) -> void:
 			mult *= 1.25
 		var dmg: float = pl.attack * mult * (1.0 - (0.0 if pierce else float(bd.get("armor", 0.0)))) * rng.randf_range(0.95, 1.05)
 		_gain_surge(7.0 + (6.0 if named != "" else 0.0))
-		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "counter": counter, "tired": tired, "same": p_same, "named": named, "combo_id": combo_id})
+		_damage_boss(dmg, {"dir": dir, "crit": crit, "combo": p_combo, "weak": elem, "rift": on_rift, "counter": counter, "tired": tired, "same": p_same, "read": read, "named": named, "combo_id": combo_id})
 		if extra_posture > 0.0 and b_state == B.RECOVER and _wear_poise(extra_posture, "cut"):
 			_poise_break("cut")
 		if on_rift and boss_open():

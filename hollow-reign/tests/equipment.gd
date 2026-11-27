@@ -1056,15 +1056,21 @@ func t_shields() -> void:
 	# the count in the duel: it runs down, then the shield is spent
 	var a := shield_run(3)
 	var lefts: Array = a.events.map(func(e): return int(e.left))
-	ok(lefts.size() >= 6 and lefts.slice(0, 4) == [2, 1, 0, 0] and a.events[0].max == 3, "three blocks count down to none (%s)" % str(lefts.slice(0, 6)))
-	ok(not a.events[2].spent and a.events[3].spent and int(a.sim.stats.spent_blocks) == lefts.size() - 3, "the blow after the last is caught on a spent shield")
+	ok(lefts.size() >= 6 and lefts.slice(0, 5) == [2, 1, 0, 0, 3] and a.events[0].max == 3, "three blocks count down to none, the next breaks the guard, and the shield is whole again after (%s)" % str(lefts.slice(0, 6)))
+	ok(not a.events[2].spent and a.events[3].spent and int(a.sim.stats.get("guard_breaks", 0)) >= 1, "the blow after the last charge is a guard break")
 	var many := shield_run(100)
-	ok(int(many.sim.stats.get("spent_blocks", 0)) == 0 and many.sim.stats.blocks == a.sim.stats.blocks, "a shield with blocks to spare is never spent in the same fight")
-	ok(a.lost > many.lost * 2.0 and a.spent > many.spent * 1.3, "a spent shield lets blows through and costs more stamina (%.0f health against %.0f)" % [a.lost, many.lost])
-	ok(shield_run(0).events.is_empty() and is_equal_approx(shield_run(0).lost, many.lost), "with no count (no shield) guarding is as it always was")
+	ok(int(many.sim.stats.get("guard_breaks", 0)) == 0 and many.sim.stats.blocks > 5, "a shield with blocks to spare is never beaten down in the same fight")
+	ok(a.lost > 0.0 and is_zero_approx(many.lost), "a held guard costs no health at all; only a broken one lets a blow through (%.0f health against %.0f)" % [a.lost, many.lost])
+	ok(shield_run(0).events.is_empty() and is_zero_approx(shield_run(0).lost) and shield_run(0).spent > many.spent * 1.5, "with no count (no shield) the guard costs stamina only, and more of it")
 	# and comes back while the guard is down, one at a time
 	var s: DuelSim = a.sim
 	s.input_block(false)
+	s.b_state = DuelSim.B.RECOVER      # (the foe stands by while the count is watched)
+	s.b_t = 1.0e9
+	s._set_p(DuelSim.P.FREE, 0.0)
+	s._shield_reset = false
+	s.p_shield = 0
+	s.p_shield_idle = 0.0
 	a.events.clear()
 	var regen: float = s.pl.shield_regen
 	for i: int in int((regen * 3.0 + 0.5) * 60.0):

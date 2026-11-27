@@ -635,6 +635,9 @@ func _process(delta: float) -> void:
 			if bot:
 				bot.tick(dt * ts)
 			sim.tick(dt * ts)
+			if _warn_ring_at >= 0.0 and sim.time >= _warn_ring_at and sim.b_state == DuelSim.B.WINDUP:
+				_warn_ring_at = -1.0
+				_ring(foe_rig.blade_mid(), Color(1.0, 0.16, 0.08), 1.2 * float(foe.rig.scale), 0.4)
 			if _whoosh_at >= 0.0 and sim.time >= _whoosh_at:
 				_whoosh_at = -1.0
 				Sfx.play("swing_heavy" if _whoosh_heavy else "swing", -2.0, 0.85 if _whoosh_heavy else 0.9)
@@ -766,6 +769,44 @@ func _screen_to_world_dir(d: String) -> Vector3:
 
 func _set_foe_blade_warning(on: bool) -> void:
 	foe_rig.set_blade_warning(on)
+	if not on:
+		_warn_ring_at = -1.0
+
+var _warn_ring_at := -1.0     # sim time of the second red ring of an unblockable's warning
+
+## Where the knight's guard takes a blow: the shield if one is carried, else the blade.
+func _shield_point() -> Vector3:
+	if player_rig.shield != null and is_instance_valid(player_rig.shield):
+		return (player_rig.shield as Node3D).global_position
+	return player_rig.blade_mid()
+
+## A ring that opens out and fades, facing the camera: the mark of a perfect block (bright), a counter (gold), a broken
+## guard or an unblockable blow being wound up (red).
+func _ring(at: Vector3, color: Color, size: float = 1.2, time: float = 0.4) -> void:
+	var m := MeshInstance3D.new()
+	var t := TorusMesh.new()
+	t.inner_radius = 0.44
+	t.outer_radius = 0.5
+	t.rings = 32
+	t.ring_segments = 6
+	m.mesh = t
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = color
+	mat.no_depth_test = true
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.material_override = mat
+	m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(m)
+	m.global_position = at
+	if cam:
+		m.global_basis = Basis(cam.global_basis.x, -cam.global_basis.z, cam.global_basis.y)      # the torus's axis toward the camera
+	m.scale = Vector3.ONE * size * 0.25
+	var tw := create_tween().set_parallel(true)
+	tw.tween_property(m, "scale", Vector3.ONE * size, time).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	tw.tween_property(mat, "albedo_color:a", 0.0, time).set_ease(Tween.EASE_IN)
+	tw.chain().tween_callback(m.queue_free)
 
 
 # ================================================================ sim events
@@ -788,6 +829,36 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		&"boss_strike":
 			_on_strike(d)
 		&"shield_charges": hud.shield_charges(d)
+		&"unblockable_warning":
+			# said before the blow, three ways: the word, the red ring on its weapon (twice), and the weapon's own red glow
+			hud.toast("UNBLOCKABLE", Color("#ff4a32"), minf(1.1, float(d.windup) * 0.7))
+			_ring(foe_rig.blade_mid(), Color(1.0, 0.16, 0.08), 1.5 * float(foe.rig.scale), 0.45)
+			_warn_ring_at = sim.time + float(d.windup) * 0.5
+		&"block":
+			# the board held: sparks off it (in `_on_strike`), a warm flash on the shield, the word
+			fx._flash(_shield_point(), Color(1.0, 0.86, 0.6), 3.5, 2.2, 0.18)
+			if _lesson < 0:
+				hud.toast("BLOCKED", UI.BONE, 0.45)
+		&"perfect_block":
+			# turned for nothing: the bright ring, the chime, a breath of slow time
+			_ring(_shield_point(), Color(1.0, 0.95, 0.7), 1.3, 0.4)
+			fx._flash(_shield_point(), Color(1.0, 0.95, 0.75), 6.0, 3.0, 0.25)
+			sparks(_shield_point(), Vector3(0, 0.7, -0.5), Fx.BUDGET.perfect, Color(1.0, 0.9, 0.6), 6.5)
+			Sfx.play("parry_perfect", -2.0, 1.1)
+			hud.toast("PERFECT BLOCK", UI.GOLD, 0.8)
+			_slow = maxf(_slow, 0.22)
+			Game.haptic(35, 0.9)
+		&"guard_break":
+			# the guard is beaten down: red, the crack of the board, splinters
+			_ring(_shield_point(), Color(1.0, 0.2, 0.1), 1.6, 0.5)
+			fx.chips(_shield_point(), 8)
+			Sfx.play("shield_heavy", -1.0, 0.8)
+			hud.toast("SHIELD BEATEN DOWN" if str(d.get("why", "")) == "shield" else "GUARD BROKEN", Color("#d23a2a"), 1.0)
+			hud.hurt_flash(0.5)
+		&"block_failed":
+			hud.toast({"unblockable": "CANNOT BE BLOCKED", "busy": "GUARD TOO SLOW", "late": "TOO LATE"}.get(str(d.get("why", "")), "TOO LATE"), Color("#d23a2a"), 0.8)
+		&"parry_failed":
+			hud.toast({"dir": "WRONG LINE", "late": "TOO EARLY", "unparryable": "CANNOT BE PARRIED"}.get(str(d.get("why", "")), "MISSED"), Color("#d23a2a"), 0.7)
 		&"boss_combo":
 			if randf() < 0.5:
 				ring_dir = -ring_dir       # comes at you from the other side
@@ -795,7 +866,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			# step in until the blade will reach the body
 			player_rig.swing(DuelSim.dir_vec(d.dir), d.time, str(d.get("finish", "")))
 			p_back_t = clampf(player_rig.reach() + 0.18 * float(foe.rig.scale) - gap - f_back, -1.1, 0.3)      # (after the swing: the reach is that of the cut chosen)
-			Sfx.play("swing", -4.0, 1.25 - float(d.time) * 0.8)
+			Sfx.play("swing", -4.0 if not d.get("tired", false) else -8.0, 1.25 - float(d.time) * 0.8)
 		&"player_parry_swing":
 			player_rig.parry(DuelSim.dir_vec(d.dir))
 			Sfx.play("swing", -9.0, 1.3)
@@ -949,8 +1020,13 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			Sfx.play("hit_armor", -2.0 if crit else -5.0, 1.0 + 0.04 * int(d.get("combo", 1)))
 			if crit:
 				Sfx.play("hit_flesh", -6.0)
-			hitstop(0.07 if crit else 0.045)
+			hitstop(0.05 if crit else 0.025)      # short: a flurry must not be held up by its own hits
 			shake(0.22 if crit else 0.12)
+			if d.get("counter", false):
+				hud.toast("COUNTER  ×%.1f" % DuelSim.COUNTER_MULT, UI.GOLD, 0.8)
+				Sfx.play("parry_perfect", -6.0, 1.25)
+				_ring(at, Color(1.0, 0.85, 0.5), 1.0, 0.3)
+				hitstop(0.09)
 			Game.haptic(18 if crit else 10, 0.5)
 			hud.combo(int(d.get("combo", 1)))
 			if _lesson >= 0:
@@ -1124,8 +1200,6 @@ func _on_strike(d: Dictionary) -> void:
 			Sfx.play("guard_break", 0.0)
 			player_rig.hurt()
 			player_rig.blocking = false
-			hud.toast("GUARD BROKEN", Color("#d23a2a"), 0.9)
-			hud.hurt_flash(0.35)
 			shake(0.7)
 			hitstop(0.09)
 			Game.haptic(70, 1.0)

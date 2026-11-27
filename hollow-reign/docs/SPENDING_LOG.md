@@ -150,3 +150,6 @@ Owner rejected round 1 ("more Kratos like"). Four samples (elevenlabs_v4, stabil
 
 ## 2026-11-27: protagonist voice round 3
 Owner sent a reference clip (a real actor's performance from a published game) and asked to replicate it: not cloned, not uploaded; pitch measured locally (about 99 Hz median). Three closest licensed voices recorded dry at stability 0.85: Alistair, Bob, Vlad, in marketing/audition/protagonist_round3/. About 1.4 credits. Unauditioned.
+
+## 2026-11-27: male protagonist re-recorded (owner's choice: Sterling, lowered 4, light helmet resonance)
+45 takes (40 player_m, 5 kept_m) on elevenlabs_v4, stability 0.7; pitch −4 semitones, tempo 0.94, then bass, room, light helmet resonance, level-matched. Clean masters kept in art/vo_masters/player_m/ (not in git) so the effect chain can be changed with `tools/voices.py --post` at no cost. Planned 20.7 credits; account read 839.89 before and 828.85 after (other passes were also running, so the difference is not solely this job). Recorded, unauditioned. No fight grunts or breathing recorded yet.

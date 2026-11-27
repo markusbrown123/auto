@@ -1,3 +1,38 @@
+# HANDOFF — read this first (written 2026-11-27, for the next session on a cheaper model)
+
+**Goal:** a polished, playable first-boss build (Generation I opening → road → Ashen Sentinel) on the owner's iPhone, without burning usage. The game imports and runs on the owner's Mac.
+
+**Usage rules from the owner (2026-11-27):** Sonnet for implementation, UI, visual polish, testing and routine fixes. The top model only for complex animation problems, combat architecture, major bugs and hard technical decisions. Group related changes; do not re-review the whole project; reuse assets and code; avoid paid asset generation (ask first). At most two background agents at once, started with `model: sonnet`, each with strict file ownership and told not to run git. Never resume an agent with a very large context for a small job: start a fresh one.
+
+**Do not break:** texture import settings are frozen (detect-3D off, compressed, mipmapped; `[importer_defaults]` in project.godot). Never hand-edit `.import` files. `tools/clone_test.sh` must show 0 import errors and `git status` clean after import. `marketing/`, `art/`, `shots/` have `.gdignore`. No FBX in git (`git ls-files | grep -ci "\.fbx$"` = 0).
+
+**Last commit with every suite green and a clean-clone pass:** `d9775ed` (clone) / `dd573a5`-era tree (all eleven suites, before armour pass 2). Nothing later has had both.
+
+**Running when this was written (Sonnet agents; their reports arrive as messages):**
+1. Death screen, checkpoints, swipe trails (Addendum 5 items 1–2) — owns src/core, overlays.gd, duel.gd, swipe_input.gd, duel_hud.gd, main.gd, tests, gen_regions.py.
+2. Walking pace and scenic roads (items 3, 5) — owns explore.gd movement/camera, src/world, locomotion in fighter_rig.gd. No paid generation.
+3. Shield clipping and cloak-colour removal (item 4) — owns shield poses in fighter_rig.gd, character_select.gd.
+4. Clip re-render and throne-hall scene check — owns src/cine small offsets, assets/video.
+
+**When each lands:** commit and push (stop hook requires it), look at its sheets, tell the owner plainly what is good and what is not, with pictures.
+
+**Then, in order:**
+1. `tools/check.sh`, `tools/test.sh` (all eleven suites), `tools/clone_test.sh`; name the build commit for the owner (Mac steps are in docs/IOS_BUILD.md quick start, using `tools/mac_import.sh`).
+2. Record one `--screen=slice` run at normal speed and look at the contact sheets (owner asked for testing "in actual gameplay at normal speed").
+3. Update this file, DEVELOPMENT_BACKLOG.md, BUG_REGISTER.md.
+
+**Open decisions waiting on the owner:**
+- Armour: monochrome gunmetal finish with etched ornament is in (`FINISH_COAT` in src/chars/armor_parts.gd; `--chrome` reverts, `--neon` restores the rejected glow). The code-built hood looks poor close up (a lumpy dark shell, worst on the male). Options: remove it (`--nohood` behaviour as default), or generate one hooded faceplate helm (about $0.30 Tripo, needs the owner's yes). Etching is too subtle at fight distance.
+- Witness: small orb (`mote`) is in; faint in daylight. Owner has not yet reacted.
+- Older suits: spikes trimmed and finish dulled by default; owner has not said whether to revert (`--spikes`).
+- Voices: 99 takes recorded in the final cast, unauditioned. Lyra is Claire lowered (owner named Claire or Caspian). Heir's own takes for shared scenes not recorded (about 140 credits; ask first).
+
+**Known defects not yet assigned:** forge layout at 16:9; roll camera swings 90–120°; dual-blade roll leg clip; two dark patches on the male abdomen; sanctuary orb drifts to the left edge; region menu text may still describe medieval scenery; final hall has no pit; stale docs (STORY_BIBLE, WORLD_HISTORY, CREDITS).
+
+**Budget:** see docs/SPENDING_LOG.md. Tripo graphics allocation about $31.50 of $100 spent; Higgsfield balance about 840 credits. Nothing has run on an iPhone; nobody has listened to the audio.
+
+---
+
 # Hollow Reign — development status
 
 Updated 2026-11-27 (UTC). Read `docs/DEVELOPMENT_BACKLOG.md` for the ordered list; this file says what is true now.

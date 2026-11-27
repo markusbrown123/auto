@@ -501,10 +501,6 @@ func _run() -> void:
 		say("  DEFECT the name field took no typing after a tap")
 	else:
 		say("  name typed: %s" % cs._typed)
-	for b: Button in _buttons():
-		if b.tooltip_text == ("Verdigris" if str(args.get("body", "m")) == "m" else "Dusk"):
-			await tap(b, "cloak " + b.tooltip_text)
-			break
 	await _wait(0.6)
 	await press("Choose a Blade")
 	step("starting sword")

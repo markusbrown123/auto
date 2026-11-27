@@ -27,7 +27,7 @@ var _typed := ""
 ## (Game.new_game's third argument) after `confirmed`.
 static var start_weapon := "w_rusted_sword"
 var weapon := "w_rusted_sword"
-var step := 0                     # 0: body, name, cloak · 1: the blade
+var step := 0                     # 0: body, name · 1: the blade
 var carousel: ItemCarousel
 var _blade := {}                  # the labels and bars of step 1, refilled as the row moves
 var _sword_stats := {}
@@ -170,44 +170,18 @@ func _fill() -> void:
 			names.append(str(Db.item(str(eq[slot])).get("name", eq[slot])))
 	_v.add_child(UI.wrapped("  ·  ".join(names), 22, UI.BONE, 600))
 	_v.add_child(UI.spacer(2))
-	# the name and the cloak side by side, so every control keeps a full-height touch target on a short screen
-	var pair := HBoxContainer.new()
-	pair.add_theme_constant_override("separation", 16)
-	_v.add_child(pair)
+	# the name (the cloak's colour is no longer offered: no cloak is drawn. `heraldry` keeps its default, and old saves keep theirs)
 	var name_col := VBoxContainer.new()
 	name_col.add_theme_constant_override("separation", 4)
-	pair.add_child(name_col)
+	_v.add_child(name_col)
 	name_col.add_child(UI.label("YOUR NAME", 18, UI.GOLD_DIM.lightened(0.3), "head"))
 	_name = LineEdit.new()
 	_name.placeholder_text = "Unbound"
 	_name.max_length = 16
 	_name.text = _typed
-	_name.custom_minimum_size = Vector2(240, UI.TAP)
+	_name.custom_minimum_size = Vector2(420, UI.TAP)
 	_name.text_changed.connect(func(t: String): _typed = t)
 	name_col.add_child(_name)
-	var cloak_col := VBoxContainer.new()
-	cloak_col.add_theme_constant_override("separation", 4)
-	pair.add_child(cloak_col)
-	cloak_col.add_child(UI.label("THE CLOAK YOU WERE BURIED IN", 18, UI.GOLD_DIM.lightened(0.3), "head"))
-	var row2 := HBoxContainer.new()
-	row2.add_theme_constant_override("separation", 8)
-	cloak_col.add_child(row2)
-	for h: Array in HERALDRY:
-		var b := Button.new()
-		b.custom_minimum_size = Vector2(62, UI.TAP)
-		var on: bool = h[1] == heraldry
-		b.add_theme_stylebox_override("normal", UI.box(Color(h[1]), UI.GOLD if on else UI.GOLD_DIM, 2 if on else 1, 1))
-		b.add_theme_stylebox_override("hover", UI.box(Color(h[1]).lightened(0.1), UI.GOLD, 2, 1))
-		b.add_theme_stylebox_override("pressed", UI.box(Color(h[1]), UI.GOLD, 2, 1))
-		b.tooltip_text = h[0]
-		b.pressed.connect(func():
-			heraldry = h[1]
-			for k: String in rigs:
-				if rigs[k].mat_cloth:
-					rigs[k].mat_cloth.albedo_color = Color(heraldry)
-			Sfx.play("ui_tap", -6.0)
-			_fill())
-		row2.add_child(b)
 	_v.add_child(UI.spacer(6))
 	var btns := HBoxContainer.new()
 	btns.add_theme_constant_override("separation", 20)

@@ -134,6 +134,9 @@ Order: benchmark set first, then roll out.
 6. [open, owner approval first] Casting and recording for father, son, heir and female equivalents; family and Monarch musical motifs.
 7. [open] Full-campaign test list in the brief; recordings.
 
+## PRIORITY (owner, 2026-11-27): a phone build playable up to the first boss
+Slice: launch → character and sword choice → Generation I opening and fall → time jump → heir's arrival → Courtyard road, Witness, lesson → Ashen Sentinel. Order: (1) land the running passes; (2) all suites together, touch failures first; (3) bot recording of the slice, watch, fix; (4) phone prep (ASTC/compressed textures, Performance preset default on device, export preset check); (5) name a commit for the owner. Hold the other armour families and the region restyle until the owner has played it. Voices: cast is final (`tools/cast_final.json`); recording waits for the story-line pass, not on the slice's critical path.
+
 ## K. Finalising for the first phone test (owner, 2026-11-27) — do in this order
 1. [running] Finish the two agent passes (opening visuals; generations II and III playable).
 2. [running] Casting files: four candidates per character in `marketing/audition/final_cast/`; owner chooses; then record all unrecorded lines with the chosen voices and regenerate dialogue.

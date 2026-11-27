@@ -1,0 +1,458 @@
+[    0.1s game |      0s wall] slice run: body=f weapon=w_starfall die=["1"] window=(960, 540) safe margins={ "l": 24.0, "r": 24.0, "t": 16.0, "b": 16.0 } preset=Balanced
+[    0.1s game |      0s wall] STEP launch
+[    0.7s game |      1s wall]   AUDIT Launch | small text 18 px: "an independent work"
+[    3.7s game |     13s wall]   launch screen took 3.6 s
+[    3.7s game |     13s wall]   audio during 'launch': Master peak -200.0 mean -100.0 dB; Music peak -200.0 mean -100.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -200.0 mean -100.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[    3.7s game |     13s wall] STEP main menu
+[    5.3s game |     54s wall]   AUDIT TitleScreen | small text 16 px: "THREE HUNDRED YEARS OF SILENCE"
+[    5.3s game |     54s wall]   AUDIT TitleScreen | small text 16 px: "v0.1.0"
+[    5.7s game |     65s wall]   tap 'NEW LEGACY' at (329, 370), target 538 x 68
+[    6.7s game |     89s wall]   audio during 'main menu': Master peak -10.1 mean -16.2 dB; Music peak -17.0 mean -24.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.7 mean -26.4 dB; Interface peak -20.5 mean -57.3 dB; Cinematics peak -200.0 mean -100.0 dB
+[    6.7s game |     89s wall] STEP character select
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 215 x 52: [THE KNIGHT]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 215 x 52: [THE BLADE]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 80 x 48: [Oxblood]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 80 x 48: [Ash]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 80 x 48: [Verdigris]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 80 x 48: [Dusk]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 80 x 48: [Bone]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 140 x 55: [BACK]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small target 290 x 55: [CHOOSE A BLADE]
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small text 20 px: "Broad in the shoulder and slow to anger."
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small text 18 px: "Both wake with the same strength, the sa"
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small text 16 px: "BURIED WITH"
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small text 18 px: "Wayfarer's Blade  ·  Splintered Heater  "
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small text 16 px: "A NAME, IF YOU REMEMBER ONE"
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small text 16 px: "THE CLOAK YOU WERE BURIED IN"
+[    6.7s game |     89s wall]   AUDIT TitleScreen:body | small text 17 px: "Drag to turn"
+[    7.1s game |     99s wall]   tap 'THE BLADE' at (386, 146), target 215 x 52
+[    8.8s game |    137s wall]   tap 'name field' at (274, 471), target 440 x 49
+[    9.3s game |    149s wall]   name typed: Ysolde
+[    9.3s game |    149s wall]   tap 'cloak Dusk' at (364, 568), target 80 x 48
+[   10.5s game |    175s wall]   tap 'CHOOSE A BLADE' at (349, 643), target 290 x 55
+[   10.7s game |    179s wall]   audio during 'character select': Master peak -10.2 mean -14.4 dB; Music peak -17.5 mean -21.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.1 mean -26.2 dB; Interface peak -20.5 mean -52.6 dB; Cinematics peak -200.0 mean -100.0 dB
+[   10.7s game |    179s wall] STEP starting sword
+[   11.7s game |    214s wall]   AUDIT TitleScreen:blade | small target 140 x 55: [BACK]
+[   11.7s game |    214s wall]   AUDIT TitleScreen:blade | small target 300 x 55: [RISE]
+[   11.7s game |    214s wall]   AUDIT TitleScreen:blade | small text 17 px: "Drag to turn"
+[   16.4s game |    342s wall]   sword in the middle: w_starfall (wanted w_starfall, 3 drags)
+[   16.8s game |    353s wall]   tap 'RISE' at (354, 653), target 300 x 55
+[   16.9s game |    357s wall]   saved? slot 1 exists=true  weapon=w_starfall body=f name=Ysolde
+[   16.9s game |    357s wall]   audio during 'starting sword': Master peak -9.0 mean -13.7 dB; Music peak -15.4 mean -20.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -26.3 dB; Interface peak -19.1 mean -57.4 dB; Cinematics peak -200.0 mean -100.0 dB
+[   16.9s game |    357s wall] STEP generation I
+[   17.5s game |    393s wall]   audio during 'generation I': Master peak -3.7 mean -10.3 dB; Music peak -17.3 mean -20.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.8 mean -26.9 dB; Interface peak -11.3 mean -21.9 dB; Cinematics peak -200.0 mean -100.0 dB
+[   17.5s game |    393s wall] STEP generation I, beat 1
+[   78.8s game |   1456s wall]   audio during 'generation I, beat 1': Master peak -1.0 mean -9.9 dB; Music peak -11.2 mean -20.6 dB; Dialogue peak -2.1 mean -19.9 dB; Combat peak -11.0 mean -51.0 dB; Ambience peak -20.7 mean -30.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[   78.8s game |   1456s wall] STEP generation I, beat 2
+[  114.8s game |   1927s wall]   duel begins: Throne Guard (knight 286 hp)
+[  114.8s game |   1929s wall]   audio during 'generation I, beat 2': Master peak -4.1 mean -17.4 dB; Music peak -14.7 mean -23.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -10.1 mean -42.3 dB; Ambience peak -23.9 mean -79.6 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[  114.8s game |   1929s wall] STEP generation I, beat 3
+[  115.1s game |   1935s wall]   AUDIT Prologue:duel | small text 19 px: "THRONE GUARD   ·   HUMANOID"
+[  140.2s game |   2255s wall]   audio during 'generation I, beat 3': Master peak -1.0 mean -6.8 dB; Music peak -13.7 mean -20.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak 0.4 mean -15.2 dB; Ambience peak -20.7 mean -26.3 dB; Interface peak -12.0 mean -44.0 dB; Cinematics peak -4.9 mean -31.1 dB
+[  140.2s game |   2255s wall] STEP generation I, beat 4
+[  150.8s game |   2328s wall]   duel begins: The Forgotten Monarch (knight 286 hp)
+[  151.1s game |   2332s wall]   AUDIT Prologue:duel | small text 19 px: "THE FORGOTTEN MONARCH"
+[  160.4s game |   2404s wall]   audio during 'generation I, beat 4': Master peak -1.0 mean -9.8 dB; Music peak -14.6 mean -18.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak 1.0 mean -21.4 dB; Ambience peak -14.1 mean -32.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -24.2 mean -65.1 dB
+[  160.4s game |   2404s wall] STEP generation I, beat 5
+[  194.0s game |   2645s wall]   audio during 'generation I, beat 5': Master peak -1.0 mean -20.6 dB; Music peak -23.1 mean -62.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -8.5 mean -35.1 dB; Ambience peak -14.5 mean -29.0 dB; Interface peak -16.5 mean -44.5 dB; Cinematics peak -200.0 mean -100.0 dB
+[  194.0s game |   2645s wall] STEP time jump
+[  205.2s game |   2803s wall]   audio during 'time jump': Master peak -15.7 mean -21.2 dB; Music peak -56.3 mean -96.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -26.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[  205.2s game |   2803s wall] STEP the heir's arrival
+[  248.7s game |   3234s wall]   audio during 'the heir's arrival': Master peak -3.5 mean -12.7 dB; Music peak -11.6 mean -18.9 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -10.0 mean -46.3 dB; Ambience peak -20.7 mean -27.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[  248.7s game |   3234s wall] STEP awakening at the Inheritance Engine
+[  270.6s game |   3429s wall]   the prompt is up: TAKE UP YOUR SWORD
+[  271.6s game |   3435s wall]   tap 'TAKE UP YOUR SWORD' at (871, 358), target 190 x 190
+[  285.7s game |   3534s wall]   audio during 'awakening at the Inheritance Engine': Master peak -1.0 mean -10.8 dB; Music peak -14.7 mean -33.5 dB; Dialogue peak -2.0 mean -17.7 dB; Combat peak -10.1 mean -37.7 dB; Ambience peak -21.7 mean -32.0 dB; Interface peak -12.6 mean -58.9 dB; Cinematics peak -200.0 mean -100.0 dB
+[  285.7s game |   3534s wall] STEP approach
+[  294.8s game |   3625s wall]   audio during 'approach': Master peak -1.0 mean -9.0 dB; Music peak -21.3 mean -32.9 dB; Dialogue peak -2.2 mean -15.3 dB; Combat peak -10.1 mean -31.6 dB; Ambience peak -28.8 mean -35.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[  294.8s game |   3625s wall] STEP first stop of the road
+[  294.8s game |   3625s wall]   the knight holds w_starfall; profile generation 2; opening seen=true
+[  304.1s game |   3723s wall]   audio during 'first stop of the road': Master peak -1.0 mean -10.9 dB; Music peak -15.1 mean -28.0 dB; Dialogue peak -2.2 mean -17.6 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.8 mean -32.1 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[  304.1s game |   3723s wall] STEP courtyard stop 1: The outer wall has fallen in on itself. Something in garriso
+[  304.1s game |   3723s wall]   health 160 / 160, gold 0, level 1
+[  305.3s game |   3738s wall]   AUDIT Explore:stop | small target 150 x 52: [TURN BACK]
+[  305.3s game |   3738s wall]   AUDIT Explore:stop | small text 18 px: "❖ ◇ ◇ ◇ ◇ ◇ ◇ "
+[  305.3s game |   3738s wall]   AUDIT Explore:stop | small text 16 px: "Record found  ·  Defaced King"
+[  305.3s game |   3738s wall]   AUDIT Explore:stop | small text 16 px: "A FOE  ·  HUMANOID"
+[  305.3s game |   3738s wall]   AUDIT Explore:stop | small text 20 px: "THE BREACH"
+[  305.3s game |   3738s wall]   AUDIT Explore:stop | small text 17 px: "Steel scrapes on stone ahead."
+[  305.3s game |   3738s wall]   tap 'a pouch' at (273, 477), target 84 x 84
+[  305.9s game |   3745s wall]   pouch: gold 0 -> 10
+[  305.9s game |   3745s wall]   ways onward: ["The Breach"]; taking 'The Breach' (fight)
+[  305.9s game |   3745s wall]   tap 'The Breach' at (640, 644), target 1216 x 104
+[  308.1s game |   3771s wall]   duel begins: Hollow Soldier  [the lesson] (knight 160 hp)
+[  308.2s game |   3773s wall]   audio during 'courtyard stop 1: The outer wall has fallen in on itself. Something in garriso': Master peak -4.1 mean -13.4 dB; Music peak -11.4 mean -21.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -13.7 mean -39.5 dB; Ambience peak -22.0 mean -26.3 dB; Interface peak -10.6 mean -33.7 dB; Cinematics peak -200.0 mean -100.0 dB
+[  308.2s game |   3773s wall] STEP duel 0: Hollow Soldier (the lesson)
+[  333.5s game |   4059s wall]   duel over after 25 s: WON. knight 160 / 160 hp. parried 1, blocked 1, dodged 1, blows taken 0, cuts landed 24
+[  333.5s game |   4059s wall]   widest gap between the fighters: 2.6 m
+[  333.9s game |   4065s wall]   duel begins: Hollow Soldier (knight 160 hp)
+[  334.0s game |   4069s wall]   audio during 'duel 0: Hollow Soldier (the lesson)': Master peak -1.0 mean -8.5 dB; Music peak -13.7 mean -18.9 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -3.0 mean -19.1 dB; Ambience peak -20.8 mean -26.3 dB; Interface peak -10.5 mean -33.7 dB; Cinematics peak -200.0 mean -100.0 dB
+[  334.0s game |   4069s wall] STEP duel 1: Hollow Soldier — meaning to lose
+[  340.3s game |   4159s wall]   pausing mid-fight
+[  340.3s game |   4159s wall]   AUDIT Duel:fight | small text 19 px: "HOLLOW SOLDIER   ·   HUMANOID"
+[  340.3s game |   4159s wall]   tap 'II' at (1224, 48), target 64 x 64
+[  342.0s game |   4182s wall]   paused=true; on screen: [II], [PERFORMANCE], [BALANCED], [HIGH], [30], [60], [120], [ON], [SMALL], [MEDIUM], [LARGE], [ON], [OFF], [OFF], [OFF], [ON], [OFF], [OFF], [PRIVACY POLICY], [CREDITS], [RESUME], [YIELD]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 80 x 45: [30]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 80 x 45: [60]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 80 x 45: [120]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 96 x 45: [ON]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [ON] at [P: (842.0, 800.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 73 x 45: [SMALL]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [SMALL] at [P: (683.0, 896.0), S: (73.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 89 x 45: [MEDIUM]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [MEDIUM] at [P: (766.0, 896.0), S: (89.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 73 x 45: [LARGE]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [LARGE] at [P: (865.0, 896.0), S: (73.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [ON] at [P: (842.0, 946.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 96 x 45: [OFF]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [OFF] at [P: (842.0, 1045.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [OFF] at [P: (842.0, 1095.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [OFF] at [P: (842.0, 1145.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [ON] at [P: (842.0, 1195.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [OFF] at [P: (842.0, 1291.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [OFF] at [P: (842.0, 1341.0), S: (96.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 148 x 45: [PRIVACY POLICY]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [PRIVACY POLICY] at [P: (320.0, 1437.0), S: (148.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 87 x 45: [CREDITS]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | off screen: [CREDITS] at [P: (476.0, 1437.0), S: (87.0, 45.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 220 x 52: [RESUME]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small target 220 x 52: [YIELD]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "HOLLOW SOLDIER   ·   HUMANOID"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "GRAPHICS"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Quality"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Resolution, anti-aliasing, shadows, part"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Frame rate"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Higher rates use more battery"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "AUDIO"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Master"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "100%"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Music"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "80%"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Dialogue"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Combat effects"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Also sets interface sounds"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Ambience"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "CONTROLS"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Control visibility"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "How visible the dodge and shield buttons"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "20%"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Swipe sensitivity"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Swipe sensitivity" at [P: (320.0, 702.0), S: (326.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Higher means a shorter, slower stroke co"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Higher means a shorter, slower stroke co" at [P: (320.0, 724.0), S: (326.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "100%" at [P: (886.0, 712.0), S: (52.0, 24.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Haptic strength"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Haptic strength" at [P: (320.0, 751.0), S: (326.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Vibration on impacts. Zero turns it off."
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Vibration on impacts. Zero turns it off." at [P: (320.0, 773.0), S: (326.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "100%" at [P: (886.0, 761.0), S: (52.0, 24.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Combat prompts"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Combat prompts" at [P: (320.0, 800.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Show the parry direction and timing ring"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Show the parry direction and timing ring" at [P: (320.0, 822.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "ACCESSIBILITY"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "ACCESSIBILITY" at [P: (320.0, 861.0), S: (636.0, 24.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Subtitle size"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Subtitle size" at [P: (320.0, 896.0), S: (353.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Subtitle backing"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Subtitle backing" at [P: (320.0, 946.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "A dark band behind spoken lines"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "A dark band behind spoken lines" at [P: (320.0, 968.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Camera shake"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Camera shake" at [P: (320.0, 996.0), S: (326.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Lower for a steadier view"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Lower for a steadier view" at [P: (320.0, 1018.0), S: (326.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "100%" at [P: (886.0, 1006.0), S: (52.0, 24.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Reduce flashes"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Reduce flashes" at [P: (320.0, 1045.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Softens full-screen hit flashes"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Softens full-screen hit flashes" at [P: (320.0, 1067.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Reduce motion"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Reduce motion" at [P: (320.0, 1095.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Stills drifting cameras and turning prev"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Stills drifting cameras and turning prev" at [P: (320.0, 1117.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Forgiving timing"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Forgiving timing" at [P: (320.0, 1145.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Widens parry and dodge windows by 30%"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Widens parry and dodge windows by 30%" at [P: (320.0, 1167.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Companion remarks"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Companion remarks" at [P: (320.0, 1195.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Unprompted lines from your companions on"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Unprompted lines from your companions on" at [P: (320.0, 1217.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "IN TESTING"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "IN TESTING" at [P: (320.0, 1256.0), S: (636.0, 24.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Cinematic exploration"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Cinematic exploration" at [P: (320.0, 1291.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Fallen Courtyard: filmed walks and views"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Fallen Courtyard: filmed walks and views" at [P: (320.0, 1313.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 19 px: "Cinematic duel"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Cinematic duel" at [P: (320.0, 1341.0), S: (512.0, 26.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 16 px: "Ashen Sentinel only: prerecorded footage"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "Ashen Sentinel only: prerecorded footage" at [P: (320.0, 1363.0), S: (512.0, 22.0)]
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | small text 17 px: "OTHER"
+[  342.0s game |   4182s wall]   AUDIT Duel:pause | text off screen: "OTHER" at [P: (320.0, 1402.0), S: (636.0, 24.0)]
+[  343.9s game |   4197s wall]   tap 'RESUME' at (524, 602), target 220 x 52
+[  344.5s game |   4202s wall]   resumed; paused=false
+[  372.5s game |   4552s wall]   widest gap between the fighters: 2.8 m
+[  375.6s game |   4597s wall]   duel over after 42 s: LOST. knight 0 / 160 hp. parried 0, blocked 0, dodged 0, blows taken 16, cuts landed 0
+[  378.4s game |   4641s wall]   AUDIT Duel:result | small target 210 x 52: [SET OUT AGAIN]
+[  378.4s game |   4641s wall]   AUDIT Duel:result | small target 260 x 52: [RETURN TO SANCTUARY]
+[  378.4s game |   4641s wall]   AUDIT Duel:result | small target 230 x 52: [REVIEW EQUIPMENT]
+[  378.4s game |   4641s wall]   AUDIT Duel:result | small text 21 px: "Hollow Soldier stands. The Inheritance E"
+[  378.4s game |   4641s wall]   AUDIT Duel:result | small text 20 px: "Nothing was lost."
+[  378.4s game |   4641s wall]   AUDIT Duel:result | small text 17 px: "What you learned of its rhythm is yours "
+[  378.4s game |   4641s wall]   result screen up: [Set out again]. gold 10, level 1, xp 0, inventory 6, deaths 1
+[  378.4s game |   4641s wall]   tap 'SET OUT AGAIN' at (383, 491), target 210 x 52
+[  380.1s game |   4671s wall]   audio during 'duel 1: Hollow Soldier — meaning to lose': Master peak -1.0 mean -10.5 dB; Music peak -13.8 mean -20.2 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -0.1 mean -23.6 dB; Ambience peak -20.7 mean -26.3 dB; Interface peak -12.0 mean -50.8 dB; Cinematics peak -6.0 mean -40.7 dB
+[  380.1s game |   4671s wall] STEP courtyard stop 1: The outer wall has fallen in on itself. Something in garriso
+[  380.1s game |   4671s wall]   health 160 / 160, gold 10, level 1
+[  381.3s game |   4691s wall]   tap 'a pouch' at (861, 433), target 84 x 84
+[  382.0s game |   4700s wall]   pouch: gold 10 -> 26
+[  382.0s game |   4700s wall]   ways onward: ["The Breach"]; taking 'The Breach' (fight)
+[  382.0s game |   4700s wall]   tap 'The Breach' at (640, 644), target 1216 x 104
+[  384.2s game |   4731s wall]   duel begins: Hollow Soldier (knight 160 hp)
+[  384.3s game |   4735s wall]   audio during 'courtyard stop 1: The outer wall has fallen in on itself. Something in garriso': Master peak -3.4 mean -13.7 dB; Music peak -14.5 mean -22.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -10.6 mean -37.6 dB; Ambience peak -21.8 mean -26.5 dB; Interface peak -10.0 mean -33.2 dB; Cinematics peak -200.0 mean -100.0 dB
+[  384.3s game |   4735s wall] STEP duel 2: Hollow Soldier
+[  393.7s game |   4875s wall]   widest gap between the fighters: 3.3 m
+[  397.2s game |   4922s wall]   duel over after 13 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 12
+[  400.2s game |   4960s wall]   AUDIT Duel:result | small text 18 px: "MASTERY"
+[  400.2s game |   4960s wall]   AUDIT Duel:result | small text 18 px: "SALVAGED"
+[  400.2s game |   4960s wall]   AUDIT Duel:result | small text 18 px: "GOLD WON"
+[  400.2s game |   4960s wall]   AUDIT Duel:result | small text 18 px: "YOUR PURSE"
+[  400.2s game |   4960s wall]   AUDIT Duel:result | small text 20 px: "2 parries, 0 of them perfect   ·   0 dod"
+[  400.2s game |   4960s wall]   result screen up: [Continue]. gold 66, level 1, xp 60, inventory 6, deaths 1
+[  400.2s game |   4960s wall]   tap 'CONTINUE' at (640, 651), target 300 x 60
+[  455.0s game |   5502s wall]   audio during 'duel 2: Hollow Soldier': Master peak -1.0 mean -9.6 dB; Music peak -13.8 mean -27.8 dB; Dialogue peak -1.9 mean -17.9 dB; Combat peak -0.3 mean -32.3 dB; Ambience peak -20.7 mean -31.7 dB; Interface peak -12.0 mean -49.4 dB; Cinematics peak -5.6 mean -40.2 dB
+[  455.0s game |   5502s wall] STEP courtyard stop 2: Beyond the rubble the path divides.
+[  455.0s game |   5502s wall]   health 160 / 160, gold 66, level 1
+[  456.2s game |   5522s wall]   AUDIT Explore:stop | small text 18 px: "◆ ❖ ◇ ◇ ◇ ◇ ◇ "
+[  456.2s game |   5522s wall]   AUDIT Explore:stop | small text 16 px: "Record found  ·  Garrison Roll"
+[  456.2s game |   5522s wall]   AUDIT Explore:stop | small text 16 px: "A CACHE"
+[  456.2s game |   5522s wall]   AUDIT Explore:stop | small text 20 px: "THE GUARDHOUSE"
+[  456.2s game |   5522s wall]   AUDIT Explore:stop | small text 17 px: "A door hangs from one hinge."
+[  456.2s game |   5522s wall]   AUDIT Explore:stop | small text 20 px: "THE RAMPART STAIR"
+[  456.2s game |   5522s wall]   AUDIT Explore:stop | small text 17 px: "A longer way, and watched."
+[  456.2s game |   5522s wall]   tap 'a pouch' at (997, 457), target 84 x 84
+[  456.9s game |   5533s wall]   pouch: gold 66 -> 80
+[  456.9s game |   5533s wall]   ways onward: ["The Guardhouse", "The Rampart Stair"]; taking 'The Guardhouse' (treasure)
+[  456.9s game |   5533s wall]   tap 'The Guardhouse' at (333, 644), target 602 x 104
+[  458.3s game |   5558s wall]   AUDIT Explore:interact | small target 220 x 57: [OPEN]
+[  459.1s game |   5570s wall]   tap 'OPEN' at (640, 359), target 220 x 57
+[  460.7s game |   5594s wall]   AUDIT Explore:interact | small target 260 x 55: [ONWARD]
+[  460.7s game |   5594s wall]   AUDIT Explore:interact | small text 21 px: "60 gold"
+[  460.7s game |   5594s wall]   AUDIT Explore:interact | small text 21 px: "1 shard"
+[  461.5s game |   5606s wall]   tap 'ONWARD' at (640, 460), target 260 x 55
+[  482.1s game |   5952s wall]   audio during 'courtyard stop 2: Beyond the rubble the path divides.': Master peak -1.0 mean -9.9 dB; Music peak -11.7 mean -23.3 dB; Dialogue peak -1.8 mean -18.9 dB; Combat peak -12.2 mean -63.7 dB; Ambience peak -21.8 mean -28.1 dB; Interface peak -7.9 mean -42.7 dB; Cinematics peak -200.0 mean -100.0 dB
+[  482.1s game |   5952s wall] STEP courtyard stop 3: A banner still flies on the barbican. Someone is standing un
+[  482.1s game |   5952s wall]   health 160 / 160, gold 140, level 1
+[  483.3s game |   5972s wall]   AUDIT Explore:stop | small text 18 px: "◆ ◆ ❖ ◇ ◇ ◇ ◇ "
+[  483.3s game |   5972s wall]   AUDIT Explore:stop | small text 16 px: "Record found  ·  The Standing Banner"
+[  483.3s game |   5972s wall]   AUDIT Explore:stop | small text 20 px: "THE BARBICAN"
+[  483.3s game |   5972s wall]   AUDIT Explore:stop | small text 17 px: "Light on his feet. He salutes first."
+[  483.3s game |   5972s wall]   tap 'a pouch' at (190, 479), target 84 x 84
+[  483.9s game |   5983s wall]   pouch: gold 140 -> 148
+[  483.9s game |   5983s wall]   tap 'something odd (cy_loose_stone)' at (957, 465), target 96 x 96
+[  496.0s game |   6149s wall]   secrets known: 0 -> 1
+[  496.0s game |   6149s wall]   ways onward: ["The Barbican"]; taking 'The Barbican' (fight)
+[  496.0s game |   6149s wall]   tap 'The Barbican' at (640, 644), target 1216 x 104
+[  498.2s game |   6184s wall]   duel begins: Banneret (knight 160 hp)
+[  498.3s game |   6188s wall]   audio during 'courtyard stop 3: A banner still flies on the barbican. Someone is standing un': Master peak -2.3 mean -16.6 dB; Music peak -11.4 mean -25.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -10.1 mean -50.9 dB; Ambience peak -21.1 mean -28.3 dB; Interface peak -10.7 mean -36.4 dB; Cinematics peak -200.0 mean -100.0 dB
+[  498.3s game |   6188s wall] STEP duel 3: Banneret
+[  505.1s game |   6307s wall]   widest gap between the fighters: 3.3 m
+[  508.6s game |   6359s wall]   duel over after 10 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 9
+[  511.5s game |   6400s wall]   result screen up: [Continue]. gold 258, level 2, xp 15, inventory 7, deaths 1
+[  511.5s game |   6400s wall]   tap 'CONTINUE' at (640, 669), target 300 x 60
+[  531.7s game |   6693s wall]   audio during 'duel 3: Banneret': Master peak -1.0 mean -9.6 dB; Music peak -13.5 mean -25.6 dB; Dialogue peak -2.0 mean -21.5 dB; Combat peak -0.6 mean -28.0 dB; Ambience peak -20.7 mean -27.9 dB; Interface peak -11.9 mean -44.0 dB; Cinematics peak -6.8 mean -33.7 dB
+[  531.7s game |   6693s wall] STEP courtyard stop 4: A winch-house stands beside the inner gate. Its chain is rus
+[  531.7s game |   6693s wall]   health 160 / 160, gold 258, level 2
+[  532.9s game |   6711s wall]   AUDIT Explore:stop | small text 18 px: "◆ ◆ ◆ ❖ ◇ ◇ ◇ "
+[  532.9s game |   6711s wall]   AUDIT Explore:stop | small text 16 px: "Record found  ·  Winch Housing"
+[  532.9s game |   6711s wall]   AUDIT Explore:stop | small text 16 px: "A MECHANISM"
+[  532.9s game |   6711s wall]   AUDIT Explore:stop | small text 20 px: "TURN THE WINCH"
+[  532.9s game |   6711s wall]   AUDIT Explore:stop | small text 17 px: "The gate would stay open behind you."
+[  532.9s game |   6711s wall]   tap 'a pouch' at (1012, 518), target 84 x 84
+[  533.6s game |   6720s wall]   pouch: gold 258 -> 269
+[  533.6s game |   6720s wall]   ways onward: ["Turn the Winch"]; taking 'Turn the Winch' (lever)
+[  533.6s game |   6720s wall]   tap 'Turn the Winch' at (640, 644), target 1216 x 104
+[  535.1s game |   6739s wall]   AUDIT Explore:interact | small target 220 x 57: [PULL]
+[  535.9s game |   6748s wall]   tap 'PULL' at (640, 359), target 220 x 57
+[  537.4s game |   6764s wall]   AUDIT Explore:interact | small text 21 px: "The Winch Gate will stay open."
+[  537.4s game |   6764s wall]   AUDIT Explore:interact | small text 21 px: "You may begin from here when you return."
+[  538.2s game |   6774s wall]   tap 'ONWARD' at (640, 440), target 260 x 55
+[  557.3s game |   7029s wall]   audio during 'courtyard stop 4: A winch-house stands beside the inner gate. Its chain is rus': Master peak -1.0 mean -10.1 dB; Music peak -11.4 mean -23.1 dB; Dialogue peak -1.8 mean -19.0 dB; Combat peak -14.5 mean -48.9 dB; Ambience peak -20.7 mean -28.3 dB; Interface peak -11.9 mean -49.1 dB; Cinematics peak -200.0 mean -100.0 dB
+[  557.3s game |   7029s wall] STEP courtyard stop 5: The gate passage. It is narrow, and it is occupied.
+[  557.3s game |   7029s wall]   health 160 / 160, gold 269, level 2
+[  558.6s game |   7045s wall]   AUDIT Explore:stop | small text 18 px: "◆ ◆ ◆ ◆ ❖ ◇ ◇ "
+[  558.6s game |   7045s wall]   AUDIT Explore:stop | small text 16 px: "Record found  ·  Breaker's Harness"
+[  558.6s game |   7045s wall]   AUDIT Explore:stop | small text 16 px: "A FOE  ·  HEAVY"
+[  558.6s game |   7045s wall]   AUDIT Explore:stop | small text 20 px: "THE GATE PASSAGE"
+[  558.6s game |   7045s wall]   AUDIT Explore:stop | small text 17 px: "He fills it wall to wall."
+[  558.6s game |   7045s wall]   AUDIT Explore:stop | small text 20 px: "THE MURDER HOLE"
+[  558.6s game |   7045s wall]   AUDIT Explore:stop | small text 17 px: "A ladder up, behind a loose stone."
+[  558.6s game |   7045s wall]   tap 'a pouch' at (395, 442), target 84 x 84
+[  559.2s game |   7054s wall]   pouch: gold 269 -> 281
+[  559.2s game |   7054s wall]   tap 'something odd (cy_charcoal_sketch)' at (292, 460), target 96 x 96
+[  572.3s game |   7192s wall]   secrets known: 1 -> 2
+[  572.3s game |   7192s wall]   audio during 'courtyard stop 5: The gate passage. It is narrow, and it is occupied.': Master peak -4.5 mean -14.8 dB; Music peak -11.7 mean -21.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -29.2 dB; Interface peak -10.1 mean -36.1 dB; Cinematics peak -200.0 mean -100.0 dB
+[  572.3s game |   7192s wall] STEP turning back to the sanctuary
+[  572.8s game |   7199s wall]   tap 'TURN BACK' at (1173, 50), target 150 x 52
+[  573.2s game |   7206s wall]   audio during 'turning back to the sanctuary': Master peak -12.9 mean -16.9 dB; Music peak -21.4 mean -24.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -23.2 mean -26.8 dB; Interface peak -20.5 mean -45.7 dB; Cinematics peak -200.0 mean -100.0 dB
+[  573.2s game |   7206s wall] STEP sanctuary
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 122 x 48: [JOURNEY]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 122 x 48: [ARMORY]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 122 x 48: [SHOP]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 122 x 48: [FORGE]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 130 x 48: [CHARACTER]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 122 x 48: [JOURNAL]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 122 x 48: [SETTINGS]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 290 x 45: [I  THE FALLEN COURTYARD]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 425 x 55: [SET OUT]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small target 425 x 52: [BY THE WINCH GATE]
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small text 20 px: "The gate of a fortress nobody has garris"
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small text 18 px: "Guardian:  unknown"
+[  575.8s game |   7234s wall]   AUDIT Sanctuary:journey | small text 18 px: "Uncleared"
+[  575.8s game |   7234s wall]   tabs: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [I  THE FALLEN COURTYARD], [SET OUT], [BY THE WINCH GATE]. purse: 281 GOLD      4 SHARDS
+[  575.8s game |   7234s wall]   audio during 'sanctuary': Master peak -1.0 mean -11.6 dB; Music peak -24.1 mean -33.4 dB; Dialogue peak -2.0 mean -18.3 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.4 mean -29.8 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB
+[  575.8s game |   7234s wall] STEP sanctuary: Armory
+[  575.8s game |   7234s wall]   tap 'ARMORY' at (219, 46), target 122 x 48
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 122 x 48: [JOURNEY]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 122 x 48: [ARMORY]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 122 x 48: [SHOP]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 122 x 48: [FORGE]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 130 x 48: [CHARACTER]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 122 x 48: [JOURNAL]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 122 x 48: [SETTINGS]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Helms]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Armour Suits]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Pauldrons]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Gauntlets]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Greaves]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Boots]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Weapons]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Shields]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 58: [Rings]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 66 x 59: [Relics]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 209 x 48: [SORT: EQUIPPED FIRST]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 84 x 48: [GRID]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 121 x 58: [UPGRADE]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 108 x 58: [INSPECT]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 62 x 58: [Favourite: cannot be sold]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 232 x 58: [PREVIEW ATTACK]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small target 168 x 58: [FULL BODY]
+[  578.9s game |   7298s wall]   AUDIT Sanctuary:armory | small text 18 px: "EQUIPPED · ITS OWN FIGURES"
+[  578.9s game |   7298s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [Helms], [Armour Suits], [Pauldrons], [Gauntlets], [Greaves], [Boots], [Weapons], [Shields], [Rings], [Relics], [SORT: EQUIPPED FIRST], [GRID], [UPGRADE], [INSPECT], [Favourite: cannot be sold], [PREVIEW ATTACK], [FULL BODY]
+[  581.0s game |   7336s wall]   tap 'EQUIP' at (179, 669), target 151 x 58
+[  582.6s game |   7370s wall]   equipped before { "weapon": "w_starfall", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  582.6s game |   7370s wall]   equipped after  { "weapon": "w_starfall", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_garrison_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  582.6s game |   7370s wall]   audio during 'sanctuary: Armory': Master peak -1.0 mean -13.5 dB; Music peak -19.9 mean -26.8 dB; Dialogue peak -3.2 mean -24.9 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.4 mean -26.6 dB; Interface peak -13.2 mean -43.8 dB; Cinematics peak -200.0 mean -100.0 dB
+[  582.6s game |   7370s wall] STEP sanctuary: Forge
+[  582.6s game |   7370s wall]   tap 'FORGE' at (475, 46), target 122 x 48
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 122 x 48: [JOURNEY]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 122 x 48: [ARMORY]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 122 x 48: [SHOP]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 122 x 48: [FORGE]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 130 x 48: [CHARACTER]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 122 x 48: [JOURNAL]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 122 x 48: [SETTINGS]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 160 x 48: [WORK]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 160 x 48: [PATTERNS]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 326 x 56: [Veilcutter]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 326 x 56: [Wayfarer Cuirass]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 326 x 56: [Wayfarer Greaves]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 326 x 56: [Garrison Gauntlets]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 326 x 56: [Wayfarer Helm]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 326 x 56: [Splintered Heater]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small target 326 x 56: [Wayfarer Gauntlets]
+[  585.8s game |   7429s wall]   AUDIT Sanctuary:forge | small text 18 px: "ON THE BENCH"
+[  585.8s game |   7429s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [WORK], [PATTERNS], [Veilcutter], [Wayfarer Cuirass], [Wayfarer Greaves], [Garrison Gauntlets], [Wayfarer Helm], [Splintered Heater], [Wayfarer Gauntlets], [REFORGE], [REWRAP], [SMELT], [SHARPEN]
+[  585.8s game |   7429s wall]   (scrolled to reach 'SHARPEN')
+[  585.9s game |   7430s wall]   tap 'SHARPEN' at (1154, 544), target 168 x 64
+[  594.1s game |   7501s wall]   forge 'Sharpen': gold 281 -> 236; weapon mods { "blade": 0, "grip": 0, "ore": 0, "ore_id": "", "edge": 3, "caps": { "blade": 2, "grip": 1 }, "max": { "blade": 5, "grip": 3, "ore": 3 }, "visual": { "blade_tier": 0, "grip_tier": 0, "ore": "iron", "ore_id": "", "keen": true } }
+[  624.1s game |   7720s wall] STUCK waiting for the forge to finish after 30 s (screen Sanctuary). On screen: [CONTINUE]
+[  624.1s game |   7720s wall]   audio during 'sanctuary: Forge': Master peak -1.0 mean -11.5 dB; Music peak -11.3 mean -22.8 dB; Dialogue peak -1.9 mean -22.8 dB; Combat peak -10.4 mean -49.1 dB; Ambience peak -16.3 mean -26.7 dB; Interface peak -12.0 mean -58.1 dB; Cinematics peak -200.0 mean -100.0 dB
+[  624.1s game |   7720s wall] STEP sanctuary: Shop
+[  624.1s game |   7720s wall]   tap 'SHOP' at (347, 46), target 122 x 48
+[  624.2s game |   7721s wall]   TAP MISSED: 'SHOP' did not receive the touch (under: /root/Main/@Node@4370/@CanvasLayer@4511/@Control@4913). Calling its handler.
+[  627.3s game |   7747s wall]   AUDIT Sanctuary:shop | small target 220 x 52: [CONTINUE]
+[  627.3s game |   7747s wall]   AUDIT Sanctuary:shop | small text 20 px: "Improved"
+[  627.3s game |   7747s wall]   on screen: [CONTINUE]
+[  627.3s game |   7747s wall]   gold 236; catalogue 23 entries; dearest within reach: a_garrison_legs (220)
+[  628.8s game |   7761s wall]   DEFECT no Buy button for an item the purse can pay for
+[  628.8s game |   7761s wall]   audio during 'sanctuary: Shop': Master peak -6.2 mean -15.0 dB; Music peak -11.4 mean -22.1 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.3 mean -24.5 dB; Interface peak -19.1 mean -59.5 dB; Cinematics peak -200.0 mean -100.0 dB
+[  628.8s game |   7761s wall] STEP sanctuary: Settings, quit to the menu
+[  628.8s game |   7761s wall]   tap 'SETTINGS' at (867, 46), target 122 x 48
+[  628.9s game |   7762s wall]   TAP MISSED: 'SETTINGS' did not receive the touch (under: /root/Main/@Node@4370/@CanvasLayer@4511/@Control@4913). Calling its handler.
+[  631.0s game |   7779s wall]   AUDIT Sanctuary:settings | small target 220 x 52: [CONTINUE]
+[  631.0s game |   7779s wall]   AUDIT Sanctuary:settings | small text 20 px: "Improved"
+[  631.0s game |   7779s wall]   DEFECT no way to the main menu from the sanctuary. On screen: [CONTINUE]
+[  631.0s game |   7779s wall]   tap 'JOURNEY' at (91, 46), target 122 x 48
+[  631.1s game |   7780s wall]   TAP MISSED: 'JOURNEY' did not receive the touch (under: /root/Main/@Node@4370/@CanvasLayer@4511/@Control@4913). Calling its handler.
+[  632.6s game |   7794s wall]   AUDIT Sanctuary:journey2 | small target 220 x 52: [CONTINUE]
+[  632.6s game |   7794s wall]   AUDIT Sanctuary:journey2 | small text 20 px: "Improved"
+[  632.6s game |   7794s wall]   setting out: from the first stop (no short way open)
+[  652.7s game |   7943s wall] STUCK waiting for button 'Set Out' after 20 s (screen Sanctuary). On screen: [CONTINUE]
+[  692.7s game |   8161s wall] STUCK waiting for the road after 40 s (screen Sanctuary). On screen: [CONTINUE]
+[  692.7s game |   8161s wall]   loading took 60.1 s of game time (367.5 s wall)
+[  695.1s game |   8174s wall]   tap 'CONTINUE' at (996, 440), target 220 x 52
+[  695.2s game |   8174s wall]   tap 'JOURNEY' at (91, 46), target 122 x 48
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 122 x 48: [JOURNEY]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 122 x 48: [ARMORY]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 122 x 48: [SHOP]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 122 x 48: [FORGE]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 130 x 48: [CHARACTER]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 122 x 48: [JOURNAL]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 122 x 48: [SETTINGS]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 290 x 45: [I  THE FALLEN COURTYARD]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 425 x 55: [SET OUT]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small target 425 x 52: [BY THE WINCH GATE]
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small text 20 px: "The gate of a fortress nobody has garris"
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small text 18 px: "Guardian:  unknown"
+[  696.9s game |   8184s wall]   AUDIT Sanctuary:journey2 | small text 18 px: "Uncleared"
+[  696.9s game |   8184s wall]   setting out: by the short way
+[  696.9s game |   8184s wall]   tap 'BY THE WINCH GATE' at (1023, 658), target 425 x 52
+[  697.3s game |   8188s wall]   loading took 0.5 s of game time (3.8 s wall)
+[  698.7s game |   8199s wall]   audio during 'sanctuary: Settings, quit to the menu': Master peak -5.4 mean -14.4 dB; Music peak -11.2 mean -21.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -12.6 mean -72.8 dB; Ambience peak -16.2 mean -24.2 dB; Interface peak -19.1 mean -69.3 dB; Cinematics peak -200.0 mean -100.0 dB
+[  698.7s game |   8199s wall] STEP courtyard stop 5: The gate passage. It is narrow, and it is occupied.
+[  698.7s game |   8199s wall]   health 160 / 160, gold 236, level 2
+[  699.9s game |   8207s wall]   tap 'a pouch' at (380, 444), target 84 x 84
+[  700.6s game |   8211s wall]   pouch: gold 236 -> 252
+[  700.6s game |   8211s wall]   ways onward: ["The Gate Passage", "The Murder Hole"]; taking 'The Gate Passage' (fight)
+[  700.6s game |   8211s wall]   tap 'The Gate Passage' at (333, 644), target 602 x 104
+[  702.7s game |   8226s wall]   audio during 'courtyard stop 5: The gate passage. It is narrow, and it is occupied.': Master peak -4.2 mean -13.9 dB; Music peak -14.5 mean -22.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -13.2 mean -43.5 dB; Ambience peak -20.7 mean -26.1 dB; Interface peak -10.1 mean -33.5 dB; Cinematics peak -200.0 mean -100.0 dB
+[  702.7s game |   8226s wall] STEP duel 4: Rampart Breaker
+[  702.8s game |   8226s wall]   duel begins: Rampart Breaker (knight 160 hp)
+[  720.7s game |   8425s wall]   widest gap between the fighters: 3.7 m
+[  724.1s game |   8452s wall]   duel over after 21 s: WON. knight 160 / 160 hp. parried 3, blocked 0, dodged 0, blows taken 0, cuts landed 18
+[  727.2s game |   8475s wall]   AUDIT Duel:result | small text 20 px: "3 parries, 2 of them perfect   ·   0 dod"
+[  727.2s game |   8475s wall]   result screen up: [Continue]. gold 322, level 2, xp 115, inventory 7, deaths 1
+[  727.2s game |   8475s wall]   tap 'CONTINUE' at (640, 599), target 300 x 60
+[  743.7s game |   8589s wall]   audio during 'duel 4: Rampart Breaker': Master peak -1.0 mean -8.0 dB; Music peak -12.4 mean -22.7 dB; Dialogue peak -2.1 mean -24.2 dB; Combat peak -0.4 mean -19.7 dB; Ambience peak -20.8 mean -27.2 dB; Interface peak -12.0 mean -53.4 dB; Cinematics peak -6.9 mean -35.6 dB
+[  743.7s game |   8589s wall] STEP courtyard stop 6: A chapel alcove survives against the keep wall. A single can
+[  743.7s game |   8589s wall]   health 160 / 160, gold 322, level 2
+[  744.9s game |   8597s wall]   AUDIT Explore:stop | small text 18 px: "◆ ◆ ◆ ◆ ◆ ❖ ◇ "
+[  744.9s game |   8597s wall]   AUDIT Explore:stop | small text 16 px: "Record found  ·  The Candle That Is Not"
+[  744.9s game |   8597s wall]   AUDIT Explore:stop | small text 16 px: "RESPITE"
+[  744.9s game |   8597s wall]   AUDIT Explore:stop | small text 20 px: "KNEEL"
+[  744.9s game |   8597s wall]   AUDIT Explore:stop | small text 17 px: "Rest a moment. Wounds close."
+[  744.9s game |   8597s wall]   tap 'a pouch' at (426, 423), target 84 x 84
+[  745.6s game |   8602s wall]   pouch: gold 322 -> 336
+[  745.6s game |   8602s wall]   ways onward: ["Kneel"]; taking 'Kneel' (shrine)
+[  745.6s game |   8602s wall]   tap 'Kneel' at (640, 644), target 1216 x 104
+[  747.1s game |   8612s wall]   AUDIT Explore:interact | small target 220 x 57: [REST]
+[  747.9s game |   8617s wall]   tap 'REST' at (640, 359), target 220 x 57
+[  749.4s game |   8626s wall]   AUDIT Explore:interact | small text 21 px: "Wounds close.  +96 health"
+[  750.2s game |   8631s wall]   tap 'ONWARD' at (640, 420), target 260 x 55
+[  760.3s game |   8709s wall]   audio during 'courtyard stop 6: A chapel alcove survives against the keep wall. A single can': Master peak -1.0 mean -12.1 dB; Music peak -11.4 mean -25.1 dB; Dialogue peak -1.9 mean -23.0 dB; Combat peak -16.3 mean -65.6 dB; Ambience peak -21.6 mean -29.2 dB; Interface peak -11.9 mean -36.5 dB; Cinematics peak -200.0 mean -100.0 dB
+[  760.3s game |   8709s wall] STEP courtyard stop 7: The inner ward. He is standing exactly where he was posted.
+[  760.3s game |   8709s wall]   health 160 / 160, gold 336, level 2
+[  761.6s game |   8719s wall]   AUDIT Explore:stop | small text 18 px: "◆ ◆ ◆ ◆ ◆ ◆ ❖ "
+[  761.6s game |   8719s wall]   AUDIT Explore:stop | small text 16 px: "THE GUARDIAN  ·  GUARDIAN"
+[  761.6s game |   8719s wall]   AUDIT Explore:stop | small text 20 px: "THE INNER WARD"
+[  761.6s game |   8719s wall]   AUDIT Explore:stop | small text 17 px: "Embers drift from the gatehouse."
+[  761.6s game |   8719s wall]   tap 'a pouch' at (991, 446), target 84 x 84
+[  762.2s game |   8724s wall]   pouch: gold 336 -> 349
+[  762.2s game |   8724s wall]   ways onward: ["The Inner Ward"]; taking 'The Inner Ward' (boss)
+[  762.2s game |   8724s wall]   tap 'The Inner Ward' at (640, 644), target 1216 x 104
+[  763.7s game |   8737s wall]   audio during 'courtyard stop 7: The inner ward. He is standing exactly where he was posted.': Master peak -3.8 mean -12.5 dB; Music peak -11.7 mean -21.2 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -11.2 mean -37.2 dB; Ambience peak -20.7 mean -26.3 dB; Interface peak -10.6 mean -31.8 dB; Cinematics peak -200.0 mean -100.0 dB
+[  763.7s game |   8737s wall] STEP duel 5: The Ashen Sentinel
+[  763.8s game |   8737s wall]   duel begins: The Ashen Sentinel (knight 160 hp)

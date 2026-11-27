@@ -391,6 +391,7 @@ var _sub_tw: Tween
 var _phase_pips: HBoxContainer
 var keen_mark: Control          # shown while the equipped blade's sharpened edge lasts
 var _dev_shield: Array = []
+var _pause_ms := -1000
 
 func _ready() -> void:
 	layer = 5
@@ -506,7 +507,19 @@ func _ready() -> void:
 	pause.custom_minimum_size.y = 64
 	pause.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	pause.offset_left = -64
-	pause.pressed.connect(func(): pause_pressed.emit())
+	# A Button only answers the first finger on the glass (it is pressed through the mouse the engine makes of that
+	# touch), so with a thumb holding the shield the pause button did nothing. It takes touches itself as the pads do;
+	# the two paths are told apart by time so one tap is one pause.
+	var tap := func():
+		var now := Time.get_ticks_msec()
+		if now - _pause_ms < 300:
+			return
+		_pause_ms = now
+		pause_pressed.emit()
+	pause.pressed.connect(tap)
+	pause.gui_input.connect(func(e: InputEvent):
+		if e is InputEventScreenTouch and e.pressed:
+			tap.call())
 	frame.add_child(pause)
 
 	# --- touch controls

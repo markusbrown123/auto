@@ -83,3 +83,24 @@ The Blackwood "before" frame was taken during a phase stain, so its row is not a
 - Sanctuary, cathedral steps, the exploration and cinematic scenes.
 - Memory on device: the 250-350 MB figure is the software renderer's own accounting with uncompressed fallbacks and
   says little about ASTC textures on iOS.
+
+## Slice QA (2026-11-27): the first-boss slice's heaviest moments, and the texture change
+
+Software renderer, 1280 x 720, one frame each (`tools/shoot.sh … --quality=0|1 [--meshes]`). Not device figures.
+"Before" is with 337 model textures imported lossless; "after" is with them VRAM-compressed (`compress/mode=2`).
+
+| Scene | Preset | Draw calls | Primitives | Video mem MB before | after |
+|---|---|---|---|---|---|
+| Courtyard duel (Hollow Soldier, t = 6 s) | Balanced | 134 | 436,244 | 339 | 148 |
+| | Performance | 134 | 403,621 | 318 | 127 |
+| Ashen Sentinel (t = 8 s) | Balanced | 131 | 467,416 (495,689 in the second run: the fight is not frame-identical) | 332 | 146 |
+| | Performance | 129 | 410,604 | 311 | 125 |
+| High road vista (Generation I, shot 1) | Balanced | 101 | 380,753 | 172 | 145 |
+| | Performance | 101 | 308,239 | 149 | 123 |
+| Sanctuary, Armory | Balanced | 292 | 188,639 | 151 | 133 |
+| | Performance | 305 | 117,256 | 120 | 102 |
+
+- Of the duel's 339 MB, 301 MB was textures and 21 MB buffers (`RenderingServer.get_rendering_info`).
+- What is left after the change is mostly render targets and shadow atlases, which grow with the window: the same duel in a 2796 x 1290 window reports 241 MB on Balanced.
+- Geometry was not reduced. The Courtyard duel holds 60 visible meshes, 486,000 triangles at full detail: about 9,600 each for `env_peak` (8 copies, no shadows), `env_rubble` (4), `env_banner` (3), 31,500 for the foe, 34,000 for the knight's under-layer and arms. The Armory's 292 draw calls are the carousel's pieces and the armour parts.
+- Shadows: on Performance the spot and omni shadow atlas is 0, so only the sun casts; Balanced allocates a 2048 atlas for positional lights. How many lights use it was not counted in this pass.

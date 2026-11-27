@@ -80,6 +80,21 @@ func _ready() -> void:
 	_touch(1, pad_b, false)
 	await get_tree().process_frame
 	ok(not dt.sim.p_block, "releasing the shield button lowers the guard")
+	# Slice QA: with one thumb holding the shield, a second finger can still pause (a plain Button cannot hear it)
+	var paused := [0]
+	dt.hud.pause_pressed.connect(func(): paused[0] += 1)
+	var pause_at := Vector2.ZERO
+	for b: Button in dt.hud.find_children("*", "Button", true, false):
+		if b.text == "II":
+			pause_at = b.get_global_rect().get_center()
+	_touch(1, pad_b, true)
+	await get_tree().process_frame
+	_touch(2, pause_at, true)
+	await get_tree().process_frame
+	_touch(2, pause_at, false)
+	_touch(1, pad_b, false)
+	await get_tree().process_frame
+	ok(paused[0] == 1, "the pause button answers a second finger while the shield is held (%d)" % paused[0])
 	dt.queue_free()
 	await get_tree().process_frame
 	print("\ntouch: %s" % ("PASS" if failed == 0 else "%d FAILED" % failed))

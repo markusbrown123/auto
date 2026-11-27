@@ -984,9 +984,8 @@ func _resume() -> void:
 	_snap("resumed")
 	if main.current is Sanctuary and not p.cleared.has("courtyard"):
 		# the second half of the slice, from the save: out by the short way, the rest of the road, the guardian
-		_visited = true
 		_turned_back = true
-		await _set_out(main.current)
+		await _sanctuary(main.current)
 		await _road()
 
 func _end() -> void:

@@ -12,6 +12,26 @@
    "voice": "Hamish (en)"
   }
  ],
+ "awakening_02_m.ogg": {
+  "credits": 0.46,
+  "hash": "c71f447d1e0a",
+  "id": "ea78cf0c-61b7-4ba5-9d55-b4692cce326e",
+  "lufs": -18.3,
+  "model": "eleven",
+  "peak": -5.0,
+  "role": "player_m",
+  "status": "done",
+  "voice": "Sterling"
+ },
+ "awakening_04_m.ogg": {
+  "credits": 0.46,
+  "hash": "7cbed41f812a",
+  "id": "a20976ef-2ae6-4a4e-bbad-234b99fc0a03",
+  "model": "eleven",
+  "role": "player_m",
+  "status": "created",
+  "voice": "Sterling"
+ },
  "blackwood_0_g3_01.ogg": {
   "credits": 2.0,
   "hash": "83d1b9d228ee",

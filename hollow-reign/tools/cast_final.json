@@ -73,7 +73,7 @@
   "stability": 0.7,
   "pitch": -4,
   "tempo": 0.94,
-  "fx": "bass=g=4:f=120,aecho=0.9:0.35:55|110:0.16|0.08,loudnorm=I=-18:TP=-2",
-  "note": "Owner's choice 2026-11-27 after three rounds ('Sterling 4 low' = marketing/audition/protagonist_round2/protagonist2__4_Sterling_low4.mp3). Replaces Malcolm for the male protagonist (Generation II) and the male Kept. Grunts, breathing and reactions must use the same voice and treatment."
+  "fx": "bass=g=4:f=120,aecho=0.9:0.35:55|110:0.16|0.08,equalizer=f=550:t=q:w=1.2:g=2.5,equalizer=f=2600:t=q:w=1:g=-2,lowpass=f=7000,aecho=1.0:0.85:8|15:0.22|0.14,loudnorm=I=-18:TP=-2",
+  "note": "Owner's choice 2026-11-27 after three rounds ('Sterling 4 low' = marketing/audition/protagonist_round2/protagonist2__4_Sterling_low4.mp3). Replaces Malcolm for the male protagonist (Generation II) and the male Kept. Grunts, breathing and reactions must use the same voice and treatment. Helmet resonance: owner chose strength 1 (light) on 2026-11-27 (marketing/audition/protagonist_helm/sterling_helm__1_light.mp3); it is the equalizer/lowpass/short-aecho part of fx."
  }
 }

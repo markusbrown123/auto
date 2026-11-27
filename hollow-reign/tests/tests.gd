@@ -1839,19 +1839,20 @@ func t_free_combat() -> void:
 	q.input_swipe("U"); run_for(q, 0.03)
 	q.input_swipe("D"); run_for(q, 0.03)
 	q.input_swipe("R"); run_for(q, 0.03)
+	q.input_swipe("DL"); run_for(q, 0.03)
 	q.input_swipe("UL")
 	run_for(q, 2.0)
-	ok(qs == ["L", "U", "D", "UL"], "three swipes queue in order, the newest replaces the last beyond that (%s)" % str(qs))
+	ok(qs == ["L", "U", "D", "R", "UL"], "four swipes queue in order into an open foe, the newest replaces the last beyond that (%s)" % str(qs))
 	# swipes at about 7 a second all become cuts
-	var r := _held(true)
-	r.pl.max_stamina = 1000.0; r.pl.stamina = 1000.0
-	var rs: Array = []
-	r.ev.connect(func(n, d): if n == &"player_swing": rs.append(d.dir))
-	var rord := ["D", "UL", "U", "R", "L", "DR", "UR", "DL"]
-	for dd: String in rord:
-		r.input_swipe(dd); run_for(r, 0.133)
-	run_for(r, 2.0)
-	ok(rs == rord, "eight swipes 0.133 s apart land eight cuts in order (%s)" % str(rs))
+	var rq := _held(true)
+	rq.pl.max_stamina = 1000.0; rq.pl.stamina = 1000.0
+	var rqs: Array = []
+	rq.ev.connect(func(n, d): if n == &"player_swing": rqs.append(d.dir))
+	var rqord := ["D", "UL", "U", "R", "L", "DR", "UR", "DL"]
+	for dd: String in rqord:
+		rq.input_swipe(dd); run_for(rq, 0.133)
+	run_for(rq, 2.0)
+	ok(rqs == rqord, "eight swipes 0.133 s apart land eight cuts in order (%s)" % str(rqs))
 	# variety builds the count; the same line holds it once, then is read; a pause starts it over
 	var v := _held(true)
 	v.pl.max_stamina = 1000.0; v.pl.stamina = 1000.0

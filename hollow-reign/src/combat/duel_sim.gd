@@ -32,11 +32,11 @@ const BUFFER_TIME := 0.18
 ## Free cutting. A cut's time is the weapon's swing stat; its blade lands at CONTACT_FRAC of it, and from CANCEL_FRAC
 ## on, the rest (the recovery) is cut short by a queued swipe or dodge, or by the shield going up: so a flurry lands
 ## one cut every swing_time * CANCEL_FRAC seconds (0.22 s with a 0.26 s sword, 0.39 s with a 0.46 s greatsword).
-## Up to QUEUE_MAX swipes are queued in order (beyond that the newest replaces the last), each thrown on the next cancel
-## frame; one queued during a cut never goes stale before that cut's cancel frame. A dodge replaces the whole queue.
+## While the foe stands open, up to QUEUE_MAX swipes are queued in order (beyond that the newest replaces the last), each
+## thrown on the next cancel frame; otherwise one is queued and the latest wins (blind swipe-spam stays a losing plan); one queued during a cut never goes stale before that cut's cancel frame. A dodge replaces the whole queue.
 const CONTACT_FRAC := 0.6
 const CANCEL_FRAC := 0.85
-const QUEUE_MAX := 3          # swipes held while a cut plays (owner: every rapid swipe should be a cut)
+const QUEUE_MAX := 4          # swipes held while a cut plays into an open foe (owner: every rapid swipe should be a cut)
 const BUFFER_SWING := 0.75
 const COMBO_PAUSE := 0.9         # seconds without a cut landing after which the variety count starts over
 const COMBO_POISE := 0.15        # more poise wear per cut for each step of the variety count
@@ -432,7 +432,7 @@ func input_swipe(dir: String) -> void:
 		return
 	if p_state != P.FREE:
 		var entry := {"kind": "swipe", "arg": dir, "t": time, "open": boss_open()}
-		if p_buffer.is_empty() or p_buffer.kind != "swipe":
+		if p_buffer.is_empty() or p_buffer.kind != "swipe" or not entry.open:   # into a guarded foe: the latest wins
 			p_buffer = entry
 			p_queue.clear()
 		elif p_queue.size() < QUEUE_MAX - 1:

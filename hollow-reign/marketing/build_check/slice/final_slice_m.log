@@ -18,3 +18,5 @@
 [   11.5s game |    134s wall] STEP generation I
 [   12.1s game |    153s wall]   audio during 'generation I': Master peak -3.4 mean -9.1 dB; Music peak -16.9 mean -18.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.5 mean -26.8 dB; Interface peak -11.8 mean -22.3 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [   12.1s game |    153s wall] STEP generation I, beat 1
+[   74.8s game |   1252s wall]   audio during 'generation I, beat 1': Master peak -1.0 mean -7.4 dB; Music peak -10.9 mean -20.6 dB; Dialogue peak -1.7 mean -15.6 dB; Combat peak -7.9 mean -28.2 dB; Ambience peak -20.7 mean -30.1 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   74.8s game |   1252s wall] STEP generation I, beat 2

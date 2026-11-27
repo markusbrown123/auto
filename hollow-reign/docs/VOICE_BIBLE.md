@@ -57,3 +57,20 @@ What that changes:
 - Catalogue: in progress (see the JSON for how many of the 115 presets are measured).
 - Reel: built after the catalogue; then **blocked on the owner listening** and choosing one candidate per role.
 - Until then the game keeps the provisional lines, labelled provisional.
+
+## Owner casting decisions, 2026-11-27 (second message; all refer to round 2, `marketing/audition/final_cast2/`)
+| Character | Chosen | Voice and treatment |
+|---|---|---|
+| Father | option 3 | Gideon (second model) |
+| Mother | option 3 | Celine (second model) |
+| Lyra | option 4 | Claire (Inworld) lowered 2 semitones — her existing recorded lines need the same lowering applied, not re-recording |
+| The Crimson Widow | Lyra's option 3 | Elodie (second model) |
+| Orren the smith | option 4 | Callum (Inworld) lowered 3 semitones — apply to existing takes |
+| The Forgotten Monarch | option 4 | Hades (Inworld) lowered 3 semitones — apply to existing takes |
+| The Frostbound King | option 4 | Josef (Inworld, German voice) lowered 3 semitones |
+| The Gravewarden | option 4 | Dominus (Inworld) lowered 4 semitones |
+| The Pale Huntsman | option 4 for now, "but I don't like any" | Craig lowered 3 semitones as a placeholder; new options in round 4 |
+| Granddaughter | likes the pitch of option 2 (about 250 Hz) but with no accent | new options in rounds 3 and 4 |
+| Grandson | none liked | new options in rounds 3 and 4 |
+The pattern in the owner's choices: natural English voices lowered in pitch, or the very deep second-model voices; no foreign accent.
+Unchanged and approved earlier: Witness Hamish, narrator Graham, son Malcolm, guardian challenges Mortimer, daughter Victoria.

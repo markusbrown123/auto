@@ -33,9 +33,11 @@ const KIT := ["s_garrison", "a_garrison_helm", "a_garrison_chest", "a_garrison_g
 ## of the road with the garrison's cuirass and greaves, and a round gatehouse shield. Sleek, and weathered: TINT darkens
 ## the silver of every piece.
 const SEEN_AS := ["a_worn_helm", "a_worn_gauntlets", "s_round"]
-const TINT := Color(0.66, 0.68, 0.73)
+const TINT := Color(0.78, 0.8, 0.84)
 const SEAL := Vector3(6.2, 0, -8.2)       # where the records are, in the hall
 const MONARCH_AT := Vector3(0, 0, -8.6)
+## The hall of the first generation: the command hall of the old civilisation, for the scenes and for both duels.
+const HALL := "command"
 
 var auto := false                 # dev captures and recordings: a bot fights
 var start_beat := 1
@@ -59,6 +61,7 @@ var _kept := {}                   # what a duel borrows from Game, to give back
 var _seal_light: OmniLight3D
 var _alarm: OmniLight3D
 var _seat: CineSeat               # holds the Monarch seated until he rises
+var _placed := {}                 # foe id -> the arena its data names, while a duel here borrows another
 
 func _ready() -> void:
 	cards = CineCards.new()
@@ -268,7 +271,7 @@ func _hall(with_guard: bool) -> void:
 	add_child(hall)
 	var arena := Arena.new()
 	hall.add_child(arena)
-	arena.build("throne")
+	arena.build(HALL)
 	# the hall at its height: warm, bright, the fires fed (as the old opening lit it)
 	arena.env.ambient_light_energy = 2.2
 	arena.env.tonemap_exposure = 1.75
@@ -311,33 +314,10 @@ func _hall(with_guard: bool) -> void:
 	hall.add_child(_seal_light)
 	Sfx.ambience("")
 
-## The Monarch is found seated: a throne of his own at the head of the hall floor (the great one behind it is the
-## dynasty's, and nobody has sat in that for a long time), and the pose CineSeat holds him in until he rises.
-func _enthrone(arena: Arena) -> void:
-	var k := monarch.scale.y
-	var chair := Node3D.new()
-	chair.position = MONARCH_AT
-	chair.scale = Vector3.ONE * k
-	hall.add_child(chair)
-	var dark := Look.stone(Color("#221c1b"), 0.5, 0.8, "throne_seat")
-	var gold := Look.flat(Color("#9a7630"), 0.45, 0.85)
-	var red := Look.flat(Color("#34100d"), 1.0)
-	# [size, where, material]: seat, cushion, the high back and its crest, arms on their posts, the plinth behind
-	for b: Array in [[Vector3(1.0, 0.5, 0.86), Vector3(0, 0.25, -0.42), dark], [Vector3(0.84, 0.09, 0.7), Vector3(0, 0.53, -0.36), red],
-			[Vector3(1.12, 2.7, 0.2), Vector3(0, 1.35, -0.84), dark], [Vector3(0.8, 1.5, 0.05), Vector3(0, 1.45, -0.72), red],
-			[Vector3(1.24, 0.12, 0.26), Vector3(0, 2.72, -0.84), gold], [Vector3(0.3, 0.7, 0.2), Vector3(0, 3.1, -0.84), dark],
-			[Vector3(0.12, 0.46, 0.12), Vector3(0, 3.62, -0.84), gold],
-			[Vector3(0.16, 0.86, 0.9), Vector3(-0.58, 0.43, -0.42), dark], [Vector3(0.16, 0.86, 0.9), Vector3(0.58, 0.43, -0.42), dark],
-			[Vector3(0.2, 0.07, 0.94), Vector3(-0.58, 0.88, -0.42), gold], [Vector3(0.2, 0.07, 0.94), Vector3(0.58, 0.88, -0.42), gold],
-			[Vector3(1.9, 0.16, 0.5), Vector3(0, 0.08, -1.06), dark]]:
-		var m := MeshInstance3D.new()
-		var bm := BoxMesh.new()
-		bm.size = b[0]
-		m.mesh = bm
-		m.position = b[1]
-		m.material_override = b[2]
-		chair.add_child(m)
-	_seat = CineSeat.make(monarch, 0.6 * k)
+## The Monarch is found seated on the throne the command hall is built round (Arena._layout_command), in the pose
+## CineSeat holds him in until he rises.
+func _enthrone(_arena: Arena) -> void:
+	_seat = CineSeat.make(monarch, 0.6 * monarch.scale.y)
 
 ## He stands up out of the throne, and only then walks.
 func _rise_and_walk(to: Vector3, speed: float) -> void:
@@ -348,6 +328,83 @@ func _rise_and_walk(to: Vector3, speed: float) -> void:
 	var tw := who.create_tween()
 	tw.tween_property(_seat, "amount", 0.0, 1.5).set_trans(Tween.TRANS_SINE)
 	tw.tween_callback(func(): _walk(who, to, speed))
+
+## The door of the Engine's room comes down and is barred: slab, dust, the light beyond it cut off, the alarm.
+func _seal(arena: Arena, door: Node3D) -> void:
+	Sfx.play("shield_scrape", -6.0, 0.5)
+	var drop := door.create_tween()
+	drop.tween_property(door, "position:y", 1.65, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	drop.tween_callback(func():
+		Sfx.play("guard_break", -2.0, 0.55)
+		Sfx.play("bell", -8.0, 0.6)
+		(arena.get_node("DoorGlow") as OmniLight3D).light_energy = 0.0
+		(arena.get_node("Daylight") as Node3D).visible = false
+		if _alarm:
+			_alarm.visible = true
+		# what the slab throws up off the floor
+		var dust := CPUParticles3D.new()
+		dust.one_shot = true
+		dust.explosiveness = 0.92
+		dust.amount = 26
+		dust.lifetime = 1.6
+		dust.mesh = arena._quad(0.7)
+		dust.material_override = Look.particle(Color(0.62, 0.6, 0.56, 0.5), false)
+		dust.emission_shape = CPUParticles3D.EMISSION_SHAPE_BOX
+		dust.emission_box_extents = Vector3(1.0, 0.05, 0.1)
+		dust.direction = Vector3(0, 0.5, 1.0)
+		dust.spread = 55.0
+		dust.gravity = Vector3(0, -0.6, 0)
+		dust.initial_velocity_min = 0.8
+		dust.initial_velocity_max = 3.2
+		dust.scale_amount_min = 0.5
+		dust.scale_amount_max = 1.6
+		dust.color_ramp = arena._fade(Color(1, 1, 1, 0.6), Color(1, 1, 1, 0.0))
+		dust.position = Vector3(0, 0.1, door.position.z + 0.3)
+		hall.add_child(dust)
+		dust.emitting = true
+		# the jolt of it in the camera
+		if cam:
+			var keep := cam.drift
+			cam.drift = 0.2
+			cam.create_tween().tween_property(cam, "drift", keep, 0.5)
+		# and the bars that run across the slab from either jamb
+		for row: Array in [[0.9, -1.0], [2.3, 1.0]]:
+			var bar := arena.box(Vector3(1.9, 0.2, 0.16), Vector3(float(row[1]) * 2.6, float(row[0]), door.position.z + 0.2), Look.flat(Color("#1a1c1e"), 0.5, 0.8))
+			var lamp := arena.box(Vector3(0.3, 0.07, 0.18), Vector3.ZERO, Look.glow(Color("#ff4a22"), 3.0))
+			arena.remove_child(lamp)
+			bar.add_child(lamp)
+			var run := bar.create_tween()
+			run.tween_interval(0.18)
+			run.tween_property(bar, "position:x", float(row[1]) * 0.1, 0.32).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+			run.tween_callback(func(): Sfx.play("armor", -5.0, 0.6)))
+
+## The sword is in the block: sparks off the stone, the block's light and the room's machines answering it.
+func _driven(arena: Arena, rack: Node3D) -> void:
+	var sparks := CPUParticles3D.new()
+	sparks.one_shot = true
+	sparks.explosiveness = 0.95
+	sparks.amount = 22
+	sparks.lifetime = 0.7
+	sparks.mesh = arena._quad(0.06)
+	sparks.material_override = Look.particle(Color(0.6, 1.0, 0.92))
+	sparks.direction = Vector3.UP
+	sparks.spread = 70.0
+	sparks.gravity = Vector3(0, -6.0, 0)
+	sparks.initial_velocity_min = 1.5
+	sparks.initial_velocity_max = 4.5
+	sparks.position = rack.position + Vector3(0, 0.55, 0)
+	hall.add_child(sparks)
+	sparks.emitting = true
+	if arena.has_meta("machine_light"):
+		var m: StandardMaterial3D = arena.get_meta("machine_light")
+		var base := m.emission_energy_multiplier
+		var tw := create_tween()
+		tw.tween_property(m, "emission_energy_multiplier", base * 3.5, 0.35)
+		tw.tween_property(m, "emission_energy_multiplier", base * 1.4, 2.4)
+	if cam:
+		var keep := cam.drift
+		cam.drift = 0.12
+		cam.create_tween().tween_property(cam, "drift", keep, 0.4)
 
 func _walk(who: FighterRig, to: Vector3, speed: float = HighRoad.WALK) -> Tween:
 	var d := to - who.position
@@ -419,6 +476,12 @@ func _borrow() -> void:
 
 ## Gives Game back what a duel borrowed. Safe to call twice.
 func _give_back() -> void:
+	for id: String in _placed:
+		if _placed[id] == null:
+			Db.foes[id].erase("arena")
+		else:
+			Db.foes[id]["arena"] = _placed[id]
+	_placed = {}
 	if _kept.is_empty():
 		return
 	Game.profile = _kept.profile
@@ -428,6 +491,10 @@ func _give_back() -> void:
 
 func _fight(foe_id: String, opts: Dictionary) -> void:
 	_borrow()
+	# the duel is fought where the scene was played: the first generation's hall, not the ruin it becomes
+	if not _placed.has(foe_id):
+		_placed[foe_id] = Db.foes[foe_id].get("arena")
+	Db.foes[foe_id]["arena"] = HALL
 	duel = Duel.new()
 	add_child(duel)
 	if auto:
@@ -587,25 +654,48 @@ func _beat_fall(me: int) -> void:
 	hall.add_child(_seal_light)
 	Sfx.ambience("crypt")
 	Sfx.music("", 2.5)
-	# through the door as it comes down, hurt, and straight to the block
-	hero.position = Vector3(0.3, 0, -4.4)
+	# the sealing, seen from inside: they come through the doorway with the hall's light behind them, and the slab
+	# comes down at their heels, the bars run across it, and the only light left is the room's own
+	hero.position = Vector3(0.15, 0, -5.6)
 	var at_block: Vector3 = rack.position + Vector3(-0.75, 0, 0.6)
-	cam.cut(Vector3(4.9, 1.5, 2.4), rack.position + Vector3(-0.6, 1.1, 0.0), 44.0)
-	cam.move(Vector3(4.5, 1.4, 1.6), rack.position + Vector3(-0.4, 1.1, 0.2), 7.0)
 	var door: Node3D = arena.get_node("Door")
 	door.position.y = 5.2
-	(arena.get_node("DoorGlow") as OmniLight3D).light_energy = 2.0
-	door.create_tween().tween_property(door, "position:y", 1.65, 2.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	create_tween().tween_property(arena.get_node("DoorGlow"), "light_energy", 0.0, 2.4)
-	Sfx.play("shield_scrape", -8.0, 0.5)
-	cards.fade(0.0, 0.8)
+	_alarm.visible = false
+	var beyond := arena.get_node("DoorGlow") as OmniLight3D
+	beyond.light_color = Color("#ffc27a")
+	beyond.light_energy = 3.2
+	(arena.get_node("Daylight") as MeshInstance3D).material_override = Look.glow(Color("#ffb060"), 2.4)
+	cam.cut(Vector3(-1.7, 1.05, 0.2), Vector3(0.1, 1.55, -6.0), 46.0)
+	cam.move(Vector3(-2.0, 0.95, 0.9), Vector3(0.2, 1.45, -6.0), 3.2)
+	cards.fade(0.0, 0.5)
+	_walk(hero, Vector3(0.5, 0, -3.3), 1.5)
+	if not await _w(1.35, me):
+		return
+	_seal(arena, door)
+	if not await _w(1.7, me):
+		return
+	cam.cut(Vector3(4.9, 1.5, 2.4), rack.position + Vector3(-0.6, 1.1, 0.0), 44.0)
+	cam.move(Vector3(4.5, 1.4, 1.6), rack.position + Vector3(-0.4, 1.1, 0.2), 6.0)
 	await _walk(hero, at_block, 1.05).finished
 	if me != _token or _over:
 		return
 	_face(hero, rack.position, 0.5)
 	if not await _w(0.7, me):
 		return
+	# the sword leaves the hand: raised in both, and driven down into the block (the two-handed downward cut, at half
+	# speed so that it is a deed and not a blow), seen from below the block's edge
+	cam.cut(rack.position + Vector3(1.7, 0.5, 2.0), rack.position + Vector3(-0.35, 1.2, 0.15), 42.0)
+	cam.move(rack.position + Vector3(1.35, 0.55, 1.7), rack.position + Vector3(-0.25, 1.0, 0.1), 2.4)
+	var strike := "th_cut_d"
+	if SkinDriver.has_clip(strike):
+		hero.time_scale = 0.5
+		hero.hold(strike, 0.2)
+		if not await _w(1.0, me):
+			return
+		hero.time_scale = 1.0
 	# the sword goes into the block, and stays there: what was found goes out through it
+	_driven(arena, rack)
+	hero.release(0.9)
 	hero.set_armed(false)
 	var blade := Node3D.new()
 	rack.add_child(blade)

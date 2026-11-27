@@ -1200,6 +1200,8 @@ func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
 ## at its head the machine the throne is part of: a ring of the makers' ceramic standing on end with the seat on a
 ## dais in the mouth of it, conduits running from it into the walls. Built from boxes, prisms and arcs merged by
 ## material (seven draws for the room).
+const COMMAND_SEAT := Vector3(0, 0, -8.6)       # where the Monarch sits (Prologue.MONARCH_AT)
+const COMMAND_SEAT_SCALE := 1.5
 func _layout_command() -> void:
 	sun.directional_shadow_max_distance = 60.0
 	var alloy := Highland.built(Color("#5a6068"), 0.6, 0.45, 0.22)
@@ -1252,22 +1254,44 @@ func _layout_command() -> void:
 	Highland._arc(ring, 5.6, 0.62, TAU - 0.62, PackedVector2Array([Vector2(-0.7, -0.6), Vector2(-0.7, 0.6), Vector2(-0.4, 0.9), Vector2(0.4, 0.9), Vector2(0.7, 0.6), Vector2(0.7, -0.6)]), 40)
 	Highland._arc(chan, 5.6, 0.7, TAU - 0.7, PackedVector2Array([Vector2(-0.82, -0.18), Vector2(-0.82, 0.18), Vector2(-0.68, 0.18), Vector2(-0.68, -0.18)]), 40)
 	for e: Array in [[ring, pale, "MachineRing"], [chan, warm, "MachineLight"]]:
-		Highland._commit(self, e[2], e[0], e[1], false).position = Vector3(0, 5.2, -11.4)
+		Highland._commit(self, e[2], e[0], e[1], false).position = Vector3(0, 5.2, -10.2)
 	for k in 3:
 		var step := BoxMesh.new()
 		step.size = Vector3(9.0 - k * 1.6, 0.22, 4.4 - k * 0.8)
-		white.append_from(step, 0, Transform3D(Basis.IDENTITY, Vector3(0, 0.11 + k * 0.22, -11.6 - k * 0.2)))
+		white.append_from(step, 0, Transform3D(Basis.IDENTITY, Vector3(0, 0.11 + k * 0.22, -11.7 - k * 0.2)))
 	for sx4: float in [-1.0, 1.0]:
-		Highland._beam(ribs, Vector3(sx4 * 4.6, 1.6, -11.4), Vector3(sx4 * 10.0, 6.5, -13.0), 0.5)
-		Highland._beam(ribs, Vector3(sx4 * 3.2, 9.6, -11.4), Vector3(sx4 * 8.8, 12.0, -14.0), 0.4)
-		Highland._prism(ribs, Vector3(sx4 * 5.6, 0, -11.4), 1.0, 0.8, 2.4, 6)
-		Highland._beam(lights, Vector3(sx4 * 5.6, 2.45, -11.4), Vector3(sx4 * 5.6, 2.65, -11.4), 1.3)
+		Highland._beam(ribs, Vector3(sx4 * 4.6, 1.6, -10.2), Vector3(sx4 * 10.0, 6.5, -12.0), 0.5)
+		Highland._beam(ribs, Vector3(sx4 * 3.2, 9.6, -10.2), Vector3(sx4 * 8.8, 12.0, -13.0), 0.4)
+		Highland._prism(ribs, Vector3(sx4 * 5.6, 0, -10.2), 1.0, 0.8, 2.4, 6)
+		Highland._beam(lights, Vector3(sx4 * 5.6, 2.45, -10.2), Vector3(sx4 * 5.6, 2.65, -10.2), 1.3)
 		# a console to either side of the floor, dead-faced but for a line of readouts
 		Highland._beam(ribs, Vector3(sx4 * 7.4, 0, 4.0), Vector3(sx4 * 7.4, 1.1, 4.0), 1.2, 3.0)
 		Highland._beam(lines, Vector3(sx4 * 6.78, 0.95, 2.8), Vector3(sx4 * 6.78, 0.95, 5.2), 0.1, 0.05)
+	# the throne: a seat cut square out of the machine, its back running up into the spine behind it. Sized for the
+	# Monarch (half as tall again as a knight); the opening seats him on it (Prologue._enthrone)
+	var seat := Highland._flat_tool()
+	var seat_pale := Highland._flat_tool()
+	var k2 := COMMAND_SEAT_SCALE
+	var at := COMMAND_SEAT
+	for b: Array in [[Vector3(1.05, 0.52, 0.9), Vector3(0, 0.26, -0.44)], [Vector3(1.2, 3.2, 0.24), Vector3(0, 1.6, -0.9)],
+			[Vector3(0.18, 0.9, 0.95), Vector3(-0.62, 0.45, -0.44)], [Vector3(0.18, 0.9, 0.95), Vector3(0.62, 0.45, -0.44)],
+			[Vector3(2.2, 0.2, 0.7), Vector3(0, 0.1, -1.1)], [Vector3(0.5, 1.4, 0.3), Vector3(0, 3.7, -0.95)]]:
+		var bm := BoxMesh.new()
+		bm.size = (b[0] as Vector3) * k2
+		seat.append_from(bm, 0, Transform3D(Basis.IDENTITY, at + (b[1] as Vector3) * k2))
+	for b2: Array in [[Vector3(0.86, 0.07, 0.74), Vector3(0, 0.55, -0.38)], [Vector3(0.84, 1.7, 0.06), Vector3(0, 1.5, -0.76)],
+			[Vector3(0.24, 0.07, 1.0), Vector3(-0.62, 0.93, -0.44)], [Vector3(0.24, 0.07, 1.0), Vector3(0.62, 0.93, -0.44)]]:
+		var bm2 := BoxMesh.new()
+		bm2.size = (b2[0] as Vector3) * k2
+		seat_pale.append_from(bm2, 0, Transform3D(Basis.IDENTITY, at + (b2[1] as Vector3) * k2))
+	for sx5: float in [-1.0, 1.0]:
+		Highland._beam(lights, at + Vector3(sx5 * 0.52, 2.5, -0.76) * k2, at + Vector3(sx5 * 0.52, 3.15, -0.76) * k2, 0.06 * k2, 0.04)
+		Highland._beam(lines, at + Vector3(sx5 * 0.72, 0.5, 0.02) * k2, at + Vector3(sx5 * 0.72, 0.86, 0.02) * k2, 0.05 * k2, 0.04)
+	Highland._commit(self, "Throne", seat, plate, true)
+	Highland._commit(self, "ThronePale", seat_pale, pale, false)
 	# the spine up the back of the ring, which the throne's own back runs into
-	Highland._beam(ribs, Vector3(0, 0.6, -12.6), Vector3(0, 12.8, -12.6), 1.6, 0.9)
-	Highland._beam(lights, Vector3(0, 3.6, -12.1), Vector3(0, 12.2, -12.1), 0.2, 0.1)
+	Highland._beam(ribs, Vector3(0, 0.6, -10.6), Vector3(0, 12.8, -10.6), 1.6, 0.9)
+	Highland._beam(lights, Vector3(0, 6.2, -10.1), Vector3(0, 12.2, -10.1), 0.2, 0.1)
 	Highland._commit(self, "Ribs", ribs, alloy, true)
 	Highland._commit(self, "Walls", walls, plate, false)
 	Highland._commit(self, "White", white, pale, false)

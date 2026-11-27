@@ -19,10 +19,37 @@
 >   **197.5 MB -> 106.4 MB**; one suit 101.3 -> 90.1 MB; an extra suit worn costs about 2.7 MB instead of 16.
 > - `--oldlook` (or `FighterRig.old_look = true`) restores the whole-suit swap and the first weapon models.
 
+> **Finish pass, third (2026-11-27; the owner: "dont do the neon glow more like these references").** The direction is
+> monochrome: pale grey, gunmetal and black; no coloured light; tone-on-tone etched ornament; a faceplate under a dark
+> cloth hood. This is the default now. The second pass (below) is kept whole behind `--neon`.
+> Sheets: `marketing/armor_finish_pass/v3/`.
+> - **No light.** No lines of light, lit visor, cast lights, vents, sheen or pulse unless `--neon`. The eye slot is dark.
+>   The hips' flex layer has no seam of light.
+> - **Plate.** `FINISH_COAT`: grey satin, about a quarter metal, the suit's creases and seams dark as before (`wear`),
+>   a pale line along the plates' borders (`trim`).
+> - **Etched ornament** (`etch`, in `src/fx/armor_part.gdshader`), each only a little darker and rougher than the plate
+>   so it shows as it catches the light: ripples like pattern-welded steel on the breast, a fine weave on the pauldrons,
+>   ruled lines down the shins, and the house's small sigil (an open ring, a diamond, a stem) incised on the breast and
+>   the brow.
+> - **Faceplate.** The same helm mesh, refinished: two cut lines from the brow down across the cheeks and one down the
+>   chin, with the planes between them shaded a step apart. They are painted, not modelled: the helm is as smooth as it
+>   was and reads faceted only from the front.
+> - **Hood and cowl** (helm slot only). `tools/armor_split.gd` `_hood` builds `<body>_crownless_hood.res` (about 3,400
+>   triangles): a shell measured off the helm, open in an arch round the faceplate, gathered into a roll round the neck,
+>   with one small ring clasp; carried by Head, Neck and Spine2 blended by height; kept inside the shoulder joints.
+>   `ArmorParts` draws it (`HOOD_CODE`: matte dark cloth, a weave in the normal that fades with distance) while the
+>   benchmark helm is worn. `--nohood` (or `ArmorParts.hood_on = false`) shows the helm bare, as generated. It is a
+>   skinned shell, not simulated cloth: it does not swing, and where the cowl meets the collar it can sink into the
+>   plate. No helm was generated or bought.
+> - **Tunables:** `FINISH_COAT` (`coat_color`, `coat_rough`, `coat_metal`, `edge_shine`, `wear`, `etch`, `trim`),
+>   `HOOD_CLOTH`, `HOOD_CLASP`; for `--neon`: `FINISH_NEON`, `GLOW`, `FX_*`. `--chrome` is still the full revert (no coat,
+>   no ornament, no hood).
+
 > **Finish pass, second (2026-11-27; the owner: "paler grey, more detail like armor but still futuristic, stronger design
 > of shapes circles, logos, cyan and maybe pink with girl with a clean glow and effect, light, shine, smoke, air coming
 > out, no cloak").** Material and a few light effects; no mesh changed, the silhouette is the generated suit's. The
-> first finish pass (matte white, three small motifs) is superseded. Sheets: `marketing/armor_finish_pass/v2/`.
+> first finish pass (matte white, three small motifs) is superseded. **Since the third pass this is what `--neon` shows,
+> not the default.** Sheets: `marketing/armor_finish_pass/v2/`.
 > - **Plate.** `ArmorParts.FINISH_COAT` (merged into the `crownless` finish) coats every texel that is not undersuit in
 >   pale cool grey satin, a fifth metal, and draws the suit's own sculpted detail through it: its creases and panel
 >   seams dark (`wear` 0.85), its edges catching the light (`edge_shine`). Chipping and scuffs stay off (`wear_edge` 0).

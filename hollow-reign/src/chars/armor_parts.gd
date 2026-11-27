@@ -36,23 +36,30 @@ const LINKED := {
 const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.7, "rough_lift": 0.17, "metal_max": 0.72, "spec": 0.3,
 	"cloth": 1.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1),
 	"coat": 0.0, "coat_color": Color(0.86, 0.84, 0.79), "coat_metal": 0.06, "coat_rough": 0.62, "wear": 0.0, "wear_edge": 1.0, "wear_color": Color(0.075, 0.07, 0.066),
-	"motif": 0.0, "visor": 0.0, "edge_shine": 0.0}
-## The benchmark suit's refinish (the owner, 2026-11-27: "paler grey, more detail like armor but still futuristic,
-## stronger design of shapes circles, logos, cyan and maybe pink with girl, with a clean glow and effect").
-## Material and a few light effects only; the meshes are as generated. Everything the owner may want nudged is here:
-##   coat_color    the plate, a pale cool grey: paler (0.70, 0.72, 0.755), darker (0.50, 0.52, 0.56), warmer (0.64, 0.62, 0.58).
-##                 It is lit hard in the Armory and in daylight: at 0.70 it already reads white in the Courtyard sun.
-##   coat_rough    0.35 polished .. 0.6 matte;   coat_metal 0 ceramic .. 0.6 steel;   edge_shine 0 .. 0.4 lit edges
+	"motif": 0.0, "visor": 0.0, "edge_shine": 0.0, "etch": 0.0, "trim": 0.0}
+## The benchmark suit's refinish, third pass (the owner, 2026-11-27: "dont do the neon glow"; the direction is
+## monochrome: pale grey, gunmetal and black, a soft matte finish, tone-on-tone etched ornament, pale edge trim, and a
+## faceplate under a dark cloth hood). Material, plus one cloth mesh on the helm; the body's meshes are as generated.
+## Everything the owner may want nudged is here:
+##   coat_color    the plate: paler (0.45, 0.46, 0.48), gunmetal (0.26, 0.27, 0.29), warmer (0.39, 0.38, 0.36).
+##                 It is lit hard in the Armory and in daylight: at 0.5 it still reads near-white in the Courtyard sun.
+##   coat_rough    0.35 polished .. 0.65 matte;   coat_metal 0 ceramic .. 0.6 steel;   edge_shine 0 .. 0.4 lit edges
 ##   wear          0 none .. 1: how dark the suit's own creases and panel seams are drawn (its sculpted detail)
 ##   wear_edge     0 none .. 1: chipped edges, scuffs and mottling (off: the brief is clean)
-##   motif         0 none .. 1: the inlaid designs;  motif_dark their metal;  motif_energy how bright their lines of light
-##   visor         brightness of the lit eye slot (0 off)
-##   GLOW          every light on the suit, one colour per body: visor, lines, hip seam, vents, cast light
-##   FX_*          the live effects (cast light, vents)
-## `--chrome` (or ArmorParts.chrome = true before a knight is dressed) puts the generated chrome back, all of it.
-const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.61, 0.63, 0.67), "coat_metal": 0.2, "coat_rough": 0.44, "edge_shine": 0.2,
-	"wear": 0.85, "wear_edge": 0.0, "wear_color": Color(0.085, 0.085, 0.09), "spec": 0.5,
-	"motif": 1.0, "motif_dark": Color(0.13, 0.13, 0.14), "motif_energy": 2.2, "visor": 4.5}
+##   etch          0 none .. 1: the etched ornament (rippled breast, woven pauldrons, ruled shins, the incised sigils,
+##                 the faceplate's cut lines)
+##   trim          0 none .. 1: the pale line along the plates' borders
+##   HOOD_*        the cloth hood and cowl on the helm
+## Dev flags: `--chrome` the generated chrome, all of it;  `--nohood` the helm bare, as generated;
+## `--neon` the second pass's coloured light back (FINISH_NEON, GLOW, FX_*): lines of light, lit visor, cast light, vents.
+const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.36, 0.37, 0.39), "coat_metal": 0.28, "coat_rough": 0.5, "edge_shine": 0.16,
+	"wear": 0.85, "wear_edge": 0.0, "wear_color": Color(0.06, 0.06, 0.065), "spec": 0.42,
+	"etch": 1.0, "trim": 0.6, "motif": 0.0, "visor": 0.0, "fx": 0.0}
+const FINISH_NEON := {"motif": 1.0, "motif_dark": Color(0.13, 0.13, 0.14), "motif_energy": 2.2, "visor": 4.5, "etch": 0.0, "fx": 1.0}
+static var neon: bool = OS.get_cmdline_user_args().has("--neon")
+static var hood_on: bool = not OS.get_cmdline_user_args().has("--nohood")
+const HOOD_CLOTH := Color(0.2, 0.2, 0.215)       # the hood's cloth
+const HOOD_CLASP := Color(0.3, 0.3, 0.32)          # its ring clasp
 const GLOW := {"m": Color(0.25, 0.9, 1.0), "f": Color(1.0, 0.3, 0.72)}
 const FX_LIGHT := 0.06         # energy of the two small lights the visor and the breast cast (0 off)
 const FX_LIGHT_RANGE := 0.9    # metres
@@ -155,6 +162,8 @@ static func finish_of(suit: String) -> Dictionary:
 	f.merge(FINISH.get(suit.get_slice("_", 0), {}), true)
 	if suit.get_slice("_", 0) == "crownless" and not chrome:
 		f.merge(FINISH_COAT, true)
+		if neon:
+			f.merge(FINISH_NEON, true)
 	return f
 
 static func _material(b: String, suit: String) -> ShaderMaterial:
@@ -224,7 +233,67 @@ func wear(slot: String, suit: String) -> bool:
 		_show_fx()
 	return true
 
-# ---------------------------------------------------------------- live effects on the refinished suit
+# ---------------------------------------------------------------- the hood on the benchmark helm
+## A dark cloth hood with a gathered cowl and one ring clasp, over the benchmark helm (mesh by tools/armor_split.gd,
+## carried by Head, Neck and Spine2). Matte, with a fine weave in its normal; the clasp is plain grey metal.
+const HOOD_CODE := "shader_type spatial;
+render_mode diffuse_burley, specular_schlick_ggx, cull_disabled;
+uniform vec3 cloth : source_color = vec3(0.036, 0.037, 0.042);
+uniform vec3 clasp : source_color = vec3(0.42, 0.42, 0.44);
+uniform vec3 flash : source_color = vec3(0.0);
+uniform vec3 rim_color : source_color = vec3(0.0);
+void fragment() {
+	float metal = step(0.5, UV2.x);
+	// warp and weft: two sets of threads, one over the other
+	vec2 t = UV * vec2(260.0, 300.0);
+	float wx = sin(t.x * 6.2832);
+	float wy = sin(t.y * 6.2832);
+	float over = step(0.0, sin(t.x * 3.1416) * sin(t.y * 3.1416));
+	float fine = clamp(1.0 - max(fwidth(t.x), fwidth(t.y)) * 1.6, 0.0, 1.0);      // far away the threads are too small to draw
+	vec3 n = normalize(vec3(mix(wx, 0.0, over) * 0.5 * fine, mix(0.0, wy, over) * 0.5 * fine, 1.0));
+	float shade = mix(0.91, 0.82 + 0.18 * mix(abs(wy), abs(wx), over), fine);
+	ALBEDO = mix(cloth * shade * (FRONT_FACING ? 1.0 : 0.55), clasp, metal);
+	ROUGHNESS = mix(0.88, 0.55, metal);
+	METALLIC = metal * 0.6;
+	SPECULAR = mix(0.18, 0.5, metal);
+	NORMAL_MAP = mix(n * 0.5 + 0.5, vec3(0.5, 0.5, 1.0), metal);
+	NORMAL_MAP_DEPTH = 0.6;
+	float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+	EMISSION = flash + rim_color * rim;
+}"
+static var _hood_shader: Shader
+var hood: MeshInstance3D
+var _hood_mat: ShaderMaterial
+
+func _show_hood(on: bool) -> void:
+	if not on:
+		if hood != null:
+			hood.visible = false
+		return
+	if hood == null:
+		var path := "%s%s_%s_hood.res" % [dir, body, host]
+		if not ResourceLoader.exists(path):
+			return
+		if _hood_shader == null:
+			_hood_shader = Shader.new()
+			_hood_shader.code = HOOD_CODE
+		hood = MeshInstance3D.new()
+		hood.name = "part_hood"
+		hood.mesh = load(path)
+		hood.skin = skin_of(body)
+		skel.add_child(hood)
+		hood.skeleton = hood.get_path_to(skel)
+		_hood_mat = ShaderMaterial.new()
+		_hood_mat.shader = _hood_shader
+		_hood_mat.set_shader_parameter("cloth", HOOD_CLOTH)
+		_hood_mat.set_shader_parameter("clasp", HOOD_CLASP)
+		for k: StringName in _params:
+			if k != &"tint":
+				_hood_mat.set_shader_parameter(k, _params[k])
+		hood.set_surface_override_material(0, _hood_mat)
+	hood.visible = true
+
+# ---------------------------------------------------------------- live effects on the refinished suit (--neon only)
 ## Light and air, kept small: two unshadowed lights (the visor's and the breast's, in the body's glow colour) and three
 ## vents (behind each shoulder and at the nape) that leak a thin wisp of vapour and open for a moment on vent()
 ## (FighterRig calls it on a dodge or a roll). Eight small particles a vent at most. No vents with reduced motion; neither
@@ -262,7 +331,8 @@ func _on_bone(short: String, at: Vector3, node: Node3D) -> bool:
 	return true
 
 func _show_fx() -> void:
-	var on: bool = not chrome and _finish and worn.get("chest", "") == host
+	_show_hood(hood_on and not chrome and _finish and worn.get("helm", "") == host)
+	var on: bool = neon and not chrome and _finish and worn.get("chest", "") == host
 	if on and _fx.is_empty():
 		_build_fx()
 	for n: Node3D in _fx:
@@ -421,7 +491,8 @@ func _show_flex(on: bool) -> void:
 		for k: StringName in _params:
 			if k != &"tint":
 				_flex_mat.set_shader_parameter(k, _params[k])
-		if not chrome:
+		_flex_mat.set_shader_parameter("seam_energy", 0.7 if (neon or chrome) else 0.0)
+		if neon and not chrome:
 			_flex_mat.set_shader_parameter("seam", GLOW.get(body, GLOW.m))
 		flex.set_surface_override_material(0, _flex_mat)
 	flex.visible = true
@@ -438,7 +509,8 @@ func _own_material(suit: String) -> ShaderMaterial:
 	for k2: String in marks:
 		m.set_shader_parameter(k2, marks[k2])
 	m.set_shader_parameter("glow_color", GLOW.get(body, GLOW.m))
-	m.set_shader_parameter("fx", 0.0 if _setting("reduce_motion", false) else 1.0)
+	if bool(_setting("reduce_motion", false)):
+		m.set_shader_parameter("fx", 0.0)
 	for k3: StringName in _params:
 		if k3 != &"tint":
 			m.set_shader_parameter(k3, _params[k3])
@@ -450,6 +522,8 @@ func set_param(param: StringName, value: Variant) -> void:
 	_params[param] = value
 	if _flex_mat != null and param != &"tint":
 		_flex_mat.set_shader_parameter(param, value)
+	if _hood_mat != null and param != &"tint":
+		_hood_mat.set_shader_parameter(param, value)
 	for suit: String in _mats:
 		var v: Variant = value
 		if param == &"tint" and _finish:
@@ -466,6 +540,9 @@ func remove() -> void:
 	if flex:
 		flex.queue_free()
 		flex = null
+	if hood:
+		hood.queue_free()
+		hood = null
 	for n: Node3D in _fx:
 		if is_instance_valid(n):
 			n.queue_free()

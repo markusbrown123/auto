@@ -9,7 +9,8 @@ extends SceneTree
 ## Writes assets/models/parts/<body>_<suit>_<slot>.res (ArrayMesh, no material), <body>_<suit>_mat.res (material)
 ## and <body>_under.res (the base body without its helmet: a dark undersuit shown under mixed parts).
 ## Run:  Godot --headless --path . -s tools/armor_split.gd -- [--only=m_frost,f_ash] [--margin=0.22] [--out=dir] [--despike=all] [--tag=_ds]
-##       [--spikes: no default trimming] [--heels: female boots as generated] [--noflex: no <body>_<host>_flex.res] [--v]
+##       [--spikes: no default trimming] [--heels: female boots as generated] [--noflex: no <body>_<host>_flex.res]
+##       [--nohood: no <body>_<host>_hood.res] [--v]
 ## Third pass (2026-11-27): the host suit's bare hips get a skin of flex-armour (_flex, <body>_<host>_flex.res; the host's
 ## own six parts are exactly as generated), female boots are made flat (_flatten_heels), and the families in
 ## DESPIKE_DEFAULT are trimmed by default.
@@ -98,6 +99,10 @@ func _init() -> void:
 				var fx := _flex(m, host, src.material)
 				_save(fx, "%s%s_flex.res" % [out_dir, id], id + "_flex")
 				line += "flex %d  " % [fx.idx.size() / 3]
+			if suit == host_suit and tag == "" and not args.has("nohood"):
+				var hd := _hood(m, host)
+				_save(hd, "%s%s_hood.res" % [out_dir, id], id + "_hood")
+				line += "hood %d  " % [hd.idx.size() / 3]
 			if suit == host_suit and tag == "":
 				# the Skin every part is bound with: the base skeleton's own rest pose, bone by name
 				var sk := Skin.new()
@@ -652,6 +657,159 @@ func _flex(m: Dictionary, h: Dictionary, mat: BaseMaterial3D) -> Dictionary:
 					o.bones.append(m.bones[v * 4 + j])
 					o.weights.append(m.weights[v * 4 + j])
 			o.idx.append(map[v])
+	return o
+
+# ---------------------------------------------------------------- a cloth hood and cowl for the host helm
+## The starting kit's helm is worn under a dark cloth hood (third finish pass). The hood is made here, not generated:
+## a shell measured off the helm, the neck and the collar (the outermost of what is there per height and direction,
+## plus the cloth's own looseness), open in front where the faceplate is, gathered into a cowl round the neck, with
+## one plain ring clasp under the chin. Head, Neck and Spine2 carry it, blended by height, so it turns with the head and
+## sits on the collar. It keeps inside the shoulder joints so the pauldrons never reach it.
+## UV: x round the head (6 turns of weave), y up. UV2.x: 0 cloth, 1 the clasp's metal.
+const HOOD_SECTORS := 56
+const HOOD_ROWS := 34
+
+func _hood(m: Dictionary, h: Dictionary) -> Dictionary:
+	var names: Array = h.names
+	var head: Vector3 = (h.rest["Head"] as Transform3D).origin
+	var neck: Vector3 = (h.rest["Neck"] as Transform3D).origin
+	var toe: Vector3 = (h.rest["LeftToeBase"] as Transform3D).origin - (h.rest["LeftFoot"] as Transform3D).origin
+	var front := signf(toe.x) if toe.x != 0.0 else 1.0
+	var pos: PackedVector3Array = m.pos
+	var top := 0.0
+	var cx := 0.0
+	var cz := 0.0
+	var cn := 0
+	for v in pos.size():
+		if names[m.top[v]] == "Head":
+			top = maxf(top, pos[v].y)
+			cx += pos[v].x
+			cz += pos[v].z
+			cn += 1
+	var axis := Vector3(cx / maxf(cn, 1), 0, cz / maxf(cn, 1))          # the upright through the middle of the helm
+	var y_lo := neck.y - float(args.get("hood_drop", "0.03"))
+	var y_hi := top + 0.024
+	var jaw_y := neck.y + 0.034                                           # where the helm ends and the cowl begins
+	var bin := (y_hi - y_lo) / HOOD_ROWS
+	var cells := {}
+	for v in pos.size():
+		var b: String = names[m.top[v]]
+		if not (b == "Head" or b == "HeadTop_End" or b == "Neck" or b.begins_with("Spine") or b.ends_with("Shoulder")):
+			continue
+		if pos[v].y < y_lo - bin or pos[v].y > y_hi:
+			continue
+		var d := pos[v] - axis
+		var key := Vector2i(int(floor((pos[v].y - y_lo) / bin)), int(floor((atan2(d.z, d.x * front) + PI) / TAU * HOOD_SECTORS)) % HOOD_SECTORS)
+		cells[key] = maxf(float(cells.get(key, 0.0)), Vector2(d.x, d.z).length())
+	var reach := float(args.get("hood_reach", "0.108"))                   # never wider than this: inside the shoulder joints
+	var body_r := func(row: int, sec: int) -> float:
+		var best := 0.0
+		for dr: int in [-1, 0, 1]:
+			for ds: int in [-1, 0, 1]:
+				best = maxf(best, float(cells.get(Vector2i(row + dr, (sec + ds + HOOD_SECTORS) % HOOD_SECTORS), 0.0)))
+		return best
+	var marks_visor := float(args.get("hood_face_y", "0.0"))
+	var face_y := marks_visor if marks_visor > 0.0 else head.y + 0.03      # the middle of the opening
+	var o := {"pos": PackedVector3Array(), "nrm": PackedVector3Array(), "tan": PackedFloat32Array(), "uv": PackedVector2Array(), "uv2": PackedVector2Array(),
+		"bones": PackedInt32Array(), "weights": PackedFloat32Array(), "idx": PackedInt32Array()}
+	var bi_head := (names as Array).find("Head")
+	var bi_neck := (names as Array).find("Neck")
+	var bi_chest := (names as Array).find("Spine2")
+	var open := PackedByteArray()
+	var add := func(p: Vector3, uv: Vector2, metal: float) -> int:
+		o.pos.append(p)
+		o.nrm.append(Vector3.UP)
+		o.uv.append(uv)
+		o.uv2.append(Vector2(metal, 0.0))
+		o.tan.append(1.0); o.tan.append(0.0); o.tan.append(0.0); o.tan.append(1.0)
+		# head above the jaw, neck between, the collar below: blended by height
+		var wh := smoothstep(neck.y + 0.012, head.y + 0.012, p.y)
+		var wc := 1.0 - smoothstep(neck.y - 0.03, neck.y + 0.012, p.y)
+		var wn := maxf(0.0, 1.0 - wh - wc)
+		for pair: Array in [[bi_head, wh], [bi_neck, wn], [bi_chest, wc], [0, 0.0]]:
+			o.bones.append(int(pair[0]))
+			o.weights.append(float(pair[1]))
+		return o.pos.size() - 1
+	for r in HOOD_ROWS + 1:
+		var y := lerpf(y_lo, y_hi, float(r) / HOOD_ROWS)
+		var up := float(r) / HOOD_ROWS
+		for i in HOOD_SECTORS:
+			var th := (float(i) + 0.5) / HOOD_SECTORS * TAU - PI          # 0 = straight ahead
+			var a := absf(th)
+			var rr: float = float(body_r.call(r, i))
+			if rr <= 0.0:
+				rr = 0.03
+			var cowl := 1.0 - smoothstep(jaw_y - 0.022, jaw_y + 0.004, y)                   # 1 round the neck, 0 on the head
+			var loose := 0.009 + 0.012 * smoothstep(1.2, 2.6, a) * (1.0 - cowl)             # the hood hangs off the back of the helm
+			var folds := cowl * (0.011 + 0.008 * sin(th * 7.0 + y * 150.0) + 0.004 * sin(th * 13.0 - y * 90.0))
+			# round the neck the cloth does not follow the neck in: it hangs from the jaw as a gathered roll, fullest
+			# half way down, and tucks in on the collar
+			# (a roll about the width of the helm's own jaw: where the collar under it is wider, the cloth is tucked into it)
+			var jaw: float = minf(float(body_r.call(int((jaw_y + 0.012 - y_lo) / bin), i)), 0.058)
+			var down := clampf((jaw_y - y) / maxf(jaw_y - y_lo, 0.001), 0.0, 1.0)
+			var roll := jaw + 0.002 + 0.011 * sin(down * PI) - 0.006 * down
+			rr = lerpf(rr, roll, cowl) + loose + folds * 0.5 * (0.4 + 0.6 * sin(down * PI))
+			rr = minf(rr, lerpf(reach, 0.078, cowl))
+			# the crown closes to a soft point a little behind the top
+			var crown := smoothstep(top + 0.002, y_hi, y)
+			rr = lerpf(rr, 0.004, crown * crown)
+			var dir := Vector3(cos(th) * front, 0, sin(th))
+			var p := axis + Vector3(0, y, 0) + dir * rr - Vector3(front, 0, 0) * 0.012 * crown
+			# the opening for the faceplate: an arch, widest at the cheek, closed above the brow and under the chin
+			var half := 1.02 * (1.0 - smoothstep(face_y + 0.012, face_y + 0.062, y)) * smoothstep(face_y - 0.07, face_y - 0.045, y)
+			open.append(1 if a < half else 0)
+			if a < half:
+				# inside the opening: the vertex is drawn back to the opening's edge, so the edge is a clean curve
+				var th2 := half * (1.0 if th >= 0.0 else -1.0)
+				dir = Vector3(cos(th2) * front, 0, sin(th2))
+				p = axis + Vector3(0, y, 0) + dir * (rr + 0.006)
+			elif a < half + 0.16 and half > 0.05:
+				p += dir * 0.006 * (1.0 - (a - half) / 0.16)                              # the rim stands a little proud
+			add.call(p, Vector2(float(i) / HOOD_SECTORS * 6.0, up * 3.0), 0.0)
+	var N := HOOD_SECTORS
+	for r in HOOD_ROWS:
+		for i in N:
+			var a0 := r * N + i
+			var a1 := r * N + (i + 1) % N
+			var b0 := a0 + N
+			var b1 := a1 + N
+			if int(open[a0]) + int(open[a1]) + int(open[b0]) + int(open[b1]) == 4:
+				continue
+			for t: Array in [[a0, a1, b1], [a0, b1, b0]]:
+				o.idx.append(t[0]); o.idx.append(t[1]); o.idx.append(t[2])
+	# the clasp: a plain ring lying on the cowl under the chin
+	var cy := neck.y + 0.01
+	var c_row := int((cy - y_lo) / bin)
+	var c_at: Vector3 = ((o.pos[c_row * N + N / 2] as Vector3) + (o.pos[c_row * N + N / 2 - 1] as Vector3)) * 0.5 + Vector3(front, 0, 0) * 0.003
+	var ring_base: int = o.pos.size()
+	const RS := 14
+	const TS := 6
+	for i in RS:
+		var u := float(i) / RS * TAU
+		for j in TS:
+			var w := float(j) / TS * TAU
+			var rad := 0.0068 + 0.0017 * cos(w)
+			add.call(c_at + Vector3(front * 0.0017 * sin(w), rad * sin(u), rad * cos(u)), Vector2(0.0, 0.0), 1.0)
+	for i in RS:
+		for j in TS:
+			var q0 := ring_base + i * TS + j
+			var q1 := ring_base + i * TS + (j + 1) % TS
+			var q2 := ring_base + ((i + 1) % RS) * TS + j
+			var q3 := ring_base + ((i + 1) % RS) * TS + (j + 1) % TS
+			o.idx.append(q0); o.idx.append(q1); o.idx.append(q3)
+			o.idx.append(q0); o.idx.append(q3); o.idx.append(q2)
+	# normals from the cloth itself, pointing away from the axis
+	var acc := PackedVector3Array()
+	acc.resize(o.pos.size())
+	for t2 in range(0, o.idx.size(), 3):
+		var pa: Vector3 = o.pos[o.idx[t2]]
+		var fn := ((o.pos[o.idx[t2 + 2]] as Vector3) - pa).cross((o.pos[o.idx[t2 + 1]] as Vector3) - pa)
+		for e in 3:
+			acc[o.idx[t2 + e]] += fn
+	for v2 in acc.size():
+		var out: Vector3 = (o.pos[v2] as Vector3) - (c_at if v2 >= ring_base else axis + Vector3(0, (o.pos[v2] as Vector3).y, 0))
+		var nn := acc[v2].normalized() if acc[v2].length_squared() > 1e-16 else out.normalized()
+		o.nrm[v2] = nn if nn.dot(out) >= 0.0 else -nn
 	return o
 
 # ---------------------------------------------------------------- split

@@ -61,6 +61,14 @@ uniform float visor_y = 0.931;
 uniform float visor_half = 0.011;
 uniform float fx = 1.0;
 uniform float edge_shine = 0.0;
+//  etch  0 off .. 1 tone-on-tone ornament cut into the coat, no light and no second colour: a rippled field on the
+//        breast, a fine weave on the pauldrons, ruled lines down the shins (each only a little darker and rougher than
+//        the plate, so it shows as it catches the light), the house's small incised sigil on the breast and the brow,
+//        and the faceplate's cut lines: two from the brow down across the cheeks, one down the chin, with the planes
+//        between them shaded a step apart so the smooth helm reads as faceted.
+//  trim  0 off .. 1 a pale line along the plates' borders (the steep parts of the normal map next to a seam).
+uniform float etch = 0.0;
+uniform float trim = 0.0;
 
 float line_at(float d, float half_w, float aa) { return 1.0 - smoothstep(half_w, half_w + aa, abs(d)); }
 float diamond(vec2 d, float r, float aa) { return 1.0 - smoothstep(r, r + aa, abs(d.x) + abs(d.y)); }
@@ -102,12 +110,56 @@ void fragment() {
 		float w = clamp(wear * (crease + chip * 1.3 + scuff), 0.0, 1.0) * plate;
 		float edge = smoothstep(0.1, 0.32, slope) * (1.0 - clamp(crease, 0.0, 1.0));
 		coated *= 1.0 + edge_shine * edge;
+		coated = mix(coated, min(coat_color * 1.45, vec3(0.95)), trim * smoothstep(0.2, 0.42, slope) * (1.0 - clamp(crease, 0.0, 1.0)) * 0.7);
 		alb = mix(a.rgb, coated, plate);
 		alb = mix(alb, wear_color, w);
 		r = mix(r, coat_rough + 0.06 * (n2 - 0.5) - 0.14 * edge * step(0.001, edge_shine), plate);
 		r = mix(r, 0.78, w);
 		metal = mix(metal, coat_metal, plate);
 		metal = mix(metal, 0.35, w * step(0.5, chip));
+	}
+	if (etch > 0.0 && coat > 0.0) {
+		float code = floor((UV2.x + 5.0) / 10.0);
+		vec2 q = vec2(UV2.x - 10.0 * code, UV2.y);
+		float aa = max(fwidth(q.y), fwidth(q.x)) * 1.2 + 0.0002;
+		float whole = step(fwidth(UV2.x), 0.01);
+		float plate = coat * smoothstep(cloth_dark, cloth_dark * 2.5, lum) * whole;
+		float front = 1.0 - step(0.5, code);
+		float field = 0.0;          // -1 .. 1: the ornament's relief
+		// breast: ripples like pattern-welded steel, fading out at the edges of the field
+		vec2 e = q - vec2(0.0, chest_y);
+		float warp = vnoise(q * 34.0) * 5.0 + vnoise(q * 90.0) * 1.6;
+		float rip = sin(q.y * 520.0 + warp + 7.0 * abs(q.x) * 30.0 * 0.1);
+		float in_breast = front * (1.0 - smoothstep(0.075, 0.105, abs(e.x))) * smoothstep(-0.17, -0.14, e.y) * (1.0 - smoothstep(0.035, 0.055, e.y));
+		field += rip * in_breast;
+		// pauldrons: a fine weave
+		float arm = span(code, 1.5, 3.5);
+		float weave = sin((q.x + q.y) * 700.0) * sin((q.x - q.y) * 700.0);
+		field += weave * arm * (1.0 - smoothstep(0.06, 0.08, q.y)) * step(0.004, q.y) * (1.0 - smoothstep(0.03, 0.045, abs(q.x)));
+		// shins: ruled lines, closer toward the ankle
+		float shin = span(code, 5.5, 7.5);
+		field += sin(q.x * 900.0) * shin * span(q.y, 0.045, 0.19) * (1.0 - smoothstep(0.02, 0.032, abs(q.x)));
+		field *= plate * etch;
+		alb *= 1.0 - 0.085 * field;
+		r = clamp(r + 0.13 * field, 0.2, 1.0);
+		// the sigil, incised: an open ring, a diamond, a stem (breast), and smaller on the brow
+		float lw = 0.0014;
+		float rr = length(e);
+		float open = smoothstep(0.62, 0.8, -e.y / max(rr, 0.0001));
+		float sig = ring_at(e, 0.0135, lw, aa) * (1.0 - open) + diamond(e, 0.0042, aa) + line_at(e.x, lw * 0.8, aa) * span(e.y, -0.036, -0.012);
+		vec2 hb = q - vec2(0.0, visor_y + 0.036);
+		float hr = length(hb);
+		float hopen = smoothstep(0.62, 0.8, -hb.y / max(hr, 0.0001));
+		sig += ring_at(hb, 0.0075, lw * 0.8, aa) * (1.0 - hopen) + diamond(hb, 0.0024, aa);
+		// the faceplate's cut lines and planes
+		float in_face = front * step(visor_y - 0.07, q.y) * step(q.y, visor_y + 0.03) * step(abs(q.x), 0.07);
+		float cheek = q.y - (visor_y + 0.026 - 1.25 * abs(q.x));
+		float cut = line_at(cheek, lw * 0.9, aa) + line_at(q.x, lw * 0.8, aa) * step(q.y, visor_y - 0.022);
+		float planes = (step(0.0, cheek) * 0.06 - step(q.y, visor_y - 0.022) * 0.03 * sign(q.x)) * in_face;
+		alb *= 1.0 + planes * plate * etch;
+		float inc = clamp((sig * front + cut * in_face), 0.0, 1.0) * plate * etch;
+		alb = mix(alb, alb * 0.42, inc);
+		r = mix(r, 0.7, inc);
 	}
 	vec3 glow = vec3(0.0);
 	float sheen = 0.0;

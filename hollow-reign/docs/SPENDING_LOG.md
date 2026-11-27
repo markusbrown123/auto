@@ -112,3 +112,7 @@ Two sleek starter-knight concepts (`art/concept/knight_{m,f}_v3.png`, about 2.5 
 
 ## Opening road props (2026-11-26)
 Two concept images (about 2.5 Higgsfield credits) and two prop models, `env_road_gatehouse` and `env_road_dead_tree` (30 Tripo credits each = **$0.60**), from the Tripo graphics allocation. Allocation spent so far: **$24.90** of $100.
+
+## Casting round, futuristic gate and sculpted hilt trial (2026-11-27)
+- Final casting round: 27 new speech takes (about 54 Higgsfield credits), 17 earlier takes reused. Asked for by the owner.
+- Three concept images (about 3.75 Higgsfield credits) and three prop models: `env_road_gate_future`, `hilt_wayfarer`, `hilt_eternal` (30 Tripo credits each = **$0.90**). Tripo graphics allocation spent so far: **$25.80** of $100. The medieval `env_road_gatehouse` ($0.30, bought the day before) is unused after the owner's futuristic-environment direction.

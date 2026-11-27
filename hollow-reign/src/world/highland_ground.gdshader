@@ -1,7 +1,7 @@
 shader_type spatial;
 // The headland's ground. Turf in two tones with large patches of colour, heather where the heather grows, earth and
-// scree where it steepens and bare banded rock where it is steeper still; the road is wet setts with a worn line
-// down the middle and grass fraying its edges. The sun's light is cut by the land's own baked shadow, the
+// scree where it steepens and bare banded rock where it is steeper still; the road is laid slabs with joints, a
+// kerb line and a lit guide strip down the middle, and grass fraying its edges where it is no longer kept. The sun's light is cut by the land's own baked shadow, the
 // Ring-Gate's shadow and drifting cloud (highland_common).
 render_mode diffuse_lambert, specular_disabled;
 
@@ -11,8 +11,8 @@ uniform sampler2D path_mask : filter_linear, repeat_disable;
 uniform sampler2D turf_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D turf_n : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D rock_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D sett_tex : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
-uniform sampler2D sett_n : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform vec3 slab : source_color = vec3(0.62, 0.64, 0.64);
+uniform vec3 guide : source_color = vec3(0.1, 0.4, 0.36);   // the light in the road's middle strip (black: dead)
 uniform vec4 mask_rect;
 uniform vec3 grass_a : source_color = vec3(0.3, 0.4, 0.15);
 uniform vec3 grass_b : source_color = vec3(0.55, 0.52, 0.22);
@@ -77,24 +77,32 @@ void fragment() {
 	gloss = 0.0;
 	vec3 nmap = texture(turf_n, wpos.xz * 0.21).rgb;
 	float nstr = 0.7 * (1.0 - rockw);
+	vec3 glow = vec3(0.0);
 	if (pm0 > 0.01) {
 		// turf takes it back from the edges, and in the later generations in patches along it
 		float keep = mix(smoothstep(0.38, 0.56, n2 * 0.6 + n1 * 0.4 + (wear - 0.5) * 0.36), 1.0, step(0.99, wear));
-		pm = smoothstep(0.34, 0.52, pm0 * (0.55 + 0.45 * keep) + (n3 - 0.5) * 0.34 + (tl - 0.3) * 0.25);
-		vec3 sd = texture(sett_tex, wpos.xz * 0.31).rgb;
-		float worn = smoothstep(0.72, 0.98, pm0) * keep;
-		vec3 road = sd * mix(vec3(0.5, 0.47, 0.43), vec3(0.74, 0.68, 0.58), worn);
-		road = mix(road, earth * 1.15, smoothstep(0.5, 0.2, pm0) * 0.55);
+		float fray = 0.08 + 0.3 * (1.0 - wear);
+		pm = smoothstep(0.36, 0.42 + fray * 0.3, pm0 * (0.55 + 0.45 * keep) + (n3 - 0.5) * fray + (tl - 0.3) * fray);
+		// laid slabs: a joint across every three metres, a dark kerb line inside each edge, a guide strip down the middle
+		float along = texture(path_mask, muv).g;
+		float joint = smoothstep(0.9, 0.97, along);
+		float kerb = smoothstep(0.5, 0.54, pm0) * (1.0 - smoothstep(0.6, 0.64, pm0));
+		float strip = smoothstep(0.8, 0.86, pm0);
+		vec3 road = slab * (0.84 + 0.3 * n2) * (0.92 + 0.3 * (n3 - 0.5));
+		road = mix(road, road * 0.3, max(joint, kerb) * 0.85);
+		road = mix(road, slab * 0.38, strip * (1.0 - joint));
+		road = mix(road, earth * 1.1, (1.0 - keep) * 0.5 + smoothstep(0.55, 0.75, n2) * (1.0 - wear) * 0.5);
 		c = mix(c, road, pm);
-		nmap = mix(nmap, texture(sett_n, wpos.xz * 0.31).rgb, pm);
-		nstr = mix(nstr, 1.1, pm);
-		gloss = pm * wet * (0.35 + 0.65 * worn);
+		nmap = mix(nmap, vec3(0.5, 0.5, 1.0), pm);
+		gloss = pm * (0.45 + 0.55 * wet);
+		glow = guide * strip * (1.0 - joint) * pm * keep;
 	}
 	// ---- snow lies where it is level, thinner on the road
 	float sn = snow * smoothstep(0.42, 0.7, wnrm.y * 0.6 + n2 * 0.5 + (tl - 0.3) * 0.4) * (1.0 - pm * 0.5) * (1.0 - rockw * 0.6);
 	c = mix(c, vec3(0.82, 0.86, 0.93), sn);
 	gloss *= 1.0 - sn;
 	ALBEDO = c;
+	EMISSION = glow * (1.0 - sn * 0.6);
 	NORMAL_MAP = nmap;
 	NORMAL_MAP_DEPTH = nstr * (1.0 - smoothstep(60.0, 220.0, dist));
 	ROUGHNESS = 1.0;

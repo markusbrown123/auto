@@ -35,6 +35,7 @@ const BUFFER_TIME := 0.18
 ## While the foe stands open, up to QUEUE_MAX swipes are queued in order (beyond that the newest replaces the last), each
 ## thrown on the next cancel frame; otherwise one is queued and the latest wins (blind swipe-spam stays a losing plan); one queued during a cut never goes stale before that cut's cancel frame. A dodge replaces the whole queue.
 const CONTACT_FRAC := 0.6
+const BARE_GUARD_COST := 1.8   # stamina multiplier for a block taken with no shield charge left
 const CANCEL_FRAC := 0.85
 const QUEUE_MAX := 4          # swipes held while a cut plays into an open foe (owner: every rapid swipe should be a cut)
 const BUFFER_SWING := 0.75
@@ -1047,13 +1048,12 @@ func _resolve_strike() -> void:
 			var cost: float = 0.0 if timed else float(a.guard) * (1.0 - float(pl.block_eff)) * maxf(1.0, trait_v("block_tax"))
 			if p_shield_max > 0 and p_shield > 0:
 				cost *= BLOCK_SHIELD_COST     # the board takes the blow; the arm behind it takes less
-			# what breaks a guard: no charge left on the shield, or not the stamina to hold the blow
+			elif p_shield_max > 0:
+				cost *= BARE_GUARD_COST       # the board is spent: the arm holds the blow, at a heavier price in stamina
+			# what breaks a guard: not the stamina to hold the blow (owner: a held block never costs health while it can be paid)
 			var why := ""
-			if not timed:
-				if p_shield_max > 0 and p_shield <= 0:
-					why = "shield"
-				elif pl.stamina - cost <= 0.0:
-					why = "stamina"
+			if not timed and pl.stamina - cost <= 0.0:
+				why = "stamina"
 			if timed:
 				perfect = true
 				stats["perfect_blocks"] = int(stats.get("perfect_blocks", 0)) + 1
@@ -1062,7 +1062,7 @@ func _resolve_strike() -> void:
 				# the shield's count: an untimed block uses one
 				p_shield = maxi(0, p_shield - 1)
 				p_shield_idle = 0.0
-				_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max, "spent": why == "shield"})
+				_emit(&"shield_charges", {"left": p_shield, "max": p_shield_max, "spent": p_shield == 0})
 			_spend(cost)
 			if a.get("drain", false):
 				_drain(dmg * 0.4)

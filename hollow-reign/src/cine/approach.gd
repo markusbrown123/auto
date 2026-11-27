@@ -15,10 +15,10 @@ extends Node
 signal finished
 
 const DIST := 11.0
-const WALK := 1.35
+const WALK := FighterRig.ROAD_SPEED
 const BEHIND := Vector3(0.75, 1.62, 3.3)
 const AHEAD := Vector3(0.1, 1.3, -3.0)
-const LAG := 0.8                 # how far the eased camera trails a walker at this pace
+const LAG := 0.66                # how far the eased camera trails a walker at this pace
 ## Where each shot begins, as how much of the walk is done (shot 1 starts at 0).
 const CUT_BACK := 0.3
 const CUT_REVEAL := 0.62
@@ -48,7 +48,7 @@ func _ready() -> void:
 	Sfx.ambience(str(region.amb))
 	Sfx.music_for("explore_" + str(region.id), "menu", 2.5)
 	_tw = create_tween()
-	_tw.tween_property(rig, "position", Vector3.ZERO, DIST / WALK)
+	_tw.tween_property(rig, "position", Vector3.ZERO, FighterRig.road_time(DIST))
 	_tw.tween_callback(_arrive)
 
 func _at(v: Vector3) -> Vector3:

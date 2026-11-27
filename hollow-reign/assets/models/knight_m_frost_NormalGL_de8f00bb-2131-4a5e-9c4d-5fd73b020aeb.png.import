@@ -1,0 +1,45 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://c82jvdaiiac22"
+path.s3tc="res://.godot/imported/knight_m_frost_NormalGL_de8f00bb-2131-4a5e-9c4d-5fd73b020aeb.png-71b7a0bce970fcb4ce34c6c72ab3518d.s3tc.ctex"
+path.etc2="res://.godot/imported/knight_m_frost_NormalGL_de8f00bb-2131-4a5e-9c4d-5fd73b020aeb.png-71b7a0bce970fcb4ce34c6c72ab3518d.etc2.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "3a1223dc969e8305c50d031db68b1898"
+}
+
+[deps]
+
+source_file="res://assets/models/knight_m_frost_NormalGL_de8f00bb-2131-4a5e-9c4d-5fd73b020aeb.png"
+dest_files=["res://.godot/imported/knight_m_frost_NormalGL_de8f00bb-2131-4a5e-9c4d-5fd73b020aeb.png-71b7a0bce970fcb4ce34c6c72ab3518d.s3tc.ctex", "res://.godot/imported/knight_m_frost_NormalGL_de8f00bb-2131-4a5e-9c4d-5fd73b020aeb.png-71b7a0bce970fcb4ce34c6c72ab3518d.etc2.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/uastc_level=0
+compress/rdo_quality_loss=0.0
+compress/hdr_compression=1
+compress/normal_map=1
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/channel_remap/red=0
+process/channel_remap/green=1
+process/channel_remap/blue=2
+process/channel_remap/alpha=3
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=1024
+detect_3d/compress_to=1

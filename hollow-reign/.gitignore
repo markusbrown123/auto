@@ -6,9 +6,8 @@ shots/
 art/models/*.glb
 assets/models/*.jpg
 assets/models/*.png
-assets/models/*.jpg.import
-assets/models/*.png.import
 art/takes/*.avi
 art/anim_src/
 art/voice_catalog/
 art/gear_hilts_src/
+# The .import files beside extracted model textures ARE tracked: they hold the compression settings the phone build needs.

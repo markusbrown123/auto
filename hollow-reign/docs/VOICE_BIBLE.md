@@ -74,3 +74,9 @@ What that changes:
 | Grandson | none liked | new options in rounds 3 and 4 |
 The pattern in the owner's choices: natural English voices lowered in pitch, or the very deep second-model voices; no foreign accent.
 Unchanged and approved earlier: Witness Hamish, narrator Graham, son Malcolm, guardian challenges Mortimer, daughter Victoria.
+
+## Owner casting decisions, 2026-11-27
+- **Father (first generation): Gideon** (second speech model, very deep). Round 2, option 3. Chosen by the owner.
+- **Mother (first generation): Celine** (second speech model, low). Round 2, option 3. Chosen by the owner.
+- The owner did not mean a Chinese accent: the wanted style is an English anime-dub voice, deeper and edgier, like the two voices chosen above. The granddaughter must be higher in pitch than the mother.
+- Round 3 (`marketing/audition/final_cast3/`) re-does the grandson and every character after him in that style. Not yet applied in `tools/gen_dialogue.py`.

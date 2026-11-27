@@ -225,6 +225,12 @@ frost still creeps through at half.
 | `parry_failed {why}` | the hit's own | WRONG LINE · TOO EARLY · CANNOT BE PARRIED |
 | `unblockable_warning` | `telegraph_unblockable` | UNBLOCKABLE in red, a red ring on the foe's weapon (twice), the weapon glows red, the cue line is red |
 | `boss_hit {counter}` | `parry_perfect` (high) | COUNTER ×2.0, a gold ring at the cut |
+| `boss_hit` (any landed cut) | `hit_armor` (+ `hit_flesh` on a crit) | sparks on the body, the foe flashes and is driven back a pace |
+| `deflected` (cut into a raised guard) | `deflect` (clash pitched up + rattle + crack; not the parry's ring) | the foe's weapon comes across to meet the cut (`FighterRig.parry` + `clash` at the cut), the knight's blade is stopped there (`halt`), sparks at the contact |
+
+Openings differ per foe (`traits.parry_open` / `dodge_open` in `tools/gen_bosses.py`): Banneret 0.8 / 0.9 (quick to
+recover), Pike Sergeant 1.35 / 0.85, Rampart Brute 0.9 / 1.35, Gate Colossus 1.25 / 1.25; the Hollow Soldier and the
+Ashen Sentinel keep the plain rules. Patience (guarded cuts before the punish blow) is 2-4 per foe.
 
 What was removed: the 0.45 "glancing" penalty for repeating a line once; the refusal to swing with no stamina; the 8%
 health chip through every block; the 35% leak and doubled stamina cost of a spent shield; the 0.18 s limit on a swipe

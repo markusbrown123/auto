@@ -1043,10 +1043,19 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 				shake(0.25)
 				hitstop(0.09)
 		&"deflected":
-			sparks(foe_rig.blade_mid(), Vector3(0, 0.6, 1), 8, Color(1, 0.9, 0.7), 4.0)
-			Sfx.play("clash", -8.0, 1.25)
+			# a cut into a raised guard: the foe's own weapon comes across to meet it on the cut's side and the
+			# knight's blade is stopped there and thrown back (a cut that lands bites the body; the knight's own block is
+			# the shield taking a blow). A parry cut ringing off a foe already winding up leaves the wind-up alone.
+			var met: Vector3 = foe_rig.blade_mid()
+			if foe_rig is FighterRig and sim.b_state == DuelSim.B.IDLE and not d.get("whiff", false):
+				met = _cut_point().lerp(player_rig.chest_point(), 0.3)
+				foe_rig.parry(DuelSim.dir_vec(DuelSim.parry_dir_for(str(d.dir))))
+				foe_rig.clash(met, 0.2)
+				player_rig.halt(0.14)
+			sparks(met, Vector3(0, 0.6, 1), 14, Color(1, 0.9, 0.7), 4.5)
+			Sfx.play("deflect", -4.0, 1.3)
 			foe_rig.flash(0.25)
-			shake(0.08)
+			shake(0.1)
 		&"boss_stagger":
 			f_back_t = 1.0                 # reels away; the player follows in
 			p_back_t = -0.55

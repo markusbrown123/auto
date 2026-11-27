@@ -35,6 +35,8 @@ const FAMILIES := {"metal": [4, 0.04], "parry": [2, 0.12], "break": [2, 0.2], "h
 const EVENTS := {
 	"clash": [{"pool": "clash"}, {"pool": "thump", "vol": -8.0, "min": 0.6}],
 	"block": [{"pool": "block"}],
+	# a cut turned on a foe's raised guard: a thin, high ring with the rattle of the recoil, under the parry's clash
+	"deflect": [{"pool": "clash"}, {"pool": "rattle", "vol": -5.0, "at": 0.03}, {"pool": "crack", "vol": -12.0}],
 	"parry": [{"pool": "parry"}, {"pool": "swell", "vol": -5.0, "at": 0.03, "chance": 0.85}],
 	"guard_break": [{"pool": "guard_break"}, {"pool": "crack", "vol": -2.0}, {"pool": "rattle", "vol": -4.0, "at": 0.09}],
 	"hit_armor": [{"pool": "hit_armor"}, {"pool": "thump", "vol": -9.0, "min": 0.9, "chance": 0.6}],

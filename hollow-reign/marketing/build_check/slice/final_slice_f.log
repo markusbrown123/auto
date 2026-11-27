@@ -21,3 +21,15 @@
 [   14.3s game |    181s wall] STEP generation I, beat 1
 [   77.0s game |   1296s wall]   audio during 'generation I, beat 1': Master peak -1.0 mean -7.4 dB; Music peak -11.2 mean -20.6 dB; Dialogue peak -1.7 mean -15.5 dB; Combat peak -8.2 mean -28.5 dB; Ambience peak -20.7 mean -30.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [   77.0s game |   1296s wall] STEP generation I, beat 2
+[  111.3s game |   1831s wall]   duel begins: Throne Guard (knight 286 hp)
+[  111.4s game |   1835s wall]   audio during 'generation I, beat 2': Master peak -1.0 mean -10.7 dB; Music peak -14.7 mean -22.8 dB; Dialogue peak -2.0 mean -19.8 dB; Combat peak -8.5 mean -37.6 dB; Ambience peak -23.9 mean -75.9 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  111.4s game |   1835s wall] STEP generation I, beat 3
+[  154.3s game |   2800s wall]   audio during 'generation I, beat 3': Master peak -1.0 mean -7.4 dB; Music peak -13.7 mean -19.3 dB; Dialogue peak -5.0 mean -66.4 dB; Combat peak -1.8 mean -15.3 dB; Ambience peak -20.7 mean -26.4 dB; Interface peak -12.0 mean -54.3 dB; Cinematics peak -5.8 mean -47.2 dB; CombatL peak -2.6 mean -34.6 dB; CombatR peak -4.3 mean -34.3 dB
+[  154.3s game |   2800s wall] STEP generation I, beat 4
+[  165.2s game |   3039s wall]   duel begins: The Forgotten Monarch (knight 286 hp)
+[  174.8s game |   3297s wall]   audio during 'generation I, beat 4': Master peak -1.0 mean -7.5 dB; Music peak -14.6 mean -18.4 dB; Dialogue peak -1.8 mean -21.5 dB; Combat peak -0.6 mean -20.8 dB; Ambience peak -14.4 mean -32.2 dB; Interface peak -15.2 mean -65.4 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -3.5 mean -39.7 dB; CombatR peak -6.4 mean -42.9 dB
+[  174.8s game |   3297s wall] STEP generation I, beat 5
+[  207.1s game |   3743s wall]   audio during 'generation I, beat 5': Master peak -1.0 mean -11.7 dB; Music peak -20.8 mean -58.5 dB; Dialogue peak -1.8 mean -20.0 dB; Combat peak -2.7 mean -34.9 dB; Ambience peak -14.9 mean -28.8 dB; Interface peak -17.2 mean -44.6 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -1.7 mean -48.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  207.1s game |   3743s wall] STEP time jump
+[  218.8s game |   3964s wall]   audio during 'time jump': Master peak -8.8 mean -14.8 dB; Music peak -15.4 mean -22.1 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -26.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  218.8s game |   3964s wall] STEP the heir's arrival

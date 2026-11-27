@@ -84,7 +84,7 @@ func shot(i: int) -> void:
 			cam.move(v[0] + Vector3(0.3, 0.5, -1.6), v[1] + Vector3(0.0, 1.5, 0.0), 14.0)
 		2:  # low, through the grass, beside them: the cliff's edge, the sea and the light beyond
 			stride(118.0, 134.0)
-			cam.ride(hero, Vector3(-3.3, 0.72, -2.1), Vector3(0.2, 1.2, -0.6))
+			cam.ride(hero, Vector3(-3.3, 0.72, -2.1), Vector3(0.2, 1.2, 0.6))
 			cam.fov = 42.0
 		3:  # the climb: in profile on a leg of the switchback, the slope folding up behind and the ring over it
 			var s3 := Highland.road_at_z(196.0)

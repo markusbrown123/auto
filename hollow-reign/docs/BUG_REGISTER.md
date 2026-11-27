@@ -357,6 +357,29 @@ Software renderer only; nothing has run on a phone. Items under "Not verified" w
 Not verified: the trail's look on a phone's screen at 120 Hz (the stills were drawn at a fixed 30 fps); a trail on a real finger (all strokes were synthetic touches of eight to nine moves); more than one finger drawing at once (the code has five slots, nothing drove two); the pause screen over a fresh trail (the trails are cleared on pause).
 Open: the lesson and training duels cannot be lost, so they have no death screen (Yield leaves them as before). Retry goes through the loading screen, as setting out always did.
 
+## Combat freedom and blocking (2026-11-27, owner's phone notes 3 and 4; sheets in `marketing/combat_freedom_pass/`)
+
+Software renderer and bots only; none of this has been felt on a phone, and no sound was listened to. Rules: `docs/FLOW.md` "Combat rules".
+
+| # | Sev | Issue | Cause | Fix | Verified by |
+|---|---|---|---|---|---|
+| F1 | A | "Restricted to the swipe the game tells you": in an opening a line repeated once landed at 0.45 | `_resolve_player_hit`: "predictable" penalty on any repeat outside a named combo, so the shown seam and alternation were in effect required | Every cut in an opening lands plain damage on any of the eight lines. Variety is a bonus (count +12% a step); a second cut on a line holds the count; only a third running is read (0.6) | `t_free_combat`; flurry sheet |
+| F2 | A | Rapid swipes were dropped | A swipe made during a cut was kept only if the cut ended within 0.18 s (`BUFFER_TIME`), so with the 0.26 s sword the first 0.08 s of every cut swallowed input, and with a 0.46 s greatsword the first 0.28 s | One swipe is queued (latest wins) and fires on the cut's cancel frame, 85% of the swing; it cannot go stale during a cut | `t_free_combat` (eight queued swipes, eight cuts, one every 0.221 s); frame log |
+| F3 | B | A swipe with no stamina did nothing | `input_swipe` returned after `exhausted` | A tired cut is thrown: half damage, 1.4 times as long | `t_free_combat` |
+| F4 | B | Hit-stop held a flurry up: 0.045 s (0.07 on a critical) froze the sim on every hit | `Duel.hitstop` | 0.016 s / 0.03 s for cuts (the counter and named combos keep longer ones) | frame log: 8 frames a cut at 30 fps |
+| F5 | B | The tail of a flurry counted as "reckless" and brought the punish blow | A cut begun in an opening that landed after the guard closed went through the guard branch | Such a cut is deflected without the recoil cost and is not counted | `t_free_combat` |
+| F6 | B | A parry cut that met nothing was only a recovery | `parry_whiff` | It still rings off the guard for 6% chip (`deflected {whiff}`) | code; not captured |
+| B1 | A | **Blocking cost health.** Not a bug: three rules did it on purpose. (1) every untimed block took 8% of the blow, less `block_eff`, as silent damage (no hurt flash, no sound: the bar just fell); (2) once the shield's charges were gone (three with the first shield) every block let 35% of the blow through and cost double stamina; (3) a block with too little stamina broke the guard for 50%. Also (4) a shield held while a cut or parry was still committed, or against an unblockable blow, did nothing and said nothing | `_resolve_strike`, "blocked" branch | A held guard costs no health. It costs a charge and stamina (halved behind a charged shield). No charge or no stamina: guard break (half the blow, 0.9 s reeling, was 1.3 s), announced, and the shield is whole again after. Fire no longer catches through a guard | `t_block_rules`, `tests/equipment.gd` `t_shields`; sheets |
+| B2 | A | A perfect block looked and sounded like a plain one | `_on_strike` treated both alike | `perfect_block` event: ring, flash, chime, word, slow time; 25 poise (was 18), 0.35 s more opening | sheet `perfect_block` |
+| B3 | A | A failed block gave no reason | none emitted | `block_failed {unblockable, busy, late}`, `parry_failed {dir, late, unparryable}`, each a red word | `t_block_rules`; words not captured except through the staged run |
+| B4 | B | An unblockable blow was marked only by a red blade and the cue's colour | no event | `unblockable_warning`: the word, two red rings on the weapon, plus what was there | sheet `unblockable` |
+| B5 | B | The shield could not interrupt a cut's recovery | block needed `P.FREE` | Raising the shield after the cut has landed and reached its cancel frame ends the cut | `t_block_rules` |
+
+Balance (default knight, 30 seeds a cell, `tools/dev/duel_balance.tscn`; before → after): skilled bot, Sentinel 42 s → 42 s, road foes 4.5-20 s → 4-21 s; sloppy bot, Sentinel 100% in 78 s → 95% in about 80 s, road foes 7-36 s → 8-38 s; a bot that only blocks and cuts in openings, 0% everywhere → wins the five road foes 53-100% of the time and still loses to the Sentinel; one-line swipe spam with no defence loses everywhere, before and after. No foe data was changed. `tools/econ_sim.sh` (sloppy, seed 1): Courtyard unchanged (8 fights, 1062 gold), no flags.
+
+Not verified: any of it under a real finger (every stroke was a synthetic touch of two moves); the feel of 0.22 s cuts at 60 or 120 Hz (captures are 30 fps, where a cut is 8 frames); every sound; the words GUARD TOO SLOW, TOO LATE, WRONG LINE, TOO EARLY (events tested, not captured); greatsword and dual-blade flurries on screen (rules tested only); the HUD's SHIELD SPENT wording now means "the next block breaks".
+Open: some authored cuts turn the knight's back to the foe mid-flurry (the clips' own bodies); the camera sits behind the knight's shoulder so some lines hide the blade; a perfect parry's riposte window and a parry's short recovery are unchanged, so most cutting time still comes from breaking poise.
+
 ## Traversal pass (2026-11-27): walking, paths, landmarks, footsteps
 
 Addendum 5 items 3 and 5, plus the owner's phone note on footsteps. Software renderer only; nothing has run on a phone.

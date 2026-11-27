@@ -159,3 +159,6 @@ Owner chose concept B (`art/concept/knight_m_v4b.png`). One image-to-model, rig 
 - Model task `1bd1328d-4fb6-4c5c-b179-adda7f9bef4a` 110 credits, rig check free (riggable biped), rig task `6d6ddd57-d102-467c-a9b4-7d1b8c56e56d` 25 credits = **135 credits = $1.35** (ids also in `art/models/knight_m_v4.json`).
 - Tripo balance (`GET /v3/account/balance`) before **6,235.00**, after **6,100.00**, frozen 0.00.
 - Tripo graphics allocation spent so far: $31.50 + $1.35 = **$32.85** of $100. No Higgsfield credits used in this step.
+
+## 2026-11-27: generated sound pilot (owner approved "Full replacement", ceiling 300 credits)
+Pilot of 3 sword-clash takes on mirelo_text_to_audio, 2.0 s each, 0.50 credits each = 1.50 credits (job ids in assets/audio/sfx/sfx_jobs.json). Measured result: every take contained many events (3 to 11), and two of the three had a spectral centroid of 44–81 Hz, far too low for metal on metal; only one (about 3,500 Hz) is plausible. The full run was NOT started. Synthesised files restored with `tools/sfx_buy.py --restore`. Raw takes for the owner to hear: marketing/audition/sfx_pilot/.

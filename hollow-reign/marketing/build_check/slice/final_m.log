@@ -4,3 +4,10 @@
 [    3.7s game |     11s wall]   audio during 'launch': Master peak -200.0 mean -100.0 dB; Music peak -200.0 mean -100.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -200.0 mean -100.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [    3.7s game |     11s wall] STEP main menu
 [    5.7s game |     37s wall]   tap 'NEW LEGACY' at (313, 370), target 538 x 68
+[    6.7s game |     49s wall]   audio during 'main menu': Master peak -7.6 mean -14.1 dB; Music peak -12.7 mean -21.2 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.9 mean -26.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    6.7s game |     49s wall] STEP character select
+[    6.7s game |     49s wall]   tap 'name field' at (336, 524), target 600 x 60
+[    7.2s game |     54s wall]   name typed: Maren
+[    8.2s game |     66s wall]   tap 'CHOOSE A BLADE' at (426, 602), target 420 x 60
+[    8.3s game |     67s wall]   audio during 'character select': Master peak -6.4 mean -10.5 dB; Music peak -11.6 mean -16.1 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.7 mean -25.7 dB; Interface peak -36.6 mean -70.4 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    8.3s game |     67s wall] STEP starting sword

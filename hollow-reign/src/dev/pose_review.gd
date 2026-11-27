@@ -280,11 +280,11 @@ func _drone_check() -> void:
 	get_tree().quit()
 
 ## The Witness drone, a row per variant: at the knight's shoulder (three-quarter view from the front), then alone
-## from the front (-Z), the side (+X) and above. Written to <out>/drone[_<tag>].png.
+## from the front (-Z), the side (+X), the back, three-quarter and above. Written to <out>/drone[_<tag>].png.
 func _drone_sheet() -> void:
 	var names: PackedStringArray = str(_args.drone).split(",", false)
 	if names.size() == 0 or names[0] == "1":
-		names = PackedStringArray(["plumb", "reed", "lens"])
+		names = PackedStringArray(["lantern", "dart", "hexring"])
 	_look["witness"] = false
 	_fresh()
 	if rig is FighterRig:
@@ -296,9 +296,11 @@ func _drone_sheet() -> void:
 		d.build(v)
 		d.attach(rig)
 		if _args.has("attend"):
-			d.look_at_point(Vector3(0.3, 1.6, -3.0))
+			d.look_at_point(rig.global_transform * Vector3(0.66, 1.84, -3.0))
 		if _args.has("speak"):
 			d.speaking(true)
+		if _args.has("dormant"):
+			d.dormant(Vector3(0.9, 1.2, 0.0))
 		if _args.has("dark"):
 			d.stowed(true)
 			d.rig = null
@@ -307,7 +309,8 @@ func _drone_sheet() -> void:
 			await get_tree().process_frame
 		var at := d.global_position
 		var tiles: Array = []
-		var shots := [[Vector3(-0.55, 0.12, -1.0), Vector3(0.15, 1.1, 0), 2.3], [Vector3(0, 0, -1), at, 0.24], [Vector3(1, 0, 0), at, 0.24], [Vector3(0, 1, -0.001), at, 0.24]]
+		var cs := maxf(0.24, d.radius * 3.0)
+		var shots := [[Vector3(-0.55, 0.12, -1.0), Vector3(0.15, 1.1, 0), 2.3], [Vector3(0, 0, -1), at, cs], [Vector3(1, 0, 0), at, cs], [Vector3(0, 0, 1), at, cs], [Vector3(-0.7, 0.45, -1.0), at, cs], [Vector3(0, 1, -0.001), at, cs]]
 		for sh: Array in shots:
 			rig.visible = sh[2] > 1.0
 			_floor.visible = sh[2] > 1.0
@@ -324,9 +327,9 @@ func _drone_sheet() -> void:
 		d.free()
 	var w: int = rows[0][0].get_width()
 	var h: int = rows[0][0].get_height()
-	var sheet := Image.create(w * 4, h * rows.size(), false, Image.FORMAT_RGB8)
+	var sheet := Image.create(w * 6, h * rows.size(), false, Image.FORMAT_RGB8)
 	for r in rows.size():
-		for i in 4:
+		for i in 6:
 			sheet.blit_rect(rows[r][i], Rect2i(0, 0, w, h), Vector2i(i * w, r * h))
 	sheet.save_png("%s/drone%s.png" % [_out, ("_" + str(_args.tag)) if _args.has("tag") else ""])
 	print("drone sheet ", names)

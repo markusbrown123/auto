@@ -23,13 +23,18 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gear_gen as G
 
 OUT = os.path.join(G.ROOT, "assets", "models", "witness")
-CHOSEN = "plumb"
+CHOSEN = "lantern"
 
 G.MATERIALS.update({
     "ceramic": ((0.80, 0.785, 0.75), 0.0, 0.62, None, "fine_n", None, 0.18, None),
     "alloy": ((0.80, 0.81, 0.84), 0.62, 0.40, "steel_a", "steel_n", "steel_orm", 0.3, None),
     "seam": ((0.07, 0.075, 0.085), 0.6, 0.55, None, None, None, 1.0, None),
     "light": ((1.0, 0.93, 0.82), 0.0, 0.5, None, None, None, 1.0, ((1.0, 0.80, 0.50), 1.6)),
+    # second pass: flat satin panels over a graphite core, a gloss-black insert that carries the light, gold caps
+    "panel": ((0.88, 0.87, 0.84), 0.0, 0.42, None, "fine_n", None, 0.12, None),
+    "core": ((0.055, 0.058, 0.066), 0.5, 0.55, None, None, None, 1.0, None),
+    "glass": ((0.012, 0.014, 0.018), 0.0, 0.07, None, None, None, 1.0, None),
+    "accent": ((0.86, 0.62, 0.28), 1.0, 0.36, "steel_a", "steel_n", "steel_orm", 0.3, None),
 })
 
 
@@ -195,24 +200,213 @@ def lens_ring(B, q):
     band(B, 0.0600, 0.0011, 0.0028, seg_for(q, 44), "alloy", dash=math.radians(30))
 
 
+# ============================================================================ second pass: faceted panels
+# The owner's note on the plumb: too plain (a white spinning top) and too small. What is wanted is the feel of a
+# manufactured product: flat white panels with crisp bevels, dark seams showing a graphite core, a gloss-black
+# insert carrying the light, a couple of gold caps, and panels that MOVE. Three silhouettes, all our own.
+def _inset(q, d, n):
+    """A convex planar polygon (3D points) pulled in by d on every side."""
+    out = []
+    N = len(q)
+    for i in range(N):
+        a, b, c = q[i - 1], q[i], q[(i + 1) % N]
+        e1, e2 = b - a, c - b
+        n1 = np.cross(n, e1)
+        n2 = np.cross(n, e2)
+        n1 /= np.linalg.norm(n1) + 1e-12
+        n2 /= np.linalg.norm(n2) + 1e-12
+        out.append(b + d * (n1 + n2) / (1.0 + float(np.dot(n1, n2)) + 1e-9))
+    return np.array(out)
+
+
+def slab(B, quad, mat, gap=0.0022, thick=0.0055, bev=0.0013, q=1.0, away=(0.0, 0.0, 0.0), lift=0.0, top=None):
+    """One flat panel: the polygon `quad` (3D, any winding) pulled in by `gap`, raised `thick` along its normal
+    (the side away from the point `away`), with its upper rim bevelled. `lift` starts it above its own plane."""
+    P = np.array(quad, dtype=float)
+    c = P.mean(axis=0)
+    n = np.zeros(3)
+    for i in range(len(P)):
+        n += np.cross(P[i] - c, P[(i + 1) % len(P)] - c)
+    n /= np.linalg.norm(n)
+    if np.dot(n, c - np.array(away)) < 0:
+        P = P[::-1]
+        n = -n
+    base = _inset(P, gap, n)
+    rings = [base + n * lift, base + n * (lift + thick - bev), _inset(P, gap + bev, n) + n * (lift + thick)]
+    if q < 1.0:
+        rings = [rings[0], rings[2]]
+    R, N = len(rings), len(P)
+    mats = [[mat] * N for _ in range(R - 1)]
+    # wound round n and rising along it, the loft already faces out: no orientation pass (the low model is open-backed)
+    B.part()
+    G.loft(B, rings, mats, smooth_u=False, smooth_v=False, cap0=q >= 1.0, cap1=True, cap_mat=top or mat)
+
+
+def solid(B, rings, mat, cap_mat=None):
+    B.part()
+    G.loft(B, rings, mat, smooth_u=False, smooth_v=False, cap_mat=cap_mat)
+    B.close()
+
+
+# ---------------------------------------------------------------------------- D: the lantern (chosen)
+# A cut-gem body of flat panels, wider than it is deep, leaning forward: the crown is swept back and the keel runs
+# down to a forward point, so from the side it is a slanted lozenge and from the front a keystone. A gloss-black
+# visor band runs round its waist with one horizontal bar of light on the front and a short one at the back.
+# The crown lifts, the keel drops and the two cheek panels slide out when it attends; a line of light shows in the
+# seam the crown leaves. Nothing radial, no centre: the focal point is the bar.
+#            y       half x  half z  corner  z shift
+LAN = [(0.060, 0.052, 0.034, 0.016, 0.020),      # top
+       (0.034, 0.098, 0.064, 0.030, 0.010),      # shoulder
+       (0.011, 0.110, 0.072, 0.034, 0.000),      # visor, upper edge
+       (-0.011, 0.107, 0.070, 0.033, -0.003),    # visor, lower edge
+       (-0.044, 0.072, 0.048, 0.022, -0.014),    # belly
+       (-0.074, 0.030, 0.020, 0.009, -0.026)]    # foot
+FRONT, BACK, RIGHT, LEFT = 6, 2, 0, 4             # facet numbers of chamfer_rect (corners are the odd ones)
+
+
+def lan_ring(i, k=1.0):
+    y, hx, hz, c, dz = LAN[i]
+    return [np.array((x * k, y, z * k + dz)) for x, z in G.chamfer_rect(hx, hz, c)]
+
+
+def lan_facet(i, f):
+    a, b = lan_ring(i), lan_ring(i + 1)
+    return [a[f], a[(f + 1) % 8], b[(f + 1) % 8], b[f]]
+
+
+def lantern_core(B, q):
+    """What shows in the seams: the graphite body just inside the panels, the line of light under the crown's
+    lower edge, and the two gold caps."""
+    solid(B, [lan_ring(i, 0.955) for i in range(6)], "core")
+    y = LAN[2][0]
+    solid(B, [[p + np.array((0, dy, 0)) for p in lan_ring(2, 0.975)] for dy in (0.0008, 0.0050)], "light", cap_mat="core")
+    # caps: a low gold tablet on the crown's flat, a gold shoe on the point
+    t = lan_ring(0, 0.62)
+    solid(B, [[p + np.array((0, dy, 0)) for p in (t if dy < 0.008 else lan_ring(0, 0.5))] for dy in (0.002, 0.0075, 0.0095)], "accent")
+    lo = lan_ring(5, 0.9)
+    solid(B, [[p + np.array((0, dy, 0)) * 1.0 for p in (lo if k == 1 else lan_ring(5, 0.9 * k))] for dy, k in ((0.001, 1), (-0.0065, 1), (-0.0085, 0.8))], "accent")
+
+
+def lantern_crown(B, q):
+    for row in (0, 1):
+        for f in range(8):
+            slab(B, lan_facet(row, f), "panel", q=q)
+    slab(B, lan_ring(0)[::-1], "panel", q=q, gap=0.0030, thick=0.0040)
+
+
+def lantern_keel(B, q):
+    for row in (3, 4):
+        for f in range(8):
+            slab(B, lan_facet(row, f), "panel", q=q)
+
+
+def lantern_cheek(B, q):
+    """The right cheek (the left is the same part mirrored by the drone): the side panel of the visor band and
+    the corner behind it."""
+    slab(B, lan_facet(2, RIGHT), "panel", q=q, thick=0.0070)
+    slab(B, lan_facet(2, 1), "panel", q=q, thick=0.0070)
+
+
+def lantern_visor(B, q):
+    """The gloss insert across the front and its two corners, the bar of light on it, and the short bar behind."""
+    for f in (5, FRONT, 7, BACK):
+        slab(B, lan_facet(2, f), "glass", q=q, gap=0.0006, thick=0.0034, bev=0.0006)
+    # the bar is NOT centred: it starts left of the middle of the front and runs round the right front corner, so
+    # the thing has a side it looks from, like the index of an instrument, and nothing about it is a pair of eyes
+    def bar(f, t0, t1, hh=0.0045):
+        a = lan_facet(2, f)
+        l0, l1 = (a[0] + a[3]) / 2, (a[1] + a[2]) / 2
+        v = np.array((0.0, 1.0, 0.0))
+        p0, p1 = l0 + (l1 - l0) * t0, l0 + (l1 - l0) * t1
+        slab(B, [p0 - v * hh, p1 - v * hh, p1 + v * hh, p0 + v * hh], "light", q=q, gap=0.0, thick=0.0010, bev=0.0003, lift=0.0034)
+    bar(FRONT, 0.10, 0.62)
+    bar(7, 0.0, 0.82)
+    bar(BACK, 0.34, 0.66)
+
+
+# ---------------------------------------------------------------------------- E: the dart
+# Three overlapping plates in an arrowhead, a bar of light under the leading edge. Fast and flat.
+def dart_core(B, q):
+    solid(B, [[np.array(p) for p in ((x * k, y, z) for x, z in ((0.0, -0.085), (0.026, 0.0), (0.014, 0.07), (-0.014, 0.07), (-0.026, 0.0)))]
+              for y, k in ((-0.016, 0.6), (-0.004, 1.0), (0.008, 1.0))], "core")
+    solid(B, [[np.array((x, y, z)) for x, z in ((-0.030, -0.064), (0.030, -0.064), (0.036, -0.056), (-0.036, -0.056))] for y in (-0.008, -0.002)], "light")
+    solid(B, [[np.array((x, y, z)) for x, z in ((-0.012, 0.070), (0.012, 0.070), (0.012, 0.075), (-0.012, 0.075))] for y in (-0.006, 0.006)], "light")
+    solid(B, [[np.array((x * k, y, -0.086 - 0.012 * (1 - k))) for x in (-0.006, 0.006)] + [np.array((0.0, y, -0.100))] for y, k in ((-0.004, 1.0), (0.002, 1.0))], "accent")
+
+
+def dart_top(B, q):
+    slab(B, [(0.0, 0.010, -0.098), (0.048, 0.010, 0.012), (0.0, 0.010, 0.066), (-0.048, 0.010, 0.012)], "panel", q=q, thick=0.0055, away=(0, -1, 0))
+
+
+def dart_wing(B, q):
+    """The right wing, hinged along its inner edge (the drone mirrors it for the left)."""
+    slab(B, [(0.0, 0.0, -0.062), (0.088, -0.030, 0.062), (0.074, -0.026, 0.094), (0.004, 0.0, 0.040)], "panel", q=q, thick=0.0050, away=(0.04, -1, 0))
+
+
+# ---------------------------------------------------------------------------- F: the hexring
+# Six wedge segments standing in a ring that faces what it looks at, round a small graphite core; the light is the
+# gap between core and ring.
+def hex_core(B, q):
+    solid(B, [[np.array((0.026 * math.cos(math.radians(60 * i)), 0.026 * math.sin(math.radians(60 * i)), z)) for i in range(6)] for z in (-0.020, 0.020)], "core")
+    solid(B, [[np.array((r * math.cos(math.radians(60 * i)), r * math.sin(math.radians(60 * i)), z)) for i in range(6)] for z, r in ((-0.004, 0.047), (0.004, 0.047))], "light")
+    solid(B, [[np.array((r * math.cos(math.radians(60 * i)), r * math.sin(math.radians(60 * i)), z)) for i in range(6)] for z, r in ((-0.0235, 0.012), (-0.020, 0.016))], "accent")
+
+
+def hex_seg(B, q):
+    """One segment, at the top of the ring; the drone turns five more into place."""
+    r0, r1, zh = 0.056, 0.104, 0.017
+    pts = [np.array((r * math.sin(a), r * math.cos(a), 0.0)) for r, a in ((r0, -math.pi / 6), (r1, -math.pi / 6), (r1, math.pi / 6), (r0, math.pi / 6))]
+    slab(B, [p + np.array((0, 0, -zh + 0.004)) for p in pts], "panel", q=q, gap=0.0030, thick=0.0040, away=(0, 0.08, 0))
+    slab(B, [p + np.array((0, 0, zh - 0.004)) for p in pts], "panel", q=q, gap=0.0030, thick=0.0040, away=(0, 0.08, 0))
+    solid(B, [[p * k + np.array((0, 0.08 * (1 - k), z)) for p in pts] for z, k in ((-zh + 0.004, 0.93), (zh - 0.004, 0.93))], "core")
+
+
 def _fin_mounts():
-    """Where the three vanes hang on the plumb's lower half: hinge point, turn about Y (degrees), and the lean
-    (degrees from vertical) that lays them along the taper. None is at the front: the dash on the ring is."""
+    """Where the three vanes hang on the plumb's lower half: hinge point, and (YXZ degrees) a turn about Y to
+    their place and a lean that lays them along the taper. None is at the front: the dash on the ring is."""
     out = []
     for deg in (60.0, 180.0, 300.0):
         a = math.radians(deg)
         r = 0.0208
-        out.append({"at": [round(-r * math.sin(a), 5), -0.0125, round(-r * math.cos(a), 5)], "yaw": deg, "lean": 17.5})
+        out.append(dict(mesh="fin", at=[round(-r * math.sin(a), 5), -0.0125 + PLUMB_SEAM * 0, round(-r * math.cos(a), 5)], rot=[-17.5, deg, 0], turn=[13.0, 0, 0], under="shell_b"))
     return out
 
 
+def _halo(axis, dist, fins=()):
+    """The first pass's layout: a body that parts at a seam, a free halo that does the looking."""
+    return [dict(mesh="shell_a"), dict(mesh="light"), dict(mesh="shell_b", slide=[a * dist for a in axis], talk=[a * dist * 0.35 for a in axis]),
+            dict(mesh="ring", group="halo", lit="dash")] + list(fins)
+
+
+# Each variant: `build` {mesh name: function}, `parts` [how each mesh is placed and how it moves], and
+#   aim   "halo": the body turns slowly and the halo (group "halo") tips toward the target
+#         "body": the whole thing turns its front (-Z) to the target
+#   size  how much over life size the game draws it;  lie, lie_rot: the height of its centre and its turn
+#         (degrees) when it lies dormant
+# A part: mesh, at [m], rot [degrees, YXZ], scale [x, y, z] (a mirrored twin), under (another part's mesh name: it
+# rides on that part), group, lit ("dash": its light surface is the second light, lit after the seam on waking), and
+# its motion, all in its own frame: slide [m] x attention, breathe [m] x a slow idle wave, talk [m] x voice level,
+# turn [degrees] x attention.
 VARIANTS = {
-    "plumb": dict(parts=dict(shell_a=plumb_shell_a, shell_b=plumb_shell_b, light=plumb_light, ring=plumb_ring, fin=plumb_fin),
-                  open_axis=[0, -1, 0], open_dist=0.0032, ring_y=0.0050, fins=_fin_mounts(), fin_open=13.0),
-    "reed": dict(parts=dict(shell_a=reed_shell_a, shell_b=reed_shell_b, light=reed_light, ring=reed_ring),
-                 open_axis=[1, 0, 0], open_dist=0.0030, ring_y=0.0, fins=[], fin_open=0.0),
-    "lens": dict(parts=dict(shell_a=lens_shell_a, shell_b=lens_shell_b, light=lens_light, ring=lens_ring),
-                 open_axis=[0, -1, 0], open_dist=0.0040, ring_y=0.0, fins=[], fin_open=0.0),
+    "lantern": dict(build=dict(core=lantern_core, crown=lantern_crown, keel=lantern_keel, cheek=lantern_cheek, visor=lantern_visor),
+                    aim="body", size=1.12, lie=0.076, lie_rot=[80, 0, 0], parts=[
+                        dict(mesh="core"), dict(mesh="visor", lit="dash"),
+                        dict(mesh="crown", slide=[0, 0.0050, 0.0012], breathe=[0, 0.0013, 0], talk=[0, 0.0028, 0]),
+                        dict(mesh="keel", slide=[0, -0.0040, -0.0010], breathe=[0, -0.0008, 0]),
+                        dict(mesh="cheek", slide=[0.0055, 0, 0], talk=[0.0020, 0, 0]),
+                        dict(mesh="cheek", scale=[-1, 1, 1], slide=[0.0055, 0, 0], talk=[0.0020, 0, 0])]),
+    "dart": dict(build=dict(core=dart_core, top=dart_top, wing=dart_wing), aim="body", size=1.12, lie=0.03, lie_rot=[0, 0, 8], parts=[
+        dict(mesh="core"), dict(mesh="top", slide=[0, 0.004, 0.006], breathe=[0, 0.001, 0]),
+        dict(mesh="wing", at=[0.012, 0.004, 0], turn=[0, 0, -9.0], talk=[0, -0.002, 0]),
+        dict(mesh="wing", at=[-0.012, 0.004, 0], scale=[-1, 1, 1], turn=[0, 0, -9.0], talk=[0, -0.002, 0])]),
+    "hexring": dict(build=dict(core=hex_core, seg=hex_seg), aim="body", size=1.12, lie=0.03, lie_rot=[80, 0, 0], parts=[dict(mesh="core")] + [
+        dict(mesh="seg", rot=[0, 0, 60.0 * i], slide=[0, 0.0065, 0], breathe=[0, 0.0012, 0], talk=[0, 0.0020, 0]) for i in range(6)]),
+    "plumb": dict(build=dict(shell_a=plumb_shell_a, shell_b=plumb_shell_b, light=plumb_light, ring=plumb_ring, fin=plumb_fin),
+                  aim="halo", size=1.5, lie=0.027, lie_rot=[0, 0, 84], ring_y=0.0050, parts=_halo([0, -1, 0], 0.0032, _fin_mounts())),
+    "reed": dict(build=dict(shell_a=reed_shell_a, shell_b=reed_shell_b, light=reed_light, ring=reed_ring),
+                 aim="halo", size=1.5, lie=0.02, lie_rot=[0, 0, 84], ring_y=0.0, parts=_halo([1, 0, 0], 0.0030)),
+    "lens": dict(build=dict(shell_a=lens_shell_a, shell_b=lens_shell_b, light=lens_light, ring=lens_ring),
+                 aim="halo", size=1.5, lie=0.045, lie_rot=[0, 0, 8], ring_y=0.0, parts=_halo([0, -1, 0], 0.0040)),
 }
 
 
@@ -233,12 +427,13 @@ def retex(path):
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    manifest = {"_chosen": CHOSEN, "_front": "-Z", "_origin": "centre of the seam"}
+    manifest = {"_chosen": CHOSEN, "_front": "-Z", "_origin": "centre of the body"}
     for name, V in VARIANTS.items():
-        info = {k: V[k] for k in ("open_axis", "open_dist", "ring_y", "fins", "fin_open")}
+        info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y") if k in V}
         lo, hi = np.ones(3) * 9, np.ones(3) * -9
         tris = {"": 0, "_lod": 0}
-        for part, fn in V["parts"].items():
+        for part, fn in V["build"].items():
+            uses = sum(1 for p in V["parts"] if p["mesh"] == part)
             for q, suffix in ((1.0, ""), (0.4, "_lod")):
                 B = G.Builder()
                 fn(B, q)
@@ -246,14 +441,21 @@ def main():
                 path = os.path.join(OUT, "%s_%s%s.glb" % (name, part, suffix))
                 G.write_glb(path, "%s_%s%s" % (name, part, suffix), surf, {})
                 retex(path)
-                n = sum(len(d["idx"]) for d in surf.values()) // 3
-                tris[suffix] += n * (len(V["fins"]) if part == "fin" else 1)
-                if q == 1.0 and part != "fin":
+                tris[suffix] += uses * sum(len(d["idx"]) for d in surf.values()) // 3
+                if q == 1.0:
                     allp = np.concatenate([np.array(d["pos"]) for d in surf.values()])
-                    lo, hi = np.minimum(lo, allp.min(axis=0)), np.maximum(hi, allp.max(axis=0))
-        info.update(parts=list(V["parts"]), tris=tris[""], tris_lod=tris["_lod"], lo=[round(float(x), 4) for x in lo], hi=[round(float(x), 4) for x in hi])
+                    for p in V["parts"]:
+                        if p["mesh"] == part and "rot" not in p:
+                            sc = np.array(p.get("scale", [1, 1, 1]))
+                            pts = allp * sc + np.array(p.get("at", [0, 0, 0]))
+                            lo, hi = np.minimum(lo, pts.min(axis=0)), np.maximum(hi, pts.max(axis=0))
+        ext = max(hi - lo)
+        if name == "hexring":
+            lo, hi = np.array((-0.104, -0.104, -0.024)), np.array((0.104, 0.104, 0.024))
+        info.update(tris=tris[""], tris_lod=tris["_lod"], lo=[round(float(x), 4) for x in lo], hi=[round(float(x), 4) for x in hi])
         manifest[name] = info
-        print("%-6s tris %4d / %3d   %.1f cm tall, %.1f cm across the ring" % (name, tris[""], tris["_lod"], (hi[1] - lo[1]) * 100, (hi[0] - lo[0]) * 100))
+        print("%-8s tris %4d / %4d   %4.1f wide, %4.1f tall, %4.1f deep (cm, life size; drawn x%.2f)" % (
+            name, tris[""], tris["_lod"], (hi[0] - lo[0]) * 100, (hi[1] - lo[1]) * 100, (hi[2] - lo[2]) * 100, V["size"]))
     json.dump(manifest, open(os.path.join(OUT, "witness_manifest.json"), "w"), indent=1)
 
 

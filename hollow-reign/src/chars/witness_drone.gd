@@ -19,10 +19,9 @@ signal woke
 enum State { DORMANT, WAKING, FOLLOW, STOWED }
 
 const DIR := "res://assets/models/witness/"
-const SIZE := 1.5                                # drawn half again over life size (about 20 cm): it has to read on a phone at duel distance
-const HOME := Vector3(0.62, 1.8, 0.24)           # rig space: sword side, above the shoulder, a little behind
-const HOME_TUCK := Vector3(0.44, 1.78, 0.2)
-const DOCK := Vector3(0.1, 0.16, 0.2)            # chest space: on the back plate, right of the spine
+const HOME := Vector3(0.66, 1.84, 0.26)          # rig space: sword side, above the shoulder, a little behind
+const HOME_TUCK := Vector3(0.5, 1.8, 0.22)
+const DOCK := Vector3(0.1, 0.16, 0.26)           # chest space: on the back plate, right of the spine
 const LOD_AT := 3.2                              # metres from the camera where the low model takes over
 const WAKE_TIME := 2.6
 const RISE := 1.25                               # metres it lifts from where it lay (wake() can ask for another height)
@@ -34,15 +33,17 @@ var state: int = State.FOLLOW
 var rig: Node3D                                  # the FighterRig it keeps station on (null: it holds where it is)
 var foe: Node3D                                  # in a duel: what it watches and must not hide (found by itself)
 var lamp: OmniLight3D
-var attention := 0.0                             # 0 idle .. 1 attentive: seam parted, vanes lifted
+var attention := 0.0                             # 0 idle .. 1 attentive: panels parted
 var glow := 0.0                                  # what the light shows now (0 dark .. about 2 on a loud syllable)
+var size := 1.0                                  # how much over life size this variant is drawn (manifest)
+var radius := 0.1                                # metres from its centre to its furthest panel, as drawn
 
 var _info := {}
-var _tilt: Node3D
-var _core: Node3D
-var _lower: Node3D
-var _ring: Node3D
-var _fins: Array = []
+var _tilt: Node3D             # the whole model: scale, and the pose it lies in when dormant
+var _core: Node3D             # the body: spins slowly (aim "halo") or turns its front to the target (aim "body")
+var _ring: Node3D             # the parts of group "halo": tip toward the target when the aim is "halo"
+var _aim_body := false
+var _moving: Array = []       # [node, rest Transform3D, slide, breathe, talk, turn (degrees)] per part that moves
 var _mat_seam: StandardMaterial3D
 var _mat_dash: StandardMaterial3D
 var _vel := Vector3.ZERO
@@ -58,6 +59,7 @@ var _flash := 0.0
 var _level := 0.0
 var _tucked := false
 var _ring_q := Quaternion.IDENTITY
+var _body_q := Quaternion.IDENTITY
 
 static func manifest() -> Dictionary:
 	if _manifest.is_empty():
@@ -66,42 +68,55 @@ static func manifest() -> Dictionary:
 			_manifest = j.data
 	return _manifest
 
+## The variant the game draws: the manifest's choice, or `--witnessvar=<name>` (dev: "plumb" is the first design).
+static func chosen() -> String:
+	for a: String in OS.get_cmdline_user_args():
+		if a.begins_with("--witnessvar="):
+			return a.get_slice("=", 1)
+	return str(manifest().get("_chosen", "plumb"))
+
 func _init() -> void:
 	top_level = true
 
 # ================================================================ construction
+static func _v3(a, fallback: Vector3 = Vector3.ZERO) -> Vector3:
+	return Vector3(a[0], a[1], a[2]) if a is Array and a.size() == 3 else fallback
+
 func build(variant: String = "") -> void:
-	if variant == "":
-		variant = str(manifest().get("_chosen", "plumb"))
+	if variant == "" or not manifest().has(variant):
+		variant = chosen()
 	_info = manifest().get(variant, {})
+	size = float(_info.get("size", 1.0))
+	var ext := (_v3(_info.get("hi"), Vector3.ONE * 0.1) - _v3(_info.get("lo"), Vector3.ONE * -0.1)) * 0.5
+	radius = maxf(ext.x, maxf(ext.y, ext.z)) * size
+	_aim_body = str(_info.get("aim", "halo")) == "body"
 	_mat_seam = _light_mat()
 	_mat_dash = _light_mat()
 	_tilt = Node3D.new()
-	_tilt.scale = Vector3.ONE * SIZE
+	_tilt.scale = Vector3.ONE * size
 	add_child(_tilt)
 	_core = Node3D.new()
 	_tilt.add_child(_core)
-	_part(variant, "shell_a", _core)
-	_part(variant, "light", _core)
-	_lower = Node3D.new()
-	_core.add_child(_lower)
-	_part(variant, "shell_b", _lower)
-	for m: Dictionary in _info.get("fins", []):
-		var hinge := Node3D.new()
-		hinge.position = Vector3(m.at[0], m.at[1], m.at[2])
-		hinge.rotation_degrees = Vector3(0, float(m.yaw), 0)
-		_lower.add_child(hinge)
-		var vane := Node3D.new()
-		hinge.add_child(vane)
-		_part(variant, "fin", vane)
-		_fins.append([vane, float(m.lean)])
 	_ring = Node3D.new()
 	_ring.position.y = float(_info.get("ring_y", 0.0))
 	_tilt.add_child(_ring)
-	_part(variant, "ring", _ring)
+	var by_mesh := {}
+	for p: Dictionary in _info.get("parts", []):
+		var parent: Node3D = _ring if str(p.get("group", "")) == "halo" else _core
+		if p.has("under") and by_mesh.has(p.under):
+			parent = by_mesh[p.under]
+		var n := Node3D.new()
+		parent.add_child(n)
+		var rot := _v3(p.get("rot")) * (PI / 180.0)
+		var rest := Transform3D(Basis.from_euler(rot, EULER_ORDER_YXZ).scaled_local(_v3(p.get("scale"), Vector3.ONE)), _v3(p.get("at")))
+		n.transform = rest
+		_part(variant, str(p.mesh), n, str(p.get("lit", "")) == "dash", rest.basis.determinant() < 0.0)
+		by_mesh[p.mesh] = n
+		if p.has("slide") or p.has("breathe") or p.has("talk") or p.has("turn"):
+			_moving.append([n, rest, _v3(p.get("slide")), _v3(p.get("breathe")), _v3(p.get("talk")), _v3(p.get("turn"))])
 	lamp = OmniLight3D.new()
 	lamp.light_color = AMBER
-	lamp.omni_range = 0.7
+	lamp.omni_range = 0.9
 	lamp.light_energy = 0.0
 	lamp.shadow_enabled = false
 	add_child(lamp)
@@ -117,7 +132,8 @@ func _light_mat() -> StandardMaterial3D:
 	return m
 
 ## One part at both detail levels under `parent`; its "light" surface is given this drone's own material.
-func _part(variant: String, part: String, parent: Node3D) -> void:
+## A mirrored twin (negative scale) is drawn two-sided, since mirroring turns its faces inside out.
+func _part(variant: String, part: String, parent: Node3D, dash: bool, mirrored: bool) -> void:
 	for lod: int in 2:
 		var path := "%s%s_%s%s.glb" % [DIR, variant, part, "_lod" if lod == 1 else ""]
 		if not ResourceLoader.exists(path):
@@ -133,7 +149,11 @@ func _part(variant: String, part: String, parent: Node3D) -> void:
 			for s: int in mi.mesh.get_surface_count():
 				var mat := mi.mesh.surface_get_material(s)
 				if mat != null and mat.resource_name == "light":
-					mi.set_surface_override_material(s, _mat_dash if part == "ring" else _mat_seam)
+					mi.set_surface_override_material(s, _mat_dash if dash else _mat_seam)
+				elif mirrored and mat is BaseMaterial3D:
+					var two: BaseMaterial3D = mat.duplicate()
+					two.cull_mode = BaseMaterial3D.CULL_DISABLED
+					mi.set_surface_override_material(s, two)
 
 # ================================================================ what it is asked to do
 func attach(to: Node3D) -> void:
@@ -159,11 +179,12 @@ func tuck(on: bool) -> void:
 func dormant(at: Vector3, yaw: float = 0.0) -> void:
 	state = State.DORMANT
 	rig = null
-	global_position = at + Vector3(0, 0.027 * SIZE, 0)
+	global_position = at + Vector3(0, float(_info.get("lie", 0.03)) * size, 0)
 	_placed = true
 	_vel = Vector3.ZERO
-	_tilt.basis = (Basis(Vector3.UP, yaw) * Basis(Vector3.BACK, deg_to_rad(84.0))).scaled(Vector3.ONE * SIZE)
+	_tilt.basis = (Basis(Vector3.UP, yaw) * Basis.from_euler(_v3(_info.get("lie_rot"), Vector3(0, 0, 84)) * (PI / 180.0))).scaled(Vector3.ONE * size)
 	_ring_q = Quaternion(Vector3.RIGHT, deg_to_rad(64.0))
+	_body_q = Quaternion.IDENTITY
 	attention = 0.0
 	glow = 0.0
 	_apply(0.0)
@@ -232,12 +253,12 @@ func _process(delta: float) -> void:
 			attention = clampf((t - 0.95) / 0.4, 0.0, 1.0)
 			var u := smoothstep(1.05, WAKE_TIME, t)
 			global_position = _from + Vector3(0, _rise * u, 0)
-			_tilt.basis = _tilt.basis.orthonormalized().slerp(Basis.IDENTITY, clampf(dt * 3.0 * smoothstep(1.0, 1.6, t), 0.0, 1.0)).scaled(Vector3.ONE * SIZE)
+			_tilt.basis = _tilt.basis.orthonormalized().slerp(Basis.IDENTITY, clampf(dt * 3.0 * smoothstep(1.0, 1.6, t), 0.0, 1.0)).scaled(Vector3.ONE * size)
 			if t >= WAKE_TIME:
 				state = State.FOLLOW
 				_state_t = 0.0
 				_vel = Vector3.ZERO
-				_tilt.basis = Basis.IDENTITY.scaled(Vector3.ONE * SIZE)
+				_tilt.basis = Basis.IDENTITY.scaled(Vector3.ONE * size)
 				woke.emit()
 		State.STOWED:
 			if rig != null:
@@ -249,29 +270,45 @@ func _process(delta: float) -> void:
 			seam_on = 0.12
 			dash_on = 0.0
 		State.FOLLOW:
-			_tilt.basis = _tilt.basis.orthonormalized().slerp(Basis.IDENTITY, clampf(dt * 6.0, 0.0, 1.0)).scaled(Vector3.ONE * SIZE)
+			_tilt.basis = _tilt.basis.orthonormalized().slerp(Basis.IDENTITY, clampf(dt * 6.0, 0.0, 1.0)).scaled(Vector3.ONE * size)
 			_follow(dt, calm)
-	# attention and the halo
+	# attention, and what does the looking: the halo, or the whole body
 	var target := _target()
 	if state == State.FOLLOW:
 		attention = move_toward(attention, 1.0 if (target != Vector3.INF or talk) else 0.0, dt * 2.5)
-	var want := Quaternion.IDENTITY
-	if state == State.STOWED:
-		want = Quaternion.IDENTITY
-	elif target != Vector3.INF:
-		var d := target - _ring.global_position
-		var flat := Vector2(d.x, d.z).length()
-		var yaw := atan2(-d.x, -d.z)
-		var lean := clampf(deg_to_rad(26.0) + atan2(d.y, maxf(flat, 0.01)) * 0.6, deg_to_rad(-8.0), deg_to_rad(58.0))
-		want = Quaternion(Vector3.UP, yaw) * Quaternion(Vector3.RIGHT, -lean)
-	elif not calm:
-		# nothing to look at: the halo wanders, slowly, like a level settling
-		want = Quaternion(Vector3.UP, _clock * 0.45) * Quaternion(Vector3.RIGHT, deg_to_rad(9.0))
+	if _aim_body:
+		var bq := _body_q
+		if state == State.STOWED:
+			bq = Quaternion(Vector3.UP, rig.global_rotation.y) if rig != null else _body_q
+		elif target != Vector3.INF:
+			var d := target - global_position
+			var pitch := clampf(atan2(d.y, maxf(Vector2(d.x, d.z).length(), 0.01)), deg_to_rad(-30.0), deg_to_rad(30.0))
+			bq = Quaternion(Vector3.UP, atan2(-d.x, -d.z)) * Quaternion(Vector3.RIGHT, pitch)
+		elif rig != null:
+			# nothing to look at: it faces the way the knight faces, and looks about a little
+			var sway := 0.0 if calm else sin(_clock * 0.47) * 0.42 + sin(_clock * 1.13) * 0.08
+			bq = Quaternion(Vector3.UP, rig.global_rotation.y + sway) * Quaternion(Vector3.RIGHT, 0.0 if calm else sin(_clock * 0.31) * 0.1)
+		_body_q = _body_q.slerp(bq, 1.0 - exp(-dt * (6.0 if target != Vector3.INF else 2.2)))
+		# it banks a little into the way it is travelling
+		var bank := 0.0 if calm else clampf(-_vel.dot(Basis(_body_q).x) * 0.12, -0.3, 0.3)
+		_core.quaternion = _body_q * Quaternion(Vector3.FORWARD, bank)
 	else:
-		want = Quaternion(Vector3.RIGHT, deg_to_rad(6.0))
-	_ring_q = _ring_q.slerp(want, 1.0 - exp(-dt * (7.0 if target != Vector3.INF else 2.5)))
-	if not calm and state == State.FOLLOW:
-		_core.rotation.y = wrapf(_core.rotation.y + dt * (0.35 + 0.5 * attention), 0.0, TAU)
+		var want := Quaternion.IDENTITY
+		if state == State.STOWED:
+			want = Quaternion.IDENTITY
+		elif target != Vector3.INF:
+			var d2 := target - _ring.global_position
+			var lean := clampf(deg_to_rad(26.0) + atan2(d2.y, maxf(Vector2(d2.x, d2.z).length(), 0.01)) * 0.6, deg_to_rad(-8.0), deg_to_rad(58.0))
+			want = Quaternion(Vector3.UP, atan2(-d2.x, -d2.z)) * Quaternion(Vector3.RIGHT, -lean)
+		elif not calm:
+			# nothing to look at: the halo wanders, slowly, like a level settling
+			want = Quaternion(Vector3.UP, _clock * 0.45) * Quaternion(Vector3.RIGHT, deg_to_rad(9.0))
+		else:
+			want = Quaternion(Vector3.RIGHT, deg_to_rad(6.0))
+		_ring_q = _ring_q.slerp(want, 1.0 - exp(-dt * (7.0 if target != Vector3.INF else 2.5)))
+		if not calm and state == State.FOLLOW:
+			_core.rotation.y = wrapf(_core.rotation.y + dt * (0.35 + 0.5 * attention), 0.0, TAU)
+	_wave = 0.0 if (calm or state != State.FOLLOW) else 0.5 + 0.5 * sin(_clock * 1.5)
 	var base := 0.0
 	if state != State.STOWED:
 		base = 0.5 + 0.3 * attention
@@ -286,6 +323,7 @@ func _process(delta: float) -> void:
 	_apply(dt)
 
 var _dash := 0.0
+var _wave := 0.0
 var _rise := RISE
 
 func _apply(_dt: float) -> void:
@@ -295,15 +333,16 @@ func _apply(_dt: float) -> void:
 	_mat_dash.emission_energy_multiplier = _dash * 2.2
 	_mat_seam.albedo_color = Color(0.16, 0.14, 0.12).lerp(Color(1.0, 0.9, 0.74), clampf(glow, 0.0, 1.0))
 	_mat_dash.albedo_color = Color(0.16, 0.14, 0.12).lerp(Color(1.0, 0.9, 0.74), clampf(_dash, 0.0, 1.0))
-	lamp.light_energy = 0.22 * glow
+	lamp.light_energy = 0.3 * glow
 	lamp.visible = glow > 0.05
-	var ax: Array = _info.get("open_axis", [0, -1, 0])
-	var open: float = float(_info.get("open_dist", 0.0)) * (attention + 0.35 * _level)
-	_lower.position = Vector3(ax[0], ax[1], ax[2]) * open
-	for f: Array in _fins:
-		# laid along the taper at rest (lower end in), lifted outward when it attends
-		(f[0] as Node3D).rotation_degrees.x = -float(f[1]) + float(_info.get("fin_open", 0.0)) * attention
-	_ring.quaternion = _ring_q
+	# the panels: parted by attention, breathing when idle, nudged by the voice
+	for m: Array in _moving:
+		var rest: Transform3D = m[1]
+		var off: Vector3 = (m[2] as Vector3) * attention + (m[3] as Vector3) * _wave + (m[4] as Vector3) * _level
+		var turn: Vector3 = (m[5] as Vector3) * (attention * PI / 180.0)
+		(m[0] as Node3D).transform = Transform3D(rest.basis * Basis.from_euler(turn, EULER_ORDER_YXZ), rest.origin + rest.basis * off)
+	if not _aim_body:
+		_ring.quaternion = _ring_q
 
 ## How loud the line is now, 0..1: the dialogue bus's own level, or a spoken rhythm where nothing is audible.
 func _voice() -> float:
@@ -376,15 +415,15 @@ func _clear_body(p: Vector3, k: float) -> Vector3:
 		var a: Vector3 = w.global_position
 		var b: Vector3 = w.global_transform * Vector3(0, float(rig.get("weapon_len")), 0)
 		var near := Geometry3D.get_closest_point_to_segment(p, a, b)
-		p = _push(p, near, 0.3 * k)
+		p = _push(p, near, (0.2 + radius) * k)
 	var sh: Node3D = rig.get("shield")
 	if sh != null and sh.is_inside_tree() and sh.is_visible_in_tree():
-		p = _push(p, sh.global_position, 0.46 * k)
+		p = _push(p, sh.global_position, (0.36 + radius) * k)
 	var body: Node3D = rig.get("body")
 	if body != null:
 		var axis := body.global_position
 		var top := axis + Vector3(0, 1.8 * k, 0)
-		p = _push(p, Geometry3D.get_closest_point_to_segment(p, axis + Vector3(0, 0.3 * k, 0), top), 0.42 * k)
+		p = _push(p, Geometry3D.get_closest_point_to_segment(p, axis + Vector3(0, 0.3 * k, 0), top), (0.32 + radius) * k)
 	return p
 
 func _push(p: Vector3, from: Vector3, clear: float) -> Vector3:
@@ -397,50 +436,64 @@ func _push(p: Vector3, from: Vector3, clear: float) -> Vector3:
 	return from + dir * clear
 
 ## Kept in the picture's clear part. Always: under the bars and tabs along the top of the screen. In a duel also:
-## not between the camera and the foe, and not behind the pads at the corners.
+## never nearer the lens than DUEL_NEAR (where it would loom), inside the frame, clear of the pads by its own
+## width on screen, and not between the camera and the foe.
+const DUEL_NEAR := 1.7
 func _clear_view(p: Vector3) -> Vector3:
 	if not is_inside_tree():
 		return p
 	var cam := get_viewport().get_camera_3d()
-	if cam == null:
+	if cam == null or cam.projection != Camera3D.PROJECTION_PERSPECTIVE:
 		return p
 	var c := cam.global_position
-	if foe != null:
-		var fs: float = foe.scale.y
-		for h: float in [0.5, 1.1, 1.7]:
-			var f: Vector3 = foe.global_position + Vector3(0, h * fs, 0)
-			var d := f - c
-			var len := d.length()
-			if len < 0.2:
-				continue
-			d /= len
-			var t := (p - c).dot(d)
-			if t < 0.05 or t > len:
-				continue
-			var near := c + d * t
-			var need := 0.5 * fs * t / len + 0.12
-			var off := p - near
-			if off.length() < need:
-				var dir := off.normalized() if off.length() > 0.005 else Vector3.UP
-				p = near + (dir + Vector3.UP * 0.4).normalized() * need
-	if cam.is_position_behind(p) or cam.projection != Camera3D.PROJECTION_PERSPECTIVE:
-		return p
-	var size := get_viewport().get_visible_rect().size
-	var s := cam.unproject_position(p)
-	if s.x < 0.0 or s.x > size.x:
-		return p
-	var depth := (p - c).dot(-cam.global_transform.basis.z)
-	var per_px := 2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5) / maxf(size.y, 1.0)
-	var m := 56.0                                                    # the halo's own radius on screen, and a little air
-	var top := 64.0 + m + 12.0 if foe != null else minf(44.0 + m, size.y * 0.14)      # the duel's bars; a screen's row of tabs (less in a small preview)
-	if s.y < top and s.y > -200.0:
-		p -= cam.global_transform.basis.y * (top - s.y) * per_px
+	var view := get_viewport().get_visible_rect().size
 	if foe == null:
+		if cam.is_position_behind(p):
+			return p
+		var s0 := cam.unproject_position(p)
+		var depth0 := (p - c).dot(-cam.global_transform.basis.z)
+		var px0 := 2.0 * depth0 * tan(deg_to_rad(cam.fov) * 0.5) / maxf(view.y, 1.0)
+		var top0 := minf(44.0 + radius / maxf(px0, 0.0001) + 12.0, view.y * 0.16)
+		if s0.x > 0.0 and s0.x < view.x and s0.y < top0 and s0.y > -200.0:
+			p -= cam.global_transform.basis.y * (top0 - s0.y) * px0
 		return p
-	s = cam.unproject_position(p)
-	if s.x < 168.0 + m and s.y > 52.0 - m and s.y < 130.0 + m:       # the two charge pads, top left
-		p += cam.global_transform.basis.x * (168.0 + m - s.x) * per_px
-		s = cam.unproject_position(p)
-	if s.y > size.y - 112.0 - m:                                       # the row of pads along the bottom
-		p += cam.global_transform.basis.y * (s.y - (size.y - 112.0 - m)) * per_px
+	var home := p
+	var away := p - c
+	if away.length() < DUEL_NEAR:
+		p = c + away.normalized() * DUEL_NEAR if away.length() > 0.01 else p
+	if not cam.is_position_behind(p):
+		var depth := maxf((p - c).dot(-cam.global_transform.basis.z), 0.3)
+		var per_px := 2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5) / maxf(view.y, 1.0)
+		var m := radius / per_px + 16.0                 # its own half-width on screen, and a little air
+		var s := cam.unproject_position(p)
+		var to := s
+		to.y = clampf(to.y, 64.0 + m, view.y - 112.0 - m)                  # the bars above, the row of pads below
+		to.x = clampf(to.x, m, view.x - m)
+		if to.x < 168.0 + m and to.y < 130.0 + m:                           # the two charge pads, top left
+			if 168.0 + m - to.x < 130.0 + m - to.y:
+				to.x = 168.0 + m
+			else:
+				to.y = 130.0 + m
+		if to.x > view.x - 64.0 - m and to.y < 64.0 + 24.0 + m:           # the pause button, top right
+			to.x = view.x - 64.0 - m
+		var shift := (cam.global_transform.basis.x * (to.x - s.x) - cam.global_transform.basis.y * (to.y - s.y)) * per_px
+		p += shift.limit_length(1.6)
+	var fs: float = foe.scale.y
+	for h: float in [0.5, 1.1, 1.7]:
+		var f: Vector3 = foe.global_position + Vector3(0, h * fs, 0)
+		var d := f - c
+		var len := d.length()
+		if len < 0.2:
+			continue
+		d /= len
+		var t := (p - c).dot(d)
+		if t < 0.05 or t > len:
+			continue
+		var near := c + d * t
+		var need := 0.5 * fs * t / len + radius + 0.04
+		var off := p - near
+		if off.length() < need:
+			# out of the line, toward where it came from (the knight's side), never across to the far side
+			var dir := (home - near).normalized() if (home - near).length() > 0.01 else Vector3.UP
+			p = near + (dir + Vector3.UP * 0.4).normalized() * need
 	return p

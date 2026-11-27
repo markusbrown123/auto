@@ -1,52 +1,439 @@
 {
- "_chosen": "plumb",
+ "_chosen": "lantern",
  "_front": "-Z",
- "_origin": "centre of the seam",
- "plumb": {
-  "open_axis": [
+ "_origin": "centre of the body",
+ "lantern": {
+  "aim": "body",
+  "size": 1.12,
+  "lie": 0.076,
+  "lie_rot": [
+   80,
    0,
-   -1,
    0
   ],
-  "open_dist": 0.0032,
-  "ring_y": 0.005,
-  "fins": [
+  "parts": [
    {
+    "mesh": "core"
+   },
+   {
+    "mesh": "visor",
+    "lit": "dash"
+   },
+   {
+    "mesh": "crown",
+    "slide": [
+     0,
+     0.005,
+     0.0012
+    ],
+    "breathe": [
+     0,
+     0.0013,
+     0
+    ],
+    "talk": [
+     0,
+     0.0028,
+     0
+    ]
+   },
+   {
+    "mesh": "keel",
+    "slide": [
+     0,
+     -0.004,
+     -0.001
+    ],
+    "breathe": [
+     0,
+     -0.0008,
+     0
+    ]
+   },
+   {
+    "mesh": "cheek",
+    "slide": [
+     0.0055,
+     0,
+     0
+    ],
+    "talk": [
+     0.002,
+     0,
+     0
+    ]
+   },
+   {
+    "mesh": "cheek",
+    "scale": [
+     -1,
+     1,
+     1
+    ],
+    "slide": [
+     0.0055,
+     0,
+     0
+    ],
+    "talk": [
+     0.002,
+     0,
+     0
+    ]
+   }
+  ],
+  "tris": 1304,
+  "tris_lod": 764,
+  "lo": [
+   -0.1165,
+   -0.0825,
+   -0.0771
+  ],
+  "hi": [
+   0.1165,
+   0.0695,
+   0.0792
+  ]
+ },
+ "dart": {
+  "aim": "body",
+  "size": 1.12,
+  "lie": 0.03,
+  "lie_rot": [
+   0,
+   0,
+   8
+  ],
+  "parts": [
+   {
+    "mesh": "core"
+   },
+   {
+    "mesh": "top",
+    "slide": [
+     0,
+     0.004,
+     0.006
+    ],
+    "breathe": [
+     0,
+     0.001,
+     0
+    ]
+   },
+   {
+    "mesh": "wing",
+    "at": [
+     0.012,
+     0.004,
+     0
+    ],
+    "turn": [
+     0,
+     0,
+     -9.0
+    ],
+    "talk": [
+     0,
+     -0.002,
+     0
+    ]
+   },
+   {
+    "mesh": "wing",
+    "at": [
+     -0.012,
+     0.004,
+     0
+    ],
+    "scale": [
+     -1,
+     1,
+     1
+    ],
+    "turn": [
+     0,
+     0,
+     -9.0
+    ],
+    "talk": [
+     0,
+     -0.002,
+     0
+    ]
+   }
+  ],
+  "tris": 146,
+  "tris_lod": 110,
+  "lo": [
+   -0.0989,
+   -0.0251,
+   -0.1
+  ],
+  "hi": [
+   0.0989,
+   0.0155,
+   0.0906
+  ]
+ },
+ "hexring": {
+  "aim": "body",
+  "size": 1.12,
+  "lie": 0.03,
+  "lie_rot": [
+   80,
+   0,
+   0
+  ],
+  "parts": [
+   {
+    "mesh": "core"
+   },
+   {
+    "mesh": "seg",
+    "rot": [
+     0,
+     0,
+     0.0
+    ],
+    "slide": [
+     0,
+     0.0065,
+     0
+    ],
+    "breathe": [
+     0,
+     0.0012,
+     0
+    ],
+    "talk": [
+     0,
+     0.002,
+     0
+    ]
+   },
+   {
+    "mesh": "seg",
+    "rot": [
+     0,
+     0,
+     60.0
+    ],
+    "slide": [
+     0,
+     0.0065,
+     0
+    ],
+    "breathe": [
+     0,
+     0.0012,
+     0
+    ],
+    "talk": [
+     0,
+     0.002,
+     0
+    ]
+   },
+   {
+    "mesh": "seg",
+    "rot": [
+     0,
+     0,
+     120.0
+    ],
+    "slide": [
+     0,
+     0.0065,
+     0
+    ],
+    "breathe": [
+     0,
+     0.0012,
+     0
+    ],
+    "talk": [
+     0,
+     0.002,
+     0
+    ]
+   },
+   {
+    "mesh": "seg",
+    "rot": [
+     0,
+     0,
+     180.0
+    ],
+    "slide": [
+     0,
+     0.0065,
+     0
+    ],
+    "breathe": [
+     0,
+     0.0012,
+     0
+    ],
+    "talk": [
+     0,
+     0.002,
+     0
+    ]
+   },
+   {
+    "mesh": "seg",
+    "rot": [
+     0,
+     0,
+     240.0
+    ],
+    "slide": [
+     0,
+     0.0065,
+     0
+    ],
+    "breathe": [
+     0,
+     0.0012,
+     0
+    ],
+    "talk": [
+     0,
+     0.002,
+     0
+    ]
+   },
+   {
+    "mesh": "seg",
+    "rot": [
+     0,
+     0,
+     300.0
+    ],
+    "slide": [
+     0,
+     0.0065,
+     0
+    ],
+    "breathe": [
+     0,
+     0.0012,
+     0
+    ],
+    "talk": [
+     0,
+     0.002,
+     0
+    ]
+   }
+  ],
+  "tris": 456,
+  "tris_lod": 312,
+  "lo": [
+   -0.104,
+   -0.104,
+   -0.024
+  ],
+  "hi": [
+   0.104,
+   0.104,
+   0.024
+  ]
+ },
+ "plumb": {
+  "aim": "halo",
+  "size": 1.5,
+  "lie": 0.027,
+  "lie_rot": [
+   0,
+   0,
+   84
+  ],
+  "parts": [
+   {
+    "mesh": "shell_a"
+   },
+   {
+    "mesh": "light"
+   },
+   {
+    "mesh": "shell_b",
+    "slide": [
+     0.0,
+     -0.0032,
+     0.0
+    ],
+    "talk": [
+     0.0,
+     -0.00112,
+     0.0
+    ]
+   },
+   {
+    "mesh": "ring",
+    "group": "halo",
+    "lit": "dash"
+   },
+   {
+    "mesh": "fin",
     "at": [
      -0.01801,
      -0.0125,
      -0.0104
     ],
-    "yaw": 60.0,
-    "lean": 17.5
+    "rot": [
+     -17.5,
+     60.0,
+     0
+    ],
+    "turn": [
+     13.0,
+     0,
+     0
+    ],
+    "under": "shell_b"
    },
    {
+    "mesh": "fin",
     "at": [
      -0.0,
      -0.0125,
      0.0208
     ],
-    "yaw": 180.0,
-    "lean": 17.5
+    "rot": [
+     -17.5,
+     180.0,
+     0
+    ],
+    "turn": [
+     13.0,
+     0,
+     0
+    ],
+    "under": "shell_b"
    },
    {
+    "mesh": "fin",
     "at": [
      0.01801,
      -0.0125,
      -0.0104
     ],
-    "yaw": 300.0,
-    "lean": 17.5
+    "rot": [
+     -17.5,
+     300.0,
+     0
+    ],
+    "turn": [
+     13.0,
+     0,
+     0
+    ],
+    "under": "shell_b"
    }
   ],
-  "fin_open": 13.0,
-  "parts": [
-   "shell_a",
-   "shell_b",
-   "light",
-   "ring",
-   "fin"
-  ],
+  "ring_y": 0.005,
   "tris": 1384,
   "tris_lod": 688,
   "lo": [
@@ -61,21 +448,41 @@
   ]
  },
  "reed": {
-  "open_axis": [
-   1,
+  "aim": "halo",
+  "size": 1.5,
+  "lie": 0.02,
+  "lie_rot": [
    0,
-   0
+   0,
+   84
   ],
-  "open_dist": 0.003,
-  "ring_y": 0.0,
-  "fins": [],
-  "fin_open": 0.0,
   "parts": [
-   "shell_a",
-   "shell_b",
-   "light",
-   "ring"
+   {
+    "mesh": "shell_a"
+   },
+   {
+    "mesh": "light"
+   },
+   {
+    "mesh": "shell_b",
+    "slide": [
+     0.003,
+     0.0,
+     0.0
+    ],
+    "talk": [
+     0.00105,
+     0.0,
+     0.0
+    ]
+   },
+   {
+    "mesh": "ring",
+    "group": "halo",
+    "lit": "dash"
+   }
   ],
+  "ring_y": 0.0,
   "tris": 932,
   "tris_lod": 396,
   "lo": [
@@ -90,21 +497,41 @@
   ]
  },
  "lens": {
-  "open_axis": [
+  "aim": "halo",
+  "size": 1.5,
+  "lie": 0.045,
+  "lie_rot": [
    0,
-   -1,
-   0
+   0,
+   8
   ],
-  "open_dist": 0.004,
-  "ring_y": 0.0,
-  "fins": [],
-  "fin_open": 0.0,
   "parts": [
-   "shell_a",
-   "shell_b",
-   "light",
-   "ring"
+   {
+    "mesh": "shell_a"
+   },
+   {
+    "mesh": "light"
+   },
+   {
+    "mesh": "shell_b",
+    "slide": [
+     0.0,
+     -0.004,
+     0.0
+    ],
+    "talk": [
+     0.0,
+     -0.0014,
+     0.0
+    ]
+   },
+   {
+    "mesh": "ring",
+    "group": "halo",
+    "lit": "dash"
+   }
   ],
+  "ring_y": 0.0,
   "tris": 1408,
   "tris_lod": 808,
   "lo": [

@@ -701,7 +701,7 @@ func _resolve_player_hit(dir: String) -> void:
 		# boss is guarding: chip damage, and recklessness is remembered
 		var chip: float = pl.attack * 0.12 * p_guard_dmg
 		b_reckless += 1
-		_spend(pl.swing_cost * 0.75)   # the recoil off a raised guard is tiring
+		_spend(pl.swing_cost * 0.25)   # the recoil off a raised guard is tiring
 		_emit(&"deflected", {"dir": dir, "dmg": chip})
 		_damage_boss(chip, {"dir": dir, "chip": true})
 		if b_state == B.IDLE and b_reckless >= int(bd.get("patience", 3)):

@@ -66,5 +66,14 @@
   "model": "inworld",
   "pitch": -3,
   "who": "The Gravewarden. Owner asked for slightly less deep than the audition (-4), so -3."
+ },
+ "player_m": {
+  "voice": "Sterling",
+  "provider": "eleven",
+  "stability": 0.7,
+  "pitch": -4,
+  "tempo": 0.94,
+  "fx": "bass=g=4:f=120,aecho=0.9:0.35:55|110:0.16|0.08,loudnorm=I=-18:TP=-2",
+  "note": "Owner's choice 2026-11-27 after three rounds ('Sterling 4 low' = marketing/audition/protagonist_round2/protagonist2__4_Sterling_low4.mp3). Replaces Malcolm for the male protagonist (Generation II) and the male Kept. Grunts, breathing and reactions must use the same voice and treatment."
  }
 }

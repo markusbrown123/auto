@@ -96,8 +96,6 @@ func tick(dt: float) -> void:
 			var cut: String = CUTS[_alt]
 			if sim.rift_dir != "" and style == Style.SKILLED:
 				cut = sim.rift_dir            # the shown line: the counter, the telling blow
-			elif style == Style.SLOPPY and rng.randf() < 0.25:
-				cut = sim.p_last_dir if sim.p_last_dir != "" else cut      # a hurried hand repeats itself
 			elif cut == sim.p_last_dir:
 				cut = CUTS[(_alt + 1) % CUTS.size()]
 			sim.input_swipe(cut)

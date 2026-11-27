@@ -1,0 +1,2 @@
+# Female knight voice, round 1 (2026-11-27)
+Owner asked for the female protagonist to be deeper and darker, still clearly the heroine. Three of the lowest female catalogue voices (measured median pitch: Karen 140 Hz, Elodie 160 Hz, Soraya 162 Hz), same line ("I die, and I wake here. What does that make me?"), stability 0.7, then the male knight's treatment scaled down: 2 semitones lower, tempo 0.95, chest warmth, light helmet resonance. Raw takes kept in art/vo_masters/heroine_round1/ (not in git). Cost 0.69 credits (827.35 -> 826.66). Nobody has listened to these yet.

@@ -162,3 +162,6 @@ Owner chose concept B (`art/concept/knight_m_v4b.png`). One image-to-model, rig 
 
 ## 2026-11-27: generated sound pilot (owner approved "Full replacement", ceiling 300 credits)
 Pilot of 3 sword-clash takes on mirelo_text_to_audio, 2.0 s each, 0.50 credits each = 1.50 credits (job ids in assets/audio/sfx/sfx_jobs.json). Measured result: every take contained many events (3 to 11), and two of the three had a spectral centroid of 44–81 Hz, far too low for metal on metal; only one (about 3,500 Hz) is plausible. The full run was NOT started. Synthesised files restored with `tools/sfx_buy.py --restore`. Raw takes for the owner to hear: marketing/audition/sfx_pilot/.
+
+## 2026-11-27: female protagonist voice, round 1 (three samples)
+Owner asked for a deeper, darker heroine. Three samples on one line (Elodie, Karen, Soraya; ElevenLabs v4 via Higgsfield). Higgsfield balance 827.35 -> 826.66 (0.69 credits). Samples in marketing/audition/heroine_round1/. Full re-record of her 59 lines waits for the owner's pick.

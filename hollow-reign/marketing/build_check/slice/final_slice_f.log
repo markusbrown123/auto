@@ -1,0 +1,2 @@
+[    0.1s game |      0s wall] slice run: body=f weapon=default die=[] window=(960, 540) safe margins={ "l": 24.0, "r": 24.0, "t": 16.0, "b": 16.0 } preset=Balanced
+[    0.1s game |      0s wall] STEP launch

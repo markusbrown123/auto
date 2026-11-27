@@ -356,3 +356,41 @@ Software renderer only; nothing has run on a phone. Items under "Not verified" w
 
 Not verified: the trail's look on a phone's screen at 120 Hz (the stills were drawn at a fixed 30 fps); a trail on a real finger (all strokes were synthetic touches of eight to nine moves); more than one finger drawing at once (the code has five slots, nothing drove two); the pause screen over a fresh trail (the trails are cleared on pause).
 Open: the lesson and training duels cannot be lost, so they have no death screen (Yield leaves them as before). Retry goes through the loading screen, as setting out always did.
+
+## Traversal pass (2026-11-27): walking, paths, landmarks, footsteps
+
+Addendum 5 items 3 and 5, plus the owner's phone note on footsteps. Software renderer only; nothing has run on a phone.
+Measured with `src/dev/pose_review.tscn --poses=road` (30 fps, headless) and stills in `marketing/traversal_pass/`.
+
+| # | Sev | Issue | Cause | Fix | Verified by |
+|---|---|---|---|---|---|
+| T1 | A | Walking "way too fast and unnatural" | Road speed 1.35 to 1.38 m/s in the Approach, the Generation I road and `CineScene.walk`, and the stop-to-marker walk was a 1 s sine tween (3.7 m/s average, 5.8 peak); the stride phase ran at 0.9 of the clip's stride, so the walk clip (0.96 m/s of its own) was played at 1.6 times | `FighterRig.ROAD_SPEED` 1.12, `STRIDE_FIT` 1.0 (the clip plays at 1.16 times, 104 steps a minute); the marker walk is carried at that pace | `pose_review --poses=road` numbers in the report; recording |
+| T2 | B | Stops and turns were abrupt: a stop's walk started at full speed, the knight pivoted to the marker at once, the head followed the shoulders | Position tween with sine ease; `rig.rotation.y` set in one frame | Body damped mass slowed (W 8 to 6.5, yaw rate 5 to 4), the walk turns the rig over its first 30%, the head leads into a bend (`_head_lead`), the body gives 3 cm at each footfall | stills, recording |
+| T3 | A | Props stood in the knight's way (e.g. a wreck and an engine on the Courtyard approach line) | Layouts are fixed and the road screens turn the camera round the court | `Corridor` lanes set by `Backdrop.build` from `Explore.road_lanes`; the kit pushes or removes what intrudes and logs it | `t_corridor`; Approach stills before/after |
+| T4 | B | Chest, shrine and lever stood on the line the knight then walked | Fixed place 0.9 m right of the line | Placed 3 m to the side of its marker's line; the walk on after it is a real walk | code |
+| T5 | B | The long road was plain and the path edge was a soft smear | No landmarks, the road mask fades | Colossus, Tether, Falls and bridge, laid kerbs (`HighlandSights`); a ring and a tether behind the Courtyard's walls | `marketing/traversal_pass/after/`, `src/dev/sights_view.tscn` |
+| T6 | A | Footsteps "like Minecraft footsteps played extremely quickly over one another" | A sound and an armour sound were played on every half of the stride's phase (two sounds per step, 4.8 a second at the old pace), not tied to the foot, and also while shuffling the stance | One sound per foot put down, read from the walk clip's foot height (`FighterRig._footfall`): never two for one plant, never two feet inside 0.12 s, none while standing; `Sfx.footstep(surface, weight)` when the sound system has it | `pose_review` footfall log, recording |
+
+Open: the Approach (`src/cine/approach.gd`: `WALK` 1.35, three cuts), the Generation I road (`src/cine/high_road.gd`: `WALK` 1.38) and `CineScene.walk` (1.35) are not this pass's files and still walk at the old pace (the stride and the footfalls are the rig's, so they do keep to the clip); `src/cine/cine_road.gd` plays footsteps on timers (line 99).
+
+
+## Shield clipping and cloak colour pass (2026-11-27, numbers and sheets in `marketing/shield_clip_pass/`)
+
+From the owner's first play session on the Mac (Addendum 5, item 4). Measured with `pose_review` (new stats `sh_fa`, `sh_ua`, `sh_hip`, `sh_th`: the wearer's forearm, upper arm, pelvis and thigh/shin vertices inside the board's slab; `--stat_from=<s>` counts from a time; `--oldshield` plays the shield as before) for the Splintered Heater (starting kit), Gatehouse Round and Tower on both bodies. Looked at in `tools/record.sh` clips of a Courtyard duel per shield (`marketing/demos/sc_s_plank.mp4`, `sc_s_round.mp4`, `sc_s_tower.mp4`), software renderer, quality 0.
+
+| # | Sev | Issue | Root cause | Fix | Verified by | Seen |
+|---|---|---|---|---|---|---|
+| SC1 | A | The thigh and shin passed through the board in sidesteps (68-99 vertices), cuts, the road carry and the walk start; the board only kept off the thigh's capsule, and when a clip drove the arm (dodge, walk) the push was lost because the board was rebuilt from the arm | Capsule radius thinner than the skin; push applied to a hand the clip then overwrote | `FighterRig._fit_props`: after the board is placed, any thigh or shin that stands behind its footprint moves the board outward along its face normal (the board alone, up to 20 cm, `SHIELD_LEG_MARGIN` 6.5 cm past the capsule); the older centre-point push also takes the shins | `NUMBERS.md`: `sh_th` 279 / 312 / 273 -> 19 / 0 / 24 over 14 states and both bodies | duels |
+| SC2 | B | The forearm skin lay through the back of the board (5-17 vertices in every state, worse on the female body), the upper arm on the face side (female, 3-4) | The grip posts stand the board 6.7 cm off the grip line; the skinned forearm is fuller | `SHIELD_STANDOFF` 2 cm outward from the forearm | `sh_fa` 246 / 230 / 186 -> 7 / 0 / 8; `sh_arm` 31 / 3 / 22 -> 0 | duels |
+| SC3 | B | Roll recovery: the slung board came off the back while the legs were still tucked and passed through thighs and hips (24-77 vertices, female plank 170) | The dock was released the moment the roll clip ended | The dock is held until the clip's weight on the body has fallen below 12% | roll_r / roll_l `sh_th` 69 / 24 -> 0 on the starting heater | not looked at frame by frame |
+| SC4 | C | (rows 74, 88, 97) Elbow piece through the first-generation heater (`s_garrison`) at the start of a block | strap position | the stand-off and leg push above: block `sh_arm` 16 (f) -> 0, `sh_fa` 23-34 -> 0 | `pose_review --gear=s_garrison --poses=block,brace` | numbers only |
+| SC5 | B | Cloak colour swatches on character creation although no cloak is drawn | — | Removed from `CharacterSelect` (name field now full width, 60 high); `profile.heraldry` keeps its default `#3d0f0f` and old saves keep theirs; `slice_bot` no longer taps a swatch | `tests`, `integration`, capture of character creation | yes |
+
+Open after this pass:
+
+| # | Sev | Issue | Note |
+|---|---|---|---|
+| SC6 | C | At the change from the fighting stance to the road walk (0.3 s in) 15-26 shin/thigh vertices of the left leg are still in the board for a few frames on the female body (and 7-14 in the stop at 5.2 s on the male body) | The walk and stop belong to the locomotion work under way elsewhere; not touched |
+| SC7 | C | `s_garrison` (first-generation kite) roll_r: the board comes off the back one frame late and the arm is through its face (`sh_arm` 39-45 at 0.77 s) | Not the starting kit |
+| SC8 | C | Rim of the slung shield under the floor in rolls (`rim` -0.2 to -0.35) | Existing (row 96); the board lies on the back |
+| SC9 | C | A small blue light stays at the neck/gorget on the knight in the pose sheets; the heater face is dark blue enamel | `src/chars/armor_parts.gd` finish constants and the shield's enamel are outside this task |

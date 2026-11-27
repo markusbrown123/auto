@@ -153,3 +153,9 @@ Owner sent a reference clip (a real actor's performance from a published game) a
 
 ## 2026-11-27: male protagonist re-recorded (owner's choice: Sterling, lowered 4, light helmet resonance)
 45 takes (40 player_m, 5 kept_m) on elevenlabs_v4, stability 0.7; pitch −4 semitones, tempo 0.94, then bass, room, light helmet resonance, level-matched. Clean masters kept in art/vo_masters/player_m/ (not in git) so the effect chain can be changed with `tools/voices.py --post` at no cost. Planned 20.7 credits; account read 839.89 before and 828.85 after (other passes were also running, so the difference is not solely this job). Recorded, unauditioned. No fight grunts or breathing recorded yet.
+
+## 2026-11-27: male knight v4 (concept B), one Tripo model
+Owner chose concept B (`art/concept/knight_m_v4b.png`). One image-to-model, rig check, rig: `tools/tripo.py art/concept/knight_m_v4b.png knight_m_v4` -> `assets/models/knight_m_v4.glb`. One attempt, none repeated.
+- Model task `1bd1328d-4fb6-4c5c-b179-adda7f9bef4a` 110 credits, rig check free (riggable biped), rig task `6d6ddd57-d102-467c-a9b4-7d1b8c56e56d` 25 credits = **135 credits = $1.35** (ids also in `art/models/knight_m_v4.json`).
+- Tripo balance (`GET /v3/account/balance`) before **6,235.00**, after **6,100.00**, frozen 0.00.
+- Tripo graphics allocation spent so far: $31.50 + $1.35 = **$32.85** of $100. No Higgsfield credits used in this step.

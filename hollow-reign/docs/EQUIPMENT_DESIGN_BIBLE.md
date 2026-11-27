@@ -267,3 +267,62 @@ image credits each.
 - On the rig (gear pass): the shield hand closes on the grip bar and the forearm lies in the strap (`pose_review` "fingers" = 0);
   the Tower shield is worn at life size (`GearModel.RIG_SCALE`), the rest at 1.15. Seen in duel frames on the software
   renderer; nothing has run on a device.
+
+## Proposal: three armour weight classes from the male v4 concepts (design only, 2026-11-27)
+
+> **Status: proposal.** Nothing here is coded, no fight changes, nothing is bought. The owner chose concept B for the
+> starting suit ("maybe ability to be all 3 and roll and power changes"). B is bought and wired (`knight_m_v4`); A and C
+> exist only as concepts (`art/concept/knight_m_v4a.png`, `knight_m_v4c.png`, sheet
+> `marketing/armor_finish_pass/male_v4_concepts_A_B_C.jpg`).
+
+**The idea.** One body, three silhouettes, three ways to play. A = **medium** (the baseline: today's numbers), B = **light**
+(the starting suit: fast, brittle), C = **heavy** (slow, hard to shift, hits harder). Today's item data has a per-piece
+`weight` (`gen_equipment.py` `WEIGHTS`: light +2% regen / -1% swing cost, heavy -2% regen / +1% swing cost / -1.2% guard
+cost per piece) and `Stats.compute` already derives a `burden` word from the worn pieces. That is too small to feel and
+has no say over the roll, so the class below is a **whole-suit bundle**, scaled by how many of the six pieces are of the
+class (so a mixed loadout lands between, as `burden` does now). Numbers are for six pieces; each piece carries 1/6.
+
+| | **B light (starting suit)** | **A medium** | **C heavy** |
+|---|---|---|---|
+| Roll distance (`ROLL_DIST` 2.55 m; sidestep `DODGE_DIST` 1.25 m) | x1.12 (2.85 m; 1.40 m) | x1.00 | x0.88 (2.25 m; 1.10 m) |
+| Roll / dodge speed (`DODGE_TIME` 0.55 s + `ROLL_EXTRA_TIME` 0.35 s) | -0.04 s dodge, -0.05 s roll extra | baseline | +0.05 s dodge, +0.07 s roll extra |
+| Dodge recovery (the rise back into guard, `ROLL_UP` tail) | -10% | baseline | +12% |
+| Stamina cost of a dodge / roll (`DODGE_COST` 14, `ROLL_EXTRA_COST` 8; same multiplier as a shield's `mobility`) | x0.85 (11.9 / 6.8) | x1.00 | x1.20 (16.8 / 9.6) |
+| Max stamina | +8 | +0 | -6 |
+| Stamina regen (`regen_pct`) | +6% | 0 | -6% |
+| Damage taken (`defense`, `mitigation = d / (d + 110)`) | defense x0.75 | x1.00 | defense x1.40 |
+| Poise (the player's; see below) | x0.80 | x1.00 | x1.40 |
+| Attack power (`attack_pct`) and swing cost (`swing_cost_pct`) | 0% power, -3% swing cost | 0 / 0 | +8% power, +4% swing cost |
+| Guarding cost (`block`) | 0 | 0 | +0.04 (cheaper) |
+
+**Fit with today's numbers.** The Crownless starter set (`a_worn_*`) is 15 defence (helm 3, chest 6, gauntlets 2, legs 4;
+shoulders and boots add 1 each at most), about 13% mitigation: B's x0.75 takes that to about 10%. The garrison set
+(36 defence, 25%) is the next medium rung; black (45) and ash (45) are the light and heavy rungs in `FAMILIES` today.
+With the class multiplier on a 36-defence rung: light 27 (20%), medium 36 (25%), heavy 50 (31%). Light takes about 6%
+more damage than medium for the same rung, heavy takes about 8% less; the price is paid in the roll, which is the
+game's main defence. Stamina: a 100-stamina knight rolls (14 + 8 = 22) 4.5 times from full in medium, 5.3 times in
+light (18.7), 3.8 times in heavy (26.4). Attack: a 21-damage sword becomes 22.7 in heavy (`attack_pct` +8%), unchanged
+in medium and light; light makes it up in swing cost and speed of recovery. None of these touch `data/items.json`
+ids or prices: they are a class table read by `Stats.compute`, next to `WEIGHTS`, and `gen_equipment.py` would write it.
+
+**Poise needs one new thing.** `duel_sim.gd` has poise only for foes (`b_poise`). The player has `max_hp`, shield
+charges and stamina but nothing that makes a heavy knight stand through a light blow. If the owner wants that line of
+the table, the smallest version is a player flinch threshold: a hit below `poise x 8` HP does not interrupt a swing or
+a guard (light 6, medium 8, heavy 11), with the staggering blows unchanged. Without it, drop the row and fold it into
+the damage-taken numbers (heavy x1.40 becomes x1.50).
+
+**Role, not just numbers.** Light is the duellist: rolls through a heavy foe's string, wins by not being hit, loses to
+anything it cannot dodge (breath, sweeps). Medium is the all-rounder the early game is balanced around. Heavy trades
+the roll for the stand: it can take a blow and swing back, and punishes a foe that is already staggered. The Armory
+should show the class as one line (as `role_text` does for swords): "Light: rolls further and recovers quicker,
+tires less, takes more from every blow."
+
+**Cost to get A and C.** A knight body is 135 Tripo credits = **$1.35** (model 110, rig 25; rig check free), the same
+per body and per attempt as v4. Male A and C: **$2.70**. If the female body also gets three classes: three concepts
+(about 1.25 Higgsfield credits each) and three bodies, **$4.05**; all six: **$8.10**. Everything after the purchase is
+free: `tools/armor_split.gd` fits each to the same host skeleton, splits it into the six parts (so A's and C's chests,
+shoulders, gauntlets, legs and boots become mixable pieces like every other suit), and `ArmorParts` finishes it. Risk
+to state honestly: v4 needed no per-body clean-up, but every generated suit has needed a look for stretching and
+clipping, and a heavy C (broader pauldrons, thicker thighs) is the likeliest to clip the shield arm and the roll. One
+attempt each: a failed task is recovered by task id; a bad result is reported, not rebought. Current allocation after
+v4: $31.50 + $1.35 = **$32.85** of $100 (see `docs/SPENDING_LOG.md`).

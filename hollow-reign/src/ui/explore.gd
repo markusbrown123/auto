@@ -148,6 +148,13 @@ func _ready() -> void:
 			return
 	create_tween().tween_property(layer.get_child(0), "modulate:a", 1.0, 0.9).set_delay(0.3)
 	for arg: String in OS.get_cmdline_user_args():
+		if arg.begins_with("--walk="):          # dev captures: walk on through a way's marker after a few seconds, with the footfalls logged
+			FighterRig.log_feet = true
+			FighterRig.foot_log.clear()
+			await get_tree().create_timer(3.0).timeout
+			var t0 := Time.get_ticks_msec()
+			_walk_then(int(arg.trim_prefix("--walk=")), func():
+				print("FEETLOG %d footfalls in %.1f s: %s" % [FighterRig.foot_log.size(), (Time.get_ticks_msec() - t0) / 1000.0, str(FighterRig.foot_log)]), true)
 		if arg.begins_with("--choose="):          # dev captures: take a way onward by its index, as a tap would
 			await get_tree().create_timer(2.0).timeout
 			var o: Array = Game.stage_options()

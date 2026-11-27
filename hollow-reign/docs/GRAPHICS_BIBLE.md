@@ -279,3 +279,33 @@ Material rule added to the table above: **far-future scenery** (class of the kit
 tall with its own dais sunk under the floor, so the seat is 0.9 m up and where the built seat was) and
 `env_fu_cradle.glb` is the Engine room's cradle (node `Cradle`; `Arena.CRADLE_AT`, `CRADLE_TALL`, `CRADLE_YAW`).
 Both fall back to the earlier boxes under `--oldworld` or without the model.
+
+## The walking corridor, pace and landmarks (traversal pass, 2026-11-27)
+
+**Corridor** (`src/world/corridor.gd`). Before a road screen's place is built (`Backdrop.build`, using `Explore.road_lanes`), the
+lanes the knight will walk are registered: from 5.5 m behind the knight to each way's marker, and, at the first stop, the
+line they walked in on (2 m either side). `Corridor.HALF` is 1.5 m. `Future.prop` and the code-built beacon, mast,
+monolith, column and trunk ask `Corridor.clear`: a piece inside a lane is pushed sideways to the lane's edge plus its own
+radius and a hand's breadth; one that would have to move more than 4.5 m is left out. What moved is logged in
+`Corridor.moves` (`Corridor.report()`). The high road's hand-placed pieces were already 2.3 m or more from its middle line
+(markers 2.6 to 3.0, conduit 2.3, gantry and signal masts 3.4 to 3.8); the new kerbs sit at 1.52 m and are 15 cm high.
+`--oldworld` and duels are untouched (no lanes are set outside a road screen).
+
+**Pace.** `FighterRig.ROAD_SPEED` = 1.12 m/s (measured before: 1.35 to 1.38 m/s in the Approach, the Generation I road and
+`CineScene.walk`, and 3.7 m/s average, 5.8 peak, in the stop-to-marker walk); the walk clip's own pace on the skeleton is
+0.96 m/s, so it plays at 1.16 times (104 steps a minute) where it was played at 1.6 times (about 135). `STRIDE_FIT` is 1.0:
+the clip's own stride is the ground's. The body gathers way and settles as a damped mass (W 6.5, about 0.7 s each way), the
+head leads into a bend (up to 0.5 rad ahead of the shoulders), a footfall gives the body 3 cm.
+
+**Footfalls** are heard when a foot is put down, read from the walk clip's own foot height (`_feet_walk`), once per plant
+and never two feet inside 0.12 s; none while standing. The surface comes from the ground (`Highland.surface_at`: stone on
+the laid road, grass, snow in the third generation, water at the stream; `Backdrop.SURFACES` by region).
+
+**Landmarks, the high road** (`src/world/highland_sights.gd`, `--nosights` leaves them out): the Colossus (the kit's
+`fu_colossus` drawn 58 m tall, kneeling on the west moor, no shadow), the Tether (a broken orbital tower standing in the sea
+off the cliff, 640 m, through both cloud decks, its torn ribs and hanging cable lit like the road's markers), the Falls (a
+stream across the road under a footbridge, over the banded cliff in one fall to the sea, mist at its foot, ice in winter:
+`highland_water.gdshader`), and a laid kerb along both sides of the road (whole in the first generation, broken after).
+**The Fallen Courtyard** gets, behind its walls, a ring of the makers' ceramic on the horizon and a tower, the broken
+tether, in the north-east (`Future._court_sights`).
+`src/dev/sights_view.tscn` shoots each landmark from a free camera.

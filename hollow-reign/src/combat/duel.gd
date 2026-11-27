@@ -837,7 +837,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 		&"block":
 			# the board held: sparks off it (in `_on_strike`), a warm flash on the shield, the word
 			fx._flash(_shield_point(), Color(1.0, 0.86, 0.6), 3.5, 2.2, 0.18)
-			if _lesson < 0:
+			if _lesson < 0 and not (sim.p_shield_max > 0 and int(d.get("left", 1)) <= 0):      # (the last charge gone is said by the HUD: SHIELD SPENT, the next block will break)
 				hud.toast("BLOCKED", UI.BONE, 0.45)
 		&"perfect_block":
 			# turned for nothing: the bright ring, the chime, a breath of slow time
@@ -1020,7 +1020,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			Sfx.play("hit_armor", -2.0 if crit else -5.0, 1.0 + 0.04 * int(d.get("combo", 1)))
 			if crit:
 				Sfx.play("hit_flesh", -6.0)
-			hitstop(0.05 if crit else 0.025)      # short: a flurry must not be held up by its own hits
+			hitstop(0.03 if crit else 0.016)      # short: a flurry must not be held up by its own hits
 			shake(0.22 if crit else 0.12)
 			if d.get("counter", false):
 				hud.toast("COUNTER  ×%.1f" % DuelSim.COUNTER_MULT, UI.GOLD, 0.8)

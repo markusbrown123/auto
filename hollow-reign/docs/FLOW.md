@@ -179,6 +179,56 @@ says `assist`.
 One full run is about 14 to 15 minutes of game time (measured: 883 s with two deliberate defeats). On the build
 machine's software renderer that is one to three hours of wall time.
 
+## Combat rules (free cutting and guarding, 2026-11-27)
+
+The rules live in `src/combat/duel_sim.gd` (pure, seeded); `src/combat/duel.gd` shows them. Tests: `tests/tests.gd`
+`t_free_combat`, `t_block_rules`. Review driver: `-- --demo=<foe> --skip_intro --combat=<log file>`
+(`src/dev/combat_demo.gd`, synthetic touches through the real swipe recogniser). Balance table:
+`godot --headless --path . res://tools/dev/duel_balance.tscn`.
+
+**A swipe is always a cut.** What the cut does depends on the moment, never on whether it was the "asked for" one:
+
+| The foe is | Any swipe | The shown line (the bonus) |
+|---|---|---|
+| open (recovering after a string, or broken: `B.RECOVER`, `B.STAGGER`) | lands plain damage, in any of the eight directions | along the seam (`rift_dir`): ×1.6 (`RIFT_MULT`); the first such cut after a parry is the **counter**, ×2.0 (`COUNTER_MULT`) |
+| on guard (`B.IDLE`) | is thrown and **deflected**: 12% chip, a little extra stamina; `patience` such cuts running bring the foe's punish blow | none |
+| winding up a blow (`B.WINDUP`) | is a parry cut. Square or one step off the blow's line, inside 0.30 s: parried (`PARRY_WINDOW`). Any other line: not a parry, the blow lands (`parry_failed {why: dir}`). Too early: it rings off the foe's guard for 6% chip and the knight is 0.25 s recovering | exact line inside 0.12 s: perfect parry (the string is cut short, 45 poise) |
+| changing phase (`B.SHIFT`) | is thrown and turned for nothing | none |
+| out of reach (`b_far`) | steps in (0.35 s) | none |
+
+**Rate.** A cut takes the weapon's `swing_time`; the blade lands at 60% of it; from 85% (`CANCEL_FRAC`) a queued swipe,
+a queued dodge or the shield going up cuts the rest short. One swipe is queued, the latest wins, and one made during a
+cut never goes stale before that cut's cancel frame. So a flurry lands a cut every `swing_time × 0.85`: 0.22 s with the
+0.26 s sword, 0.39 s with a 0.46 s greatsword. With no stamina a cut is still thrown, as a tired one (half damage, 1.4
+times as long); stamina is 11 a cut with the first sword against 130, so a flurry of eight never stalls.
+
+**Variety.** Each cut along a new line raises the count (+12% damage and +15% poise wear a step, to six); the same
+line a second time holds it; a third time running it is read (the count starts over and the cut lands at 0.6); 0.9 s
+without a cut landing starts it over. Named combos (`data/combos.json`) are unchanged and may repeat a line freely.
+
+**Blocking.** A blockable blow caught on a raised guard costs **no health**. It costs one shield charge
+(`shield_blocks`, back at one per `shield_regen` seconds with the guard down) and stamina (the blow's `guard`, less
+`block_eff`, halved while the shield has a charge). Raised within 0.22 s of the blow, from rest, it is a **perfect
+block**: nothing spent, 25 poise worn (a plain block wears 6), 0.35 s more opening. With no charge left, or not the
+stamina to pay, the **guard breaks**: half the blow lands and the knight reels for 0.9 s; a shield beaten down is whole
+again when the knight recovers. An **unblockable** blow ignores the guard and is announced when it is wound up
+(`unblockable_warning`): it is dodged, or parried where its data allows. Fire no longer catches through a held guard;
+frost still creeps through at half.
+
+| Sim event | Sound (`Sfx.play`) | Seen |
+|---|---|---|
+| `block` | `block` / `shield_heavy` (heavy blow), `shield_scrape` | sparks at the contact, a warm flash on the shield, BLOCKED, the charge pip |
+| `perfect_block` | `parry_perfect` over the block | bright ring on the shield, a flash, 40 sparks, PERFECT BLOCK, 0.22 s of slow time |
+| `guard_break {why}` | `guard_break`, `shield_heavy` | red ring, splinters, red screen edge, shake, GUARD BROKEN or SHIELD BEATEN DOWN, the knight staggers |
+| `block_failed {why}` | the hit's own | CANNOT BE BLOCKED (unblockable) · GUARD TOO SLOW (blade still committed) · TOO LATE (raised just after) |
+| `parry_failed {why}` | the hit's own | WRONG LINE · TOO EARLY · CANNOT BE PARRIED |
+| `unblockable_warning` | `telegraph_unblockable` | UNBLOCKABLE in red, a red ring on the foe's weapon (twice), the weapon glows red, the cue line is red |
+| `boss_hit {counter}` | `parry_perfect` (high) | COUNTER ×2.0, a gold ring at the cut |
+
+What was removed: the 0.45 "glancing" penalty for repeating a line once; the refusal to swing with no stamina; the 8%
+health chip through every block; the 35% leak and doubled stamina cost of a spent shield; the 0.18 s limit on a swipe
+queued during a cut.
+
 ## Continue
 Continue → the road where it was left if the save holds one (the last stop reached; after a fall, its checkpoint at full health), else the sanctuary of the latest save (0.35 s fade). It never plays the opening or the chamber.
 

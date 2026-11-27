@@ -419,7 +419,10 @@ func _fight(delta: float) -> void:
 				if p.kind == "roll":
 					get_tree().create_timer(0.16).timeout.connect(func(): _pad_tap(pad, 5))
 	_hold_block(d, want_block)
-	if _busy or sim.p_state != DuelSim.P.FREE or sim.time < _next_cut:
+	# free cutting: in an opening the next stroke is drawn while the last cut is still recovering, so it is queued and
+	# fires on the cancel frame (the lesson's steps keep their own unhurried pace)
+	var queue_ok: bool = d._lesson < 0 and sim.boss_open() and sim.p_state == DuelSim.P.SWING and sim.p_swing.get("landed", false) and sim.p_buffer.is_empty()
+	if _busy or (sim.p_state != DuelSim.P.FREE and not queue_ok) or sim.time < _next_cut:
 		return
 	if d._lesson >= 0:
 		if d._lesson_strike:
@@ -448,7 +451,7 @@ func _fight(delta: float) -> void:
 		elif cut == sim.p_last_dir:
 			cut = CUTS[(_alt + 1) % CUTS.size()]
 		swipe(cut)
-		_next_cut = sim.time + 0.12
+		_next_cut = sim.time + 0.06
 
 # ================================================================ the slice
 func _run() -> void:

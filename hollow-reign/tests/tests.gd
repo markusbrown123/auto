@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson", "t_corridor", "t_sfx"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson", "t_corridor", "t_sfx", "t_free_combat", "t_block_rules"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -267,7 +267,7 @@ func t_attack() -> void:
 	if hits.size() == 3:
 		ok(hits[0].crit, "stagger hits are critical")
 		ok(hits[1].dmg > hits[0].dmg * 1.05, "alternating directions builds a combo")
-		ok(hits[2].dmg >= hits[1].dmg * 0.9 and hits[2].combo == hits[1].combo, "a line repeated once still lands a full cut: the variety count holds, it does not rise")
+		ok(hits[2].dmg >= hits[0].dmg * 0.95, "a line repeated once still lands a full cut")
 	ok(s.b_hp < hp, "boss took damage")
 	# stamina gate
 	s = mk("ashen_sentinel")
@@ -1774,3 +1774,259 @@ func t_sfx() -> void:
 		p.stop()
 	Sfx._voices.clear()
 	Sfx._gate_at.clear()
+
+
+# ------------------------------------------------------------------ free cutting (combat freedom pass)
+## A foe held open (or held on guard) with no combo book, so that only the plain rules are measured.
+func _held(open: bool, seed_value: int = 7) -> DuelSim:
+	var s := mk("hollow_soldier", seed_value, {}, {"combos": []})
+	s.b_state = DuelSim.B.RECOVER if open else DuelSim.B.IDLE
+	s.b_t = 1.0e6
+	return s
+
+func _hits_of(s: DuelSim) -> Array:
+	var hits: Array = []
+	s.ev.connect(func(n, d):
+		if n == &"boss_hit":
+			var e: Dictionary = d.duplicate()
+			e["t"] = s.time
+			hits.append(e))
+	return hits
+
+func t_free_combat() -> void:
+	# any of the eight lines is a real cut for plain damage in an opening
+	var base := 0.0
+	for dir: String in DuelSim.DIRS:
+		var s := _held(true)
+		var hits := _hits_of(s)
+		s.input_swipe(dir)
+		run_for(s, 0.4)
+		base = float(s.pl.attack) * (1.0 - float(s.bd.get("armor", 0.0)))
+		ok(hits.size() == 1 and float(hits[0].dmg) >= base * 0.94 and float(hits[0].dmg) <= base * 1.06, "a %s cut lands plain damage in an opening (%.1f of %.1f)" % [dir, float(hits[0].dmg) if hits.size() == 1 else -1.0, base])
+	# buffered rapid swipes: each made while the last cut is still recovering; one lands every swing_time * CANCEL_FRAC
+	var f := _held(true)
+	f.pl.max_stamina = 1000.0; f.pl.stamina = 1000.0
+	var fh := _hits_of(f)
+	var swings: Array = []
+	f.ev.connect(func(n, d): if n == &"player_swing": swings.append([f.time, d.dir]))
+	var order := ["L", "UR", "D", "R", "UL", "DR", "U", "DL"]
+	var sent := 0
+	for i: int in 600:
+		if sent < order.size() and (f.p_state == DuelSim.P.FREE or (f.p_state == DuelSim.P.SWING and f.p_elapsed >= 0.03 and f.p_buffer.is_empty())):
+			f.input_swipe(order[sent])        # (the second and later ones 0.03 s into the cut before: far too early to act, so it is queued)
+			sent += 1
+		f.tick(1.0 / 240.0)
+	var step: float = float(f.pl.swing_time) * DuelSim.CANCEL_FRAC
+	ok(fh.size() == 8, "eight rapid swipes in mixed directions land eight cuts (%d)" % fh.size())
+	if fh.size() == 8:
+		var worst := 0.0
+		for i: int in range(1, 8):
+			worst = maxf(worst, absf(float(fh[i].t) - float(fh[i - 1].t) - step))
+		ok(worst < 0.012, "queued cuts fire on the cancel frame: one every %.3fs (worst error %.3fs)" % [step, worst])
+		ok(float(fh[7].t) - float(fh[0].t) < 7.0 * float(f.pl.swing_time) - 0.1, "a queued flurry is quicker than waiting each cut out")
+		ok(swings.map(func(e): return e[1]) == order, "each cut follows its own swipe, in order")
+		ok(step >= 0.2 and step <= 0.30, "a light blade cuts every 0.22-0.30s (%.3fs)" % step)
+	var gs := Stats.compute(geared(2), Db.items, Db.classes)
+	ok(float(gs.swing_time) * DuelSim.CANCEL_FRAC > step * 1.3, "and the rate scales with the weapon's swing stat (greatsword %.2fs)" % (float(gs.swing_time) * DuelSim.CANCEL_FRAC))
+	# one swipe is queued, and the latest wins
+	var q := _held(true)
+	var qs: Array = []
+	q.ev.connect(func(n, d): if n == &"player_swing": qs.append(d.dir))
+	q.input_swipe("L"); run_for(q, 0.03)
+	q.input_swipe("U"); run_for(q, 0.03)
+	q.input_swipe("D")
+	run_for(q, 1.0)
+	ok(qs == ["L", "D"], "one swipe is queued and the latest wins (%s)" % str(qs))
+	# variety builds the count; the same line holds it once, then is read; a pause starts it over
+	var v := _held(true)
+	v.pl.max_stamina = 1000.0; v.pl.stamina = 1000.0
+	var vh := _hits_of(v)
+	for dir: String in ["L", "R", "U", "D"]:
+		v.input_swipe(dir); run_for(v, 0.3)
+	ok(vh.size() == 4 and vh.map(func(e): return int(e.combo)) == [1, 2, 3, 4], "four different lines count 1, 2, 3, 4")
+	ok(vh.size() == 4 and float(vh[3].dmg) > float(vh[0].dmg) * (1.0 + DuelSim.COMBO_STEP * 3.0) * 0.9, "and each is worth a little more (%.1f to %.1f)" % [float(vh[0].dmg), float(vh[3].dmg)])
+	var p0: float = v.b_poise
+	v.input_swipe("L"); run_for(v, 0.3)
+	ok(p0 - v.b_poise > DuelSim.POISE_CUT * 1.4, "and wears more poise (%.1f)" % (p0 - v.b_poise))
+	v.input_swipe("L"); run_for(v, 0.3)
+	v.input_swipe("L"); run_for(v, 0.3)
+	ok(vh.size() == 7 and int(vh[5].combo) == int(vh[4].combo) and not vh[5].read and float(vh[5].dmg) > base, "the same line a second time holds the count and still cuts whole")
+	ok(vh.size() == 7 and vh[6].read and int(vh[6].combo) == 1 and float(vh[6].dmg) < base * 0.7 and float(vh[6].dmg) > base * 0.5, "a third time running it is read: the count starts over and the cut glances (%.1f)" % float(vh[6].dmg))
+	v.input_swipe("R"); run_for(v, 0.3)
+	v.input_swipe("U"); run_for(v, 0.3)
+	run_for(v, DuelSim.COMBO_PAUSE + 0.3)
+	v.input_swipe("D"); run_for(v, 0.3)
+	ok(vh.size() == 10 and int(vh[8].combo) == 3 and int(vh[9].combo) == 1, "a pause starts the count over")
+	# the shown line is a bonus, not a requirement
+	var r := _held(true)
+	r.pl.max_stamina = 1000.0; r.pl.stamina = 1000.0
+	var rh := _hits_of(r)
+	r._next_rift()
+	var seam := r.rift_dir
+	var other := "L" if seam != "L" else "R"
+	r.input_swipe(other); run_for(r, 0.3)
+	ok(rh.size() == 1 and not rh[0].rift and float(rh[0].dmg) >= base * 0.94, "a cut off the shown line is still a whole cut")
+	r.p_combo = 0; r.p_last_dir = ""; r.p_same = 0
+	r.input_swipe(seam); run_for(r, 0.3)
+	ok(rh.size() == 2 and rh[1].rift and not rh[1].counter and absf(float(rh[1].dmg) / base - DuelSim.RIFT_MULT) < 0.12, "a cut along it is the telling blow (x%.2f)" % (float(rh[1].dmg) / base if rh.size() == 2 else 0.0))
+	# the counter: the first cut along the shown line after a parry
+	var cut := {"dir": "L", "windup": 1.0, "dmg": 20, "swing": 0.3, "guard": 26, "parry": true, "unblockable": false, "element": null, "kind": "slash", "dodge": "L"}
+	var c := _with_attack("hollow_soldier", [cut], 7, {"combos": []})
+	var ch := _hits_of(c)
+	to_impact(c, 0.2); c.input_swipe("R"); _strike(c)
+	ok(c.boss_open() and c.opening_from == "parry" and c.rift_dir != "", "a parry opens the foe and shows a line")
+	var line := c.rift_dir
+	c.input_swipe(line); run_for(c, 0.24)
+	ok(ch.size() == 1 and ch[0].counter and absf(float(ch[0].dmg) / base - DuelSim.COUNTER_MULT) < 0.15 and int(c.stats.get("counters", 0)) == 1, "the first cut along it is the counter (x%.2f)" % (float(ch[0].dmg) / base if ch.size() == 1 else 0.0))
+	var c2 := _with_attack("hollow_soldier", [cut], 7, {"combos": []})
+	var ch2 := _hits_of(c2)
+	to_impact(c2, 0.2); c2.input_swipe("R"); _strike(c2)
+	c2.input_swipe("D" if c2.rift_dir != "D" else "U"); run_for(c2, 0.24)
+	ok(ch2.size() == 1 and not ch2[0].counter and float(ch2[0].dmg) >= base * 0.94, "any other line in the same moment is an ordinary cut, not a refusal")
+	# against an incoming blow the wrong line is not a parry, and the blow lands
+	var w := _with_attack("hollow_soldier", [cut], 7, {"combos": []})
+	var why: Array = []
+	w.ev.connect(func(n, d): if n == &"parry_failed": why.append(d.why))
+	var hp: float = w.pl.hp
+	to_impact(w, 0.2); w.input_swipe("L"); _strike(w)
+	ok(w.stats.parries == 0 and w.pl.hp < hp and why == ["dir"], "a swipe along the wrong line is a cut, not a parry: the blow lands and says why")
+	# a foe on guard turns the cut: chip damage, never nothing
+	var g := _held(false)
+	var gh := _hits_of(g)
+	var defl: Array = []
+	var thrown := [0]
+	g.ev.connect(func(n, d):
+		if n == &"deflected": defl.append(d)
+		if n == &"player_swing": thrown[0] += 1)
+	var bhp: float = g.b_hp
+	g.input_swipe("R"); run_for(g, 0.3)
+	ok(thrown[0] == 1 and defl.size() == 1 and gh.is_empty(), "a cut at a guarding foe is thrown and deflected")
+	ok(float(defl[0].dmg) > 0.0 and float(defl[0].dmg) < base * 0.2 and is_equal_approx(bhp - g.b_hp, float(defl[0].dmg)), "for chip damage (%.2f)" % float(defl[0].dmg))
+	# a cut begun in an opening that lands as the guard closes is the tail of a flurry, not recklessness
+	var t := _held(true)
+	t.input_swipe("L"); run_for(t, 0.05)
+	t.input_swipe("R")
+	t._go_idle(30.0)
+	run_for(t, 0.6)
+	ok(t.b_reckless == 0, "the tail of a flurry is not counted as reckless")
+	t.input_swipe("U"); run_for(t, 0.3)
+	ok(t.b_reckless == 1, "a cut begun at a raised guard is")
+	# a spent arm still cuts
+	var e := _held(true)
+	var eh := _hits_of(e)
+	e.pl.stamina = 0.0
+	e.input_swipe("L"); run_for(e, 0.6)
+	ok(eh.size() == 1 and eh[0].tired and absf(float(eh[0].dmg) / base - DuelSim.TIRED_MULT) < 0.05, "with no stamina the cut still lands, tired (x%.2f)" % (float(eh[0].dmg) / base if eh.size() == 1 else 0.0))
+	# determinism: the same seed and the same hands give the same fight
+	var runs: Array = []
+	for k: int in 2:
+		var d := mk("ashen_sentinel", 31)
+		var log: Array = []
+		d.ev.connect(func(n, _d): log.append(n))
+		run_for(d, 600.0, DuelBot.new(d, DuelBot.Style.SLOPPY, 9))
+		runs.append([d.time, d.pl.hp, d.b_hp, d.cuts_landed, log.size(), log.hash()])
+	ok(runs[0] == runs[1], "the free-cutting rules are deterministic per seed")
+
+func t_block_rules() -> void:
+	var cut := {"dir": "L", "windup": 1.0, "dmg": 20, "swing": 0.3, "guard": 26, "parry": true, "unblockable": false, "element": null, "kind": "slash", "dodge": "L"}
+	# a normal block of a blockable blow costs no health: a charge and some stamina
+	var s := _with_attack("ashen_sentinel", [cut])
+	var evs: Array = []
+	s.ev.connect(func(n, d): evs.append([n, d]))
+	var names := func() -> Array: return evs.map(func(e): return e[0])
+	s.input_block(true)
+	var hp: float = s.pl.hp
+	var st: float = s.pl.stamina
+	var ch: int = s.p_shield
+	_strike(s)
+	ok(s.pl.hp == hp, "a blocked blow costs no health at all (%.2f lost)" % (hp - s.pl.hp))
+	ok(s.pl.stamina < st and s.p_shield == ch - 1 and ch > 0, "it costs stamina and one of the shield's charges")
+	ok(names.call().has(&"block") and not names.call().has(&"perfect_block") and not names.call().has(&"guard_break"), "and is announced as a block")
+	# fire does not catch through a held guard
+	var fire := cut.duplicate(); fire["element"] = "fire"
+	var fs := _with_attack("ashen_sentinel", [fire])
+	fs.input_block(true); hp = fs.pl.hp; _strike(fs); run_for(fs, 1.0)
+	ok(fs.pl.hp == hp and fs.p_burn <= 0.0, "nor does fire catch through a held guard")
+	# a perfect block: nothing spent, more poise worn, a longer opening
+	var p := _with_attack("ashen_sentinel", [cut])
+	var pe: Array = []
+	var rec: Array = []
+	p.ev.connect(func(n, d):
+		pe.append(n)
+		if n == &"boss_recover": rec.append(d.time))
+	to_impact(p, 0.1)
+	hp = p.pl.hp; st = p.pl.stamina; ch = p.p_shield
+	var poise: float = p.b_poise
+	p.input_block(true); _strike(p)
+	ok(p.pl.hp == hp and p.pl.stamina >= st and p.p_shield == ch, "a perfect block costs nothing")
+	ok(pe.has(&"perfect_block") and not pe.has(&"block") and int(p.stats.get("perfect_blocks", 0)) == 1, "and is announced as one")
+	ok(is_equal_approx(poise - p.b_poise, DuelSim.POISE_BLOCK_TIMED) and DuelSim.POISE_BLOCK_TIMED > DuelSim.POISE_BLOCK * 3.0, "it wears four times the poise of a plain block")
+	ok(rec.size() == 1 and is_equal_approx(float(rec[0]), maxf(DuelSim.SHORT_RECOVER_MIN, 1.5 * DuelSim.SHORT_RECOVER) + 0.35), "and leaves the foe open longer")
+	# guard break: no charge left
+	var b := _with_attack("ashen_sentinel", [cut])
+	var be: Array = []
+	b.ev.connect(func(n, d): be.append([n, d]))
+	b.p_shield = 0
+	b.input_block(true); hp = b.pl.hp
+	_strike(b)
+	var gb: Array = be.filter(func(e): return e[0] == &"guard_break")
+	var full: float = 20.0 * (1.0 - float(b.pl.mitigation))
+	ok(gb.size() == 1 and gb[0][1].why == "shield" and int(b.stats.get("guard_breaks", 0)) == 1, "with no charge left the guard breaks")
+	ok(absf((hp - b.pl.hp) - full * DuelSim.GUARD_BREAK_DMG) < 0.01 and b.pl.hp < hp, "part of the blow lands (%.1f of %.1f)" % [hp - b.pl.hp, full])
+	ok(b.p_state == DuelSim.P.STUN and absf(b.p_t - DuelSim.GUARD_BREAK_STUN) < 0.05 and DuelSim.GUARD_BREAK_STUN < 1.0, "and the knight reels, briefly")
+	b.b_state = DuelSim.B.RECOVER; b.b_t = 30.0
+	b.input_block(false)
+	run_for(b, DuelSim.GUARD_BREAK_STUN + 0.1)
+	ok(b.p_state == DuelSim.P.FREE and b.p_shield == b.p_shield_max and b.p_shield_max > 0, "the shield is whole again once the knight has recovered")
+	# guard break: no stamina to hold the blow
+	var b2 := _with_attack("ashen_sentinel", [cut])
+	var be2: Array = []
+	b2.ev.connect(func(n, d): if n == &"guard_break": be2.append(d.why))
+	b2.pl.stamina = 3.0
+	b2.input_block(true); hp = b2.pl.hp
+	_strike(b2)
+	ok(be2 == ["stamina"] and b2.pl.hp < hp and b2.p_state == DuelSim.P.STUN, "with no stamina to hold it the guard breaks too")
+	# an unblockable blow is announced when it is wound up, and must be dodged or parried
+	var ub := cut.duplicate(); ub["unblockable"] = true
+	var u := mk("ashen_sentinel")
+	var ue: Array = []
+	u.ev.connect(func(n, d): ue.append(n))
+	u._start_combo({"id": "test", "attacks": [ub], "recover": 1.5, "tags": [], "gap": 0.15}, true)
+	ok(ue.has(&"unblockable_warning") and u.b_state == DuelSim.B.WINDUP and u.b_t > 0.9, "an unblockable blow is announced a full wind-up before it lands")
+	u.input_block(true); hp = u.pl.hp
+	_strike(u)
+	ok(u.pl.hp < hp - 10.0 and ue.has(&"block_failed") and u.stats.blocks == 0, "a guard does not stop it, and the failure is said")
+	var u2 := _with_attack("ashen_sentinel", [ub])
+	to_impact(u2, 0.3); u2.input_dodge(-1); hp = u2.pl.hp; _strike(u2)
+	ok(u2.pl.hp == hp and u2.stats.dodges == 1, "it can be dodged")
+	var u3 := _with_attack("ashen_sentinel", [ub])
+	to_impact(u3, 0.2); u3.input_swipe("R"); hp = u3.pl.hp; _strike(u3)
+	ok(u3.pl.hp == hp and u3.stats.parries == 1, "or parried")
+	var plain := _with_attack("ashen_sentinel", [cut])
+	var pl_e: Array = []
+	plain.ev.connect(func(n, d): pl_e.append(n))
+	ok(not pl_e.has(&"unblockable_warning"), "a blockable blow carries no such warning")
+	# a guard that is not up in time
+	var l := _with_attack("ashen_sentinel", [cut])
+	var le: Array = []
+	l.ev.connect(func(n, d): if n == &"block_failed": le.append(d.why))
+	l.b_state = DuelSim.B.RECOVER      # (a cut is in the air when the blow comes)
+	l.input_swipe("L")
+	l.b_state = DuelSim.B.WINDUP; l.b_t = 0.03
+	l.input_block(true)
+	hp = l.pl.hp
+	run_for(l, 0.06)
+	ok(l.pl.hp < hp and le == ["busy"], "a shield held while the blade is still committed does not serve, and says so")
+	var l2 := _with_attack("ashen_sentinel", [cut])
+	var le2: Array = []
+	l2.ev.connect(func(n, d): if n == &"block_failed": le2.append(d.why))
+	_strike(l2); run_for(l2, 0.1)
+	l2.input_block(true)
+	ok(le2 == ["late"], "a shield raised just after the blow is told it was late")
+	# the shield cuts a cut's recovery short
+	var k := _held(true)
+	k.input_swipe("L")
+	run_for(k, float(k.pl.swing_time) * DuelSim.CONTACT_FRAC + 0.02)
+	k.input_block(true)
+	run_for(k, 0.07)
+	ok(k.p_state == DuelSim.P.FREE and k.time < float(k.pl.swing_time) and k.cuts_landed == 1, "raising the shield cuts a cut's recovery short once it has landed")

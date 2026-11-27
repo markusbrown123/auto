@@ -723,6 +723,9 @@ func _dev_boot() -> void:
 		if _args.has("showcase"):
 			d.bot = null
 			d.add_child(Showcase.new(d, _args.showcase))
+		if _args.has("combat"):
+			d.bot = null
+			d.add_child(CombatDemo.new(d, _args.combat))      # the combat-freedom review (src/dev/combat_demo.gd)
 		if _args.has("snap"):
 			# contact review: save a frame at each named moment (--snap=parried,blocked,hit,dodged,boss_hit --snapdir=dir)
 			var want: PackedStringArray = str(_args.snap).split(",")

@@ -107,3 +107,21 @@ reveal 6 (intro only) › struggle 5 = story_beat 5 › clash 4 › phase 3 › 
 - `HR_CAM_DEV="shot=struggle"` holds a shot during the fight; `kill@3` / `die@3` leaves the foe / knight on 1 hp three seconds in, to film phase changes, the finisher or the death.
 - `HR_CAM_SEEN=1` marks the foe's spoken intro as seen, to film the silent intro.
 - `--oldrollcam`, `--camlog=<file>`, `--side=L|R`, `--calm`: see "The move shot".
+
+## The traversal camera (2026-11-27, `docs/MASTER_REQUIREMENTS.md` Addendum 5 items 3 and 5)
+
+Nothing here has run on a phone; stills and recordings are from the software renderer.
+
+- **A walk has a camera of its own** (`Explore._follow_cam`): behind the knight and to the sword side, 1.3 m high rising to
+  1.65, 3.5 m back drifting to 4.4 and from 1.4 m to the side to 0.5 as the walk goes on (a slow arc round and up), looking
+  2.8 m ahead of them so there is room in front for the road, 46 degrees. It is the Backdrop's eased glide (`cam_speed` 1.7),
+  never a cut, and the knight turns onto the line to the marker over the first 30% of the walk, so a bend is an arc.
+  Reduce motion: the offsets are fixed (no arc, no rise) and the Backdrop's idle drift is already off.
+- **Arrival at a stop** glides onto the road's view from the last stop's bearing starting slowly (`cam_speed` 0.55, to 1.6 over
+  5 s); with Reduce motion it is set at once.
+- **Interactions** (chest, shrine, lever) are framed from where the prop stands, which is now to the side of the line to its
+  marker, so the walk on afterwards goes past it and not through it.
+- **No clipping:** the camera stays within the walking corridor's lane (it starts 5.5 m behind the knight, where the lane
+  starts, and stays within 1.5 m of the line), and the corridor is kept free of props (see GRAPHICS_BIBLE "Walking corridor").
+- **Not done (src/cine is not this pass's):** the Approach's three set-ups and the Generation I road's six shots
+  (`HighRoad.shot`) are unchanged; they cut between shots, which is their design.

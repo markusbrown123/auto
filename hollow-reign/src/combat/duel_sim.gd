@@ -102,6 +102,7 @@ var p_last_dir := ""
 var p_same := 0          # cuts thrown along the same line running
 var _countered := false  # the counter of this opening has been taken
 var _last_hit_t := -9.0  # when a blow last landed on the knight
+var _queued_open := false    # the queued swipe now being thrown was made while the foe stood open
 var _shield_reset := false   # a shield beaten down comes back whole once the knight has recovered from the break
 var p_counter := false   # next hit boosted (earned by perfect dodge)
 var p_frost := 0.0
@@ -426,7 +427,7 @@ func input_swipe(dir: String) -> void:
 	if over or p_state == P.STRUGGLE:
 		return
 	if p_state != P.FREE:
-		p_buffer = {"kind": "swipe", "arg": dir, "t": time}
+		p_buffer = {"kind": "swipe", "arg": dir, "t": time, "open": boss_open()}
 		return
 	if b_state == B.WINDUP:
 		if pl.stamina < PARRY_COST:
@@ -450,7 +451,7 @@ func input_swipe(dir: String) -> void:
 			_spend(pl.stamina)
 	else:
 		_spend(pl.swing_cost)
-	p_swing = {"dir": dir, "contact": st * CONTACT_FRAC, "cancel": st * CANCEL_FRAC, "landed": false, "tired": tired}
+	p_swing = {"dir": dir, "contact": st * CONTACT_FRAC, "cancel": st * CANCEL_FRAC, "landed": false, "tired": tired, "grace": boss_open() or _queued_open}
 	_set_p(P.SWING, st)
 	# if this cut would complete a combo, say which kind, so the body can throw its signature finish
 	var finish := ""
@@ -611,7 +612,9 @@ func _tick_player(dt: float) -> void:
 			var b := p_buffer
 			p_buffer = {}
 			if b.kind == "swipe":
+				_queued_open = b.get("open", false)
 				input_swipe(b.arg)
+				_queued_open = false
 			else:
 				input_dodge(b.arg)
 		p_buffer = {}
@@ -700,8 +703,10 @@ func _resolve_player_hit(dir: String) -> void:
 	else:
 		# boss is guarding: chip damage, and recklessness is remembered
 		var chip: float = pl.attack * 0.12 * p_guard_dmg
-		b_reckless += 1
-		_spend(pl.swing_cost * 0.25)   # the recoil off a raised guard is tiring
+		# (a cut begun while the foe stood open, landing as its guard closes, is the tail of a flurry, not recklessness)
+		if not p_swing.get("grace", false):
+			b_reckless += 1
+			_spend(pl.swing_cost * 0.25)   # the recoil off a raised guard is tiring
 		_emit(&"deflected", {"dir": dir, "dmg": chip})
 		_damage_boss(chip, {"dir": dir, "chip": true})
 		if b_state == B.IDLE and b_reckless >= int(bd.get("patience", 3)):

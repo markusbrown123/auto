@@ -494,7 +494,7 @@ func _apply(_dt: float) -> void:
 		elif cam != null:
 			var fwd := -_flare.get_parent_node_3d().global_transform.basis.z.normalized()
 			facing = clampf(fwd.dot((cam.global_position - _flare.global_position).normalized()), 0.0, 1.0)
-		_flare_mat.albedo_color = Color(HALO if _flare_all else AMBER, clampf(0.55 * glow * facing * facing, 0.0, 0.9))
+		_flare_mat.albedo_color = Color(HALO if _flare_all else AMBER, clampf((0.8 if _flare_all else 0.55) * glow * facing * facing, 0.0, 0.9))
 		_flare.visible = glow > 0.05 and facing > 0.02
 	# the panels: parted by attention, breathing when idle, nudged by the voice
 	for m: Array in _moving:
@@ -682,17 +682,21 @@ func _roam_station(dt: float, calm: bool) -> Array:
 					_flash = maxf(_flash, 0.35 + 0.3 * sin(_clock * 6.0))      # its light works over the thing
 		_:
 			_orbit_a += dt * (0.16 if calm else 0.3) * _orbit_dir
-			var ring := 1.7 + 0.25 * sin(_clock * 0.37)
+			var ring := (1.7 + 0.25 * sin(_clock * 0.37)) * _near()
 			var away := _away_from_lens()
 			if away != Vector3.ZERO:
 				# the lens is watching: it sweeps to and fro round the side of the knight the camera is NOT on, and
 				# never crosses between the knight and the lens (a full circle put it in the camera's face each lap)
-				_goal = rig.global_position + away.rotated(Vector3.UP, sin(_orbit_a) * 1.95) * ring * rig.scale.y + Vector3(0, 1.95 * rig.scale.y, 0)
+				_goal = rig.global_position + away.rotated(Vector3.UP, sin(_orbit_a) * 1.95) * ring * rig.scale.y + Vector3(0, (1.95 if _near() == 1.0 else 1.78) * rig.scale.y, 0)
 			else:
 				_goal = here * (Vector3(sin(_orbit_a), 0, -cos(_orbit_a)) * ring + Vector3(0, 1.95, 0))
 	if _goal.distance_to(rig.global_position) > 7.0:
 		_beat_t = 0.0
 	return [_goal + bob, 3.2 if calm else 5.5]
+
+## A small Witness keeps closer company: it is found by being near and lit, not by being large.
+func _near() -> float:
+	return 0.65 if radius < 0.1 else 1.0
 
 ## The level direction from the lens to the knight (zero when there is no perspective camera, or it is overhead).
 func _away_from_lens() -> Vector3:
@@ -812,8 +816,8 @@ func _duel_station(calm: bool) -> Array:
 		mood = "over_foe"
 		return [b + Vector3(0, 1.5 * maxf(1.0, foe.scale.y) + 0.5, 0) + far * 0.5, 6.0]
 	var ang := sin(_clock * (0.11 if calm else 0.23)) * 1.0
-	var r := 1.6 + 0.25 * sin(_clock * 0.41)      # just beyond the fighters: near enough to read, never nearer than they are
-	var h := head + 0.45 + (0.0 if calm else sin(_clock * 1.6) * 0.05)
+	var r := (1.6 + 0.25 * sin(_clock * 0.41)) * _near()      # just beyond the fighters: near enough to read, never nearer than they are
+	var h := head + (0.45 if _near() == 1.0 else 0.2) + (0.0 if calm else sin(_clock * 1.6) * 0.05)
 	var stiff := 4.0 if calm else 7.0
 	mood = "ring"
 	if low:
@@ -899,7 +903,12 @@ func _clear_view(p: Vector3) -> Vector3:
 				if (p - near).length() < need:
 					var dir := (home - near).normalized() if (home - near).length() > 0.01 else Vector3.UP
 					p = near + (dir + Vector3.UP * 0.4).normalized() * need
-	if cam.is_position_behind(p):
+	var ahead := (p - c).dot(-cam.global_transform.basis.z)
+	if free and not duel and ahead < 1.6:
+		# roaming took it beside or behind the lens (the knight faces the camera in a menu, and "ahead of the knight"
+		# is then past it): it stays in the picture instead
+		p += -cam.global_transform.basis.z * (1.6 - ahead)
+	elif cam.is_position_behind(p):
 		return p
 	var depth := maxf((p - c).dot(-cam.global_transform.basis.z), 0.3)
 	var per_px := 2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5) / maxf(view.y, 1.0)

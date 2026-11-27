@@ -396,7 +396,7 @@ static func prop(a: Arena, id: String, height: float, pos: Vector3, yaw: float =
 				if src != null and src.albedo_texture != null:
 					mi.set_surface_override_material(si, _prop_mat(a, src, id))
 		# background: coarser detail early, and coarser still away from the ring
-		mi.lod_bias = (0.4 if d < 12.0 else 0.2) * (0.8 if perf else 1.0)
+		mi.lod_bias = (0.4 if d < 12.0 else 0.2) * (0.45 if perf else 1.0)
 		if id in COARSE:
 			# big, simple shapes a long way back: their coarsest levels hold the silhouette, the texture does the rest
 			mi.lod_bias = 0.05 if perf else 0.1
@@ -573,7 +573,7 @@ static func _court(a: Arena, k: Kit) -> void:
 	var gp := Vector3(-11.6, 0, -10.6)
 	prop(a, "fu_colossus", 7.6, gp, toward(gp, -8.0), 0.02, 1)
 	var ep := Vector3(11.6, 0, -9.8)
-	prop(a, "fu_engine", 4.2, ep, toward(ep, 20.0), 0.06, 1)
+	prop(a, "fu_engine", 4.2, ep, toward(ep, 20.0), 0.06, 0)
 	conduit(k, [Vector3(14.0, 0, -12.0), Vector3(15.5, 0, -15.0), Vector3(15.5, 0, -18.9)], 0.2)
 	conduit(k, [Vector3(8.2, 0, -11.6), Vector3(5.8, 0, -14.0), Vector3(8.4, 0, -18.9)], 0.14)
 	# pylons where the court's pillars stood
@@ -586,8 +586,9 @@ static func _court(a: Arena, k: Kit) -> void:
 	var hp := Vector3(8.2, 0, -1.4)
 	prop(a, "fu_husk", 2.0, hp, toward(hp, 25.0), 0.05)
 	prop(a, "fu_wreck", 3.4, Vector3(5.0, 0, 15.0), -20.0, 0.05)
-	var e2 := Vector3(-7.0, 0, 14.0)
-	prop(a, "fu_engine", 3.0, e2, toward(e2, -30.0), 0.08)
+	if not low():
+		var e2 := Vector3(-7.0, 0, 14.0)
+		prop(a, "fu_engine", 3.0, e2, toward(e2, -30.0), 0.08)
 	# the land's own: one old tree (the high road's)
 	# (not on the Performance preset: it is 8,300 triangles, and behind the camera for most of a fight)
 	if not low():

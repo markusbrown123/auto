@@ -239,7 +239,7 @@ func _show_flex(on: bool) -> void:
 			_flex_shader = Shader.new()
 			_flex_shader.code = FLEX_CODE
 		flex = MeshInstance3D.new()
-		flex.name = "flex_hips"
+		flex.name = "part_flex"
 		flex.mesh = load(path)
 		flex.skin = skin_of(body)
 		flex.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF

@@ -885,6 +885,9 @@ func _dev_boot() -> void:
 		"trails":
 			start_training()
 			add_child(TrailDemo.new())       # the eight swipes, short and long, by synthetic touch (src/dev/trail_demo.gd)
+		"prompts":
+			start_training()
+			add_child(PromptDemo.new())      # the swipe prompt line in each direction (src/dev/prompt_demo.gd)
 		"lesson":
 			Game.profile.tutorial_done = false
 			Game.start_run("courtyard")

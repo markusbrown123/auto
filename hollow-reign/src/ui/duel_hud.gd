@@ -281,6 +281,7 @@ class Cue extends Control:
 	var danger := false
 	var total := 1.0
 	var left := 0.0
+	var line: PromptLine      # a swipe to make is shown as the big line (the glyph below is for the dodge only)
 	func show_cue(k: String, v: Vector2, side: String, red: bool, windup: float) -> void:
 		kind = k
 		vec = v
@@ -288,18 +289,27 @@ class Cue extends Control:
 		danger = red
 		total = windup
 		left = windup
+		if line != null:
+			if k == "parry":
+				line.show_dir(v, "danger" if red else "parry", windup, self)
+			else:
+				line.hide_line(self)
 		queue_redraw()
 	func clear() -> void:
 		kind = ""
+		if line != null:
+			line.hide_line(self)
 		queue_redraw()
 	func _process(dt: float) -> void:
 		if kind != "":
 			left -= dt
 			if left < -0.15:
 				kind = ""
+				if line != null:
+					line.hide_line(self)
 			queue_redraw()
 	func _draw() -> void:
-		if kind == "":
+		if kind == "" or kind == "parry":
 			return
 		var c := size * 0.5
 		var col := Color("#d23a2a") if danger else UI.GOLD
@@ -327,15 +337,123 @@ class Cue extends Control:
 				draw_line(c + Vector2(-14, -14), c + Vector2(14, 14), col, 5.0, true)
 				draw_line(c + Vector2(14, -14), c + Vector2(-14, 14), col, 5.0, true)
 
+## The swipe to make, drawn large in the middle of the combat area: a translucent white tapered stroke the length of
+## the swipe (half the screen's height), widest at the end it is to reach, with a soft outline and a dashed core (which is
+## what tells it from the player's own trail), a bright head that runs from the start to the end again and again, and an
+## arrowhead at the end. Tinted gold for a parry, red for an unblockable blow, amber for a counter-cut. Eases in over
+## 0.15 s and fades over 0.25 s when the chance is over or taken. Draws only; never takes a touch.
+class PromptLine extends Control:
+	const SEG := 14
+	const WIDTH := 46.0
+	const ALPHA := 0.45
+	const RUN := 1.0                # seconds for the bright head to run the path
+	var d := Vector2.RIGHT          # on screen (y down)
+	var tint := Color.WHITE
+	var _src: Object = null
+	var _t := 0.0
+	var _on := 0.0                  # 0..1 envelope
+	var _open := false
+	var _left := -1.0               # time left of a timed chance (parry); < 0: untimed
+	var _quad := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
+	var _quad_c := PackedColorArray([Color.WHITE, Color.WHITE, Color.WHITE, Color.WHITE])
+	var _quad_uv := PackedVector2Array([Vector2.ZERO, Vector2.ZERO, Vector2.ZERO, Vector2.ZERO])
+	func _init() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	func show_dir(v: Vector2, kind: String, windup: float, src: Object) -> void:
+		var nd := Vector2(v.x, -v.y).normalized()
+		if not _open or nd.dot(d) < 0.99:
+			_t = 0.0                # a new line starts its run from the beginning
+		d = nd
+		tint = {"parry": UI.GOLD, "danger": Color("#d23a2a"), "counter": Color(1.0, 0.78, 0.4)}.get(kind, Color.WHITE)
+		_left = windup if windup > 0.0 else -1.0
+		_src = src
+		_open = true
+		set_process(true)
+	func hide_line(src: Object) -> void:
+		if src == _src:
+			_open = false
+	func _process(dt: float) -> void:
+		_t += dt
+		if _left >= 0.0:
+			_left -= dt
+		_on = move_toward(_on, 1.0 if _open else 0.0, dt / (0.15 if _open else 0.25))
+		if _on <= 0.0 and not _open:
+			set_process(false)
+		queue_redraw()
+	func _draw() -> void:
+		if _on <= 0.0:
+			return
+		var ease_in := 1.0 - pow(1.0 - _on, 3.0)
+		var near := 1.0 if (_left >= 0.0 and _left < 0.3) else 0.0
+		var a := ALPHA * ease_in * (1.0 + 0.35 * near)
+		var c := size * Vector2(0.5, 0.47)
+		var total := size.y * 0.5 * (0.88 + 0.12 * ease_in)       # a quick growth as it opens
+		var n := Vector2(-d.y, d.x)
+		var s0 := c - d * total * 0.5
+		var base := Color(1, 1, 1).lerp(tint, 0.4)
+		# the body: thin at the start, wide at the end
+		for i: int in SEG:
+			var u0 := float(i) / SEG
+			var u1 := float(i + 1) / SEG
+			var w0 := WIDTH * 0.5 * (0.12 + 0.88 * u0)
+			var w1 := WIDTH * 0.5 * (0.12 + 0.88 * u1)
+			var p0 := s0 + d * total * u0
+			var p1 := s0 + d * total * u1
+			_quad[0] = p0 + n * w0
+			_quad[1] = p1 + n * w1
+			_quad[2] = p1 - n * w1
+			_quad[3] = p0 - n * w0
+			var c0 := Color(base, a * (0.45 + 0.55 * u0))
+			var c1 := Color(base, a * (0.45 + 0.55 * u1))
+			_quad_c[0] = c0
+			_quad_c[1] = c1
+			_quad_c[2] = c1
+			_quad_c[3] = c0
+			draw_primitive(_quad, _quad_c, _quad_uv)
+		# the soft outline of the two edges
+		var e1 := s0 + d * total + n * WIDTH * 0.5
+		draw_line(s0 + n * WIDTH * 0.06, e1, Color(base, a * 0.9), 2.0, true)
+		draw_line(s0 - n * WIDTH * 0.06, s0 + d * total - n * WIDTH * 0.5, Color(base, a * 0.9), 2.0, true)
+		draw_line(e1, s0 + d * total - n * WIDTH * 0.5, Color(base, a * 0.9), 2.0, true)
+		# the dashed core, marching toward the end
+		var shift := fmod(_t * 90.0, 36.0)
+		var pos := shift - 36.0
+		while pos < total:
+			var f0 := maxf(pos, 0.0)
+			var f1 := minf(pos + 20.0, total)
+			if f1 > f0:
+				draw_line(s0 + d * f0, s0 + d * f1, Color(1, 1, 1, a * 1.5), 3.0, true)
+			pos += 36.0
+		# the bright head running from the start to the end
+		var run := fposmod(_t / RUN, 1.0)
+		for k: int in 6:
+			var back := float(k) / 6.0
+			var q := maxf(run - back * 0.2, 0.0)
+			var pk := s0 + d * total * q
+			var wk := WIDTH * (0.12 + 0.88 * q) * 0.5 * (1.0 - back * 0.4)
+			draw_circle(pk, maxf(wk, 4.0), Color(1, 1, 1, minf(1.0, a * 2.2) * (1.0 - back) * sin(run * PI) ))
+		# the arrowhead at the end
+		var tip := s0 + d * (total + 14.0)
+		var arm := 22.0
+		var ac := Color(base, minf(1.0, a * 2.0))
+		draw_polyline(PackedVector2Array([tip - d * arm + n * arm * 0.75, tip, tip - d * arm - n * arm * 0.75]), ac, 4.0, true)
+
 ## The seam in an open foe's guard: a glowing line to cut along.
 class Rift extends Control:
 	var vec := Vector2.ZERO
 	var _pulse := 0.0
 	var _burst := 0.0
+	var line: PromptLine      # the seam is drawn as the big prompt line, in amber, centred on the combat area
 	func show_dir(d: String) -> void:
 		vec = DuelSim.dir_vec(d) if d != "" else Vector2.ZERO
 		visible = d != ""
 		_pulse = 0.0
+		if line != null:
+			if d != "":
+				line.show_dir(vec, "counter", 0.0, self)
+			else:
+				line.hide_line(self)
 		queue_redraw()
 	func burst() -> void:
 		_burst = 1.0
@@ -345,7 +463,7 @@ class Rift extends Control:
 			_burst = maxf(0.0, _burst - dt * 4.0)
 			queue_redraw()
 	func _draw() -> void:
-		if vec == Vector2.ZERO:
+		if vec == Vector2.ZERO or line != null:
 			return
 		var c := size * 0.5
 		var d := Vector2(vec.x, -vec.y)
@@ -375,6 +493,7 @@ var toast_label: Label
 var sub_label: Label
 var combo_label: Label
 var cue: Cue
+var prompt: PromptLine
 var vignette: ColorRect
 var pad_l: Pad
 var pad_r: Pad
@@ -413,6 +532,7 @@ func _ready() -> void:
 		if _struggle_cb.is_valid():
 			_struggle_cb.call())
 	rift = Rift.new()
+	rift.line = prompt
 	rift.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rift.size = Vector2(260, 260)
 	rift.visible = false
@@ -559,6 +679,9 @@ func _ready() -> void:
 	# --- prompts and text
 	cue = Cue.new()
 	cue.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	prompt = PromptLine.new()
+	root.add_child(prompt)           # under the pads and the bars (added later), over the swipe area; it takes no touch
+	cue.line = prompt
 	cue.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	cue.custom_minimum_size = Vector2(220, 220)
 	cue.offset_left = -110

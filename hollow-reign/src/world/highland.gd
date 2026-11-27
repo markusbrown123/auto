@@ -439,6 +439,18 @@ static func _tex(path: String) -> Texture2D:
 
 # ================================================================ building it
 ## Fills an Arena that has made its sky, sun and floor. Called by Arena._layout_highland.
+static var snow_now := 0.0                   # how much snow lies (the generation's), for what a footfall lands on
+static var stream: PackedVector2Array = PackedVector2Array()      # the stream's line (HighlandSights), for the same
+
+## What is underfoot at a point: the laid road is stone, the stream shallow water, snow where it lies, turf elsewhere.
+static func surface_at(p: Vector3) -> String:
+	for q: Vector2 in stream:
+		if absf(q.x - p.x) < 1.3 and absf(q.y - p.z) < 1.3:
+			return "water"
+	if snow_now > 0.4:
+		return "snow"
+	return "stone" if on_road(p.x, p.z) > 0.3 else "grass"
+
 static func off_sights() -> bool:
 	return HighlandSights.off
 
@@ -1900,6 +1912,7 @@ static func generation(a: Arena, g: int) -> void:
 	sea.set_shader_parameter("deep", Color(str(s.deep)))
 	sea.set_shader_parameter("shelf", Color(str(s.shelf)))
 	sea.set_shader_parameter("glint", Color(str(s.sun)))
+	snow_now = float(s.snow)
 	var water: ShaderMaterial = st.get("water")
 	if water:
 		water.set_shader_parameter("freeze", float(s.snow))

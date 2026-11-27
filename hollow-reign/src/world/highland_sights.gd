@@ -114,6 +114,10 @@ static func _falls(a: Arena, st: Dictionary) -> void:
 		t += 1.2 if lip < 0.0 else 0.8
 	if pts.size() < 10:
 		return
+	Highland.stream = PackedVector2Array()
+	for q: Vector2 in pts:
+		if Highland.height(q.x, q.y) > Highland.SEA + 2.0 and absf(q.x - rx) < 20.0:
+			Highland.stream.append(q)
 	var width := func(along: float) -> float: return 2.0 + 0.8 * smoothstep(40.0, 120.0, along)
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://src/world/highland_water.gdshader")

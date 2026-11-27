@@ -593,6 +593,9 @@ func _run() -> void:
 		_owe = 0.0
 		_push = 0.0
 		_slip_from = 0.0
+		_contacts.clear()
+		FighterRig.foot_log.clear()
+		FighterRig.log_feet = true
 		var strip := float(_args.get("strip", "0"))
 		var strip_n := 0
 		_track.append([0.0, _tip_local(), 0.0])
@@ -649,6 +652,18 @@ func _run() -> void:
 					(tm[1] as Callable).call()
 		_motion(stat)
 		_report(str(pose[0]), stat)
+		FighterRig.log_feet = false
+		if str(pose[0]) == "road":
+			# footfall sounds against feet coming down: the frame each was logged, and how far each sound is from its foot
+			var worst := 0
+			for c: Array in _contacts:
+				var best := 999
+				for e: Array in FighterRig.foot_log:
+					if e[1] == c[1]:
+						best = mini(best, absi(int(e[0]) - int(c[0])))
+				worst = maxi(worst, best)
+			var span := maxf(float(pose[2]) - 1.0, 0.1)
+			print("  footfalls: %d sounds, %d feet down, worst offset %d frame(s) = %.0f ms at 30 fps (the audit reads a frame after the rig), %.2f sounds a second" % [FighterRig.foot_log.size(), _contacts.size(), worst, worst * 1000.0 / 30.0, FighterRig.foot_log.size() / span])
 		if not strips.is_empty():
 			var cols := int(_args.get("cols", "8"))
 			var tw := int(_args.get("tilew", "300"))
@@ -786,6 +801,7 @@ var _owe := 0.0               # metres the "duel" still has to carry the rig sid
 var _push := 0.0              # metres it still has to shove the rig back (a blow taken)
 var _slip_from := 0.0         # seconds into the state before which foot slip is not counted
 var _slope := 0.0             # --slope=<degrees>: the ground rises toward -Z, with a rock step across it at z = -1.6
+var _contacts: Array = []     # [frame, side] of each foot coming down (the truth the footfall sounds are checked against)
 var _slip := {}               # per foot: [down, last ankle position, metres slid in this contact]; "hips0": where the hips began
 var _track: Array = []        # [t, blade tip in the rig's own space, chest yaw] per frame
 
@@ -946,6 +962,8 @@ func _audit(stat: Dictionary, t: float) -> void:
 				_worse(stat, "slip", float(e2[2]) / s * 100.0, t, side, false)
 			elif not down:
 				e2[2] = 0.0
+			if down and not e2[0] and t >= _slip_from:
+				_contacts.append([Engine.get_process_frames(), side])
 			e2[0] = down
 			e2[1] = ank2
 			_slip[side] = e2

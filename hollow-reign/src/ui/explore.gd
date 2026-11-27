@@ -61,7 +61,6 @@ func _ready() -> void:
 			# the arrival is a slow turn of the view onto the road, not a swing: it starts gently, gathers, and settles
 			backdrop.cam_speed = 0.55
 			create_tween().tween_property(backdrop, "cam_speed", 1.6, 5.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-		Sfx.play("footstep", -6.0)
 	Sfx.ambience(str(region.amb))
 	Sfx.music_for("explore_" + str(region.id), "menu")
 	layer = CanvasLayer.new()

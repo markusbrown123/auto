@@ -21,8 +21,12 @@ var cam_speed := 1.6              # how quickly the camera glides to where it is
 var cam_drift := 1.0              # how much of the idle drift is applied (close framings want less)
 var cam_fov := 50.0
 var _studio: Node3D
+var _theme := ""
+## What the ground of each place is, for the knight's footfalls.
+const SURFACES := {"courtyard": "stone", "blackwood": "grass", "cathedral": "stone", "crypt": "stone", "citadel": "snow", "throne": "metal", "roost": "stone", "deep": "metal", "sanctuary": "stone", "highland": "grass"}
 
 func build(theme: String, with_knight: bool = true) -> void:
+	_theme = theme
 	arena = Arena.new()
 	add_child(arena)
 	if with_knight and not Game.run.is_empty() and Game.run.has("stage"):
@@ -77,6 +81,7 @@ func refresh_knight(preview: Dictionary = {}, tint: String = "") -> void:
 	var look := knight_look(preview, tint)
 	look_now = look
 	rig.build(look, false)
+	rig.surface_id = str(SURFACES.get(_theme, "stone"))
 	rig.rotation.y = knight_yaw
 	if rig.skin and look.has("skin_tint"):
 		# The rig's own tint keeps only the hue of the plate, so dark iron and bright steel look alike.

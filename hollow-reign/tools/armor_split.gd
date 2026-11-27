@@ -127,7 +127,7 @@ func _init() -> void:
 
 # ---------------------------------------------------------------- reading
 func _read(body: String, suit: String) -> Dictionary:
-	var path := "res://assets/models/knight_%s%s.glb" % [body, "" if suit == "base" else ("_v3" if suit == "crownless" else "_" + suit)]
+	var path := "res://assets/models/knight_%s%s.glb" % [body, "" if suit == "base" else (("_v4" if body == "m" and not args.has("v3m") else "_v3") if suit == "crownless" else "_" + suit)]
 	var root: Node = (load(path) as PackedScene).instantiate()
 	var skel: Skeleton3D = root.find_children("*", "Skeleton3D", true, false)[0]
 	var mi: MeshInstance3D = root.find_children("*", "MeshInstance3D", true, false)[0]

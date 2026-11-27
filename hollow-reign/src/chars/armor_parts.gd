@@ -21,7 +21,14 @@ static var host := "crownless"
 
 ## The model whose skeleton the parts are bound to: the skin a rig that wears parts must attach.
 static func host_path(b: String) -> String:
-	return "res://assets/models/knight_%s%s.glb" % [b, "_v3" if host == "crownless" else ""]
+	return "res://assets/models/knight_%s%s.glb" % [b, ("_v3" if b == "m" and v3m else "_v4" if b == "m" else "_v3") if host == "crownless" else ""]
+
+## `--v3m`: the male starting suit as it was before the v4 body (knight_m_v3 and the male parts cut from it, kept whole
+## in parts_v3m/). The female body is unaffected.
+static var v3m: bool = OS.get_cmdline_user_args().has("--v3m")
+const DIR_V3M := "res://assets/models/parts_v3m/"
+static func _d(b: String) -> String:
+	return DIR_V3M if v3m and b == "m" and dir == DIR else dir
 ## Parts that only look right next to another part of the same suit (docs/MODULAR_ARMOR.md): suit -> {slot: [slots that
 ## must be the same suit]}. An equipment screen should show such a piece as "worn with ..." and not as a free piece.
 ##   vigil helm     is a hood whose mantle is the shoulders part: alone it ends in a torn hem in the air
@@ -107,7 +114,7 @@ var _hidden: Array = []               # the skeleton's own meshes, hidden while 
 
 # ---------------------------------------------------------------- data
 static func has_part(b: String, suit: String, slot: String) -> bool:
-	return ResourceLoader.exists("%s%s_%s_%s.res" % [dir, b, suit, slot])
+	return ResourceLoader.exists("%s%s_%s_%s.res" % [_d(b), b, suit, slot])
 
 ## The slots that must hold the same suit for `slot` of `suit` to look right; empty for a freely mixable piece.
 static func needs(suit: String, slot: String) -> Array:
@@ -148,13 +155,13 @@ func is_clean() -> bool:
 static func mesh_of(b: String, suit: String, slot: String) -> ArrayMesh:
 	var key := "%s_%s_%s" % [b, suit, slot]
 	if not _mesh.has(key):
-		var path := "%s%s.res" % [dir, key]
+		var path := "%s%s.res" % [_d(b), key]
 		_mesh[key] = load(path) if ResourceLoader.exists(path) else null
 	return _mesh[key]
 
 static func skin_of(b: String) -> Skin:
 	if not _skin.has(b):
-		_skin[b] = load("%s%s_skin.res" % [dir, b])
+		_skin[b] = load("%s%s_skin.res" % [_d(b), b])
 	return _skin[b]
 
 static func finish_of(suit: String) -> Dictionary:
@@ -169,7 +176,7 @@ static func finish_of(suit: String) -> Dictionary:
 static func _material(b: String, suit: String) -> ShaderMaterial:
 	var key := "%s_%s" % [b, suit.get_slice("_", 0)]      # (a suffix names a variant of the same suit's meshes)
 	if not _mat.has(key):
-		var path := "%s%s_mat.res" % [dir, key]
+		var path := "%s%s_mat.res" % [_d(b), key]
 		_mat[key] = load(path) if ResourceLoader.exists(path) else null
 	return _mat[key]
 
@@ -271,7 +278,7 @@ func _show_hood(on: bool) -> void:
 			hood.visible = false
 		return
 	if hood == null:
-		var path := "%s%s_%s_hood.res" % [dir, body, host]
+		var path := "%s%s_%s_hood.res" % [_d(body), body, host]
 		if not ResourceLoader.exists(path):
 			return
 		if _hood_shader == null:
@@ -470,7 +477,7 @@ func _show_flex(on: bool) -> void:
 			flex.visible = false
 		return
 	if flex == null:
-		var path := "%s%s_%s_flex.res" % [dir, body, host]
+		var path := "%s%s_%s_flex.res" % [_d(body), body, host]
 		if not ResourceLoader.exists(path):
 			return
 		if _flex_shader == null:
@@ -592,7 +599,7 @@ void fragment() {
 }"
 
 func _build_under() -> void:
-	var path := "%s%s_under.res" % [dir, body]
+	var path := "%s%s_under.res" % [_d(body), body]
 	if not ResourceLoader.exists(path):
 		return
 	if _under_shader == null:

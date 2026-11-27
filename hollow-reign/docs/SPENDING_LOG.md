@@ -144,3 +144,6 @@ Three concept images (gpt_image_2_6, 2k, 3:4): art/concept/knight_m_v4{a,b,c}.pn
 
 ## 2026-11-27: protagonist voice round
 Three samples on one line (elevenlabs_v4, stability 0.5): Caspian, Barrett, Holden, in marketing/audition/protagonist_round/. About 0.46 credits each (about 1.4 credits). Unauditioned. No lines regenerated; waiting for the owner's choice.
+
+## 2026-11-27: protagonist voice round 2
+Owner rejected round 1 ("more Kratos like"). Four samples (elevenlabs_v4, stability 0.7, slowed 6%, pitch lowered where marked): Vlad, Alistair −3, Caspian −4, Sterling −4, in marketing/audition/protagonist_round2/. About 0.46 credits each (about 1.9 credits). Unauditioned.

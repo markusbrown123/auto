@@ -2772,7 +2772,7 @@ func _feet_walk(dt: float) -> void:
 		if down and not f.lock:
 			# the foot has come down after being up: that is the step, and the one place it is heard
 			if float(f.get("air", 0.0)) > 0.025 and _walk_amount > 0.3:
-				_footfall(side.trim_suffix("")) 
+				_footfall(side)
 			f["air"] = 0.0
 			f.lock = true
 			f.at = w + (f.off as Vector3)

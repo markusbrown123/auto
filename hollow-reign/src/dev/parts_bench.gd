@@ -83,7 +83,7 @@ func _rig(yaw_deg: float, x: float) -> FighterRig:
 	var look: Dictionary = Duel.player_look()
 	look["skin"] = ArmorParts.host_path(body)
 	if args.has("orig"):
-		look["skin"] = "res://assets/models/knight_%s%s.glb" % [body, {"base": "", "crownless": "_v3"}.get(str(args.orig), "_" + str(args.orig))]
+		look["skin"] = "res://assets/models/knight_%s%s.glb" % [body, {"base": "", "crownless": "_v4" if body == "m" and not ArmorParts.v3m else "_v3"}.get(str(args.orig), "_" + str(args.orig))]
 	look.erase("parts")
 	look.erase("skin_tint")
 	rig.build(look, false)

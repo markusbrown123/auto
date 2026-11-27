@@ -817,6 +817,8 @@ func brace(world_point: Vector3, hold: float = 0.3) -> void:
 func dodge(side: float) -> void:
 	_dodge_side = side
 	_rolling = false
+	if parts != null:
+		parts.vent()      # the suit's vents open for a moment (ArmorParts)
 	_dg_begin(false)
 	_go(Mode.DODGE, 0.5)
 
@@ -825,6 +827,8 @@ var _rolling := false
 func roll(side: float) -> void:
 	_dodge_side = side
 	_rolling = true
+	if parts != null:
+		parts.vent()      # the suit's vents open for a moment (ArmorParts)
 	_dg_begin(true)
 	_go(Mode.DODGE, 0.84)      # ends as the rules free the knight, not before
 

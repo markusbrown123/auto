@@ -69,6 +69,7 @@ func _init() -> void:
 	var tag := str(args.get("tag", ""))
 	for body: String in ["m", "f"]:
 		var host := _read(body, host_suit)
+		_cur_host = host
 		var hull := {}
 		for suit: String in SUITS:
 			var id := "%s_%s" % [body, suit]
@@ -779,6 +780,22 @@ func _cut(a: int, b: int) -> int:
 	return i
 
 # ---------------------------------------------------------------- writing
+var _cur_host := {}
+const LIMB_CODE := {"LeftArm": 20.0, "RightArm": 30.0, "LeftForeArm": 40.0, "RightForeArm": 50.0, "LeftLeg": 60.0, "RightLeg": 70.0}
+
+func _limb_uv(pos: Vector3, b: String) -> Variant:
+	if not LIMB_CODE.has(b):
+		return null
+	var j: Vector3 = (_cur_host.rest[b] as Transform3D).origin
+	var a: Vector3 = ((_cur_host.rest[CHILD[b]] as Transform3D).origin - j).normalized()
+	var ref := Vector3.RIGHT if b.ends_with("Leg") else Vector3.UP        # shins: the front line; arms: the outer, upper line
+	var e1 := (ref - a * ref.dot(a)).normalized()
+	var e2 := a.cross(e1)
+	var d := pos - j
+	var t := d.dot(a)
+	var rad := d - a * t
+	return Vector2(float(LIMB_CODE[b]) + clampf(atan2(rad.dot(e2), rad.dot(e1)) * rad.length(), -4.0, 4.0), t)
+
 func _save(p: Dictionary, path: String, id: String) -> void:
 	if (p.idx as PackedInt32Array).is_empty():
 		push_warning("empty part " + path)
@@ -792,13 +809,23 @@ func _save(p: Dictionary, path: String, id: String) -> void:
 	if p.has("uv2"):
 		arr[Mesh.ARRAY_TEX_UV2] = p.uv2
 	else:
-		# where a vertex is on the standing body, for what the material draws ON the plates (ArmorParts: inlaid
-		# motifs, the visor's light): x = sideways from the middle, plus 10 on what faces backward; y = height.
-		# (Every suit faces +X and stands 1 tall in this space.)
+		# where a vertex is, for what the material draws ON the plates (ArmorParts: inlaid designs, the visor's light).
+		# Trunk and head: on the standing body: x = sideways from the middle, plus 10 on what faces backward; y = height.
+		# Upper arms, forearms and shins: on the limb itself, so a design follows it however it is posed:
+		# x = 20 + 10 * (which limb) + distance round the limb from its outer (shins: front) line; y = distance along
+		# it from its upper joint. (Every suit faces +X and stands 1 tall in this space.)
 		var uv2 := PackedVector2Array()
 		uv2.resize(p.pos.size())
 		for v in p.pos.size():
-			uv2[v] = Vector2((p.pos[v] as Vector3).z + (10.0 if (p.nrm[v] as Vector3).x < 0.0 else 0.0), (p.pos[v] as Vector3).y)
+			var best := 0
+			for j in 4:
+				if p.weights[v * 4 + j] > p.weights[v * 4 + best]:
+					best = j
+			var lu = _limb_uv(p.pos[v], str(_cur_host.names[p.bones[v * 4 + best]])) if not _cur_host.is_empty() else null
+			if lu != null:
+				uv2[v] = lu
+			else:
+				uv2[v] = Vector2((p.pos[v] as Vector3).z + (10.0 if (p.nrm[v] as Vector3).x < 0.0 else 0.0), (p.pos[v] as Vector3).y)
 		arr[Mesh.ARRAY_TEX_UV2] = uv2
 	arr[Mesh.ARRAY_BONES] = p.bones
 	arr[Mesh.ARRAY_WEIGHTS] = p.weights

@@ -38,24 +38,34 @@ uniform float coat_rough = 0.62;
 uniform float wear = 0.0;
 uniform float wear_edge = 1.0;
 uniform vec3 wear_color : source_color = vec3(0.075, 0.07, 0.066);
-//  motif 0 off .. 1 the designs inlaid in the coated plate, drawn where the part is on the standing body (UV2, written
-//        by tools/armor_split.gd: x sideways, +10 on what faces backward; y height, the body 1 tall): the house's
-//        open ring on the breast with a line of light falling from its gap, a dark line over the helm's crown, and a
-//        line of light with three nodes down the spine. Sparse on purpose.
+//  motif 0 off .. 1 the designs inlaid in the coated plate, some in dark metal and some as lines of light. They are
+//        drawn where the part is (UV2, written by tools/armor_split.gd): on the standing body for trunk and head (x
+//        sideways, +10 on what faces backward; y height, the body 1 tall), on the limb itself for upper arms (+20/30),
+//        forearms (+40/50) and shins (+60/70) (x round the limb from its outer line, y along it), so they follow a limb.
+//        Breast: the house's mark (an open ring round a ring of light, a diamond, a line of light falling from the gap).
+//        Brow: a small ring of light. Crown: a dark line. Back: a ring and the spine's line of light. Pauldrons: a
+//        ring round a ring of light over a chevron. Forearms and shins: a line of light between dark marks. Thin
+//        dark panel breaks round the limbs.
+//  glow_color  every light on the suit: the visor, the lines, (ArmorParts) the vents and the cast light.
 //  visor the eye slot lit: dark texels of the helm's front within visor_half of visor_y.
+//  fx    1 the lights breathe and a sheen passes up the plate now and then; 0 still (reduced motion).
+//  edge_shine  how much the sculpted edges (steep parts of the normal map) catch the light under the coat.
 uniform float motif = 0.0;
 uniform vec3 motif_dark : source_color = vec3(0.16, 0.15, 0.14);
-uniform vec3 motif_light : source_color = vec3(0.55, 0.85, 1.0);
+uniform vec3 glow_color : source_color = vec3(0.3, 0.9, 1.0);
 uniform float motif_energy = 1.6;
 uniform float chest_y = 0.775;
 uniform vec2 back_span = vec2(0.66, 0.82);
 uniform float visor = 0.0;                // brightness, 0 off
-uniform vec3 visor_color : source_color = vec3(0.6, 0.92, 1.0);
 uniform float visor_y = 0.931;
 uniform float visor_half = 0.011;
+uniform float fx = 1.0;
+uniform float edge_shine = 0.0;
 
 float line_at(float d, float half_w, float aa) { return 1.0 - smoothstep(half_w, half_w + aa, abs(d)); }
 float diamond(vec2 d, float r, float aa) { return 1.0 - smoothstep(r, r + aa, abs(d.x) + abs(d.y)); }
+float ring_at(vec2 d, float r, float half_w, float aa) { return 1.0 - smoothstep(half_w, half_w + aa, abs(length(d) - r)); }
+float span(float v, float lo, float hi) { return step(lo, v) * step(v, hi); }
 
 float hash21(vec2 p) {
 	p = fract(p * vec2(123.34, 456.21));
@@ -90,55 +100,91 @@ void fragment() {
 		float chip = smoothstep(0.12, 0.34, slope) * smoothstep(0.36, 0.62, n1 * 0.65 + n2 * 0.35) * wear_edge;
 		float scuff = smoothstep(0.58, 0.85, n1 * 0.5 + vnoise(UV * 19.0) * 0.5) * 0.3 * wear_edge;
 		float w = clamp(wear * (crease + chip * 1.3 + scuff), 0.0, 1.0) * plate;
+		float edge = smoothstep(0.1, 0.32, slope) * (1.0 - clamp(crease, 0.0, 1.0));
+		coated *= 1.0 + edge_shine * edge;
 		alb = mix(a.rgb, coated, plate);
 		alb = mix(alb, wear_color, w);
-		r = mix(r, coat_rough + 0.06 * (n2 - 0.5), plate);
+		r = mix(r, coat_rough + 0.06 * (n2 - 0.5) - 0.14 * edge * step(0.001, edge_shine), plate);
 		r = mix(r, 0.78, w);
 		metal = mix(metal, coat_metal, plate);
 		metal = mix(metal, 0.35, w * step(0.5, chip));
 	}
 	vec3 glow = vec3(0.0);
+	float sheen = 0.0;
 	if (motif > 0.0 || visor > 0.0) {
-		float back = step(5.0, UV2.x);
-		vec2 q = vec2(UV2.x - 10.0 * back, UV2.y);
+		float code = floor((UV2.x + 5.0) / 10.0);          // 0 front, 1 back, 2/3 upper arms, 4/5 forearms, 6/7 shins
+		vec2 q = vec2(UV2.x - 10.0 * code, UV2.y);
 		float aa = max(fwidth(q.y), fwidth(q.x)) * 1.2 + 0.0002;
-		// (a triangle that runs from the front of the body to the back sweeps UV2.x through every value: nothing is drawn there)
+		// (a triangle that runs from one region to another sweeps UV2.x through every value: nothing is drawn there)
 		float whole = step(fwidth(UV2.x), 0.01);
 		float plate = coat * smoothstep(cloth_dark, cloth_dark * 2.5, lum) * whole;
-		float lw = 0.0013;
-		// the breast: an open ring, a diamond at its heart, a line of light falling from the gap, two ticks, two strokes
+		float lw = 0.0021;
+		float dark = 0.0;
+		float light = 0.0;
+		float front = 1.0 - step(0.5, code);
+		float back = span(code, 0.5, 1.5);
+		// ---- the breast: the house's mark
 		vec2 e = q - vec2(0.0, chest_y);
 		float rr = length(e);
-		float open = smoothstep(0.62, 0.78, -e.y / max(rr, 0.0001));
-		float d_ring = line_at(rr - 0.021, lw, aa) * (1.0 - open);
-		float d_ticks = line_at(e.y + 0.046, lw * 0.8, aa) * step(0.006, abs(e.x)) * step(abs(e.x), 0.017);
-		float d_strokes = line_at(e.y - 0.55 * abs(e.x) + 0.004, lw * 0.8, aa) * step(0.028, abs(e.x)) * step(abs(e.x), 0.052);
-		float l_stem = line_at(e.x, lw * 0.7, aa) * step(-0.074, e.y) * step(e.y, -0.011);
-		float l_heart = diamond(e, 0.0042, aa);
-		float front = 1.0 - back;
-		float dark = (d_ring + d_ticks + d_strokes) * front;
-		float light = (l_stem + l_heart) * front;
-		// the helm: one dark line over the crown, front to back
-		dark += line_at(q.x, lw * 0.9, aa) * step(visor_y + 0.03, q.y);
-		// the spine: a line of light, three dark-rimmed nodes
-		float in_back = back * step(back_span.x, q.y) * step(q.y, back_span.y);
-		light += line_at(q.x, lw * 0.7, aa) * in_back;
+		float open = smoothstep(0.62, 0.8, -e.y / max(rr, 0.0001));
+		float bd = ring_at(e, 0.034, lw, aa) * (1.0 - open);
+		bd += line_at(e.y + 0.062, lw * 0.8, aa) * span(abs(e.x), 0.009, 0.026);
+		bd += line_at(e.y - 0.55 * abs(e.x) + 0.012, lw * 0.8, aa) * span(abs(e.x), 0.044, 0.082);
+		bd += ring_at(vec2(abs(e.x) - 0.058, e.y + 0.03), 0.006, lw * 0.7, aa);
+		bd += line_at(abs(q.x) - 0.072, lw * 0.6, aa) * span(q.y, chest_y - 0.16, chest_y - 0.065);        // side panel lines
+		float bl = ring_at(e, 0.021, lw * 0.7, aa) + diamond(e, 0.0065, aa) + line_at(e.x, lw * 0.75, aa) * span(e.y, -0.105, -0.03);
+		dark += bd * front;
+		light += bl * front;
+		// ---- the helm: a dark line over the crown, a ring of light on the brow
+		dark += line_at(q.x, lw, aa) * step(visor_y + 0.045, q.y) * step(code, 1.5);
+		vec2 hb = q - vec2(0.0, visor_y + 0.032);
+		light += ring_at(hb, 0.0075, lw * 0.6, aa) * front;
+		// ---- the back: a ring, and the spine's line of light with its nodes
+		vec2 bk = q - vec2(0.0, back_span.y - 0.015);
+		dark += ring_at(bk, 0.032, lw, aa) * back * step(abs(q.x), 0.05) * step(0.004, abs(q.x));
+		light += ring_at(bk, 0.019, lw * 0.7, aa) * back;
+		light += line_at(q.x, lw * 0.75, aa) * back * span(q.y, back_span.x, back_span.y - 0.04);
 		for (int i = 0; i < 3; i++) {
-			vec2 nd = q - vec2(0.0, mix(back_span.x, back_span.y, 0.2 + 0.3 * float(i)));
-			dark += (diamond(nd, 0.0075, aa) - diamond(nd, 0.0048, aa)) * back;
+			vec2 nd = q - vec2(0.0, mix(back_span.x, back_span.y - 0.05, 0.12 + 0.36 * float(i)));
+			dark += (diamond(nd, 0.0095, aa) - diamond(nd, 0.006, aa)) * back;
 		}
+		// ---- pauldrons: a ring round a ring of light, a chevron under them
+		float arm = span(code, 1.5, 3.5);
+		vec2 pc = q - vec2(0.0, 0.034);
+		dark += (ring_at(pc, 0.019, lw, aa) + line_at(pc.y - 0.7 * abs(pc.x) - 0.03, lw * 0.8, aa) * step(abs(pc.x), 0.024)) * arm;
+		light += (ring_at(pc, 0.0105, lw * 0.7, aa) + diamond(pc, 0.0035, aa)) * arm;
+		dark += line_at(q.y - 0.088, lw * 0.6, aa) * arm;                                              // a panel break round the arm
+		// ---- forearms: a line of light between two dark strokes, a ring at the elbow end
+		float fore = span(code, 3.5, 5.5);
+		light += line_at(q.x, lw * 0.75, aa) * span(q.y, 0.04, 0.105) * fore;
+		dark += (line_at(abs(q.x) - 0.014, lw * 0.6, aa) * span(q.y, 0.05, 0.095) + ring_at(q - vec2(0.0, 0.026), 0.0085, lw * 0.7, aa)) * fore;
+		dark += line_at(q.y - 0.118, lw * 0.6, aa) * fore;
+		// ---- shins: a diamond under the knee, a line of light down the front
+		float shin = span(code, 5.5, 7.5);
+		light += line_at(q.x, lw * 0.75, aa) * span(q.y, 0.075, 0.175) * shin;
+		vec2 sd = q - vec2(0.0, 0.052);
+		dark += ((diamond(sd, 0.012, aa) - diamond(sd, 0.008, aa)) + line_at(abs(q.x) - 0.016, lw * 0.6, aa) * span(q.y, 0.09, 0.16)) * shin;
+		dark += line_at(q.y - 0.195, lw * 0.6, aa) * shin;
 		dark = clamp(dark, 0.0, 1.0) * motif * plate;
 		light = clamp(light, 0.0, 1.0) * motif * plate;
+		float breathe = mix(1.0, 0.8 + 0.2 * sin(TIME * 1.4), fx);
 		alb = mix(alb, motif_dark, dark);
 		metal = mix(metal, 0.85, dark);
-		r = mix(r, 0.38, dark);
-		alb = mix(alb, motif_light * 0.5, light);
-		glow += motif_light * motif_energy * light;
-		// the visor: the slot's own dark texels, lit
+		r = mix(r, 0.36, dark);
+		alb = mix(alb, glow_color * 0.5, light);
+		glow += glow_color * motif_energy * light * breathe;
+		// ---- the visor: the slot's own dark texels, lit
 		float slot = (1.0 - smoothstep(cloth_dark, cloth_dark * 3.0, lum)) * front * (1.0 - smoothstep(visor_half * 0.6, visor_half, abs(q.y - visor_y))) * step(abs(q.x), 0.06) * whole;
-		glow += visor_color * visor * slot;
-		alb = mix(alb, visor_color, clamp(slot * visor, 0.0, 1.0) * 0.6);
+		glow += glow_color * visor * slot * breathe;
+		alb = mix(alb, glow_color, clamp(slot * visor, 0.0, 1.0) * 0.6);
 		under *= 1.0 - clamp(slot * visor, 0.0, 1.0);
+		// ---- a sheen that passes up the plate every seven seconds
+		vec3 wp = (INV_VIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
+		float at = fract(TIME / 7.0) * 3.2 - 0.3;
+		float d_sh = (wp.y - at) * 8.0;
+		sheen = exp(-d_sh * d_sh) * fx * coat * smoothstep(cloth_dark, cloth_dark * 2.5, lum);
+		r = mix(r, r * 0.6, sheen);
+		glow += mix(vec3(1.0), glow_color, 0.35) * 0.07 * sheen;
 	}
 	ALBEDO = alb * tint.rgb;
 	ROUGHNESS = mix(r, 0.86, under);

@@ -19,28 +19,39 @@
 >   **197.5 MB -> 106.4 MB**; one suit 101.3 -> 90.1 MB; an extra suit worn costs about 2.7 MB instead of 16.
 > - `--oldlook` (or `FighterRig.old_look = true`) restores the whole-suit swap and the first weapon models.
 
-> **Finish pass (2026-11-27; the owner: "sleek clean armor with cool designs in it maybe led in face glowing").** Material
-> only: no mesh changed, the silhouette is the generated suit's. Sheets: `marketing/armor_finish_pass/`.
-> - **Plate.** The benchmark suit is no longer mirror-bright chrome. `ArmorParts.FINISH_COAT` (merged into the `crownless`
->   finish) coats every texel that is not undersuit in clean satin off-white, nearly non-metal, with only light dark wear
->   in the deepest creases and panel lines (`wear` 0.3; chipping and scuffs exist behind `wear_edge`, which is 0). The
->   undersuit stays dark; the hips' flex layer was darkened and made matte to sit with it.
-> - **Designs.** Inlaid in the plate by the shader, placed on the standing body (every part now carries UV2 = sideways
->   and height on the body, written by `tools/armor_split.gd`; `ArmorParts.BODY_MARKS` says where the breast, spine and
->   visor are on each body): the house's open ring on the breast in dark metal, a diamond at its heart and a line of
->   cold light falling from its gap, two ticks and two strokes; one dark line over the helm's crown; a line of light with
->   three dark-rimmed nodes down the spine. Nothing on pauldrons or greaves (in this projection a line there would not
->   follow the limb).
-> - **Visor.** The eye slot's own dark texels on the helm's front are lit cold white-cyan (`visor`, `visor_color`). It is
->   steady: `ArmorParts` has no per-frame hook, so it does not pulse with speech.
-> - **Tunables, all in `FINISH_COAT`:** `coat_color`, `coat_rough`, `coat_metal`, `wear`, `wear_edge`, `motif`,
->   `motif_dark`, `motif_light`, `motif_energy`, `visor`, `visor_color`. The shader is `src/fx/armor_part.gdshader`;
->   every new parameter is 0 by default, so the other suits are as they were.
-> - **`--chrome`** (or `ArmorParts.chrome = true` before a knight is dressed) puts the generated chrome back, all of it.
+> **Finish pass, second (2026-11-27; the owner: "paler grey, more detail like armor but still futuristic, stronger design
+> of shapes circles, logos, cyan and maybe pink with girl with a clean glow and effect, light, shine, smoke, air coming
+> out, no cloak").** Material and a few light effects; no mesh changed, the silhouette is the generated suit's. The
+> first finish pass (matte white, three small motifs) is superseded. Sheets: `marketing/armor_finish_pass/v2/`.
+> - **Plate.** `ArmorParts.FINISH_COAT` (merged into the `crownless` finish) coats every texel that is not undersuit in
+>   pale cool grey satin, a fifth metal, and draws the suit's own sculpted detail through it: its creases and panel
+>   seams dark (`wear` 0.85), its edges catching the light (`edge_shine`). Chipping and scuffs stay off (`wear_edge` 0).
+>   The undersuit and the hips' flex layer stay dark.
+> - **Designs**, drawn by the shader in dark metal and in lines of light. Every part carries UV2 written by
+>   `tools/armor_split.gd`: trunk and head by where they are on the standing body; upper arms, forearms and shins by
+>   where they are on the limb itself (round it and along it, from the bone), so a design there follows the limb in any
+>   pose. Breast: the house's mark (an open ring round a ring of light, a diamond, a line of light falling from the gap,
+>   ticks, strokes, two small rings, two side panel lines). Brow: a ring of light; crown: a dark line. Back: a ring
+>   round a ring of light, the spine's line of light with three nodes. Pauldrons: a ring round a ring of light over a
+>   chevron. Forearms: a line of light between dark strokes, a ring at the elbow end. Shins: a diamond under the knee
+>   and a line of light down the front. Thin dark panel breaks round each limb. `ArmorParts.BODY_MARKS` says where the
+>   breast, spine and visor are on each body.
+> - **One glow colour per body** (`ArmorParts.GLOW`): cyan on the male, pink on the female. The visor, every line of
+>   light, the hips' seam, the vents and the cast light all take it.
+> - **Live effects.** In the shader (`fx`): the lights breathe slowly, and a sheen passes up the plate every seven
+>   seconds. In `ArmorParts` (`_build_fx`): two small unshadowed lights (visor and breast, `FX_LIGHT`), and three vents
+>   (behind each shoulder and at the nape) leaking thin vapour, eight small particles each at most, a third of that when
+>   idle (`FX_VENT`); `ArmorParts.vent()` opens them for 0.9 s and `FighterRig.dodge`/`roll` call it. Reduce motion: no
+>   vents, no breathing, no sheen. Performance preset: no vents and no lights. Only while the benchmark breastplate is worn.
+> - **Tunables, all at the top of `src/chars/armor_parts.gd`:** `FINISH_COAT` (`coat_color`, `coat_rough`, `coat_metal`,
+>   `edge_shine`, `wear`, `wear_edge`, `motif`, `motif_dark`, `motif_energy`, `visor`), `GLOW`, `FX_LIGHT`,
+>   `FX_LIGHT_RANGE`, `FX_VENT`, `FX_VENT_ALPHA`. The shader is `src/fx/armor_part.gdshader`; every parameter of the
+>   refinish is 0 by default, so the other suits are as they were.
+> - **`--chrome`** (or `ArmorParts.chrome = true` before a knight is dressed) puts the generated chrome back: no coat, no
+>   designs, no visor light, no effects.
 > - Known: where the generated texture painted a near-black reflection onto a plate (two patches on the male abdomen)
->   the shader cannot tell it from undersuit and leaves it dark. There is no cloak on the skinned knight (the cape
->   exists only on the old procedural rig, `fighter_rig.gd`), so no pale cloak was added; the swatches only set the
->   heraldry colour, whose palest is "Bone".
+>   the shader cannot tell it from undersuit and leaves it dark. The designs are drawn at fixed places measured on these
+>   two bodies; they are not on the gauntlets' hands or the thighs. No cloak.
 
 > **Gap pass (2026-11-27).** All in `tools/armor_split.gd` (parts rebuilt) and `ArmorParts.FINISH`; no model was regenerated. Sheets: `marketing/armor_gap_pass/`.
 > - **The starting kit's bare hips: flex-armour, not plates.** The benchmark knights were generated with a bare black

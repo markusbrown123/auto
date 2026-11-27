@@ -36,22 +36,28 @@ const LINKED := {
 const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38, "rough_gain": 1.7, "rough_lift": 0.17, "metal_max": 0.72, "spec": 0.3,
 	"cloth": 1.0, "cloth_dark": 0.045, "tone": Color(1, 1, 1),
 	"coat": 0.0, "coat_color": Color(0.86, 0.84, 0.79), "coat_metal": 0.06, "coat_rough": 0.62, "wear": 0.0, "wear_edge": 1.0, "wear_color": Color(0.075, 0.07, 0.066),
-	"motif": 0.0, "visor": 0.0}
-## The benchmark suit's refinish (owner's reference, 2026-11-27): no longer mirror-bright chrome but SLEEK, CLEAN,
-## matte-to-satin off-white ceramic plate over the dark undersuit, with a few inlaid designs and a lit visor.
-## Material only; the meshes are as generated. Everything the owner may want nudged is here:
-##   coat_color    the plate: whiter (0.88, 0.87, 0.84), greyer (0.68, 0.68, 0.67), warmer (0.82, 0.77, 0.68). It is lit hard in the Armory and outdoors: much above 0.8 burns out
-##   coat_rough    0.45 satin .. 0.7 chalky;   coat_metal 0 .. 0.2
-##   wear          0 spotless .. 1 heavy: dark in the deepest creases and panel lines
+	"motif": 0.0, "visor": 0.0, "edge_shine": 0.0}
+## The benchmark suit's refinish (the owner, 2026-11-27: "paler grey, more detail like armor but still futuristic,
+## stronger design of shapes circles, logos, cyan and maybe pink with girl, with a clean glow and effect").
+## Material and a few light effects only; the meshes are as generated. Everything the owner may want nudged is here:
+##   coat_color    the plate, a pale cool grey: paler (0.78, 0.80, 0.83), darker (0.56, 0.58, 0.62), warmer (0.72, 0.70, 0.66).
+##                 It is lit hard in the Armory and in daylight: much above 0.8 burns out.
+##   coat_rough    0.35 polished .. 0.6 matte;   coat_metal 0 ceramic .. 0.6 steel;   edge_shine 0 .. 0.4 lit edges
+##   wear          0 none .. 1: how dark the suit's own creases and panel seams are drawn (its sculpted detail)
 ##   wear_edge     0 none .. 1: chipped edges, scuffs and mottling (off: the brief is clean)
-##   motif         0 none .. 1: the inlaid designs (breast emblem, crown line, spine line);  motif_dark their metal;
-##                 motif_light / motif_energy their lines of light
-##   visor         brightness of the lit eye slot (0 off);  visor_color its colour
+##   motif         0 none .. 1: the inlaid designs;  motif_dark their metal;  motif_energy how bright their lines of light
+##   visor         brightness of the lit eye slot (0 off)
+##   GLOW          every light on the suit, one colour per body: visor, lines, hip seam, vents, cast light
+##   FX_*          the live effects (cast light, vents)
 ## `--chrome` (or ArmorParts.chrome = true before a knight is dressed) puts the generated chrome back, all of it.
-const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.78, 0.765, 0.73), "coat_metal": 0.05, "coat_rough": 0.5, "wear": 0.3, "wear_edge": 0.0,
-	"wear_color": Color(0.11, 0.105, 0.1), "spec": 0.45,
-	"motif": 1.0, "motif_dark": Color(0.17, 0.16, 0.15), "motif_light": Color(0.55, 0.85, 1.0), "motif_energy": 1.6,
-	"visor": 4.5, "visor_color": Color(0.6, 0.92, 1.0)}
+const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.70, 0.72, 0.755), "coat_metal": 0.2, "coat_rough": 0.44, "edge_shine": 0.2,
+	"wear": 0.85, "wear_edge": 0.0, "wear_color": Color(0.085, 0.085, 0.09), "spec": 0.5,
+	"motif": 1.0, "motif_dark": Color(0.13, 0.13, 0.14), "motif_energy": 2.2, "visor": 4.5}
+const GLOW := {"m": Color(0.25, 0.9, 1.0), "f": Color(1.0, 0.3, 0.72)}
+const FX_LIGHT := 0.06         # energy of the two small lights the visor and the breast cast (0 off)
+const FX_LIGHT_RANGE := 0.9    # metres
+const FX_VENT := 0.3           # how much of the vents' full flow is idle wisp (0 none); a dodge or roll opens them fully for a moment
+const FX_VENT_ALPHA := 0.13    # how visible the vapour is
 ## Where the designs sit on each body (heights as a share of the body's height; printed by tools/armor_split.gd --v).
 const BODY_MARKS := {
 	"m": {"chest_y": 0.745, "back_span": Vector2(0.665, 0.825), "visor_y": 0.931, "visor_half": 0.011},
@@ -214,7 +220,144 @@ func wear(slot: String, suit: String) -> bool:
 	worn[slot] = suit
 	if slot == "legs":
 		_show_flex(suit == host)
+	if slot == "chest" or slot == "helm":
+		_show_fx()
 	return true
+
+# ---------------------------------------------------------------- live effects on the refinished suit
+## Light and air, kept small: two unshadowed lights (the visor's and the breast's, in the body's glow colour) and three
+## vents (behind each shoulder and at the nape) that leak a thin wisp of vapour and open for a moment on vent()
+## (FighterRig calls it on a dodge or a roll). Eight small particles a vent at most. No vents with reduced motion; neither
+## vents nor lights on the Performance preset. Only while the benchmark suit's breastplate is worn, and never with --chrome.
+var _fx: Array = []                 # every effect node
+var _vents: Array = []              # GPUParticles3D
+var _vent_gen := 0
+
+static func _setting(key: String, fallback: Variant) -> Variant:
+	var loop := Engine.get_main_loop()
+	var game: Node = (loop as SceneTree).root.get_node_or_null("Game") if loop is SceneTree else null
+	if game == null:
+		return fallback
+	var st = game.get("settings")
+	return st.get(key, fallback) if st is Dictionary else fallback
+
+func _bone(short: String) -> int:
+	for i: int in skel.get_bone_count():
+		var n := skel.get_bone_name(i)
+		if n == short or n.ends_with(":" + short) or n.ends_with("_" + short) or n == "mixamorig" + short:
+			return i
+	return -1
+
+## A node riding on a bone, placed at `at` in the skeleton's own rest space (the body 1 tall, facing +X).
+func _on_bone(short: String, at: Vector3, node: Node3D) -> bool:
+	var bi := _bone(short)
+	if bi < 0:
+		return false
+	var ba := BoneAttachment3D.new()
+	ba.bone_idx = bi
+	skel.add_child(ba)
+	ba.add_child(node)
+	node.transform = skel.get_bone_global_rest(bi).affine_inverse() * Transform3D(Basis.IDENTITY, at)
+	_fx.append(ba)
+	return true
+
+func _show_fx() -> void:
+	var on: bool = not chrome and _finish and worn.get("chest", "") == host
+	if on and _fx.is_empty():
+		_build_fx()
+	for n: Node3D in _fx:
+		n.visible = on
+
+func _build_fx() -> void:
+	var quality := int(_setting("quality", 1))
+	if quality <= 0:
+		return
+	var glow: Color = GLOW.get(body, GLOW.m)
+	var marks: Dictionary = BODY_MARKS.get(body, BODY_MARKS.m)
+	if FX_LIGHT > 0.0:
+		for spot: Array in [["Head", Vector3(0.11, float(marks.visor_y), 0.0)], ["Spine2", Vector3(0.14, float(marks.chest_y), 0.0)]]:
+			var l := OmniLight3D.new()
+			l.light_color = glow
+			l.light_energy = FX_LIGHT
+			l.omni_range = FX_LIGHT_RANGE
+			l.shadow_enabled = false
+			if not _on_bone(str(spot[0]), spot[1], l):
+				l.free()
+	if FX_VENT <= 0.0 or bool(_setting("reduce_motion", false)):
+		return
+	var span: Vector2 = marks.back_span
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3(-1.0, 0.9, 0.0)          # back and up, in the body's own space
+	mat.spread = 16.0
+	mat.initial_velocity_min = 0.16
+	mat.initial_velocity_max = 0.3
+	mat.gravity = Vector3(0, 0.22, 0)
+	mat.damping_min = 0.25
+	mat.damping_max = 0.5
+	mat.scale_min = 0.6
+	mat.scale_max = 1.0
+	var grow := Curve.new()
+	grow.add_point(Vector2(0, 0.35))
+	grow.add_point(Vector2(1, 1.0))
+	var grow_tex := CurveTexture.new()
+	grow_tex.curve = grow
+	mat.scale_curve = grow_tex
+	var fade := Gradient.new()
+	fade.set_color(0, Color(1, 1, 1, 0.0))
+	fade.add_point(0.18, Color(1, 1, 1, 1.0))
+	fade.set_color(fade.get_point_count() - 1, Color(1, 1, 1, 0.0))
+	var fade_tex := GradientTexture1D.new()
+	fade_tex.gradient = fade
+	mat.color_ramp = fade_tex
+	var puff := Gradient.new()
+	puff.set_color(0, Color(1, 1, 1, 1))
+	puff.set_color(1, Color(1, 1, 1, 0))
+	var puff_tex := GradientTexture2D.new()
+	puff_tex.gradient = puff
+	puff_tex.fill = GradientTexture2D.FILL_RADIAL
+	puff_tex.fill_from = Vector2(0.5, 0.5)
+	puff_tex.fill_to = Vector2(1.0, 0.5)
+	puff_tex.width = 32
+	puff_tex.height = 32
+	var draw := StandardMaterial3D.new()
+	draw.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	draw.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	draw.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	draw.vertex_color_use_as_albedo = true
+	draw.albedo_texture = puff_tex
+	draw.albedo_color = Color(glow.lerp(Color(1, 1, 1), 0.55), FX_VENT_ALPHA)
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.085, 0.085)
+	quad.material = draw
+	for at: Vector3 in [Vector3(-0.07, span.y - 0.005, 0.075), Vector3(-0.07, span.y - 0.005, -0.075), Vector3(-0.06, span.y + 0.035, 0.0)]:
+		var g := GPUParticles3D.new()
+		g.amount = 8
+		g.lifetime = 1.1
+		g.randomness = 0.6
+		g.local_coords = false
+		g.process_material = mat
+		g.draw_pass_1 = quad
+		g.amount_ratio = FX_VENT
+		g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		g.visibility_aabb = AABB(Vector3(-2, -2, -2), Vector3(4, 4, 4))
+		if _on_bone("Spine2", at, g):
+			_vents.append(g)
+		else:
+			g.free()
+
+## The vents open fully for a moment (a dodge, a roll), then settle back to their idle wisp.
+func vent(seconds: float = 0.9) -> void:
+	if _vents.is_empty() or not is_instance_valid(skel) or not skel.is_inside_tree():
+		return
+	_vent_gen += 1
+	var gen := _vent_gen
+	for g: GPUParticles3D in _vents:
+		g.amount_ratio = 1.0
+	skel.get_tree().create_timer(seconds).timeout.connect(func() -> void:
+		if gen == _vent_gen:
+			for g2: GPUParticles3D in _vents:
+				if is_instance_valid(g2):
+					g2.amount_ratio = FX_VENT)
 
 # ---------------------------------------------------------------- flex armour over the host suit's hips
 ## The benchmark suit leaves the pelvis as bare black undersuit. Where its legs are worn, a copy of exactly that region
@@ -278,6 +421,8 @@ func _show_flex(on: bool) -> void:
 		for k: StringName in _params:
 			if k != &"tint":
 				_flex_mat.set_shader_parameter(k, _params[k])
+		if not chrome:
+			_flex_mat.set_shader_parameter("seam", GLOW.get(body, GLOW.m))
 		flex.set_surface_override_material(0, _flex_mat)
 	flex.visible = true
 
@@ -292,6 +437,8 @@ func _own_material(suit: String) -> ShaderMaterial:
 	var marks: Dictionary = BODY_MARKS.get(body, {})
 	for k2: String in marks:
 		m.set_shader_parameter(k2, marks[k2])
+	m.set_shader_parameter("glow_color", GLOW.get(body, GLOW.m))
+	m.set_shader_parameter("fx", 0.0 if _setting("reduce_motion", false) else 1.0)
 	for k3: StringName in _params:
 		if k3 != &"tint":
 			m.set_shader_parameter(k3, _params[k3])
@@ -319,6 +466,11 @@ func remove() -> void:
 	if flex:
 		flex.queue_free()
 		flex = null
+	for n: Node3D in _fx:
+		if is_instance_valid(n):
+			n.queue_free()
+	_fx.clear()
+	_vents.clear()
 	if under:
 		under.queue_free()
 		under = null

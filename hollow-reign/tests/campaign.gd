@@ -175,10 +175,11 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 		var said := ""
 		for l: Label in m.find_children("*", "Label", true, false):
 			said += l.text + " "
-		ok(said.contains("THE REIGN ENDURES") and not said.to_lower().contains("generation") and not said.to_lower().contains("heir"), "the defeat screen says nothing of the lineage")
+		ok(said.contains("THE REIGN ENDURES") and said.contains("Inheritance Engine brings you back") and not said.to_lower().contains("generation") and not said.to_lower().contains("heir") and Game.just_died,
+			"the defeat screen says what it is (the Engine restores the one on the road) and nothing of the lineage")
 		press("Return to sanctuary")
 		await until(func(): return m.current is Sanctuary, 10.0)
-		ok(m.current is Sanctuary, "and the knight is back at the sanctuary")
+		ok(m.current is Sanctuary and not Game.just_died and Story.has_scene("rebirth_%d" % clampi(int(Game.profile.deaths) - 1, 0, 5)), "and the knight is back at the sanctuary, where Lyra says so (a rebirth line)")
 	# ---- the second meeting, for real
 	Game.start_run("throne")
 	Game.run.stage = 6

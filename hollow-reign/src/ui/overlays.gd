@@ -344,7 +344,9 @@ static func death(parent: Node, foe: Dictionary, summary: Dictionary, done: Call
 	v.custom_minimum_size.x = 640
 	v.add_child(_centered("THE REIGN ENDURES", 42, UI.BLOOD.lightened(0.18), "title"))
 	v.add_child(_centre(UI.ornament(420, UI.CRIMSON)))
-	v.add_child(_centered("%s stands. You wake in the sanctuary, as you always do." % foe.name, 21, UI.SILVER))
+	# an ordinary defeat, in every generation: the Inheritance Engine restores the one on the road. It is not one of
+	# the family's two falls, and nothing here speaks of the lineage.
+	v.add_child(_centered("%s stands. The Inheritance Engine brings you back to the sanctuary, as it always does." % foe.name, 21, UI.SILVER))
 	v.add_child(UI.spacer(4))
 	var kept := "Nothing was lost."
 	if int(summary.get("xp", 0)) > 0 or not summary.get("found", []).is_empty():

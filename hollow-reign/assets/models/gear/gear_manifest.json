@@ -866,5 +866,216 @@
   "verts_lod": 1645,
   "bytes_lod": 67232,
   "rig_scale": 1.15
+ },
+ "wayfarer_h": {
+  "class": "sword",
+  "name": "Wayfarer (hybrid)",
+  "role": "balanced",
+  "rarity": "common",
+  "basic": true,
+  "blade": 0.8,
+  "tip": 0.9186,
+  "pommel": 0.1234,
+  "grip_clear": 0.1428,
+  "guard_span": 0.2321,
+  "hands": 1.5,
+  "lo": [
+   -0.1161,
+   -0.1234,
+   -0.0308
+  ],
+  "hi": [
+   0.1161,
+   0.9186,
+   0.0308
+  ],
+  "materials": [
+   "blade",
+   "blade_groove",
+   "edge",
+   "engrave_rule",
+   "hilt"
+  ],
+  "hybrid": true,
+  "base": "wayfarer",
+  "hilt_source": "hilts/hilt_wayfarer.glb",
+  "tris": 5962,
+  "tris_lod": 5322,
+  "verts": 4225,
+  "bytes": 206836,
+  "parts": {
+   "hilt0": {
+    "tris": 4938,
+    "verts": 3184,
+    "bytes": 162860
+   },
+   "blade0": {
+    "tris": 1024,
+    "verts": 1041,
+    "bytes": 42832,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 17080
+   },
+   "blade1": {
+    "tris": 1024,
+    "verts": 1041,
+    "bytes": 43976,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 18208
+   },
+   "blade2": {
+    "tris": 1312,
+    "verts": 1409,
+    "bytes": 58464,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 18208
+   },
+   "blade3": {
+    "tris": 1312,
+    "verts": 1409,
+    "bytes": 57472,
+    "tris_lod": 384,
+    "verts_lod": 387,
+    "bytes_lod": 18208
+   },
+   "rings2": {
+    "tris": 192,
+    "verts": 244,
+    "bytes": 10492,
+    "tris_lod": 96,
+    "verts_lod": 148,
+    "bytes_lod": 6852
+   },
+   "rings3": {
+    "tris": 384,
+    "verts": 464,
+    "bytes": 18692,
+    "tris_lod": 192,
+    "verts_lod": 300,
+    "bytes_lod": 12296
+   }
+  },
+  "blade_tint": [
+   0.66,
+   0.645,
+   0.62
+  ],
+  "blade_rough_max": 0.42,
+  "default_mod": {
+   "blade_tier": 1,
+   "grip_tier": 0,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
+ },
+ "eternal_edge_h": {
+  "class": "sword",
+  "name": "Eternal Edge (hybrid)",
+  "role": "balanced",
+  "rarity": "legendary",
+  "blade": 0.88,
+  "tip": 1.0452,
+  "pommel": 0.1391,
+  "grip_clear": 0.108,
+  "guard_span": 0.1279,
+  "hands": 1,
+  "emissive": true,
+  "lo": [
+   -0.0639,
+   -0.1391,
+   -0.0207
+  ],
+  "hi": [
+   0.0639,
+   1.0452,
+   0.0207
+  ],
+  "materials": [
+   "blade",
+   "edge",
+   "gold",
+   "glow",
+   "engrave_wave",
+   "hilt"
+  ],
+  "hybrid": true,
+  "base": "eternal_edge",
+  "hilt_source": "hilts/hilt_eternal.glb",
+  "tris": 6190,
+  "tris_lod": 5278,
+  "verts": 4809,
+  "bytes": 227464,
+  "parts": {
+   "hilt0": {
+    "tris": 4862,
+    "verts": 3382,
+    "bytes": 168288
+   },
+   "blade0": {
+    "tris": 1040,
+    "verts": 1059,
+    "bytes": 43552,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 18180
+   },
+   "blade1": {
+    "tris": 1040,
+    "verts": 1059,
+    "bytes": 44692,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19312
+   },
+   "blade2": {
+    "tris": 1328,
+    "verts": 1427,
+    "bytes": 59176,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19312
+   },
+   "blade3": {
+    "tris": 1328,
+    "verts": 1427,
+    "bytes": 59176,
+    "tris_lod": 416,
+    "verts_lod": 415,
+    "bytes_lod": 19312
+   },
+   "rings2": {
+    "tris": 192,
+    "verts": 244,
+    "bytes": 10504,
+    "tris_lod": 96,
+    "verts_lod": 148,
+    "bytes_lod": 6856
+   },
+   "rings3": {
+    "tris": 384,
+    "verts": 512,
+    "bytes": 20232,
+    "tris_lod": 192,
+    "verts_lod": 296,
+    "bytes_lod": 12176
+   }
+  },
+  "blade_tint": [
+   0.72,
+   0.68,
+   0.62
+  ],
+  "blade_rough_max": 0.42,
+  "default_mod": {
+   "blade_tier": 2,
+   "grip_tier": 0,
+   "ore": "steel",
+   "sharpened": true
+  },
+  "rig_scale": 1.15
  }
 }

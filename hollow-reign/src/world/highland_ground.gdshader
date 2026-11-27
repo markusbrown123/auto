@@ -62,7 +62,7 @@ void fragment() {
 	float rl = mix(lum(texture(rock_tex, wpos.xy * 0.085).rgb), lum(texture(rock_tex, wpos.zy * 0.085).rgb), wx);
 	// beds: thin, uneven, and broken up by the stone's own grain rather than drawn over it
 	float bed = wpos.y * 0.9 + n2 * 3.0 + n1 * 14.0;
-	float strata = smoothstep(0.2, 0.8, fract(bed)) * (1.0 - smoothstep(0.86, 1.0, fract(bed)));
+	float strata = 0.5 + 0.5 * sin(bed * 6.2832);
 	strata = mix(strata, 0.5 + 0.5 * sin(wpos.y * 5.3 + n3 * 4.0), 0.3);
 	vec3 rock = mix(rock_a, rock_b, clamp(rl * 1.7 - 0.12 + (strata - 0.5) * 0.24 + (n3 - 0.5) * 0.2, 0.0, 1.0));
 	rock *= 0.8 + 0.4 * n2;

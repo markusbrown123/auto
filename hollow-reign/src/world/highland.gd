@@ -1,8 +1,9 @@
 class_name Highland
 extends RefCounted
 ## The high road: a windswept headland of grass and heather above the sea, a worn path that climbs it in
-## switchbacks, and at the top the outer gate of the old capital, the Ring-Gate, a broken stone ring taller than
-## anything else in the kingdom, with the stepped spires of the citadel far behind it.
+## switchbacks, and at the top the outer gate of the old capital, the Ring-Gate: one engineered ring of pale ceramic
+## taller than anything else in the kingdom, with the towers of the citadel far behind it. The land is natural; what
+## is built on it is the work of the Everbound, plate and alloy and light, and the sky is not Earth's.
 ##
 ## Everything is made here. The ground is a height field built once and cached: a calm crown for the road, two rock
 ## steps across the climb, tors on the moor, and on the east a banded sea cliff with a shelf and a surf line at its
@@ -35,7 +36,8 @@ const MASK_W := 256.0
 const MASK_L := 512.0
 const MASK_PX := 2.0              # texels a metre
 const GATE_AT := Vector3(0, 0, -21.0)
-const GATE_YAW := 90.0             # the gatehouse model's doors are on its X side
+const GATE_YAW := -90.0            # the gate model's doors are on its X side
+const GATE_TALL := 14.5            # the whole gate model; its door is about two thirds of that
 
 ## The road, from its foot to the court (x, z). The middle of it is the climb.
 const ROAD := [[-20, 500], [-18, 470], [-8, 432], [8, 398], [6, 360], [-12, 322], [-20, 284], [-8, 250], [16, 228],
@@ -53,9 +55,9 @@ const SEASONS := [
 	{"sky": "#2a5798", "horizon": "#f2c58a", "fog": "#cfb596", "fog_d": 0.00028, "sun": "#ffd49a", "sun_e": 3.5, "sun_rot": Vector3(-15, 80, 0),
 		"amb": "#6c84aa", "amb_e": 0.72, "fill": 0.2, "exp": 0.92, "sat": 1.1, "con": 1.12,
 		"grass_a": "#2c5a20", "grass_b": "#5c7c2a", "heather": "#75507e", "heather_amt": 1.0, "straw": "#b8a24c", "dry": 0.1, "snow": 0.0,
-		"rock_a": "#2a2826", "rock_b": "#857c6e", "earth": "#4a3a26", "wet": 0.5,
+		"rock_a": "#2a2928", "rock_b": "#7e7c78", "earth": "#4a3a26", "wet": 0.5,
 		"cloud": 0.5, "cloud_lit": "#fff0d6", "cloud_dark": "#646a84", "cloud_shadow": 0.5,
-		"far_lit": "#8c8a7a", "far_shade": "#3c4e6c", "haze": "#c8bca8", "rim": "#ffdf9c",
+		"far_lit": "#8c8a7a", "far_shade": "#3c4e6c", "haze": "#a9b0bd", "rim": "#ffdf9c",
 		"deep": "#0d2a3a", "shelf": "#2a6c6c", "shafts": 0.2,
 		"wind": 1.0, "seam": 0.25, "weather": "", "wear": 1.0, "whole": true},
 	{"sky": "#18224a", "horizon": "#d8763c", "fog": "#4c4a60", "fog_d": 0.00045, "sun": "#ff8e4a", "sun_e": 2.6, "sun_rot": Vector3(-7, 208, 0),
@@ -74,6 +76,14 @@ const SEASONS := [
 		"far_lit": "#aab8c8", "far_shade": "#2e3c52", "haze": "#93a2b4", "rim": "#ffffff",
 		"deep": "#0b1c28", "shelf": "#224852", "shafts": 0.1,
 		"wind": 0.6, "seam": 6.0, "weather": "snow", "wear": 0.6, "whole": false},
+]
+## The sky in each generation: the colours of the planet, how strongly it and the arc, aurora, stars and falling
+## trails show, and the colour of the road's slabs. I serene; II hazy amber, with debris coming down; III cold, the
+## orbital structure lit.
+const SKY := [
+	{"planet": "#f6ead6", "band": "#b98f78", "planet_e": 0.95, "arc": 1.0, "aurora": 0.16, "stars": 0.5, "trails": 0.0, "slab": "#a6aaa8"},
+	{"planet": "#f0b98a", "band": "#9a5a48", "planet_e": 0.75, "arc": 0.5, "aurora": 0.08, "stars": 0.6, "trails": 0.9, "slab": "#7c7772"},
+	{"planet": "#d6e2f0", "band": "#8a9cb4", "planet_e": 0.85, "arc": 1.0, "aurora": 0.5, "stars": 0.9, "trails": 0.0, "slab": "#98a0a8"},
 ]
 
 static var _h := PackedFloat32Array()       # the height field, row by row along z
@@ -320,25 +330,31 @@ static func _road_mask() -> ImageTexture:
 	var l := int(MASK_L * MASK_PX)
 	var px := PackedByteArray()
 	px.resize(w * l)
-	var reach := 5                # texels: 2.5 m
+	var rg := PackedByteArray()          # red: how near the middle of the road; green: where the slab joints fall along it
+	rg.resize(w * l * 2)
+	var reach := 9
 	for s in range(0, _road.size()):
 		var c := _road[s]
-		# the road is wider and more broken where it climbs, and opens out as it reaches the court
-		var half := 1.35 + 1.6 * smoothstep(34.0, 8.0, c.y)
+		# the road is wider where it climbs, and opens out as it reaches the court
+		var half := 1.4 + 1.6 * smoothstep(34.0, 8.0, c.y)
 		var cx := (c.x - MASK_X0) * MASK_PX
 		var cz := (c.y - MASK_Z0) * MASK_PX
-		for dz in range(-reach - 4, reach + 5):
-			for dx in range(-reach - 4, reach + 5):
+		# a joint every three metres of road: a wave that peaks on each joint, so it can be filtered
+		var joint := int(255.0 * absf(fposmod(float(s) * 0.5 / 3.0, 1.0) - 0.5) * 2.0)
+		for dz in range(-reach, reach + 1):
+			for dx in range(-reach, reach + 1):
 				var x := int(cx) + dx
 				var z := int(cz) + dz
 				if x < 0 or z < 0 or x >= w or z >= l:
 					continue
 				var d := Vector2(float(x) + 0.5 - cx, float(z) + 0.5 - cz).length() / MASK_PX
-				var val := int(255.0 * clampf(1.0 - (d - half * 0.55) / (half * 0.9), 0.0, 1.0))
+				var val := int(255.0 * clampf(1.0 - d / (half * 1.45), 0.0, 1.0))
 				if val > px[z * w + x]:
 					px[z * w + x] = val
+					rg[(z * w + x) * 2] = val
+					rg[(z * w + x) * 2 + 1] = joint
 	_mask_px = px
-	var img := Image.create_from_data(w, l, false, Image.FORMAT_R8, px)
+	var img := Image.create_from_data(w, l, false, Image.FORMAT_RG8, rg)
 	_mask = ImageTexture.create_from_image(img)
 	return _mask
 
@@ -425,8 +441,8 @@ static func _tex(path: String) -> Texture2D:
 ## Fills an Arena that has made its sky, sun and floor. Called by Arena._layout_highland.
 static func build(a: Arena) -> void:
 	_ensure()
-	var st := {"kept": [], "ruin": [], "woken": [], "fires": [], "shared": [], "sunlit": []}
-	# the arena's square of paving becomes the round court at the gate, in the Courtyard's own stone
+	var st := {"kept": [], "ruin": [], "woken": [], "fires": [], "shared": [], "sunlit": [], "lamps": [], "lights": []}
+	# the arena's square of paving becomes the round pad at the gate, in the makers' own plate
 	for c in a.get_children():
 		if c is MeshInstance3D and (c as MeshInstance3D).mesh is PlaneMesh:
 			var disc := CylinderMesh.new()
@@ -437,19 +453,7 @@ static func build(a: Arena) -> void:
 			disc.rings = 1
 			(c as MeshInstance3D).mesh = disc
 			(c as MeshInstance3D).position = Vector3(0, -0.13, -4.0)
-			if ResourceLoader.exists("res://assets/textures/floor_courtyard.jpg"):
-				var fm := StandardMaterial3D.new()
-				fm.albedo_texture = load("res://assets/textures/floor_courtyard.jpg")
-				fm.albedo_color = Color(0.62, 0.6, 0.57)
-				fm.uv1_triplanar = true
-				fm.uv1_world_triplanar = true
-				fm.uv1_scale = Vector3.ONE * 0.22
-				fm.roughness = 0.8
-				fm.metallic_specular = 0.3
-				if ResourceLoader.exists("res://assets/textures/floor_courtyard_n.png"):
-					fm.normal_enabled = true
-					fm.normal_texture = load("res://assets/textures/floor_courtyard_n.png")
-				(c as MeshInstance3D).material_override = fm
+			(c as MeshInstance3D).material_override = built(Color("#aeb2b0"), 0.2, 0.5, 0.16)
 		elif c is MeshInstance3D and (c as MeshInstance3D).mesh is TorusMesh:
 			(c as MeshInstance3D).visible = false      # no duelling ring painted on a road
 	a.sun.directional_shadow_max_distance = 85.0
@@ -475,8 +479,6 @@ static func build(a: Arena) -> void:
 	ground.set_shader_parameter("turf_tex", _tex("res://assets/textures/floor_blackwood.jpg"))
 	ground.set_shader_parameter("turf_n", _tex("res://assets/textures/floor_blackwood_n.png"))
 	ground.set_shader_parameter("rock_tex", _tex("res://assets/textures/floor_deep.jpg"))
-	ground.set_shader_parameter("sett_tex", _tex("res://assets/textures/floor_courtyard.jpg"))
-	ground.set_shader_parameter("sett_n", _tex("res://assets/textures/floor_courtyard_n.png"))
 	ground.set_shader_parameter("sea_level", SEA)
 	var land := MeshInstance3D.new()
 	land.name = "HLGround"
@@ -534,6 +536,7 @@ static func build(a: Arena) -> void:
 		st.clouds.append(cloud)
 		st.sunlit.append(cloud)
 	st["cloud"] = st.clouds[0]
+	_sky(a, st)
 	_ranges(a, st)
 	_shafts(a, st)
 	_grass(a, st)
@@ -838,7 +841,7 @@ static func _ranges(a: Arena, st: Dictionary) -> void:
 		var crest := FastNoiseLite.new()
 		crest.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
 		crest.frequency = 1.0
-		crest.fractal_octaves = 4
+		crest.fractal_octaves = 2
 		var sf := SurfaceTool.new()
 		sf.begin(Mesh.PRIMITIVE_TRIANGLES)
 		# [radius, air, height, from, to (degrees; 0 is behind the gate, positive toward the sea), seed, snow on the tops]
@@ -851,10 +854,10 @@ static func _ranges(a: Arena, st: Dictionary) -> void:
 				var u := float(i) / float(n)
 				var az := deg_to_rad(lerpf(float(layer[3]), float(layer[4]), u))
 				var env := pow(sin(u * PI), 0.55)
-				var ridged := 1.0 - absf(crest.get_noise_2d(az * 3.2, float(layer[5])))
+				var ridged := 1.0 - absf(crest.get_noise_2d(az * 1.5, float(layer[5])))
 				var top := float(layer[2]) * env * (0.3 + 0.7 * ridged * ridged) * (0.75 + 0.5 * crest.get_noise_2d(az * 0.9 + 10.0, float(layer[5])))
 				var dir := Vector3(sin(az), 0, -cos(az))
-				var wob := crest.get_noise_2d(az * 9.0, float(layer[5]) + 5.0)
+				var wob := crest.get_noise_2d(az * 4.0, float(layer[5]) + 5.0)
 				rows.append([
 					RING_C * Vector3(1, 0, 1) + dir * radius + Vector3(0, SEA + top, 0),
 					RING_C * Vector3(1, 0, 1) + dir * (radius - top * (0.55 + 0.35 * wob)) + Vector3(0, SEA + top * (0.5 + 0.2 * wob), 0),
@@ -902,87 +905,239 @@ static func _shafts(a: Arena, st: Dictionary) -> void:
 	st["shaft"] = mat
 	st.sunlit.append(mat)
 
-# ================================================================ the Ring-Gate
-## The Ring-Gate: forty stones in a ring, an arc of them gone, a seam of something that is not stone set into the
-## inner face; and so that it has form from a long way off, teeth standing out of its rim, a plinth under each foot,
-## and in the first generation the long banners of the house on it and watch-fires on its shoulders.
-static func _ring(a: Arena, st: Dictionary) -> StandardMaterial3D:
-	var stone := Look.stone(Color("#8d877b"), 0.07, 0.9, "ringgate")
-	stone.disable_fog = true          # the landmark is drawn by its own light and shadow, not by the haze
-	var block := BoxMesh.new()
-	block.size = Vector3(TAU * (RING_R + RING_THICK * 0.5) / RING_BLOCKS * 0.97, RING_THICK, RING_DEEP)
-	var tooth := BoxMesh.new()
-	tooth.size = Vector3(block.size.x * 0.56, 4.4, RING_DEEP * 1.12)
-	var rng := RandomNumberGenerator.new()
-	rng.seed = 97
-	var xf: Array = []
-	var lamps: Array = []
-	var teeth: Array = []
-	var arc: Array = []           # the stones that stand in the first generation and are down by the second
-	var arc_lamps: Array = []
-	var arc_teeth: Array = []
-	var fallen: Array = []
-	for i in RING_BLOCKS:
-		var ang := TAU * (float(i) + 0.5) / RING_BLOCKS
-		var gone := ang > BREAK_FROM and ang < BREAK_TO
-		var r := RING_R + rng.randf_range(-0.5, 0.5)
-		var basis := Basis(Vector3(0, 0, 1), ang)
-		var out := Vector3(sin(ang), -cos(ang), 0)
-		var at := RING_C + out * r + Vector3(0, 0, rng.randf_range(-0.35, 0.35))
-		var sc := Vector3(1.0, rng.randf_range(0.94, 1.05), rng.randf_range(0.92, 1.06))
-		(arc if gone else xf).append(Transform3D(basis.scaled(sc), at))
-		if rng.randf() < 0.8:
-			(arc_lamps if gone else lamps).append(Transform3D(basis, RING_C + out * (RING_R - RING_THICK * 0.5 - 0.05) + Vector3(0, 0, RING_DEEP * 0.5 - 0.6)))
-		if i % 2 == 0:
-			(arc_teeth if gone else teeth).append(Transform3D(basis, RING_C + out * (RING_R + RING_THICK * 0.5 + 1.6)))
-	# what came down lies east of the court, where the ground breaks toward the cliff
-	for f: Array in [[38.0, -14.0, 0.5, 0.3], [47.0, -2.0, 1.1, -0.4], [33.0, 4.0, 2.0, 0.7], [52.0, -22.0, 0.2, 1.3]]:
-		var p := on_ground(float(f[0]), float(f[1]), 2.2)
-		fallen.append(Transform3D(Basis.from_euler(Vector3(float(f[3]) * 0.5, float(f[2]), float(f[3]))).scaled(Vector3.ONE * 0.9), p))
-	var seam := Look.glow(Color("#5fe0c8"), 0.5)
-	seam.albedo_color = Color(0.08, 0.1, 0.1)
-	var strip := BoxMesh.new()
-	strip.size = Vector3(block.size.x * 0.7, 1.9, 0.7)
-	_batch(a, "HLRing", block, xf, stone, true)
-	_batch(a, "HLRingArc", block, arc, stone, true)
-	_batch(a, "HLRingFallen", block, fallen, stone, true)
-	_batch(a, "HLRingTeeth", tooth, teeth, stone, false)
-	st.kept.append(_batch(a, "HLRingTeethArc", tooth, arc_teeth, stone, false))
-	_batch(a, "HLSeam", strip, lamps, seam, false)
-	_batch(a, "HLSeamArc", strip, arc_lamps, seam, false)
-	# the plinths: where the ring goes into the ground it stands on something
-	var feet: Array = []
-	var cloth: Array = []
-	var scars: Array = []
-	for sx: float in [-1.0, 1.0]:
-		var foot := Vector3(sx * 35.0, 0, RING_C.z)
-		feet.append([Vector3(23.0, 5.0, 16.0), on_ground(foot.x, foot.z, 1.5)])
-		feet.append([Vector3(20.0, 5.0, 14.0), on_ground(foot.x, foot.z, 6.0), Vector3(0, 0, sx * 5.0)])
-		feet.append([Vector3(16.5, 6.0, 12.5), on_ground(foot.x, foot.z, 11.0), Vector3(0, 0, sx * 12.0)])
-		for fin: float in [-7.5, 0.0, 7.5]:
-			feet.append([Vector3(2.0, 13.0, 2.2), on_ground(foot.x + fin, foot.z, 6.5) + Vector3(0, 0, 7.6), Vector3(-6.0, 0, 0)])
-		feet.append([Vector3(5.0, 22.0, 4.0), on_ground(sx * 27.5, RING_C.z + 5.5, 9.0), Vector3(0, 0, sx * -4.0)])
-		# the house's colours, the height of the gatehouse twice over
-		cloth.append([Vector3(3.6, 11.0, 0.25), on_ground(sx * 38.0, RING_C.z, 7.0) + Vector3(0, 0, 8.3)])
-		a.fire(Vector3(sx * 36.0, 15.2, RING_C.z + 5.0), 3.0, 34.0, false)
-	_solid(a, "HLRingFeet", feet, stone, true)
-	st.kept.append(_solid(a, "HLRingCloth", cloth, _cloth_mat(), false))
-	# where the arc came away: the timber the masons left when they gave up on mending it
-	var timber := Look.flat(Color("#2a2119"), 1.0)
-	for ang: float in [BREAK_FROM - 0.03, BREAK_TO + 0.03]:
-		var out := Vector3(sin(ang), -cos(ang), 0)
-		var c := RING_C + out * RING_R
-		for k in 5:
-			scars.append([Vector3(0.7, 17.0, 0.7), c + Vector3((k - 2) * 2.8, -1.0, RING_DEEP * 0.5 + 1.2), Vector3(0, 0, (k - 2) * 3.0)])
-		for k in 3:
-			scars.append([Vector3(13.0, 0.6, 0.9), c + Vector3(0, -7.0 + k * 6.0, RING_DEEP * 0.5 + 1.4), Vector3(0, 0, rad_to_deg(ang) * 0.1 + (k - 1) * 6.0)])
-	st.ruin.append(_solid(a, "HLRingScars", scars, timber, false))
-	return seam
+# ================================================================ what was built here
+# Nothing on this road is masonry. The people who made the Ring-Gate worked in pale ceramic and alloy, cut to the
+# millimetre and laid in panels; what they built is still square where it stands. These are the materials and the
+# few shapes all of it is made from.
 
-static func _cloth_mat() -> StandardMaterial3D:
-	var m := Look.flat(Color("#7a1c16"), 1.0)
-	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+## Panel lines: a sheet cut into rectangular plates, each a slightly different tone, with a groove between them.
+## Returns [albedo, normal].
+static func _panels() -> Array:
+	if Look._cache.has("highland_panels"):
+		return Look._cache["highland_panels"]
+	var size := 256
+	var tone := Image.create(size, size, false, Image.FORMAT_RGB8)
+	var high := Image.create(size, size, false, Image.FORMAT_RGB8)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 404
+	var todo: Array = [Rect2i(0, 0, size, size)]
+	while not todo.is_empty():
+		var r: Rect2i = todo.pop_back()
+		var big := maxi(r.size.x, r.size.y)
+		if big > 96 or (big > 40 and rng.randf() < 0.6):
+			if r.size.x >= r.size.y:
+				var cut := int(r.size.x * rng.randf_range(0.35, 0.65))
+				todo.append(Rect2i(r.position, Vector2i(cut, r.size.y)))
+				todo.append(Rect2i(r.position + Vector2i(cut, 0), Vector2i(r.size.x - cut, r.size.y)))
+			else:
+				var cut2 := int(r.size.y * rng.randf_range(0.35, 0.65))
+				todo.append(Rect2i(r.position, Vector2i(r.size.x, cut2)))
+				todo.append(Rect2i(r.position + Vector2i(0, cut2), Vector2i(r.size.x, r.size.y - cut2)))
+			continue
+		var v := rng.randf_range(0.8, 1.0)
+		tone.fill_rect(r, Color(v, v, v))
+		high.fill_rect(r, Color(1, 1, 1))
+		# the groove along two sides of every plate (its neighbours draw the other two; the sheet tiles)
+		tone.fill_rect(Rect2i(r.position, Vector2i(r.size.x, 2)), Color(0.42, 0.42, 0.42))
+		tone.fill_rect(Rect2i(r.position, Vector2i(2, r.size.y)), Color(0.42, 0.42, 0.42))
+		high.fill_rect(Rect2i(r.position, Vector2i(r.size.x, 2)), Color(0, 0, 0))
+		high.fill_rect(Rect2i(r.position, Vector2i(2, r.size.y)), Color(0, 0, 0))
+	high.bump_map_to_normal_map(3.0)
+	tone.generate_mipmaps()
+	high.generate_mipmaps()
+	var out := [ImageTexture.create_from_image(tone), ImageTexture.create_from_image(high)]
+	Look._cache["highland_panels"] = out
+	return out
+
+## A built surface: `metal` 0 is matte ceramic, towards 1 brushed alloy. `scale` is panel sheets a metre.
+static func built(tint: Color, metal: float, rough: float, scale: float, far: bool = false) -> StandardMaterial3D:
+	var key := "hlbuilt%s%.2f%.2f%.3f%s" % [tint.to_html(), metal, rough, scale, far]
+	if Look._cache.has(key):
+		return Look._cache[key]
+	var tex := _panels()
+	var m := StandardMaterial3D.new()
+	m.albedo_color = tint
+	m.albedo_texture = tex[0]
+	m.normal_enabled = true
+	m.normal_texture = tex[1]
+	m.normal_scale = 0.8
+	m.metallic = metal
+	m.metallic_specular = 0.45
+	m.roughness = rough
+	m.uv1_triplanar = true
+	m.uv1_world_triplanar = true
+	m.uv1_scale = Vector3.ONE * scale
+	m.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	m.disable_fog = far               # the landmarks are drawn by their own light and shadow, not by the haze
+	Look._cache[key] = m
 	return m
+
+## A light that is part of a structure. Each call is its own material, so a generation can turn it down or recolour it.
+static func _lamp(c: Color, energy: float) -> StandardMaterial3D:
+	var m := Look.glow(c, energy)
+	m.disable_fog = true
+	return m
+
+## A length of ring: `section` (radial offset, depth) swept from angle a0 to a1 at radius r about the origin, in the
+## ring's own plane (angle 0 is the foot, as everywhere here). `at_mid` moves it so its middle is the origin (for a
+## piece that has come off and lies on the ground).
+static func _arc(sf: SurfaceTool, r: float, a0: float, a1: float, section: PackedVector2Array, steps: int, at_mid: bool = false) -> void:
+	var mid := Vector3(sin((a0 + a1) * 0.5), -cos((a0 + a1) * 0.5), 0) * r if at_mid else Vector3.ZERO
+	var n := section.size()
+	var rings: Array = []
+	for s in steps + 1:
+		var ang := lerpf(a0, a1, float(s) / float(steps))
+		var out := Vector3(sin(ang), -cos(ang), 0)
+		var ring := PackedVector3Array()
+		for p: Vector2 in section:
+			ring.append(out * (r + p.x) + Vector3(0, 0, p.y) - mid)
+		rings.append(ring)
+	var centres: Array = []
+	for s in steps + 1:
+		var ang2 := lerpf(a0, a1, float(s) / float(steps))
+		centres.append(Vector3(sin(ang2), -cos(ang2), 0) * r - mid)
+	for s in steps:
+		var p0: PackedVector3Array = rings[s]
+		var p1: PackedVector3Array = rings[s + 1]
+		var mid_line: Vector3 = ((centres[s] as Vector3) + (centres[s + 1] as Vector3)) * 0.5
+		for k in n:
+			var k2 := (k + 1) % n
+			var away := (p0[k] + p1[k2]) * 0.5 - mid_line
+			_tri(sf, p0[k], p1[k], p1[k2], away)
+			_tri(sf, p0[k], p1[k2], p0[k2], away)
+	# the two cut ends
+	var along: Vector3 = (centres[steps] as Vector3) - (centres[0] as Vector3)
+	for e: Array in [[rings[0], -along], [rings[steps], along]]:
+		var ring2: PackedVector3Array = e[0]
+		for k in range(1, n - 1):
+			_tri(sf, ring2[0], ring2[k], ring2[k + 1], e[1])
+
+## One flat triangle, wound and given its normal so that it faces `away`.
+static func _tri(sf: SurfaceTool, p: Vector3, q: Vector3, r: Vector3, away: Vector3) -> void:
+	var nrm := (q - p).cross(r - p).normalized()
+	if nrm.dot(away) < 0.0:
+		var t := q
+		q = r
+		r = t
+		nrm = -nrm
+	for v: Vector3 in [p, r, q]:
+		sf.set_normal(nrm)
+		sf.add_vertex(v)
+
+static func _commit(parent: Node3D, node_name: String, sf: SurfaceTool, mat: Material, shadows: bool) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.name = node_name
+	mi.mesh = sf.commit()
+	mi.material_override = mat
+	if not shadows:
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	parent.add_child(mi)
+	return mi
+
+static func _flat_tool() -> SurfaceTool:
+	var sf := SurfaceTool.new()
+	sf.begin(Mesh.PRIMITIVE_TRIANGLES)
+	return sf
+
+## A tapered prism standing on `at` (a tower's tier, a mast, a pylon): `sides` faces, `r0` at the foot, `r1` at the top.
+static func _prism(sf: SurfaceTool, at: Vector3, r0: float, r1: float, h: float, sides: int = 6, turn: float = 0.0, squash: Vector3 = Vector3.ONE) -> void:
+	var c := CylinderMesh.new()
+	c.bottom_radius = r0
+	c.top_radius = r1
+	c.height = h
+	c.radial_segments = sides
+	c.rings = 1
+	sf.append_from(c, 0, Transform3D(Basis(Vector3.UP, turn).scaled(squash), at + Vector3(0, h * 0.5, 0)))
+
+## A slender member from one point to another (a strut, a stay, a span).
+static func _beam(sf: SurfaceTool, from: Vector3, to: Vector3, w: float, d: float = -1.0) -> void:
+	var b := BoxMesh.new()
+	b.size = Vector3(w, from.distance_to(to), d if d > 0.0 else w)
+	sf.append_from(b, 0, Transform3D(Basis(Quaternion(Vector3.UP, (to - from).normalized())), (from + to) * 0.5))
+
+# ================================================================ the Ring-Gate
+const RING_SEGS := 24
+const RING_SECTION := [Vector2(-5.0, -2.3), Vector2(-5.0, 2.3), Vector2(-3.7, 3.6), Vector2(3.7, 3.6), Vector2(5.0, 2.3), Vector2(5.0, -2.3), Vector2(3.7, -3.6), Vector2(-3.7, -3.6)]
+
+## Whether a segment of the ring is one of those that come down between the first generation and the second.
+static func _in_break(i: int) -> bool:
+	var ang := TAU * (float(i) + 0.5) / RING_SEGS
+	return ang > BREAK_FROM and ang < BREAK_TO
+
+## The Ring-Gate: one engineered ring of pale ceramic in twenty-four segments, a seam between each, a channel of
+## light let into its inner face, slim fins cantilevered off its rim, plates that hang in the air over its crown,
+## and stays running down to the rock on either side. Two segments of it are gone by the second generation.
+## Returns the channel's light.
+static func _ring(a: Arena, st: Dictionary) -> StandardMaterial3D:
+	var shell := built(Color("#cfd2cf"), 0.15, 0.5, 0.05, true)
+	var dark := built(Color("#4a5058"), 0.6, 0.45, 0.1, true)
+	var section := PackedVector2Array(RING_SECTION)
+	var channel := PackedVector2Array([Vector2(-5.25, -1.0), Vector2(-5.25, 1.0), Vector2(-4.95, 1.0), Vector2(-4.95, -1.0)])
+	var gap := deg_to_rad(0.55)
+	var whole := _flat_tool()
+	var arc := _flat_tool()
+	var light := _flat_tool()
+	var arc_light := _flat_tool()
+	var core := _flat_tool()
+	var fins: Array = []
+	var arc_fins: Array = []
+	var fin := BoxMesh.new()
+	fin.size = Vector3(0.5, 6.5, 2.4)
+	for i in RING_SEGS:
+		var a0 := TAU * float(i) / RING_SEGS + gap
+		var a1 := TAU * float(i + 1) / RING_SEGS - gap
+		var gone := _in_break(i)
+		_arc(arc if gone else whole, RING_R, a0, a1, section, 6)
+		_arc(arc_light if gone else light, RING_R, a0 + gap, a1 - gap, channel, 6)
+		var ang := (a0 + a1) * 0.5
+		if cos(ang) < 0.55:          # none underground
+			(arc_fins if gone else fins).append(Transform3D(Basis(Vector3(0, 0, 1), ang), RING_C + Vector3(sin(ang), -cos(ang), 0) * (RING_R + 7.2)))
+	# a darker spine shows in the seams, so the ring reads as plates on a frame rather than a row of blocks
+	_arc(core, RING_R, 0.0, BREAK_FROM - 0.08, PackedVector2Array([Vector2(-3.6, -2.6), Vector2(-3.6, 2.6), Vector2(3.6, 2.6), Vector2(3.6, -2.6)]), 40)
+	_arc(core, RING_R, BREAK_TO + 0.08, TAU, PackedVector2Array([Vector2(-3.6, -2.6), Vector2(-3.6, 2.6), Vector2(3.6, 2.6), Vector2(3.6, -2.6)]), 60)
+	var seam := _lamp(Color("#5fe0c8"), 0.5)
+	for e: Array in [["HLRing", whole, shell, true], ["HLRingArc", arc, shell, true], ["HLRingCore", core, dark, false], ["HLSeam", light, seam, false], ["HLSeamArc", arc_light, seam, false]]:
+		_commit(a, e[0], e[1], e[2], e[3]).position = RING_C
+	_batch(a, "HLRingFins", fin, fins, dark, false)
+	st.kept.append(_batch(a, "HLRingFinsArc", fin, arc_fins, dark, false))
+	# what came down lies east of the court, where the ground breaks toward the cliff
+	var piece := _flat_tool()
+	_arc(piece, RING_R, 0.0, TAU / RING_SEGS - gap * 2.0, section, 6, true)
+	var fallen: Array = []
+	for f: Array in [[40.0, -10.0, 0.5, 0.25], [50.0, 6.0, 1.9, -0.35]]:
+		fallen.append(Transform3D(Basis.from_euler(Vector3(PI * 0.5 + float(f[3]), float(f[2]), float(f[3]) * 0.6)), on_ground(float(f[0]), float(f[1]), 2.0)))
+	_batch(a, "HLRingFallen", piece.commit(), fallen, shell, true)
+	# stays, feet, and the plates over the crown
+	var frame := _flat_tool()
+	var pale := _flat_tool()
+	var lit := _flat_tool()
+	for sx: float in [-1.0, 1.0]:
+		# each foot goes into an angled housing rather than the ground
+		var foot := on_ground(sx * 35.0, RING_C.z)
+		for b: Array in [[Vector3(22.0, 6.0, 15.0), 2.0, 0.0], [Vector3(17.0, 6.0, 12.5), 7.0, 9.0], [Vector3(12.0, 6.0, 10.5), 12.0, 17.0]]:
+			var box := BoxMesh.new()
+			box.size = b[0]
+			frame.append_from(box, 0, Transform3D(Basis(Vector3(0, 0, 1), deg_to_rad(float(b[2]) * sx)), foot + Vector3(sx * float(b[2]) * 0.12, float(b[1]), 0)))
+		for k in 3:
+			_beam(lit, foot + Vector3(sx * -9.0 + sx * k * 7.0, 1.0, 7.7), foot + Vector3(sx * -7.0 + sx * k * 6.0, 13.5, 6.6), 0.35, 0.2)
+		# two stays to each flank, one before the ring and one behind
+		for stay: Array in [[1.35, 74.0, 16.0], [1.35, 78.0, -22.0], [2.15, 96.0, -10.0]]:
+			var ang := float(stay[0]) * sx
+			var on_ring := RING_C + Vector3(sin(ang), -cos(ang), 0) * (RING_R + 4.0)
+			_beam(frame, on_ground(sx * float(stay[1]), RING_C.z + float(stay[2]), -1.0), on_ring, 1.1)
+	for k in 7:
+		# plates that hold station over the crown: nothing joins them to it
+		var ang2 := PI + (k - 3) * 0.14
+		var out := Vector3(sin(ang2), -cos(ang2), 0)
+		var slab := BoxMesh.new()
+		slab.size = Vector3(5.2 - absf(k - 3) * 0.6, 1.1, 4.0)
+		pale.append_from(slab, 0, Transform3D(Basis(Vector3(0, 0, 1), ang2), RING_C + out * (RING_R + 12.5 - absf(k - 3) * 0.9)))
+	_commit(a, "HLRingFrame", frame, dark, true)
+	st.kept.append(_commit(a, "HLRingHalo", pale, shell, false))
+	var foot_light := _lamp(Color("#ffc27a"), 2.2)
+	_commit(a, "HLRingFootLights", lit, foot_light, false)
+	st.lamps.append([foot_light, Color("#ffc27a"), 2.2])
+	return seam
 
 static func _batch(a: Arena, node_name: String, mesh: Mesh, xf: Array, mat: Material, shadows: bool) -> MultiMeshInstance3D:
 	var mm := MultiMesh.new()
@@ -1000,7 +1155,7 @@ static func _batch(a: Arena, node_name: String, mesh: Mesh, xf: Array, mat: Mate
 	a.add_child(mi)
 	return mi
 
-## Many boxes as one mesh: [size, where, rotation in degrees] each. One draw for a whole building.
+## Many boxes as one mesh: [size, where, rotation in degrees] each. One draw for a whole structure.
 static func _solid(parent: Node3D, node_name: String, boxes: Array, mat: Material, shadows: bool) -> MeshInstance3D:
 	var sf := SurfaceTool.new()
 	sf.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -1019,134 +1174,274 @@ static func _solid(parent: Node3D, node_name: String, boxes: Array, mat: Materia
 	return mi
 
 # ================================================================ the citadel
-## The citadel, far behind the gate and seen through it: two stepped spires and the span between them, on a wall
-## of towers. Built so that it has a lit side and a shadow side from the road: every tier has corner piers and a
-## buttress, the wall has towers and merlons, the windows of the first generation are lit and its banners are out.
-## By the second the eastern spire has lost its head and stands in scaffolding.
+## The citadel, far behind the gate and seen through it: not a keep but a stand of towers, each a clean taper in
+## three setbacks with lines of light up its faces, thin spans between them, on a terraced base. Lit and whole in the
+## first generation; by the second the tallest has lost its head and stands in a gantry.
 static func _citadel(a: Arena, st: Dictionary) -> void:
-	var m := Look.stone(Color("#77716a"), 0.016, 0.95, "citadel")
-	m.disable_fog = true
+	var m := built(Color("#b9bdbd"), 0.2, 0.5, 0.012, true)
 	var root := Node3D.new()
 	root.name = "HLCitadel"
 	root.position = Vector3(6.0, 34.0, -330.0)
 	a.add_child(root)
-	var body: Array = []
-	var head: Array = []          # the top of the eastern spire: gone after the first generation
-	var lit: Array = []
-	var cloth: Array = []
-	var scaffold: Array = []
-	for sx: float in [-1.0, 1.0]:
+	var body := _flat_tool()
+	var head := _flat_tool()
+	var lit := _flat_tool()
+	var holo := _flat_tool()
+	var gantry := _flat_tool()
+	# [x, z, height, foot radius]
+	var towers: Array = [[-66.0, 4.0, 118.0, 13.0], [-27.0, -6.0, 176.0, 16.0], [2.0, -24.0, 104.0, 12.0], [29.0, 6.0, 212.0, 17.0], [68.0, -2.0, 128.0, 13.0], [104.0, 10.0, 70.0, 10.0], [-104.0, 12.0, 62.0, 10.0]]
+	for ti in towers.size():
+		var t: Array = towers[ti]
+		var c := Vector3(float(t[0]), 0, float(t[1]))
+		var h := float(t[2])
+		var r := float(t[3])
 		var y := 0.0
-		var c := Vector3(sx * 27.0, 0, sx * -6.0)
-		for k in 5:
-			var w := 34.0 - k * 6.0
-			var h := 27.0 - k * 3.0
-			var into: Array = head if sx > 0.0 and k >= 3 else body
-			into.append([Vector3(w, h, w), c + Vector3(0, y + h * 0.5, 0)])
-			for cx: float in [-1.0, 1.0]:
-				for cz: float in [-1.0, 1.0]:
-					into.append([Vector3(w * 0.17, h + 3.5, w * 0.17), c + Vector3(cx * w * 0.5, y + h * 0.5 + 1.75, cz * w * 0.5)])
-			into.append([Vector3(w * 0.22, h * 0.8, 5.0), c + Vector3(0, y + h * 0.4, w * 0.5 + 2.0)])
-			into.append([Vector3(5.0, h * 0.8, w * 0.22), c + Vector3(sx * (w * 0.5 + 2.0), y + h * 0.4, 0)])
-			if k >= 1 and k <= 3:
-				for wx: float in [-0.27, 0.27]:
-					lit.append([Vector3(1.5, h * 0.36, 0.5), c + Vector3(wx * w, y + h * 0.55, w * 0.5 + 0.3)])
-			y += h
-		(head if sx > 0.0 else body).append([Vector3(3.2, 22.0, 3.2), c + Vector3(0, y + 11.0, 0)])
-		(head if sx > 0.0 else body).append([Vector3(7.0, 3.0, 7.0), c + Vector3(0, y + 1.5, 0)])
-		cloth.append([Vector3(5.5, 46.0, 0.4), c + Vector3(0, 48.0, 17.6)])
-	# the span, and the piers it rides on
-	body.append([Vector3(46.0, 5.0, 8.0), Vector3(0, 64.0, 0)])
-	body.append([Vector3(46.0, 2.0, 10.0), Vector3(0, 67.5, 0)])
-	for px: float in [-7.0, 7.0]:
-		body.append([Vector3(3.6, 40.0, 6.0), Vector3(px, 44.0, 0)])
-	# the rock it stands on, cut square, and the wall along the front of it
-	body.append([Vector3(150.0, 30.0, 60.0), Vector3(0, -6.0, 6.0)])
-	body.append([Vector3(270.0, 22.0, 40.0), Vector3(0, -22.0, 30.0)])
-	for tx: float in [-118.0, -78.0, -42.0, 42.0, 78.0, 118.0]:
-		body.append([Vector3(15.0, 46.0, 15.0), Vector3(tx, -4.0, 44.0)])
-		body.append([Vector3(18.0, 4.0, 18.0), Vector3(tx, 20.0, 44.0)])
-		lit.append([Vector3(1.4, 5.0, 0.5), Vector3(tx, 8.0, 51.8)])
-	for i in 26:
-		body.append([Vector3(5.0, 4.0, 4.0), Vector3(-125.0 + i * 10.0, -9.0, 49.0)])
-	# scaffolding up the broken spire
-	var east := Vector3(27.0, 0, -6.0)
-	for k in 6:
-		scaffold.append([Vector3(1.2, 52.0, 1.2), east + Vector3(-12.0 + k * 4.8, 78.0, 12.5 + (k % 2) * 1.5), Vector3(0, 0, (k - 2.5) * 0.8)])
+		for k in 3:
+			var hh: float = h * float([0.46, 0.32, 0.22][k])
+			var r0: float = r * float([1.0, 0.7, 0.44][k])
+			var r1: float = r * float([0.78, 0.5, 0.2][k])
+			var into: SurfaceTool = head if ti == 3 and k >= 1 else body
+			_prism(into, c + Vector3(0, y, 0), r0, r1, hh, 6, 0.26)
+			# a collar where each tier sets back
+			_prism(into, c + Vector3(0, y + hh - 1.2, 0), r1 * 1.12, r1 * 1.12, 1.6, 6, 0.26)
+			# lines of light up the faces that look down the road
+			for face: float in [-1.0, 0.0, 1.0]:
+				var rr: float = (r0 + r1) * 0.5 * 0.9
+				var where := c + Vector3(sin(face * 1.05) * rr, y + hh * 0.5, cos(face * 1.05) * rr)
+				var strip := BoxMesh.new()
+				strip.size = Vector3(0.7, hh * (0.62 if face == 0.0 else 0.4), 0.5)
+				(lit if not (ti == 3 and k >= 1) else holo).append_from(strip, 0, Transform3D(Basis(Vector3.UP, face * 1.05), where))
+			y += hh
+		_prism(head if ti == 3 else body, c + Vector3(0, y, 0), 1.2, 0.15, h * 0.16, 4)
+	# thin spans from tower to tower
+	for sp: Array in [[0, 1, 70.0], [1, 3, 98.0], [3, 4, 84.0], [1, 2, 52.0], [2, 3, 60.0]]:
+		var p0 := Vector3(float(towers[sp[0]][0]), float(sp[2]), float(towers[sp[0]][1]))
+		var p1 := Vector3(float(towers[sp[1]][0]), float(sp[2]) + 4.0, float(towers[sp[1]][1]))
+		_beam(body, p0, p1, 2.2, 1.2)
+	# the terraces it stands on
+	_prism(body, Vector3(0, -24.0, 14.0), 150.0, 128.0, 16.0, 8, 0.39, Vector3(1.0, 1.0, 0.36))
+	_prism(body, Vector3(0, -8.0, 6.0), 118.0, 100.0, 12.0, 8, 0.39, Vector3(1.0, 1.0, 0.34))
+	_prism(body, Vector3(0, -40.0, 24.0), 190.0, 170.0, 18.0, 8, 0.39, Vector3(1.0, 1.0, 0.36))
+	for k in 9:
+		var strip2 := BoxMesh.new()
+		strip2.size = Vector3(14.0, 0.8, 0.5)
+		lit.append_from(strip2, 0, Transform3D(Basis.IDENTITY, Vector3(-96.0 + k * 24.0, -2.0, 41.5)))
+	# the gantry up the tower that lost its head
+	var east := Vector3(29.0, 0, 6.0)
 	for k in 5:
-		scaffold.append([Vector3(28.0, 1.0, 1.4), east + Vector3(0, 56.0 + k * 10.0, 13.5), Vector3(0, 0, (k % 2) * 4.0 - 2.0)])
-	_solid(root, "Stone", body, m, false)
-	st.kept.append(_solid(root, "Head", head, m, false))
-	st.kept.append(_solid(root, "Cloth", cloth, _cloth_mat(), false))
-	st.ruin.append(_solid(root, "Scaffold", scaffold, Look.flat(Color("#231c16"), 1.0), false))
-	var windows := Look.glow(Color("#ffb45a"), 2.4)
-	_solid(root, "Windows", lit, windows, false)
+		_beam(gantry, east + Vector3(-11.0 + k * 5.5, 86.0, 11.0), east + Vector3(-10.0 + k * 5.0, 150.0, 8.0), 1.0)
+	for k in 5:
+		_beam(gantry, east + Vector3(-13.0, 96.0 + k * 12.0, 10.5), east + Vector3(13.0, 98.0 + k * 12.0, 9.5), 0.9)
+	_commit(root, "Stone", body, m, false)
+	st.kept.append(_commit(root, "Head", head, m, false))
+	st.ruin.append(_commit(root, "Scaffold", gantry, Look.flat(Color("#1d2126"), 0.8, 0.4), false))
+	var windows := _lamp(Color("#ffb45a"), 2.4)
+	_commit(root, "Windows", lit, windows, false)
+	st.kept.append(_commit(root, "HeadLights", holo, windows, false))
 	st["windows"] = windows
-	# and the mountains it was cut from, a long way off
-	for p: Array in [[-560.0, -640.0, 300.0, 40.0], [-800.0, -160.0, 270.0, 280.0]]:
-		var pk := a.prop("peak", float(p[2]), Vector3(float(p[0]), -40.0, float(p[1])), float(p[3]))
-		if pk:
-			for mi in pk.find_children("*", "MeshInstance3D", true, false):
-				(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 
 # ================================================================ the gate court
-## The court between the ring's feet. In the first generation it is a kept fortress: the gatehouse shut, the curtain
-## wall whole to either side of it, fires fed, banners in ranks, the kings' statues standing. After it, what the
-## years did: the gatehouse settled and dark, ivy on it, a statue down, rubble where the wall has shed.
-static func _gate_court(a: Arena, st: Dictionary) -> void:
-	var gate := a.prop("road_gatehouse", 13.0, GATE_AT, GATE_YAW)
-	if gate == null:
-		gate = a.prop("gate", 13.0, GATE_AT, 0.0)
-	st["gatehouse"] = gate
-	_shadowed(gate)
-	for sx: float in [-1.0, 1.0]:
-		a.prop("wall", 8.5, Vector3(sx * 12.6, 0, -22.5), 0.0 if sx < 0 else 180.0)
-		a.prop("wall", 8.5, on_ground(sx * 21.6, -23.5, -0.4), 4.0 * sx + (0.0 if sx < 0 else 180.0))
-		for b: Array in [[4.4, -8.5], [4.4, 3.0]]:
-			a.prop("brazier", 1.9, Vector3(sx * float(b[0]), 0, float(b[1])), 0.0)
-			a.fire(Vector3(sx * float(b[0]), 1.75, float(b[1])), 2.2, 10.0, false)
-		for b: Array in [[8.4, -13.0, -14.0], [10.6, -4.0, -8.0]]:
-			st.kept.append(_shadowed(a.prop("banner", 6.5, Vector3(sx * float(b[0]), 0, float(b[1])), sx * float(b[2]))))
-		_shadowed(a.prop("pillar", 4.6, Vector3(sx * 11.5, 0, 6.5), sx * 40.0))
-	_shadowed(a.prop("statue", 9.0, on_ground(-17.0, -8.0, -0.3), 28.0))
-	st.kept.append(_shadowed(a.prop("statue", 9.0, on_ground(17.0, -8.0, -0.3), -28.0)))
-	# the years
-	for r: Array in [[17.5, -7.0, 3.6, 70.0], [12.5, 4.5, 2.4, 20.0], [-11.0, 8.5, 1.8, 200.0], [-7.5, -15.5, 2.2, 140.0], [6.0, -17.0, 1.6, 300.0]]:
-		st.ruin.append(a.prop("rubble", float(r[2]), on_ground(float(r[0]), float(r[1]), -0.2), float(r[3])))
-	st.ruin.append(_ivy(a))
-	# awake: the seam between the doors
-	var seam := Node3D.new()
-	seam.name = "HLGateSeam"
-	a.add_child(seam)
-	var glow := a.box(Vector3(0.22, 8.2, 0.3), GATE_AT + Vector3(0, 4.3, 2.8), Look.glow(Color("#5fe0c8"), 4.0))
-	a.remove_child(glow)
-	seam.add_child(glow)
-	var l := OmniLight3D.new()
-	l.light_color = Color("#5fe0c8")
-	l.light_energy = 3.0
-	l.omni_range = 16.0
-	l.position = GATE_AT + Vector3(0, 3.0, 6.0)
-	seam.add_child(l)
-	st.woken.append(seam)
+## Where the gate itself stands (a generated model can take the place of the built door: see _gate_court).
+const GATE_FRONT := 6.2            # how far in front of the gate model's middle its door face is
+const DOOR_W := 9.6
+const DOOR_H := 11.6
 
-## Ivy up the face of the gatehouse: leaf cards in one batch, thick at the foot and thinning as it climbs.
+## The court between the ring's feet: an engineered forecourt. A blast door twelve metres high with a seam of light
+## down the middle of it, in a frame of two leaning pylons; bulkhead walls running out from it to the ring's feet,
+## with sentry alcoves let into them; lamps on slim posts; pennants of light on masts; a landing ring inlaid in the
+## floor. Kept and shut in the first generation. Breached and overgrown in the second: a leaf of the door hangs off
+## true, plates are down, ivy is up the wall. In the third the seam and the inlay are alight again.
+static func _gate_court(a: Arena, st: Dictionary) -> void:
+	var wall := built(Color("#565c64"), 0.55, 0.5, 0.14)
+	var pale := built(Color("#c4c8c6"), 0.12, 0.55, 0.1)
+	var black := Look.flat(Color("#0c0e10"), 0.9)
+	var gate := Node3D.new()
+	gate.name = "HLGate"
+	gate.position = GATE_AT
+	a.add_child(gate)
+	st["gatehouse"] = gate
+	# the gate itself: the generated model (a ceramic bulkhead with its blast door, alcoves and masts), or, without it,
+	# the frame and two leaves built here in the same language
+	var model := a.prop("road_gate_future", GATE_TALL, GATE_AT + Vector3(0, -0.15, 0), GATE_YAW)
+	st["gate_model"] = model
+	_shadowed(model)
+	var front := 2.2 if model == null else GATE_FRONT
+	var leaves: Array = []
+	var frame := _flat_tool()
+	var trim := _flat_tool()
+	var dark := _flat_tool()
+	var lamps := _flat_tool()
+	if model == null:
+		# the frame: two pylons leaning in over the door, a head across them, a hood above that
+		for sx: float in [-1.0, 1.0]:
+			var py := BoxMesh.new()
+			py.size = Vector3(3.4, 15.5, 5.0)
+			frame.append_from(py, 0, Transform3D(Basis(Vector3(0, 0, 1), deg_to_rad(sx * 5.0)), Vector3(sx * 7.3, 7.6, 0)))
+			var cap := BoxMesh.new()
+			cap.size = Vector3(4.2, 1.0, 5.6)
+			trim.append_from(cap, 0, Transform3D(Basis(Vector3(0, 0, 1), deg_to_rad(sx * 5.0)), Vector3(sx * 6.65, 15.6, 0)))
+			for k in 4:
+				_beam(lamps, Vector3(sx * 8.95 - sx * k * 0.06, 2.0 + k * 3.2, front + 0.35), Vector3(sx * 8.8 - sx * k * 0.06, 4.2 + k * 3.2, front + 0.35), 0.16, 0.1)
+			# sentry alcoves either side of the door: a dark recess, a sill, a light in its head
+			var recess := BoxMesh.new()
+			recess.size = Vector3(1.5, 3.4, 0.5)
+			dark.append_from(recess, 0, Transform3D(Basis.IDENTITY, Vector3(sx * 7.3, 2.5, front + 0.3)))
+			var sill := BoxMesh.new()
+			sill.size = Vector3(1.9, 0.25, 0.9)
+			trim.append_from(sill, 0, Transform3D(Basis.IDENTITY, Vector3(sx * 7.3, 0.7, front + 0.4)))
+			_beam(lamps, Vector3(sx * 6.7, 4.25, front + 0.5), Vector3(sx * 7.9, 4.25, front + 0.5), 0.12)
+		var head := BoxMesh.new()
+		head.size = Vector3(12.4, 2.6, 5.2)
+		frame.append_from(head, 0, Transform3D(Basis.IDENTITY, Vector3(0, 13.1, 0)))
+		var hood := BoxMesh.new()
+		hood.size = Vector3(15.5, 0.7, 7.0)
+		trim.append_from(hood, 0, Transform3D(Basis(Vector3.RIGHT, deg_to_rad(8.0)), Vector3(0, 15.2, 0.8)))
+		_beam(lamps, Vector3(-5.6, 12.1, front + 0.45), Vector3(5.6, 12.1, front + 0.45), 0.18, 0.1)
+		_commit(gate, "Frame", frame, wall, true)
+		_commit(gate, "Trim", trim, pale, true)
+		_commit(gate, "Recess", dark, black, false)
+		if true:
+			for sx: float in [-1.0, 1.0]:
+				var leaf := Node3D.new()
+				leaf.name = "Leaf" + ("L" if sx < 0.0 else "R")
+				leaf.position = Vector3(sx * DOOR_W * 0.5, 0, front - 0.4)       # hinged, so to speak, at its outer edge
+				gate.add_child(leaf)
+				var lf := _flat_tool()
+				var lt := _flat_tool()
+				var slab := BoxMesh.new()
+				slab.size = Vector3(DOOR_W * 0.5 - 0.12, DOOR_H, 0.9)
+				lf.append_from(slab, 0, Transform3D(Basis.IDENTITY, Vector3(-sx * DOOR_W * 0.25, DOOR_H * 0.5, 0)))
+				for k in 4:
+					# raised plates, and between them the rails the leaf runs on
+					var plate := BoxMesh.new()
+					plate.size = Vector3(DOOR_W * 0.5 - 1.1, 2.1, 0.3)
+					lt.append_from(plate, 0, Transform3D(Basis.IDENTITY, Vector3(-sx * DOOR_W * 0.25 + sx * 0.2, 1.7 + k * 2.75, 0.5)))
+				var edge := BoxMesh.new()
+				edge.size = Vector3(0.5, DOOR_H - 0.6, 1.2)
+				lf.append_from(edge, 0, Transform3D(Basis.IDENTITY, Vector3(-sx * (DOOR_W * 0.5 - 0.42), DOOR_H * 0.5, 0)))
+				_commit(leaf, "Slab", lf, built(Color("#3c4148"), 0.6, 0.45, 0.16), true)
+				_commit(leaf, "Plates", lt, wall, false)
+				leaves.append(leaf)
+		st["leaves"] = leaves
+	# bulkheads from the door out to the ring's feet: leaning plates, a rib between each, a line of light along the top
+	var bulk := _flat_tool()
+	var rib := _flat_tool()
+	for sx: float in [-1.0, 1.0]:
+		for k in 4:
+			var x0 := (9.2 if model == null else 10.4) + k * 5.6
+			var hgt := 10.0 - k * 0.9
+			var base := on_ground(sx * (x0 + 2.8), GATE_AT.z - 0.8 - k * 0.5)
+			var plate2 := BoxMesh.new()
+			plate2.size = Vector3(5.5, hgt + 2.0, 1.6)
+			bulk.append_from(plate2, 0, Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-7.0)), Vector3(base.x, base.y + hgt * 0.5 - 1.0, base.z) - GATE_AT))
+			var fin := BoxMesh.new()
+			fin.size = Vector3(0.7, hgt + 2.6, 3.0)
+			rib.append_from(fin, 0, Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-12.0)), Vector3(sx * (x0 + 5.6), base.y + hgt * 0.5 - 1.0, base.z + 0.9) - GATE_AT))
+			_beam(lamps, Vector3(sx * (x0 + 0.3), base.y + hgt - 0.2, base.z + 1.6) - GATE_AT, Vector3(sx * (x0 + 5.2), base.y + hgt - 0.2, base.z + 1.6) - GATE_AT, 0.14, 0.1)
+			if k == 1:
+				var recess2 := BoxMesh.new()
+				recess2.size = Vector3(1.6, 3.2, 0.5)
+				dark.append_from(recess2, 0, Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-7.0)), Vector3(base.x, base.y + 2.2, base.z + 1.2) - GATE_AT))
+	_commit(gate, "Bulkhead", bulk, wall, true)
+	_commit(gate, "Ribs", rib, pale, true)
+	_commit(gate, "Recess2", dark, black, false)
+	var gate_light := _lamp(Color("#ffc27a"), 2.0)
+	_commit(gate, "Lines", lamps, gate_light, false)
+	st.lamps.append([gate_light, Color("#ffc27a"), 2.0])
+	# the seam down the middle of the door: what the door is for
+	var seam := _lamp(Color("#ffb060"), 1.6)
+	var seam_h := DOOR_H - 0.5 if model == null else GATE_TALL * 0.6
+	var seam_mi := a.box(Vector3(0.26, seam_h, 0.3), GATE_AT + Vector3(0, seam_h * 0.5 + 0.2, front + 0.15), seam)
+	seam_mi.name = "HLGateSeam"
+	seam_mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	st["gate_seam"] = seam
+	var seam_glow := OmniLight3D.new()
+	seam_glow.name = "HLGateGlow"
+	seam_glow.omni_range = 18.0
+	seam_glow.position = GATE_AT + Vector3(0, 3.5, front + 4.0)
+	a.add_child(seam_glow)
+	st["gate_glow"] = seam_glow
+	# lamps on posts down the approach, and pennants of light on masts behind them
+	var posts := _flat_tool()
+	var heads := _flat_tool()
+	var pennants := _flat_tool()
+	for sx: float in [-1.0, 1.0]:
+		for b: Array in [[4.6, -8.5], [4.6, 3.0]]:
+			var at := Vector3(sx * float(b[0]), 0, float(b[1]))
+			_prism(posts, at, 0.16, 0.09, 2.5, 6)
+			_prism(heads, at + Vector3(0, 2.5, 0), 0.2, 0.2, 0.34, 6)
+			var l := OmniLight3D.new()
+			l.omni_range = 10.0
+			l.omni_attenuation = 1.3
+			l.position = at + Vector3(0, 2.8, 0)
+			a.add_child(l)
+			st.lights.append([l, 1.8])
+		for b: Array in [[9.0, -11.5], [11.2, -2.5], [12.4, 6.5]]:
+			var at2 := Vector3(sx * float(b[0]), 0, float(b[1]))
+			_prism(posts, at2, 0.14, 0.05, 8.2, 6)
+			var card := BoxMesh.new()
+			card.size = Vector3(0.6, 2.6, 0.02)
+			pennants.append_from(card, 0, Transform3D(Basis(Vector3.UP, sx * -0.3), at2 + Vector3(sx * -0.55, 6.0, 0)))
+	_commit(a, "HLPosts", posts, wall, true)
+	var post_light := _lamp(Color("#ffd9a0"), 3.0)
+	_commit(a, "HLPostLights", heads, post_light, false)
+	st.lamps.append([post_light, Color("#ffd9a0"), 3.0])
+	st.kept.append(_commit(a, "HLPennants", pennants, _pennant_mat(), false))
+	# the landing ring let into the floor, and its four marks
+	var inlay := _flat_tool()
+	_arc(inlay, 8.6, 0.0, TAU, PackedVector2Array([Vector2(-0.14, -0.02), Vector2(-0.14, 0.02), Vector2(0.14, 0.02), Vector2(0.14, -0.02)]), 48)
+	var pad := _lamp(Color("#ffb060"), 1.2)
+	var pad_mi := _commit(a, "HLPad", inlay, pad, false)
+	pad_mi.rotation.x = PI * 0.5
+	pad_mi.position = Vector3(0, 0.035, -4.0)
+	var marks := _flat_tool()
+	for k in 4:
+		var ang := PI * 0.25 + k * PI * 0.5
+		var mk := BoxMesh.new()
+		mk.size = Vector3(0.3, 0.03, 2.6)
+		marks.append_from(mk, 0, Transform3D(Basis(Vector3.UP, ang), Vector3(sin(ang) * 10.4, 0.04, -4.0 + cos(ang) * 10.4)))
+	_commit(a, "HLPadMarks", marks, pad, false)
+	st["pad"] = pad
+	# the years: plates off the wall, lying where they fell, and ivy up what still stands
+	var down := _flat_tool()
+	for r: Array in [[15.5, -15.0, 5.0, 3.4, 24.0, 8.0], [19.0, -9.0, 4.2, 5.2, 70.0, -5.0], [-12.5, -14.0, 5.2, 4.0, 150.0, 6.0], [-8.5, 7.5, 2.6, 1.8, 200.0, 12.0], [6.5, -15.5, 3.0, 2.2, 300.0, -9.0]]:
+		var pl := BoxMesh.new()
+		pl.size = Vector3(float(r[2]), 0.5, float(r[3]))
+		down.append_from(pl, 0, Transform3D(Basis.from_euler(Vector3(deg_to_rad(float(r[5])), deg_to_rad(float(r[4])), deg_to_rad(float(r[5]) * 0.6))), on_ground(float(r[0]), float(r[1]), 0.3)))
+	st.ruin.append(_commit(a, "HLDown", down, wall, true))
+	st.ruin.append(_ivy(a))
+
+## A pennant of light: a flat card that glows and is seen through.
+static func _pennant_mat() -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = Color(1.0, 0.36, 0.2, 0.4)
+	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
+	m.emission_enabled = true
+	m.emission = Color("#ff4a30")
+	m.emission_energy_multiplier = 1.6
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.cull_mode = BaseMaterial3D.CULL_DISABLED
+	m.disable_fog = true
+	return m
+
+## Ivy up the bulkheads either side of the door: leaf cards in one batch, thick at the foot and thinning as it climbs.
 static func _ivy(a: Arena) -> Node3D:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 808
 	var leaf := QuadMesh.new()
 	leaf.size = Vector2(0.9, 0.9)
 	var xf: Array = []
-	for stem in 9:
-		var x := rng.randf_range(-6.5, 6.5)
-		if absf(x) < 2.6:
-			x = signf(x) * rng.randf_range(2.8, 6.5)
-		var top := rng.randf_range(3.0, 10.5)
+	for stem in 16:
+		var x := rng.randf_range(5.6, 26.0) * (1.0 if stem % 2 == 0 else -1.0)
+		var top := rng.randf_range(3.0, 9.5)
 		var y := 0.0
 		while y < top:
 			x += rng.randf_range(-0.35, 0.35)
 			var sc := lerpf(1.3, 0.6, y / top) * rng.randf_range(0.7, 1.3)
+			var lean := 0.8 - y * 0.123 if absf(x) > 9.0 else 2.75
 			xf.append(Transform3D(Basis.from_euler(Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.5, 0.5), rng.randf() * TAU)).scaled(Vector3.ONE * sc),
-				GATE_AT + Vector3(x, y + 0.2, 2.85 + rng.randf_range(0.0, 0.25))))
+				GATE_AT + Vector3(x, y + 0.2, lean + rng.randf_range(0.0, 0.25))))
 			y += rng.randf_range(0.25, 0.5)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = _ivy_tex()
@@ -1185,39 +1480,120 @@ static func _ivy_tex() -> Texture2D:
 	return t
 
 # ================================================================ beside the road
-## What stands beside the road: waystones in pairs, a ruined arch where the climb ends, the dead tree (and its
-## fellow, down where the road begins), a king's fallen head, old banners.
+## What stands beside the road: marker pylons in pairs with a light in the head of each, a slim gantry where the
+## climb ends, signal masts with pennants of light on the last stretch, a conduit lying along the verge, and what
+## the makers left in the turf: lengths of great pipe, a hoop off some machine, a sensor dome the size of a house.
+## And the dead tree, which nobody made.
 static func _wayside(a: Arena, st: Dictionary) -> void:
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 1909
-	# waystones: one each side, every sixty metres or so, some of them broken off short
+	var alloy := built(Color("#7c838a"), 0.55, 0.45, 0.35)
+	var worn := built(Color("#6c7068"), 0.35, 0.7, 0.2)
+	var pale := built(Color("#c4c8c6"), 0.12, 0.55, 0.2)
+	# marker pylons: one each side, every fifty metres or so; a few have been knocked short
+	var body := _flat_tool()
+	var caps := _flat_tool()
 	var s := 44.0
 	var k := 0
 	while s < road_length() - 30.0:
 		for side: float in [-1.0, 1.0]:
-			if rng.randf() < 0.25:
+			if rng.randf() < 0.2:
 				continue
-			var p := road(s + rng.randf_range(-1.0, 1.0), side * rng.randf_range(2.7, 3.3))
-			_shadowed(a.prop("pillar", rng.randf_range(1.6, 3.3) if rng.randf() < 0.7 else 1.0, p - Vector3(0, 0.15, 0), rng.randf() * 360.0))
-		s += 58.0 if k % 2 == 0 else 46.0
+			var p := road(s + rng.randf_range(-1.0, 1.0), side * rng.randf_range(2.6, 3.0)) - Vector3(0, 0.1, 0)
+			var tall := 1.5 if rng.randf() < 0.8 else 0.6
+			_prism(body, p, 0.17, 0.11, tall, 4, road_yaw(s) + PI * 0.25)
+			if tall > 1.0:
+				_prism(caps, p + Vector3(0, tall, 0), 0.12, 0.12, 0.14, 4, road_yaw(s) + PI * 0.25)
+		s += 52.0 if k % 2 == 0 else 44.0
 		k += 1
-	# the arch at the head of the climb
+	# the gantry at the head of the climb: two masts and a thin span, lights along it
 	var sa := road_at_z(126.0)
-	var along := road_yaw(sa)
-	for side: float in [-1.0, 1.0]:
-		_shadowed(a.prop("pillar", 6.6 if side < 0.0 else 4.9, road(sa, side * 3.3) - Vector3(0, 0.3, 0), rad_to_deg(along)))
-	var lintel := a.box(Vector3(5.6, 0.9, 1.2), road(sa, -1.6) + Vector3(0, 6.5, 0), Look.stone(Color("#8d877b"), 0.2), Vector3(0, rad_to_deg(along), -7.0))
-	lintel.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+	var g0 := road(sa, -3.6)
+	var g1 := road(sa, 3.6)
+	_prism(body, g0 - Vector3(0, 0.3, 0), 0.34, 0.16, 7.4, 6)
+	_prism(body, g1 - Vector3(0, 0.3, 0), 0.34, 0.16, 6.8, 6)
+	_beam(body, g0 + Vector3(0, 6.6, 0), g1 + Vector3(0, 6.2, 0), 0.3, 0.5)
+	for t: float in [0.25, 0.5, 0.75]:
+		var lp := (g0 + Vector3(0, 6.3, 0)).lerp(g1 + Vector3(0, 5.9, 0), t)
+		_beam(caps, lp - Vector3(0, 0.12, 0), lp + Vector3(0, 0.12, 0), 0.3)
+	# signal masts on the last stretch, kept while the road is
+	var pennants := _flat_tool()
+	for b: Array in [[44.0, 3.4], [31.0, -3.6], [58.0, 3.8], [72.0, -3.8]]:
+		var sm := road_at_z(float(b[0]))
+		var at := road(sm, float(b[1])) - Vector3(0, 0.2, 0)
+		_prism(body, at, 0.13, 0.05, 6.4, 6)
+		var card := BoxMesh.new()
+		card.size = Vector3(0.55, 2.2, 0.02)
+		pennants.append_from(card, 0, Transform3D(Basis(Vector3.UP, road_yaw(sm) + PI * 0.5), at + Vector3(0, 4.7, 0) + Basis(Vector3.UP, road_yaw(sm)) * Vector3(0.5 * signf(float(b[1])) * -1.0, 0, 0)))
+	_commit(a, "HLMarkers", body, alloy, true)
+	var marker := _lamp(Color("#9ff0e0"), 2.2)
+	_commit(a, "HLMarkerLights", caps, marker, false)
+	st.lamps.append([marker, Color("#9ff0e0"), 2.2])
+	st.kept.append(_commit(a, "HLSignal", pennants, _pennant_mat(), false))
+	# a conduit along the verge for two stretches of the road, half in the turf
+	var pipe := _flat_tool()
+	for stretch: Array in [[36.0, 150.0, -2.3], [300.0, 372.0, 2.4], [420.0, 500.0, -2.4]]:
+		var d := float(stretch[0])
+		while d < float(stretch[1]):
+			var p0 := road(d, float(stretch[2])) + Vector3(0, 0.03, 0)
+			var p1 := road(d + 3.0, float(stretch[2])) + Vector3(0, 0.03, 0)
+			var seg := CylinderMesh.new()
+			seg.top_radius = 0.13
+			seg.bottom_radius = 0.13
+			seg.height = p0.distance_to(p1) + 0.05
+			seg.radial_segments = 6
+			seg.rings = 1
+			pipe.append_from(seg, 0, Transform3D(Basis(Quaternion(Vector3.UP, (p1 - p0).normalized())), (p0 + p1) * 0.5))
+			if int(d) % 12 == 0:
+				_prism(pipe, p0 - Vector3(0, 0.1, 0), 0.24, 0.24, 0.34, 6)
+			d += 3.0
+	_commit(a, "HLConduit", pipe, worn, false)
+	# what was left in the turf
+	var junk := _flat_tool()
+	var junk_pale := _flat_tool()
+	# lengths of great pipe, lying half under
+	for pp: Array in [[86.0, 13.0, 0.5, 2.0, 16.0], [352.0, -16.0, 1.3, 1.5, 12.0], [246.0, 30.0, 2.2, 2.4, 20.0], [455.0, 18.0, 0.2, 1.7, 14.0]]:
+		var c := road(float(pp[0]), float(pp[1]))
+		var tube := CylinderMesh.new()
+		tube.top_radius = float(pp[3])
+		tube.bottom_radius = float(pp[3])
+		tube.height = float(pp[4])
+		tube.radial_segments = 14
+		tube.rings = 1
+		var lie := Basis(Vector3.UP, float(pp[2])) * Basis(Vector3.RIGHT, PI * 0.5 + 0.07)
+		junk.append_from(tube, 0, Transform3D(lie, c + Vector3(0, float(pp[3]) * 0.28, 0)))
+		for e: float in [-0.42, 0.0, 0.42]:
+			var band := CylinderMesh.new()
+			band.top_radius = float(pp[3]) * 1.08
+			band.bottom_radius = float(pp[3]) * 1.08
+			band.height = 0.7
+			band.radial_segments = 14
+			band.rings = 1
+			junk_pale.append_from(band, 0, Transform3D(lie, c + Vector3(0, float(pp[3]) * 0.28, 0) + lie * Vector3(0, e * float(pp[4]), 0)))
+	# a hoop off some machine, standing a third out of the ground and leaning
+	for hp: Array in [[150.0, -17.0, 6.0, 0.3], [404.0, 24.0, 8.0, -0.25]]:
+		var hoop := _flat_tool()
+		_arc(hoop, float(hp[2]), 0.0, TAU, PackedVector2Array([Vector2(-0.6, -0.5), Vector2(-0.6, 0.5), Vector2(0.6, 0.5), Vector2(0.6, -0.5)]), 28)
+		var hmi := _commit(a, "HLHoop", hoop, worn, true)
+		hmi.position = road(float(hp[0]), float(hp[1])) + Vector3(0, float(hp[2]) * 0.2, 0)
+		hmi.rotation = Vector3(float(hp[3]), rng.randf() * TAU, 0.1)
+	# the dome, where the road tops the rise (it has a face of sorts: a ring of dead lenses)
+	var dome_at := road(road_at_z(103.0), 9.5) - Vector3(0, 1.2, 0)
+	var dome := SphereMesh.new()
+	dome.radius = 3.6
+	dome.height = 7.2
+	dome.radial_segments = 20
+	dome.rings = 10
+	junk_pale.append_from(dome, 0, Transform3D(Basis.from_euler(Vector3(0.3, 0.6, 0.2)), dome_at))
+	_prism(junk, dome_at - Vector3(0, 1.6, 0), 4.4, 4.0, 2.0, 12)
+	for k2 in 6:
+		var la := k2 * TAU / 6.0
+		_prism(junk, dome_at + Basis.from_euler(Vector3(0.3, 0.6, 0.2)) * (Vector3(cos(la), 0.55, sin(la)).normalized() * 3.45), 0.5, 0.42, 0.4, 8)
+	_commit(a, "HLJunk", junk, worn, true)
+	_commit(a, "HLJunkPale", junk_pale, pale, true)
 	# the dead tree in the saddle below the gate, and another where the road sets out
 	_dead_tree(a, road(tree_s(), -5.5) - Vector3(0, 0.5, 0), 7.6, 200.0)
 	_dead_tree(a, road(75.0, 7.5) - Vector3(0, 0.5, 0), 6.8, 20.0)
-	# a king's head, off its statue, where the road tops the rise
-	var sh := road_at_z(103.0)
-	_shadowed(a.prop("statue_head", 4.6, road(sh, 9.0) - Vector3(0, 1.1, 0), -150.0))
-	# banners on the last stretch, kept while the road is
-	for b: Array in [[44.0, 3.4, 20.0], [31.0, -3.6, -30.0], [58.0, 3.8, 0.0]]:
-		var flag := a.prop("banner", 5.6, road(road_at_z(float(b[0])), float(b[1])) - Vector3(0, 0.2, 0), rad_to_deg(road_yaw(road_at_z(float(b[0])))) + float(b[2]))
-		st.kept.append(_shadowed(flag))
 
 ## The dead tree: a wind-bent hawthorn on its mound of rock (the generated prop; a bare procedural one without it).
 static func _dead_tree(a: Arena, at: Vector3, tall: float, yaw: float) -> void:
@@ -1272,6 +1648,123 @@ static func _shadowed(n: Node3D) -> Node3D:
 		(mi as MeshInstance3D).cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 	return n
 
+# ================================================================ the sky that is not this world's
+## What says, before anything built does, that this is not Earth: the pale banded world this one turns about, low
+## in the north-west; the arc of the orbital ring crossing the whole sky, plate by plate; stars near the zenith
+## even by day; aurora in high thin curtains; and, in the second generation, the trails of what is falling.
+static func _sky(a: Arena, st: Dictionary) -> void:
+	var centre := Vector3(0, 0, 200.0)
+	# ---- the planet
+	var pdir := (Basis(Vector3.UP, deg_to_rad(27.0)) * Vector3(0, 0, -1)).rotated(Basis(Vector3.UP, deg_to_rad(27.0)) * Vector3.RIGHT, deg_to_rad(9.5))
+	var card := QuadMesh.new()
+	card.size = Vector2(1350, 1350)
+	var planet := ShaderMaterial.new()
+	planet.shader = load("res://src/world/highland_planet.gdshader")
+	planet.set_shader_parameter("noise_tex", _noise_tex())
+	var pmi := MeshInstance3D.new()
+	pmi.name = "HLPlanet"
+	pmi.mesh = card
+	pmi.material_override = planet
+	pmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	pmi.sorting_offset = -6000.0
+	a.add_child(pmi)
+	pmi.position = centre + pdir * 5000.0
+	pmi.look_at(centre, Vector3.UP, true)
+	st["planet"] = planet
+	st["planet_node"] = pmi
+	# ---- ribbons: the orbital arc, the aurora, the falling trails
+	var lines := load("res://src/world/highland_skyline.gdshader") as Shader
+	var mats := {}
+	for nm: String in ["arc", "aurora", "trails", "stars"]:
+		var m := ShaderMaterial.new()
+		m.shader = lines
+		m.set_shader_parameter("noise_tex", _noise_tex())
+		mats[nm] = m
+	st["skyfx"] = mats
+	# the arc: a circle about the viewer, tipped over toward the north, so it climbs out of the west and comes down in the sea
+	var u := Vector3(0.94, 0, -0.34).normalized()
+	var v := Vector3(0.22, 0.78, 0.59).normalized()
+	v = (v - u * v.dot(u)).normalized()
+	var arc := SurfaceTool.new()
+	arc.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for band: Array in [[70.0, 1.0, Color(0.95, 0.93, 0.88, 0.85)], [420.0, 0.0, Color(0.7, 0.75, 0.85, 0.1)]]:
+		_ribbon(arc, func(t: float) -> Vector3: return centre + (u * cos(t * PI) + v * sin(t * PI)) * 5100.0,
+			func(_t: float) -> Vector3: return u.cross(v).normalized(),
+			float(band[0]), 96, band[2], float(band[1]))
+	_sky_mesh(a, "HLOrbit", arc.commit(), mats.arc, -5600.0)
+	# aurora: three curtains hanging high in the north and west
+	var aur := SurfaceTool.new()
+	aur.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for c: Array in [[-70.0, 10.0, 34.0, Color(0.3, 1.0, 0.75, 0.5)], [-20.0, 60.0, 42.0, Color(0.45, 0.6, 1.0, 0.4)], [-130.0, -60.0, 30.0, Color(0.5, 0.95, 0.7, 0.4)]]:
+		var from_az := deg_to_rad(float(c[0]))
+		var to_az := deg_to_rad(float(c[1]))
+		var elev := deg_to_rad(float(c[2]))
+		_ribbon(aur, func(t: float) -> Vector3:
+			var az := lerpf(from_az, to_az, t)
+			var el := elev + sin(t * 9.0) * 0.05
+			return centre + Vector3(sin(az) * cos(el), sin(el), -cos(az) * cos(el)) * 4900.0 + Vector3(0, 450.0, 0),
+			func(_t: float) -> Vector3: return Vector3.DOWN, 900.0, 40, c[3], 2.0)
+	_sky_mesh(a, "HLAurora", aur.commit(), mats.aurora, -5400.0)
+	# trails: short bright streaks coming down out of the arc
+	var tr := SurfaceTool.new()
+	tr.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 77
+	for k in 7:
+		var t0 := rng.randf_range(0.2, 0.75)
+		var head := centre + (u * cos(t0 * PI) + v * sin(t0 * PI)) * 5050.0
+		var fall := (Vector3(rng.randf_range(-0.5, 0.2), -1.0, rng.randf_range(-0.2, 0.3))).normalized()
+		var length := rng.randf_range(350.0, 900.0)
+		_ribbon(tr, func(t: float) -> Vector3: return head + fall * length * (1.0 - t), func(_t: float) -> Vector3: return fall.cross(head - centre).normalized(),
+			rng.randf_range(14.0, 30.0), 2, Color(1.0, 0.62, 0.3, rng.randf_range(0.4, 0.9)), 0.0)
+	st["trails"] = _sky_mesh(a, "HLTrails", tr.commit(), mats.trails, -5500.0)
+	# stars, near the zenith
+	var sm := SurfaceTool.new()
+	sm.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for k in 170:
+		var az := rng.randf() * TAU
+		var el := deg_to_rad(rng.randf_range(24.0, 86.0))
+		var dir := Vector3(sin(az) * cos(el), sin(el), -cos(az) * cos(el))
+		var at := centre + dir * 5300.0
+		var size := rng.randf_range(11.0, 30.0) * (2.2 if k % 23 == 0 else 1.0)
+		var sx := dir.cross(Vector3.UP).normalized() * size
+		var sy := sx.cross(dir).normalized() * size
+		var col := Color(rng.randf_range(0.8, 1.0), rng.randf_range(0.85, 1.0), 1.0, rng.randf_range(0.35, 1.0) * smoothstep(20.0, 55.0, rad_to_deg(el)))
+		var corners := [[-sx - sy, Vector2(0, 0)], [sx - sy, Vector2(1, 0)], [sx + sy, Vector2(1, 1)], [-sx + sy, Vector2(0, 1)]]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			sm.set_color(col)
+			sm.set_uv(corners[i][1])
+			sm.set_uv2(Vector2(3.0, rng.randf()))
+			sm.add_vertex(at + corners[i][0])
+	_sky_mesh(a, "HLStars", sm.commit(), mats.stars, -5900.0)
+
+## A strip of sky light: `path` gives its line (t from 0 to 1), `across` the way it is wide.
+static func _ribbon(sf: SurfaceTool, path: Callable, across: Callable, width: float, steps: int, col: Color, kind: float) -> void:
+	for s in steps:
+		var t0 := float(s) / float(steps)
+		var t1 := float(s + 1) / float(steps)
+		var p0: Vector3 = path.call(t0)
+		var p1: Vector3 = path.call(t1)
+		var w0: Vector3 = across.call(t0) * width
+		var w1: Vector3 = across.call(t1) * width
+		var quad := [[p0, Vector2(0, t0)], [p0 + w0, Vector2(1, t0)], [p1 + w1, Vector2(1, t1)], [p1, Vector2(0, t1)]]
+		for i: int in [0, 1, 2, 0, 2, 3]:
+			sf.set_color(col)
+			sf.set_uv(quad[i][1])
+			sf.set_uv2(Vector2(kind, 0.0))
+			sf.add_vertex(quad[i][0])
+
+static func _sky_mesh(a: Arena, node_name: String, mesh: Mesh, mat: Material, order: float) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.name = node_name
+	mi.mesh = mesh
+	mi.material_override = mat
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	mi.sorting_offset = order
+	mi.custom_aabb = AABB(Vector3(-7000, -500, -7000), Vector3(14000, 7000, 14000))
+	a.add_child(mi)
+	return mi
+
 # ================================================================ seasons
 ## Sets which generation's road this is (1, 2 or 3): the light and the air, the colour of the turf, the weather,
 ## whether the ring is whole, how worn the road still is, whether the fires and banners are kept, and how awake
@@ -1305,12 +1798,39 @@ static func generation(a: Arena, g: int) -> void:
 			(n as Node3D).visible = not whole
 	for n in st.woken:
 		(n as Node3D).visible = float(s.seam) > 1.0
-	# the gatehouse: square and clean while it is kept; settled, stained and dark afterwards
-	var gate: Node3D = st.get("gatehouse")
-	if gate:
-		gate.rotation_degrees = Vector3(0, GATE_YAW, 0) if whole else Vector3(2.6, GATE_YAW, 1.6)
-		gate.position = GATE_AT if whole else GATE_AT + Vector3(0, -0.5, 0)
-		Look.set_param(gate, &"tint", Color(1, 1, 1) if whole else (Color(0.5, 0.47, 0.42) if g == 2 else Color(0.6, 0.63, 0.68)))
+	var woke := float(s.seam) > 1.0
+	var engine := Color("#5fe0c8")
+	# the door: shut and true while it is kept; afterwards one leaf hangs off its rail and stands ajar
+	var leaves: Array = st.get("leaves", [])
+	if leaves.size() == 2:
+		(leaves[1] as Node3D).rotation_degrees = Vector3.ZERO if whole else Vector3(2.0, -17.0, -3.0)
+		(leaves[1] as Node3D).position.y = 0.0 if whole else -0.45
+	var model: Node3D = st.get("gate_model")
+	if model:
+		model.rotation_degrees = Vector3(0, GATE_YAW, 0) if whole else Vector3(1.4, GATE_YAW, 0.9)
+		Look.set_param(model, &"tint", Color(1, 1, 1) if whole else (Color(0.5, 0.47, 0.43) if g == 2 else Color(0.62, 0.66, 0.72)))
+	# every light that is part of a structure: fed while the road is kept, dead after, and the Engine's colour when it wakes
+	for l: Array in st.lamps:
+		_set_lamp(l[0], l[1] if whole else engine, float(l[2]) if whole else (float(l[2]) * 0.8 if woke else 0.0))
+	_set_lamp(st.gate_seam, Color("#ffb060") if whole else engine, 1.6 if whole else (6.0 if woke else 0.0))
+	_set_lamp(st.pad, Color("#ffb060") if whole else engine, 1.0 if whole else (3.5 if woke else 0.0))
+	var glow := st.gate_glow as OmniLight3D
+	glow.light_color = Color("#ffb060") if whole else engine
+	glow.light_energy = 1.0 if whole else (3.5 if woke else 0.0)
+	for l: Array in st.lights:
+		(l[0] as Light3D).light_color = Color("#ffd9a0")
+		(l[0] as Light3D).light_energy = float(l[1]) if whole else 0.0
+	# the sky that is not this world's
+	var sk: Dictionary = SKY[g - 1]
+	var planet: ShaderMaterial = st.planet
+	planet.set_shader_parameter("lit", Color(str(sk.planet)))
+	planet.set_shader_parameter("band", Color(str(sk.band)))
+	planet.set_shader_parameter("strength", float(sk.planet_e))
+	planet.set_shader_parameter("light", (st.planet_node as Node3D).global_basis.inverse() * _sun_dir(s.sun_rot))
+	for nm: String in ["arc", "aurora", "stars", "trails"]:
+		(st.skyfx[nm] as ShaderMaterial).set_shader_parameter("strength", float(sk[nm]))
+	(st.skyfx.arc as ShaderMaterial).set_shader_parameter("wake", engine * 1.4 if woke else Color.BLACK)
+	(st.trails as Node3D).visible = float(sk.trails) > 0.0
 	var env := a.env
 	var sky := env.sky.sky_material as ProceduralSkyMaterial
 	sky.sky_cover = null                      # the cloud is the two decks; a painted cover would lie flat behind them
@@ -1353,6 +1873,8 @@ static func generation(a: Arena, g: int) -> void:
 		m.set_shader_parameter("ring_break", 0.0 if whole else 1.0)
 		m.set_shader_parameter("cloud_shadow", float(s.cloud_shadow))
 	var ground: ShaderMaterial = st.ground
+	ground.set_shader_parameter("slab", Color(str(sk.slab)))
+	ground.set_shader_parameter("guide", Color(0.1, 0.42, 0.38) * 0.7 if whole else (Color(0.3, 1.4, 1.2) if woke else Color.BLACK))
 	ground.set_shader_parameter("wear", float(s.wear))
 	ground.set_shader_parameter("wet", float(s.wet))
 	for m in st.sunlit:
@@ -1377,11 +1899,8 @@ static func generation(a: Arena, g: int) -> void:
 	var shaft: ShaderMaterial = st.shaft
 	shaft.set_shader_parameter("tint", Color(str(s.sun)))
 	shaft.set_shader_parameter("strength", float(s.shafts))
-	# the citadel's windows: lit while it is lived in, dark after, and the Engine's colour when it wakes
-	var windows: StandardMaterial3D = st.windows
-	windows.emission = Color("#ffb45a") if whole else Color("#5fe0c8")
-	windows.albedo_color = windows.emission if (whole or g == 3) else Color(0.05, 0.05, 0.06)
-	windows.emission_energy_multiplier = 2.4 if whole else (3.0 if g == 3 else 0.0)
+	# the citadel's lines of light: lit while it is lived in, dark after, and the Engine's colour when it wakes
+	_set_lamp(st.windows, Color("#ffb45a") if whole else engine, 2.4 if whole else (3.0 if woke else 0.0))
 	(st.seam as StandardMaterial3D).emission_energy_multiplier = float(s.seam)
 	# awake, it is seen through any weather
 	(st.seam as StandardMaterial3D).disable_fog = float(s.seam) > 1.0
@@ -1391,6 +1910,12 @@ static func generation(a: Arena, g: int) -> void:
 		old.free()
 	if str(s.weather) != "":
 		_weather(a, str(s.weather))
+
+## Turns a structure's light to a colour and a strength (nothing: it reads as dead glass).
+static func _set_lamp(m: StandardMaterial3D, c: Color, energy: float) -> void:
+	m.emission = c
+	m.emission_energy_multiplier = energy
+	m.albedo_color = c if energy > 0.0 else Color(0.05, 0.055, 0.06)
 
 ## Rain or snow in a box that the scene keeps over its camera (see `follow`).
 static func _weather(a: Arena, kind: String) -> void:

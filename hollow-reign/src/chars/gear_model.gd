@@ -26,10 +26,11 @@ static func manifest() -> Dictionary:
 	return _manifest
 
 ## Item ids in the manifest, optionally of one class ("sword" matches every blade class).
-static func ids(kind: String = "") -> Array:
+## Hybrids (a modelled blade in a generated hilt: manifest `hybrid`) are trial pieces and are left out unless asked for.
+static func ids(kind: String = "", hybrids: bool = false) -> Array:
 	var out: Array = []
 	for k: String in manifest():
-		if k.begins_with("_"):
+		if k.begins_with("_") or (not hybrids and bool(manifest()[k].get("hybrid", false))):
 			continue
 		var cls := str(manifest()[k].get("class", ""))
 		if kind == "" or (kind == "shield") == (cls == "shield"):
@@ -118,16 +119,47 @@ static func spawn(id: String, lod_at: float = 9.0, force_lod: bool = false, mod:
 	var def: Dictionary = info(id).get("default_mod", {})
 	var bt := clampi(int(mod.get("blade_tier", def.get("blade_tier", 0))), 0, 3)
 	var gt := clampi(int(mod.get("grip_tier", def.get("grip_tier", 0))), 0, 3)
-	if parts and ResourceLoader.exists("%s%s__blade%d.glb" % [DIR, id, bt]):
+	var hybrid := bool(info(id).get("hybrid", false))
+	if hybrid:
+		# a modelled blade seated in a generated hilt: always joined from parts; the hilt has one form, and the
+		# upper handle tiers are gold rings laid over its grip
+		_add(root, "%s__blade%d" % [id, bt], lod_at, force_lod)
+		_add(root, id + "__hilt0", lod_at, force_lod)
+		if gt >= 2 and ResourceLoader.exists("%s%s__rings%d.glb" % [DIR, id, gt]):
+			_add(root, "%s__rings%d" % [id, gt], lod_at, force_lod)
+	elif parts and ResourceLoader.exists("%s%s__blade%d.glb" % [DIR, id, bt]):
 		_add(root, "%s__blade%d" % [id, bt], lod_at, force_lod)
 		_add(root, "%s__hilt%d" % [id, gt], lod_at, force_lod)
 	else:
 		_add(root, id, lod_at, force_lod)
 	Look.sanitise(root, "weapon")
+	if hybrid:
+		_match_blade(root, info(id))
 	awaken(root, false)
 	if not mod.is_empty():
 		apply_mod(root, mod)
 	return root
+
+## Hybrids: brings the blade's steel to the generated hilt's metal (manifest `blade_tint`, `blade_rough_max`,
+## measured from the hilt's own textures) so the two read as one object. Ore tints multiply on top of this.
+static func _match_blade(root: Node3D, i: Dictionary) -> void:
+	var t: Array = i.get("blade_tint", [1.0, 1.0, 1.0])
+	var tint := Color(float(t[0]), float(t[1]), float(t[2]))
+	root.set_meta("blade_base_tint", tint)
+	for e: Array in _surfaces(root):
+		var mi: MeshInstance3D = e[0]
+		var mname: String = e[2]
+		var cur: Material = mi.get_active_material(e[1])
+		if mname == "edge" and cur is BaseMaterial3D:
+			var d: BaseMaterial3D = cur.duplicate()
+			d.albedo_color = Color(d.albedo_color.r * tint.r, d.albedo_color.g * tint.g, d.albedo_color.b * tint.b)
+			mi.set_surface_override_material(e[1], d)
+		elif (mname == "blade" or mname == "blade_groove" or mname.begins_with("engrave_")) and cur is ShaderMaterial:
+			var sm: ShaderMaterial = cur.duplicate()
+			var base: Color = sm.get_shader_parameter("tint")
+			sm.set_shader_parameter("tint", Color(base.r * tint.r, base.g * tint.g, base.b * tint.b, 1.0))
+			sm.set_shader_parameter("rough_max", float(i.get("blade_rough_max", 1.0)))
+			mi.set_surface_override_material(e[1], sm)
 
 static func _surfaces(root: Node3D) -> Array:
 	var out: Array = []           # [MeshInstance3D, surface, material name]
@@ -147,13 +179,14 @@ static func apply_mod(root: Node3D, mod: Dictionary) -> void:
 	if mod.get("tint") is Color:
 		tint = mod.tint            # a metal the manifest's palette does not have
 	var sharp := bool(mod.get("sharpened", true))
+	var bb: Color = root.get_meta("blade_base_tint", Color.WHITE)      # hybrids: the hilt's metal, under the ore
 	for e: Array in _surfaces(root):
 		var mi: MeshInstance3D = e[0]
 		var mname: String = e[2]
 		var cur: Material = mi.get_active_material(e[1])
 		if mname == "edge" and cur is BaseMaterial3D:
 			var d: BaseMaterial3D = cur.duplicate()
-			d.albedo_color = Color(tint.r * (0.80 if sharp else 0.6), tint.g * (0.81 if sharp else 0.61), tint.b * (0.83 if sharp else 0.63))
+			d.albedo_color = Color(tint.r * bb.r * (0.80 if sharp else 0.6), tint.g * bb.g * (0.81 if sharp else 0.61), tint.b * bb.b * (0.83 if sharp else 0.63))
 			d.roughness = 0.3 if sharp else 0.52
 			mi.set_surface_override_material(e[1], d)
 		elif (mname == "blade" or mname == "blade_groove" or mname.begins_with("engrave_")) and cur is ShaderMaterial and tint != Color.WHITE:

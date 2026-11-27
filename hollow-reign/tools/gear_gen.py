@@ -685,6 +685,7 @@ def build_wayfarer(B, q, mod, parts):
     P = dict(L=0.80, y0=0.070, w=[(0, 0.0238), (0.14, 0.0222), (0.50, 0.0250), (0.84, 0.0165)], s_tip=0.84, tip_p=1.9,
              t0=0.0031, t1=0.0016, bevel=0.0040, band=dict(bw=0.0093, end=0.66, mat="blade"),
              groove=dict(gw=0.0013, d=0.0010, s0=0.02, s1=0.60, mat="blade_groove"))
+    P.update(mod.get("P", {}))
 
     def guard(B, q):
         zh = 0.0055
@@ -829,6 +830,7 @@ def build_eternal_edge(B, q, mod, parts):
     P = dict(L=0.88, y0=0.070, w=[(0, 0.0170), (0.10, 0.0158), (0.52, 0.0215), (0.80, 0.0150)], s_tip=0.80, tip_p=2.2,
              t0=0.0033, t1=0.0016, bevel=0.0034, band=dict(bw=0.0101, end=0.72, mat="blade"),
              groove=dict(gw=0.0011, d=0.0009, s0=0.11, s1=0.62, mat="glow"))
+    P.update(mod.get("P", {}))
 
     def guard(B, q):
         zh = 0.0058
@@ -1655,14 +1657,158 @@ def export(name, build, variant=None):
     return info, stats
 
 
+# ============================================================================ hybrids: our blade in a generated hilt
+# A hybrid is a code-built blade seated in an image-to-3D hilt (guard + grip + pommel). The generated model comes
+# normalised (1 unit long, guard along Z, pommel at -Y); bake_hilt() turns it into the gear convention.
+#   src      the generated GLB under gear/hilts/
+#   scale    metres per model unit, chosen so the grip is a hand's thickness (about 15 mm radius)
+#   y_hand   model height of the centre of the main hand: 5 cm (half a palm, at `scale`) under the guard's collar
+#   seat     model height where the blade leaves the hilt (top of the socket or collar); the blade starts 13 mm inside
+#   flatten  (from_y, factor): generated guards come out too deep front to back; squeeze the depth above from_y
+#   P        changes to the base sword's blade so its foot is hidden by the socket
+#   tint, rough_max: the blade's steel brought to the hilt's metal (measured from its textures)
+HYBRIDS = {
+    "wayfarer_h": dict(base="wayfarer", src="hilt_wayfarer", scale=0.255, y_hand=-0.016, seat=0.500, collar=0.18, grip=(-0.38, 0.18),
+                       flatten=None, P=dict(w=[(0, 0.0212), (0.14, 0.0216), (0.50, 0.0250), (0.84, 0.0165)]),
+                       tint=[0.66, 0.645, 0.62], rough_max=0.42, hands=1.5),
+    "eternal_edge_h": dict(base="eternal_edge", src="hilt_eternal", scale=0.3375, y_hand=-0.088, seat=0.440, collar=0.06, grip=(-0.26, 0.06),
+                           flatten=(0.05, 0.62), P={}, tint=[0.72, 0.68, 0.62], rough_max=0.42, hands=1),
+}
+
+
+def bake_hilt(spec, dst):
+    """Rewrites a generated hilt into the gear convention (origin at the hand, +Y to the tip, guard along X,
+    metres) and drops its embedded textures in favour of the files Godot already extracted beside the source."""
+    d = open(os.path.join(OUT, "hilts", spec["src"] + ".glb"), "rb").read()
+    jl = struct.unpack("<I", d[12:16])[0]
+    j = json.loads(d[20:20 + jl])
+    b0 = 20 + jl + 8
+    prim = j["meshes"][0]["primitives"][0]
+
+    def read(ai, dtype, comps):
+        a = j["accessors"][ai]
+        bv = j["bufferViews"][a["bufferView"]]
+        off = b0 + bv.get("byteOffset", 0) + a.get("byteOffset", 0)
+        return np.frombuffer(d, dtype=dtype, count=a["count"] * comps, offset=off).reshape(-1, comps).copy()
+
+    pos = read(prim["attributes"]["POSITION"], np.float32, 3)
+    nrm = read(prim["attributes"]["NORMAL"], np.float32, 3)
+    uv = read(prim["attributes"]["TEXCOORD_0"], np.float32, 2)
+    idx = read(prim["indices"], np.uint32 if j["accessors"][prim["indices"]]["componentType"] == 5125 else np.uint16, 1).astype(np.uint32)
+    depth = np.ones(len(pos))
+    if spec.get("flatten"):
+        y_from, k = spec["flatten"]
+        t = np.clip((pos[:, 1] - y_from) / 0.06, 0, 1)
+        depth = 1 - (1 - k) * t * t * (3 - 2 * t)
+    sc = spec["scale"]
+    out_p = np.stack([pos[:, 2], pos[:, 1] - spec["y_hand"], -pos[:, 0] * depth], axis=1) * sc
+    out_n = np.stack([nrm[:, 2], nrm[:, 1], -nrm[:, 0] / depth], axis=1)
+    out_n /= np.linalg.norm(out_n, axis=1)[:, None]
+    buf = bytearray()
+    views, accs = [], []
+
+    def add(arr, target, ctype, typ, minmax=False):
+        while len(buf) % 4:
+            buf.append(0)
+        views.append({"buffer": 0, "byteOffset": len(buf), "byteLength": arr.nbytes, "target": target})
+        buf.extend(arr.tobytes())
+        a = {"bufferView": len(views) - 1, "componentType": ctype, "count": len(arr), "type": typ}
+        if minmax:
+            a["min"] = arr.min(axis=0).tolist()
+            a["max"] = arr.max(axis=0).tolist()
+        accs.append(a)
+        return len(accs) - 1
+
+    p2 = {"attributes": {"POSITION": add(out_p.astype(np.float32), 34962, 5126, "VEC3", True), "NORMAL": add(out_n.astype(np.float32), 34962, 5126, "VEC3"),
+                         "TEXCOORD_0": add(uv, 34962, 5126, "VEC2")}, "indices": add(idx.reshape(-1), 34963, 5125, "SCALAR"), "material": 0}
+    mat = dict(j["materials"][0])
+    mat["name"] = "hilt"
+    images = []
+    for im in j["images"]:
+        ext = ".png" if im.get("mimeType") == "image/png" else ".jpg"
+        images.append({"uri": "hilts/%s_%s%s" % (spec["src"], im["name"], ext)})
+    name = os.path.basename(dst)[:-4]
+    g = {"asset": {"version": "2.0", "generator": "hollow-reign gear_gen (baked hilt)"}, "scene": 0, "scenes": [{"nodes": [0]}],
+         "nodes": [{"name": name, "mesh": 0}], "meshes": [{"name": name, "primitives": [p2]}], "materials": [mat],
+         "textures": j["textures"], "images": images, "samplers": [{"magFilter": 9729, "minFilter": 9987, "wrapS": 10497, "wrapT": 10497}],
+         "buffers": [{"byteLength": len(buf)}], "bufferViews": views, "accessors": accs}
+    for t in g["textures"]:
+        t["sampler"] = 0
+    while len(buf) % 4:
+        buf.append(0)
+    js = json.dumps(g, separators=(",", ":")).encode()
+    while len(js) % 4:
+        js += b" "
+    with open(dst, "wb") as f:
+        f.write(struct.pack("<III", 0x46546C67, 2, 12 + 8 + len(js) + 8 + len(buf)))
+        f.write(struct.pack("<II", len(js), 0x4E4F534A))
+        f.write(js)
+        f.write(struct.pack("<II", len(buf), 0x004E4942))
+        f.write(buf)
+    return {"tris": len(idx) // 3, "verts": len(out_p), "bytes": os.path.getsize(dst), "lo": out_p.min(axis=0), "hi": out_p.max(axis=0), "pos": out_p}
+
+
+def build_hybrids(manifest):
+    for hid, spec in HYBRIDS.items():
+        base = spec["base"]
+        sc, yh = spec["scale"], spec["y_hand"]
+        y0 = (spec["seat"] - yh) * sc - 0.013
+        P = dict(spec["P"], y0=round(y0, 4))
+        hilt = bake_hilt(spec, os.path.join(OUT, hid + "__hilt0.glb"))
+        parts = {"hilt0": {k: hilt[k] for k in ("tris", "verts", "bytes")}}
+        info = {}
+        for t in range(4):
+            info_t, st = export("%s__blade%d" % (hid, t), lambda B, q: SWORDS[base](B, q, {"blade_tier": t, "grip_tier": 0, "P": P}, ("blade",)))
+            parts["blade%d" % t] = st
+            info = info_t if t == DEFAULT_MOD[base][0] else info
+        # <id>.glb must exist for GearModel.exists(): it is the default blade alone; spawn() always joins the parts
+        bt = DEFAULT_MOD[base][0]
+        _, st = export(hid, lambda B, q: SWORDS[base](B, q, {"blade_tier": bt, "grip_tier": 0, "P": P}, ("blade",)))
+        g0, g1 = [(y - yh) * sc for y in spec["grip"]]
+        # optional ring overlays for the handle tiers a generated grip cannot change itself
+        pos = hilt["pos"]
+        for tier, ys in ((2, (0.3, 0.7)), (3, (0.2, 0.4, 0.6, 0.8))):
+            def rings(B, q, ys=ys):
+                for u in ys:
+                    y = g0 + (g1 - g0) * u
+                    near = pos[np.argsort(np.abs(pos[:, 1] - y))[:16]]
+                    rx = float(np.abs(near[:, 0]).max()) + 0.0012
+                    rz = float(np.abs(near[:, 2]).max()) + 0.0012
+                    collar(B, y - 0.0016, y + 0.0016, rx, rz, "gold", 12 if q >= 1 else 6, 0.0008)
+                return {}
+            _, st = export("%s__rings%d" % (hid, tier), rings)
+            parts["rings%d" % tier] = st
+        blade_stats = parts["blade%d" % bt]
+        info.update({"name": manifest.get(base, {}).get("name", base) + " (hybrid)", "hybrid": True, "base": base, "hilt_source": "hilts/%s.glb" % spec["src"],
+                     "tris": blade_stats["tris"] + hilt["tris"], "tris_lod": blade_stats["tris_lod"] + hilt["tris"], "verts": blade_stats["verts"] + hilt["verts"],
+                     "bytes": blade_stats["bytes"] + hilt["bytes"], "parts": parts,
+                     "tip": round(y0 + info["blade"], 4), "pommel": round(-float(hilt["lo"][1]), 4), "grip_clear": round(g1 - g0, 4),
+                     "guard_span": round(float(hilt["hi"][0] - hilt["lo"][0]), 4), "hands": spec["hands"],
+                     "lo": [round(float(min(hilt["lo"][i], info["lo"][i])), 4) for i in range(3)],
+                     "hi": [round(float(max(hilt["hi"][i], info["hi"][i])), 4) for i in range(3)],
+                     "materials": info["materials"] + ["hilt"], "blade_tint": spec["tint"], "blade_rough_max": spec["rough_max"],
+                     "default_mod": {"blade_tier": bt, "grip_tier": 0, "ore": "steel", "sharpened": True}, "rig_scale": 1.15})
+        manifest[hid] = info
+        print("%-14s blade %d + hilt %d tris, hilt %.0f kB (+ %d kB shared textures), grip %.3f m, guard %.3f m, tip %.3f" % (
+            hid, blade_stats["tris"], hilt["tris"], hilt["bytes"] / 1024,
+            sum(os.path.getsize(os.path.join(OUT, "hilts", f)) for f in os.listdir(os.path.join(OUT, "hilts")) if f.startswith(spec["src"] + "_") and not f.endswith(".import")) // 1024,
+            g1 - g0, info["guard_span"], info["tip"]))
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
+    if sys.argv[1:] == ["--hybrids"]:
+        mpath = os.path.join(OUT, "gear_manifest.json")
+        manifest = json.load(open(mpath))
+        build_hybrids(manifest)
+        json.dump(manifest, open(mpath, "w"), indent=1)
+        return
     want = sys.argv[1:] or (list(SWORDS) + list(SHIELDS))
     textures()
     engrave_textures()
     mpath = os.path.join(OUT, "gear_manifest.json")
     old = json.load(open(mpath)) if os.path.exists(mpath) else {}
-    manifest = {k: old[k] for k in ["_mods"] + list(SWORDS) + list(SHIELDS) if k in old}
+    manifest = {k: old[k] for k in ["_mods"] + list(SWORDS) + list(SHIELDS) + list(HYBRIDS) if k in old}
     manifest["_mods"] = {
         "ores": ORES, "blade_tiers": 4, "grip_tiers": 4,
         "naming": "<id>.glb is the sword at default_mod. Basic swords also have <id>__blade<0-3>.glb and <id>__hilt<0-3>.glb "

@@ -14,6 +14,7 @@ extends Node3D
 ##     --cheap            the Performance / reduced-motion path of Recall
 ##     --compare          the old Wayfarer model beside the new one
 ##     --lineup[=swords|shields]  the collection upright, side by side      --mods  forge progression of --item
+##     --lineup=<id>,<id>         those pieces only, hybrids included (wayfarer,wayfarer_h); --focus --dist to close in
 ##     --hand             in the knight's hand (the piece replaces what the rig carries, in this viewer only)
 
 var args := {}
@@ -268,12 +269,20 @@ func _compare() -> void:
 ## The collection standing side by side, pommels on one line. Twin Relics shows both of its pair.
 func _lineup(which: String) -> void:
 	var list: Array = []
-	if which != "shields":
+	var custom := which.contains(",") or GearModel.exists(which)
+	var drop := 0.0                # custom lists stand hand to hand, not pommel to pommel
+	if custom:
+		# --lineup=<id>,<id>,..: these pieces only (hybrids too), hands on one line; --focus=<y> --dist=<m> frame a part
+		for id: String in which.split(",", false):
+			list.append([id, 1.0])
+			drop = maxf(drop, -float(GearModel.info(id).get("lo", [0, 0, 0])[1]))
+		which = "none"
+	if which != "shields" and not custom:
 		for id: String in GearModel.ids("sword"):
 			list.append([id, 1.0])
 			if GearModel.info(id).get("pair", false):
 				list.append([id, -1.0])
-	if which != "swords":
+	if which != "swords" and not custom:
 		for id: String in GearModel.ids("shield"):
 			list.append([id, 1.0])
 	var x := 0.0
@@ -295,18 +304,21 @@ func _lineup(which: String) -> void:
 			n.position = Vector3(x + (lo.x + hi.x) * 0.5, -lo.y, 0)
 		else:
 			n.rotation_degrees.y = yaw
-			n.position = Vector3(x - (lo.x + hi.x) * 0.5 * float(e[1]), -lo.y, 0)
+			n.position = Vector3(x - (lo.x + hi.x) * 0.5 * float(e[1]), drop if custom else -lo.y, 0)
 		nodes.append(n)
 		if e[1] > 0.0:
 			_label(str(info.get("name", e[0])) + ("\n" + str(info.get("role", "")) if args.has("roles") else ""), Vector3(x, -0.06, 0), 0.0011)
 		x += w * 0.5 + (0.05 if shield else 0.035)
-		top = maxf(top, hi.y - lo.y)
+		top = maxf(top, (hi.y + drop) if custom else (hi.y - lo.y))
 	for n: Node3D in nodes:
 		n.position.x -= x * 0.5
 	for c in get_children():
 		if c is Label3D:
 			c.position.x -= x * 0.5
-	_camera(Vector3(0, top * 0.5 - 0.03, 0), maxf(x / 0.92, (top + 0.14) / 0.52))
+	if args.has("focus"):
+		_camera(Vector3(0, drop + float(args.focus), 0), float(args.get("dist", "0.6")))
+	else:
+		_camera(Vector3(0, top * 0.5 - 0.03, 0), maxf(x / 0.92, (top + 0.14) / 0.52))
 
 ## Forge progression of one basic sword: each track at its ends, then the blade metals.
 func _mods(id: String) -> void:

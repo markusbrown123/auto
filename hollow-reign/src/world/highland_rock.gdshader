@@ -26,7 +26,7 @@ void fragment() {
 	vec3 bw = wnrm * wnrm;
 	float l = dot(vec3(0.35, 0.5, 0.15), texture(rock_tex, wpos.xy * 0.11).rgb * bw.z + texture(rock_tex, wpos.zy * 0.11).rgb * bw.x + texture(rock_tex, wpos.xz * 0.11).rgb * bw.y);
 	float bed = wpos.y * 0.9 + n2 * 3.0;
-	float strata = smoothstep(0.2, 0.8, fract(bed)) * (1.0 - smoothstep(0.86, 1.0, fract(bed)));
+	float strata = 0.5 + 0.5 * sin(bed * 6.2832);
 	vec3 c = mix(rock_a, rock_b, clamp(l * 1.7 - 0.12 + (strata - 0.5) * 0.24 + (n3 - 0.5) * 0.2, 0.0, 1.0)) * (0.8 + 0.4 * n2);
 	c *= mix(0.45, 1.0, smoothstep(sea_level + 1.0, sea_level + 9.0, wpos.y));
 	float top = smoothstep(0.62, 0.86, wnrm.y + (n3 - 0.5) * 0.3);

@@ -10,4 +10,10 @@ art/takes/*.avi
 art/anim_src/
 art/voice_catalog/
 art/gear_hilts_src/
-# The .import files beside extracted model textures ARE tracked: they hold the compression settings the phone build needs.
+assets/models/*.jpg.import
+assets/models/*.png.import
+# Exception: the knights' textures are referenced directly by the armour-part materials, so they and their import settings must be in the repository.
+!assets/models/knight_*.jpg
+!assets/models/knight_*.png
+!assets/models/knight_*.jpg.import
+!assets/models/knight_*.png.import

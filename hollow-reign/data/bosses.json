@@ -430,6 +430,10 @@
      ]
     }
    ],
+   "traits": {
+    "parry_open": 0.8,
+    "dodge_open": 0.9
+   },
    "poise": 50,
    "press": 0.5,
    "footwork": {
@@ -613,6 +617,10 @@
      ]
     }
    ],
+   "traits": {
+    "parry_open": 0.9,
+    "dodge_open": 1.35
+   },
    "poise": 85,
    "press": 0.35,
    "footwork": {
@@ -5232,6 +5240,10 @@
      ]
     }
    ],
+   "traits": {
+    "parry_open": 1.25,
+    "dodge_open": 1.25
+   },
    "poise": 120,
    "press": 0.25,
    "footwork": {
@@ -5609,6 +5621,10 @@
      ]
     }
    ],
+   "traits": {
+    "parry_open": 1.35,
+    "dodge_open": 0.85
+   },
    "poise": 70,
    "press": 0.6,
    "footwork": {

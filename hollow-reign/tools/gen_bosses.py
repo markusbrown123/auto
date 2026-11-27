@@ -583,6 +583,11 @@ TRAITS = {
  "forgotten_monarch": {"marks": 4, "mark_mult": 1.5, "parry_open": 1.15},
  "devourer": {"lifesteal": 0.25, "frenzy": 0.2},
  "azhurion": {"parry_open": 0.85, "frenzy": 0.18},               # armoured: a parry buys less; it speeds up as the engine fails                # it feeds on what it takes
+ # the slice's road foes each give a different opening (the Hollow Soldier and the Sentinel keep the plain rules)
+ "banneret": {"parry_open": 0.8, "dodge_open": 0.9},            # light and quick: back on guard sooner than most
+ "pike_sergeant": {"parry_open": 1.35, "dodge_open": 0.85},     # a long haft beaten aside is slow to bring back; a sidestep he covers
+ "rampart_brute": {"parry_open": 0.9, "dodge_open": 1.35},      # the axe that misses buries itself; meeting it barely moves him
+ "gate_colossus": {"parry_open": 1.25, "dodge_open": 1.25},     # slow to gather itself after anything
 }
 for f in B:
     if f["id"] in TRAITS:

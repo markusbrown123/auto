@@ -240,6 +240,10 @@ static func bulkhead(k: Kit, from: Vector3, to: Vector3, h: float, far: bool = t
 
 ## A standing monolith built in code (the far cousin of env_fu_pylon): a four-sided taper with a seam of light.
 static func monolith(k: Kit, at: Vector3, h: float, w: float, yaw: float = 0.0, far: bool = true) -> void:
+	if not Corridor.lanes.is_empty():
+		at = Corridor.clear(at, w * 0.8, "monolith")
+		if at == Vector3.INF:
+			return
 	var turn := deg_to_rad(yaw) + PI * 0.25
 	Highland._prism(k.pale(far), at, w * 0.72, w * 0.4, h, 4, turn, Vector3(1, 1, 0.6))
 	Highland._prism(k.alloy(far), at, w * 0.95, w * 0.8, h * 0.1, 4, turn, Vector3(1, 1, 0.75))
@@ -283,6 +287,10 @@ static func spire(k: Kit, at: Vector3, h: float, r: float, far: bool = true, bro
 
 ## A mast with a blade of light at its head (the kit's lamp post and pennant): steady, the region's own lamp colour.
 static func mast(k: Kit, at: Vector3, h: float, far: bool = true, blade: float = 1.0) -> void:
+	if not Corridor.lanes.is_empty():
+		at = Corridor.clear(at, 0.3, "mast")
+		if at == Vector3.INF:
+			return
 	var alloy := k.alloy(far)
 	Highland._prism(alloy, at, 0.09, 0.05, h, 5)
 	Highland._prism(alloy, at, 0.26, 0.12, 0.22, 5)
@@ -292,6 +300,10 @@ static func mast(k: Kit, at: Vector3, h: float, far: bool = true, blade: float =
 
 ## A standing beacon: a short mast, a ceramic collar, a tall light element between two blades.
 static func beacon(k: Kit, at: Vector3, h: float, yaw: float = 0.0) -> void:
+	if not Corridor.lanes.is_empty():
+		at = Corridor.clear(at, 0.5, "beacon")
+		if at == Vector3.INF:
+			return
 	var b := _yaw(yaw)
 	var alloy := k.alloy(false)
 	for i in 3:
@@ -374,6 +386,12 @@ static func prop(a: Arena, id: String, height: float, pos: Vector3, yaw: float =
 	var lo2: Vector3 = PropModel._fit_cache[key][0]
 	var hi2: Vector3 = PropModel._fit_cache[key][1]
 	var s := height / maxf(hi2.y - lo2.y, 0.001)
+	if not Corridor.lanes.is_empty() and height > 0.4:
+		# nothing of the kit stands in the knight's way: pushed clear of the walking corridor, or left out (Corridor)
+		pos = Corridor.clear(pos, 0.42 * maxf(hi2.x - lo2.x, hi2.z - lo2.z) * s, "prop " + id)
+		if pos == Vector3.INF:
+			root.free()
+			return null
 	var holder := Node3D.new()
 	holder.name = "Fu_" + id
 	a.add_child(holder)
@@ -620,6 +638,10 @@ static func _check(a: Arena, _k: Kit) -> void:
 # ---------------------------------------------------------------- more shapes, for the other regions
 ## A colossal trunk built in code: a taper with buttress roots, in bark. The Blackwood's wall of trees.
 static func trunk(k: Kit, at: Vector3, h: float, r: float) -> void:
+	if not Corridor.lanes.is_empty():
+		at = Corridor.clear(at, r * 1.4, "trunk")
+		if at == Vector3.INF:
+			return
 	var sf := k.tool("bark")
 	var turn := k.rng.randf() * TAU
 	Highland._prism(sf, at + Vector3(0, -0.5, 0), r, r * 0.62, h, 9, turn)
@@ -642,6 +664,10 @@ static func trunk(k: Kit, at: Vector3, h: float, r: float) -> void:
 
 ## A six-sided column with an alloy foot and head and a band of light let into it at head height.
 static func column(k: Kit, at: Vector3, h: float, r: float, far: bool = true, lit: String = "lit") -> void:
+	if not Corridor.lanes.is_empty():
+		at = Corridor.clear(at, r * 1.1, "column")
+		if at == Vector3.INF:
+			return
 	Highland._prism(k.pale(far), at, r, r * 0.9, h, 6)
 	Highland._prism(k.alloy(far), at, r * 1.5, r * 1.15, 0.5, 6)
 	Highland._prism(k.alloy(far), at + Vector3(0, h - 0.5, 0), r * 1.1, r * 1.5, 0.5, 6)

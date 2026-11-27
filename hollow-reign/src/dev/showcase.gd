@@ -57,6 +57,8 @@ func _process(dt: float) -> void:
 				duel._on_block(true)
 		"dodge", "roll":
 			var side := -1 if str(a.dodge) == "L" else 1
+			if OS.get_cmdline_user_args().has("--side=L") or OS.get_cmdline_user_args().has("--side=R"):
+				side = -1 if OS.get_cmdline_user_args().has("--side=L") else 1      # dev: every dodge or roll to one side
 			if not _acted and s.b_t <= 0.22:
 				_acted = true
 				s.input_dodge(side)

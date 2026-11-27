@@ -673,6 +673,8 @@ func _dev_boot() -> void:
 	Game.save_dir_override = OS.get_cache_dir() + "/hollow_reign_dev" + str(_args.get("savedir", ""))   # parallel captures keep apart
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	Game.profile = Game.default_profile()
+	if _args.has("calm"):
+		Game.settings.reduce_motion = true      # dev: --calm films with Reduce motion on (the settings file is not written)
 	if _args.has("quality"):
 		# dev: --quality=0|1|2 measures a scene on a given graphics preset without touching the settings file
 		Game.settings.quality = int(_args.quality)

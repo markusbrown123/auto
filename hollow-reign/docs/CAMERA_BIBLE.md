@@ -28,14 +28,31 @@ Chosen per fight: `dragon` if the rig is a `DragonRig`; `giant` if scale ≥ 1.3
 
 | shot | when | numbers (relative to the class row) | ease rate |
 |---|---|---|---|
-| COMBAT | default | class row; +0.6 × sidestep offset in X; fov −5 when the foe has backed off (`b_far`) | 6 |
+| COMBAT | default | class row; fov −5 when the foe has backed off (`b_far`) | 6 |
 | GUARD | foe winding up a slam, sweep, breath, or any blow of 30+ damage | back +0.45, side +0.1, y −0.08, fov +4 | 4 |
 | OPENING | `sim.boss_open()` (recovering or staggered) | back −0.35, side +0.55, y +0.12, fov −5; aims at 0.82 × H, 0.3 m in front of the foe | 3.5 |
 
 Modifiers on all three:
 - **exchange** (`cue("exchange")`, on a landed cut, a block, or a hit taken): 0.7 s of back −0.18, fov −2.5.
-- **reposition** (`cue("reposition", {t})`, dodge 0.7 s, roll 1.0 s): back +0.7, side +0.25, y +0.1, fov +3; eases out at 5, back at 2.
-- **keep the knight in frame**: if the knight would pass 92% of the half-width of the view, the aim turns toward them by the excess.
+- **reposition** (`cue("reposition", {t, amt})`, sidestep 0.7 s at 0.9, roll 1.0 s at 1.0): the move shot, below.
+- **keep the knight in frame**: if the middle of the knight's body would pass 92% of the half-width of the view, the aim turns toward them by the excess. In a move the limit comes in by the body's own half-width (atan(0.85 m / distance)), and it is applied to the eased pose as well, so the aim cannot trail a fast body out of the frame.
+
+## The move shot: rolls and sidesteps
+
+What the player sees when the knight sidesteps (1.25 m) or rolls (2.55 m): the knight whole, at a readable size, at the left of the frame for the whole move; the foe and its blow in the middle of the frame for the whole move; one eased turn of the camera about the duel that starts with the knight and ends with them; then the close combat framing eases back. Rules, timing and distances are the sim's and the duel's and are unchanged.
+
+How it is made (all in the base shots, so GUARD and OPENING get it too):
+
+- **The knight goes round the circle they stand on** (`Duel._footwork`): `p_side` is an arc about the arena's centre, not a tangent, and it is paid out at the pace of the clip being played (`FighterRig.carry_step`) instead of 14/s. The rig's origin and the body are then the same place, a roll's 2.55 m is 2.55 m of ground, and nothing curls back in toward the line afterwards.
+- **One turn, critically damped** (`CamDirector.axis`, called from `Duel._footwork`): `ring_cam` goes to the angle the line between the fighters will have when the move in hand is over (`ring + (p_side + p_side_owed) / radius`), smoothing time `AXIS_TIME` 0.34 s (×1.6 with `reduce_motion`). No step in speed at the start, never past the target. A sidestep turns the camera 45–57°, a roll 66° (dragon) to 117° (man-sized foe): the pair stand on a line through the arena's centre, so the line turns by distance / radius.
+- **Station.** The class row in the frame of `ring_cam` (it no longer chases `p_side`). On top of the eased pose, not eased itself: 0.85 × how far sideways the knight's hips really are from the line in that frame, beyond a 0.15 m dead band (0.4 with `reduce_motion`). A quick sidestep gets ahead of the turn (up to 30°); the lens goes most of the way with it, so the knight is seen to cross a little of the frame but not as far as the foe.
+- **Stand-off.** The lens is kept at least `_floor` metres across the floor from the knight's hips (their real place, read from the skeleton), by moving away from them and out to the sword side in equal parts (straight back would bring the knight in front of the foe). `_floor` = REST_MIN 1.5 m at rest, rising with smoothstep(`_wide`) to max(MOVE_MIN 3.2, 1.3 × the distance at which the frame's lower edge meets the floor + 0.6). At 3.2 m a standing knight is about 0.6–0.7 of the frame's height with the feet in frame; mid-tumble about 0.3. Applied to the target and again to the eased pose, so the pose ease cannot trail the knight into the lens.
+- **Aim and lens.** The aim comes down to 0.1 m under the lens's height (so the floor under the knight is in frame with a short step back instead of a long one; the foe is tall enough to stay in), fov +4, pose ease rate 6 → 12. `_wide` rises at 6/s to the cue's `amt` and falls at 2/s; it is held up for as long as the rig is in its dodge state (a roll in slowed time outlasts the cue).
+- **Keep-out** (`KEEP_OUT` 0.9 m): after everything else, if any joint of either fighter, a weapon's point or a shield is within 0.9 m of the lens, the lens backs away from it and rises.
+- **`reduce_motion`**: slower turn (×1.6), no fov change, a shorter step back (+0.4 instead of +0.6), less sideways follow; all ease rates ×0.6 as elsewhere. The turn itself cannot be made smaller: the camera has to end on the sword side of the new line.
+- **The line of action** is measured between the fighters' real places (hips), not their nominal ones.
+
+`--oldrollcam` (dev) films the camera, the footwork and the roll's body placement as they were before this pass. `--camlog=<file>` writes one CSV line a frame of the fight: nearest joint to the lens, the knight's box on screen, share of the knight's joints in frame, share of the foe's joints in frame and not behind the knight's box, the knight's angle from the camera's axis, camera speed and turn rate, fov. `--side=L|R` makes the `--showcase=dodge|roll` driver always go one way; `--calm` turns Reduce motion on.
 
 ## Cued shots (FIGHT)
 
@@ -89,3 +106,4 @@ reveal 6 (intro only) › struggle 5 = story_beat 5 › clash 4 › phase 3 › 
 - `HR_CAM="side,back,y,fov,look_h,look_x"` overrides the class row.
 - `HR_CAM_DEV="shot=struggle"` holds a shot during the fight; `kill@3` / `die@3` leaves the foe / knight on 1 hp three seconds in, to film phase changes, the finisher or the death.
 - `HR_CAM_SEEN=1` marks the foe's spoken intro as seen, to film the silent intro.
+- `--oldrollcam`, `--camlog=<file>`, `--side=L|R`, `--calm`: see "The move shot".

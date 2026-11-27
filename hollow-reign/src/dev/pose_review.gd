@@ -635,6 +635,8 @@ func _run() -> void:
 			t += dt
 			rig.position += _vel * dt * rig.scale.x
 			var pay := _owe * (1.0 - exp(-dt * 14.0))
+			if rig is FighterRig and not CamDirector.old_roll:
+				pay = rig.carry_step(_owe, pay)      # as the duel does
 			_owe -= pay
 			var pay2 := _push * (1.0 - exp(-dt * 6.0))
 			_push -= pay2

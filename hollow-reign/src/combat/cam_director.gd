@@ -24,6 +24,12 @@ const CLASS := {
 }
 const ARENA_R := 6.4          # some arenas stand scenery from about 7 m out: stay inside it
 const MIN_Y := 0.25
+## Rolls and sidesteps (docs/CAMERA_BIBLE.md "The move shot"). `--oldrollcam` films what was there before.
+static var old_roll: bool = OS.get_cmdline_user_args().has("--oldrollcam")
+const AXIS_TIME := 0.34       # seconds: smoothing time of the camera's swing about the duel (critically damped)
+const KEEP_OUT := 0.9         # metres: no joint of either fighter comes nearer the lens than this
+const MOVE_MIN := 3.2         # metres from the lens to the knight's hips while they roll or sidestep, at least
+const REST_MIN := 1.5         # and the rest of the time
 
 var duel: Duel
 var cam: Camera3D
@@ -41,6 +47,7 @@ var _tight := 0.0             # 0..1, blows being exchanged: framing tightens
 var _tight_left := 0.0
 var _wide := 0.0              # 0..1, a roll or big sidestep: framing opens out, then comes back
 var _wide_left := 0.0
+var _wide_amt := 1.0          # how far it opens: 1 for a roll, less for a sidestep (the knight stays on their feet)
 var cls := "humanoid"         # which CLASS row this foe uses
 var _side := 0.0              # drift with the knight's dodges
 var _settle := 0.0            # seconds left of the slow settle out of a cinematic into combat
@@ -54,6 +61,13 @@ var _S := 1.0                 # foe scale
 var _big := 1.0               # how much room the foe needs (dragons: long as well as tall)
 var _dragon := false
 var _calm := false            # reduce_motion
+var _KB := Vector3.ZERO       # where the knight's body really is on the floor (ring frame): mid-roll it is not at _K
+var _FB := Vector3.ZERO       # and the foe's
+var _kp := PackedVector3Array()      # the knight's joints, sword point and shield (world)
+var _fp := PackedVector3Array()      # the foe's
+var _ax_v := 0.0              # angular speed of the swing about the duel
+var _floor := REST_MIN        # the least distance from lens to knight in force now
+var _lat := 0.0               # metres the lens has gone sideways with a knight ahead of the turn
 
 
 func _init(d: Duel, c: Camera3D) -> void:
@@ -74,6 +88,7 @@ func cue(name: String, params: Dictionary = {}) -> void:
 			return
 		"reposition":
 			_wide_left = float(params.get("t", 0.8))
+			_wide_amt = float(params.get("amt", 1.0))
 			return
 		"struggle":
 			if bool(params.get("on", true)):
@@ -111,7 +126,12 @@ func update(delta: float, trauma: float, clock: float) -> void:
 	_tight_left = maxf(0.0, _tight_left - delta)
 	_settle = maxf(0.0, _settle - delta)
 	_wide_left = maxf(0.0, _wide_left - delta)
-	_wide = lerpf(_wide, 1.0 if _wide_left > 0.0 else 0.0, 1.0 - exp(-delta * (5.0 if _wide_left > 0.0 else 2.0)))
+	if not old_roll and duel.stage == Duel.Stage.FIGHT and duel.player_rig.mode == FighterRig.Mode.DODGE:
+		_wide_left = maxf(_wide_left, 0.2)      # (a roll in slowed time outlasts the cue: the move shot holds until the knight is up)
+	if old_roll:
+		_wide = lerpf(_wide, 1.0 if _wide_left > 0.0 else 0.0, 1.0 - exp(-delta * (5.0 if _wide_left > 0.0 else 2.0)))
+	else:
+		_wide = lerpf(_wide, _wide_amt if _wide_left > 0.0 else 0.0, 1.0 - exp(-delta * (6.0 if _wide_left > 0.0 else 2.0)))
 	_tight = lerpf(_tight, 1.0 if _tight_left > 0.0 else 0.0, 1.0 - exp(-delta * 5.0))
 	_side = lerpf(_side, duel.player_rig._root.x * 0.6, 1.0 - exp(-delta * 5.0))
 
@@ -137,8 +157,10 @@ func update(delta: float, trauma: float, clock: float) -> void:
 		rate *= 0.6
 	if duel.stage == Duel.Stage.FIGHT:
 		# never cross the line of action: stay on the knight's sword side of the line between the fighters
-		var u := clampf(inverse_lerp(_F.z, _K.z, pos.z), 0.0, 1.3)
-		pos.x = maxf(pos.x, lerpf(_F.x, _K.x, u) + 0.7)
+		var lk := _K if old_roll else _KB
+		var lf := _F if old_roll else _FB
+		var u := clampf(inverse_lerp(lf.z, lk.z, pos.z), 0.0, 1.3)
+		pos.x = maxf(pos.x, lerpf(lf.x, lk.x, u) + 0.7)
 	var k := 1.0 - exp(-delta * rate)
 	if cut or not _started:
 		k = 1.0
@@ -147,9 +169,24 @@ func update(delta: float, trauma: float, clock: float) -> void:
 	_look = _look.lerp(look, k)
 	_roll = lerpf(_roll, float(s.get("roll", 0.0)), k)
 	cam.fov = lerpf(cam.fov, float(s.fov), k)
+	var at := _pos
+	if _moving():
+		# A quick sidestep gets ahead of the turn. The lens goes sideways with the knight's hips, less a dead band
+		# (so it does not sway with a guard) and not the whole way (with reduce_motion less than half): the knight is
+		# seen to cross a little of the frame, never as far as the foe. This is not eased: it is the knight's own motion.
+		var ahead := signf(_KB.x) * maxf(absf(_KB.x) - 0.15, 0.0) * (0.4 if _calm else 0.85)
+		_lat = lerpf(_lat, ahead, 1.0 - exp(-delta * 30.0))
+		at.x += _lat
+		# the eased pose trails the knight's own speed: it may not trail them into the lens
+		at = _stand_off(at, _floor)
+		_look = _keep_knight(at, _look, cam.fov)
+	else:
+		_lat = 0.0
 
 	var turn := Basis(Vector3.UP, duel.ring_cam)
-	var wp := turn * _pos
+	var wp := turn * at
+	if _moving():
+		wp = _keep_out(wp)
 	# stay inside the arena's props and above the floor
 	var flat := Vector2(wp.x, wp.z)
 	if flat.length() > ARENA_R:
@@ -160,6 +197,169 @@ func update(delta: float, trauma: float, clock: float) -> void:
 	cam.position = wp + off
 	cam.look_at(turn * _look + off * 0.5)
 	cam.rotation.z += _roll + _noise.get_noise_2d(clock * 50.0, 9.0) * 0.035 * shake
+	if _log != null:
+		_log_frame(delta)
+
+
+# ================================================================ rolls and sidesteps
+## True while the fight's own framing is on and the roll/dodge pass is in force.
+func _moving() -> bool:
+	return not old_roll and duel.stage == Duel.Stage.FIGHT and shot in ["combat", "guard", "opening", "clash"]
+
+## The camera's swing about the duel (`Duel.ring_cam`), called from the duel's footwork. `target` is the angle the
+## line between the fighters will have once the sidestep or roll in hand is over, so the camera sets off with the
+## knight and arrives with them: one eased turn, critically damped (no jump at the start, no overshoot at the end).
+func axis(dt: float, target: float) -> float:
+	var st := AXIS_TIME * (1.6 if bool(Game.settings.get("reduce_motion", false)) else 1.0)
+	var om := 2.0 / st
+	var x := om * dt
+	var e := 1.0 / (1.0 + x + 0.48 * x * x + 0.235 * x * x * x)
+	var change := wrapf(duel.ring_cam - target, -PI, PI)
+	var temp := (_ax_v + om * change) * dt
+	_ax_v = (_ax_v - om * temp) * e
+	var out := change + temp
+	out *= e
+	if (change > 0.0) != (out > 0.0):      # never past where it is going
+		out = 0.0
+		_ax_v = 0.0
+	return target + out
+
+## A fighter's joints, the point of its weapon and what it carries (world): what the lens must keep clear of.
+func _points(rig: Node3D) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	var sk = rig.get("skin")
+	if sk != null and sk.ok and sk.skel != null:
+		var x: Transform3D = sk.skel.global_transform
+		for i: int in sk.skel.get_bone_count():
+			out.append(x * sk.skel.get_bone_global_pose(i).origin)
+	else:
+		out.append(rig.global_position)
+		out.append(rig.chest_point())
+		if rig.get("head") != null:
+			out.append(rig.head.global_position)
+	out.append(rig.blade_tip())
+	for n: String in ["weapon_r", "weapon_l", "shield"]:
+		var node = rig.get(n)
+		if node != null and node is Node3D and node.is_visible_in_tree():
+			out.append(node.global_position)
+	return out
+
+## Where a body stands on the floor (ring frame): under its hips when it has a skeleton.
+func _body_at(rig: Node3D) -> Vector3:
+	var w: Vector3 = rig.global_position
+	var sk = rig.get("skin")
+	if sk != null and sk.ok and sk.skel != null and sk is SkinDriver and sk.bone.has("Hips"):
+		w = sk.skel.global_transform * sk.skel.get_bone_global_pose(int(sk.bone["Hips"])).origin
+	var r := _ring(w)
+	return Vector3(r.x, 0, r.z)
+
+## `pos` (ring frame) moved away from the knight's body until it is `least` metres off across the floor: away from
+## them and out to the sword side in equal parts, so that stepping back does not bring the knight in front of the foe.
+func _stand_off(pos: Vector3, least: float) -> Vector3:
+	var d := Vector2(pos.x - _KB.x, pos.z - _KB.z)
+	if d.length() >= least or d.length() < 0.01:
+		return pos
+	var dir := (d.normalized() + Vector2(0.7, 0.0)).normalized()
+	# the point along `dir` from `pos` that is `least` from the knight
+	var b := d.dot(dir)
+	var go := -b + sqrt(maxf(b * b - d.length_squared() + least * least, 0.0))
+	return Vector3(pos.x + dir.x * go, pos.y, pos.z + dir.y * go)
+
+## Keep-out: if a joint of either fighter is within KEEP_OUT of the lens (world), the lens backs away from it and rises.
+func _keep_out(wp: Vector3) -> Vector3:
+	for pass_i: int in 2:
+		var near := 1e9
+		var at := Vector3.ZERO
+		for pts: PackedVector3Array in [_kp, _fp]:
+			for p: Vector3 in pts:
+				var d := wp.distance_to(p)
+				if d < near:
+					near = d
+					at = p
+		if near >= KEEP_OUT or near < 0.001:
+			break
+		var away := wp - at
+		away.y = absf(away.y) + 0.35 * away.length()
+		wp += away.normalized() * (KEEP_OUT - near)
+	return wp
+
+## How far across the floor the knight must be from the lens for their feet to be in the frame.
+func _feet_dist(pos: Vector3, look: Vector3, fov: float) -> float:
+	var flat := Vector2(look.x - pos.x, look.z - pos.z).length()
+	var pitch := atan2(look.y - pos.y, maxf(flat, 0.1))
+	var down := deg_to_rad(fov) * 0.5 - pitch
+	return pos.y / tan(clampf(down, 0.12, 1.2))
+
+
+# ================================================================ dev: measuring the move shot
+## `--camlog=<file>`: one line a frame of the fight (CSV): f (frame), t, mv (2 in a roll or sidestep, 1 in its settle), near (m, nearest
+## joint of either fighter to the lens), kx0 ky0 kx1 ky1 (the knight's box on screen, 0..1, unclipped), kin (share of
+## the knight's joints inside the frame less a 2% margin), kh (height of the box, share of the frame), fvis (share of
+## the foe's joints in the frame and not behind the knight's box), lag (degrees the knight is round from the camera's
+## axis), cv (m/s the lens moves), yv (degrees a second it turns), fov.
+var _log: FileAccess = _log_open()
+var _log_p := Vector3.ZERO
+var _log_yaw := 0.0
+var _log_n := 0
+static func _log_open() -> FileAccess:
+	for a: String in OS.get_cmdline_user_args():
+		if a.begins_with("--camlog="):
+			var f := FileAccess.open(a.trim_prefix("--camlog="), FileAccess.WRITE)
+			if f != null:
+				f.store_line("f,t,mv,near,kx0,ky0,kx1,ky1,kin,kh,fvis,lag,cv,yv,fov")
+			return f
+	return null
+
+func _log_frame(delta: float) -> void:
+	if duel.stage != Duel.Stage.FIGHT or delta <= 0.0:
+		return
+	var kp := _points(duel.player_rig)
+	var fp := _points(duel.foe_rig)
+	var vs := cam.get_viewport().get_visible_rect().size
+	var near := 1e9
+	for pts: PackedVector3Array in [kp, fp]:
+		for p: Vector3 in pts:
+			near = minf(near, cam.global_position.distance_to(p))
+	var lo := Vector2(1e9, 1e9)
+	var hi := Vector2(-1e9, -1e9)
+	var inside := 0
+	var right := cam.global_basis.x
+	var sk = duel.player_rig.get("skin")
+	var body_n: int = sk.skel.get_bone_count() if (sk != null and sk.ok and sk.skel != null) else kp.size()
+	for i: int in body_n:      # (the body: the sword's point and the shield are not counted)
+		var p := kp[i]
+		var ok := not cam.is_position_behind(p)
+		var s := cam.unproject_position(p) / vs if ok else Vector2(-9, -9)
+		if ok and s.x > 0.02 and s.x < 0.98 and s.y > 0.02 and s.y < 0.98:
+			inside += 1
+		# a joint is the middle of a limb: the box is taken a hand's breadth wider all round
+		for o: Vector3 in [Vector3(0, 0.13, 0), Vector3(0, -minf(0.1, p.y), 0), right * 0.13, right * -0.13]:
+			var q := p + o
+			var sq := (cam.unproject_position(q) / vs) if not cam.is_position_behind(q) else Vector2(-9, 9)
+			lo = Vector2(minf(lo.x, sq.x), minf(lo.y, sq.y))
+			hi = Vector2(maxf(hi.x, sq.x), maxf(hi.y, sq.y))
+	var seen := 0
+	for p: Vector3 in fp:
+		if cam.is_position_behind(p):
+			continue
+		var s := cam.unproject_position(p) / vs
+		if s.x > 0.0 and s.x < 1.0 and s.y > 0.0 and s.y < 1.0 and not Rect2(lo, hi - lo).has_point(s):
+			seen += 1
+	var kw := duel.player_rig.global_position
+	if sk != null and sk.ok and sk.bone.has("Hips"):
+		kw = sk.skel.global_transform * sk.skel.get_bone_global_pose(int(sk.bone["Hips"])).origin
+	var lag := rad_to_deg(wrapf(atan2(kw.x, kw.z) - duel.ring_cam, -PI, PI))
+	var yaw := cam.global_rotation.y
+	var mv := 2 if duel.player_rig.mode == FighterRig.Mode.DODGE else (1 if (_wide_left > 0.0 or _wide > 0.25) else 0)
+	if _log_n > 0:
+		_log.store_line("%d,%.3f,%d,%.2f,%.3f,%.3f,%.3f,%.3f,%.2f,%.3f,%.2f,%.1f,%.2f,%.1f,%.1f" % [Engine.get_process_frames(), duel.sim.time, mv, near, lo.x, lo.y, hi.x, hi.y,
+			float(inside) / maxf(body_n, 1.0), hi.y - lo.y, float(seen) / maxf(fp.size(), 1.0), lag,
+			cam.global_position.distance_to(_log_p) / delta, rad_to_deg(absf(wrapf(yaw - _log_yaw, -PI, PI))) / delta, cam.fov])
+		if _log_n % 30 == 0:
+			_log.flush()
+	_log_n += 1
+	_log_p = cam.global_position
+	_log_yaw = yaw
 
 
 ## Dev only (capture harness): HR_CAM_DEV="shot=struggle" holds a shot during the fight;
@@ -193,6 +393,13 @@ func _context() -> void:
 	_H = 1.4 * _S * (1.0 - float(foe.rig.get("hunch", 0.0)) * 0.3)
 	_K = Vector3(duel.p_side, 0, pz + duel.p_back)
 	_F = Vector3(0, 0, -pz - duel.f_back)
+	_KB = _K
+	_FB = _F
+	if not old_roll and duel.stage == Duel.Stage.FIGHT:
+		_kp = _points(duel.player_rig)
+		_fp = _points(duel.foe_rig)
+		_KB = _body_at(duel.player_rig)
+		_FB = _body_at(duel.foe_rig)
 
 ## World point to ring frame.
 func _ring(world: Vector3) -> Vector3:
@@ -306,13 +513,32 @@ func _combat(back: float, round: float, lift: float, dfov: float) -> Dictionary:
 	if OS.has_environment("HR_CAM"):      # dev tuning: side,back,y,fov,look_h,look_x
 		var v := OS.get_environment("HR_CAM").split_floats(",")
 		c = {"side": v[0], "back": v[1], "y": v[2], "fov": v[3], "look_h": v[4], "look_x": v[5]}
-	back += -0.18 * _tight + 0.7 * _wide
 	if duel.sim.b_far:
 		dfov -= 5.0      # it has backed off: hold it large with the lens, not by chasing it
+	if not old_roll:
+		return _combat_move(c, back - 0.18 * _tight, round, lift, dfov - 2.5 * _tight)
+	back += -0.18 * _tight + 0.7 * _wide
 	var pos := Vector3(float(c.side) + _side + duel.p_side * 0.6 + round + 0.25 * _wide, float(c.y) + lift + 0.1 * _wide, _K.z + float(c.back) + back)
 	var look := Vector3(float(c.look_x) + _side * 0.4, _H * float(c.look_h), _F.z + duel.f_back * 0.4)
 	var fov := float(c.fov) + dfov - 2.5 * _tight + 3.0 * _wide
 	return {"pos": pos, "look": _keep_knight(pos, look, fov), "fov": fov, "rate": 6.0}
+
+## The same view, written so that a roll or a sidestep reads (the move shot). The camera's station is fixed in the
+## frame of `Duel.ring_cam`, which swings to the new line in one eased turn (`axis`), so the station does not chase
+## the knight sideways. While the knight moves (`_wide`) the lens stands further off from where their body really
+## is, far enough that their feet are in the frame, opens a little, and turns its aim to hold the whole figure.
+func _combat_move(c: Dictionary, back: float, round: float, lift: float, dfov: float) -> Dictionary:
+	var w := smoothstep(0.0, 1.0, _wide)
+	var pos := Vector3(float(c.side) + round, float(c.y) + lift, duel.gap * 0.5 + duel.p_back + float(c.back) + back)
+	var look := Vector3(float(c.look_x), _H * float(c.look_h), _F.z + duel.f_back * 0.4)
+	var fov := float(c.fov) + dfov + (0.0 if _calm else 4.0 * w)
+	# (the aim comes down to just above the lens's own height for the move: the floor under the knight comes into the
+	# frame with a short step back instead of a long one, and the foe is tall enough to stay in it. The knight is off
+	# to one side of the aim, where the frame's lower edge meets the floor further out, and a tumbling body is long.)
+	look.y = lerpf(look.y, minf(look.y, pos.y - 0.1), w)
+	_floor = lerpf(REST_MIN, maxf(MOVE_MIN, _feet_dist(pos, look, fov) * 1.3 + (0.4 if _calm else 0.6)), w)
+	pos = _stand_off(pos, _floor)
+	return {"pos": pos, "look": _keep_knight(pos, look, fov), "fov": fov, "rate": lerpf(6.0, 12.0, w)}
 
 ## Turns the aim toward the knight just enough that a sidestep or a shove never carries them out of the frame.
 func _keep_knight(pos: Vector3, look: Vector3, fov: float) -> Vector3:
@@ -323,8 +549,12 @@ func _keep_knight(pos: Vector3, look: Vector3, fov: float) -> Vector3:
 		aspect = sz.x / maxf(sz.y, 1.0)
 	var half := atan(tan(deg_to_rad(fov) * 0.5) * aspect)
 	var to_l := Vector2(look.x - pos.x, look.z - pos.z)
-	var to_k := Vector2(_K.x - pos.x, _K.z - pos.z)
+	var kb := _K if old_roll else _KB
+	var to_k := Vector2(kb.x - pos.x, kb.z - pos.z)
 	var over := absf(to_l.angle_to(to_k)) - half * 0.92
+	if not old_roll:
+		# the middle of the body, so in a roll or a sidestep the margin is the body's own half-width
+		over += smoothstep(0.0, 1.0, _wide) * atan(0.85 / maxf(to_k.length(), 0.5))
 	if over <= 0.0:
 		return look
 	var r := to_l.rotated(signf(to_l.angle_to(to_k)) * over)
@@ -336,14 +566,23 @@ func _shot_combat() -> Dictionary:
 ## A heavy blow, slam, sweep or breath is coming: wider and lower so the whole telegraph reads.
 func _shot_guard() -> Dictionary:
 	var s := _combat(0.45, 0.1, -0.08, 4.0)
-	s.rate = 4.0
+	s.rate = 4.0 if old_roll else lerpf(4.0, 12.0, smoothstep(0.0, 1.0, _wide))
 	return s
 
 ## The foe is open: swing further round to the knight's side and push in, so the knight's cuts read across the frame.
 func _shot_opening() -> Dictionary:
 	var s := _combat(-0.35, 0.55, 0.12, -5.0)
-	s.look = Vector3(-0.1, _H * 0.82, _F.z + 0.3)
-	s.rate = 3.5
+	var look := Vector3(-0.1, _H * 0.82, _F.z + 0.3)
+	var rate := 3.5
+	if not old_roll:
+		# (a roll that ends in the foe's opening: the move shot's level aim, its hold on the knight and its pace win
+		# while the knight is still moving)
+		var w := smoothstep(0.0, 1.0, _wide)
+		look.y = lerpf(look.y, minf(look.y, (s.pos as Vector3).y - 0.1), w)
+		look = _keep_knight(s.pos, look, float(s.fov))
+		rate = lerpf(rate, 7.0, w)
+	s.look = look
+	s.rate = rate
 	return s
 
 ## The fight stops for them to speak (Duel._story_beat): over the shoulder at the foe, eased, held until they finish.

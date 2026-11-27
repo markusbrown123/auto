@@ -2406,6 +2406,8 @@ const DODGE_DIST := 1.25      # metres the duel carries the knight in a sidestep
 const ROLL_DIST := 2.55       # and in a sidestep turned into a roll
 const WALK_CLIP := "walk"
 const ROLL_UP := 0.66         # share of the roll's time the tumble itself takes; the rest is the rise into guard
+const DODGE_SKIP := 0.15      # share of a sidestep clip passed over at its start (the wind-up; the change of pose is blended)
+const DODGE_WARP := 2.2       # how far the rest is front-loaded: clip time = 1 - (1 - u)^this
 
 func _stance_on() -> bool:
 	return polish and combat_steps and skin != null and skin.ok and str(cfg.get("weapon", "")) != "claws" and not cfg.get("wraith", false)
@@ -2503,29 +2505,54 @@ func _dg_begin(rolling: bool) -> void:
 			n = ""
 	var from := 0.0
 	var start := global_position
+	var seen := 0.0
+	var at := global_position
 	if rolling and mode == Mode.DODGE and not _dg.is_empty():
 		from = float(_dg.get("want", 0.0))      # what the sidestep has already covered
 		start = _dg.start
+		seen = float(_dg.get("seen", 0.0))
+		at = _dg.get("at", at)
 	var dist := (ROLL_DIST if rolling else DODGE_DIST) if combat_steps else 0.0
 	var hh: float = 1.0
 	if n != "":
 		hh = float(clip_meta(n).get("hip_travel", 2.0)) * skin.point("Hips").y
-	_dg = {"clip": n, "start": start, "from": from, "dist": dist, "want": from, "T": 0.0, "s": clampf((dist - from) / maxf(hh, 0.1), 0.0, 1.0)}
+	_dg = {"clip": n, "start": start, "from": from, "dist": dist, "want": from, "T": 0.0, "s": clampf((dist - from) / maxf(hh, 0.1), 0.0, 1.0),
+		"seen": seen, "at": at, "fed": from}
+
+## Metres the duel should carry the knight sideways this frame (signed like `owed`, what it still has to carry them):
+## the travel the sidestep or roll being played has made since this was last asked, so the knight crosses the ground at
+## the clip's own pace and the body needs no offset from the rig. `otherwise` when no such clip is playing.
+func carry_step(owed: float, otherwise: float) -> float:
+	if mode != Mode.DODGE or not _dg_on() or float(_dg.dist) <= 0.0:
+		return otherwise
+	var d := (float(_dg.want) - float(_dg.fed)) * signf(_dodge_side)
+	_dg.fed = _dg.want
+	return clampf(d, minf(owed, 0.0), maxf(owed, 0.0))
 
 ## Where the body is across the ground at this moment of the clip (rig space), less what the duel has already moved the rig.
 func _dg_root(u: float) -> Vector3:
 	var n := str(_dg.clip)
 	# (a sidestep leaves the line at once and takes its time coming to rest: the first of the clip is played faster)
-	var t := lerpf(0.0 if _rolling else 0.04, SkinDriver.clip_length(n), minf(u / ROLL_UP, 1.0) if _rolling else 1.0 - pow(1.0 - u, 1.7))
+	# (the pack's wind-up before the push-off is skipped but for its last frames, and the push-off itself is played at
+	# about twice its speed: the body is 40 cm off the line of a blow sooner, see docs/BUG_REGISTER.md row 85)
+	var cl := SkinDriver.clip_length(n)
+	var t0 := 0.0 if _rolling else DODGE_SKIP * cl
+	var t := lerpf(t0, cl, minf(u / ROLL_UP, 1.0) if _rolling else 1.0 - pow(1.0 - u, DODGE_WARP))
 	_dg.T = t
-	var want: float = lerpf(float(_dg.from), float(_dg.dist), SkinDriver.clip_travel_frac(n, t))
+	var f0 := SkinDriver.clip_travel_frac(n, t0)
+	var want: float = lerpf(float(_dg.from), float(_dg.dist), (SkinDriver.clip_travel_frac(n, t) - f0) / maxf(1.0 - f0, 0.01))
 	_dg.want = want
 	var seen := (global_position - (_dg.start as Vector3)).dot(global_transform.basis.x.normalized()) / maxf(scale.x, 0.01) * signf(_dodge_side)
+	if not CamDirector.old_roll:
+		# (measured along the way the knight is carried, a frame at a time: the duel takes them round an arc)
+		_dg.seen = float(_dg.seen) + (global_position - (_dg.at as Vector3)).dot(global_transform.basis.x.normalized()) / maxf(scale.x, 0.01) * signf(_dodge_side)
+		_dg.at = global_position
+		seen = float(_dg.seen)
 	if float(_dg.dist) <= 0.0:
 		return Vector3.ZERO
-	# (in a roll the body keeps half-way to where the duel has the knight: the camera follows that place, and a body
-	# left a metre behind it tumbles across the lens)
-	return Vector3((want - seen) * signf(_dodge_side) * (0.5 if _rolling else 1.0), 0, 0)
+	# (before the camera followed the body itself, a roll kept half-way to where the duel has the knight: a body left a
+	# metre behind the rig tumbled across the lens. `--oldrollcam` films that)
+	return Vector3((want - seen) * signf(_dodge_side) * (0.5 if _rolling and CamDirector.old_roll else 1.0), 0, 0)
 
 # ---------------------------------------------------------------- feet
 ## Called by the skin when the pose is solved. In a fight each foot is planted in the world and steps when the body
@@ -2705,7 +2732,7 @@ func _carry_dir(clip_dir: Vector3) -> Vector3:
 ## For a roll a strapped shield is slung onto the back (between the shoulders, face outward) so that nothing of it
 ## passes through the tumbling body; it comes back onto the arm as the knight rises.
 func _dock(held: Transform3D, caps: Array) -> Transform3D:
-	_dock_w = lerpf(_dock_w, 1.0 if (polish and _au_state == "roll") else 0.0, 0.55)
+	_dock_w = lerpf(_dock_w, 1.0 if (polish and _au_state == "roll") else 0.0, 0.55 if CamDirector.old_roll else 0.8)      # (two frames, not four: it passes through the arm on the way)
 	if _dock_w < 0.01:
 		_dock_w = 0.0
 		return held

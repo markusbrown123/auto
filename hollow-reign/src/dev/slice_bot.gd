@@ -918,8 +918,15 @@ func _forge_visit(s: Sanctuary) -> void:
 			var g2 := int(Game.profile.gold)
 			await tap(fb)
 			await _wait(1.0)
-			var yes2 := _find(verb)
-			await _wait(7.0)
+			# the work is shown at the anvil; its result waits for a tap
+			await _until(func(): return _find("Continue") != null, 30.0, "the forge's result")
+			await _wait(1.5)
+			_snap("forge_result")
+			audit("forge result")
+			var fin := _find("Continue")
+			if fin != null:
+				await tap(fin)
+			await _wait(1.5)
 			say("  forge '%s': gold %d -> %d; weapon mods %s" % [verb, g2, int(Game.profile.gold), str(Game.weapon_mods(str(Game.profile.equipped.weapon)))])
 			_snap("forged")
 			done_work = true

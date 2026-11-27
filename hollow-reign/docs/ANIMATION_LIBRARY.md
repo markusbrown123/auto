@@ -332,6 +332,12 @@ sections of `src/chars/skin_driver.gd`. `--oldanim` (or `FighterRig.polish = fal
 - **Cuts.** A strapped shield arm takes only 30% of an authored cut's arm pose (it was thrown back with the board's face
   to the camera).
 
+- **After the camera pass for rolls and sidesteps (same day; docs/CAMERA_BIBLE.md "The move shot").** The duel now carries
+  the knight round the circle they stand on at the clip's own pace (`FighterRig.carry_step`), so in a sidestep or a roll
+  the body is on the rig's origin (no half-way placement, no slide back as the roll rises). A sidestep passes over the
+  first 15% of its clip and plays the rest as `1 - (1-u)^2.2` (`DODGE_SKIP`, `DODGE_WARP`): 40 cm off the line at
+  0.06-0.10 s. The shield goes onto the back and comes off it in two frames. `--oldrollcam` plays all of this as it was.
+
 Audit additions (`pose_review`): `slip` (cm an ankle travels over the ground while within 3 cm of its standing height,
 worst single contact), `moved` / `off10` / `off40` (seconds until the hips have moved 1, 10, 40 cm), `sh_arm` (shield-arm
 vertices through the face of the board); states `circle`, `shove`, `road`; `dodge_*` and `roll_*` are now carried across

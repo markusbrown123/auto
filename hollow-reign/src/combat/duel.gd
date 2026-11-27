@@ -648,16 +648,27 @@ func _footwork(dt: float) -> void:
 	# sidestep: the knight leaves the line quickly, then the line swings round to where they now stand,
 	# so the foe has to turn to find them and the camera follows the new angle
 	var step := p_side_owed * (1.0 - exp(-dt * 14.0))
+	if not CamDirector.old_roll:
+		step = player_rig.carry_step(p_side_owed, step)      # at the pace of the sidestep or roll being played
 	p_side_owed -= step
 	p_side += step
 	var turn := p_side * (1.0 - exp(-dt * 3.2))
 	p_side -= turn
 	ring += turn / maxf(gap * 0.5 + p_back, 0.6)      # exact for where the knight stands, so nothing slides back
 	p_side_owed = clampf(p_side_owed, -2.8, 2.8)
-	ring_cam = lerp_angle(ring_cam, ring, 1.0 - exp(-dt * 2.2))
+	if CamDirector.old_roll or director == null:
+		ring_cam = lerp_angle(ring_cam, ring, 1.0 - exp(-dt * 2.2))
+	else:
+		# the camera turns to where the line will be when the sidestep in hand is over (docs/CAMERA_BIBLE.md "The move shot")
+		ring_cam = director.axis(dt, ring + (p_side + p_side_owed) / maxf(gap * 0.5 + p_back, 0.6))
 	var axis := Vector3(sin(ring), 0, cos(ring))
 	var perp := Vector3(cos(ring), 0, -sin(ring))
 	player_rig.position = axis * (gap * 0.5 + p_back) + perp * p_side
+	if not CamDirector.old_roll:
+		# (round the circle the knight stands on, not out along its tangent: a roll's 2.55 m is then 2.55 m of ground,
+		# with no curl back in toward the line afterwards)
+		var arc := p_side / maxf(gap * 0.5 + p_back, 0.6)
+		player_rig.position = (axis * cos(arc) + perp * sin(arc)) * (gap * 0.5 + p_back)
 	foe_rig.position = -axis * (gap * 0.5 + f_back)
 	var to_foe: Vector3 = foe_rig.position - player_rig.position
 	player_rig.rotation.y = atan2(-to_foe.x, -to_foe.z)
@@ -757,7 +768,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			player_rig.parry(DuelSim.dir_vec(d.dir))
 			Sfx.play("swing", -9.0, 1.3)
 		&"player_dodge":
-			director.cue("reposition", {"t": 0.7})
+			director.cue("reposition", {"t": 0.7, "amt": 0.9})
 			p_side_owed += float(d.side) * 1.25     # a real step across the ground, not a lean
 			player_rig.dodge(float(d.side))
 			fx.dust(_feet(player_rig), 5, null, 0.8)

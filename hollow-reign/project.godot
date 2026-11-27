@@ -44,5 +44,7 @@ textures/default_filters/texture_mipmap_bias=-0.6
 
 texture={
 "compress/mode": 2,
+"detect_3d/compress_to": 0,
+"mipmaps/generate": true,
 "process/size_limit": 1024
 }

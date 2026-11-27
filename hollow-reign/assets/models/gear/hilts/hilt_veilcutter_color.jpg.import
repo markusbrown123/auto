@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://vlsj6mt758lr"
-path="res://.godot/imported/hilt_veilcutter_color.jpg-cfb74f2d54414b3a5308d048ff38a9ee.ctex"
+path.s3tc="res://.godot/imported/hilt_veilcutter_color.jpg-cfb74f2d54414b3a5308d048ff38a9ee.s3tc.ctex"
+path.etc2="res://.godot/imported/hilt_veilcutter_color.jpg-cfb74f2d54414b3a5308d048ff38a9ee.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/models/gear/hilts/hilt_veilcutter_color.jpg"
-dest_files=["res://.godot/imported/hilt_veilcutter_color.jpg-cfb74f2d54414b3a5308d048ff38a9ee.ctex"]
+dest_files=["res://.godot/imported/hilt_veilcutter_color.jpg-cfb74f2d54414b3a5308d048ff38a9ee.s3tc.ctex", "res://.godot/imported/hilt_veilcutter_color.jpg-cfb74f2d54414b3a5308d048ff38a9ee.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

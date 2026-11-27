@@ -3,25 +3,27 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://b5cgq4ix3gujm"
-path="res://.godot/imported/hilt_eternal_normal.jpg-85ebef3735b51548dddd38b0c3de1fa9.ctex"
+path.s3tc="res://.godot/imported/hilt_eternal_normal.jpg-85ebef3735b51548dddd38b0c3de1fa9.s3tc.ctex"
+path.etc2="res://.godot/imported/hilt_eternal_normal.jpg-85ebef3735b51548dddd38b0c3de1fa9.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/models/gear/hilts/hilt_eternal_normal.jpg"
-dest_files=["res://.godot/imported/hilt_eternal_normal.jpg-85ebef3735b51548dddd38b0c3de1fa9.ctex"]
+dest_files=["res://.godot/imported/hilt_eternal_normal.jpg-85ebef3735b51548dddd38b0c3de1fa9.s3tc.ctex", "res://.godot/imported/hilt_eternal_normal.jpg-85ebef3735b51548dddd38b0c3de1fa9.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=0
+compress/normal_map=1
 compress/channel_pack=0
 mipmaps/generate=false
 mipmaps/limit=-1

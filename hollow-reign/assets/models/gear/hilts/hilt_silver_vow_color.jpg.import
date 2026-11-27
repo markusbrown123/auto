@@ -3,19 +3,21 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://byoctn40p02j4"
-path="res://.godot/imported/hilt_silver_vow_color.jpg-ea72a4494d1ff659848cdd459ba545eb.ctex"
+path.s3tc="res://.godot/imported/hilt_silver_vow_color.jpg-ea72a4494d1ff659848cdd459ba545eb.s3tc.ctex"
+path.etc2="res://.godot/imported/hilt_silver_vow_color.jpg-ea72a4494d1ff659848cdd459ba545eb.etc2.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc", "etc2_astc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/models/gear/hilts/hilt_silver_vow_color.jpg"
-dest_files=["res://.godot/imported/hilt_silver_vow_color.jpg-ea72a4494d1ff659848cdd459ba545eb.ctex"]
+dest_files=["res://.godot/imported/hilt_silver_vow_color.jpg-ea72a4494d1ff659848cdd459ba545eb.s3tc.ctex", "res://.godot/imported/hilt_silver_vow_color.jpg-ea72a4494d1ff659848cdd459ba545eb.etc2.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

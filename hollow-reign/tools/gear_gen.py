@@ -1795,7 +1795,9 @@ def bake_hilt(spec, dst):
         arrs[role[i]] = np.asarray(pic.resize((256, 256)), dtype=float) / 255
     sel = (arrs["orm"][..., 2] > 0.6) & (arrs["color"].mean(-1) > 0.35)
     lin = (((arrs["color"][sel] + 0.055) / 1.055) ** 2.4).mean(axis=0)
-    tint = [round(float(min(1.0, max(0.5, c / 0.448 * 1.03))), 3) for c in lin]
+    # the hilt's steel as a near-neutral grey (gold inlays would otherwise pull the blade toward bronze)
+    lum = float(min(0.9, max(0.58, lin.mean() / 0.448 * 1.06)))
+    tint = [round(lum, 3), round(lum * 0.985, 3), round(lum * 0.955, 3)]
     mat = dict(j["materials"][0])
     mat["name"] = "hilt"
     out = {}

@@ -134,6 +134,16 @@ Order: benchmark set first, then roll out.
 6. [open, owner approval first] Casting and recording for father, son, heir and female equivalents; family and Monarch musical motifs.
 7. [open] Full-campaign test list in the brief; recordings.
 
+## K. Finalising for the first phone test (owner, 2026-11-27) — do in this order
+1. [running] Finish the two agent passes (opening visuals; generations II and III playable).
+2. [running] Casting files: four candidates per character in `marketing/audition/final_cast/`; owner chooses; then record all unrecorded lines with the chosen voices and regenerate dialogue.
+3. [open] Sculpted guard trial on two swords (generated hilt, code-built blade); if better, roll out.
+4. [open] Remaining armour families in the mixed medieval/future language on the v3 body (concepts, models, split into parts), replacing the spiky suits; bosses and the Monarch brought into line where cheap.
+5. [open] Stabilise: run every suite together on a quiet machine (touch suite's two failures first), fix all failures, then a bug sweep from `docs/BUG_REGISTER.md` open rows (shield through body in rolls, elbow through shield, shield facing in swings, King's Remnant class, Awakened Beast patterns, late-game balance, tab bar crowding, forge layout at 16:9, tells as plain boxes).
+6. [open] Full playthrough recording by bot from New Legacy to an ending; watch the contact sheets; fix what breaks.
+7. [open] iOS readiness: export preset checked against the current project (icons, orientation, bundle id placeholder, privacy reasons), ASTC import for all textures, Performance preset as the device default, a tagged commit named for the owner to build from, `docs/IOS_BUILD.md` quick start verified against that commit.
+8. [open] Stale docs brought into line (story bible, character bible, world history, credits).
+
 ## Owner decisions made 2026-11-26 (act on these)
 - **Animation library: buy the Game Dev Hero packs ($59.97)** — Sword And Shield Animation V3, Two Handed Sword Animation V3, Dual Sword Animation V1 (itch.io, $19.99 each). The owner buys them and supplies the `*_Mixamo.zip` from each. WAITING on the files. When they arrive: unpack under `art/anim_src/gamedevhero/` (git-ignored: the licence forbids redistribution, so never commit the sources), read the licence text and save it to `docs/licenses/`, list the clips, extend `tools/bake_anims.gd` (FBX via `FBXDocument`; Mixamo names need no bone map) and bake: eight directional cuts, combo chains, directional parries, shield blocks high/low, rolls, greatsword and dual sets, hit reactions, finishers. Then replace the IK sword arm with authored full-body clips per direction and give each of the sixteen combos its own chain.
 - **iOS:** the owner has a Mac with Xcode and an iPhone; the Apple Developer account is awaiting approval. Building needs a session on that Mac (this cloud container cannot reach it; no folders are shared with it yet). Prepare: `docs/IOS_BUILD.md` exact steps, export presets, icon, launch screen.

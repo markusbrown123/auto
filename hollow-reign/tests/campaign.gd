@@ -38,14 +38,14 @@ func until(cond: Callable, limit: float = 60.0) -> bool:
 
 func press(text: String) -> bool:
 	for b: Button in m.find_children("*", "Button", true, false):
-		if b.text == text and b.is_visible_in_tree() and not b.disabled and not b.is_queued_for_deletion():
+		if b.text.to_upper() == text.to_upper() and b.is_visible_in_tree() and not b.disabled and not b.is_queued_for_deletion():
 			b.pressed.emit()
 			return true
 	return false
 
 func button(text: String) -> Button:
 	for b: Button in m.find_children("*", "Button", true, false):
-		if b.text == text and not b.is_queued_for_deletion():
+		if b.text.to_upper() == text.to_upper() and not b.is_queued_for_deletion():
 			return b
 	return null
 
@@ -205,10 +205,11 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 		# the knight is nearly down: the seal is offered then too, and this one goes to it
 		m._args["choice"] = "records"
 		d = await begin_duel(o, 1.0)
+		var sim: DuelSim = d.sim if d != null else null
 		if d != null:
 			d.sim.pl.hp = float(d.sim.pl.max_hp) * 0.15
 		await until(func(): return m.current is SecondFall, 60.0)
-		ok(d != null and d.sim.interrupted == "records" and d.sim.p_state != DuelSim.P.DEAD and d.sim.b_state != DuelSim.B.DEAD, "near falling, the seal was offered and chosen: the duel was left, not lost")
+		ok(sim != null and sim.interrupted == "records" and sim.p_state != DuelSim.P.DEAD and sim.b_state != DuelSim.B.DEAD, "near falling, the seal was offered and chosen: the duel was left, not lost")
 		ok(m.current is SecondFall and not m.current.won and str(m.current.choice) == "records" and not Game.monarch_won(2) and str(Game.monarch(2).record.get("choice", "")) == "records",
 			"the second fall, told as it was: he was not beaten, and nobody says he was")
 		ok(int(Game.profile.gold) == gold, "no reward is paid for a fight that was left")
@@ -216,6 +217,7 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 		await frames(3)
 		ok(m.current is SecondFall and not m.current.won, "Continue after the choice and before the fall: the fall")
 	await saved_and_loaded("before the second fall")
+	weapon_before = Generations._weapon_record(blade, Game.profile)
 	ok(Game.transition_pending().is_empty(), "nothing has fallen until the scene says so")
 	await skip_scene()
 	var tr: Dictionary = Game.transition_pending()
@@ -279,8 +281,8 @@ func journey(body: String, variant: String, seals: Dictionary, looks: Dictionary
 	var page := ""
 	for l: Label in ch.find_children("*", "Label", true, false):
 		page += l.text + "|"
-	ok(page.contains("House") and page.contains("THE FIRST OATH") and page.contains("THE BROKEN CROWN") and page.contains("THE LAST HEIR") and page.contains(str(Db.item(blade).name)) and ch.find_children("*", "SubViewport", true, false).size() == 3,
-		"the Lineage page: three of the house, each standing in what they wore, the second's blade named")
+	ok(page.to_upper().contains("HOUSE MARREK") and page.contains("THE FIRST OATH") and page.contains("THE BROKEN CROWN") and page.contains("THE LAST HEIR") and page.contains(str(Db.item(blade).name)) and ch.find_children("*", "SubViewport", true, false).size() == 3,
+		"the Lineage page: three of the house, each standing in what they wore, the second's blade named (%d views) %s" % [ch.find_children("*", "SubViewport", true, false).size(), page.left(400)])
 	ch.queue_free()
 	var t := TitleScreen.new()
 	add_child(t)

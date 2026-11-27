@@ -50,6 +50,39 @@ An `Arena` theme, `"highland"`: any screen that takes a theme can stand in it (`
 
 The menu can use it: `TitleScreen.vista = true` (off by default; `--screen=title --vista`) puts the menu over that composition with the player's knight on the road, in the generation their save has reached.
 
+## The second fall and the Last Heir (2026-11-26, the three generations wired end to end)
+
+Router: `src/main.gd` (`story_kind`, `_story_opts`, `_story_hooks`, `_story_won`, `resume`). Scenes: `src/cine/second_fall.gd`, `heir_return.gd`, `kept_scene.gd`, `final_hall.gd`, `aftermath.gd`, `facility.gd`, all on `cine_scene.gd` (cards, SKIP, `_closing()` called once however a scene ends). These apply only while the family's canon is open (`Generations.canon_open`): a legacy journey fights the same foes as plain duels and ends at the throne as it always did.
+
+| # | Step | File | How it is reached, and what it records |
+|---|---|---|---|
+| 1 | **The second meeting** (Generation II, Throne stop 6) | `combat/duel.gd` | `forgotten_monarch`, his own data. `monarch_blade` ("That blade.") before `monarch_intro`. Sim options `beat_at [1, 2]`, `beat_hp 0.22`. |
+| 1a | · the records choice | `Overlays.choice` over the held fight | Sent by the sim as the third phase begins (33 %) **or** when the knight is under 22 % health, once a fight. "Press the attack" / "Save the records". `Game.record_monarch(2, {choice})`. |
+| 1b | · records chosen | | `sim._story_end("records")`: the duel is neither won nor lost (`Duel.interrupted`), no reward is paid, on to 2 with `won = false`. |
+| 1c | · pressed and **won** | | The ordinary finisher; `Game.on_victory` (the win is recorded, `monarch_bested:2`, real rewards); the ordinary victory screen shows them. Continue → 2 with `won = true`. |
+| 1d | · pressed and lost | | An ordinary defeat: the death screen, the road again. Nothing in the lineage moves. The choice is offered again in the next attempt. |
+| 2 | **The second fall** | `cine/second_fall.gd` | `won`: he is down, the floor's machines wake, he is stood up ("I am not the thing that is keeping me."). Then, both ways: the seal burns, the knight goes to it and drives the blade in, `gen2_seal`, the blow (the camera stays on the Monarch), black, the mark, `gen2_close`. At the blow (or on SKIP): a winner's Throne road is cleared, then `Game.fall(2, "saved_the_records", {choice, won})`. |
+| 3 | Twenty-four years | `cine/time_jump.gd` | `show_time_jump(24, 2, 3, show_heir)`. |
+| 4 | The heir's name | `HeirReturn.Naming` | One field over the family's mark; the line (grandson / granddaughter) follows the body chosen at the start. `Game.inherit({name, body})`. |
+| 5 | The heir's arrival | `cine/arrival.gd` with `gen = 3` | The winter road, card "VAELORA · THE LAST HEIR", `gen3_arrive`, no title. |
+| 6 | The Inheritance Engine | `cine/heir_return.gd` | The heir walks in. The second's blade stands in the block (the Engine has called it home). `gen3_engine`. **TAKE UP YOUR SWORD** → `Game.take_fallen_weapon()` (also on SKIP). Sets `flags.gen3_arrived`. Out into the white → Approach → the Courtyard. |
+| 7 | Generation III's roads | `ui/explore.gd`, `ui/world_map.gd` | The director's stops (`Game.stage_options`); the map's cards read `Encounters.region_info`. |
+| 8 | **The Kept** (Courtyard stop 6) | `cine/kept_scene.gd`, `combat/duel.gd` | First meeting: the reveal (its back; the mask at the heir's hip, `kept_approach`; it turns; the card; `kept_intro`), sets `flags.kept_revealed`. The duel: foe `the_kept`, dressed from its saved `rig`; `kept_beat` as its second phase begins; at no health it **yields** (`story.yield`). Then mode `after` (`kept_after`, the blade held out), `KeptScene.grant_edge()` gives **The Second's Edge**, then the ordinary victory screen with it on, and the region is cleared. |
+| 9 | **The last meeting** (Throne stop 6) | `combat/duel.gd`, `cine/final_hall.gd` | `monarch_iii`; `monarch_g3_intro`; `FinalHall.dress` over the hall, following the phases; phase three carries the seal (`seal {phase 2, need}`; need = 9 less one for each inheritance record held, never under 2). Ends on the real finisher and the recorded `monarch_death` lines (scene `monarch_g3_death`). |
+| 10 | The aftermath | `cine/aftermath.gd` | No victory screen. `Game.on_victory` and `complete_region` are done silently. The hall, the empty throne, `final_door`, the wall parts on white. |
+| 11 | The facility | `cine/facility.gd` | The descent; `facility`; sets `flags.facility_seen`. The Deep is open (`monarch_felled:3`). |
+| 12 | What was won, and the Crown | `Overlays.message`, `Overlays.choice` | At the sanctuary: the duel's rewards in three lines, then the choice from `Game.endings()` with a fourth answer, "Not yet". It comes back whenever the Deep's road or the Throne's is finished again. |
+| 13 | After an ending | | `Game.choose_ending` closes the canon; the sanctuary's journey panel offers the legacy journey as before. |
+
+**Continue** (`main.resume`): a fall not yet answered → the years and the heir; Generation II with the Monarch beaten or the seal chosen but no fall yet → the second fall; Generation III before `gen3_arrived` → the arrival; the Monarch felled before `facility_seen` → the aftermath; otherwise the sanctuary.
+
+**Ordinary defeat** is unchanged: "THE REIGN ENDURES … You wake in the sanctuary, as you always do", and one of the six `rebirth_*` lines at the sanctuary. That is the Engine restoring the present hero in every generation; whether it stays in the fiction is the owner's pending decision (a). Nothing in it mentions or moves the lineage.
+
+**The Second's Edge** (`w_seconds_edge`, `tools/gen_equipment.py`): in the data a plain sword with one source, `story`. `KeptScene.sync_edge()` (called from `resume`, the inheritance and the dev helpers) lays the snapshot weapon's class, numbers and model over that entry, and `grant_edge()` copies its tier, grip, ore and edge records. A profile read without the router (a test) sees the plain entry until it is synced.
+
+### Dev screens for these
+`--screen=gen2choice` (the choice over the held fight), `--screen=gen2fall [--won] [--hold=rise|seal|fall|mark]`, `--screen=heirname`, `--screen=heir [--auto]` (years → name → arrival → Engine), `--screen=heirreturn [--hold=enter|sword|taken]`, `--screen=kept [--mode=reveal|duel|after] [--hold=back|hip|turn|offer] [--kit=a|b]`, `--screen=finalmonarch [--phase=0|1|2] [--seal=N] [--seal_left=K] [--seen]`, `--screen=aftermath [--hold=hall|throne|door]`, `--screen=facility [--hold=shaft|rings|floor|crown]`, `--screen=lineage [--gen=3]`, `--screen=map --gen=3 [--felled]`, `--screen=slots --gen=3`. `--kit=a|b` chooses what the second generation wore; `--bot` lets a bot fight (and answer the records choice with `--choice=press|records`).
+
 ## Hooks for the generational pass
 Nothing below is generational architecture; it is what these scenes already emit and what they need to be given.
 

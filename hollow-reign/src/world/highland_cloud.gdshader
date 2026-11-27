@@ -31,7 +31,8 @@ void vertex() {
 }
 
 float shape(vec2 p) {
-	return texture(noise_tex, p).r * 0.6 + texture(noise_tex, p * 2.7 + vec2(0.3, 0.6) + TIME * wind * 0.0016 * speed).r * 0.4;
+	// big masses first; the small sample only frays their edges
+	return texture(noise_tex, p).r * 0.78 + texture(noise_tex, p * 3.1 + vec2(0.3, 0.6) + TIME * wind * 0.0016 * speed).r * 0.22;
 }
 
 void fragment() {
@@ -39,9 +40,9 @@ void fragment() {
 	float n = shape(p);
 	float a = smoothstep(cover, cover + 0.17, n);
 	// a step toward the sun: thinner there means this side is the lit one
-	float toward = texture(noise_tex, p + normalize(sun_dir.xz + vec2(0.0001)) * 0.035 * stretch).r * 0.6 + n * 0.4;
+	float toward = texture(noise_tex, p + normalize(sun_dir.xz + vec2(0.0001)) * 0.03 * stretch).r * 0.78 + n * 0.22;
 	float thick = smoothstep(cover, cover + 0.34, n);
-	float light = clamp(0.55 + (n - toward) * 5.0 - thick * 0.55, 0.0, 1.0);
+	float light = clamp(0.6 + (n - toward) * 6.0 - thick * 0.7, 0.0, 1.0);
 	vec3 v = normalize(wpos - CAMERA_POSITION_WORLD);
 	float near_sun = pow(max(dot(v, normalize(sun_dir)), 0.0), 6.0);
 	vec3 c = mix(dark, lit, light);

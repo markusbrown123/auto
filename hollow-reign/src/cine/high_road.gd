@@ -68,8 +68,8 @@ static func vista() -> Array:
 	var yaw := Highland.road_yaw(VISTA_S)
 	var fwd := Vector3(-sin(yaw), 0, -cos(yaw))
 	var right := Vector3(-fwd.z, 0, fwd.x)
-	var eye := h - fwd * 9.0 + right * 1.6 + Vector3(0, 1.55, 0)
-	var look := Basis(Vector3.UP, deg_to_rad(11.0)) * fwd
+	var eye := h - fwd * 9.0 + right * 2.5 + Vector3(0, 1.55, 0)
+	var look := Basis(Vector3.UP, deg_to_rad(18.0)) * fwd
 	return [eye, eye + look * 100.0 + Vector3(0, 5.0, 0), 32.0]
 
 ## One designed shot. Each puts the walker on his stretch of road and frames it.
@@ -88,7 +88,7 @@ func shot(i: int) -> void:
 		3:  # the climb: in profile on a leg of the switchback, the slope folding up behind and the ring over it
 			var s3 := Highland.road_at_z(196.0)
 			stride(s3 - 20.0, s3 - 6.0)
-			cam.ride(hero, Vector3(-6.6, 0.9, -1.2), Vector3(5.0, 3.4, -2.4))
+			cam.ride(hero, Vector3(-5.4, 1.5, -0.6), Vector3(1.0, 2.3, -0.9))
 			cam.fov = 44.0
 		4:  # over the shoulder, topping the rise: the gate's foot comes up out of the ground
 			var s4 := Highland.road_at_z(108.0)

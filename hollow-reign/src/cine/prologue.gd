@@ -29,6 +29,11 @@ const CLASH_FLOOR := 0.25                 # safety only: the forebear is never l
 ## The first of the house: a veteran in the garrison's weathered silver and a practical shield. The sword is not
 ## in this list: it is the very item the player's knight will carry (see forebear()).
 const KIT := ["s_garrison", "a_garrison_helm", "a_garrison_chest", "a_garrison_gauntlets", "a_garrison_legs"]
+## What that kit is seen as (appearance only, the numbers stay the garrison's): the plain closed helm and gauntlets
+## of the road with the garrison's cuirass and greaves, and a round gatehouse shield. Sleek, and weathered: TINT darkens
+## the silver of every piece.
+const SEEN_AS := ["a_worn_helm", "a_worn_gauntlets", "s_round"]
+const TINT := Color(0.66, 0.68, 0.73)
 const SEAL := Vector3(6.2, 0, -8.2)       # where the records are, in the hall
 const MONARCH_AT := Vector3(0, 0, -8.6)
 
@@ -53,6 +58,7 @@ var _cuts := 0                    # cuts the player has landed in the clash
 var _kept := {}                   # what a duel borrows from Game, to give back
 var _seal_light: OmniLight3D
 var _alarm: OmniLight3D
+var _seat: CineSeat               # holds the Monarch seated until he rises
 
 func _ready() -> void:
 	cards = CineCards.new()
@@ -83,6 +89,11 @@ static func forebear() -> Dictionary:
 			if not p.inventory.has(id):
 				p.inventory.append(id)
 			p.equipped[str(Db.item(id).slot)] = id
+	for id: String in SEEN_AS:
+		if Db.items.has(id) and p.equipped.get(str(Db.item(id).slot)) != null:
+			if not p.inventory.has(id):
+				p.inventory.append(id)
+			p.cosmetics[str(Db.item(id).slot)] = {"look_as": id}
 	# the sword is the heir's own: the same item, with whatever has been done to it (blade tier, mods, edge)
 	var sword := inherited_sword()
 	if not p.inventory.has(sword):
@@ -109,6 +120,11 @@ static func forebear_look() -> Dictionary:
 	var look: Dictionary = Duel.player_look()
 	Game.profile = real
 	return look
+
+## Weathers a rig built from that look: the armour's silver gone dull and dark with years of road.
+static func weather(rig: FighterRig) -> void:
+	if rig != null and rig.parts != null:
+		rig.parts.set_param(&"tint", TINT)
 
 # ================================================================ plumbing
 func _w(t: float, me: int) -> bool:
@@ -207,7 +223,7 @@ func _beat_road(me: int) -> void:
 	road = HighRoad.new()
 	add_child(road)
 	road.setup(1)
-	road.walker(forebear_look())
+	weather(road.walker(forebear_look()))
 	Sfx.music_for("theme", "menu", 2.0)
 	if only_shot > 0:
 		cards.veil.color.a = 0.0
@@ -267,6 +283,7 @@ func _hall(with_guard: bool) -> void:
 	hero = CineActor.new()
 	hall.add_child(hero)
 	hero.build(forebear_look(), false)
+	weather(hero)
 	hero.footsteps = true
 	monarch = FighterRig.new()
 	hall.add_child(monarch)
@@ -274,6 +291,7 @@ func _hall(with_guard: bool) -> void:
 	monarch.position = MONARCH_AT
 	monarch.rotation.y = PI
 	monarch.time_scale = 0.5
+	_enthrone(arena)
 	if with_guard:
 		guard = FighterRig.new()
 		hall.add_child(guard)
@@ -292,6 +310,44 @@ func _hall(with_guard: bool) -> void:
 	_seal_light.position = SEAL + Vector3(0.2, 1.7, 0.3)
 	hall.add_child(_seal_light)
 	Sfx.ambience("")
+
+## The Monarch is found seated: a throne of his own at the head of the hall floor (the great one behind it is the
+## dynasty's, and nobody has sat in that for a long time), and the pose CineSeat holds him in until he rises.
+func _enthrone(arena: Arena) -> void:
+	var k := monarch.scale.y
+	var chair := Node3D.new()
+	chair.position = MONARCH_AT
+	chair.scale = Vector3.ONE * k
+	hall.add_child(chair)
+	var dark := Look.stone(Color("#221c1b"), 0.5, 0.8, "throne_seat")
+	var gold := Look.flat(Color("#9a7630"), 0.45, 0.85)
+	var red := Look.flat(Color("#34100d"), 1.0)
+	# [size, where, material]: seat, cushion, the high back and its crest, arms on their posts, the plinth behind
+	for b: Array in [[Vector3(1.0, 0.5, 0.86), Vector3(0, 0.25, -0.42), dark], [Vector3(0.84, 0.09, 0.7), Vector3(0, 0.53, -0.36), red],
+			[Vector3(1.12, 2.7, 0.2), Vector3(0, 1.35, -0.84), dark], [Vector3(0.8, 1.5, 0.05), Vector3(0, 1.45, -0.72), red],
+			[Vector3(1.24, 0.12, 0.26), Vector3(0, 2.72, -0.84), gold], [Vector3(0.3, 0.7, 0.2), Vector3(0, 3.1, -0.84), dark],
+			[Vector3(0.12, 0.46, 0.12), Vector3(0, 3.62, -0.84), gold],
+			[Vector3(0.16, 0.86, 0.9), Vector3(-0.58, 0.43, -0.42), dark], [Vector3(0.16, 0.86, 0.9), Vector3(0.58, 0.43, -0.42), dark],
+			[Vector3(0.2, 0.07, 0.94), Vector3(-0.58, 0.88, -0.42), gold], [Vector3(0.2, 0.07, 0.94), Vector3(0.58, 0.88, -0.42), gold],
+			[Vector3(1.9, 0.16, 0.5), Vector3(0, 0.08, -1.06), dark]]:
+		var m := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = b[0]
+		m.mesh = bm
+		m.position = b[1]
+		m.material_override = b[2]
+		chair.add_child(m)
+	_seat = CineSeat.make(monarch, 0.6 * k)
+
+## He stands up out of the throne, and only then walks.
+func _rise_and_walk(to: Vector3, speed: float) -> void:
+	if _seat == null:
+		_walk(monarch, to, speed)
+		return
+	var who := monarch
+	var tw := who.create_tween()
+	tw.tween_property(_seat, "amount", 0.0, 1.5).set_trans(Tween.TRANS_SINE)
+	tw.tween_callback(func(): _walk(who, to, speed))
 
 func _walk(who: FighterRig, to: Vector3, speed: float = HighRoad.WALK) -> Tween:
 	var d := to - who.position
@@ -330,8 +386,8 @@ func _beat_throne(me: int) -> void:
 			cam.move(Vector3(-1.3, 1.55, -1.3), Vector3(0.1, 1.5, 1.6), 5.0)
 		else:
 			# the Monarch, from below
-			cam.cut(Vector3(1.3, 0.8, -3.6), MONARCH_AT + Vector3(0, 2.2, 0), 38.0)
-			cam.move(Vector3(1.0, 0.9, -4.2), MONARCH_AT + Vector3(0, 2.3, 0), 6.0)
+			cam.cut(Vector3(2.0, 0.7, -4.6), MONARCH_AT + Vector3(0, 1.55, 0), 40.0)
+			cam.move(Vector3(1.6, 0.8, -5.2), MONARCH_AT + Vector3(0, 1.65, 0), 6.0)
 	if not await _spoken(me):
 		return
 	# "Show the warden out": the guardian leaves the wall, and turns
@@ -379,6 +435,7 @@ func _fight(foe_id: String, opts: Dictionary) -> void:
 		opts["bot_style"] = DuelBot.Style.SKILLED
 	opts["skip_intro"] = true
 	duel.setup(foe_id, opts)
+	weather(duel.player_rig)
 	_fight_t = 0.0
 	_cuts = 0
 	duel.sim.ev.connect(_on_duel_ev)
@@ -452,7 +509,7 @@ func _beat_records(me: int) -> void:
 	monarch.time_scale = 1.0
 	cam.cut(Vector3(3.6, 0.5, -3.4), MONARCH_AT + Vector3(0, 2.0, 0), 38.0)
 	cam.move(Vector3(3.9, 0.6, -2.6), Vector3(1.6, 2.0, -5.6), 4.0)
-	_walk(monarch, Vector3(2.4, 0, -5.2), 1.0)
+	_rise_and_walk(Vector3(2.4, 0, -5.2), 1.0)
 	_face(hero, MONARCH_AT, 0.8)
 	if not await _spoken(me):
 		return
@@ -506,6 +563,7 @@ func _beat_fall(me: int) -> void:
 	hero = CineActor.new()
 	hall.add_child(hero)
 	hero.build(forebear_look(), false)
+	weather(hero)
 	hero.footsteps = true
 	# (the Monarch is not in the room: the door has come down between them, and he speaks through it)
 	var key := SpotLight3D.new()

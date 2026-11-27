@@ -25,9 +25,9 @@ void fragment() {
 	float n3 = texture(noise_tex, wpos.xz * 0.61 + wpos.y * 0.3).r;
 	vec3 bw = wnrm * wnrm;
 	float l = dot(vec3(0.35, 0.5, 0.15), texture(rock_tex, wpos.xy * 0.11).rgb * bw.z + texture(rock_tex, wpos.zy * 0.11).rgb * bw.x + texture(rock_tex, wpos.xz * 0.11).rgb * bw.y);
-	float strata = 0.5 + 0.5 * sin(wpos.y * 1.45 + n2 * 5.0);
-	strata = strata * 0.6 + 0.4 * (0.5 + 0.5 * sin(wpos.y * 4.9 + n2 * 9.0));
-	vec3 c = mix(rock_a, rock_b, clamp(l * 1.5 - 0.1 + (strata - 0.5) * 0.5, 0.0, 1.0)) * (0.8 + 0.4 * n2);
+	float bed = wpos.y * 0.9 + n2 * 3.0;
+	float strata = smoothstep(0.2, 0.8, fract(bed)) * (1.0 - smoothstep(0.86, 1.0, fract(bed)));
+	vec3 c = mix(rock_a, rock_b, clamp(l * 1.7 - 0.12 + (strata - 0.5) * 0.24 + (n3 - 0.5) * 0.2, 0.0, 1.0)) * (0.8 + 0.4 * n2);
 	c *= mix(0.45, 1.0, smoothstep(sea_level + 1.0, sea_level + 9.0, wpos.y));
 	float top = smoothstep(0.62, 0.86, wnrm.y + (n3 - 0.5) * 0.3);
 	c = mix(c, mix(grass_a, grass_b, n2) * (0.5 + 0.5 * n3), top * 0.85 * (1.0 - snow));

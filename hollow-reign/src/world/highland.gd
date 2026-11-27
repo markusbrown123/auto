@@ -35,6 +35,7 @@ const MASK_W := 256.0
 const MASK_L := 512.0
 const MASK_PX := 2.0              # texels a metre
 const GATE_AT := Vector3(0, 0, -21.0)
+const GATE_YAW := 90.0             # the gatehouse model's doors are on its X side
 
 ## The road, from its foot to the court (x, z). The middle of it is the climb.
 const ROAD := [[-20, 500], [-18, 470], [-8, 432], [8, 398], [6, 360], [-12, 322], [-20, 284], [-8, 250], [16, 228],
@@ -42,7 +43,7 @@ const ROAD := [[-20, 500], [-18, 470], [-8, 432], [8, 398], [6, 360], [-12, 322]
 	[-9, 74], [-8, 58], [-3, 40], [1, 24], [0, 12], [0, 5]]
 ## The ridge line: how high the ground stands at each z (z, height), highest z first.
 const PROFILE := [[580, -62], [470, -54], [400, -50], [330, -46], [300, -47], [240, -41], [228, -38], [120, -10.5],
-	[105, -7], [70, -8.5], [40, -5], [22, -1.2], [14, 0], [-22, 0], [-44, 4], [-140, 42]]
+	[105, -7], [70, -8.5], [40, -5], [22, -1.2], [14, 0], [-22, 0], [-40, 2], [-64, 31], [-140, 48]]
 
 ## The same place in each generation of the family (index = generation - 1).
 ## I: a summer dawn, the sun low over the sea, the gate whole and kept. II: an autumn dusk, the sun going down behind
@@ -50,29 +51,29 @@ const PROFILE := [[580, -62], [470, -54], [400, -50], [330, -46], [300, -47], [2
 ## it alight: what is under the stone has woken.
 const SEASONS := [
 	{"sky": "#2a5798", "horizon": "#f2c58a", "fog": "#cfb596", "fog_d": 0.00028, "sun": "#ffd49a", "sun_e": 3.5, "sun_rot": Vector3(-15, 80, 0),
-		"amb": "#6c84aa", "amb_e": 0.72, "exp": 0.92, "sat": 1.1, "con": 1.12,
-		"grass_a": "#2f5c20", "grass_b": "#6f8a2c", "heather": "#8a4f92", "heather_amt": 1.0, "straw": "#b8a24c", "dry": 0.1, "snow": 0.0,
-		"rock_a": "#2c2825", "rock_b": "#93826a", "earth": "#4a3a26", "wet": 0.5,
+		"amb": "#6c84aa", "amb_e": 0.72, "fill": 0.2, "exp": 0.92, "sat": 1.1, "con": 1.12,
+		"grass_a": "#2c5a20", "grass_b": "#5c7c2a", "heather": "#75507e", "heather_amt": 1.0, "straw": "#b8a24c", "dry": 0.1, "snow": 0.0,
+		"rock_a": "#2a2826", "rock_b": "#857c6e", "earth": "#4a3a26", "wet": 0.5,
 		"cloud": 0.5, "cloud_lit": "#fff0d6", "cloud_dark": "#646a84", "cloud_shadow": 0.5,
-		"far_lit": "#a89872", "far_shade": "#3a4c66", "haze": "#dcc4a2", "rim": "#ffdf9c",
+		"far_lit": "#8c8a7a", "far_shade": "#3c4e6c", "haze": "#c8bca8", "rim": "#ffdf9c",
 		"deep": "#0d2a3a", "shelf": "#2a6c6c", "shafts": 0.2,
 		"wind": 1.0, "seam": 0.25, "weather": "", "wear": 1.0, "whole": true},
-	{"sky": "#1c2234", "horizon": "#c8703c", "fog": "#7a584a", "fog_d": 0.0009, "sun": "#ff8c48", "sun_e": 3.0, "sun_rot": Vector3(-8, 226, 0),
-		"amb": "#4a5270", "amb_e": 0.85, "exp": 1.05, "sat": 0.98, "con": 1.12,
-		"grass_a": "#56481e", "grass_b": "#9c702a", "heather": "#4c2d2a", "heather_amt": 0.6, "straw": "#b88a3c", "dry": 1.0, "snow": 0.0,
-		"rock_a": "#221d1c", "rock_b": "#806650", "earth": "#3a2a1c", "wet": 0.7,
-		"cloud": 0.4, "cloud_lit": "#ea9058", "cloud_dark": "#2a2836", "cloud_shadow": 0.55,
-		"far_lit": "#b46a3e", "far_shade": "#27293c", "haze": "#a6644a", "rim": "#ffb070",
+	{"sky": "#18224a", "horizon": "#d8763c", "fog": "#4c4a60", "fog_d": 0.00045, "sun": "#ff8e4a", "sun_e": 2.6, "sun_rot": Vector3(-7, 208, 0),
+		"amb": "#3c4e80", "amb_e": 1.1, "fill": 0.5, "exp": 0.95, "sat": 1.0, "con": 1.14,
+		"grass_a": "#3c4a26", "grass_b": "#7a5e2c", "heather": "#4c2d2a", "heather_amt": 0.6, "straw": "#a07a40", "dry": 0.8, "snow": 0.0,
+		"rock_a": "#201d1e", "rock_b": "#766252", "earth": "#3a2a1c", "wet": 0.7,
+		"cloud": 0.49, "cloud_lit": "#d89468", "cloud_dark": "#262b44", "cloud_shadow": 0.55,
+		"far_lit": "#8a5a48", "far_shade": "#1c2238", "haze": "#6a5062", "rim": "#ffb070",
 		"deep": "#0b1620", "shelf": "#1e3842", "shafts": 0.3,
 		"wind": 2.0, "seam": 0.0, "weather": "", "wear": 0.45, "whole": false},
-	{"sky": "#39506f", "horizon": "#c6d0dc", "fog": "#a8b4c2", "fog_d": 0.0008, "sun": "#dde8fa", "sun_e": 2.5, "sun_rot": Vector3(-13, 138, 0),
-		"amb": "#6c7c96", "amb_e": 0.85, "exp": 0.86, "sat": 0.8, "con": 1.12,
-		"grass_a": "#5a6250", "grass_b": "#82826a", "heather": "#5c4c52", "heather_amt": 0.4, "straw": "#9a9478", "dry": 0.7, "snow": 0.85,
-		"rock_a": "#22252a", "rock_b": "#6c7078", "earth": "#34322e", "wet": 0.3,
-		"cloud": 0.44, "cloud_lit": "#f2f5fa", "cloud_dark": "#687284", "cloud_shadow": 0.4,
-		"far_lit": "#c6d0dc", "far_shade": "#46546a", "haze": "#b6c2ce", "rim": "#ffffff",
+	{"sky": "#22344e", "horizon": "#aebccc", "fog": "#8c9aac", "fog_d": 0.0005, "sun": "#e6eefc", "sun_e": 3.0, "sun_rot": Vector3(-13, 138, 0),
+		"amb": "#5a6c8a", "amb_e": 0.8, "fill": 0.35, "exp": 0.82, "sat": 0.85, "con": 1.18,
+		"grass_a": "#4e5646", "grass_b": "#77775e", "heather": "#5c4c52", "heather_amt": 0.4, "straw": "#9a9478", "dry": 0.7, "snow": 0.6,
+		"rock_a": "#1e2126", "rock_b": "#63676f", "earth": "#34322e", "wet": 0.3,
+		"cloud": 0.4, "cloud_lit": "#e8eef6", "cloud_dark": "#3c4658", "cloud_shadow": 0.4,
+		"far_lit": "#aab8c8", "far_shade": "#2e3c52", "haze": "#93a2b4", "rim": "#ffffff",
 		"deep": "#0b1c28", "shelf": "#224852", "shafts": 0.1,
-		"wind": 0.6, "seam": 5.0, "weather": "snow", "wear": 0.6, "whole": false},
+		"wind": 0.6, "seam": 6.0, "weather": "snow", "wear": 0.6, "whole": false},
 ]
 
 static var _h := PackedFloat32Array()       # the height field, row by row along z
@@ -154,6 +155,8 @@ static func _raw(x: float, z: float) -> float:
 		var ts := (floorf(tw * 2.0) + smoothstep(0.36, 0.6, fposmod(tw * 2.0, 1.0))) * 0.5
 		ridge = lerpf(ridge, -38.0 + 27.5 * minf(ts, 1.0), mid)
 	var h := ridge + _big.get_noise_2d(x, z) * lerpf(1.6, 6.5, mid) + _small.get_noise_2d(x, z) * lerpf(0.3, 1.3, mid)
+	# east of the road the ground tips toward the cliff, so the sea is seen from the road
+	h -= minf(maxf(0.0, x - _road_x(z) - 12.0) * 0.17, 7.5) * smoothstep(-10.0, 60.0, z)
 	# the west falls away as moor
 	var west := maxf(0.0, -x - 48.0)
 	h -= west * 0.13 + west * west * 0.0007
@@ -456,6 +459,13 @@ static func build(a: Arena) -> void:
 	a.env.fog_sky_affect = 0.0
 	a.env.fog_height = SEA + 5.0
 	a.env.fog_height_density = 0.012
+	# a little light from the camera's side of the land, so a figure with the sun behind it is not a cut-out
+	var fill := DirectionalLight3D.new()
+	fill.name = "HLFill"
+	fill.shadow_enabled = false
+	fill.light_specular = 0.0
+	fill.rotation_degrees = Vector3(-24, 0, 0)
+	a.add_child(fill)
 	var land_rect := Vector4(X0 - CELL, Z0 - CELL, 1.0 / (float((_nx + 1) / 2) * CELL * 2.0), 1.0 / (float((_nz + 1) / 2) * CELL * 2.0))
 	# ---- ground
 	var ground := ShaderMaterial.new()
@@ -497,7 +507,7 @@ static func build(a: Arena) -> void:
 	st.sunlit.append(sea_mat)
 	# ---- cloud, moving, in two layers: a low broken deck and high streaks
 	st["clouds"] = []
-	for layer: Array in [[310.0, 0.00042, Vector2(1.0, 1.0), 1.0, 0.000026, 0.0, 0.92], [760.0, 0.00021, Vector2(1.0, 3.4), 0.45, 0.00006, 0.07, 0.6]]:
+	for layer: Array in [[310.0, 0.00034, Vector2(1.0, 1.0), 1.0, 0.000026, 0.0, 0.95], [760.0, 0.00016, Vector2(1.0, 2.2), 0.45, 0.00006, 0.1, 0.4]]:
 		var cloud := ShaderMaterial.new()
 		cloud.shader = load("res://src/world/highland_cloud.gdshader")
 		cloud.set_shader_parameter("noise_tex", _noise_tex())
@@ -583,7 +593,7 @@ static func _grass(a: Arena, st: Dictionary) -> void:
 			var side := 1.0 if rng.randf() < 0.5 else -1.0
 			var off := 0.0
 			var kind := 0
-			var sc := rng.randf_range(0.7, 1.35)
+			var sc := rng.randf_range(0.62, 1.15)
 			if i < fine:
 				off = 1.1 + pow(rng.randf(), 1.5) * 11.0
 				sc *= lerpf(0.5, 1.0, smoothstep(1.1, 4.5, off))
@@ -647,8 +657,8 @@ static func _grass_batch(a: Arena, mm: MultiMesh, mat: ShaderMaterial, kind: int
 static func _clump_mesh() -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var w := 0.62
-	var h := 0.62
+	var w := 0.6
+	var h := 0.52
 	for k in 3:
 		var ang := PI * float(k) / 3.0 + 0.2
 		var d := Vector3(cos(ang), 0, sin(ang)) * w
@@ -663,19 +673,19 @@ static func _clump_mesh() -> ArrayMesh:
 
 ## Blades of grass for the cards: thin, many, of every height, a few gone to seed. The shader tints them.
 static func _blades() -> Texture2D:
-	if Look._cache.has("highland_blades2"):
-		return Look._cache["highland_blades2"]
+	if Look._cache.has("highland_blades3"):
+		return Look._cache["highland_blades3"]
 	var size := 256
 	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
 	img.fill(Color(0.6, 0.0, 0.0, 0))
 	var r := RandomNumberGenerator.new()
 	r.seed = 23
-	for b in 74:
+	for b in 120:
 		var base_x := r.randf_range(6.0, 250.0)
 		var lean := r.randf_range(-46.0, 46.0)
 		var h := float(size) * (r.randf_range(0.3, 0.72) if b % 5 != 0 else r.randf_range(0.74, 0.99))
-		var w := r.randf_range(2.1, 4.6)
-		var shade := r.randf_range(0.5, 1.0)
+		var w := r.randf_range(1.3, 3.1)
+		var shade := r.randf_range(0.45, 1.0)
 		var seed_head := b % 9 == 0
 		for y in int(h):
 			var u := float(y) / h
@@ -691,7 +701,7 @@ static func _blades() -> Texture2D:
 					img.set_pixel(x, size - 1 - y, Color(v, 0.0, 0.0, 1.0))
 	img.generate_mipmaps()
 	var t := ImageTexture.create_from_image(img)
-	Look._cache["highland_blades2"] = t
+	Look._cache["highland_blades3"] = t
 	return t
 
 ## Heather and gorse: a low dome of twigs (red: light and dark) with flower along the upper stems (green).
@@ -831,12 +841,11 @@ static func _ranges(a: Arena, st: Dictionary) -> void:
 		crest.fractal_octaves = 4
 		var sf := SurfaceTool.new()
 		sf.begin(Mesh.PRIMITIVE_TRIANGLES)
-		sf.set_smooth_group(-1)
 		# [radius, air, height, from, to (degrees; 0 is behind the gate, positive toward the sea), seed, snow on the tops]
 		for layer: Array in [[470.0, 0.1, 110.0, -78.0, 70.0, 3, 0.0], [820.0, 0.28, 290.0, -150.0, 34.0, 11, 0.0], [1250.0, 0.44, 440.0, -160.0, 48.0, 23, 0.0],
-				[1900.0, 0.6, 640.0, -165.0, 30.0, 37, 0.6], [2900.0, 0.75, 930.0, -170.0, 60.0, 51, 1.0], [2500.0, 0.72, 170.0, 58.0, 118.0, 67, 0.0]]:
+				[1900.0, 0.64, 640.0, -165.0, 30.0, 37, 0.5], [2900.0, 0.8, 930.0, -170.0, 60.0, 51, 1.0], [2500.0, 0.72, 170.0, 58.0, 118.0, 67, 0.0]]:
 			var radius := float(layer[0])
-			var n := 84
+			var n := 150
 			var rows: Array = []
 			for i in n + 1:
 				var u := float(i) / float(n)
@@ -899,6 +908,7 @@ static func _shafts(a: Arena, st: Dictionary) -> void:
 ## and in the first generation the long banners of the house on it and watch-fires on its shoulders.
 static func _ring(a: Arena, st: Dictionary) -> StandardMaterial3D:
 	var stone := Look.stone(Color("#8d877b"), 0.07, 0.9, "ringgate")
+	stone.disable_fog = true          # the landmark is drawn by its own light and shadow, not by the haze
 	var block := BoxMesh.new()
 	block.size = Vector3(TAU * (RING_R + RING_THICK * 0.5) / RING_BLOCKS * 0.97, RING_THICK, RING_DEEP)
 	var tooth := BoxMesh.new()
@@ -946,11 +956,14 @@ static func _ring(a: Arena, st: Dictionary) -> StandardMaterial3D:
 	var scars: Array = []
 	for sx: float in [-1.0, 1.0]:
 		var foot := Vector3(sx * 35.0, 0, RING_C.z)
-		feet.append([Vector3(21.0, 9.0, 15.0), on_ground(foot.x, foot.z, 3.0), Vector3(0, 0, sx * 8.0)])
-		feet.append([Vector3(15.0, 7.0, 12.5), on_ground(foot.x, foot.z, 10.0), Vector3(0, 0, sx * 14.0)])
+		feet.append([Vector3(23.0, 5.0, 16.0), on_ground(foot.x, foot.z, 1.5)])
+		feet.append([Vector3(20.0, 5.0, 14.0), on_ground(foot.x, foot.z, 6.0), Vector3(0, 0, sx * 5.0)])
+		feet.append([Vector3(16.5, 6.0, 12.5), on_ground(foot.x, foot.z, 11.0), Vector3(0, 0, sx * 12.0)])
+		for fin: float in [-7.5, 0.0, 7.5]:
+			feet.append([Vector3(2.0, 13.0, 2.2), on_ground(foot.x + fin, foot.z, 6.5) + Vector3(0, 0, 7.6), Vector3(-6.0, 0, 0)])
 		feet.append([Vector3(5.0, 22.0, 4.0), on_ground(sx * 27.5, RING_C.z + 5.5, 9.0), Vector3(0, 0, sx * -4.0)])
 		# the house's colours, the height of the gatehouse twice over
-		cloth.append([Vector3(5.0, 22.0, 0.25), Vector3(sx * 30.0, 14.0, RING_C.z + RING_DEEP * 0.5 + 1.4)])
+		cloth.append([Vector3(3.6, 11.0, 0.25), on_ground(sx * 38.0, RING_C.z, 7.0) + Vector3(0, 0, 8.3)])
 		a.fire(Vector3(sx * 36.0, 15.2, RING_C.z + 5.0), 3.0, 34.0, false)
 	_solid(a, "HLRingFeet", feet, stone, true)
 	st.kept.append(_solid(a, "HLRingCloth", cloth, _cloth_mat(), false))
@@ -1012,6 +1025,7 @@ static func _solid(parent: Node3D, node_name: String, boxes: Array, mat: Materia
 ## By the second the eastern spire has lost its head and stands in scaffolding.
 static func _citadel(a: Arena, st: Dictionary) -> void:
 	var m := Look.stone(Color("#77716a"), 0.016, 0.95, "citadel")
+	m.disable_fog = true
 	var root := Node3D.new()
 	root.name = "HLCitadel"
 	root.position = Vector3(6.0, 34.0, -330.0)
@@ -1080,14 +1094,14 @@ static func _citadel(a: Arena, st: Dictionary) -> void:
 ## wall whole to either side of it, fires fed, banners in ranks, the kings' statues standing. After it, what the
 ## years did: the gatehouse settled and dark, ivy on it, a statue down, rubble where the wall has shed.
 static func _gate_court(a: Arena, st: Dictionary) -> void:
-	var gate := a.prop("road_gatehouse", 13.0, GATE_AT, 0.0)
+	var gate := a.prop("road_gatehouse", 13.0, GATE_AT, GATE_YAW)
 	if gate == null:
 		gate = a.prop("gate", 13.0, GATE_AT, 0.0)
 	st["gatehouse"] = gate
 	_shadowed(gate)
 	for sx: float in [-1.0, 1.0]:
-		a.prop("wall", 8.5, Vector3(sx * 14.5, 0, -22.5), 0.0 if sx < 0 else 180.0)
-		a.prop("wall", 8.5, on_ground(sx * 24.0, -24.0, -0.4), 4.0 * sx + (0.0 if sx < 0 else 180.0))
+		a.prop("wall", 8.5, Vector3(sx * 12.6, 0, -22.5), 0.0 if sx < 0 else 180.0)
+		a.prop("wall", 8.5, on_ground(sx * 21.6, -23.5, -0.4), 4.0 * sx + (0.0 if sx < 0 else 180.0))
 		for b: Array in [[4.4, -8.5], [4.4, 3.0]]:
 			a.prop("brazier", 1.9, Vector3(sx * float(b[0]), 0, float(b[1])), 0.0)
 			a.fire(Vector3(sx * float(b[0]), 1.75, float(b[1])), 2.2, 10.0, false)
@@ -1104,7 +1118,7 @@ static func _gate_court(a: Arena, st: Dictionary) -> void:
 	var seam := Node3D.new()
 	seam.name = "HLGateSeam"
 	a.add_child(seam)
-	var glow := a.box(Vector3(0.22, 8.2, 0.3), GATE_AT + Vector3(0, 4.3, 3.6), Look.glow(Color("#5fe0c8"), 4.0))
+	var glow := a.box(Vector3(0.22, 8.2, 0.3), GATE_AT + Vector3(0, 4.3, 2.8), Look.glow(Color("#5fe0c8"), 4.0))
 	a.remove_child(glow)
 	seam.add_child(glow)
 	var l := OmniLight3D.new()
@@ -1132,7 +1146,7 @@ static func _ivy(a: Arena) -> Node3D:
 			x += rng.randf_range(-0.35, 0.35)
 			var sc := lerpf(1.3, 0.6, y / top) * rng.randf_range(0.7, 1.3)
 			xf.append(Transform3D(Basis.from_euler(Vector3(rng.randf_range(-0.3, 0.3), rng.randf_range(-0.5, 0.5), rng.randf() * TAU)).scaled(Vector3.ONE * sc),
-				GATE_AT + Vector3(x, y + 0.2, 3.45 + rng.randf_range(0.0, 0.25))))
+				GATE_AT + Vector3(x, y + 0.2, 2.85 + rng.randf_range(0.0, 0.25))))
 			y += rng.randf_range(0.25, 0.5)
 	var mat := StandardMaterial3D.new()
 	mat.albedo_texture = _ivy_tex()
@@ -1294,7 +1308,7 @@ static func generation(a: Arena, g: int) -> void:
 	# the gatehouse: square and clean while it is kept; settled, stained and dark afterwards
 	var gate: Node3D = st.get("gatehouse")
 	if gate:
-		gate.rotation_degrees = Vector3(0, 0, 0) if whole else Vector3(1.6, 0, -2.6)
+		gate.rotation_degrees = Vector3(0, GATE_YAW, 0) if whole else Vector3(2.6, GATE_YAW, 1.6)
 		gate.position = GATE_AT if whole else GATE_AT + Vector3(0, -0.5, 0)
 		Look.set_param(gate, &"tint", Color(1, 1, 1) if whole else (Color(0.5, 0.47, 0.42) if g == 2 else Color(0.6, 0.63, 0.68)))
 	var env := a.env
@@ -1317,6 +1331,9 @@ static func generation(a: Arena, g: int) -> void:
 	a.sun.light_color = Color(str(s.sun))
 	a.sun.light_energy = float(s.sun_e)
 	a.sun.rotation_degrees = s.sun_rot
+	var fill := a.get_node("HLFill") as DirectionalLight3D
+	fill.light_color = Color(str(s.amb)).lerp(Color.WHITE, 0.4)
+	fill.light_energy = float(s.fill)
 	var sun_dir := _sun_dir(s.sun_rot)
 	var wind := Vector2(0.86, 0.5) * float(s.wind)
 	for m: ShaderMaterial in st.shared:

@@ -42,7 +42,7 @@ void vertex() {
 	VERTEX.y -= bend * bend * 0.7 * h;
 	cdist = distance(CAMERA_POSITION_WORLD, root);
 	// far clumps sink into the ground; one the lens is about to pass through gets out of its way
-	float k = (1.0 - smoothstep(fade_near, fade_far, cdist)) * smoothstep(0.35, 1.6, cdist);
+	float k = (1.0 - smoothstep(fade_near, fade_far, cdist)) * smoothstep(1.3, 3.6, cdist);
 	VERTEX = mix(root, VERTEX, k);
 	NORMAL = normalize(MODEL_MATRIX[1].xyz);
 	gust = g * h;
@@ -58,8 +58,8 @@ void vertex() {
 void fragment() {
 	vec4 a = texture(albedo_tex, UV);
 	float h = 1.0 - UV.y;
-	vec3 c = tint * mix(0.3, 1.05, smoothstep(0.0, 0.85, h)) * (0.55 + 0.6 * a.r);
-	c = mix(c, c * 1.12 + straw * 0.06, smoothstep(0.6, 1.0, h) * 0.5);
+	vec3 c = tint * mix(0.26, 0.92, smoothstep(0.0, 0.9, h)) * (0.5 + 0.62 * a.r);
+	c = mix(c, c * 1.06 + straw * 0.05, smoothstep(0.65, 1.0, h) * 0.45);
 	c = mix(c, tint * 0.42 * (0.7 + 0.5 * a.r), heath * (1.0 - a.g) * 0.8);
 	c = mix(c, bloom * (0.8 + 0.5 * a.r), a.g * heath);
 	c *= 0.92 + 0.42 * gust;

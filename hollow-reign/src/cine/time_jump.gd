@@ -41,18 +41,31 @@ func _run() -> void:
 	cards.show_card(str(WORDS.get(years, "%d YEARS" % years)), 4.4)
 	if not await _w(1.4):
 		return
-	# the weather closes over the road, and when it opens the years have been at it
-	await cards.fade(1.0, 1.5, true)
+	# the weather closes over the road, and when it opens the years have been at it. The veil is the colour of each
+	# generation's own air (never blank white): the first's haze going in, the second's coming out.
+	await _weather(1.0, 1.5, from_gen)
 	if _over:
 		return
 	Highland.generation(road.arena, to_gen)
+	cards.veil.color = Color(_air(to_gen), 1.0)
 	if not await _w(0.5):
 		return
-	await cards.fade(0.0, 2.2, true)
+	await _weather(0.0, 2.2, to_gen)
 	if not await _w(2.6):
 		return
 	await cards.fade(1.0, 0.5)
 	_end()
+
+## The colour of a generation's weather: its haze, a little toward its sky.
+func _air(g: int) -> Color:
+	var s: Dictionary = Highland.SEASONS[clampi(g, 1, Highland.SEASONS.size()) - 1]
+	return Color(str(s.fog)).lerp(Color(str(s.horizon)), 0.35).darkened(0.12)
+
+func _weather(to: float, time: float, g: int) -> void:
+	cards.veil.color = Color(_air(g), cards.veil.color.a)
+	var tw := create_tween()
+	tw.tween_property(cards.veil, "color:a", to, time).set_trans(Tween.TRANS_SINE)
+	await tw.finished
 
 func _w(t: float) -> bool:
 	await get_tree().create_timer(t).timeout

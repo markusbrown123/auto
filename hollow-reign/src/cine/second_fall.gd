@@ -135,11 +135,11 @@ func _run() -> void:
 	cam.move(hero.position + Vector3(-1.1, 0.6, 0.8), SEAL + Vector3(-3.0, 2.0, 2.4), 6.0)
 	if not await _spoken():
 		return
-	await walk(monarch, hero.position + Vector3(-1.5, 0, 1.2), 1.3).finished
+	await walk(monarch, hero.position + Vector3(-1.3, 0, 1.5), 1.3).finished
 	if _over:
 		return
 	face(monarch, hero.position, 0.2)
-	cam.cut(hero.position + Vector3(-0.2, 0.5, 0.2), monarch.position + Vector3(0, 1.9, 0), 36.0)
+	cam.cut(monarch.position + Vector3(-2.1, 0.7, 3.0), monarch.position + Vector3(0, 2.0, 0), 34.0)       # from the hall, up at him: he stands between us and the seal
 	monarch.telegraph(Vector2(-0.8, -0.5), 0.7, 0.3)
 	if not await _w(0.72):
 		return
@@ -151,7 +151,7 @@ func _run() -> void:
 	create_tween().tween_property(cards.veil, "color:a", 0.0, 0.5)
 	create_tween().tween_property(_seal, "light_energy", 0.25, 1.8)
 	monarch.guard()
-	cam.move(cam.pos + Vector3(-0.25, 0.15, 0.35), monarch.position + Vector3(0, 2.0, 0), 5.0)
+	cam.move(cam.pos + Vector3(-0.3, 0.1, 0.5), monarch.position + Vector3(0, 2.0, 0), 5.0)
 	if _held("fall"):
 		return
 	if not await _w(3.6):

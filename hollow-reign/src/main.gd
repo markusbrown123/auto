@@ -704,6 +704,8 @@ func _dev_boot() -> void:
 			Game.run.stage = 6
 			Game.profile.flags["scene_monarch_intro"] = true
 			Game.profile.flags["scene_monarch_blade"] = true
+			for heard: String in Companion.pick_boss_approach("forgotten_monarch"):
+				Companion.mark_heard(heard)
 			start_duel({"type": "boss", "foe": "forgotten_monarch", "label": "The Hollow Throne"})
 			_dev_phase(current, 2)
 		"gen2fall":
@@ -749,6 +751,8 @@ func _dev_boot() -> void:
 			Encounters.cast(3, "monarch_iii", Game.profile)
 			if _args.has("seen"):
 				Game.profile.flags["scene_monarch_g3_intro"] = true
+				for heard3: String in Companion.pick_boss_approach("monarch_iii"):
+					Companion.mark_heard(heard3)
 			start_duel({"type": "boss", "foe": "monarch_iii", "label": "The Hollow Throne"})
 			_dev_phase(current, int(_args.get("phase", "0")))
 		"aftermath":

@@ -44,8 +44,8 @@ void fragment() {
 	float n1 = texture(noise_tex, wpos.xz * 0.006).r;
 	float n2 = texture(noise_tex, wpos.xz * 0.045 + vec2(0.37, 0.11)).r;
 	float n3 = texture(noise_tex, wpos.xz * 0.61).r;
-	vec3 td = texture(turf_tex, wpos.xz * 0.21).rgb;
-	float tl = lum(td);
+	// the detail map at two scales, so that neither one's repeat is seen on a far slope
+	float tl = mix(lum(texture(turf_tex, wpos.xz * 0.21).rgb), lum(texture(turf_tex, wpos.zx * 0.037 + vec2(0.4, 0.1)).rgb), 0.35 + 0.45 * smoothstep(25.0, 120.0, dist));
 	// ---- turf
 	vec3 g = mix(grass_a, grass_b, smoothstep(0.36, 0.64, n1 * 0.6 + n2 * 0.4));
 	g *= mix(0.72, 1.16, smoothstep(0.3, 0.7, texture(noise_tex, wpos.xz * 0.0021 + vec2(0.5, 0.2)).r));
@@ -60,13 +60,15 @@ void fragment() {
 	vec3 bw = abs(wnrm);
 	float wx = bw.x * bw.x / (bw.x * bw.x + bw.z * bw.z + 0.0001);
 	float rl = mix(lum(texture(rock_tex, wpos.xy * 0.085).rgb), lum(texture(rock_tex, wpos.zy * 0.085).rgb), wx);
-	float strata = 0.5 + 0.5 * sin(wpos.y * 1.45 + n2 * 5.0 + n1 * 9.0);
-	strata = strata * 0.6 + 0.4 * (0.5 + 0.5 * sin(wpos.y * 4.9 + n2 * 9.0));
-	vec3 rock = mix(rock_a, rock_b, clamp(rl * 1.5 - 0.1 + (strata - 0.5) * 0.5, 0.0, 1.0));
+	// beds: thin, uneven, and broken up by the stone's own grain rather than drawn over it
+	float bed = wpos.y * 0.9 + n2 * 3.0 + n1 * 14.0;
+	float strata = smoothstep(0.2, 0.8, fract(bed)) * (1.0 - smoothstep(0.86, 1.0, fract(bed)));
+	strata = mix(strata, 0.5 + 0.5 * sin(wpos.y * 5.3 + n3 * 4.0), 0.3);
+	vec3 rock = mix(rock_a, rock_b, clamp(rl * 1.7 - 0.12 + (strata - 0.5) * 0.24 + (n3 - 0.5) * 0.2, 0.0, 1.0));
 	rock *= 0.8 + 0.4 * n2;
 	// the foot of the sea cliff is dark and wet
 	rock *= mix(0.45, 1.0, smoothstep(sea_level + 1.0, sea_level + 9.0, wpos.y));
-	vec3 scree = mix(earth, rock_b * 0.8, smoothstep(0.42, 0.6, n3)) * (0.55 + 1.3 * tl);
+	vec3 scree = mix(earth, rock_b * 0.8, smoothstep(0.42, 0.6, n3) * 0.6 + 0.4 * n2) * (0.75 + 0.7 * tl);
 	vec3 c = mix(mix(g, scree, screew), rock, rockw);
 	// ---- the road
 	vec2 muv = (wpos.xz - mask_rect.xy) * mask_rect.zw;

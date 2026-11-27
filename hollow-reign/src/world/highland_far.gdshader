@@ -17,9 +17,9 @@ void vertex() {
 }
 
 void fragment() {
-	float l = smoothstep(-0.15, 0.6, dot(normalize(wn), normalize(sun_dir)));
+	float l = 0.75 * smoothstep(-0.1, 0.7, dot(normalize(wn), normalize(sun_dir)));
 	vec3 base = mix(shade, lit, l);
-	base = mix(base, vec3(0.86, 0.89, 0.94) * (0.55 + 0.45 * l), max(snow, smoothstep(0.62, 0.9, UV.y) * COLOR.g) * 0.8);
+	base = mix(base, vec3(0.86, 0.89, 0.94) * (0.55 + 0.45 * l), max(snow, smoothstep(0.72, 0.96, UV.y) * COLOR.g * 0.4) * 0.8);
 	base += rim * pow(UV.y, 7.0) * 0.35 * (0.3 + 0.7 * l);
 	float air = COLOR.a + (1.0 - COLOR.a) * 0.75 * (1.0 - smoothstep(0.0, 0.42, UV.y));
 	ALBEDO = mix(base, haze, air);

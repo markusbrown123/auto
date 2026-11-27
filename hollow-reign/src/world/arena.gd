@@ -42,7 +42,7 @@ const THEMES := {
 		"amb_e": 1.55, "fill_e": 0.35, "key": "#fff4e6", "key_e": 3.6, "rim": "#ffd080", "rim_e": 0.55, "exp": 1.12, "sat": 0.95, "con": 1.12},
 	# the resurrection chamber under the fortress: a closed round room, lit only by what its machines still give off
 	"chamber": {"sky": "#050607", "horizon": "#0a0c0e", "fog": "#0e1414", "fog_d": 0.03, "sun": "#8fb0b0", "sun_e": 0.0, "sun_rot": Vector3(-80, 160, 0),
-		"stone": "#5a5750", "floor": "#45433e", "fire": "#ffb45a", "layout": "chamber", "particles": "motes", "amb": "#2c3836",
+		"stone": "#5a5750", "floor": "#45433e", "fire": "#ffb45a", "layout": "chamber", "particles": "motes+mist", "amb": "#2c3836",
 		"amb_e": 0.75, "fill_e": 0.0, "key": "#ffe9c8", "key_e": 3.0, "rim": "#6fd8c8", "rim_e": 0.0, "exp": 1.1, "sat": 0.92, "con": 1.08},
 	# the high road to the Ring-Gate: a headland of grass above the sea at dawn (src/world/highland.gd builds it and sets the light)
 	"highland": {"sky": "#34578f", "horizon": "#f0c692", "fog": "#d8b690", "fog_d": 0.0021, "sun": "#ffd6a2", "sun_e": 3.4, "sun_rot": Vector3(-11, 168, 0),
@@ -1062,6 +1062,7 @@ func _layout_chamber() -> void:
 		box(Vector3(0.74, 0.05, 0.74), at + Vector3(0, 1.1, 0), lit, Vector3(0, rad_to_deg(a2), 0))
 		cyl(0.06, 0.06, 2.6, at * 1.02 + Vector3(0, 4.2, 0), metal, 6)
 		_glow(at * 0.86 + Vector3(0, 1.8, 0), Color(theme.fire) if i % 2 == 1 else Color("#5fe0c8"), 0.55, 4.5)
+	_chamber_machine(metal, amber, teal)
 	# the voice in the walls: a grille over the cradle's head with a light behind it
 	var ly := OmniLight3D.new()
 	ly.name = "Lyra"
@@ -1081,6 +1082,103 @@ func _layout_chamber() -> void:
 	box(Vector3(1.2, 0.14, 1.2), rack.position + Vector3(0, 0.07, 0), metal, Vector3(0, 20, 0))
 	rubble(Vector3(-3.6, 0, 2.6), 5, 1.0)
 	rubble(Vector3(3.4, 0, 3.4), 4, 0.8)
+
+## What makes the chamber a machine rather than a round room: old stone from the kits standing between the panels,
+## conduits and the crown-ring from the regions that came after it, the cradle's ribs and its head unit, cables
+## across the floor from the cradle to every pylon and to the block, banks of small lit readouts on the wall, and a
+## band of metal let into the floor round the cradle. The merged pieces are one draw each.
+func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
+	var dark := Look.flat(Color("#17191b"), 0.6, 0.6)
+	# kit stone and machinery round the wall (each only if its kit is there), kept out of the story cameras' way
+	for c0: Array in [[-5.2, 1.6], [-4.7, -3.0], [4.8, -3.4]]:
+		var p := prop("cr_pillar", 5.3, Vector3(float(c0[0]), 0, float(c0[1])), rad_to_deg(atan2(float(c0[0]), float(c0[1]))))
+		if p:
+			Look.set_param(p, &"tint", Color(0.62, 0.66, 0.66))
+	for c: Array in [[-4.3, 3.0, 130.0], [-5.0, -0.5, 80.0], [3.0, -4.9, -30.0]]:
+		prop("de_conduit", 2.6, Vector3(float(c[0]), 0, float(c[1])), float(c[2]))
+	var ring := prop("th_ring", 2.2, Vector3(-3.6, 0, 4.2), 140.0)
+	if ring:
+		Look.set_param(ring, &"tint", Color(0.5, 0.55, 0.55))
+	# the cradle: three hoops over the bed, a head unit with its panel, feet under the frame
+	var solid: Array = []
+	var hoops: Array = []
+	var lit_teal: Array = []
+	var lit_amber: Array = []
+	for k in 3:
+		var z := -0.9 + k * 0.75
+		for sx: float in [-1.0, 1.0]:
+			hoops.append([Vector3(0.05, 0.5, 0.06), Vector3(sx * 0.74, 0.8, z), Vector3(0, 0, sx * -14.0)])
+			hoops.append([Vector3(0.05, 0.42, 0.06), Vector3(sx * 0.52, 1.14, z), Vector3(0, 0, sx * -56.0)])
+		hoops.append([Vector3(0.72, 0.05, 0.06), Vector3(0, 1.26, z)])
+	solid.append([Vector3(1.7, 1.7, 0.5), Vector3(0, 0.85, -1.62)])
+	solid.append([Vector3(1.2, 0.4, 0.6), Vector3(0, 1.9, -1.6)])
+	lit_teal.append([Vector3(1.1, 0.5, 0.04), Vector3(0, 1.2, -1.36)])
+	lit_amber.append([Vector3(0.9, 0.06, 0.04), Vector3(0, 0.78, -1.36)])
+	for sx2: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			solid.append([Vector3(0.22, 0.2, 0.3), Vector3(sx2 * 0.7, 0.1, sz * 1.15)])
+	Highland._solid(self, "Hoops", hoops, metal, false)
+	# readouts: banks of small lights on the wall panels, some of them out
+	for i in 22:
+		var a2 := TAU * (i + 0.5) / 22.0
+		if absf(wrapf(a2 - PI, -PI, PI)) < TAU / 22.0 * 1.6 or i % 3 == 1:
+			continue
+		var dir := Vector3(sin(a2), 0, cos(a2))
+		var side := Vector3(cos(a2), 0, -sin(a2))
+		solid.append([Vector3(1.2, 0.9, 0.06), dir * (CHAMBER_R - 0.37) + Vector3(0, 1.55, 0), Vector3(0, rad_to_deg(a2), 0)])
+		for r in 3:
+			for c2 in 5:
+				if rng.randf() < 0.35:
+					continue
+				var where := dir * (CHAMBER_R - 0.41) + side * ((c2 - 2) * 0.2) + Vector3(0, 1.3 + r * 0.25, 0)
+				(lit_teal if rng.randf() < 0.6 else lit_amber).append([Vector3(0.12 if rng.randf() < 0.7 else 0.17, 0.07, 0.02), where, Vector3(0, rad_to_deg(a2), 0)])
+	Highland._solid(self, "Machine", solid, dark, false)
+	Highland._solid(self, "ReadoutsTeal", lit_teal, teal, false)
+	Highland._solid(self, "ReadoutsAmber", lit_amber, amber, false)
+	# cables: from under the cradle out to each pylon and to the block, lying in loops on the floor
+	var cables := SurfaceTool.new()
+	cables.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var ends: Array = [Vector3(3.1, 0.2, -1.4), Vector3(-2.8, 1.2, -4.6)]
+	for i in 6:
+		var a3 := TAU * (i + 0.5) / 6.0 + 0.2
+		if absf(wrapf(a3 - PI, -PI, PI)) >= 0.5:
+			ends.append(Vector3(sin(a3), 0, cos(a3)) * (CHAMBER_R - 1.35) + Vector3(0, 0.5, 0))
+	for e: Vector3 in ends:
+		var from := Vector3(clampf(e.x, -0.5, 0.5), 0.3, clampf(e.z, -1.2, 1.2))
+		var bow := Vector3(-(e.z - from.z), 0, e.x - from.x).normalized() * rng.randf_range(-0.9, 0.9)
+		var last := from
+		for s in range(1, 11):
+			var t := float(s) / 10.0
+			var pt := from.lerp(e, t) + bow * sin(t * PI)
+			pt.y = lerpf(0.045, lerpf(from.y, e.y, t), pow(absf(t * 2.0 - 1.0), 3.0))
+			var seg := CylinderMesh.new()
+			seg.top_radius = 0.035
+			seg.bottom_radius = 0.035
+			seg.height = last.distance_to(pt) + 0.03
+			seg.radial_segments = 5
+			seg.rings = 1
+			cables.append_from(seg, 0, Transform3D(Basis(Quaternion(Vector3.UP, (pt - last).normalized())), (last + pt) * 0.5))
+			last = pt
+	var cmi := MeshInstance3D.new()
+	cmi.name = "Cables"
+	cmi.mesh = cables.commit()
+	cmi.material_override = dark
+	cmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(cmi)
+	# a band of metal let into the floor round the cradle, and the block's own ring
+	var band := TorusMesh.new()
+	band.inner_radius = 2.5
+	band.outer_radius = 2.62
+	band.rings = 48
+	band.ring_segments = 4
+	var bmi := MeshInstance3D.new()
+	bmi.mesh = band
+	bmi.scale = Vector3(1, 0.12, 1)
+	bmi.position = Vector3(0, 0.005, 0)
+	bmi.material_override = metal
+	bmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(bmi)
+	set_meta("machine_light", teal)
 
 ## The high road and the Ring-Gate (the prologue's place, and a duel's): everything is in src/world/highland.gd.
 func _layout_highland() -> void:

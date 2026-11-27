@@ -1,5 +1,11 @@
 # Modular armour: what the existing suits can do
 
+> **Male host is now v4 (2026-11-27).** The male `crownless` host is `knight_m_v4.glb` (concept B, `art/concept/knight_m_v4b.png`); all
+> ten male suits were re-fitted to its skeleton with `armor_split.gd --bodies=m --noflex --nohood` (no flex layer or hood files: its
+> undersuit is already dark; `--bodies=` limits a rebuild to one body). `--v3m` (`ArmorParts.v3m`) wears the previous male set whole
+> from `assets/models/parts_v3m/` on `knight_m_v3.glb`. The female host is unchanged. `FINISH_COAT` is unchanged and reads correctly on v4.
+> Sheets: `marketing/knight_v4/`.
+
 > **Integrated (2026-11-26, "gear on rig" pass).** The game now wears parts. What changed against the study below:
 > - **Base body = the sleek benchmark knights** (`knight_<body>_v3.glb`, suit id `crownless`). `tools/armor_split.gd`
 >   fits every suit to *their* skeleton (`--host=crownless`, the default; `--host=base` rebuilds the study's set), the

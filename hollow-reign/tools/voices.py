@@ -38,6 +38,8 @@ TARGET_LUFS, PEAK_DB = -18.4, -1.8          # measured on the 246 earlier takes:
 ROOM = "bass=g=2.5:f=150,aecho=0.9:0.35:55|110:0.16|0.08"
 # the female knight (owner's choice): presence up, low-mids down, lighter room
 CLEAR = "highpass=f=90,equalizer=f=3500:t=q:w=1.2:g=4.5,equalizer=f=250:t=q:w=1.0:g=-2,treble=g=1.5:f=7000,aecho=0.9:0.22:45|95:0.10|0.05"
+# Female knight (owner, 2026-11-27): her original voice behind a space-helmet filter, option 3 made a little softer.
+HELM_F = "highpass=f=200,lowpass=f=5400,equalizer=f=1600:t=q:w=0.8:g=3,acompressor=threshold=0.12:ratio=3:attack=5:release=60,aecho=1.0:0.85:5|9|14:0.27|0.19|0.11,aecho=0.9:0.25:40:0.08,loudnorm=I=-18:TP=-2"
 SLOW = ",atempo=0.93"                        # the Kept: "a voice the player knows, slowed"
 # The male knight's post chain (bass + room + loudnorm, as the approved audition). The pre-treatment master of every take of
 # these roles (after pitch and tempo, before this chain) is kept in MASTERS, so a changed chain is applied by
@@ -47,8 +49,8 @@ STERLING_FX = PLAYER_M_FX
 MASTER_ROLES = ("player_m", "kept_m", "effort_m")
 MASTERS = "art/vo_masters/player_m"          # lossless wav, gitignored
 ROLE_FX = {
- "player_f": CLEAR, "witness": ROOM + ",aecho=0.9:0.25:11:0.12", "narrator": "bass=g=2:f=150,aecho=0.9:0.4:80|170:0.18|0.1",
- "player_m": STERLING_FX, "kept_m": STERLING_FX + SLOW, "kept_f": CLEAR + SLOW,   # male knight: Sterling (cast_final.json), the Kept's extra 7% on top
+ "player_f": CLEAR + "," + HELM_F, "witness": ROOM + ",aecho=0.9:0.25:11:0.12", "narrator": "bass=g=2:f=150,aecho=0.9:0.4:80|170:0.18|0.1",
+ "player_m": STERLING_FX, "kept_m": STERLING_FX + SLOW, "kept_f": CLEAR + SLOW + "," + HELM_F,   # male knight: Sterling (cast_final.json), the Kept's extra 7% on top
  # the Widow (tools/cast_final.json): bass +2 at 160 Hz, presence +2.5 at 2.8 kHz, light room
  "widow": "bass=g=2:f=160,equalizer=f=2800:t=q:w=1.2:g=2.5,aecho=0.9:0.35:55|110:0.16|0.08",
  "devourer": "aecho=0.8:0.8:60|130|210:0.4|0.3|0.2,chorus=0.6:0.9:55|70:0.4|0.3:0.25|0.4:2|1.3",

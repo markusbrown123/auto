@@ -45,8 +45,13 @@ func _gui_input(e: InputEvent) -> void:
 			s.pos = e.position
 			s.t = _now()
 
+var _clock := 0.0               # game time, not the wall clock: a stroke is judged by frames played, so a slow machine (or a test) reads it the same way
+
+func _process(delta: float) -> void:
+	_clock += minf(delta, 0.1)    # one long hitch must not expire a stroke that was quick in the player's hand
+
 func _now() -> float:
-	return Time.get_ticks_msec() / 1000.0
+	return _clock
 
 static func quantize(v: Vector2) -> String:
 	var a := fposmod(atan2(v.y, v.x), TAU)

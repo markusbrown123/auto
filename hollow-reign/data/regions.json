@@ -23,7 +23,8 @@
        "foe": "hollow_soldier"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "Beyond the rubble the path divides.",
@@ -84,7 +85,8 @@
        "needs": "courtyard_gate"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The gate passage. It is narrow, and it is occupied.",
@@ -121,7 +123,8 @@
        "hint": "Rest a moment. Wounds close."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The inner ward. He is standing exactly where he was posted.",
@@ -161,7 +164,8 @@
        "foe": "blackwood_stalker"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "A deer trail leaves the road. The road goes on.",
@@ -232,7 +236,8 @@
        "shards": 2
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The trees here have been cut and stacked, very neatly, for a very long time.",
@@ -270,7 +275,8 @@
        "needs": "blackwood_bridge"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "A clearing of stumps. Every one has been used as a block.",
@@ -314,7 +320,8 @@
        ]
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "A censer the size of a bell swings across the porch, and a knight swings it.",
@@ -340,7 +347,8 @@
        "shards": 2
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "At the great doors, a woman in red is waiting. She has been waiting a long time.",
@@ -375,7 +383,8 @@
        "shards": 3
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The choir is still singing. There is nothing left of them to sing with.",
@@ -398,7 +407,8 @@
        "hint": "Warmth without smoke."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The bell tower has fallen through the crossing. Something has made its den in the bronze.",
@@ -442,7 +452,8 @@
        ]
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The ossuary. Skulls are stacked to the vault.",
@@ -497,7 +508,8 @@
        "hint": "A saint's alcove above the waterline."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "With the water gone, a lower door stands revealed.",
@@ -536,7 +548,8 @@
        "hint": "It asks nothing."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The oldest tomb. Its keeper has not left his post.",
@@ -577,7 +590,8 @@
        "foe": "scalebound"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The falconry, roofless. The perches are man-height.",
@@ -637,7 +651,8 @@
        "shards": 4
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The egg chamber. The shells are old. One is not.",
@@ -675,7 +690,8 @@
        "hint": "Heat without harm."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The summit. The sky is very large here, and part of it is looking at you.",
@@ -715,7 +731,8 @@
        "foe": "frost_thrall"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The curtain wall, sheathed in ice.",
@@ -781,7 +798,8 @@
        "hint": "Someone kept one fire alive."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The great stair. Halfway up it, a shape that was part of the wall steps out.",
@@ -820,7 +838,8 @@
        "hint": "The view is all white. It is restful."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The hall of the winter throne.",
@@ -861,7 +880,8 @@
        "foe": "husk"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "A gallery of names, carved floor to roof. Most have been licked smooth.",
@@ -916,7 +936,8 @@
        "hint": "Someone carried it this far."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "A hall where oaths were sworn. The banners hang empty; the words are gone out of them.",
@@ -955,7 +976,8 @@
        "hint": "Nothing here wants anything."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The bottom. It is not dark. It is occupied.",
@@ -995,7 +1017,8 @@
        "foe": "throne_guard"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The antechamber, hung with banners gone to thread.",
@@ -1051,7 +1074,8 @@
        "hint": "The last quiet place."
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The last guard. He has not been relieved. He does not expect to be.",
@@ -1096,7 +1120,8 @@
        "optional": true
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "checkpoint": true
     },
     {
      "prompt": "The Hollow Throne.",

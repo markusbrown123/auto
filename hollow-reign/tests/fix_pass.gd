@@ -199,7 +199,7 @@ func _slice_save() -> void:
 	Game.new_game()
 	Game.profile.tutorial_done = true
 	Companion.mark_heard(Companion.discovery_id())
-	ok(Game.SAVE_VERSION == 4 and Game.profile.road == {} and Game.profile.pouches == {}, "save version 4: a new journey has no road in progress and no pouches taken")
+	ok(Game.SAVE_VERSION == 5 and Game.profile.road == {} and Game.profile.pouches == {}, "save version 5: a new journey has no road in progress and no pouches taken")
 	Game.start_run("courtyard")
 	Game.run.stage = 2
 	Game.run.hp = 61.0
@@ -238,8 +238,8 @@ func _slice_save() -> void:
 	# migration: a version-3 save has neither key; it gains both, empty, and loses nothing
 	var v3 := fixture("save_v3")
 	var m3 := Game._migrate(fixture("save_v3"))
-	ok(int(v3.version) == 3 and not v3.has("road") and int(m3.version) == 4 and m3.road == {} and m3.pouches == {} and int(m3.gold) == int(v3.gold) and m3.inventory.size() > 0,
-		"save_v3: brought to version 4 with no road and no pouches taken, nothing else changed")
+	ok(int(v3.version) == 3 and not v3.has("road") and int(m3.version) == 5 and m3.road == {} and m3.pouches == {} and int(m3.gold) == int(v3.gold) and m3.inventory.size() > 0,
+		"save_v3: brought to version 5 with no road and no pouches taken, nothing else changed")
 	var v4 := fixture("save_v4")
 	var m4 := Game._migrate(fixture("save_v4"))
 	ok(int(v4.version) == 4 and str(m4.road.region) == "courtyard" and typeof(m4.road.stage) == TYPE_INT and int(m4.road.stage) == 4 and m4.pouches.size() >= 1,

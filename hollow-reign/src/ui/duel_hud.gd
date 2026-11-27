@@ -376,7 +376,6 @@ var sub_label: Label
 var combo_label: Label
 var cue: Cue
 var vignette: ColorRect
-var streak: Line2D
 var pad_l: Pad
 var pad_r: Pad
 var pad_block: Pad
@@ -404,20 +403,7 @@ func _ready() -> void:
 	root.add_child(vignette)
 	swipe_input = SwipeInput.new()
 	root.add_child(swipe_input)
-	swipe_input.swiped.connect(func(d, v):
-		swipe.emit(d, v)
-		_streak())
-	streak = Line2D.new()
-	streak.width = 5.0
-	streak.default_color = Color(1, 0.95, 0.85, 0.0)
-	streak.begin_cap_mode = Line2D.LINE_CAP_ROUND
-	streak.end_cap_mode = Line2D.LINE_CAP_ROUND
-	var wc := Curve.new()
-	wc.add_point(Vector2(0, 0.1))
-	wc.add_point(Vector2(0.7, 1.0))
-	wc.add_point(Vector2(1, 0.0))
-	streak.width_curve = wc
-	root.add_child(streak)
+	swipe_input.swiped.connect(func(d, v): swipe.emit(d, v))      # (the trail under the finger is drawn by swipe_input itself)
 
 	# under the pads and the pause button, over the swipe area: any touch that is not on a pad is a tap
 	struggle = Struggle.new()
@@ -895,10 +881,3 @@ func show_cue(attack: Dictionary, windup: float) -> void:
 	else:
 		cue.show_cue("dodge", Vector2.ZERO, attack.dodge, attack.unblockable, windup)
 
-func _streak() -> void:
-	var pts: Array = swipe_input.trail_points
-	if pts.size() < 2:
-		return
-	streak.points = PackedVector2Array([pts[0], pts[0].lerp(pts[1], 0.5), pts[1]])
-	streak.default_color = Color(1, 0.95, 0.85, 0.75)
-	create_tween().tween_property(streak, "default_color:a", 0.0, 0.22)

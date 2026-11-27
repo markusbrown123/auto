@@ -967,6 +967,25 @@ func _audit(stat: Dictionary, t: float) -> void:
 					if la.z < -0.012 and la.x * la.x / (fr._sh_hw * fr._sh_hw * 0.82) + la.y * la.y / (fr._sh_hh * fr._sh_hh * 0.78) < 1.0:
 						arm_n += 1
 			_worse(stat, "sh_arm", float(arm_n), t, "", false)
+			# vertices of the wearer's own body inside the board slab (3 cm in front of its middle to 6 mm behind), by region
+			# (`sh_fa` forearm, `sh_ua` upper arm and shoulder, `sh_hip` pelvis, `sh_th` thighs and shins)
+			var cnt := {"sh_fa": 0, "sh_ua": 0, "sh_hip": 0, "sh_th": 0}
+			var cnames := {}
+			for i in pts.size():
+				var key := ""
+				match names[i]:
+					"LeftForeArm": key = "sh_fa"
+					"LeftArm", "LeftShoulder": key = "sh_ua"
+					"Hips": key = "sh_hip"
+					"LeftUpLeg", "RightUpLeg", "LeftLeg", "RightLeg": key = "sh_th"
+				if key == "":
+					continue
+				var lb := inv3 * pts[i]
+				if lb.z < 0.006 and lb.z > -0.03 and lb.x * lb.x / (fr._sh_hw * fr._sh_hw * 0.82) + lb.y * lb.y / (fr._sh_hh * fr._sh_hh * 0.78) < 1.0:
+					cnt[key] += 1
+					cnames[str(names[i])] = int(cnames.get(str(names[i]), 0)) + 1
+			for ck: String in cnt:
+				_worse(stat, ck, float(cnt[ck]), t, str(cnames) if ck == "sh_th" else "", false)
 		if fr.two_handed:
 			var lh: Vector3 = fr.weapon_l.global_position
 			var wt := fr.weapon_r.global_transform
@@ -975,7 +994,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 func _report(pose: String, stat: Dictionary) -> void:
 	var out := "%-16s" % pose
 	var flags := ""
-	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "fingers", "knee_min", "knee_back", "elbow_min", "ankle_low", "slip", "moved", "off10", "off40", "sh_arm", "offhand", "delay", "dir_err", "yaw", "tipz"]:
+	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "fingers", "knee_min", "knee_back", "elbow_min", "ankle_low", "slip", "moved", "off10", "off40", "sh_arm", "offhand", "sh_fa", "sh_ua", "sh_hip", "sh_th", "delay", "dir_err", "yaw", "tipz"]:
 		if not stat.has(k):
 			continue
 		var e: Array = stat[k]
@@ -996,7 +1015,7 @@ func _report(pose: String, stat: Dictionary) -> void:
 			"ankle_low": bad = v < -0.03
 			"offhand": bad = v > 0.06
 			"slip": bad = v > 2.0
-			"sh_arm": bad = v >= 3.0
+			"sh_arm", "sh_fa", "sh_ua", "sh_hip", "sh_th": bad = v >= 3.0
 			"moved": bad = v > 0.07
 			"delay": bad = v > 0.085
 			"dir_err": bad = absf(v) > 25.0

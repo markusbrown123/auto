@@ -138,3 +138,6 @@ Owner direction: "Environment more new and space but land like futuristic not me
 - The twelfth, `env_fu_beacon`, failed inside Tripo ("Internal processing error", task `1a7b517e-ec87-4dc1-a485-41bfd2eaed1b`) and was not charged; it was not sent again. The beacon is built in code instead (`Future.beacon`).
 - Balances: Tripo 6,565 credits before, 6,235 after (the account's balance endpoint; nothing frozen). Higgsfield 1,030.83 before; the other agents' speech jobs were being billed to it at the same time, so its balance after is not a measure of this task: the twelve image charges are listed singly in the account's transactions (08:28 to 08:29 UTC).
 - Tripo graphics allocation spent so far: $28.20 + $3.30 = **$31.50** of $100.
+
+## 2026-11-27: male knight v4 concepts (owner: "body is morphed every render for the male, fix, make look more like a soldier real")
+Three concept images (gpt_image_2_6, 2k, 3:4): art/concept/knight_m_v4{a,b,c}.png, sheet marketing/armor_finish_pass/male_v4_concepts_A_B_C.jpg. About 1.25 credits each at list (about 3.75 credits). No 3D model bought: waiting for the owner to choose one (a knight model is 135 Tripo credits = $1.35). Account read after: View the signed-in account's balance, subscription plan, and recent credit transactions..

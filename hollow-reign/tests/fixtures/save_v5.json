@@ -1,0 +1,1564 @@
+{
+ "attr_points": 0,
+ "attrs": {
+  "crit": 0,
+  "defense": 2,
+  "dex": 17,
+  "endurance": 15,
+  "health": 21,
+  "resist": 0,
+  "strength": 20
+ },
+ "body": "m",
+ "campaign": {
+  "echo": {
+   "attrs": {
+    "crit": 0,
+    "defense": 2,
+    "dex": 17,
+    "endurance": 15,
+    "health": 21,
+    "resist": 0,
+    "strength": 20
+   },
+   "body": "m",
+   "combos": [
+    [
+     "double_slash",
+     12
+    ],
+    [
+     "rising_fang",
+     2
+    ],
+    [
+     "armor_splitter",
+     1
+    ]
+   ],
+   "cosmetics": {},
+   "equipped": {
+    "boots": "a_wyrm_boots",
+    "chest": "a_wyrm_chest",
+    "gauntlets": "a_wyrm_gauntlets",
+    "helm": "a_hollow_helm",
+    "legs": "a_hollow_legs",
+    "offhand": null,
+    "relic": "x_heart",
+    "ring": "r_crown",
+    "shield": null,
+    "shoulders": "a_frost_shoulders",
+    "weapon": "w_twin_fangs"
+   },
+   "generation": 2,
+   "habits": {
+    "block": 0.015,
+    "dodge": 0.177,
+    "parry": 0.808,
+    "seen": 130
+   },
+   "heraldry": "#3d0f0f",
+   "known": [
+    "double_slash",
+    "riposte",
+    "rising_fang",
+    "armor_splitter",
+    "colossus",
+    "twin_fang"
+   ],
+   "level": 12,
+   "look": {
+    "boots": "a_wyrm_boots",
+    "chest": "a_wyrm_chest",
+    "gauntlets": "a_wyrm_gauntlets",
+    "helm": "a_hollow_helm",
+    "legs": "a_hollow_legs",
+    "offhand": null,
+    "relic": "x_heart",
+    "ring": "r_crown",
+    "shield": null,
+    "shoulders": "a_frost_shoulders",
+    "weapon": "w_twin_fangs"
+   },
+   "name": "Aldric",
+   "shield": "",
+   "stats": {
+    "attack": 69.859,
+    "block_eff": -0.102,
+    "crit_mult": 1.9,
+    "defense": 117.8,
+    "max_hp": 441,
+    "max_stamina": 240,
+    "mitigation": 0.517,
+    "swing_time": 0.175
+   },
+   "upgrades": {
+    "a_frost_shoulders": 5,
+    "a_hollow_helm": 4,
+    "a_hollow_legs": 4,
+    "a_wyrm_boots": 5,
+    "a_wyrm_chest": 4,
+    "a_wyrm_gauntlets": 5,
+    "w_twin_fangs": 5
+   },
+   "weapon": {
+    "cls": "dual",
+    "edge": 0,
+    "id": "w_twin_fangs",
+    "level": 5,
+    "mastered": true,
+    "mastery_xp": 9,
+    "mods": {
+     "grip": 1,
+     "ore": 3,
+     "ore_id": "m_iron"
+    }
+   }
+  },
+  "ending": "",
+  "generation": 3,
+  "history": [
+   {
+    "cause": "sealed_hall",
+    "from": 1,
+    "to": 2,
+    "year": 22
+   },
+   {
+    "cause": "saved_the_records",
+    "from": 2,
+    "to": 3,
+    "year": 46
+   }
+  ],
+  "inheritance": {
+   "broken_crown": 2,
+   "first_oath": 1,
+   "measure_of_him": 1,
+   "partition_key": 2,
+   "siege_engine": 2,
+   "the_crown_can_bleed": 2
+  },
+  "left_weapon": {
+   "generation": 2,
+   "id": "w_twin_fangs",
+   "left_where_it_fell": true,
+   "record": {
+    "cls": "dual",
+    "edge": 0,
+    "id": "w_twin_fangs",
+    "level": 5,
+    "mastered": true,
+    "mastery_xp": 9,
+    "mods": {
+     "grip": 1,
+     "ore": 3,
+     "ore_id": "m_iron"
+    }
+   },
+   "taken": false,
+   "where": "throne_seal"
+  },
+  "legacy": 0,
+  "monarch": {
+   "1": {
+    "fought": true,
+    "result": "ahead",
+    "won": false
+   },
+   "2": {
+    "choice": "records",
+    "fought": true,
+    "won": true
+   }
+  },
+  "transition": {}
+ },
+ "challenges_done": [],
+ "cleared": [],
+ "combo_uses": {
+  "armor_splitter": 1,
+  "double_slash": 12,
+  "rising_fang": 2
+ },
+ "combos": [
+  "double_slash",
+  "riposte",
+  "rising_fang",
+  "armor_splitter",
+  "colossus",
+  "twin_fang"
+ ],
+ "completion": {
+  "finishes": [
+   "f_half"
+  ],
+  "milestones": [
+   "all_50"
+  ],
+  "shop": [],
+  "stops": {
+   "blackwood": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "cathedral": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "citadel": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "courtyard": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "crypt": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "deep": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "roost": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "throne": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  },
+  "title": "ti_surveyor",
+  "titles": [
+   "ti_surveyor"
+  ],
+  "trophies": []
+ },
+ "cosmetics": {},
+ "deaths": 0,
+ "defeated": {
+  "ash_acolyte": 1,
+  "ashen_sentinel": 2,
+  "azhurion": 1,
+  "banneret": 2,
+  "blackwood_stalker": 1,
+  "cathedral_beast": 1,
+  "choir_wraith": 1,
+  "cinder_whelp": 1,
+  "cinder_wyrm": 1,
+  "crimson_widow": 1,
+  "crownless": 1,
+  "devourer": 1,
+  "drowned_squire": 1,
+  "forgotten_monarch": 1,
+  "frost_thrall": 1,
+  "frostbound_king": 1,
+  "gravewarden": 1,
+  "hoarbeast": 1,
+  "hollow_executioner": 1,
+  "hollow_soldier": 3,
+  "husk": 1,
+  "pale_huntsman": 1,
+  "rampart_brute": 1,
+  "rimewyrm": 1,
+  "scalebound": 2,
+  "soul_eater": 1,
+  "throne_guard": 1,
+  "tomb_leech": 1,
+  "woodward": 1
+ },
+ "endings": [],
+ "equipped": {
+  "boots": "a_wyrm_boots",
+  "chest": "a_wyrm_chest",
+  "gauntlets": "a_wyrm_gauntlets",
+  "helm": "a_hollow_helm",
+  "legs": "a_hollow_legs",
+  "offhand": null,
+  "relic": "x_heart",
+  "ring": "r_crown",
+  "shield": null,
+  "shoulders": "a_frost_shoulders",
+  "weapon": "w_twin_fangs"
+ },
+ "family": {
+  "emblem": "oath",
+  "name": "Marrek"
+ },
+ "favourites": [],
+ "feats": {
+  "perfect_parries": 1,
+  "win:royal_gatekeeper": 1,
+  "win_cls:sword": 1,
+  "win_item:w_dawnline": 1
+ },
+ "flags": {
+  "chest_blackwood_2_The Hollow Oak": true,
+  "chest_blackwood_3_The Charcoal Burner's Hut": true,
+  "chest_cathedral_1_The Almoner's Box": true,
+  "chest_cathedral_3_The Reliquary": true,
+  "chest_citadel_1_The Armoury": true,
+  "chest_citadel_5_The Solar": true,
+  "chest_courtyard_1_The Guardhouse": true,
+  "chest_courtyard_3_The Well": true,
+  "chest_courtyard_4_The Murder Hole": true,
+  "chest_crypt_1_The Ossuary": true,
+  "chest_crypt_4_The Royal Vault": true,
+  "chest_deep_1_The Unread Wall": true,
+  "chest_deep_4_The Reliquary of Vows": true,
+  "chest_roost_1_The Tack Room": true,
+  "chest_roost_3_The Keeper's Cell": true,
+  "chest_throne_1_The Treasury": true,
+  "chest_throne_4_Behind the Throne": true,
+  "citadel_lift": true,
+  "courtyard_gate": true,
+  "crypt_sluice": true,
+  "deep_stair": true,
+  "gen1_complete": true,
+  "generation": 3,
+  "throne_door": true,
+  "witness_found": true
+ },
+ "generations": [
+  {
+   "authored": false,
+   "body": "m",
+   "cause": "sealed_hall",
+   "chapter": "The First Oath",
+   "context": {
+    "clash": "ahead"
+   },
+   "deeds": {
+    "discoveries": [],
+    "guardians": [],
+    "regions": [],
+    "routes": []
+   },
+   "fate": "fallen",
+   "index": 1,
+   "loadout": {
+    "attrs": {
+     "crit": 2,
+     "defense": 6,
+     "dex": 9,
+     "endurance": 12,
+     "health": 14,
+     "resist": 0,
+     "strength": 16
+    },
+    "cosmetics": {},
+    "equipped": {
+     "weapon": "w_dawnline"
+    },
+    "heraldry": "#3d0f0f",
+    "level": 12,
+    "look": {
+     "weapon": "w_dawnline"
+    },
+    "shield": "",
+    "upgrades": {},
+    "weapon": {
+     "cls": "sword",
+     "edge": 0,
+     "id": "w_dawnline",
+     "level": 0,
+     "mastered": false,
+     "mastery_xp": 0,
+     "mods": {
+      "grip": 0,
+      "ore": 0,
+      "ore_id": ""
+     }
+    }
+   },
+   "migrated": false,
+   "name": "",
+   "role": "first",
+   "stats": {
+    "blocks": 0,
+    "dealt": 624,
+    "defeats": 0,
+    "dodges": 0,
+    "fights": 1,
+    "hits_taken": 5,
+    "parries": 2,
+    "perfect_dodges": 0,
+    "perfect_parries": 1,
+    "taken": 102,
+    "time": 20,
+    "wins": 1
+   },
+   "year": 0
+  },
+  {
+   "authored": false,
+   "body": "m",
+   "cause": "saved_the_records",
+   "chapter": "The Broken Crown",
+   "context": {
+    "choice": "records"
+   },
+   "deeds": {
+    "discoveries": [],
+    "guardians": [
+     "ashen_sentinel",
+     "pale_huntsman",
+     "hollow_executioner",
+     "crimson_widow",
+     "cathedral_beast",
+     "gravewarden",
+     "cinder_wyrm",
+     "rimewyrm",
+     "frostbound_king",
+     "devourer",
+     "azhurion",
+     "forgotten_monarch"
+    ],
+    "regions": [
+     "courtyard",
+     "blackwood",
+     "cathedral",
+     "crypt",
+     "roost",
+     "citadel",
+     "deep",
+     "throne"
+    ],
+    "routes": [
+     "courtyard",
+     "crypt",
+     "citadel",
+     "deep",
+     "throne"
+    ]
+   },
+   "fate": "kept",
+   "index": 2,
+   "loadout": {
+    "attrs": {
+     "crit": 0,
+     "defense": 2,
+     "dex": 17,
+     "endurance": 15,
+     "health": 21,
+     "resist": 0,
+     "strength": 20
+    },
+    "cosmetics": {},
+    "equipped": {
+     "boots": "a_wyrm_boots",
+     "chest": "a_wyrm_chest",
+     "gauntlets": "a_wyrm_gauntlets",
+     "helm": "a_hollow_helm",
+     "legs": "a_hollow_legs",
+     "offhand": null,
+     "relic": "x_heart",
+     "ring": "r_crown",
+     "shield": null,
+     "shoulders": "a_frost_shoulders",
+     "weapon": "w_twin_fangs"
+    },
+    "heraldry": "#3d0f0f",
+    "level": 12,
+    "look": {
+     "boots": "a_wyrm_boots",
+     "chest": "a_wyrm_chest",
+     "gauntlets": "a_wyrm_gauntlets",
+     "helm": "a_hollow_helm",
+     "legs": "a_hollow_legs",
+     "offhand": null,
+     "relic": "x_heart",
+     "ring": "r_crown",
+     "shield": null,
+     "shoulders": "a_frost_shoulders",
+     "weapon": "w_twin_fangs"
+    },
+    "shield": "",
+    "upgrades": {
+     "a_frost_shoulders": 5,
+     "a_hollow_helm": 4,
+     "a_hollow_legs": 4,
+     "a_wyrm_boots": 5,
+     "a_wyrm_chest": 4,
+     "a_wyrm_gauntlets": 5,
+     "w_twin_fangs": 5
+    },
+    "weapon": {
+     "cls": "dual",
+     "edge": 0,
+     "id": "w_twin_fangs",
+     "level": 5,
+     "mastered": true,
+     "mastery_xp": 9,
+     "mods": {
+      "grip": 1,
+      "ore": 3,
+      "ore_id": "m_iron"
+     }
+    }
+   },
+   "migrated": false,
+   "name": "Aldric",
+   "role": "second",
+   "stats": {
+    "blocks": 2,
+    "dealt": 91052,
+    "defeats": 0,
+    "dodges": 23,
+    "fights": 34,
+    "hits_taken": 1,
+    "parries": 105,
+    "perfect_dodges": 23,
+    "perfect_parries": 105,
+    "taken": 16,
+    "time": 553,
+    "wins": 34
+   },
+   "year": 22
+  },
+  {
+   "authored": false,
+   "body": "m",
+   "cause": "",
+   "chapter": "The Last Heir",
+   "context": {},
+   "deeds": {
+    "discoveries": [],
+    "guardians": [],
+    "regions": [],
+    "routes": []
+   },
+   "fate": "alive",
+   "index": 3,
+   "loadout": {},
+   "migrated": false,
+   "name": "Maren",
+   "role": "heir",
+   "stats": {
+    "blocks": 0,
+    "dealt": 0,
+    "defeats": 0,
+    "dodges": 0,
+    "fights": 0,
+    "hits_taken": 0,
+    "parries": 0,
+    "perfect_dodges": 0,
+    "perfect_parries": 0,
+    "taken": 0,
+    "time": 0,
+    "wins": 0
+   },
+   "year": 46
+  }
+ ],
+ "gold": 97,
+ "heard": [],
+ "heraldry": "#3d0f0f",
+ "inv_sort": "equipped",
+ "items": {
+  "a_ash_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 3,
+   "mastered": true,
+   "mastery_xp": 7,
+   "order": 17,
+   "owned": true,
+   "seen": true
+  },
+  "a_ash_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 7,
+   "order": 16,
+   "owned": true,
+   "seen": true
+  },
+  "a_ash_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 7,
+   "order": 10,
+   "owned": true,
+   "seen": true
+  },
+  "a_ash_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 7,
+   "order": 9,
+   "owned": true,
+   "seen": true
+  },
+  "a_ash_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_ash_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_black_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_black_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_black_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 23,
+   "owned": true,
+   "seen": false
+  },
+  "a_black_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_black_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 1,
+   "mastered": true,
+   "mastery_xp": 7,
+   "order": 22,
+   "owned": true,
+   "seen": true
+  },
+  "a_black_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 3,
+   "mastered": true,
+   "mastery_xp": 7,
+   "order": 21,
+   "owned": true,
+   "seen": true
+  },
+  "a_frost_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_frost_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 50,
+   "owned": true,
+   "seen": false
+  },
+  "a_frost_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 43,
+   "owned": true,
+   "seen": false
+  },
+  "a_frost_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 47,
+   "owned": true,
+   "seen": false
+  },
+  "a_frost_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 44,
+   "owned": true,
+   "seen": false
+  },
+  "a_frost_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 5,
+   "mastered": true,
+   "mastery_xp": 10,
+   "order": 45,
+   "owned": true,
+   "seen": true
+  },
+  "a_garrison_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 6,
+   "order": 14,
+   "owned": true,
+   "seen": true
+  },
+  "a_garrison_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 6,
+   "order": 6,
+   "owned": true,
+   "seen": true
+  },
+  "a_garrison_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 6,
+   "order": 7,
+   "owned": true,
+   "seen": true
+  },
+  "a_garrison_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 6,
+   "order": 20,
+   "owned": true,
+   "seen": true
+  },
+  "a_garrison_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 6,
+   "order": 18,
+   "owned": true,
+   "seen": true
+  },
+  "a_hollow_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_hollow_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_hollow_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 51,
+   "owned": true,
+   "seen": false
+  },
+  "a_hollow_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 4,
+   "mastered": false,
+   "mastery_xp": 6,
+   "order": 53,
+   "owned": true,
+   "seen": true
+  },
+  "a_hollow_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 4,
+   "mastered": false,
+   "mastery_xp": 6,
+   "order": 52,
+   "owned": true,
+   "seen": true
+  },
+  "a_hollow_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_regal_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_regal_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 55,
+   "owned": true,
+   "seen": false
+  },
+  "a_regal_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 60,
+   "owned": true,
+   "seen": false
+  },
+  "a_regal_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 56,
+   "owned": true,
+   "seen": false
+  },
+  "a_vigil_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 39,
+   "owned": true,
+   "seen": false
+  },
+  "a_vigil_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 1,
+   "mastered": true,
+   "mastery_xp": 9,
+   "order": 34,
+   "owned": true,
+   "seen": true
+  },
+  "a_vigil_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 2,
+   "mastered": true,
+   "mastery_xp": 9,
+   "order": 31,
+   "owned": true,
+   "seen": true
+  },
+  "a_vigil_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 2,
+   "mastered": true,
+   "mastery_xp": 9,
+   "order": 35,
+   "owned": true,
+   "seen": true
+  },
+  "a_vigil_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 1,
+   "mastered": false,
+   "mastery_xp": 5,
+   "order": 36,
+   "owned": true,
+   "seen": true
+  },
+  "a_vigil_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_worn_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 11,
+   "owned": true,
+   "seen": true
+  },
+  "a_worn_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 4,
+   "order": 3,
+   "owned": true,
+   "seen": true
+  },
+  "a_worn_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 4,
+   "order": 4,
+   "owned": true,
+   "seen": true
+  },
+  "a_worn_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 4,
+   "order": 2,
+   "owned": true,
+   "seen": true
+  },
+  "a_worn_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 4,
+   "order": 5,
+   "owned": true,
+   "seen": true
+  },
+  "a_worn_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 1,
+   "mastered": true,
+   "mastery_xp": 3,
+   "order": 12,
+   "owned": true,
+   "seen": true
+  },
+  "a_wyrm_boots": {
+   "discovered": true,
+   "favourite": false,
+   "level": 5,
+   "mastered": true,
+   "mastery_xp": 10,
+   "order": 42,
+   "owned": true,
+   "seen": true
+  },
+  "a_wyrm_chest": {
+   "discovered": true,
+   "favourite": false,
+   "level": 4,
+   "mastered": true,
+   "mastery_xp": 10,
+   "order": 41,
+   "owned": true,
+   "seen": true
+  },
+  "a_wyrm_gauntlets": {
+   "discovered": true,
+   "favourite": false,
+   "level": 5,
+   "mastered": true,
+   "mastery_xp": 10,
+   "order": 37,
+   "owned": true,
+   "seen": true
+  },
+  "a_wyrm_helm": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "a_wyrm_legs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 2,
+   "mastered": true,
+   "mastery_xp": 10,
+   "order": 38,
+   "owned": true,
+   "seen": true
+  },
+  "a_wyrm_shoulders": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "r_brood": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "r_crown": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 59,
+   "owned": true,
+   "seen": true
+  },
+  "r_ember": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "r_frost": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 46,
+   "owned": true,
+   "seen": false
+  },
+  "r_iron": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 3,
+   "order": 13,
+   "owned": true,
+   "seen": true
+  },
+  "r_widow": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 9,
+   "order": 30,
+   "owned": true,
+   "seen": true
+  },
+  "s_plank": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 4,
+   "order": 1,
+   "owned": true,
+   "seen": true
+  },
+  "s_reliquary": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 33,
+   "owned": true,
+   "seen": false
+  },
+  "s_rime": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": -1,
+   "owned": false,
+   "seen": false
+  },
+  "s_scale": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 40,
+   "owned": true,
+   "seen": false
+  },
+  "s_tower": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 6,
+   "order": 8,
+   "owned": true,
+   "seen": true
+  },
+  "w_ashen_great": {
+   "discovered": true,
+   "favourite": false,
+   "level": 1,
+   "mastered": false,
+   "mastery_xp": 6,
+   "order": 27,
+   "owned": true,
+   "seen": true,
+   "taught": "colossus"
+  },
+  "w_censer_sword": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 6,
+   "order": 19,
+   "owned": true,
+   "seen": true,
+   "taught": "armor_splitter"
+  },
+  "w_dawnline": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 4,
+   "order": 0,
+   "owned": true,
+   "seen": true,
+   "taught": "riposte"
+  },
+  "w_frost_great": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 48,
+   "owned": true,
+   "seen": false
+  },
+  "w_knight_sword": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 26,
+   "owned": true,
+   "seen": true
+  },
+  "w_monarch": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 58,
+   "owned": true,
+   "seen": false
+  },
+  "w_rusted_sword": {
+   "discovered": true,
+   "favourite": false,
+   "level": 1,
+   "mastered": true,
+   "mastery_xp": 3,
+   "order": 15,
+   "owned": true,
+   "seen": true,
+   "taught": "rising_fang"
+  },
+  "w_throneshard": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 61,
+   "owned": true,
+   "seen": false
+  },
+  "w_twin_fangs": {
+   "discovered": true,
+   "favourite": false,
+   "level": 5,
+   "mastered": true,
+   "mastery_xp": 9,
+   "mods": {
+    "grip": 1,
+    "ore": 3,
+    "ore_id": "m_iron"
+   },
+   "order": 29,
+   "owned": true,
+   "seen": true,
+   "taught": "twin_fang"
+  },
+  "w_woodcutter": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 24,
+   "owned": true,
+   "seen": true
+  },
+  "x_bell": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": true,
+   "mastery_xp": 7,
+   "order": 32,
+   "owned": true,
+   "seen": true
+  },
+  "x_candle": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 28,
+   "owned": true,
+   "seen": false
+  },
+  "x_heart": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 0,
+   "order": 57,
+   "owned": true,
+   "seen": true
+  },
+  "x_name": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 6,
+   "order": 54,
+   "owned": true,
+   "seen": true
+  },
+  "x_tear": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 4,
+   "order": 49,
+   "owned": true,
+   "seen": true
+  },
+  "x_tooth": {
+   "discovered": true,
+   "favourite": false,
+   "level": 0,
+   "mastered": false,
+   "mastery_xp": 6,
+   "order": 25,
+   "owned": true,
+   "seen": true
+  }
+ },
+ "last_played": 1795730980.65616,
+ "level": 12,
+ "lore": [],
+ "mastered": [
+  "a_worn_chest",
+  "a_worn_gauntlets",
+  "a_worn_helm",
+  "a_worn_legs",
+  "s_plank",
+  "r_iron",
+  "a_worn_shoulders",
+  "w_rusted_sword",
+  "a_garrison_boots",
+  "a_garrison_gauntlets",
+  "a_garrison_helm",
+  "a_garrison_legs",
+  "a_garrison_shoulders",
+  "w_censer_sword",
+  "a_ash_boots",
+  "a_ash_chest",
+  "a_ash_gauntlets",
+  "a_ash_helm",
+  "a_black_legs",
+  "a_black_shoulders",
+  "x_bell",
+  "a_vigil_chest",
+  "a_vigil_gauntlets",
+  "a_vigil_helm",
+  "r_widow",
+  "w_twin_fangs",
+  "a_wyrm_boots",
+  "a_wyrm_chest",
+  "a_wyrm_gauntlets",
+  "a_wyrm_legs",
+  "a_frost_shoulders"
+ ],
+ "materials": {
+  "m_core": 9,
+  "m_glass": 6,
+  "m_iron": 7,
+  "m_rime": 3,
+  "m_scale": 0,
+  "m_silver": 17
+ },
+ "name": "Maren",
+ "ng": 0,
+ "playtime": 0.0,
+ "quests_done": [
+  "six_people_i_buried",
+  "older_than_my_bloodline",
+  "chain_that_stayed",
+  "names_for_the_waiting",
+  "the_rain"
+ ],
+ "rewards": {
+  "cores": {
+   "ashen_sentinel": 1,
+   "azhurion": 1,
+   "cathedral_beast": 1,
+   "cinder_wyrm": 1,
+   "crimson_widow": 1,
+   "devourer": 1,
+   "forgotten_monarch": 1,
+   "frostbound_king": 1,
+   "gravewarden": 1,
+   "hollow_executioner": 1,
+   "pale_huntsman": 1,
+   "rimewyrm": 1
+  },
+  "pity": 0,
+  "recent": [
+   "frostbound_king",
+   "husk",
+   "soul_eater",
+   "devourer",
+   "throne_guard",
+   "crownless",
+   "azhurion",
+   "forgotten_monarch"
+  ],
+  "seed": 7
+ },
+ "secret_lore": [],
+ "secrets": {},
+ "shards": 0,
+ "sold": [],
+ "tutorial_done": false,
+ "version": 5,
+ "world": {
+  "cleared": {
+   "blackwood": [
+    2
+   ],
+   "cathedral": [
+    2
+   ],
+   "citadel": [
+    2
+   ],
+   "courtyard": [
+    2
+   ],
+   "crypt": [
+    2
+   ],
+   "deep": [
+    2
+   ],
+   "roost": [
+    2
+   ],
+   "throne": [
+    2
+   ]
+  },
+  "facts": {
+   "cleared:blackwood": 2,
+   "cleared:cathedral": 2,
+   "cleared:citadel": 2,
+   "cleared:courtyard": 2,
+   "cleared:crypt": 2,
+   "cleared:deep": 2,
+   "cleared:roost": 2,
+   "cleared:throne": 2,
+   "monarch_bested:2": 2,
+   "route_opened:citadel": 2,
+   "route_opened:courtyard": 2,
+   "route_opened:crypt": 2,
+   "route_opened:deep": 2,
+   "route_opened:throne": 2,
+   "slain:ashen_sentinel": 2,
+   "slain:azhurion": 2,
+   "slain:cathedral_beast": 2,
+   "slain:cinder_wyrm": 2,
+   "slain:crimson_widow": 2,
+   "slain:devourer": 2,
+   "slain:forgotten_monarch": 2,
+   "slain:frostbound_king": 2,
+   "slain:gravewarden": 2,
+   "slain:hollow_executioner": 2,
+   "slain:pale_huntsman": 2,
+   "slain:rimewyrm": 2
+  }
+ },
+ "xp": 5601,
+ "road": {
+  "region": "courtyard",
+  "stage": 4.0,
+  "hp": 88.0,
+  "found": [],
+  "xp": 0.0,
+  "gold": 12.0,
+  "seed": 123456.0,
+  "checkpoint": 3
+ },
+ "pouches": {
+  "3|0|courtyard|4": [
+   0.0
+  ],
+  "3|0|courtyard|0": [
+   0.0
+  ]
+ }
+}

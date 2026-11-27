@@ -1349,12 +1349,12 @@ func _fit_props(hands: Dictionary) -> void:
 		# the board is kept off the head and trunk: moved away from them by however far its nearest point is inside
 		var board := Transform3D(held.basis, held * _sh_c)
 		var board0 := board.origin
-		for c2: Array in _arm_caps("Right") + [caps[2], caps[4], caps[0], caps[1]]:
+		for c2: Array in _arm_caps("Right") + [caps[2], caps[4], caps[0], caps[1], caps[3], caps[5]]:
 			var q2: Vector3 = Geometry3D.get_closest_point_to_segment(board.origin, c2[0], c2[1])
 			var l2 := board.affine_inverse() * q2
 			var e2 := l2.x * l2.x / (_sh_hw * _sh_hw + 0.005) + l2.y * l2.y / (_sh_hh * _sh_hh + 0.008)
 			var on_board := board * (Vector3(l2.x, l2.y, 0) / maxf(1.0, sqrt(e2)))
-			var r2: float = float(c2[2]) + 0.02
+			var r2: float = float(c2[2]) + 0.02 + (SHIELD_LEG_MARGIN if caps.find(c2) >= 2 else 0.0)      # (the capsules are slimmer than the skinned thigh)
 			var v2 := on_board - q2
 			if v2.length() < r2:
 				var away := v2.normalized() if v2.length() > 0.005 else -board.basis.z.normalized()
@@ -1482,6 +1482,8 @@ var _sh_c := Vector3.ZERO
 var _sh_hw := 0.27
 var _sh_hh := 0.41
 
+## How much farther than their capsules the board is kept off the thighs and shins (the skin is fuller than the capsule).
+const SHIELD_LEG_MARGIN := 0.045
 const SHIELD_RIM := [Vector3(0.27, 0.41, 0), Vector3(-0.27, 0.41, 0), Vector3(0.27, -0.41, 0), Vector3(-0.27, -0.41, 0), Vector3(0, -0.41, 0), Vector3(0, 0.41, 0)]
 
 ## The wielder's own body as a few capsules [a, b, radius] in rig body space: head, trunk, thighs.

@@ -7,7 +7,7 @@ const SAVE_PATH := "user://save.json"
 const SAVE_TMP := "user://save.tmp"
 const SAVE_BAK := "user://save.bak"
 const SETTINGS_PATH := "user://settings.json"
-const SAVE_VERSION := 4           # 0: no version field · 1: flat lists · 2: per-item records, materials, cosmetics, reward state · 3: generations, world, campaign
+const SAVE_VERSION := 5           # 0: no version field · 1: flat lists · 2: per-item records, materials, cosmetics, reward state · 3: generations, world, campaign · 4: the road and pouches · 5: the road remembers its checkpoint
 const SLOT_COUNT := 3          # slot 1 keeps the original file names, so an old single save simply is slot 1
 const LORE_FOR_DIVIDE := 30   # records needed before the Crown can be divided
 
@@ -61,6 +61,7 @@ func _base_profile() -> Dictionary:
 		# the road (save version 4). `road`: the journey in progress as of the last stop reached ({} when not on one),
 		# so an app ended in the background takes the road up again at that stop. `pouches`: the coin already picked
 		# up, {"<generation>|<ng>|<region>|<stop>": [index, ...]}: a pouch taken once is not found again.
+		# version 5: `road.checkpoint`, the stop of the last checkpoint passed (a fall puts the knight back there).
 		"road": {}, "pouches": {},
 	}
 
@@ -224,7 +225,7 @@ func resume_road() -> bool:
 	var st := stats()
 	run = {"region": str(r.region), "stage": int(r.stage), "hp": clampf(float(r.get("hp", st.max_hp)), 1.0, st.max_hp),
 		"found": (r.get("found", []) as Array).duplicate() if r.get("found") is Array else [], "xp": int(r.get("xp", 0)), "gold": int(r.get("gold", 0)),
-		"seed": int(r.get("seed", 0))}
+		"seed": int(r.get("seed", 0)), "checkpoint": clampi(int(r.get("checkpoint", checkpoint_at_or_before(str(r.region), int(r.stage)))), 0, int(r.stage))}
 	return true
 
 func _parse(txt: String) -> Variant:
@@ -403,6 +404,8 @@ func _migrate(v: Dictionary) -> Dictionary:
 	else:
 		for k: String in ["stage", "xp", "gold", "seed"]:
 			v.road[k] = int(v.road.get(k, 0))
+		# version 5: a road saved before checkpoints is given the last one at or before its stop
+		v.road["checkpoint"] = clampi(int(v.road.get("checkpoint", checkpoint_at_or_before(str(v.road.region), int(v.road.stage)))), 0, int(v.road.stage))
 	if not (v.get("pouches") is Dictionary):
 		v["pouches"] = {}
 	for k in v.pouches.keys():
@@ -805,7 +808,7 @@ func start_run(region_id: String, use_shortcut: bool = false) -> void:
 	var stage := 0
 	if use_shortcut and shortcut_open(region_id):
 		stage = int(Db.region_by_id[region_id].shortcut.stage)
-	run = {"region": region_id, "stage": stage, "hp": st.max_hp, "found": [], "xp": 0, "gold": 0, "seed": rng.randi()}
+	run = {"region": region_id, "stage": stage, "hp": st.max_hp, "found": [], "xp": 0, "gold": 0, "seed": rng.randi(), "checkpoint": stage}
 
 func run_region() -> Dictionary:
 	return Db.region_by_id[run.region]
@@ -846,7 +849,33 @@ func _chest_flag(o: Dictionary) -> String:
 func advance_stage() -> bool:
 	Secrets.mark_stop(str(run.region), int(run.stage), profile)
 	run.stage += 1
+	if run.stage < run_region().stages.size() and is_checkpoint(str(run.region), int(run.stage)):
+		run["checkpoint"] = int(run.stage)         # passed: a fall from here on starts the road again at this stop
 	return run.stage < run_region().stages.size()
+
+## Whether a stop of a road is a checkpoint (`checkpoint: true` in data/regions.json, authored in tools/gen_regions.py).
+func is_checkpoint(region: String, stage: int) -> bool:
+	return Db.region_by_id.has(region) and stage >= 0 and stage < Db.region_by_id[region].stages.size() and bool(Db.region_by_id[region].stages[stage].get("checkpoint", false))
+
+## The last checkpoint at or before `stage` on a road (the road's start is always one).
+func checkpoint_at_or_before(region: String, stage: int) -> int:
+	for i in range(mini(stage, Db.region_by_id[region].stages.size() - 1), -1, -1):
+		if is_checkpoint(region, i):
+			return i
+	return 0
+
+## The knight has fallen on the road: it is taken up again at the last checkpoint passed, at full health. Nothing
+## earned is touched; what the road holds from there on is simply not yet reached again (a stop's foes are met anew),
+## and what was taken there stays taken (pouches by `profile.pouches`, chests and levers by flags, rewards by the
+## profile). Never a fall of the house: this does not come near `fall()`.
+func rewind_to_checkpoint() -> bool:
+	if not _road_ok(run):
+		return false
+	var cp: int = clampi(int(run.get("checkpoint", 0)), 0, int(run.stage))
+	run["checkpoint"] = cp
+	run.stage = cp
+	run.hp = stats().max_hp
+	return true
 
 ## Open a treasure node. Returns what was found.
 func open_treasure(o: Dictionary) -> Dictionary:
@@ -1001,13 +1030,18 @@ func complete_region() -> bool:
 	profile_changed.emit()
 	return first
 
-func on_death() -> Dictionary:
-	# Everything earned is kept; only the route resets.
+## A defeat. Everything earned is kept. By default the route is dropped (the sanctuary follows); with `keep_road` (the
+## road's own defeat, see Overlays.death) the knight is instead put back at the last checkpoint with full health, and
+## the road is saved there, so the main menu's Continue resumes it. The house does not fall: see `fall()`.
+func on_death(keep_road: bool = false) -> Dictionary:
 	profile.deaths += 1
-	just_died = true
 	_dull()
 	var summary := run.duplicate(true)
-	run = {}
+	if keep_road and rewind_to_checkpoint():
+		summary["checkpoint"] = int(run.stage)
+	else:
+		just_died = true
+		run = {}
 	save()
 	return summary
 

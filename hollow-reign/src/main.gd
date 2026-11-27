@@ -587,13 +587,19 @@ func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 			else:
 				_region_done())
 	else:
-		var summary := Game.on_death()
+		# an ordinary defeat (never a fall of the house: that is Game.fall, at two authored moments only). The road is
+		# put back at the last checkpoint, at full health, and saved there before anything is shown, so that quitting
+		# from the death screen and pressing Continue lands at the same place.
+		var summary := Game.on_death(true)
 		var region := str(summary.get("region", ""))
-		var actions := {"equipment": func(): _fade_then(func(): show_sanctuary("Armory"))}
-		if Db.region_by_id.has(region):
-			# the route resets on death, as it always has: this sets out on the same road again, by the short way if it is open
-			actions["retry"] = func(): _set_out(region, true)
+		var actions := {"menu": func(): _fade_then(show_title)}
+		if not Game.run.is_empty() and Db.region_by_id.has(region):
+			actions["retry"] = func(): _retry_from_checkpoint(region)
 		Overlays.death(d, foe, summary, func(): _fade_then(show_sanctuary), actions)
+
+## The road again from the last checkpoint (Game.on_death has already put the run there, at full health).
+func _retry_from_checkpoint(region: String) -> void:
+	LoadingScreen.show(region, show_stage)
 
 func _region_done() -> void:
 	var region := Game.run_region()
@@ -1003,7 +1009,7 @@ func _dev_boot() -> void:
 			_swap(d3)
 			d3.setup("ashen_sentinel", {"skip_intro": true})
 			d3.sim._damage_player(99999.0, true)
-			Overlays.death(d3, Db.foes.ashen_sentinel, {"xp": 120, "gold": 80, "found": ["r_iron"]}, func(): pass, {"retry": func(): pass, "equipment": func(): pass})
+			Overlays.death(d3, Db.foes.ashen_sentinel, {"xp": 120, "gold": 80, "found": ["r_iron"]}, func(): pass, {"retry": func(): pass, "menu": func(): pass})
 
 ## The front-end screens, in a known state, for captures:
 ##   --screen=menu|slots|charselect|loading|map|chronicle|credits|launch  [--rich] [--fresh] [--mode=new] [--region=id] [--tab=Name] [--licences]

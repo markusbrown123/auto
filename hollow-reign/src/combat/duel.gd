@@ -645,7 +645,10 @@ func _process(delta: float) -> void:
 			if _stage_t > FINISH_HOLD:
 				_finish(true)
 		Stage.DEATH:
-			if _stage_t > 3.0:
+			# the fall plays out in full, then the picture goes to black over DEATH_FADE; only then is the defeat reported
+			if _death_fade != null:
+				_death_fade.color.a = clampf((_stage_t - _death_fall) / DEATH_FADE, 0.0, 1.0)
+			if _stage_t > _death_fall + DEATH_FADE:
 				_finish(false)
 	_footwork(delta * ts)
 	_camera(delta)
@@ -1185,9 +1188,21 @@ func _begin_yield() -> void:
 	if foe_rig.eye_light:
 		create_tween().tween_property(foe_rig.eye_light, "light_energy", 0.0, 2.0)
 
+const DEATH_FADE := 1.5          # seconds to black after the fall has played (the death screen follows)
+var _death_fade: ColorRect
+var _death_fall := 2.0           # seconds of the fall itself before the fade begins
+
 func _begin_death() -> void:
 	stage = Stage.DEATH
 	_stage_t = 0.0
+	_death_fall = maxf(1.6, SkinDriver.clip_length("death")) + 0.4      # the whole of the fall clip, and a moment lying still
+	var fl := CanvasLayer.new()
+	fl.layer = 15                    # over the fight's bars (5), under the screens that follow (20)
+	add_child(fl)
+	_death_fade = UI.full(ColorRect.new())
+	_death_fade.color = Color(0.0, 0.0, 0.0, 0.0)
+	_death_fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fl.add_child(_death_fade)
 	hud.set_combat_visible(false, 0.3)
 	hud.cue.clear()
 	player_rig.blocking = false

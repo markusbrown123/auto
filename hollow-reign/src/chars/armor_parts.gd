@@ -50,14 +50,14 @@ const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38
 ##                 the faceplate's cut lines)
 ##   trim          0 none .. 1: the pale line along the plates' borders
 ##   HOOD_*        the cloth hood and cowl on the helm
-## Dev flags: `--chrome` the generated chrome, all of it;  `--nohood` the helm bare, as generated;
+## Dev flags: `--chrome` the generated chrome, all of it;  `--hood` the rejected cloth hood;
 ## `--neon` the second pass's coloured light back (FINISH_NEON, GLOW, FX_*): lines of light, lit visor, cast light, vents.
 const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.36, 0.37, 0.39), "coat_metal": 0.28, "coat_rough": 0.5, "edge_shine": 0.16,
 	"wear": 0.85, "wear_edge": 0.0, "wear_color": Color(0.06, 0.06, 0.065), "spec": 0.42,
 	"etch": 1.0, "trim": 0.6, "motif": 0.0, "visor": 0.0, "fx": 0.0}
 const FINISH_NEON := {"motif": 1.0, "motif_dark": Color(0.13, 0.13, 0.14), "motif_energy": 2.2, "visor": 4.5, "etch": 0.0, "fx": 1.0}
 static var neon: bool = OS.get_cmdline_user_args().has("--neon")
-static var hood_on: bool = not OS.get_cmdline_user_args().has("--nohood")
+static var hood_on: bool = OS.get_cmdline_user_args().has("--hood")   # owner rejected the hood (2026-11-27): off unless asked for
 const HOOD_CLOTH := Color(0.2, 0.2, 0.215)       # the hood's cloth
 const HOOD_CLASP := Color(0.3, 0.3, 0.32)          # its ring clasp
 const GLOW := {"m": Color(0.25, 0.9, 1.0), "f": Color(1.0, 0.3, 0.72)}

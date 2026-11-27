@@ -210,6 +210,32 @@ for r in R:
                 assert o["foe"] in POOLS[o["label"]], o["label"]
                 o["foes"] = POOLS[o["label"]]; used.add(o["label"])
 assert used == set(POOLS), set(POOLS) - used
+# Checkpoints (docs/FLOW.md, "Death and checkpoints"): a stage flagged `checkpoint: true` is where a knight who has fallen
+# starts the road again. The road's start; the stop before every guardian's approach; the stop after a guardian that is
+# not the last; and a stop in any long run between them, so that about every second or third stop is one. Never a stop
+# that has a (non-optional) guardian in it.
+def _checkpoints(stages):
+    n = len(stages)
+    boss = [any(o["type"] == "boss" and not o.get("optional") for o in s["options"]) for s in stages]
+    forced = {0}
+    for i in range(n):
+        if boss[i]:
+            if i > 0: forced.add(i - 1)
+            if i + 1 < n: forced.add(i + 1)
+    cps = sorted(i for i in forced if not boss[i])
+    out, last = [], 0
+    for i in range(n):
+        if i in cps:
+            out.append(i); last = i
+        elif not boss[i] and i - last >= 3 and min([c for c in cps if c > i] or [n]) - i >= 2:
+            out.append(i); last = i
+    return out
+for r in R:
+    cps = _checkpoints(r["stages"])
+    assert 0 in cps and all(not any(o["type"] == "boss" and not o.get("optional") for o in r["stages"][i]["options"]) for i in cps), r["id"]
+    for i, s in enumerate(r["stages"]):
+        if i in cps: s["checkpoint"] = True
+    print(r["id"], "checkpoints at stops", cps)
 json.dump({"regions": R}, open("data/regions.json", "w"), indent=1)
 print(len(R), "regions")
 

@@ -23,7 +23,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	wipe()
 	for t: String in ["t_data", "t_migration", "t_new_journey", "t_falls_and_defeats", "t_bodies", "t_director", "t_monarch", "t_echo", "t_endings",
-			"t_companion", "t_campaign"]:
+			"t_companion", "t_campaign", "t_checkpoints"]:
 		print("• ", t)
 		call(t)
 	wipe()
@@ -119,7 +119,7 @@ func t_data() -> void:
 	var d: Dictionary = Generations.data()
 	ok(d.generations.size() == 3 and d.generations[0].year == 0 and d.generations[1].year == 22 and d.generations[2].year == 46, "three generations at +0, +22 and +46 years")
 	ok(d.generations.map(func(g): return g.role) == ["first", "second", "heir"], "the roles are first, second, heir")
-	ok(Game.SAVE_VERSION == 4, "the save is version 4 (3 brought the generations; 4 the road in progress and the pouches taken)")
+	ok(Game.SAVE_VERSION == 5, "the save is version 5 (3 brought the generations; 4 the road in progress and the pouches taken; 5 the road's checkpoint)")
 	ok(Db.foes.size() >= 52, "the roster is whole")
 	var roster := 0
 	for id: String in Db.foes:
@@ -262,6 +262,159 @@ func t_falls_and_defeats() -> void:
 	ok(Game.generation() == 3 and Game.profile.campaign.history.size() == 2, "exactly two transitions, whatever happens after")
 	ok(Game.profile.generations.map(func(r): return r.fate) == ["fallen", "kept", "alive"], "fallen, kept, alive")
 	round_trips("after both falls")
+
+# ------------------------------------------------------------------ death and checkpoints (docs/FLOW.md, "Death and checkpoints")
+func walk_to(stage: int) -> void:
+	while int(Game.run.stage) < stage:
+		Game.advance_stage()
+
+func t_checkpoints() -> void:
+	# the data: the start, the stop before every guardian's approach, never a guardian's own stop, never far apart
+	for r: Dictionary in Db.regions:
+		var cps: Array = []
+		var boss_at: Array = []
+		for i: int in r.stages.size():
+			if r.stages[i].get("checkpoint", false):
+				cps.append(i)
+			for o: Dictionary in r.stages[i].options:
+				if o.type == "boss" and not o.get("optional", false):
+					boss_at.append(i)
+		ok(cps.has(0), "%s: the road's start is a checkpoint" % r.id)
+		ok(cps.has(r.stages.size() - 2), "%s: the stop before the guardian is a checkpoint" % r.id)
+		var clean := true
+		for b: int in boss_at:
+			clean = clean and not cps.has(b) and (b == 0 or cps.has(b - 1))
+		ok(clean, "%s: no checkpoint is a guardian's stop, and each guardian's approach has one before it" % r.id)
+		var gap := 0
+		for i: int in range(1, cps.size()):
+			gap = maxi(gap, int(cps[i]) - int(cps[i - 1]))
+		ok(gap <= 3 and cps.size() >= 3, "%s: checkpoints every two or three stops (%s)" % [r.id, str(cps)])
+	# a road, walked, and a fall in the middle of it
+	fresh(2)
+	Game.profile.tutorial_done = true
+	Game.start_run("courtyard")
+	ok(Game.run.checkpoint == 0, "a new road's checkpoint is its start")
+	walk_to(1)
+	var chest: Dictionary = Game.stage_options().filter(func(o): return o.type == "treasure")[0]
+	var found: Dictionary = Game.open_treasure(chest)
+	ok(not found.items.is_empty(), "the Guardhouse gave its piece")
+	Game.take_pouch(0)
+	walk_to(4)
+	ok(Game.run.checkpoint == 3, "the winch stop was passed: it is the checkpoint now")
+	Game.take_pouch(0)
+	Game.on_victory("hollow_soldier", 40.0)
+	Game.profile.level = 7
+	Game.profile.mods = {"w_rusted_sword": {"x": 1}}
+	var inv: Array = Game.profile.inventory.duplicate()
+	var gold: int = Game.profile.gold
+	var defeated: int = int(Game.profile.defeated.get("hollow_soldier", 0))
+	var pouches := JSON.stringify(Game.profile.pouches)
+	var flags := JSON.stringify(Game.profile.flags)
+	var deaths: int = Game.profile.deaths
+	Game.run.hp = 3.0
+	var before := family()
+	var gen_before := canon()
+	var sum := Game.on_death(true)
+	ok(int(sum.get("checkpoint", -1)) == 3 and str(Game.run.region) == "courtyard" and Game.run.stage == 3, "after a fall the road is at the checkpoint, not at the foe's stop")
+	ok(is_equal_approx(float(Game.run.hp), Game.stats().max_hp) and Game.run.hp > 3.0, "with full health")
+	ok(Game.profile.deaths == deaths + 1 and not Game.just_died, "the fall is counted, and no sanctuary is owed for it")
+	ok(Game.profile.gold == gold and Game.profile.inventory == inv and Game.profile.level == 7 and Game.profile.mods.has("w_rusted_sword") and int(Game.profile.defeated.get("hollow_soldier", 0)) == defeated,
+		"gold, equipment, mods, level and every victory are kept")
+	var kept := JSON.parse_string(family())
+	var was = JSON.parse_string(before)
+	var same := true
+	for k: String in was:
+		same = same and (k == "deaths" or JSON.stringify(was[k]) == JSON.stringify(kept[k]))
+	ok(same, "everything the family holds is as it was (the count of falls apart)")
+	ok(JSON.stringify(Game.profile.pouches) == pouches and JSON.stringify(Game.profile.flags) == flags, "what was taken stays taken (pouches, chests, levers)")
+	ok(JSON.stringify(JSON.parse_string(canon())[2]) == JSON.stringify(JSON.parse_string(gen_before)[2]) and Game.generation() == 2 and Game.transition_pending().is_empty(),
+		"the campaign is untouched")
+	# no duplicate rewards: the pouches of stop 4 (past the checkpoint) and of stop 2 (before it)
+	Game.run.stage = 4
+	ok(Game.pouch_taken(0) and Game.take_pouch(0) == 0, "a pouch beyond the checkpoint is not found a second time")
+	Game.run.stage = 1
+	ok(Game.pouch_taken(0) and Game.take_pouch(0) == 0, "nor one before it")
+	var again: Dictionary = Game.open_treasure(chest)
+	ok(again.items.is_empty() and again.shards == 0, "a chest already opened gives no piece and no shards again")
+	Game.run.stage = 3
+	Game.run.hp = Game.stats().max_hp
+	# every enemy and encounter from there on stands again
+	var met := 0
+	while true:
+		for o: Dictionary in Game.stage_options():
+			if o.type in ["fight", "boss"]:
+				met += 1
+				ok(Db.foes.has(str(o.foe)), "stop %d: %s is there to be fought again" % [int(Game.run.stage) + 1, str(o.foe)])
+		if not Game.advance_stage():
+			break
+	ok(met >= 3, "the road beyond the checkpoint has its foes (%d)" % met)
+	# a fall at the very start, at a guardian's door, and from a shortcut
+	Game.start_run("courtyard")
+	walk_to(2)
+	Game.on_death(true)
+	ok(Game.run.stage == 0, "a fall before the first checkpoint puts the knight at the start")
+	Game.start_run("courtyard")
+	walk_to(6)
+	Game.on_death(true)
+	ok(Game.run.stage == 5, "a fall to the guardian puts the knight at the stop before its approach, not at the guardian")
+	Game.start_run("courtyard", true)
+	ok(Game.run.stage == 4 and Game.run.checkpoint == 4, "a road begun at the open gate has the gate as its start")
+	Game.on_death(true)
+	ok(Game.run.stage == 4, "and a fall there is at the gate again")
+	# Continue (and "return to main menu") land at the checkpoint
+	Game.start_run("courtyard")
+	walk_to(5)
+	Game.on_death(true)
+	ok(Game.load_game() and Game.run.is_empty() and Game.resume_road() and Game.run.stage == 3 and is_equal_approx(float(Game.run.hp), Game.stats().max_hp) and Game.run.checkpoint == 3,
+		"Continue takes the road up at the checkpoint with full health")
+	# the old way is still there for a run that has no road (a defeat off the road, the legacy callers)
+	Game.run = {}
+	Game.on_death(true)
+	ok(Game.run.is_empty() and Game.just_died, "a defeat with no road in progress still ends the route")
+	# the house does not fall: in every generation, however often, and the two authored falls still happen once each
+	for gen: int in [1, 2, 3]:
+		fresh(gen if gen < 3 else 2)
+		if gen == 3:
+			Game.fall(2, "saved_the_records")
+			Game.inherit({"name": "Third"})
+		ok(Game.generation() == gen, "generation %d begun" % gen)
+		var recs: int = Game.profile.generations.size()
+		for i: int in 8:
+			Game.start_run("courtyard")
+			walk_to(i % 7)
+			Game.on_death(true)
+		ok(Game.generation() == gen and Game.transition_pending().is_empty() and Game.profile.generations.size() == recs and Game.generation_record().fate == "alive",
+			"generation %d: eight falls on the road, and the house has not fallen: no time jump is owed" % gen)
+		ok(Game.profile.campaign.history.size() == (gen - 1) and Game.profile.campaign.transition.is_empty(), "generation %d: no transition was recorded" % gen)
+	fresh(1)
+	for i: int in 3:
+		Game.start_run("courtyard")
+		Game.on_death(true)
+	ok(Game.fall(1, "sealed_hall", {"clash": "ahead"}) and Game.transition_pending().get("to", 0) == 2, "the first generation's authored fall still happens, once, after ordinary ones")
+	Game.on_death(true)
+	ok(Game.transition_pending().get("to", 0) == 2 and Game.inherit() and Game.fall(2, "saved_the_records") and Game.inherit({"name": "Third"}) and Game.generation() == 3,
+		"and the second's, and the last heir comes after")
+	# the scripted deaths have scenes of their own and never use the death screen
+	for f: String in ["prologue", "second_fall", "heir_return", "kept_scene", "final_hall", "aftermath", "facility", "ending_scene", "time_jump", "arrival"]:
+		var src := FileAccess.get_file_as_string("res://src/cine/%s.gd" % f)
+		ok(src != "" and not src.contains("Overlays.death") and not src.contains("on_death"), "src/cine/%s.gd: no death screen, no ordinary-defeat handling" % f)
+	var main_src := FileAccess.get_file_as_string("res://src/main.gd")
+	ok(main_src.count("Overlays.death(") == 2 and main_src.count("Game.on_death(true)") == 1, "the death screen is shown from one place (the duel's defeat) and a dev screen")
+	# the save: version 5 (the road's checkpoint) from older ones
+	var v4 := Game._migrate(fixture("save_v4"))
+	ok(int(v4.version) == 5 and int(v4.road.stage) == 4 and v4.road.checkpoint == 3 and typeof(v4.road.checkpoint) == TYPE_INT, "save_v4: a road saved at stop 5 is given the checkpoint at stop 4")
+	var v5 := Game._migrate(fixture("save_v5"))
+	ok(int(fixture("save_v5").version) == 5 and v5.road.checkpoint == 3 and typeof(v5.road.checkpoint) == TYPE_INT, "save_v5 (fixture): the road's checkpoint is read back whole")
+	var odd := fixture("save_v4")
+	for pair: Array in [[0, 0], [2, 0], [3, 3], [6, 5]]:
+		odd.road.stage = pair[0]
+		odd.road.erase("checkpoint")
+		ok(Game._migrate(odd.duplicate(true)).road.checkpoint == pair[1], "a road saved at stop %d is given checkpoint %d" % [int(pair[0]) + 1, pair[1]])
+	odd.road.stage = 2
+	odd.road.checkpoint = 5.0
+	ok(Game._migrate(odd).road.checkpoint == 2, "a checkpoint past the stop is held at the stop")
+	ok(snap(Game._migrate(v5.duplicate(true))) == snap(v5), "migrating twice changes nothing")
+	wipe()
 
 # ------------------------------------------------------------------ both lineages
 func t_bodies() -> void:

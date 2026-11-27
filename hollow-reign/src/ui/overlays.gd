@@ -340,39 +340,75 @@ static func _item_card(layer: CanvasLayer, it: Dictionary, grand: bool) -> Contr
 	btns.add_child(ins)
 	return p
 
-## The knight fell. `done` returns to the sanctuary, as it always has. `actions` may add "retry" (set out on the
-## same road again) and "equipment" (go and look at what is worn); each is shown only if given.
-static func death(parent: Node, foe: Dictionary, summary: Dictionary, done: Callable, actions: Dictionary = {}) -> void:
-	var v := _shell(parent, 0.84)
-	v.custom_minimum_size.x = 820
-	v.add_child(_centered("THE REIGN ENDURES", 42, UI.BLOOD.lightened(0.18), "title"))
-	v.add_child(_centre(UI.ornament(420, UI.CRIMSON)))
-	# an ordinary defeat, in every generation: the Inheritance Engine restores the one on the road. It is not one of
-	# the family's two falls, and nothing here speaks of the lineage.
-	v.add_child(_centered("%s stands. The Inheritance Engine brings you back to the sanctuary, as it always does." % foe.name, 21, UI.SILVER))
-	v.add_child(UI.spacer(4))
-	var kept := "Nothing was lost."
-	if int(summary.get("xp", 0)) > 0 or not summary.get("found", []).is_empty():
-		kept = "Kept:  %d experience,  %d gold" % [summary.get("xp", 0), summary.get("gold", 0)]
-		if not summary.get("found", []).is_empty():
-			kept += ",  %d item%s" % [summary.found.size(), "" if summary.found.size() == 1 else "s"]
-	v.add_child(_centered(kept, 20, UI.BONE, "bold"))
-	v.add_child(_centered("What you learned of its rhythm is yours as well.", 17, UI.DIM))
-	var h := _button_row(v)
+## The knight fell (an ordinary defeat; the two authored falls of the house have scenes of their own and never come
+## here). The picture has already faded to black (Duel.DEATH_FADE). Near-black ground, a small sword mark between two thin
+## rules, YOU HAVE FALLEN in wide-tracked capitals, a line in italics, then RETRY FROM CHECKPOINT and RETURN TO MAIN MENU.
+## `actions`: "retry" (the road again from the last checkpoint) and "menu" (save, and the title); `done` stands in for
+## whichever is missing. `foe` and `summary` are kept for the callers' sake and are not shown: nothing is lost.
+static func death(parent: Node, _foe: Dictionary, _summary: Dictionary, done: Callable, actions: Dictionary = {}) -> void:
+	var v := _shell(parent, 1.0)
+	v.custom_minimum_size.x = 720
+	v.add_theme_constant_override("separation", 6)
+	# the sword between two rules
+	var mark := HBoxContainer.new()
+	mark.alignment = BoxContainer.ALIGNMENT_CENTER
+	mark.add_theme_constant_override("separation", 18)
+	mark.custom_minimum_size = Vector2(420, 64)
+	for i: int in 3:
+		if i == 1:
+			mark.add_child(_sword_mark())
+		else:
+			var r := UI.rule(Color(UI.GOLD_DIM, 0.8))
+			r.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			r.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			mark.add_child(r)
+	v.add_child(_centre(mark))
+	v.add_child(UI.spacer(14))
+	var t := _centered("YOU HAVE FALLEN", 54, UI.GOLD, "title")
+	var tracked := FontVariation.new()
+	tracked.base_font = UI.font("title")
+	tracked.spacing_glyph = 12
+	t.add_theme_font_override("font", tracked)
+	v.add_child(t)
+	v.add_child(UI.spacer(2))
+	var it := _centered("Your journey is not yet over.", 26, UI.BONE.darkened(0.12))
+	var slanted := FontVariation.new()
+	slanted.base_font = UI.font("body")
+	slanted.variation_transform = Transform2D(Vector2(1, 0), Vector2(-0.22, 1), Vector2.ZERO)
+	it.add_theme_font_override("font", slanted)
+	v.add_child(it)
+	v.add_child(UI.spacer(34))
 	var close := func(f: Callable):
+		for c in v.find_children("*", "Button", true, false):
+			(c as Button).disabled = true
 		v.get_meta("layer").queue_free()
 		f.call()
-	if actions.has("retry"):
-		var r := UI.button("Set out again", 20, 230)
-		r.pressed.connect(func(): close.call(actions.retry))
-		h.add_child(r)
-	var b := UI.button("Return to sanctuary" if not actions.is_empty() else "Rise", 20 if not actions.is_empty() else 22, 300)
-	b.pressed.connect(func(): close.call(done))
-	h.add_child(b)
-	if actions.has("equipment"):
-		var e := UI.button("Review equipment", 20, 260)
-		e.pressed.connect(func(): close.call(actions.equipment))
-		h.add_child(e)
+	var r := UI.button("Retry from checkpoint", 24, 470)
+	r.custom_minimum_size.y = 72
+	r.add_theme_color_override("font_color", UI.GOLD)
+	r.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	r.pressed.connect(func(): close.call(actions.get("retry", done)))
+	v.add_child(r)
+	v.add_child(UI.spacer(4))
+	var m := UI.menu_item("Return to main menu", 20, 380)
+	m.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	m.pressed.connect(func(): close.call(actions.get("menu", done)))
+	v.add_child(m)
+
+## A small upright sword, drawn in code: pommel, grip, cross-guard, blade to a point.
+static func _sword_mark() -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(26, 64)
+	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	c.draw.connect(func():
+		var x := c.size.x * 0.5
+		var col := UI.GOLD
+		c.draw_colored_polygon(PackedVector2Array([Vector2(x, 0), Vector2(x + 3.5, 6), Vector2(x + 3.5, 41), Vector2(x - 3.5, 41), Vector2(x - 3.5, 6)]), col)
+		c.draw_line(Vector2(x, 8), Vector2(x, 40), Color(0.1, 0.08, 0.04, 0.55), 1.0)        # the fuller
+		c.draw_rect(Rect2(x - 12, 41, 24, 3.5), col)
+		c.draw_rect(Rect2(x - 2, 44.5, 4, 14), col.darkened(0.25))
+		c.draw_circle(Vector2(x, 61), 3.0, col))
+	return c
 
 static func pause(parent: Node, resume: Callable, abandon: Callable) -> void:
 	parent.get_tree().paused = true

@@ -40,6 +40,11 @@ const THEMES := {
 	"throne": {"sky": "#0e0a0a", "horizon": "#2e1c12", "fog": "#1c140e", "fog_d": 0.014, "sun": "#ffdcaa", "sun_e": 1.15, "sun_rot": Vector3(-48, 180, 0),
 		"stone": "#4a443c", "floor": "#3a332e", "fire": "#ffc860", "layout": "throne", "particles": "motes", "amb": "#42342a",
 		"amb_e": 1.55, "fill_e": 0.35, "key": "#fff4e6", "key_e": 3.6, "rim": "#ffd080", "rim_e": 0.55, "exp": 1.12, "sat": 0.95, "con": 1.12},
+	# the command hall of the old civilisation, as the first generation finds it: a ribbed vault of alloy and light
+	# columns with the throne set into a machine at its head (the opening's hall; see _layout_command)
+	"command": {"sky": "#06080a", "horizon": "#10161c", "fog": "#121a20", "fog_d": 0.012, "sun": "#dfeaf2", "sun_e": 1.0, "sun_rot": Vector3(-52, 172, 0),
+		"stone": "#5a6068", "floor": "#353a40", "fire": "#ffc27a", "layout": "command", "particles": "motes", "amb": "#35424e",
+		"amb_e": 1.5, "fill_e": 0.35, "key": "#f4f8ff", "key_e": 3.4, "rim": "#ffd49a", "rim_e": 0.6, "exp": 1.1, "sat": 0.95, "con": 1.12},
 	# the resurrection chamber under the fortress: a closed round room, lit only by what its machines still give off
 	"chamber": {"sky": "#050607", "horizon": "#0a0c0e", "fog": "#0e1414", "fog_d": 0.03, "sun": "#8fb0b0", "sun_e": 0.0, "sun_rot": Vector3(-80, 160, 0),
 		"stone": "#5a5750", "floor": "#45433e", "fire": "#ffb45a", "layout": "chamber", "particles": "motes+mist", "amb": "#2c3836",
@@ -1083,22 +1088,32 @@ func _layout_chamber() -> void:
 	rubble(Vector3(-3.6, 0, 2.6), 5, 1.0)
 	rubble(Vector3(3.4, 0, 3.4), 4, 0.8)
 
-## What makes the chamber a machine rather than a round room: old stone from the kits standing between the panels,
-## conduits and the crown-ring from the regions that came after it, the cradle's ribs and its head unit, cables
+## What makes the chamber a machine rather than a round room: ribs up the wall with a channel of light in each,
+## conduits, the cradle's hoops and its head unit, cables
 ## across the floor from the cradle to every pylon and to the block, banks of small lit readouts on the wall, and a
 ## band of metal let into the floor round the cradle. The merged pieces are one draw each.
 func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
 	var dark := Look.flat(Color("#17191b"), 0.6, 0.6)
-	# kit stone and machinery round the wall (each only if its kit is there), kept out of the story cameras' way
-	for c0: Array in [[-5.2, 1.6], [-4.7, -3.0], [4.8, -3.4]]:
-		var p := prop("cr_pillar", 5.3, Vector3(float(c0[0]), 0, float(c0[1])), rad_to_deg(atan2(float(c0[0]), float(c0[1]))))
-		if p:
-			Look.set_param(p, &"tint", Color(0.62, 0.66, 0.66))
+	# ribs up the wall and over onto the ceiling, a channel of light in the face of each: the room is the inside of a machine
+	var ribs: Array = []
+	var channels_teal: Array = []
+	var channels_amber: Array = []
+	for i in 11:
+		var a := TAU * (i + 0.5) / 11.0
+		if absf(wrapf(a - PI, -PI, PI)) < 0.34:
+			continue          # the doorway
+		var dir := Vector3(sin(a), 0, cos(a))
+		var yaw := rad_to_deg(a)
+		ribs.append([Vector3(0.42, 4.4, 0.5), dir * (CHAMBER_R - 0.5) + Vector3(0, 2.2, 0), Vector3(0, yaw, 0)])
+		ribs.append([Vector3(0.42, 1.9, 0.5), dir * (CHAMBER_R - 1.05) + Vector3(0, 4.85, 0), Vector3(-42.0, yaw, 0)])
+		ribs.append([Vector3(0.42, 0.4, 2.4), dir * (CHAMBER_R - 2.7) + Vector3(0, 5.3, 0), Vector3(0, yaw, 0)])
+		ribs.append([Vector3(0.7, 0.3, 0.8), dir * (CHAMBER_R - 0.55) + Vector3(0, 0.15, 0), Vector3(0, yaw, 0)])
+		(channels_teal if i % 2 == 0 else channels_amber).append([Vector3(0.07, 3.2, 0.04), dir * (CHAMBER_R - 0.77) + Vector3(0, 2.3, 0), Vector3(0, yaw, 0)])
+	Highland._solid(self, "Ribs", ribs, Highland.built(Color("#5c6268"), 0.55, 0.5, 0.5), false)
+	Highland._solid(self, "ChannelsTeal", channels_teal, teal, false)
+	Highland._solid(self, "ChannelsAmber", channels_amber, amber, false)
 	for c: Array in [[-4.3, 3.0, 130.0], [-5.0, -0.5, 80.0], [3.0, -4.9, -30.0]]:
 		prop("de_conduit", 2.6, Vector3(float(c[0]), 0, float(c[1])), float(c[2]))
-	var ring := prop("th_ring", 2.2, Vector3(-3.6, 0, 4.2), 140.0)
-	if ring:
-		Look.set_param(ring, &"tint", Color(0.5, 0.55, 0.55))
 	# the cradle: three hoops over the bed, a head unit with its panel, feet under the frame
 	var solid: Array = []
 	var hoops: Array = []
@@ -1179,6 +1194,87 @@ func _chamber_machine(metal: Material, amber: Material, teal: Material) -> void:
 	bmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	add_child(bmi)
 	set_meta("machine_light", teal)
+
+## The command hall: where the Forgotten Monarch sits in the first generation. Nothing gothic in it: a long vault of
+## leaning alloy ribs with a column of light in each, plated walls behind them, guide lines let into the floor, and
+## at its head the machine the throne is part of: a ring of the makers' ceramic standing on end with the seat on a
+## dais in the mouth of it, conduits running from it into the walls. Built from boxes, prisms and arcs merged by
+## material (seven draws for the room).
+func _layout_command() -> void:
+	sun.directional_shadow_max_distance = 60.0
+	var alloy := Highland.built(Color("#5a6068"), 0.6, 0.45, 0.22)
+	var plate := Highland.built(Color("#2c3036"), 0.5, 0.55, 0.14)
+	var pale := Highland.built(Color("#c2c6c4"), 0.12, 0.55, 0.16)
+	var warm := Look.glow(Color(theme.fire), 2.6)
+	var cool := Look.glow(Color("#9fe8dc"), 2.0)
+	var ribs := Highland._flat_tool()
+	var walls := Highland._flat_tool()
+	var white := Highland._flat_tool()
+	var lights := Highland._flat_tool()
+	var lines := Highland._flat_tool()
+	for i in 7:
+		var z := 16.0 - i * 6.0
+		for sx: float in [-1.0, 1.0]:
+			# a rib: a leaning leg, a haunch, and half of the beam that meets its twin over the middle of the hall
+			Highland._beam(ribs, Vector3(sx * 10.2, 0, z), Vector3(sx * 8.6, 11.0, z), 1.0, 1.5)
+			Highland._beam(ribs, Vector3(sx * 8.6, 10.6, z), Vector3(sx * 4.6, 14.2, z), 0.8, 1.3)
+			Highland._beam(ribs, Vector3(sx * 4.8, 14.1, z), Vector3(0, 14.9, z), 0.7, 1.2)
+			Highland._beam(white, Vector3(sx * 10.4, 0, z), Vector3(sx * 10.25, 1.1, z), 1.5, 2.0)
+			# the column of light let into its inner face
+			Highland._beam(lights, Vector3(sx * 9.62, 1.3, z), Vector3(sx * 8.25, 10.4, z), 0.16, 0.5)
+			# the wall behind it, to the next rib
+			var panel := BoxMesh.new()
+			panel.size = Vector3(0.6, 15.0, 6.0)
+			walls.append_from(panel, 0, Transform3D(Basis(Vector3(0, 0, 1), deg_to_rad(sx * 8.0)), Vector3(sx * 10.6, 7.2, z - 3.0)))
+			if i % 2 == 0:
+				Highland._beam(lines, Vector3(sx * 10.2, 3.2, z - 1.2), Vector3(sx * 10.2, 3.2, z - 4.8), 0.1, 0.5)
+		if i % 2 == 1:
+			_glow(Vector3(0, 9.0, z), Color(theme.fire), 1.6, 15.0)
+	# the roof between the ribs, and the two ends of the hall
+	var roof := BoxMesh.new()
+	roof.size = Vector3(11.0, 0.5, 44.0)
+	walls.append_from(roof, 0, Transform3D(Basis.IDENTITY, Vector3(0, 15.3, -2.0)))
+	for sx2: float in [-1.0, 1.0]:
+		var slope := BoxMesh.new()
+		slope.size = Vector3(7.0, 0.5, 44.0)
+		walls.append_from(slope, 0, Transform3D(Basis(Vector3(0, 0, 1), deg_to_rad(sx2 * -41.0)), Vector3(sx2 * 7.2, 12.6, -2.0)))
+	for zz: float in [-24.5, 20.5]:
+		var end := BoxMesh.new()
+		end.size = Vector3(22.0, 16.0, 0.8)
+		walls.append_from(end, 0, Transform3D(Basis.IDENTITY, Vector3(0, 8.0, zz)))
+	# guide lines down the floor to the throne
+	for sx3: float in [-1.0, 1.0]:
+		Highland._beam(lines, Vector3(sx3 * 3.4, 0.02, 18.0), Vector3(sx3 * 3.4, 0.02, -11.5), 0.12, 0.04)
+		Highland._beam(lines, Vector3(sx3 * 6.6, 0.02, 18.0), Vector3(sx3 * 6.6, 0.02, -14.0), 0.06, 0.04)
+	# the machine at the head of the hall: the ring on end, the dais in its mouth, conduits into the walls
+	var ring := Highland._flat_tool()
+	var chan := Highland._flat_tool()
+	Highland._arc(ring, 5.6, 0.62, TAU - 0.62, PackedVector2Array([Vector2(-0.7, -0.6), Vector2(-0.7, 0.6), Vector2(-0.4, 0.9), Vector2(0.4, 0.9), Vector2(0.7, 0.6), Vector2(0.7, -0.6)]), 40)
+	Highland._arc(chan, 5.6, 0.7, TAU - 0.7, PackedVector2Array([Vector2(-0.82, -0.18), Vector2(-0.82, 0.18), Vector2(-0.68, 0.18), Vector2(-0.68, -0.18)]), 40)
+	for e: Array in [[ring, pale, "MachineRing"], [chan, warm, "MachineLight"]]:
+		Highland._commit(self, e[2], e[0], e[1], false).position = Vector3(0, 5.2, -11.4)
+	for k in 3:
+		var step := BoxMesh.new()
+		step.size = Vector3(9.0 - k * 1.6, 0.22, 4.4 - k * 0.8)
+		white.append_from(step, 0, Transform3D(Basis.IDENTITY, Vector3(0, 0.11 + k * 0.22, -11.6 - k * 0.2)))
+	for sx4: float in [-1.0, 1.0]:
+		Highland._beam(ribs, Vector3(sx4 * 4.6, 1.6, -11.4), Vector3(sx4 * 10.0, 6.5, -13.0), 0.5)
+		Highland._beam(ribs, Vector3(sx4 * 3.2, 9.6, -11.4), Vector3(sx4 * 8.8, 12.0, -14.0), 0.4)
+		Highland._prism(ribs, Vector3(sx4 * 5.6, 0, -11.4), 1.0, 0.8, 2.4, 6)
+		Highland._beam(lights, Vector3(sx4 * 5.6, 2.45, -11.4), Vector3(sx4 * 5.6, 2.65, -11.4), 1.3)
+		# a console to either side of the floor, dead-faced but for a line of readouts
+		Highland._beam(ribs, Vector3(sx4 * 7.4, 0, 4.0), Vector3(sx4 * 7.4, 1.1, 4.0), 1.2, 3.0)
+		Highland._beam(lines, Vector3(sx4 * 6.78, 0.95, 2.8), Vector3(sx4 * 6.78, 0.95, 5.2), 0.1, 0.05)
+	# the spine up the back of the ring, which the throne's own back runs into
+	Highland._beam(ribs, Vector3(0, 0.6, -12.6), Vector3(0, 12.8, -12.6), 1.6, 0.9)
+	Highland._beam(lights, Vector3(0, 3.6, -12.1), Vector3(0, 12.2, -12.1), 0.2, 0.1)
+	Highland._commit(self, "Ribs", ribs, alloy, true)
+	Highland._commit(self, "Walls", walls, plate, false)
+	Highland._commit(self, "White", white, pale, false)
+	Highland._commit(self, "LightColumns", lights, warm, false)
+	Highland._commit(self, "Lines", lines, cool, false)
+	_glow(Vector3(0, 6.0, -9.0), Color(theme.fire), 3.0, 16.0)
+	_glow(Vector3(0, 3.0, -13.5), Color("#9fe8dc"), 1.4, 9.0)
 
 ## The high road and the Ring-Gate (the prologue's place, and a duel's): everything is in src/world/highland.gd.
 func _layout_highland() -> void:

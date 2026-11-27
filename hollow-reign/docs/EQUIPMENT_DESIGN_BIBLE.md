@@ -184,6 +184,73 @@ clipping. One surface per material; swords have 6 - 8 surfaces, shields 6 - 7.
 | Blade metal (ore) and edge polish | Gloss beyond the 0.30 floor |
 | Light channel: only rare and above have one; dark until awakened | The number of channels: one |
 
+## Hybrid swords: our blade in a generated hilt (trial, 2026-11-27)
+
+The owner found the flat plate guards too plain. Trial: keep the code-built blade (profile, engraving, forge tiers,
+ore, light channel) and replace guard + grip + pommel with one **image-to-3D hilt** made from a concept image.
+Two exist as separate ids, **not used by the live game**: `wayfarer_h` and `eternal_edge_h` (manifest `hybrid: true`,
+`base`, `hilt_source`). `GearModel.spawn("wayfarer_h", ...)` loads them; `GearModel.ids()` leaves hybrids out unless
+asked (`ids("sword", true)`). Captures: `marketing/gear_bench/v3_hybrid/`.
+
+**Verdict.** Clearly better against the owner's taste: the generated hilts are sculpted in the round (fluted
+sockets, pierced flowing arms, prongs, chevron collars, inlaid gems and gold lines) where the plates are outlines.
+The silhouettes are also stronger. What it costs is listed under "Defects and cost".
+
+**Alignment recipe** (`HYBRIDS` and `bake_hilt()` in `tools/gear_gen.py`; run `python3 tools/gear_gen.py --hybrids`):
+1. The generated model arrives 1 unit long, pommel at -Y, guard along Z, depth along X. Slice it along Y and read off:
+   pommel, grip (the long run of constant radius), collar (where the radius first widens), guard, and the top of the
+   socket or collar the blade leaves from.
+2. `scale` = 0.0150 m / grip radius in model units (a grip about 30 mm across). Wayfarer 0.255, Eternal Edge 0.3375.
+3. `y_hand` = collar height - 0.05 / scale: the hand sits half a palm under the guard. That point becomes the origin.
+4. Turn it a quarter round Y so the guard runs along X and the thin axis is Z. If the guard came out too deep front to
+   back (Eternal Edge's prongs were 6.6 cm deep), `flatten` squeezes the depth above the grip (x 0.62).
+5. `seat`: the blade starts 13 mm below the top of the socket, so its foot is inside the hilt: no gap and nothing
+   coplanar to z-fight. Where the blade's foot is wider than the socket, narrow the first control point of its width
+   profile (`P` override; Wayfarer 23.8 -> 21.2 mm).
+6. Metal match: average the hilt's albedo and roughness over its metal texels and set `tint` (blade x 0.66 - 0.72,
+   slightly warm) and `rough_max` 0.42 so blade and hilt read as one piece of steel. Ore tints multiply on top.
+7. The bake writes `<id>__hilt0.glb` (geometry only; it points at the textures Godot extracted beside the source),
+   `<id>__blade<0-3>.glb` at the new seat, `<id>__rings<2,3>.glb`, and manifest numbers measured from the result
+   (`tip`, `pommel`, `grip_clear`, `guard_span`).
+
+**Forge mods on a hybrid.** `blade_tier`, `ore` and `sharpened` work unchanged. A generated grip cannot change form,
+so `grip_tier` 2 and 3 lay two or four thin gold rings over it (`__rings` parts, sized from the hilt's own radius at
+each height); tiers 0 and 1 look the same. The alternative, if handle upgrades must be more visible, is to generate
+only guard and pommel and keep the code-built grip between them (cord -> fine wrap -> twisted bar): two generated
+parts per sword instead of one.
+
+**Defects and cost (measured on the two trial pieces).**
+- Grips are soft: the concept's cord wrap comes back as lumpy leather. Fine at fighting distance, poor in a close-up.
+- Wayfarer's guard arms end in sharp hooked points; the first brief asked for less spiky. It follows its concept.
+- The generated metal is glossier than ours (roughness 0.21 - 0.30 before the 0.30 clamp) and blooms on thin edges.
+- Eternal Edge's hybrid grip is 10.8 cm (one hand) against 16.1 cm code-built: `hands` 1 instead of 1.5.
+- Triangles: hilt 4,938 / 4,862 against about 1,100 for a code-built hilt; whole sword about 6,000 - 6,200. There is
+  no hand-made low model for the hilt (only Godot's automatic LOD).
+- Draw calls: the hilt is one surface, so a hybrid is 5 - 7 draws, one or two fewer than code-built.
+- Disk: 3.3 - 3.7 MB of 2K textures per hilt (colour, normal, ORM) against 0 new bytes for a code-built hilt, plus the
+  3.6 - 4 MB source GLB that still embeds the same textures. Halving the textures to 1K would be the first saving.
+
+**Producing the other eight this way.** One concept image per sword (hilt only, straight-on, plain grey ground, an
+empty socket or collar where the blade enters, no blade), then image-to-3D at about 5k triangles, then the recipe
+above. Cost each: **30 Tripo credits + about 1.25 image credits**; eight swords: 240 Tripo + 10 image credits.
+Nothing has been spent on these; they need the owner's approval. Prompts, in the same language as the two trial hilts
+("sculpted futuristic sword hilt, satin brushed steel, tiny antique-gold inlays, black cord grip, jewellery
+precision, no blade"), each keeping its role silhouette:
+
+| Sword | Hilt concept |
+|---|---|
+| Silver Vow (light) | small open lens-shaped frame guard with two pierced leaf windows, very slender grip, faceted bead pommel |
+| Ashbrand (heavy) | broad blocky anvil guard with stepped shoulders and two rectangular windows, tall fluted collar, long grip, heavy slotted block pommel |
+| Veilcutter (precision) | asymmetric guard: one short arm leaning forward, one long arm sweeping back past the knuckles as an open ribbon, slim grip, spike pommel |
+| Oathbreaker (greatsword) | wide tiered architectural guard with windows and slots, tall clamp up the ricasso, long two-hand grip with a centre ring, keystone pommel |
+| King's Remnant | guard whose upper edge is a row of small merlons like a broken crown over a long pierced window, disc pommel pierced by a square |
+| Cold Resolve | open hexagonal collar the blade stands in with a faceted window each side, pale-blue light line, four-sided crystal pommel |
+| Nightward | half-disc guard on one side only, pierced by three graduated ports, blackened steel, tab pommel with a lanyard eye |
+| Twin Relics (one of a pair) | angular C-frame guard returning to the pommel as a knuckle bar, short grip, hexagonal cap |
+
+Check each result as the trial pieces were checked: slices, grip radius against a 9 cm palm, silhouette beside the
+other nine, in the knight's hand, and the triangle and texture cost.
+
 ## Known limits (second pass)
 
 - Guards and pommels are flat plates: sculpted in outline, not in relief. There is no surface modelling on a guard's

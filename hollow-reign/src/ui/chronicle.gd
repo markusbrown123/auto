@@ -197,8 +197,10 @@ func _portrait(who: Dictionary) -> Control:
 	frame.add_child(vp)
 	var rig := FighterRig.new()
 	vp.add_child(rig)
-	rig.build(lineage_look(who), false)
-	rig.rotation.y = PI * 0.9
+	var look := lineage_look(who)
+	rig.ready.connect(func():          # dressed once it stands in the tree: the rig measures itself in world space
+		rig.build(look, false)
+		rig.rotation.y = PI * 0.9)
 	var cam := Camera3D.new()
 	vp.add_child(cam)
 	cam.position = Vector3(0.0, 1.05, 3.1)

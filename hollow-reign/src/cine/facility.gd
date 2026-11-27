@@ -38,6 +38,10 @@ func _ready() -> void:
 	arena.position.y = -DEPTH
 	arena.env.fog_density = 0.012
 	arena.env.ambient_light_energy = 1.3
+	# the way ahead is kept clear of the Deep's own rocks and growths: what is beyond the leaves has to be seen
+	for c: Node in arena.get_children():
+		if c is Node3D and not c is Light3D and not c is WorldEnvironment and absf((c as Node3D).position.x) < 8.0 and (c as Node3D).position.z < -3.0 and (c as Node3D).position.length() > 0.5:
+			c.queue_free()
 	var metal := Look.flat(Color("#1f2224"), 0.5, 0.85)
 	# the shaft: rings of the old make, each with a band of machine light, alternate ones turning
 	var n := int(DEPTH / RING_GAP)
@@ -208,7 +212,7 @@ func _run() -> void:
 	wake.tween_interval(0.38 * _racks.size())
 	wake.tween_property(_crown_mat, "emission_energy_multiplier", 5.0, 2.4)
 	wake.parallel().tween_property(_crown_light, "light_energy", 7.0, 2.4)
-	cam.move(Vector3(0.9, 3.4, 2.6), Vector3(0.0, 8.0, -40.0), 10.0, 40.0)
+	cam.move(Vector3(0.6, 4.2, 1.6), Vector3(0.0, 9.0, -50.0), 10.0, 42.0)
 	walk(hero, Vector3(0, 0, -3.4), 1.0)
 	if not await _w(6.4):
 		return

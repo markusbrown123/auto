@@ -40,8 +40,8 @@ const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38
 ## The benchmark suit's refinish (the owner, 2026-11-27: "paler grey, more detail like armor but still futuristic,
 ## stronger design of shapes circles, logos, cyan and maybe pink with girl, with a clean glow and effect").
 ## Material and a few light effects only; the meshes are as generated. Everything the owner may want nudged is here:
-##   coat_color    the plate, a pale cool grey: paler (0.78, 0.80, 0.83), darker (0.56, 0.58, 0.62), warmer (0.72, 0.70, 0.66).
-##                 It is lit hard in the Armory and in daylight: much above 0.8 burns out.
+##   coat_color    the plate, a pale cool grey: paler (0.70, 0.72, 0.755), darker (0.50, 0.52, 0.56), warmer (0.64, 0.62, 0.58).
+##                 It is lit hard in the Armory and in daylight: at 0.70 it already reads white in the Courtyard sun.
 ##   coat_rough    0.35 polished .. 0.6 matte;   coat_metal 0 ceramic .. 0.6 steel;   edge_shine 0 .. 0.4 lit edges
 ##   wear          0 none .. 1: how dark the suit's own creases and panel seams are drawn (its sculpted detail)
 ##   wear_edge     0 none .. 1: chipped edges, scuffs and mottling (off: the brief is clean)
@@ -50,7 +50,7 @@ const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38
 ##   GLOW          every light on the suit, one colour per body: visor, lines, hip seam, vents, cast light
 ##   FX_*          the live effects (cast light, vents)
 ## `--chrome` (or ArmorParts.chrome = true before a knight is dressed) puts the generated chrome back, all of it.
-const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.70, 0.72, 0.755), "coat_metal": 0.2, "coat_rough": 0.44, "edge_shine": 0.2,
+const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.61, 0.63, 0.67), "coat_metal": 0.2, "coat_rough": 0.44, "edge_shine": 0.2,
 	"wear": 0.85, "wear_edge": 0.0, "wear_color": Color(0.085, 0.085, 0.09), "spec": 0.5,
 	"motif": 1.0, "motif_dark": Color(0.13, 0.13, 0.14), "motif_energy": 2.2, "visor": 4.5}
 const GLOW := {"m": Color(0.25, 0.9, 1.0), "f": Color(1.0, 0.3, 0.72)}

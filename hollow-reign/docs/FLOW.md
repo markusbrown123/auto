@@ -135,11 +135,41 @@ knight waits for it (at most 14 s), then the road screen adopts the place.
 `Companion` picks `witness_discovery` for the stop. On the real-time road the scene is staged (`Explore._find_witness`):
 the knight turns to the fallen statue head and the camera eases down to its foot, where a machined hatch lies flush in
 the paving. During Lyra's line the hatch slides back in its own dust; the Witness (a `WitnessDrone`, dormant, on its
-side) wakes on its own first word: seam, then the dash on its halo, then the vanes, then it rises, rights itself and
-turns the halo to the knight. The dialogue plays (its light follows its voice), it crosses to the knight's shoulder,
+back) wakes on its own first word: the seam line, then the bar, then the panels part, then it rises, rights itself and
+turns to the knight. The dialogue plays (its light follows its voice), it crosses to the knight,
 the knight is rebuilt with the Witness as its own (`flags.witness_found`, set by `Companion.mark_heard`), the camera
 returns and the choices fade in. The filmed road plays the dialogue only, as before.
 Other regions have no monument: a save that meets the Witness late gets the dialogue without the staging.
+
+## The slice, played by touch (`--screen=slice`, `src/dev/slice_bot.gd`, added 2026-11-27)
+An automated first-time player for the first-boss slice. It starts at the launch screen with no save and plays to the
+Ashen Sentinel's fall and the sanctuary after it. Every button is pressed by a synthetic touch at its centre, sent
+through `Input` (the path a finger takes, so a button with something lying over it is found out and logged as
+`TAP MISSED`); every cut, parry, dodge, roll, block and struggle tap in a fight is a touch on the duel's own surface
+and pads; the name is typed as key events. It walks: launch → menu → New Legacy → (a place, if none is free) →
+body, name, cloak → the sword row, dragged to the sword asked for → Rise → Generation I (both duels fought) → the
+years → the arrival → the Engine (the prompt tapped) → the walk out → stop 1 (the pouch, the lesson, the first
+fight) → stop 2 (the Witness; the Guardhouse cache) → stop 3 (anything odd is touched; the Banneret) → stop 4 (the
+winch) → stop 5: Turn Back → sanctuary: Armory (put on what was found), Shop (buy the dearest thing in reach), Forge
+(one piece of work if it can be paid for), Settings → Return to title → Continue → out by the Winch Gate → stop 5
+(fight) → stop 6 (kneel) → stop 7, the Sentinel → the victory screen → the sanctuary. It pauses once mid-fight and
+resumes.
+
+```
+tools/record.sh <name> 900 --screen=slice [--body=m|f] [--weapon=<id>] [--die=1,boss] [--forge_first] [--audit]
+                           [--fast] [--until=menu|arrival|quit] [--resume] [--log=<file>] [--snaps=<dir>] [--notch=l,t,r,b]
+```
+`--die=1,boss` stands still in the first real fight and/or the Sentinel's, then takes "Set out again". `--until=quit`
+ends at the main menu after the sanctuary visit; a second launch with `--resume` (and the same `--savedir`) presses
+Continue, checks what the save holds, and plays the rest: that pair is the app-relaunch test. `--fast` presses SKIP on
+every story beat. `--audit` lists, per screen, touch targets under 60 units, text under 22, and controls outside the
+safe area. The log gives the game's clock and the wall clock for every step, each fight's length and tallies, and the
+peak and mean level of every audio bus during each step. A step that does not arrive is logged as `STUCK` with what
+is on screen. If the touch player loses more than three unplanned fights the sim's own bot takes over and the log
+says `assist`.
+
+One full run is about 14 to 15 minutes of game time (measured: 883 s with two deliberate defeats). On the build
+machine's software renderer that is one to three hours of wall time.
 
 ## Continue
 Continue → the sanctuary of the latest save (0.35 s fade). It never plays the opening or the chamber. A road in

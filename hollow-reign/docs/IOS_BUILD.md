@@ -63,3 +63,31 @@ A free Apple ID "Personal Team" in Xcode can install to your own phone (the app 
 6. Project > Export > iOS: set a bundle identifier unique to you (a Personal Team cannot use one already registered), leave Team ID empty for now, Export Project to an empty folder with no spaces.
 7. Open the exported `.xcodeproj` in Xcode, target > Signing & Capabilities > Team: your Personal Team, Automatically manage signing. Select the iPhone, Run. On the phone: Settings > General > VPN & Device Management > trust the developer profile.
 8. Build only from a commit this project's status file marks as passing all suites.
+
+## First export of the first-boss slice: what was checked from Linux, and what to watch (added 2026-11-27, slice QA)
+Nothing below was verified on a Mac, in Xcode or on a phone. "Checked" means read against the Godot 4.6 binary's own option names or measured in the software renderer.
+
+**Checked and set in the repository**
+- `export_presets.cfg`: every option name in it exists in the 4.6 editor binary. Name "Hollow Reign" (from `project.godot`), version 0.1.0 (build 1), min iOS 15.0, arm64, iPhone + iPad, icon `assets/icons/icon_1024.png` (1024 x 1024, RGB, no alpha; the file exists).
+- Required-reason API declarations are now filled in (they were 0): file timestamp `C617.1`, system boot time `35F9.1`, disk space `E174.1`, user defaults `CA92.1`. These are the reasons that fit an engine reading and writing its own save files. Confirm the four boxes are ticked in Project > Export > iOS > Privacy when the preset is first opened; if Godot shows them unticked, tick them.
+- `ITSAppUsesNonExemptEncryption = false` is in `application/additional_plist_content` (the export-compliance question is then not asked on every upload).
+- Orientation: `window/handheld/orientation=4` (sensor landscape: both landscape ways, never portrait). Stretch `canvas_items` / `expand` on a 1280 x 720 reference: the UI was captured at 1560 x 720 (19.5:9) and at 2532 x 1170 and 2796 x 1290 window sizes.
+- Safe area: menus, the duel HUD, the road and the sanctuary take their margins from `DisplayServer.get_display_safe_area()` (`UI.safe_margins`). SKIP on the story scenes now does too. On a desktop the insets can be faked: `-- --notch=87,0,87,39` (left, top, right, bottom in 720-high units; these are an iPhone 14's 47 pt sides and 21 pt bottom).
+- Graphics preset: a phone or tablet starts on **Performance** the first time (`Game.default_quality`); Settings offers Balanced and High. Frame cap 60 with vsync on; the 120 option exists in Settings.
+- Touch: `emulate_mouse_from_touch` is on (the engine default), which is what lets a finger press buttons; `emulate_touch_from_mouse` is on for desktop testing and does nothing on a phone. Low-processor mode is off. Audio output latency is the engine default (15 ms).
+- A fight pauses itself when the app loses focus or is sent to the background (a call, the notification shade, the app switcher): `main.pause_fight()`. This only runs on a phone and has not been seen working on one.
+- Textures: all 337 model textures that were stored lossless (and so sat uncompressed in video memory) are now imported VRAM-compressed, as the knights' already were. On export for iOS they are ETC2 (`import_etc2_astc`; ASTC only for textures marked high quality, none are). Video memory in the Courtyard duel fell from 339 MB to 148 MB in the software renderer. Floors (`assets/textures`) and the engraving sheets (`assets/models/gear/tex`) are still lossless because custom shaders sample them; that is about 20 MB.
+- Filmed road and the cinematic duel (Theora, `assets/video/*.ogv`, 110 MB) are off by default (`cine_road`, `cine` under Settings > In testing).
+
+**Watch for on the first export**
+1. The first import on the Mac recompresses 427 textures: several minutes, and the editor may look frozen.
+2. App size. `export_filter="all_resources"` ships everything under `assets/`: about 1.2 GB of models before compression, most of them for regions after the slice. Expect an `.ipa` near or over 1 GB. That is fine for a cable install; it is over the cellular download limit and needs a cut list before TestFlight.
+3. Whether Theora video plays on iOS at all is unknown. Leave the two "In testing" switches off on the phone unless that is what is being tested.
+4. The name field in character select uses the system keyboard. Whether the keyboard covers the field or the "Choose a Blade" button in landscape is unknown; the name is optional.
+5. First-launch shader compilation: each new place may hitch the first time it is shown (there is no shader pre-warm; `shader_baker/enabled` exists in the 4.6 preset options and is worth trying if hitches are bad).
+6. Memory: the software renderer reports 127 to 148 MB of video memory in the slice's heaviest scenes after the texture change. ETC2 on the phone will differ. If iOS kills the app in a duel, try Performance first, then report which scene.
+7. Triangles: about 400,000 to 500,000 primitives a frame in the Courtyard (shadow pass included). Not reduced in this pass; the first thing to cut if the frame rate is poor is sun shadows on scenery.
+8. A journey in progress on a road is not stored: if iOS ends the app while it is in the background, Continue returns to the sanctuary with everything earned kept and the road to walk again (by the Winch Gate once it is open).
+9. Haptics, the home-indicator and notch margins, rotation between the two landscape ways, and audio levels have only been checked in code or by meter, never felt or heard.
+
+**The automated run to compare a phone session against**: `docs/FLOW.md`, "The slice, played by touch".

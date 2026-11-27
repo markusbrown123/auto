@@ -815,6 +815,7 @@ func brace(world_point: Vector3, hold: float = 0.3) -> void:
 func dodge(side: float) -> void:
 	_dodge_side = side
 	_rolling = false
+	_dg_begin(false)
 	_go(Mode.DODGE, 0.5)
 
 ## Turn the sidestep in progress into a roll.
@@ -822,6 +823,7 @@ var _rolling := false
 func roll(side: float) -> void:
 	_dodge_side = side
 	_rolling = true
+	_dg_begin(true)
 	_go(Mode.DODGE, 0.84)      # ends as the rules free the knight, not before
 
 func roar() -> void:
@@ -883,10 +885,10 @@ func _process(delta: float) -> void:
 	_au_tick(dt)
 	_present_tick(dt)
 	# stride phase advances with ground actually covered, so feet never slide
-	var moved := global_position.distance_to(_last_world) / maxf(scale.x, 0.01)
+	var moved := _travel(dt)
 	_last_world = global_position
-	if walking and moved < 1.0:
-		_walk_phase += moved / (STRIDE * (0.62 if combat_steps else 1.0)) * PI
+	if (walking or _lag_on) and moved < 1.0:
+		_walk_phase += moved / _stride_now() * PI
 		if moved > 0.0004:
 			var local := global_transform.basis.inverse() * (global_position - _prev_world)
 			local.y = 0.0
@@ -900,7 +902,7 @@ func _process(delta: float) -> void:
 		if footsteps and _walk_amount > 0.35 and mode != Mode.DODGE and moved < 0.12:
 			Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
 			Sfx.play("armor", -17.0 + 4.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x), 0.12)      # plates shift with every step
-	_walk_amount = lerpf(_walk_amount, 1.0 if (walking and moved > 0.0005) else 0.0, 1.0 - exp(-dt * 7.0))
+	_walk_amount = lerpf(_walk_amount, _walk_want(moved, dt), 1.0 - exp(-dt * 7.0))
 	_solve(dt)
 
 func _out_of_helm(p: Vector3) -> Vector3:
@@ -957,6 +959,14 @@ func _solve(dt: float) -> void:
 				# long blades are held at the hip with the point forward and up at the foe, clear of the wielder's own head
 				hand_t = Vector3(0.2, 0.9 + breathe, -0.32)
 				blade_t = Vector3(-0.18, 0.5, -0.85).normalized()
+			if _stance_on():
+				var gp := _guard_pose(breathe)
+				hand_t = gp[0]
+				blade_t = gp[1]
+			elif polish and rest_carry and not combat_steps and not two_handed:
+				# at ease: the sword low at the side, its point forward and down
+				hand_t = Vector3(0.34, 0.9 + breathe, -0.04)
+				blade_t = Vector3(0.1, -0.42, -0.9).normalized()
 		Mode.WINDUP:
 			var rise := minf(_dur * 0.5, 0.5)
 			var sweep_start := _dur - _swing * 0.5
@@ -1085,6 +1095,15 @@ func _solve(dt: float) -> void:
 			var u4 := clampf(_t / _dur, 0.0, 1.0)
 			var hop := sin(u4 * PI)
 			_root_target = Vector3(_dodge_side * 0.95 * hop, 0, 0.12 * hop)
+			if _dg_on():
+				_root_target = _dg_root(u4)      # the clip's own travel, scaled to the distance the duel carries the knight
+				if _rolling and u4 >= ROLL_UP:
+					# the tumble is over: the rest of the rules' time is the rise into guard, so the knight stands ready as they are freed
+					_root = _root_target
+					_xfade(0.3)
+					_au_state = ""
+					_clip_w = 0.0
+					guard()
 			lean_t = 0.15
 			twist_t = -_dodge_side * 0.35 * hop
 			crouch_t = 0.06 + 0.16 * hop
@@ -1119,7 +1138,7 @@ func _solve(dt: float) -> void:
 		hand_t = hand_t.lerp(Vector3(0.34, 0.92, -0.06 - 0.10 * sw), w)
 		blade_t = blade_t.lerp(Vector3(0.12, -0.42, -0.9).normalized(), w).normalized()
 		twist_t = lerpf(twist_t, 0.14 * sw, w)
-		lean_t = lerpf(lean_t, 0.10, w)
+		lean_t = lerpf(lean_t, 0.10 + clampf(_slope_now * 0.55, -0.08, 0.22), w)
 		crouch_t = lerpf(crouch_t, 0.03 + 0.035 * absf(cos(_walk_phase)), w)
 	if _sheath_w > 0.5 and mode == Mode.GUARD:
 		hand_t = Vector3(0.33, 0.9, -0.04)
@@ -1140,6 +1159,8 @@ func _solve(dt: float) -> void:
 	_crouch = lerpf(_crouch, crouch_t, slow * 1.4)
 	_far = lerpf(_far, _far_target, 1.0 - exp(-dt * 4.0))
 	_root = _root.lerp(_root_target + Vector3(0, 0, _far), 1.0 - exp(-dt * (16.0 if mode == Mode.DODGE else 9.0)))
+	if mode == Mode.DODGE and _dg_on():
+		_root.x = _root_target.x
 	_pose()
 	_update_trail()
 	_update_cape(dt)
@@ -1152,7 +1173,8 @@ func _solve(dt: float) -> void:
 			skin.flash(_flash)
 
 func _pose() -> void:
-	body.position = _root
+	body.position = _root + _lag + Vector3(0, _dock_lift, 0)
+	body.rotation.y = _lag_yaw
 	var pel := Vector3(0, 0.96 - _crouch * 0.6, 0)
 	if cfg.get("wraith", false):
 		pel.y += 0.22 + sin(_clock * 1.9) * 0.07
@@ -1190,11 +1212,17 @@ func _pose() -> void:
 			var ap := _arc_point(_theta - 0.55, -0.4)
 			hl = ap[0] + Vector3(-0.12 * signf(_arc_dir.x + 0.01), -0.1, 0.04)
 			bl = ap[1]
+		if _stance_on() and mode == Mode.GUARD and _au.is_empty():
+			# an offset pair: the off blade lower and nearer, its point at the opponent's belly
+			hl = Vector3(-0.27, 1.0 + _osc(1.7) * 0.012, -0.24)
+			bl = Vector3(0.24, 0.36, -0.9).normalized()
 	elif has_shield:
 		hl = Vector3(-0.05, 1.3, -0.42) if blocking else Vector3(-0.3, 1.08, -0.24)
 		if _sh_gear != "" and not blocking:
 			# a strapped shield faces where the outside of the forearm faces: the forearm is carried across the body
 			hl = Vector3(-0.08, 1.15, -0.37)
+			if _stance_on():
+				hl = Vector3(-0.17, 1.12 + _osc(1.7) * 0.01 + _osc(0.83) * 0.012, -0.4)      # at the ribs, angled across the body
 		if _brace_t > 0.0:
 			# the shield goes to where the blow lands, then is driven back toward the body by it
 			_brace_t -= get_process_delta_time() * time_scale
@@ -1225,7 +1253,7 @@ func _pose() -> void:
 	if mode == Mode.DEAD:
 		f_r.z += 0.25
 		f_l.z += 0.1
-	if _walk_amount > 0.01:
+	if _walk_amount > 0.01 and not (combat_steps and _feet_mode() == 1):
 		# each foot: planted and sliding back under the body for half the cycle, lifted and swung forward for the other half
 		var w2 := _walk_amount
 		var half := STRIDE * (0.31 if combat_steps else 0.5)
@@ -1280,7 +1308,7 @@ func _fit_props(hands: Dictionary) -> void:
 			up = up.normalized() if up.length() > 0.05 else Vector3(0, 0, -1)
 			# thrown about by a fall, a roll or a blow (clips made without a shield), the forearm is turned in its strap
 			# so that the board faces away from the chest instead of cutting through it
-			var body_w := _whole_w if (_au_state == "" or mode == Mode.DEAD) else 0.0
+			var body_w := _whole_w if (_au_state == "" or _au_state == "roll" or mode == Mode.DEAD) else 0.0
 			if body_w > 0.01:
 				var out := fore.origin.lerp(skin.point("LeftHand"), 0.6) - skin.point("Spine2")
 				out = out - x * out.dot(x)
@@ -1308,6 +1336,10 @@ func _fit_props(hands: Dictionary) -> void:
 					up = up.normalized() if up.length() > 0.2 else axis
 					strapped = Transform3D(Basis(up.cross(-out).normalized(), up, -out), mid + out * 0.07)
 			held = held.interpolate_with(strapped, _whole_w)
+		var docked := _dock(held, caps)
+		if _dock_w > 0.5:
+			strap = false      # (slung on the back for a roll: the arm is free of it)
+		held = docked
 		# the board is kept off the head and trunk: moved away from them by however far its nearest point is inside
 		var board := Transform3D(held.basis, held * _sh_c)
 		var board0 := board.origin
@@ -1325,7 +1357,9 @@ func _fit_props(hands: Dictionary) -> void:
 		var low := 1e9
 		for c: Vector3 in SHIELD_RIM:
 			low = minf(low, (board * Vector3(c.x * _sh_hw / 0.27, c.y * _sh_hh / 0.41, 0)).y)
-		if low < 0.015:
+		_dock_lift = lerpf(_dock_lift, clampf(0.015 - low + _dock_lift, 0.0, 0.06) if _dock_w > 0.5 else 0.0, 0.5)
+		# (slung on the back in a roll, the board is under the knight when the back is down: it is not forced up into the body)
+		if low < 0.015 and _dock_w <= 0.5:
 			board.origin.y += 0.015 - low
 		var shift := board.origin - board0
 		if strap and shift.length() > 0.003:
@@ -1347,6 +1381,8 @@ func _fit_props(hands: Dictionary) -> void:
 	if au_arm:
 		# an authored cut: the blade is where the clip's own hand holds it, from the first frame
 		dir = skin.clip_axis.get("Right", carried)
+		if _au_state == "walk":
+			dir = _carry_dir(dir)
 	elif _whole_w > 0.01 and carried != Vector3.ZERO and _pin_t <= 0.0 and _au_state == "":
 		# a whole-body clip (a fall, a hit, a roll) throws the arm: the weapon goes with the hand, not with the old aim
 		dir = dir.slerp(carried, _whole_w) if dir.dot(carried) > -0.99 else carried
@@ -1567,6 +1603,9 @@ func _pick_clip() -> void:
 				elif combat_steps:
 					n = "shield_idle" if has_shield else "sword_idle"
 					t = _clock; w = 0.55 * (1.0 - _walk_amount)
+					if _stance_on() and authored and SkinDriver.has_clip(str(STANCE.get(au_set(), ""))):
+						# the packs' own fighting stance under the guard; the feet are planted and stepped by `_feet_pass`
+						n = STANCE[au_set()]; w = 0.85
 	if n == "" or not SkinDriver.has_clip(n):
 		w = 0.0
 	elif n != skin.clip:
@@ -1976,6 +2015,8 @@ func _au_apply() -> void:
 	skin.arm_l = 1.0
 	skin.clip_look = false
 	skin.clip_roll = 0.0
+	if polish and not skin.foot_fix.is_valid():
+		skin.foot_fix = _feet_pass
 	if _au.is_empty():
 		_au_other()
 		return
@@ -1988,6 +2029,10 @@ func _au_apply() -> void:
 	skin.clip_roll = float(_au.roll)
 	skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
 	skin.arm_l = 0.0 if _brace_t > 0.0 else float(_au.arm_l)
+	if polish and shield != null and _sh_gear != "" and _brace_t <= 0.0:
+		# a strapped board shows its face to the camera behind the knight when the clip throws that arm back:
+		# the shield arm keeps most of its own guard through a cut
+		skin.arm_l = minf(skin.arm_l, 0.3)
 
 
 # ---------------------------------------------------------------- authored parry, block, draw and sheath
@@ -2020,7 +2065,15 @@ func _au_other() -> void:
 	var t := 0.0
 	var k := au_set()
 	if authored and use_clips and test_clip == "" and skin.ok and mode != Mode.DEAD:
-		if _draw_dir != 0 and mode == Mode.GUARD:
+		if mode == Mode.DODGE and _dg_on():
+			st = "roll" if _rolling else "dodge"
+			n = str(_dg.clip)
+			t = float(_dg.get("T", 0.0))
+		elif _walk_clip_on():
+			st = "walk"
+			n = WALK_CLIP
+			t = _walk_phase / TAU * SkinDriver.clip_length(n)
+		elif _draw_dir != 0 and mode == Mode.GUARD:
 			st = "draw"
 			n = "ss_unsheath" if _draw_dir > 0 else "ss_sheath"
 			t = _draw_t / AU_DRAW_TIME * SkinDriver.clip_length(n)
@@ -2061,6 +2114,15 @@ func _au_other() -> void:
 			skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
 		"block":
 			skin.arm_r = 0.0 if _pin_t > 0.0 else 1.0
+		"dodge":
+			skin.arm_r = 0.0            # the sword stays in its guard through a sidestep; the clip has it trailing level
+		"roll":
+			skin.clip_look = false      # a tumble is grounded by whatever part of the body is lowest, not by the feet
+		"walk":
+			skin.clip_w = _walk_amount
+			if two_handed:
+				skin.arm_r = 0.0
+				skin.arm_l = 0.0
 
 # --- draw / sheath
 var _sheath_w := 0.0          # 1: the weapon hangs in its place on the body; 0: in the hand
@@ -2331,3 +2393,325 @@ const AU_COMBOS := {
 		"twin_fang": [null, ["dw_a2", 1], ["dw_cut_l", 0], ["dw_cut_r", 0, {"linger": 0.3}]],
 		"whirlwind": [null, ["dw_x", 2], null, ["dw_x", 0, {"linger": 0.35}]]},
 }
+
+
+# ================================================================ motion polish: stance, planted feet, dodge, roll, road walk
+## `--oldanim` (or `FighterRig.polish = false`) keeps what was there before this pass, for comparison.
+static var polish: bool = not OS.get_cmdline_user_args().has("--oldanim")
+var ground := Callable()      # (world x, world z) -> world height of the ground there; unset: the flat floor the rig stands on
+const STANCE := {"ss": "ss_idle", "th": "th_idle", "dw": "dw_idle"}
+const DODGE_CLIP := {"ss": "ss_dodge", "th": "th_dodge", "dw": "dw_dodge"}
+const ROLL_CLIP := "th_roll"
+const DODGE_DIST := 1.25      # metres the duel carries the knight in a sidestep (`Duel`: `p_side_owed`)
+const ROLL_DIST := 2.55       # and in a sidestep turned into a roll
+const WALK_CLIP := "walk"
+const ROLL_UP := 0.66         # share of the roll's time the tumble itself takes; the rest is the rise into guard
+
+func _stance_on() -> bool:
+	return polish and combat_steps and skin != null and skin.ok and str(cfg.get("weapon", "")) != "claws" and not cfg.get("wraith", false)
+
+## Where the sword hand and the blade rest in a fight: sword up and angled at the opponent's face, not held upright.
+func _guard_pose(breathe: float) -> Array:
+	var drift := _osc(0.83) * 0.03
+	if two_handed:
+		# middle guard: hilt at the belt, both hands on it, the point at the opponent's throat
+		return [Vector3(0.15, 1.0 + breathe - hunch * 0.3, -0.36), Vector3(-0.17 + drift, 0.74, -0.64).normalized()]
+	if dual:
+		return [Vector3(0.26, 1.14 + breathe - hunch * 0.3, -0.42), Vector3(-0.3 + drift, 0.66, -0.69).normalized()]
+	return [Vector3(0.28, 1.1 + breathe - hunch * 0.3, -0.38), Vector3(-0.2 + drift, 0.74, -0.64).normalized()]
+
+# ---------------------------------------------------------------- the road walk: eased starts and stops, arcs, the slope
+var _lag := Vector3.ZERO      # where the body is from the rig's own origin (rig space): it follows the origin smoothly
+var _lag_on := false
+var _lag_yaw := 0.0
+var _vis := Vector3.ZERO      # the body's place in the world
+var _vis_v := Vector3.ZERO
+var _vis_ok := false
+var _speed := 0.0             # metres a second over the ground (rig units)
+var _slope_now := 0.0         # rise per metre along the way the body faces
+
+## Distance covered this frame (rig units). Out of combat the body follows whoever moves the rig as a damped mass
+## does: it gathers way over the first half second, turns through an arc, and comes to rest half a pace later.
+func _travel(dt: float) -> float:
+	var s := maxf(scale.x, 0.01)
+	var raw := global_position.distance_to(_last_world) / s
+	if dt <= 0.0 and _vis_ok:
+		return 0.0      # (time stopped: a hit-stop, a still being taken)
+	if not (polish and skin != null and skin.ok and not combat_steps and mode == Mode.GUARD and dt > 0.0 and test_clip == "") or raw > 1.0 or not _vis_ok:
+		_vis = global_position
+		_vis_v = Vector3.ZERO
+		_vis_ok = true
+		_lag = Vector3.ZERO
+		_lag_on = false
+		_lag_yaw = 0.0
+		_slope_now = 0.0
+		_speed = raw / maxf(dt, 0.001)
+		return raw
+	const W := 8.0
+	var prev := _vis
+	_vis_v += ((global_position - _vis) * W * W - _vis_v * 2.0 * W) * dt
+	_vis += _vis_v * dt
+	_vis.y = float(ground.call(_vis.x, _vis.z)) if ground.is_valid() else global_position.y
+	var d := Vector2(_vis.x - prev.x, _vis.z - prev.z).length() / s
+	_speed = d / dt
+	_lag = global_transform.affine_inverse() * _vis
+	_lag_on = Vector2(_lag.x, _lag.z).length() > 0.01 or _speed > 0.05
+	if not _lag_on:
+		_lag = Vector3(0, _lag.y, 0)
+	var hv: Vector3 = global_transform.basis.inverse() * Vector3(_vis_v.x, 0, _vis_v.z)
+	var want_yaw := clampf(atan2(-hv.x, -hv.z), -1.0, 1.0) if _speed > 0.3 and hv.z < 0.0 else 0.0
+	_lag_yaw = lerp_angle(_lag_yaw, want_yaw, 1.0 - exp(-dt * 5.0))
+	var slope := 0.0
+	if ground.is_valid():
+		var f: Vector3 = (global_transform.basis * Basis(Vector3.UP, _lag_yaw) * Vector3(0, 0, -1)).normalized() * 0.4 * s
+		slope = (float(ground.call(_vis.x + f.x, _vis.z + f.z)) - float(ground.call(_vis.x - f.x, _vis.z - f.z))) / (0.8 * s)
+	_slope_now = lerpf(_slope_now, slope, 1.0 - exp(-dt * 4.0))
+	return d
+
+## Metres of ground to one step.
+func _stride_now() -> float:
+	if _walk_clip_ok():
+		# the clip's own stride on this skeleton, shortened on a climb
+		return skin.clip_stride(WALK_CLIP) * 0.5 * STRIDE_FIT * (1.0 - 0.5 * clampf(_slope_now, 0.0, 0.5))
+	return STRIDE * (0.62 if combat_steps else 1.0)
+const STRIDE_FIT := 0.9       # share of a foot's whole sweep that is made on the ground
+
+func _walk_clip_ok() -> bool:
+	return polish and authored and use_clips and skin != null and skin.ok and not combat_steps and SkinDriver.has_clip(WALK_CLIP)
+
+## The walk clip takes the whole body (arms swinging, the sword and shield carried at rest in them).
+func _walk_clip_on() -> bool:
+	return _walk_clip_ok() and mode == Mode.GUARD and _walk_amount > 0.01 and _sheath_w <= 0.0 and _draw_dir == 0 and get("armed") != false
+
+func _walk_want(moved: float, dt: float) -> float:
+	if _walk_clip_ok() and dt > 0.0:
+		return clampf(_speed / 0.8, 0.0, 1.0) if moved > 0.0005 else 0.0      # the stride grows and dies with the pace
+	return 1.0 if (walking and moved > 0.0005) else 0.0
+
+# ---------------------------------------------------------------- dodge and roll: the clip's own travel, the duel's distance
+var _dg := {}                 # the sidestep or roll in progress: {clip, start, from, dist, s, T, want}
+
+func _dg_on() -> bool:
+	return polish and str(_dg.get("clip", "")) != "" and authored and use_clips and skin != null and skin.ok and test_clip == ""
+
+func _dg_begin(rolling: bool) -> void:
+	var n := ""
+	var k := au_set()
+	if polish and skin != null and skin.ok and k != "":
+		n = (ROLL_CLIP if rolling else str(DODGE_CLIP[k])) + ("_r" if _dodge_side * mirror > 0.0 else "_l")
+		if not SkinDriver.has_clip(n):
+			n = ""
+	var from := 0.0
+	var start := global_position
+	if rolling and mode == Mode.DODGE and not _dg.is_empty():
+		from = float(_dg.get("want", 0.0))      # what the sidestep has already covered
+		start = _dg.start
+	var dist := (ROLL_DIST if rolling else DODGE_DIST) if combat_steps else 0.0
+	var hh: float = 1.0
+	if n != "":
+		hh = float(clip_meta(n).get("hip_travel", 2.0)) * skin.point("Hips").y
+	_dg = {"clip": n, "start": start, "from": from, "dist": dist, "want": from, "T": 0.0, "s": clampf((dist - from) / maxf(hh, 0.1), 0.0, 1.0)}
+
+## Where the body is across the ground at this moment of the clip (rig space), less what the duel has already moved the rig.
+func _dg_root(u: float) -> Vector3:
+	var n := str(_dg.clip)
+	# (a sidestep leaves the line at once and takes its time coming to rest: the first of the clip is played faster)
+	var t := lerpf(0.0 if _rolling else 0.04, SkinDriver.clip_length(n), minf(u / ROLL_UP, 1.0) if _rolling else 1.0 - pow(1.0 - u, 1.7))
+	_dg.T = t
+	var want: float = lerpf(float(_dg.from), float(_dg.dist), SkinDriver.clip_travel_frac(n, t))
+	_dg.want = want
+	var seen := (global_position - (_dg.start as Vector3)).dot(global_transform.basis.x.normalized()) / maxf(scale.x, 0.01) * signf(_dodge_side)
+	if float(_dg.dist) <= 0.0:
+		return Vector3.ZERO
+	# (in a roll the body keeps half-way to where the duel has the knight: the camera follows that place, and a body
+	# left a metre behind it tumbles across the lens)
+	return Vector3((want - seen) * signf(_dodge_side) * (0.5 if _rolling else 1.0), 0, 0)
+
+# ---------------------------------------------------------------- feet
+## Called by the skin when the pose is solved. In a fight each foot is planted in the world and steps when the body
+## has moved off it; in a sidestep the clip's own footwork is scaled to the distance covered; on the road a foot that
+## is down stays where it came down, at the height of the ground under it.
+var _ft := {}                 # fight: side -> {at, yaw, step, t, dur, from, fyaw, lift}
+var _fw := {}                 # road: side -> {lock, at, off}
+var _ft_prev := Vector3.ZERO
+var _ft_drop := 0.0
+var _ft_still := 0.0
+var _since_walk := 9.0
+
+func _feet_mode() -> int:
+	if not polish or skin == null or not skin.ok or cfg.get("wraith", false) or test_clip != "" or mode == Mode.DEAD or mode == Mode.ROAR:
+		return 0
+	if combat_steps:
+		if mode == Mode.DODGE:
+			if _rolling:
+				return 2 if _au_state == "roll" and _t / _dur > 0.66 * ROLL_UP else 0      # (coming up out of it: the feet that land stay put)
+			return 2 if _au_state == "dodge" else 1
+		return 1 if _au.is_empty() else 0
+	if mode != Mode.GUARD or not _walk_clip_ok() or get("armed") == false or not (_au_state in ["walk", ""]):
+		return 0
+	if _walk_amount > 0.05:
+		return 3
+	# come to a stand: the feet are where the last strides left them and step in under the body; then they are let be
+	# (a figure turned on the spot in a menu is not held by its feet)
+	return 1 if (_since_walk < 1.6 or walking or _lag_on or ground.is_valid()) else 0
+
+func _feet_pass() -> void:
+	var m := _feet_mode()
+	var dt := get_process_delta_time() * time_scale
+	_since_walk = 0.0 if _walk_amount > 0.05 else _since_walk + dt
+	if m == 1 and _ft.is_empty() and not _fw.is_empty():
+		for side: String in _fw:      # from the walk: each foot is where it last stood
+			_ft[side] = {"at": _fw[side].at, "yaw": global_rotation.y + body.rotation.y + skin.foot_yaw(side), "step": false, "t": 0.0, "dur": 0.2, "from": _fw[side].at, "fyaw": 0.0, "lift": 0.06}
+	elif m == 3 and _fw.is_empty() and not _ft.is_empty():
+		for side: String in _ft:
+			_fw[side] = {"lock": not _ft[side].step, "at": _ft[side].at, "off": Vector3.ZERO}
+	if m != 1:
+		_ft.clear()
+		_ft_prev = body.global_transform.origin
+	if m != 3:
+		_fw.clear()
+	match m:
+		0: _ft_drop = 0.0
+		1: _feet_step(dt)
+		2: _feet_dodge()
+		3: _feet_walk(dt)
+
+func _feet_step(dt: float) -> void:
+	var xf := body.global_transform
+	var inv := xf.affine_inverse()
+	var s := maxf(scale.x, 0.01)
+	var yaw_w := global_rotation.y + body.rotation.y
+	var vel := (xf.origin - _ft_prev) / dt if dt > 0.0 else Vector3.ZERO
+	_ft_prev = xf.origin
+	if vel.length() > 30.0 * s:
+		vel = Vector3.ZERO
+		_ft.clear()
+	var speed := Vector2(vel.x, vel.z).length() / s
+	_ft_still = (_ft_still + dt) if speed < 0.05 else 0.0
+	var worst := ""
+	var worst_e := 0.0
+	var busy := false
+	var home := {}
+	for side: String in ["Left", "Right"]:
+		var h: Vector3 = skin.point(side + "Foot")
+		h.y = 0.0
+		var hw: Vector3 = xf * h
+		home[side] = hw
+		if not _ft.has(side):
+			_ft[side] = {"at": hw, "yaw": yaw_w + skin.foot_yaw(side), "step": false, "t": 0.0, "dur": 0.2, "from": hw, "fyaw": 0.0, "lift": 0.06}
+		var f: Dictionary = _ft[side]
+		if f.step:
+			busy = true
+		else:
+			var e := Vector2(hw.x - (f.at as Vector3).x, hw.z - (f.at as Vector3).z).length() / s
+			if e > worst_e:
+				worst_e = e
+				worst = side
+	if worst != "" and dt > 0.0 and worst_e > ((0.05 if combat_steps else 0.025) if _ft_still > 0.3 else 0.17) and (not busy or worst_e > 0.42):
+		var f2: Dictionary = _ft[worst]
+		f2.step = true
+		f2.t = 0.0
+		f2.dur = clampf(0.24 - speed * 0.05, 0.12, 0.24)
+		f2.from = f2.at
+		f2.fyaw = f2.yaw
+		f2.lift = clampf(0.04 + worst_e * 0.2, 0.05, 0.12)
+	var need := 0.0
+	var put := {}
+	for side: String in ["Left", "Right"]:
+		var f: Dictionary = _ft[side]
+		var lift := 0.0
+		if f.step:
+			f.t = float(f.t) + dt
+			var u := clampf(float(f.t) / float(f.dur), 0.0, 1.0)
+			var to: Vector3 = (home[side] as Vector3) + Vector3(vel.x, 0, vel.z) * 0.09      # it lands a little ahead of the body's travel
+			f.at = (f.from as Vector3).lerp(to, smoothstep(0.18, 0.82, u))      # it travels while it is off the floor
+			f.yaw = lerp_angle(float(f.fyaw), yaw_w + skin.foot_yaw(side), u)
+			lift = pow(sin(PI * u), 0.6) * float(f.lift)
+			if u >= 1.0:
+				f.step = false
+		var at_b: Vector3 = inv * (f.at as Vector3)
+		at_b.y = (inv * Vector3((f.at as Vector3).x, float(ground.call((f.at as Vector3).x, (f.at as Vector3).z)), (f.at as Vector3).z)).y if ground.is_valid() else 0.0
+		need = maxf(need, -at_b.y)
+		put[side] = [at_b, lift, clampf(wrapf(float(f.yaw) - (yaw_w + skin.foot_yaw(side)), -PI, PI), -0.7, 0.7)]
+		need = maxf(need, skin.point(side + "UpLeg").distance_to(at_b + Vector3(0, skin.ankle_height(side) + lift, 0)) - skin.leg_len(side) * 0.97)
+	_ft_drop = lerpf(_ft_drop, clampf(need, 0.0, 0.16), 0.5)
+	if _ft_drop > 0.002:
+		skin.shift_hips(Vector3(0, -_ft_drop, 0))
+	for side: String in ["Left", "Right"]:
+		skin.step_foot(side, put[side][0], put[side][1], put[side][2])
+
+## A planted foot in the clip is planted in the world: what each foot does along the line of travel is scaled as the
+## travel itself is (the clip covers about two metres, the duel's sidestep 1.25).
+func _feet_dodge() -> void:
+	var along := Vector3(signf(_dodge_side), 0, 0)
+	for side: String in ["Left", "Right"]:
+		var l: Vector3 = skin.point(side + "Foot")
+		if not _dg.has(side):
+			_dg[side] = l
+		skin.move_foot(side, l - along * (l - (_dg[side] as Vector3)).dot(along) * (1.0 - float(_dg.get("s", 1.0))))
+
+func _feet_walk(dt: float) -> void:
+	var xf := body.global_transform
+	var inv := xf.affine_inverse()
+	var s := maxf(scale.x, 0.01)
+	var put := {}
+	var floor_lo := 1e9
+	var pitch := atan(_slope_now)
+	for side: String in ["Left", "Right"]:
+		var a: Vector3 = skin.point(side + "Foot")
+		var up: float = a.y - skin.ankle_height(side)      # how far the pose has this ankle above where it stands
+		var w: Vector3 = xf * Vector3(a.x, 0, a.z)
+		if not _fw.has(side):
+			_fw[side] = {"lock": false, "at": w, "off": Vector3.ZERO}
+		var f: Dictionary = _fw[side]
+		# (a figure turned on the spot, as in a menu, is not held by its feet: they lock only while it travels or stands on terrain)
+		# (while the stride is only beginning or dying away the pose is part stance, part walk: both feet count as down)
+		var down := up < 0.035 + 0.1 * (1.0 - smoothstep(0.3, 0.8, _walk_amount))
+		if down and not f.lock:
+			f.lock = true
+			f.at = w + (f.off as Vector3)
+			f.off = Vector3.ZERO
+		elif f.lock and (not down or Vector2(w.x - (f.at as Vector3).x, w.z - (f.at as Vector3).z).length() > 0.45 * s):
+			f.lock = false
+			f.off = (f.at as Vector3) - w
+		if not f.lock:
+			f.off = (f.off as Vector3) * exp(-dt * 12.0)
+			f.at = w + (f.off as Vector3)
+		var at: Vector3 = f.at
+		var gy: float = float(ground.call(at.x, at.z)) if ground.is_valid() else xf.origin.y
+		var b: Vector3 = inv * Vector3(at.x, gy, at.z)
+		floor_lo = minf(floor_lo, b.y)
+		put[side] = [Vector3(b.x, b.y + a.y, b.z), pitch * clampf(1.0 - up / 0.08, 0.0, 1.0)]
+	# the hips come down to the lower foot (the higher knee bends more), never up past where the pose has them
+	var drop := clampf(floor_lo, -0.3, 0.0)
+	for side: String in ["Left", "Right"]:
+		drop = minf(drop, -(skin.point(side + "UpLeg").distance_to(put[side][0]) - skin.leg_len(side) * 0.985))
+	_ft_drop = lerpf(_ft_drop, clampf(drop, -0.35, 0.0), 1.0 - exp(-dt * 12.0)) if dt > 0.0 else _ft_drop
+	if absf(_ft_drop) > 0.002:
+		skin.shift_hips(Vector3(0, _ft_drop, 0))
+	for side: String in ["Left", "Right"]:
+		skin.move_foot(side, put[side][0], put[side][1])
+
+# ---------------------------------------------------------------- carried at rest; the shield slung for a roll
+var rest_carry := false       # standing out of combat: sword low at the side instead of the upright guard (story scenes)
+var _dock_w := 0.0            # 1: the shield is on the back (a roll), 0: on the arm
+var _dock_lift := 0.0         # metres the body is raised so that it rolls over the slung board, not through it
+
+## The blade of a sword carried on the walk: low, point forward and down, swinging a little with the arm that holds it.
+func _carry_dir(clip_dir: Vector3) -> Vector3:
+	var d := Vector3(0.1, -0.4, -0.91).normalized()
+	return d.slerp(clip_dir, 0.12).normalized() if d.dot(clip_dir) > -0.9 else d
+
+## For a roll a strapped shield is slung onto the back (between the shoulders, face outward) so that nothing of it
+## passes through the tumbling body; it comes back onto the arm as the knight rises.
+func _dock(held: Transform3D, caps: Array) -> Transform3D:
+	_dock_w = lerpf(_dock_w, 1.0 if (polish and _au_state == "roll") else 0.0, 0.55)
+	if _dock_w < 0.01:
+		_dock_w = 0.0
+		return held
+	var t: Basis = skin.turn("Spine1")
+	var fwd := (t * Vector3(0, 0, -1)).normalized()
+	var up := (t * Vector3.UP).normalized()
+	var b := Basis(up.cross(fwd).normalized(), up, fwd)
+	var c: Vector3 = skin.point("Spine1") - fwd * (float(caps[1][2]) + 0.15) + up * 0.02
+	return held.interpolate_with(Transform3D(b, c - b * _sh_c), smoothstep(0.0, 1.0, _dock_w))

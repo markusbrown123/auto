@@ -279,7 +279,7 @@ Limits: combos sharing their first cuts cannot differ there; several finishers r
 - Parry: body and shield arm from `ss_parry` (shield swept aside) or `th_parry`; the sword arm stays on the procedural parry arc and is then pinned by `clash()`. Dual: procedural, the packs have none.
 - Block: `ss_block_idle` / `th_guard` while the guard is up; on `brace()` the body plays `ss_block_hit` / `th_block_hit_f` and the shield arm is pinned to the blow.
 - `draw()` / `sheath()`: body from `ss_unsheath` / `ss_sheath` (all classes: only that pack has them). The weapon hangs at the left hip (long blades across the back, a second blade at the right hip); the hand is brought onto the grip by IK before the weapon moves, and carries it back before letting go.
-- Hit reactions, staggers, dodges, rolls and deaths are unchanged (the free-library clips of the QA pass); the packs' own were not tried.
+- Hit reactions, staggers and deaths are unchanged (the free-library clips of the QA pass); sidesteps and rolls now use the packs' (see "Motion polish").
 
 ### Equipment on the rig (2026-11-26, gear pass)
 
@@ -292,6 +292,47 @@ Limits: combos sharing their first cuts cannot differ there; several finishers r
 - `--oldlook` / `FighterRig.old_look`: whole-suit swap and first-generation weapon models, for comparison.
 
 Audit on the new body (`pose_review`, 30 fps, sampling as dense as on one suit; both bodies; Wayfarer, Silver Vow, Ashbrand, Veilcutter with the heater, the round and tower shields, Oathbreaker, Twin Relics): lowest point 0.00-0.02 in every state (no foot under the floor), `float` 0.02-0.05, shield-hand vertices through the board 0, body vertices in the board 0, off hand on the greatsword's grip 0.00, `dir_err` within 5 deg (sword and shield), 6 (greatsword), 10 (pair). Open: see the register.
+
+### Motion polish: stance, planted feet, sidestep, roll, road walk (2026-11-27)
+
+No clip was added to the library in this pass (still 169 clips, 2.75 MB): everything used was already baked. Code: the
+"motion polish" sections at the end of `src/chars/fighter_rig.gd`, the "feet placed by the rig" and "a clip's own travel"
+sections of `src/chars/skin_driver.gd`. `--oldanim` (or `FighterRig.polish = false`) plays what was there before.
+
+- **Guard.** Body and legs from the packs' own stances (`ss_idle`, `th_idle`, `dw_idle`, body-only at 0.85 so the arms stay
+  on IK and the gear's grip points stay exact). Sword hand at chest height with the blade up and angled at the opponent
+  (`_guard_pose`), a strapped shield at the ribs angled across the body, the greatsword in a middle guard with both hands
+  on the grip, the pair offset (off blade lower, point at the belly). Slow breathing and a drift of the point.
+- **Feet in a fight (`_feet_step`).** Each foot is planted in the world. When the body has moved 17 cm off a foot (5 cm
+  once it has stood still for 0.3 s) that foot steps to where the stance wants it, one foot at a time, travelling while it
+  is off the floor. This replaces the sine footwork cycle for circling, shoves, steps in and back; the hips drop if a leg
+  cannot reach. Off during an authored cut (the clip's own step shows) and during a roll.
+- **Sidestep.** `ss_dodge_l/r`, `th_dodge_l/r`, `dw_dodge_l/r` as whole-body clips (sword arm kept on its guard; the clip
+  trails it level). The rules own the time (the rig's 0.5 s) and the duel owns the distance (1.25 m): the clip is played
+  over that time, front-loaded (`1 - (1-u)^1.7`), and the body is put where the clip's own travel curve says, scaled to
+  1.25 m (`_dg_root`: rig offset = wanted travel minus what the duel has already moved the rig). What each foot does
+  along the line of travel is scaled by the same factor (`_feet_dodge`), so a foot planted in the clip is planted in the
+  world. The packs have no forward dodge; `ss_dodge_b` is baked but the game has no back-step input, so it is unused.
+- **Roll.** `th_roll_l/r` for every weapon set (the only authored combat roll in the packs: sword and shield has flips,
+  not rolls), over the rig's 0.84 s, travel scaled from about 5 m to what is left of the duel's 2.55 m. Grounded by the
+  lowest body point. A strapped shield is slung onto the back for the roll (`_dock`: on the mid-spine, face outward, the
+  body raised up to 6 cm to roll over it) and comes back onto the arm as the knight rises; the feet that land in the
+  last third are scaled like a sidestep's.
+- **Road walk.** Free-library `walk` as a whole-body clip (arms swing; sword carried low with the point forward and down,
+  the shield hanging on the arm; greatsword: arms stay on IK). Stride from the clip measured on the skeleton in use
+  (`SkinDriver.clip_stride`, 1.28 m a cycle on the knight), shortened on a climb. Out of combat the body follows whoever
+  moves the rig as a damped mass (`_travel`): it gathers way and comes to rest over about half a second and turns through
+  an arc, which is this pass's start and stop (the packs' `Walk_Fw_Start/End` were not baked). A foot that is down stays
+  where it came down, at the height `FighterRig.ground` gives (`HighRoad` sets `Highland.height`); the hips come down to
+  the lower foot, the body leans into the slope. `CineActor` stands with the sword low (`rest_carry`).
+- **Cuts.** A strapped shield arm takes only 30% of an authored cut's arm pose (it was thrown back with the board's face
+  to the camera).
+
+Audit additions (`pose_review`): `slip` (cm an ankle travels over the ground while within 3 cm of its standing height,
+worst single contact), `moved` / `off10` / `off40` (seconds until the hips have moved 1, 10, 40 cm), `sh_arm` (shield-arm
+vertices through the face of the board); states `circle`, `shove`, `road`; `dodge_*` and `roll_*` are now carried across
+the floor as the duel carries them; `--strip=<fps> --view=duel|side|front|back|q` writes one view as a strip of frames;
+`--slope=<deg>` walks the `road` state up a slope with a 16 cm rock step; `--strides` prints clip strides and travel curves.
 
 ### Rig API added
 

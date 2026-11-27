@@ -44,7 +44,27 @@ func _ready() -> void:
 	_out = str(_args.get("out", "user://pose_review"))
 	DirAccess.make_dir_recursive_absolute(_out)
 	_zoom = float(_args.get("zoom", "1.0"))
+	_slope = float(_args.get("slope", "0"))
 	_room()
+	if _slope != 0.0:
+		# the test ground as a mesh: strips across the climb, each at the height `_gy` gives
+		var sf := SurfaceTool.new()
+		sf.begin(Mesh.PRIMITIVE_TRIANGLES)
+		var z := 2.0
+		while z > -8.0:
+			var z2 := z - 0.04
+			for v: Vector3 in [Vector3(-3, _gy(0, z), z), Vector3(3, _gy(0, z), z), Vector3(3, _gy(0, z2), z2), Vector3(-3, _gy(0, z), z), Vector3(3, _gy(0, z2), z2), Vector3(-3, _gy(0, z2), z2)]:
+				sf.set_color(Color(0.3, 0.33, 0.3) if int(floor(-z * 2.0)) % 2 == 0 else Color(0.24, 0.26, 0.25))
+				sf.add_vertex(v)
+			z = z2
+		sf.generate_normals()
+		var gm := MeshInstance3D.new()
+		gm.mesh = sf.commit()
+		var gmat := StandardMaterial3D.new()
+		gmat.vertex_color_use_as_albedo = true
+		gmat.cull_mode = BaseMaterial3D.CULL_DISABLED
+		gm.material_override = gmat
+		add_child(gm)
 	if _args.has("relic"):
 		_relic_sheet()
 		return
@@ -237,7 +257,8 @@ func _relic_sheet() -> void:
 
 ## The Witness drone against the knight's own motion (works with --headless): every cut, a block, a sidestep and a
 ## roll are played, and each frame the drone's centre is measured against the blade (hand to tip), the shield and
-## the body's axis. Prints the least distance of each per state; `!!` under 0.16 m (the halo's radius plus a margin).
+## the body's axis. Prints the least distance of each per state; `!!` under its own radius plus 6 cm. It roams unless
+## `--pin` holds it at the shoulder.
 func _drone_check() -> void:
 	_look["witness"] = true
 	_fresh()
@@ -255,6 +276,8 @@ func _drone_check() -> void:
 	acts.append(["roll_r", func(): r.roll(1.0), 1.1])
 	acts.append(["roll_l", func(): r.roll(-1.0), 1.1])
 	acts.append(["hurt", func(): r.hurt(), 0.9])
+	if _args.has("pin"):
+		d.roam(false)      # held at the shoulder, as a directed shot holds it
 	var worst := 9.0
 	for a: Array in acts:
 		r.blocking = false
@@ -275,7 +298,7 @@ func _drone_check() -> void:
 			lo[2] = minf(lo[2], Vector2(p.x - r.body.global_position.x, p.z - r.body.global_position.z).length() if p.y < 1.9 else 9.0)
 			far = maxf(far, p.distance_to(r.global_transform * WitnessDrone.HOME))
 		worst = minf(worst, minf(lo[0], minf(lo[1], lo[2])))
-		print("  %-9s blade %.2f  shield %.2f  body %.2f  strayed %.2f%s" % [a[0], lo[0], lo[1], lo[2], far, "  !!" if minf(lo[0], minf(lo[1], lo[2])) < 0.16 else ""])
+		print("  %-9s blade %.2f  shield %.2f  body %.2f  strayed %.2f%s" % [a[0], lo[0], lo[1], lo[2], far, "  !!" if minf(lo[0], minf(lo[1], lo[2])) < d.radius + 0.06 else ""])
 	print("dronecheck: least clearance %.2f m" % worst)
 	get_tree().quit()
 
@@ -295,6 +318,7 @@ func _drone_sheet() -> void:
 		add_child(d)
 		d.build(v)
 		d.attach(rig)
+		d.roam(false)
 		if _args.has("attend"):
 			d.look_at_point(rig.global_transform * Vector3(0.66, 1.84, -3.0))
 		if _args.has("speak"):
@@ -457,6 +481,8 @@ func _fresh() -> void:
 	if not _is_dragon:
 		rig.walking = true
 		rig.combat_steps = true
+	if _slope != 0.0 and not _is_dragon:
+		rig.set("ground", Callable(self, "_gy"))
 	_collect()
 
 # ---------------------------------------------------------------- states
@@ -502,10 +528,16 @@ func _poses() -> Array:
 		p.append(["parry", func(): rig.parry(DIRS["L"]), 0.6, [0.08, 0.2]])
 		p.append(["clash", func(): rig.clash(rig.global_transform * Vector3(0.1, 1.5, -0.8), 0.3), 0.5, [0.1]])
 		p.append(["brace", func(): rig.blocking = true; _later(0.4, func(): rig.brace(rig.global_transform * Vector3(-0.1, 1.3, -0.7), 0.3)), 0.9, [0.45, 0.7]])
-		p.append(["dodge_r", func(): rig.dodge(1.0), 0.7, [0.15, 0.3, 0.45]])
-		p.append(["dodge_l", func(): rig.dodge(-1.0), 0.7, [0.15, 0.3, 0.45]])
-		p.append(["roll_r", func(): rig.roll(1.0), 1.0, [0.2, 0.42, 0.64]])
-		p.append(["roll_l", func(): rig.roll(-1.0), 1.0, [0.2, 0.42, 0.64]])
+		# (the duel carries the knight 1.25 m across the ground for a sidestep and 1.3 m more for a roll, eased as
+		# `Duel._footwork` does it: `_owe` is that debt; the rig only shapes the body)
+		p.append(["dodge_r", func(): rig.dodge(1.0); _owe = 1.25, 0.9, [0.15, 0.3, 0.45]])
+		p.append(["dodge_l", func(): rig.dodge(-1.0); _owe = -1.25, 0.9, [0.15, 0.3, 0.45]])
+		p.append(["roll_r", func(): rig.dodge(1.0); _owe = 1.25; _later(0.08, func(): rig.roll(1.0); _owe += 1.3), 1.3, [0.2, 0.42, 0.64]])
+		p.append(["roll_l", func(): rig.dodge(-1.0); _owe = -1.25; _later(0.08, func(): rig.roll(-1.0); _owe -= 1.3), 1.3, [0.2, 0.42, 0.64]])
+		p.append(["circle", func(): _vel = Vector3(0.14, 0, 0), 4.0, [1.0, 2.0, 3.0]])
+		p.append(["shove", func(): _later(0.3, func(): rig.hurt(); _push = 0.6), 1.6, [0.4, 0.8, 1.2]])
+		# (the first second is the change from the fighting stance to standing at ease: slip is counted from the walk's start)
+		p.append(["road", func(): rig.combat_steps = false; _slip_from = 1.0; _later(1.0, func(): _vel = Vector3(0, 0, -1.38)); _later(4.0, func(): _vel = Vector3.ZERO), 5.6, [1.9, 2.15, 2.4, 2.65]])
 	if only_has("sheath") or only_has("draw") or only_has("preview_attack") or only_has("preview_block"):
 		p.append(["sheath", func(): rig.sheath(), 1.3, [0.15, 0.36, 0.5, 0.7, 1.1]])
 		p.append(["draw", func(): rig.sheath(true); _later(0.3, func(): rig.draw()), 1.5, [0.25, 0.5, 0.66, 0.8, 1.0, 1.3]])
@@ -534,6 +566,19 @@ func _run() -> void:
 	var only: PackedStringArray = str(_args.get("poses", "")).split(",", false)
 	var shots := not _args.has("noshots")
 	print("== pose review: %s%s" % [_tag, " (foe)" if _as_foe else ""])
+	if _args.has("strides"):
+		# --strides: what the walk clips cover per cycle on this skeleton, and where the dodge and roll clips are along their travel
+		_fresh()
+		for i in 4:
+			await get_tree().process_frame
+		for c: String in ["walk", "ss_walk_f", "th_walk_f", "dw_walk_f"]:
+			var st: float = rig.skin.clip_stride(c)
+			print("  %-10s %.2f m a cycle, %.2f s: %.2f m/s" % [c, st * 0.9, SkinDriver.clip_length(c), st * 0.9 / SkinDriver.clip_length(c)])
+		for c: String in ["ss_dodge_l", "ss_dodge_r", "th_dodge_l", "dw_dodge_l", "th_roll_l", "th_roll_r"]:
+			var o := ""
+			for i in 11:
+				o += "%.2f " % SkinDriver.clip_travel_frac(c, SkinDriver.clip_length(c) * i / 10.0)
+			print("  %-10s travel by tenths of the clip: %s" % [c, o])
 	for pose: Array in _poses():
 		if not only.is_empty() and not only.has(str(pose[0])):
 			continue
@@ -544,6 +589,12 @@ func _run() -> void:
 		_timers.clear()
 		_cur = pose[4] if pose.size() > 4 else {}
 		_track.clear()
+		_slip.clear()
+		_owe = 0.0
+		_push = 0.0
+		_slip_from = 0.0
+		var strip := float(_args.get("strip", "0"))
+		var strip_n := 0
 		_track.append([0.0, _tip_local(), 0.0])
 		(pose[1] as Callable).call()
 		var t := 0.0
@@ -553,6 +604,7 @@ func _run() -> void:
 			for ts: String in str(_args.t).split(",", false):
 				todo.append(float(ts))
 		var tiles: Array = []
+		var strips: Array = []
 		var stat := {}
 		while t < float(pose[2]):
 			await get_tree().process_frame      # the rig solved the previous frame; measure that, then move on
@@ -569,14 +621,42 @@ func _run() -> void:
 				rig.time_scale = 1.0
 				await get_tree().process_frame
 			var dt := 1.0 / float(_args.get("fps", "30"))
+			if strip > 0.0 and t + 0.001 >= strip_n / strip and t >= float(_args.get("from", "0")):
+				# a strip: one view, a tile every 1/strip seconds of game time, so motion can be read frame to frame
+				strip_n = int(floor(t * strip + 0.001)) + 1
+				rig.time_scale = 0.0
+				_aim_cam(_strip_dir())
+				await RenderingServer.frame_post_draw
+				await RenderingServer.frame_post_draw
+				var simg := get_viewport().get_texture().get_image()
+				simg.convert(Image.FORMAT_RGB8)
+				strips.append(simg)
+				rig.time_scale = 1.0
 			t += dt
 			rig.position += _vel * dt * rig.scale.x
+			var pay := _owe * (1.0 - exp(-dt * 14.0))
+			_owe -= pay
+			var pay2 := _push * (1.0 - exp(-dt * 6.0))
+			_push -= pay2
+			rig.position += Vector3(pay, 0, pay2) * rig.scale.x
+			if _slope != 0.0:
+				rig.position.y = _gy(rig.position.x, rig.position.z)
 			for tm: Array in _timers.duplicate():
 				if t >= float(tm[0]):
 					_timers.erase(tm)
 					(tm[1] as Callable).call()
 		_motion(stat)
 		_report(str(pose[0]), stat)
+		if not strips.is_empty():
+			var cols := int(_args.get("cols", "8"))
+			var tw := int(_args.get("tilew", "300"))
+			var th: int = int(float(tw) * strips[0].get_height() / strips[0].get_width())
+			var ss := Image.create(tw * cols, th * int(ceil(strips.size() / float(cols))), false, Image.FORMAT_RGB8)
+			for i in strips.size():
+				var im2: Image = strips[i]
+				im2.resize(tw, th, Image.INTERPOLATE_BILINEAR)
+				ss.blit_rect(im2, Rect2i(0, 0, tw, th), Vector2i((i % cols) * tw, (i / cols) * th))
+			ss.save_jpg("%s/%s__%s__strip_%s.jpg" % [_out, _tag, pose[0], str(_args.get("view", "duel"))], 0.88)
 		if shots and not tiles.is_empty():
 			var w: int = tiles[0].get_width()
 			var h: int = tiles[0].get_height()
@@ -588,6 +668,22 @@ func _run() -> void:
 			sheet.save_png("%s/%s__%s.png" % [_out, _tag, pose[0]])
 	get_tree().quit()
 
+## Where a strip is seen from: "duel" is behind the fighter, a little to the right and above, as the duel camera is.
+func _strip_dir() -> Vector3:
+	match str(_args.get("view", "duel")):
+		"side": return Vector3(1, 0, 0)
+		"left": return Vector3(-1, 0, 0)
+		"front": return Vector3(0, 0, -1)
+		"back": return Vector3(0, 0, 1)
+		"q": return Vector3(0.8, 0.25, -1).normalized()
+	return Vector3(0.38, 0.3, 1).normalized()
+
+## The ground under a point (the flat floor, or the --slope test ground: a climb toward -Z with a 16 cm rock step).
+func _gy(_x: float, z: float) -> float:
+	if _slope == 0.0:
+		return 0.0
+	return -z * tan(deg_to_rad(_slope)) + 0.16 * smoothstep(-1.5, -1.62, z) * (1.0 - smoothstep(-2.3, -2.42, z))
+
 func _aim_cam(dir: Vector3) -> void:
 	var s: float = rig.scale.x
 	var centre: Vector3 = Vector3(_mid.x, 0, _mid.z) + Vector3(0, (1.6 if _is_dragon else 0.95) * s, 0)
@@ -595,9 +691,12 @@ func _aim_cam(dir: Vector3) -> void:
 		var a: PackedStringArray = str(_args.aim).split(",")
 		centre = Vector3(_mid.x, 0, _mid.z) + Vector3(float(a[0]), float(a[1]), float(a[2])) * s
 	cam.size = (9.5 if _is_dragon else 2.75) * s / _zoom
+	if _slope != 0.0:
+		centre = Vector3(rig.position.x, rig.position.y + 0.95 * s, rig.position.z)
 	cam.position = centre + dir * 30.0
 	cam.look_at(centre)
 	_floor.position = Vector3(centre.x, -3.0, centre.z)
+	_floor.visible = _slope == 0.0
 
 # ---------------------------------------------------------------- measurement
 func _collect() -> void:
@@ -679,6 +778,11 @@ func _worse(stat: Dictionary, key: String, v: float, t: float, note: String = ""
 		stat[key] = [v, t, note]
 
 var _cur := {}                # the state being played, if it is a cut: {dir, hit, from}
+var _owe := 0.0               # metres the "duel" still has to carry the rig sideways (a sidestep, a roll)
+var _push := 0.0              # metres it still has to shove the rig back (a blow taken)
+var _slip_from := 0.0         # seconds into the state before which foot slip is not counted
+var _slope := 0.0             # --slope=<degrees>: the ground rises toward -Z, with a rock step across it at z = -1.6
+var _slip := {}               # per foot: [down, last ankle position, metres slid in this contact]; "hips0": where the hips began
 var _track: Array = []        # [t, blade tip in the rig's own space, chest yaw] per frame
 
 func _tip_local() -> Vector3:
@@ -827,6 +931,40 @@ func _audit(stat: Dictionary, t: float) -> void:
 			var ha: Vector3 = bp.call(side + "Hand")
 			_worse(stat, "elbow_min", rad_to_deg((sh - el).angle_to(ha - el)), t, side)
 			_worse(stat, "ankle_low", (ank.y - g.origin.y) / s - d.rest[side + "Foot"].origin.y * d.root.scale.y * (d.root.global_transform.affine_inverse() * d.skel.global_transform).basis.get_scale().y / 1.0, t, side)
+		# foot slip: how far an ankle travels over the ground while its foot is down (within 3 cm of its standing height), per step
+		for side: String in ["Left", "Right"]:
+			var ank2: Vector3 = bp.call(side + "Foot")
+			var rest_h: float = d.ankle_height(side) * s      # (the ankle's height with the sole flat on the floor)
+			var down: bool = ank2.y - (g.origin.y if _slope == 0.0 else _gy(ank2.x, ank2.z)) < rest_h + 0.03 * s
+			var e2: Array = _slip.get(side, [false, Vector3.ZERO, 0.0])
+			if down and e2[0] and t >= _slip_from:
+				e2[2] = float(e2[2]) + Vector2(ank2.x - (e2[1] as Vector3).x, ank2.z - (e2[1] as Vector3).z).length()
+				_worse(stat, "slip", float(e2[2]) / s * 100.0, t, side, false)
+			elif not down:
+				e2[2] = 0.0
+			e2[0] = down
+			e2[1] = ank2
+			_slip[side] = e2
+		# the first frame on which the hips have moved 1 cm from where the state began (input to visible motion)
+		var hp2: Vector3 = bp.call("Hips")
+		if not _slip.has("hips0"):
+			_slip["hips0"] = hp2
+		else:
+			# (`moved`: 1 cm, the first visible motion; `off10`, `off40`: 10 and 40 cm, leaving the line of a blow)
+			for mk: Array in [["moved", 0.01], ["off10", 0.1], ["off40", 0.4]]:
+				if not stat.has(mk[0]) and hp2.distance_to(_slip["hips0"]) > float(mk[1]) * s:
+					stat[mk[0]] = [t, t, ""]
+		if fr.shield:
+			# the shield arm through the board: upper-arm and forearm vertices on the FACE side of it
+			var st3 := Transform3D(fr.shield.global_transform.basis, fr.shield.global_transform * fr._sh_c)
+			var inv3 := st3.affine_inverse()
+			var arm_n := 0
+			for i in pts.size():
+				if names[i] == "LeftForeArm" or names[i] == "LeftArm" or names[i] == "LeftShoulder":
+					var la := inv3 * pts[i]
+					if la.z < -0.012 and la.x * la.x / (fr._sh_hw * fr._sh_hw * 0.82) + la.y * la.y / (fr._sh_hh * fr._sh_hh * 0.78) < 1.0:
+						arm_n += 1
+			_worse(stat, "sh_arm", float(arm_n), t, "", false)
 		if fr.two_handed:
 			var lh: Vector3 = fr.weapon_l.global_position
 			var wt := fr.weapon_r.global_transform
@@ -835,7 +973,7 @@ func _audit(stat: Dictionary, t: float) -> void:
 func _report(pose: String, stat: Dictionary) -> void:
 	var out := "%-16s" % pose
 	var flags := ""
-	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "fingers", "knee_min", "knee_back", "elbow_min", "ankle_low", "offhand", "delay", "dir_err", "yaw", "tipz"]:
+	for k: String in ["low", "float", "tip", "rim", "blade", "blade_l", "shield", "bshield", "fingers", "knee_min", "knee_back", "elbow_min", "ankle_low", "slip", "moved", "off10", "off40", "sh_arm", "offhand", "delay", "dir_err", "yaw", "tipz"]:
 		if not stat.has(k):
 			continue
 		var e: Array = stat[k]
@@ -855,6 +993,9 @@ func _report(pose: String, stat: Dictionary) -> void:
 			"elbow_min": bad = v < 25.0
 			"ankle_low": bad = v < -0.03
 			"offhand": bad = v > 0.06
+			"slip": bad = v > 2.0
+			"sh_arm": bad = v >= 3.0
+			"moved": bad = v > 0.07
 			"delay": bad = v > 0.085
 			"dir_err": bad = absf(v) > 25.0
 			"yaw": bad = v > 75.0

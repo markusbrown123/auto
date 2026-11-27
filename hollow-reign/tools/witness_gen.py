@@ -291,7 +291,7 @@ def lantern_crown(B, q):
     for row in (0, 1):
         for f in range(8):
             slab(B, lan_facet(row, f), "panel", q=q)
-    slab(B, lan_ring(0)[::-1], "panel", q=q, gap=0.0030, thick=0.0040)
+    slab(B, lan_ring(0)[::-1], "accent", q=q, gap=0.0034, thick=0.0034)      # the crown's flat is its gold cap
 
 
 def lantern_keel(B, q):

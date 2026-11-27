@@ -115,6 +115,7 @@ func _ready() -> void:
 		row.add_child(_card(opts[i], i))
 	_scatter_pouches(frame, int(Game.run_stage().get("pouches", 1)))
 	_place_secrets(frame)
+	WitnessDrone.set_points(self, _witness_points())      # what the Witness may drift over to and look at
 	for note: Dictionary in Secrets.take_notes():
 		head.add_child(UI.label("Secret found  ·  " + str(note.name), 15, UI.GOLD))
 		_banner(note)
@@ -849,3 +850,12 @@ func dev_tap(id: String, after: float) -> void:
 			return
 	if Secrets.by_id.has(id):
 		_discover(Secrets.by_id[id], _at(angle, Vector3(-0.3, 0.6, -5.5)), false)
+
+## What is worth the Witness's curiosity at this stop: each way onward, and anything hidden that can be touched.
+func _witness_points() -> Array:
+	var pts: Array = markers.duplicate()
+	for e: Dictionary in spots:
+		var n = e.get("node")
+		if n is Node3D and is_instance_valid(n):
+			pts.append((n as Node3D).global_position if (n as Node3D).is_inside_tree() else (n as Node3D).position)
+	return pts

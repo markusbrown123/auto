@@ -1150,7 +1150,7 @@ func _process(delta: float) -> void:
 			get_tree().quit()
 
 ## Dev (`--meshes` with --shots): what the frame is made of. The heaviest meshes by triangle count (and whether they
-## cast shadows, which draws them again), and the textures in video memory by size and format.
+## cast shadows, which draws them again), and how video memory divides between textures and buffers.
 func _dump_cost() -> void:
 	var rows: Array = []
 	var total := 0
@@ -1168,13 +1168,5 @@ func _dump_cost() -> void:
 	print("meshes: %d visible, %d triangles at full detail" % [rows.size(), total])
 	for r: Array in rows.slice(0, 18):
 		print("  %7d  %s" % r)
-	var tex: Array = RenderingServer.texture_debug_usage()
-	tex.sort_custom(func(a, b): return int(a.bytes) > int(b.bytes))
-	var sum := 0
-	var by_fmt := {}
-	for t: Dictionary in tex:
-		sum += int(t.bytes)
-		by_fmt[int(t.format)] = int(by_fmt.get(int(t.format), 0)) + int(t.bytes)
-	print("textures: %d, %.1f MB; by format (Image.Format -> MB): %s" % [tex.size(), sum / 1048576.0, str(by_fmt.keys().map(func(k): return "%d: %.1f" % [k, by_fmt[k] / 1048576.0]))])
-	for t: Dictionary in tex.slice(0, 14):
-		print("  %6.1f MB  %dx%d fmt %d  %s" % [int(t.bytes) / 1048576.0, int(t.width), int(t.height), int(t.format), str(t.path).get_file()])
+	print("texture memory %.1f MB, buffer memory %.1f MB, video memory %.1f MB" % [RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TEXTURE_MEM_USED) / 1048576.0,
+		RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_BUFFER_MEM_USED) / 1048576.0, RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_VIDEO_MEM_USED) / 1048576.0])

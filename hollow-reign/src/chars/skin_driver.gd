@@ -237,6 +237,8 @@ func drive(j: Dictionary) -> Dictionary:
 		if pin_l:
 			_limb("LeftArm", "LeftForeArm", "LeftHand", tl, q * pole_l, 0.985, ELBOW_MIN)
 		_ground(back, q, whole and not clip_look, true, true, whole and clip_look)
+	if foot_fix.is_valid():
+		foot_fix.call()      # the rig places the feet: planted in the world, on the ground under them
 	hr = skel.get_bone_global_pose(bone["RightHand"]).origin
 	hl = skel.get_bone_global_pose(bone["LeftHand"]).origin
 	return {"r": back * _palm("Right", hr), "l": back * _palm("Left", hl)}
@@ -859,3 +861,144 @@ func _palm(side: String, wrist: Vector3) -> Vector3:
 	if not bone.has(mid):
 		return wrist
 	return wrist.lerp(skel.get_bone_global_pose(bone[mid]).origin, 0.75)
+
+# ---------------------------------------------------------------- feet placed by the rig
+## Called at the end of drive(), before the hands are read: the rig puts each foot where it must stand in the world
+## (a planted foot stays put while the body moves over it; a foot on a slope stands on the ground under it).
+var foot_fix := Callable()
+
+## The way the toes point, as a turn about the vertical in rig body space (0 = straight ahead, -Z).
+func foot_yaw(side: String) -> float:
+	if not bone.has(side + "ToeBase"):
+		return 0.0
+	var d: Vector3 = _back.basis * (skel.get_bone_global_pose(bone[side + "ToeBase"]).origin - skel.get_bone_global_pose(bone[side + "Foot"]).origin)
+	return atan2(-d.x, -d.z)
+
+## Hip joint to ankle with the leg straight, in rig body space metres.
+func leg_len(side: String) -> float:
+	return ((rest[side + "Leg"].origin - rest[side + "UpLeg"].origin).length() + (rest[side + "Foot"].origin - rest[side + "Leg"].origin).length()) * _back.basis.get_scale().y
+
+## How high the ankle is when this foot stands flat on the floor (rig body space metres).
+func ankle_height(side: String) -> float:
+	var pts: PackedVector3Array = _contact.get(side + "Foot", PackedVector3Array())
+	if pts.is_empty():
+		return rest[side + "Foot"].origin.y * _back.basis.get_scale().y
+	return SOLE - _low_with(pts, _back.basis * (rest[side + "Foot"] as Transform3D).basis.orthonormalized())
+
+## Move the hips (and all they carry) by `d`, rig body space.
+func shift_hips(d: Vector3) -> void:
+	var hi: int = bone["Hips"]
+	var cur := skel.get_bone_global_pose(hi)
+	skel.set_bone_global_pose(hi, Transform3D(cur.basis, cur.origin + _back.affine_inverse().basis * d))
+
+func _leg_to(side: String, ankle: Vector3, basis: Basis) -> void:
+	var fi: int = bone[side + "Foot"]
+	var hip: Vector3 = skel.get_bone_global_pose(bone[side + "UpLeg"]).origin
+	var knee: Vector3 = skel.get_bone_global_pose(bone[side + "Leg"]).origin
+	var f: Vector3 = skel.get_bone_global_pose(fi).origin
+	var pole := knee - hip.lerp(f, 0.5)
+	var fwd := _back.affine_inverse().basis.orthonormalized() * Vector3(0.15 if side == "Right" else -0.15, 0.1, -1)
+	if pole.length() < 0.05 * (knee - hip).length():
+		pole = fwd
+	else:
+		pole = pole.normalized() + fwd * 0.35      # (a knee never swings round behind the leg as the foot is moved)
+	var o := _limb(side + "UpLeg", side + "Leg", side + "Foot", ankle, pole)
+	skel.set_bone_global_pose(fi, Transform3D(basis, o))
+
+## A foot stood flat: its sole at `at` (rig body space; `at.y` is the height of the ground there), raised by `lift`,
+## turned `yaw_add` radians about the vertical from where the pose has it and tipped `pitch` (toes up) for a slope.
+func step_foot(side: String, at: Vector3, lift: float = 0.0, yaw_add: float = 0.0, pitch: float = 0.0) -> void:
+	var to_skel := _back.affine_inverse()
+	var q := to_skel.basis.orthonormalized()
+	var up := (q * Vector3.UP).normalized()
+	var cur := skel.get_bone_global_pose(bone[side + "Foot"]).basis.orthonormalized()
+	var rb: Basis = (rest[side + "Foot"] as Transform3D).basis.orthonormalized()
+	var dq := (cur * rb.inverse()).get_rotation_quaternion()
+	var along := up * Vector3(dq.x, dq.y, dq.z).dot(up)
+	var tw := Quaternion(along.x, along.y, along.z, dq.w)
+	tw = tw.normalized() if tw.length_squared() > 0.0001 else Quaternion.IDENTITY
+	var flat := Basis(up, yaw_add) * Basis(tw) * rb
+	var pts: PackedVector3Array = _contact.get(side + "Foot", PackedVector3Array())
+	var h: float = (SOLE - _low_with(pts, _back.basis * flat)) if not pts.is_empty() else ankle_height(side)
+	if pitch != 0.0 and bone.has(side + "ToeBase"):
+		var toe: Vector3 = flat * rb.inverse() * (rest[side + "ToeBase"].origin - rest[side + "Foot"].origin)
+		var axis := toe.cross(up)
+		if axis.length() > 0.001:
+			flat = Basis(axis.normalized(), pitch) * flat
+	_leg_to(side, to_skel * Vector3(at.x, at.y + lift + h, at.z), flat)
+	if bone.has(side + "ToeBase"):
+		# (a foot stood flat has its toes flat: a walk clip that has stopped leaves them as it last bent them)
+		var ti: int = bone[side + "ToeBase"]
+		skel.set_bone_pose_rotation(ti, skel.get_bone_rest(ti).basis.get_rotation_quaternion())
+
+## A foot kept as the pose has it (heel strike, toe-off) but with its ankle at `ankle` (rig body space), tipped `pitch`.
+func move_foot(side: String, ankle: Vector3, pitch: float = 0.0) -> void:
+	var to_skel := _back.affine_inverse()
+	var b := skel.get_bone_global_pose(bone[side + "Foot"]).basis
+	if pitch != 0.0 and bone.has(side + "ToeBase"):
+		var up := (to_skel.basis.orthonormalized() * Vector3.UP).normalized()
+		var toe: Vector3 = skel.get_bone_global_pose(bone[side + "ToeBase"]).origin - skel.get_bone_global_pose(bone[side + "Foot"]).origin
+		var axis := Vector3(toe.x, 0, toe.z).cross(up) if absf(up.y) > 0.9 else toe.cross(up)
+		if axis.length() > 0.001:
+			b = Basis(axis.normalized(), pitch) * b
+	_leg_to(side, to_skel * ankle, b)
+
+# ---------------------------------------------------------------- a clip's own travel
+## How far along its own travel a root-motion clip is at `t` (0 at the start, 1 where it ends up); time itself for a
+## clip that goes nowhere.
+static func clip_travel_frac(cn: String, t: float) -> float:
+	if not has_clip(cn):
+		return 0.0
+	var a: Animation = _lib.get_animation(cn)
+	var ti := a.find_track(NodePath("_pos"), Animation.TYPE_POSITION_3D)
+	if ti < 0:
+		for i in a.get_track_count():
+			if a.track_get_type(i) == Animation.TYPE_POSITION_3D:
+				ti = i
+	var u := clampf(t / maxf(a.length, 0.001), 0.0, 1.0)
+	if ti < 0:
+		return u
+	var p0: Vector3 = a.position_track_interpolate(ti, 0.0)
+	var p1: Vector3 = a.position_track_interpolate(ti, a.length)
+	var all := Vector2(p1.x - p0.x, p1.z - p0.z)
+	if all.length() < 0.2:
+		return u
+	var p: Vector3 = a.position_track_interpolate(ti, clampf(t, 0.0, a.length))
+	return clampf(Vector2(p.x - p0.x, p.z - p0.z).dot(all) / all.length_squared(), 0.0, 1.0)
+
+## Metres of ground one whole cycle of an in-place walk clip covers on this skeleton: what each foot sweeps back
+## under the body while it is down, both feet together.
+var _stride := {}
+func clip_stride(cn: String) -> float:
+	if _stride.has(cn):
+		return _stride[cn]
+	var out := 1.5
+	if has_clip(cn):
+		if not _canon_ready:
+			_prepare_canon()
+		var a: Animation = _lib.get_animation(cn)
+		var map := _track_map(cn)
+		var src_dir: Dictionary = a.get_meta("rest_dir", {})
+		out = 0.0
+		for side: String in ["Left", "Right"]:
+			var lo := 1e9
+			var hi := -1e9
+			for i in 32:
+				var t := a.length * i / 32.0
+				var o := Vector3.ZERO
+				var d_par := Basis.IDENTITY
+				var prev := ""
+				for b: String in ["Hips", side + "UpLeg", side + "Leg", side + "Foot"]:
+					if prev != "":
+						o += d_par * (rest[b].origin - rest[prev].origin)
+					if map.has(b):
+						var d := Basis(a.rotation_track_interpolate(map[b], t))
+						if _my_dir.has(b) and src_dir.has(b):
+							d = d * Basis(Quaternion(_my_dir[b], src_dir[b]))
+						d_par = d * _canon
+					prev = b
+				lo = minf(lo, o.z)      # (canonical frame: the fighter faces -Z)
+				hi = maxf(hi, o.z)
+			out += (hi - lo) * root.scale.y * (root.global_transform.affine_inverse() * skel.global_transform).basis.get_scale().y
+	_stride[cn] = maxf(out, 0.3)
+	return _stride[cn]

@@ -32,6 +32,7 @@ func walker(look: Dictionary) -> CineActor:
 	add_child(hero)
 	hero.build(look, false)
 	hero.footsteps = true
+	hero.ground = Highland.height      # feet on the slope, the stride and lean of a climb
 	return hero
 
 ## Sets the walker going along the road from `a` to `b`.

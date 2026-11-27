@@ -15,6 +15,9 @@ var _w := 0.0                     # how much of the held clips shows over the ri
 var _w_to := 0.0
 var _w_rate := 2.0
 
+func _init() -> void:
+	rest_carry = true             # in the story scenes a standing knight carries the sword low, not in a guard
+
 ## Builds the player's knight exactly as the duel does, with whatever is equipped.
 static func knight(parent: Node) -> CineActor:
 	var a := CineActor.new()

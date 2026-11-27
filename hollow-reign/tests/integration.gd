@@ -26,6 +26,7 @@ func _ready() -> void:
 	t._main()
 	ok(t.menu.get_child_count() >= 3, "title screen builds")
 	t.queue_free()
+	await _slice_qa()
 	Game.profile.gold = 9000
 	Game.profile.shards = 99
 	Game.profile.attr_points = 2
@@ -356,3 +357,69 @@ func _gear_on_rig() -> void:
 	for r: Node in [plain, spiky, great, twin]:
 		r.queue_free()
 	Game.profile = keep
+
+## Slice QA (docs/BUG_REGISTER.md, "Slice QA"): the defects a first-time player met, held fixed.
+func _slice_qa() -> void:
+	# S1: with no journey yet, the menu's knight is the one who will wake, not the bare procedural figure
+	var keep: Dictionary = Game.profile
+	Game.profile = {}
+	var bd := Backdrop.new()
+	var look: Dictionary = bd.knight_look()
+	ok(str(look.get("skin", "")).ends_with(".glb") and Game.profile.is_empty(), "first launch: the menu's knight has a real body (%s) and no profile is left behind" % str(look.get("skin", "none")).get_file())
+	bd.free()
+	Game.profile = keep
+	var fresh := TitleScreen.new()
+	Game.profile = {}
+	var my_slot: int = Game.slot
+	for n in range(1, Game.SLOT_COUNT + 1):
+		Game.delete_slot(n)             # (the test's own folder: the journey in memory is written back below)
+	add_child(fresh)
+	await get_tree().process_frame
+	var rows: Array = fresh.menu.find_children("*", "Button", true, false)
+	ok(rows.size() == 3 and rows[1].custom_minimum_size.y >= 60.0, "first launch: three menu rows, each at least 60 high (%d rows)" % rows.size())
+	fresh.queue_free()
+	Game.profile = keep
+	Game.slot = my_slot
+	Game.save()
+	# S4: a remark made as an aside takes no touches; a scene that is waited for can still be tapped past
+	Story.play("orren_intro", true, true)
+	ok(Story._catcher.mouse_filter == Control.MOUSE_FILTER_IGNORE, "an aside leaves the screen to the player's touch")
+	Story.stop()
+	Story.play("orren_intro", true)
+	ok(Story._catcher.mouse_filter == Control.MOUSE_FILTER_STOP, "a scene that is waited for can be tapped past")
+	Story.stop()
+	# S6: the road's choices do nothing while they are faded out for a staged moment
+	Game.start_run("courtyard")
+	var ex := Explore.new()
+	add_child(ex)
+	await get_tree().process_frame
+	var went := [0]
+	ex.turned_back.connect(func(): went[0] += 1)
+	var back: Button = null
+	for b: Button in ex.layer.find_children("*", "Button", true, false):
+		if b.text.to_lower() == "turn back":
+			back = b
+	ex.layer.get_child(0).modulate.a = 0.0
+	ex._staging = true
+	if back:
+		back.pressed.emit()
+	ok(back != null and went[0] == 0, "Turn Back does nothing while a staged moment has the screen")
+	ex._staging = false
+	ex.layer.get_child(0).modulate.a = 1.0
+	if back:
+		back.pressed.emit()
+	ok(went[0] == 1, "Turn Back works when the choices are showing")
+	ex.queue_free()
+	await get_tree().process_frame
+	Game.run = {}
+	Story.stop()
+	# S12: a phone starts on the Performance preset, a desktop on Balanced
+	ok(Game.default_quality(true) == 0 and Game.default_quality(false) == 1, "first launch preset: Performance on a phone, Balanced elsewhere")
+	# S8, S9: SKIP and the pause button are a thumb high, and SKIP sits below the pause button
+	var cards := CineCards.new()
+	add_child(cards)
+	await get_tree().process_frame
+	ok(cards.skip.size.y >= 60.0 and cards.skip.position.y >= 80.0, "SKIP is 60 high and below a duel's pause button (%d at y %d)" % [cards.skip.size.y, cards.skip.position.y])
+	ok(cards.hint.position.y >= 140.0, "the story's instruction line sits under the duel's toasts")
+	cards.queue_free()
+	await get_tree().process_frame

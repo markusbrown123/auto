@@ -159,6 +159,12 @@ func _part(variant: String, part: String, parent: Node3D, dash: bool, mirrored: 
 func attach(to: Node3D) -> void:
 	rig = to
 	foe = null
+	_sim = null
+	_foe_down = false
+	# a cinematic's actor keeps it tucked at the shoulder unless the scene frees it: roam(true), tuck(false)
+	if to != null and to.get_script() != null and str((to.get_script() as Script).get_global_name()) == "CineActor":
+		roaming = false
+		_tucked = true
 
 ## Turn the halo to a point in the world, for `hold` seconds (0: until idle() or another call).
 func look_at_point(p: Vector3, hold: float = 0.0) -> void:
@@ -284,6 +290,8 @@ func _process(delta: float) -> void:
 			var d := target - global_position
 			var pitch := clampf(atan2(d.y, maxf(Vector2(d.x, d.z).length(), 0.01)), deg_to_rad(-30.0), deg_to_rad(30.0))
 			bq = Quaternion(Vector3.UP, atan2(-d.x, -d.z)) * Quaternion(Vector3.RIGHT, pitch)
+		elif Vector2(_vel.x, _vel.z).length() > 0.7:
+			bq = Quaternion(Vector3.UP, atan2(-_vel.x, -_vel.z))      # under way: nose first
 		elif rig != null:
 			# nothing to look at: it faces the way the knight faces, and looks about a little
 			var sway := 0.0 if calm else sin(_clock * 0.47) * 0.42 + sin(_clock * 1.13) * 0.08
@@ -309,6 +317,9 @@ func _process(delta: float) -> void:
 		if not calm and state == State.FOLLOW:
 			_core.rotation.y = wrapf(_core.rotation.y + dt * (0.35 + 0.5 * attention), 0.0, TAU)
 	_wave = 0.0 if (calm or state != State.FOLLOW) else 0.5 + 0.5 * sin(_clock * 1.5)
+	# at the far edge of a fight it is drawn a third larger, so that it still reads at that distance
+	_presence = lerpf(_presence, DUEL_PRESENCE if (foe != null and rig != null and _free_now()) else 1.0, 1.0 - exp(-dt * 2.0))
+	_core.scale = Vector3.ONE * _presence
 	var base := 0.0
 	if state != State.STOWED:
 		base = 0.5 + 0.3 * attention
@@ -323,6 +334,8 @@ func _process(delta: float) -> void:
 	_apply(dt)
 
 var _dash := 0.0
+var _presence := 1.0
+const DUEL_PRESENCE := 1.32
 var _wave := 0.0
 var _rise := RISE
 
@@ -354,7 +367,8 @@ func _voice() -> float:
 		return 0.25 + 0.75 * absf(sin(_clock * 8.3)) * (0.55 + 0.45 * sin(_clock * 2.9))
 	return clampf(lin * 2.4, 0.0, 1.0)
 
-## What the halo is turned to: a point it was given; the knight while either of them speaks; the foe in a duel.
+## What it looks at: a point it was given; the knight while either of them speaks; the thing it is inspecting; in a
+## duel whoever is attacking (the foe otherwise, and the foe where it lies once it is down).
 func _target() -> Vector3:
 	if _look != Vector3.INF:
 		return _look
@@ -363,16 +377,94 @@ func _target() -> Vector3:
 	if rig != null and (_forced_speech or who == "witness" or who == "player") and foe == null:
 		return rig.global_transform * Vector3(0, 1.74, 0)
 	if foe != null:
+		if _foe_down:
+			return foe.global_position + Vector3(0, 0.4, 0)
+		var m = rig.get("mode") if rig != null else null
+		var fm = foe.get("mode")
+		var foe_busy: bool = fm != null and int(fm) in [FighterRig.Mode.WINDUP, FighterRig.Mode.STRIKE, FighterRig.Mode.THRUST_WINDUP, FighterRig.Mode.THRUST]
+		if not foe_busy and m != null and int(m) in [FighterRig.Mode.WINDUP, FighterRig.Mode.STRIKE, FighterRig.Mode.THRUST_WINDUP, FighterRig.Mode.THRUST]:
+			return rig.global_transform * Vector3(0, 1.4, 0)
 		return foe.global_position + Vector3(0, 1.45 * foe.scale.y, 0)
+	if rig != null and _free_now() and _beat == "inspect" and _poi != Vector3.INF:
+		return _poi + Vector3(0, 0.2, 0)
 	return Vector3.INF
 
-# ---------------------------------------------------------------- keeping station
+# ---------------------------------------------------------------- where it goes
+## It is free. Out of a fight it roams: a loose orbit of the knight, a look ahead down the road, a visit to
+## whatever is of interest at this stop, and it comes round in front of the knight to speak. In a fight it keeps to
+## the far edge of the ring (beyond the fighters as the camera sees them, above their heads) and answers what
+## happens. roam(false), tuck(true), a cinematic's actor, or the knight's death put it back at the shoulder.
+var roaming := true
+var _beat := "orbit"          # orbit | scout | inspect | pause
+var _beat_t := 0.0
+var _goal := Vector3.ZERO
+var _orbit_a := 0.7
+var _orbit_dir := 1.0
+var _poi := Vector3.INF       # what it is inspecting
+var _poi_last := Vector3.INF
+var _rig_was := Vector3.INF
+var _rig_speed := 0.0
+var _rng := RandomNumberGenerator.new()
+var _sim: Object              # the duel's rules, for its events and the knight's health
+var _dart_t := 0.0            # a heavy blow is coming: it has backed off
+var _dip_t := 0.0             # a parry or a broken guard: it has come in to see
+var _foe_down := false
+var mood := ""                # what it is doing now (dev: logged and shown by the path plot)
+
+static var _points: Array = []
+static var _points_of: WeakRef
+
+## The things worth a look at this stop (world points). `by` is the screen that owns them: they lapse with it.
+static func set_points(by: Node, pts: Array) -> void:
+	_points = pts
+	_points_of = weakref(by)
+
+func roam(on: bool) -> void:
+	roaming = on
+
+func _free_now() -> bool:
+	if not roaming or _tucked or rig == null:
+		return false
+	return int(rig.get("mode")) != FighterRig.Mode.DEAD
+
 func _follow(dt: float, calm: bool) -> void:
 	if rig == null:
-		# found but not yet at a shoulder: it holds where it rose
+		# found but not yet with anyone: it holds where it rose
 		if not calm:
 			global_position.y += sin(_clock * 1.7) * 0.012 * dt
 		return
+	var k: float = rig.scale.y
+	_rig_speed = lerpf(_rig_speed, (rig.global_position.distance_to(_rig_was) / maxf(dt, 0.001)) if _rig_was != Vector3.INF else 0.0, 0.1)
+	_rig_was = rig.global_position
+	_dart_t -= dt
+	_dip_t -= dt
+	_connect_duel()
+	var st: Array
+	if not _free_now():
+		st = _shoulder(calm)
+	elif foe != null:
+		st = _duel_station(calm)
+	else:
+		st = _roam_station(dt, calm)
+	var to: Vector3 = st[0]
+	var stiff: float = st[1]
+	to = _clear_body(to, k)
+	to = _clear_view(to)
+	to.y = maxf(to.y, 0.5)
+	if not _placed or global_position.distance_to(to) > 14.0 * k:
+		global_position = to
+		_vel = Vector3.ZERO
+		_placed = true
+		return
+	# a critically damped spring: it arrives a little late and never overshoots; a soft one makes the long eased arcs
+	_vel += ((to - global_position) * stiff - _vel * 2.0 * sqrt(stiff)) * dt
+	global_position += _vel * dt
+	global_position = _clear_body(global_position, k)
+	_log()
+
+## At the sword-side shoulder (the first behaviour): held there for directed shots, and where it goes when the knight falls.
+func _shoulder(calm: bool) -> Array:
+	mood = "shoulder"
 	var local := HOME_TUCK if _tucked else HOME
 	var stiff := 34.0
 	var mode: int = int(rig.get("mode"))
@@ -389,25 +481,167 @@ func _follow(dt: float, calm: bool) -> void:
 		FighterRig.Mode.DEAD:
 			local = Vector3(0.42, 0.62, 0.3)       # it comes down to the one who fell
 			stiff = 6.0
+			mood = "fallen"
 		_:
 			if bool(rig.get("blocking")):
 				local += Vector3(0.06, 0.1, 0.2)
 	if not calm and mode != FighterRig.Mode.DEAD:
 		local += Vector3(sin(_clock * 0.83 + 1.3) * 0.012, sin(_clock * 1.7) * 0.022 + sin(_clock * 0.9 + 1.0) * 0.008, cos(_clock * 0.61) * 0.01)
-	var k: float = rig.scale.y
-	var to: Vector3 = rig.global_transform * local
-	to = _clear_body(to, k)
-	to = _clear_view(to)
-	if not _placed or global_position.distance_to(to) > 3.0 * k:
-		global_position = to
-		_vel = Vector3.ZERO
-		_placed = true
-		return
-	# a critically damped spring: it arrives a little late and never overshoots
-	_vel += ((to - global_position) * stiff - _vel * 2.0 * sqrt(stiff)) * dt
-	global_position += _vel * dt
-	global_position = _clear_body(global_position, k)
+	return [rig.global_transform * local, stiff]
 
+## Out of a fight. Returns [where to, how stiffly].
+func _roam_station(dt: float, calm: bool) -> Array:
+	var here: Transform3D = rig.global_transform
+	var bob := Vector3.ZERO if calm else Vector3(0, sin(_clock * 1.6) * 0.035 + sin(_clock * 0.7 + 1.0) * 0.02, 0)
+	var story := get_node_or_null("/root/Story")
+	var who := str(story.get("speaker")) if story != null and story.get("speaker") != null else ""
+	if _forced_speech or who == "witness" or who == "player":
+		# it comes round in front of the knight to talk, and faces them
+		mood = "address"
+		_beat_t = 0.6
+		_beat = "orbit"
+		return [here * Vector3(0.5, 1.62, -1.3) + bob, 9.0]
+	if _rig_speed > 0.5:
+		# the knight is moving on: it leads, ahead and to the sword side
+		mood = "lead"
+		_beat_t = 0.8
+		_beat = "orbit"
+		return [here * Vector3(0.9 + (0.0 if calm else sin(_clock * 0.6) * 0.3), 1.95, -1.9) + bob, 7.0]
+	_beat_t -= dt
+	if _beat_t <= 0.0:
+		_next_beat(calm)
+	match _beat:
+		"scout", "pause":
+			pass
+		"inspect":
+			if _poi == Vector3.INF or _poi.distance_to(rig.global_position) > 11.0:
+				_beat_t = 0.0
+			else:
+				# beside and above it, on the knight's side: never on top of the thing itself
+				var side := rig.global_position - _poi
+				side.y = 0.0
+				_goal = _poi + side.normalized() * 0.55 + Vector3(0, 1.05, 0)
+				if global_position.distance_to(_goal) < 0.5:
+					mood = "scan"
+					_flash = maxf(_flash, 0.35 + 0.3 * sin(_clock * 6.0))      # its light works over the thing
+		_:
+			_orbit_a += dt * (0.16 if calm else 0.3) * _orbit_dir
+			_goal = here * (Vector3(sin(_orbit_a), 0, -cos(_orbit_a)) * (1.5 + 0.25 * sin(_clock * 0.37)) + Vector3(0, 1.95, 0))
+	if _goal.distance_to(rig.global_position) > 7.0:
+		_beat_t = 0.0
+	return [_goal + bob, 3.2 if calm else 5.5]
+
+func _next_beat(calm: bool) -> void:
+	var pts: Array = []
+	if _points_of != null and _points_of.get_ref() != null and (_points_of.get_ref() as Node).is_inside_tree():
+		for p in _points:
+			if p is Vector3 and p.distance_to(rig.global_position) < 10.0 and p.distance_to(_poi_last) > 0.5:
+				pts.append(p)
+	var r := _rng.randf()
+	if _beat != "pause" and not calm and r < 0.3:
+		# a hesitation: it stops where it is, as if something had caught it
+		_beat = "pause"
+		mood = "pause"
+		_goal = global_position
+		_beat_t = _rng.randf_range(0.4, 0.9)
+	elif not calm and not pts.is_empty() and r < 0.72:
+		_beat = "inspect"
+		mood = "inspect"
+		_poi = pts[_rng.randi() % pts.size()]
+		_poi_last = _poi
+		_beat_t = _rng.randf_range(4.0, 5.5)
+	elif not calm and r < 0.86:
+		_beat = "scout"
+		mood = "scout"
+		_goal = rig.global_transform * Vector3(_rng.randf_range(-1.4, 1.4), _rng.randf_range(1.6, 2.2), -_rng.randf_range(2.6, 4.2))
+		_beat_t = _rng.randf_range(2.8, 4.2)
+	else:
+		_beat = "orbit"
+		mood = "orbit"
+		_orbit_dir = -1.0 if _rng.randf() < 0.4 else 1.0
+		_beat_t = _rng.randf_range(4.0, 7.0)
+
+# ---------------------------------------------------------------- in a fight
+func _connect_duel() -> void:
+	if foe == null or _sim != null:
+		return
+	var d := rig.get_parent()
+	var sim = d.get("sim") if d != null else null
+	if sim is Object and sim.has_signal("ev"):
+		_sim = sim
+		sim.connect("ev", _on_duel_ev)
+
+func _on_duel_ev(n: StringName, d: Dictionary) -> void:
+	match n:
+		&"boss_telegraph":
+			# a blow is coming: out of the space between them, and well back from a heavy one
+			var a: Dictionary = d.get("attack", {})
+			var heavy: bool = bool(a.get("unblockable", false)) or str(a.get("kind", "")) in ["slam", "sweep", "breath", "heavy"]
+			_dart_t = float(d.get("windup", 0.6)) + (0.9 if heavy else 0.45)
+			_dart_heavy = heavy
+			_dip_t = 0.0
+		&"deflected", &"poise_break", &"boss_stagger":
+			_dip_t = 1.1
+			_dart_t = 0.0
+			_flash = 1.0
+		&"boss_dead":
+			_foe_down = true
+			_flash = 1.0
+		&"restored", &"phase_change":
+			_foe_down = false
+			_dart_t = 1.2
+			_dart_heavy = true
+var _dart_heavy := false
+
+## The far edge of the ring. Returns [where to, how stiffly].
+func _duel_station(calm: bool) -> Array:
+	var cam := get_viewport().get_camera_3d() if is_inside_tree() else null
+	var a: Vector3 = rig.global_position
+	var b: Vector3 = foe.global_position
+	var mid := (a + b) * 0.5
+	mid.y = 0.0
+	var far := Vector3(0, 0, -1)
+	if cam != null:
+		far = mid - cam.global_position
+		far.y = 0.0
+		far = far.normalized() if far.length() > 0.1 else Vector3(0, 0, -1)
+	var lat := far.cross(Vector3.UP)
+	var to_knight := signf((a - mid).dot(lat))
+	if to_knight == 0.0:
+		to_knight = 1.0
+	var head := 1.95 * maxf(1.0, foe.scale.y)
+	var low := false
+	if _sim != null:
+		var pl = _sim.get("pl")
+		low = pl is Dictionary and float(pl.get("hp", 1.0)) < 0.3 * float(pl.get("max_hp", 1.0))
+	if _foe_down:
+		mood = "over_foe"
+		return [b + Vector3(0, 1.5 * maxf(1.0, foe.scale.y) + 0.5, 0) + far * 0.5, 6.0]
+	var ang := sin(_clock * (0.11 if calm else 0.23)) * 1.0
+	var r := 1.6 + 0.25 * sin(_clock * 0.41)      # just beyond the fighters: near enough to read, never nearer than they are
+	var h := head + 0.45 + (0.0 if calm else sin(_clock * 1.6) * 0.05)
+	var stiff := 4.0 if calm else 7.0
+	mood = "ring"
+	if low:
+		# the knight is hurt: it stays by them, just beyond and above
+		mood = "near_knight"
+		return [a + far * 0.95 + lat * to_knight * 0.35 + Vector3(0, 2.15, 0), stiff]
+	if not calm and _dart_t > 0.0:
+		# back, and round to the knight's outer side: nothing of it between the fighters while the blow is read
+		mood = "dart"
+		ang = to_knight * 0.5
+		r += 1.5 if _dart_heavy else 0.8
+		h += 0.4
+		stiff = 26.0
+	elif not calm and _dip_t > 0.0:
+		mood = "dip"
+		ang = -to_knight * 0.35
+		r -= 0.8
+		h -= 0.2
+		stiff = 18.0
+	return [mid + (far * cos(ang) + lat * sin(ang)) * r + Vector3(0, h, 0), stiff]
+
+# ---------------------------------------------------------------- keeping clear
 ## Never in the blade, the shield or the knight: pushed out of each to a clear distance.
 func _clear_body(p: Vector3, k: float) -> Vector3:
 	var w: Node3D = rig.get("weapon_r")
@@ -435,10 +669,9 @@ func _push(p: Vector3, from: Vector3, clear: float) -> Vector3:
 	dir = (dir + Vector3.UP * 0.5).normalized()      # when it must give way it goes up, not down into the arc
 	return from + dir * clear
 
-## Kept in the picture's clear part. Always: under the bars and tabs along the top of the screen. In a duel also:
-## never nearer the lens than DUEL_NEAR (where it would loom), inside the frame, clear of the pads by its own
-## width on screen, and not between the camera and the foe.
-const DUEL_NEAR := 1.7
+## Kept in the picture's clear part: inside the frame; under the bars and tabs along the top; above the subtitles
+## and the cards along the bottom; in a duel clear of the pads by its own width on screen, and never between the
+## camera and either fighter; on the road never on top of a thing that can be touched.
 func _clear_view(p: Vector3) -> Vector3:
 	if not is_inside_tree():
 		return p
@@ -447,53 +680,86 @@ func _clear_view(p: Vector3) -> Vector3:
 		return p
 	var c := cam.global_position
 	var view := get_viewport().get_visible_rect().size
-	if foe == null:
-		if cam.is_position_behind(p):
-			return p
-		var s0 := cam.unproject_position(p)
-		var depth0 := (p - c).dot(-cam.global_transform.basis.z)
-		var px0 := 2.0 * depth0 * tan(deg_to_rad(cam.fov) * 0.5) / maxf(view.y, 1.0)
-		var top0 := minf(44.0 + radius / maxf(px0, 0.0001) + 12.0, view.y * 0.16)
-		if s0.x > 0.0 and s0.x < view.x and s0.y < top0 and s0.y > -200.0:
-			p -= cam.global_transform.basis.y * (top0 - s0.y) * px0
+	var duel := foe != null
+	var free := _free_now()
+	if duel:
+		# out of the lines from the lens to the fighters (beyond them it cannot cover them: only nearer counts)
+		var home := p
+		for who: Node3D in [foe, rig]:
+			var fs: float = who.scale.y
+			for h: float in [0.5, 1.1, 1.7]:
+				var f: Vector3 = who.global_position + Vector3(0, h * fs, 0)
+				var d := f - c
+				var len := d.length()
+				if len < 0.2:
+					continue
+				d /= len
+				var t := (p - c).dot(d)
+				if t < 0.05 or t > len:
+					continue
+				var near := c + d * t
+				var need := 0.5 * fs * t / len + radius + 0.04
+				if who == rig and not free:
+					continue                     # at the shoulder it is beside the knight by design
+				if (p - near).length() < need:
+					var dir := (home - near).normalized() if (home - near).length() > 0.01 else Vector3.UP
+					p = near + (dir + Vector3.UP * 0.4).normalized() * need
+	if cam.is_position_behind(p):
 		return p
-	var home := p
-	var away := p - c
-	if away.length() < DUEL_NEAR:
-		p = c + away.normalized() * DUEL_NEAR if away.length() > 0.01 else p
-	if not cam.is_position_behind(p):
-		var depth := maxf((p - c).dot(-cam.global_transform.basis.z), 0.3)
-		var per_px := 2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5) / maxf(view.y, 1.0)
-		var m := radius / per_px + 16.0                 # its own half-width on screen, and a little air
-		var s := cam.unproject_position(p)
-		var to := s
-		to.y = clampf(to.y, 64.0 + m, view.y - 112.0 - m)                  # the bars above, the row of pads below
-		to.x = clampf(to.x, m, view.x - m)
+	var depth := maxf((p - c).dot(-cam.global_transform.basis.z), 0.3)
+	var per_px := 2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5) / maxf(view.y, 1.0)
+	var m := minf(radius / per_px, view.y * 0.2) + 14.0      # its own half-width on screen, and a little air
+	var s := cam.unproject_position(p)
+	var to := s
+	if not free and not duel:
+		# held at a shoulder outside a fight: only kept from under a row of tabs
+		var top0 := minf(44.0 + m, view.y * 0.16)
+		if s.x > 0.0 and s.x < view.x and s.y < top0 and s.y > -200.0:
+			p -= cam.global_transform.basis.y * (top0 - s.y) * per_px
+		return p
+	var story := get_node_or_null("/root/Story")
+	var top := (64.0 if duel else 96.0) + m
+	var bottom := view.y - (112.0 if duel else (215.0 if story != null and bool(story.get("busy")) else 150.0)) - m
+	to.y = clampf(to.y, top, maxf(top, bottom))
+	to.x = clampf(to.x, m, view.x - m)
+	if duel:
 		if to.x < 168.0 + m and to.y < 130.0 + m:                           # the two charge pads, top left
 			if 168.0 + m - to.x < 130.0 + m - to.y:
 				to.x = 168.0 + m
 			else:
 				to.y = 130.0 + m
-		if to.x > view.x - 64.0 - m and to.y < 64.0 + 24.0 + m:           # the pause button, top right
+		if to.x > view.x - 64.0 - m and to.y < 88.0 + m:                   # the pause button, top right
 			to.x = view.x - 64.0 - m
-		var shift := (cam.global_transform.basis.x * (to.x - s.x) - cam.global_transform.basis.y * (to.y - s.y)) * per_px
-		p += shift.limit_length(1.6)
-	var fs: float = foe.scale.y
-	for h: float in [0.5, 1.1, 1.7]:
-		var f: Vector3 = foe.global_position + Vector3(0, h * fs, 0)
-		var d := f - c
-		var len := d.length()
-		if len < 0.2:
-			continue
-		d /= len
-		var t := (p - c).dot(d)
-		if t < 0.05 or t > len:
-			continue
-		var near := c + d * t
-		var need := 0.5 * fs * t / len + radius + 0.04
-		var off := p - near
-		if off.length() < need:
-			# out of the line, toward where it came from (the knight's side), never across to the far side
-			var dir := (home - near).normalized() if (home - near).length() > 0.01 else Vector3.UP
-			p = near + (dir + Vector3.UP * 0.4).normalized() * need
-	return p
+	elif _points_of != null and _points_of.get_ref() != null:
+		for q in _points:
+			if q is Vector3 and not cam.is_position_behind(q):
+				var sq := cam.unproject_position(q)
+				if to.distance_to(sq) < m + 30.0:                              # something that can be touched: above it, not on it
+					to.y = sq.y - (m + 30.0)
+	var shift := (cam.global_transform.basis.x * (to.x - s.x) - cam.global_transform.basis.y * (to.y - s.y)) * per_px
+	return p + shift.limit_length(3.0)
+
+## Dev: HR_WITNESS_LOG=<file> writes ten lines a second: t, mood, drone x y z, knight x z, foe x z, camera x z,
+## screen x y, view w h, on-screen half-width (tools/witness_plot.py draws them).
+var _log_file: FileAccess
+var _log_next := 0.0
+func _log() -> void:
+	if not OS.has_environment("HR_WITNESS_LOG") or _clock < _log_next or not is_inside_tree():
+		return
+	_log_next = _clock + 0.1
+	if _log_file == null:
+		_log_file = FileAccess.open(OS.get_environment("HR_WITNESS_LOG"), FileAccess.WRITE)
+		if _log_file == null:
+			return
+	var cam := get_viewport().get_camera_3d()
+	if cam == null or rig == null:
+		return
+	var p := global_position
+	var s := cam.unproject_position(p) if not cam.is_position_behind(p) else Vector2(-999, -999)
+	var view := get_viewport().get_visible_rect().size
+	var depth := maxf((p - cam.global_position).dot(-cam.global_transform.basis.z), 0.3)
+	var half := radius / (2.0 * depth * tan(deg_to_rad(cam.fov) * 0.5) / maxf(view.y, 1.0))
+	var f: Vector3 = foe.global_position if foe != null else Vector3(999, 0, 999)
+	_log_file.store_line("%.2f %s %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.3f %.1f %.1f %.0f %.0f %.1f" % [_clock, mood if mood != "" else "-", p.x, p.y, p.z,
+		rig.global_position.x, rig.global_position.z, f.x, f.z, cam.global_position.x, cam.global_position.z, s.x, s.y, view.x, view.y, half])
+	_log_file.flush()

@@ -40,7 +40,7 @@ const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38
 ## The benchmark suit's refinish (owner's reference, 2026-11-27): no longer mirror-bright chrome but SLEEK, CLEAN,
 ## matte-to-satin off-white ceramic plate over the dark undersuit, with a few inlaid designs and a lit visor.
 ## Material only; the meshes are as generated. Everything the owner may want nudged is here:
-##   coat_color    the plate: whiter (0.95, 0.94, 0.91), greyer (0.76, 0.76, 0.75), warmer (0.92, 0.87, 0.78)
+##   coat_color    the plate: whiter (0.88, 0.87, 0.84), greyer (0.68, 0.68, 0.67), warmer (0.82, 0.77, 0.68). It is lit hard in the Armory and outdoors: much above 0.8 burns out
 ##   coat_rough    0.45 satin .. 0.7 chalky;   coat_metal 0 .. 0.2
 ##   wear          0 spotless .. 1 heavy: dark in the deepest creases and panel lines
 ##   wear_edge     0 none .. 1: chipped edges, scuffs and mottling (off: the brief is clean)
@@ -48,10 +48,10 @@ const FINISH_DEFAULT := {"rough_min": 0.4, "rough_max": 1.0, "rough_pivot": 0.38
 ##                 motif_light / motif_energy their lines of light
 ##   visor         brightness of the lit eye slot (0 off);  visor_color its colour
 ## `--chrome` (or ArmorParts.chrome = true before a knight is dressed) puts the generated chrome back, all of it.
-const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.90, 0.885, 0.845), "coat_metal": 0.05, "coat_rough": 0.5, "wear": 0.3, "wear_edge": 0.0,
+const FINISH_COAT := {"coat": 1.0, "coat_color": Color(0.78, 0.765, 0.73), "coat_metal": 0.05, "coat_rough": 0.5, "wear": 0.3, "wear_edge": 0.0,
 	"wear_color": Color(0.11, 0.105, 0.1), "spec": 0.45,
 	"motif": 1.0, "motif_dark": Color(0.17, 0.16, 0.15), "motif_light": Color(0.55, 0.85, 1.0), "motif_energy": 1.6,
-	"visor": 3.2, "visor_color": Color(0.6, 0.92, 1.0)}
+	"visor": 4.5, "visor_color": Color(0.6, 0.92, 1.0)}
 ## Where the designs sit on each body (heights as a share of the body's height; printed by tools/armor_split.gd --v).
 const BODY_MARKS := {
 	"m": {"chest_y": 0.745, "back_span": Vector2(0.665, 0.825), "visor_y": 0.931, "visor_half": 0.011},

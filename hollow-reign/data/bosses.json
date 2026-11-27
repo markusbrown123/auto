@@ -4319,7 +4319,17 @@
     "cloth": "#3a0e0e",
     "weapon": "greatsword",
     "eye": "#ffd98a",
-    "helm": "great"
+    "helm": "great",
+    "parts": {
+     "body": "m",
+     "helm": "regal",
+     "chest": "regal",
+     "shoulders": "regal",
+     "arms": "black",
+     "legs": "regal",
+     "boots": "black"
+    },
+    "parts_tint": "#e8cf96"
    },
    "music": "combat_a",
    "punish": {

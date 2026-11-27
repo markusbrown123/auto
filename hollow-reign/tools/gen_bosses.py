@@ -146,7 +146,9 @@ B += [
  duelist("husk","Emptied Husk","deep",660,36,R("#5a5660","#1a1620","sword","#c08aff","kettle",bulk=0.9),speed=1.2,xp=460,gold=290),
  brute("oath_eater","Eater of Oaths","deep",680,36,R("#342a3c","#140e1c","cleaver","#d8a8ff","hood",scale=1.4,bulk=1.3,**WR),speed=1.1,xp=540,gold=340),
 
- soldier("throne_guard","Throne Guard","throne",720,38,R("#8c7a52","#3a0e0e","greatsword","#ffd98a","great",scale=1.15),speed=1.22,xp=560,gold=350),
+ soldier("throne_guard","Throne Guard","throne",720,38,R("#8c7a52","#3a0e0e","greatsword","#ffd98a","great",scale=1.15,
+   # the King's Own: dressed from the modular armour (ArmorParts), court plate over black lacquer, gilded by a tint
+   parts=dict(body="m", helm="regal", chest="regal", shoulders="regal", arms="black", legs="regal", boots="black"), parts_tint="#e8cf96"),speed=1.22,xp=560,gold=350),
  duelist("kingsblade","Kingsblade","throne",720,39,R("#b89b5e","#3a0e0e","dual","#ffd98a","crown",bulk=0.85,cape=True),speed=1.22,xp=580,gold=365),
  eater("crownless","The Crownless","throne",740,38,R("#4a4038","#1c0808","claws","#ffe8b0","crown",scale=1.25,bulk=0.9,**WR),speed=1.18,xp=620,gold=390),
 ]

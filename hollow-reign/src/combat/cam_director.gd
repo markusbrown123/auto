@@ -437,12 +437,12 @@ func _choose() -> String:
 		Duel.Stage.FINISHER:
 			_ended = "win"
 			var t := duel._stage_t
-			return "finish_blow" if t < 1.25 else ("finish_fall" if t < 2.4 else "victory")
+			return "finish_blow" if t < 1.25 else ("finish_fall" if t < 2.4 else _after_shot())
 		Duel.Stage.DEATH:
 			_ended = "loss"
 			return "death_fall" if duel._stage_t < 1.2 else "defeat"
 		Duel.Stage.DONE:
-			return "victory" if _ended == "win" else ("defeat" if _ended == "loss" else "combat")
+			return _after_shot() if _ended == "win" else ("defeat" if _ended == "loss" else "combat")
 	if _cue_left > 0.0 and _cue != "reveal":
 		return _cue
 	if sim.boss_open():
@@ -452,6 +452,26 @@ func _choose() -> String:
 		if str(a.get("kind", "")) in ["slam", "sweep", "breath"] or float(a.get("dmg", 0.0)) >= 30.0:
 			return "guard"
 	return "combat"
+
+## After the fall, while last words, the record and the companions are heard: a cut for each voice, each of them
+## close (the foe where it lies, the knight's answer, the record over the knight's shoulder, the knight and the
+## Witness), instead of one shot that drew back for as long as anyone spoke. No cut is shorter than AFTER_MIN.
+const AFTER_MIN := 1.3
+const AFTER_SHOTS := ["victory", "victory_fallen", "victory_knight", "victory_record", "victory_pair"]
+func _after_shot() -> String:
+	var want := "victory"
+	var who := str(Story.speaker) if Story.busy else ""
+	if who == "player":
+		want = "victory_knight"
+	elif who in ["archivist", "lyra"]:
+		want = "victory_record"
+	elif who == "witness":
+		want = "victory_pair"
+	elif who != "":
+		want = "victory_fallen"
+	if shot in AFTER_SHOTS and shot != want and shot_t < AFTER_MIN:
+		return shot
+	return want
 
 ## Establishing wide, low reveal of the foe, close-up, over the shoulder; the fight then eases to combat.
 ## The silent intro lasts 4.6 s (Duel._process); a spoken one lasts as long as the scene, so after the
@@ -607,9 +627,10 @@ func _shot_struggle() -> Dictionary:
 	var m := _mid(1.15 + 0.1 * (_S - 1.0))
 	return {"pos": m + Vector3(2.1 + 0.7 * _big, -0.15, 0.45), "look": m, "fov": 48.0, "roll": -0.03, "rate": 5.0}
 
-## Phase change: a low hero angle on the foe.
+## Phase change: a low hero angle on the foe, from the ground at the knight's flank: the foe towers, and the knight
+## (whose fight goes on through it) stays in the near corner of the frame, never behind the lens.
 func _shot_phase() -> Dictionary:
-	return {"pos": _F + Vector3(0.8 + 0.4 * _big, 0.3, 1.2 + 0.9 * _big), "look": _F + Vector3(0, _H * 0.95, 0),
+	return {"pos": _K + Vector3(0.9 + 0.2 * _big, 0.3, 1.5 + 0.3 * _big), "look": _F + Vector3(0, _H * 0.95, 0),
 		"fov": 54.0, "roll": 0.05, "rate": 4.5}
 
 ## The killing blow: side-on and wide, both figures whole.
@@ -621,10 +642,36 @@ func _shot_finish_blow() -> Dictionary:
 func _shot_finish_fall() -> Dictionary:
 	return {"pos": _F + Vector3(1.5 * _big, 0.3, 1.7 * _big), "look": _F + Vector3(0, _H * 0.55, 0), "fov": 52.0, "roll": 0.06, "rate": 30.0}
 
-## Victory: a slow rise behind the knight, the fallen foe beyond.
+## Victory: a short rise behind the knight, the fallen foe beyond. The rise ends (it used to go on for as long as
+## anyone spoke, until the knight was a few pixels high).
+const VICTORY_RISE := 2.6
 func _shot_victory() -> Dictionary:
-	var d := shot_t * (0.05 if _calm else 0.3)
-	return {"pos": _K + Vector3(1.0, 0.9 + d, 2.3 + d * 0.5), "look": _K.lerp(_F, 0.55) + Vector3(0, 0.9, 0), "fov": 50.0, "rate": 30.0}
+	var d := minf(shot_t, VICTORY_RISE) * (0.05 if _calm else 0.22)
+	return {"pos": _K + Vector3(1.0, 1.0 + d, 2.1 + d * 0.5), "look": _K.lerp(_F, 0.55) + Vector3(0, 0.9, 0), "fov": 48.0, "rate": 30.0}
+
+## Where the beaten foe lies (ring frame, on the floor).
+func _fallen_at() -> Vector3:
+	return _body_at(duel.foe_rig) if is_instance_valid(duel.foe_rig) else _F
+
+## Its last words: low and close to where it lies.
+func _shot_victory_fallen() -> Dictionary:
+	var f := _fallen_at()
+	var d := minf(shot_t, 8.0) * (0.0 if _calm else 0.04)
+	return {"pos": f + Vector3(1.1 * _big, 0.5, (1.5 - d) * _big), "look": f + Vector3(0, 0.3 * _S, 0), "fov": 40.0, "roll": 0.03, "rate": 30.0}
+
+## The knight's answer: chest up, from the foe's side of the line.
+func _shot_victory_knight() -> Dictionary:
+	return {"pos": _K + Vector3(0.75, 1.42, -1.55), "look": _K + Vector3(0, 1.45, 0), "fov": 38.0, "rate": 30.0}
+
+## What the dead leave behind, read out: over the knight's shoulder, down at the fallen, pushing slowly in.
+func _shot_victory_record() -> Dictionary:
+	var f := _fallen_at()
+	var d := minf(shot_t, 12.0) * (0.0 if _calm else 0.035)
+	return {"pos": _K + Vector3(0.7, 1.62, 1.25 - d), "look": f + Vector3(0, 0.35 * _S, 0), "fov": 42.0, "rate": 30.0}
+
+## The companion's word on it: the knight from the sword side, waist up, room at the shoulder for the Witness.
+func _shot_victory_pair() -> Dictionary:
+	return {"pos": _K + Vector3(1.9, 1.35, 0.5), "look": _K + Vector3(-0.1, 1.3, -0.2), "fov": 40.0, "rate": 30.0}
 
 ## The knight goes down: low and side-on, close.
 func _shot_death_fall() -> Dictionary:

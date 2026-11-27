@@ -35,6 +35,7 @@ static func foe_look(foe_id: String) -> Dictionary:
 			if not foe.boss:
 				look["skin_tint"] = foe.rig.get("metal", "#888888")
 			break
+	Duel.dress_foe(look)
 	var carried: String = Duel.BOSS_WEAPON.get(foe_id, Duel.FOE_WEAPON.get(str(foe.rig.get("weapon", "")), ""))
 	if carried != "":
 		look.merge(Duel.weapon_model(carried))

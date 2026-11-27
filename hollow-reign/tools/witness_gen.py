@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import gear_gen as G
 
 OUT = os.path.join(G.ROOT, "assets", "models", "witness")
-CHOSEN = "lantern"
+CHOSEN = "gnomon"
 
 G.MATERIALS.update({
     "ceramic": ((0.80, 0.785, 0.75), 0.0, 0.62, None, "fine_n", None, 0.18, None),
@@ -35,6 +35,11 @@ G.MATERIALS.update({
     "core": ((0.055, 0.058, 0.066), 0.5, 0.55, None, None, None, 1.0, None),
     "glass": ((0.012, 0.014, 0.018), 0.0, 0.07, None, None, None, 1.0, None),
     "accent": ((0.86, 0.62, 0.28), 1.0, 0.36, "steel_a", "steel_n", "steel_orm", 0.3, None),
+    # third pass: an old instrument. Pitted pale plates that have lost their glaze, dark bronze gone brown, a few
+    # fittings turned green; nothing polished, nothing gold
+    "bone": ((0.86, 0.80, 0.69), 0.0, 1.0, "worn_a", "worn_n", "matte_orm", 1.0, None),
+    "bronze": ((0.50, 0.38, 0.25), 0.9, 1.0, "worn_a", "worn_n", "worn_orm", 1.0, None),
+    "verdigris": ((0.34, 0.56, 0.50), 0.25, 1.0, "worn_a", "worn_n", "matte_orm", 1.0, None),
 })
 
 
@@ -361,6 +366,136 @@ def hex_seg(B, q):
     solid(B, [[p * k + np.array((0, 0.08 * (1 - k), z)) for p in pts] for z, k in ((-zh + 0.004, 0.93), (zh - 0.004, 0.93))], "core")
 
 
+
+# ============================================================================ third pass: the gnomon (chosen)
+# The owner's note on the lantern: it reads as a smart speaker, and it is too small in a fight. Wanted: an ancient,
+# weathered, slightly lopsided relic-machine, upright and angular, half as large again, with a brighter light that
+# turns to look. The gnomon is the upright blade of a sundial: the instrument that tells the truth by where the
+# light falls. A tall shard of dark bronze, six-sided and never symmetric, its top cut on a slant; pale pitted plates
+# cover most of it and some are chipped or gone. A hooded lamp is carried off-centre on its front ridge and turns by
+# itself to what the Witness looks at: one flat five-sided pane of light. A tall vane stands off its left side and
+# the snapped stub of its twin off the right; a small weight hangs free under its point.
+# Nothing here is a shell round an eye: the body is a blade, the light is a lamp on its front, and nothing splits.
+#          y       left x  right x  front z  back z  z shift  slant (y per x)
+GN = [(0.150, 0.030, 0.038, 0.030, 0.022, 0.006, 0.55),
+      (0.072, 0.052, 0.062, 0.048, 0.034, 0.002, 0.0),
+      (0.000, 0.058, 0.066, 0.054, 0.038, 0.000, 0.0),
+      (-0.078, 0.038, 0.044, 0.040, 0.027, -0.006, 0.0),
+      (-0.150, 0.012, 0.015, 0.016, 0.010, -0.014, 0.0)]
+GN_LAMP = (0.010, 0.040, -0.050)       # where the lamp turns (the manifest places it)
+
+
+def gn_ring(i, k=1.0, dy=0.0):
+    y, xl, xr, zf, zb, dz, sl = GN[i]
+    pts = [(0.005, -zf), (xr, -0.25 * zf), (0.70 * xr, zb), (-0.006, 1.14 * zb), (-0.70 * xl, zb), (-xl, -0.25 * zf)]
+    return [np.array((x * k, y + sl * x + dy, z * k + dz)) for x, z in pts]
+
+
+def gn_facet(i, f):
+    a, b = gn_ring(i), gn_ring(i + 1)
+    return [a[f], a[(f + 1) % 6], b[(f + 1) % 6], b[f]]
+
+
+def chip(quad, corner, along=0.3, down=0.35):
+    """The facet with one corner broken off: a five-sided plate."""
+    q = [np.array(p, dtype=float) for p in quad]
+    a, b, c = q[corner - 1], q[corner], q[(corner + 1) % 4]
+    out = q[:corner] + [b + (a - b) * along, b + (c - b) * down] + q[corner + 1:]
+    return out
+
+
+def gn_plates(B, q, cells):
+    """cells: (row, facet, thickness, chipped corner or None). Old plates are not all one thickness."""
+    for row, f, thick, ch in cells:
+        quad = gn_facet(row, f)
+        if ch is not None:
+            quad = chip(quad, ch)
+        slab(B, quad, "bone", q=q, gap=0.0030, thick=thick, bev=0.0016, away=(0.0, GN[row][0] * 0.5 + GN[row + 1][0] * 0.5, 0.0))
+
+
+def gnomon_core(B, q):
+    """The bronze shard itself, the line of light under the brow plates, the lit rule down its back, and the dark
+    socket the lamp sits in."""
+    solid(B, [gn_ring(i, 0.93) for i in range(5)], "bronze", cap_mat="bronze")
+    solid(B, [gn_ring(1, 0.975, dy) for dy in (-0.0030, 0.0022)], "light", cap_mat="core")
+    # the back, left of the ridge, has lost its plate: a dark recess with one upright rule of light (what the duel
+    # camera sees of where it faces)
+    a = gn_facet(1, 3)
+    slab(B, a, "core", q=q, gap=0.0040, thick=0.0020, bev=0.0005, away=(0, 0.036, 0))
+    m0, m1 = (a[0] * 0.62 + a[1] * 0.38), (a[3] * 0.62 + a[2] * 0.38)
+    w = (a[1] - a[0]) / np.linalg.norm(a[1] - a[0]) * 0.0042
+    p0, p1 = m0 + (m1 - m0) * 0.16, m0 + (m1 - m0) * 0.84
+    slab(B, [p0 - w, p0 + w, p1 + w, p1 - w], "light", q=q, gap=0.0, thick=0.0012, bev=0.0003, lift=0.0020, away=(0, 0.036, 0))
+    # the socket: the two front facets behind the lamp
+    for f in (0, 5):
+        slab(B, gn_facet(1, f), "core", q=q, gap=0.0040, thick=0.0022, bev=0.0005, away=(0, 0.036, 0))
+    # a green collar where the point narrows, and a cap on the slanted top
+    solid(B, [gn_ring(3, 1.06, dy) for dy in (-0.004, 0.005)], "verdigris")
+    slab(B, gn_ring(0)[::-1], "bronze", q=q, gap=0.0050, thick=0.0050, bev=0.0015, away=(0, 0.0, 0))
+
+
+def gnomon_brow(B, q):
+    """The plates of the slanted head: they lift when it attends. One is chipped."""
+    gn_plates(B, q, [(0, 0, 0.0075, None), (0, 1, 0.0065, 1), (0, 2, 0.0080, None), (0, 3, 0.0060, None), (0, 4, 0.0075, None), (0, 5, 0.0070, None)])
+
+
+def gnomon_flank_r(B, q):
+    gn_plates(B, q, [(1, 1, 0.0090, None), (1, 2, 0.0070, 2)])
+
+
+def gnomon_flank_l(B, q):
+    gn_plates(B, q, [(1, 4, 0.0080, 0)])
+
+
+def gnomon_keel(B, q):
+    """The lower plates: they drop when it attends. The back-left one below the waist is gone."""
+    gn_plates(B, q, [(2, 0, 0.0080, None), (2, 1, 0.0065, None), (2, 2, 0.0075, None), (2, 4, 0.0070, 3), (2, 5, 0.0085, 1),
+                     (3, 0, 0.0060, None), (3, 1, 0.0060, None), (3, 3, 0.0055, None), (3, 4, 0.0060, None), (3, 5, 0.0060, None)])
+
+
+def gnomon_lamp(B, q):
+    """The lamp, in its own frame: it turns about the origin, its pane faces -Z. A five-sided bronze cowl, longer
+    over the top than underneath and longer on the right than the left, with two pale plates on its roof."""
+    sec = [(-0.031, -0.011), (0.003, -0.024), (0.036, -0.009), (0.030, 0.020), (-0.025, 0.023)]
+
+    def ring(z, k, rake):
+        return [np.array((x * k, y * k, z - rake * (y + 0.024) - 0.10 * max(x, 0.0))) for x, y in sec]
+    back, mid, front = ring(0.016, 0.62, 0.0), ring(-0.004, 0.96, 0.0), ring(-0.030, 1.0, 0.36)
+    solid(B, [back, mid, front], "bronze", cap_mat="seam")
+    slab(B, front, "light", q=q, gap=0.0060, thick=0.0016, bev=0.0005, away=(0, 0, 0.05))
+    for f, t in ((3, 0.0060), (2, 0.0048)):
+        slab(B, [mid[f], mid[(f + 1) % 5], front[(f + 1) % 5], front[f]], "bone", q=q, gap=0.0022, thick=t, bev=0.0014, away=(0, 0, -0.01))
+    # the stalk it turns on
+    solid(B, [[np.array((x * k, y * k, z)) for x, y in ((-0.010, -0.008), (0.010, -0.008), (0.010, 0.008), (-0.010, 0.008))] for z, k in ((0.014, 1.0), (0.034, 0.8))], "verdigris")
+
+
+def _blade(B, outline, t, mat):
+    """A flat vane in the YZ plane, 2 t thick, from its outline [(y, z)]."""
+    solid(B, [[np.array((x, y, z)) for y, z in outline] for x in (-t, t)], mat)
+
+
+def gnomon_vane(B, q):
+    """The tall left vane: hinge at the origin, standing up +Y, its outer face toward -X."""
+    out = [(-0.052, 0.004), (0.0, -0.014), (0.105, -0.022), (0.232, -0.006), (0.256, 0.012), (0.125, 0.030), (0.0, 0.022)]
+    _blade(B, out, 0.0034, "bronze")
+    inlay = [(0.012, -0.008), (0.100, -0.015), (0.200, -0.004), (0.118, 0.022), (0.012, 0.016)]
+    for sx in (-1.0, 1.0):
+        slab(B, [np.array((sx * 0.0034, y, z)) for y, z in inlay], "bone", q=q, gap=0.0, thick=0.0026, bev=0.0010, away=(0, 0.1, 0.004))
+
+
+def gnomon_stub(B, q):
+    """What is left of the right vane: snapped off on a slant."""
+    _blade(B, [(-0.030, 0.004), (0.0, -0.012), (0.052, -0.018), (0.088, 0.006), (0.058, 0.024), (0.0, 0.020)], 0.0034, "bronze")
+    solid(B, [[np.array((x, y, z)) for y, z in ((0.050, -0.016), (0.086, 0.006), (0.058, 0.022))] for x in (-0.0042, 0.0042)], "verdigris")
+
+
+def gnomon_weight(B, q):
+    """The plumb weight that hangs free under the point: origin at its top."""
+    d = [(0.0, -1.0), (1.0, 0.0), (0.0, 1.0), (-1.0, 0.0)]
+    solid(B, [[np.array((x * r, y, z * r * 0.8)) for x, z in d] for y, r in ((0.0, 0.003), (-0.016, 0.015), (-0.058, 0.002))], "bronze")
+    solid(B, [[np.array((x * r, y, z * r * 0.8)) for x, z in d] for y, r in ((-0.0135, 0.0165), (-0.0185, 0.0165))], "light")
+
+
 def _fin_mounts():
     """Where the three vanes hang on the plumb's lower half: hinge point, and (YXZ degrees) a turn about Y to
     their place and a lean that lays them along the taper. None is at the front: the dash on the ring is."""
@@ -388,6 +523,19 @@ def _halo(axis, dist, fins=()):
 # its motion, all in its own frame: slide [m] x attention, breathe [m] x a slow idle wave, talk [m] x voice level,
 # turn [degrees] x attention.
 VARIANTS = {
+    "gnomon": dict(build=dict(core=gnomon_core, brow=gnomon_brow, flank_r=gnomon_flank_r, flank_l=gnomon_flank_l, keel=gnomon_keel, lamp=gnomon_lamp,
+                              vane=gnomon_vane, stub=gnomon_stub, weight=gnomon_weight),
+                   aim="body", size=1.35, lie=0.062, lie_rot=[78, 0, 14], glow=1.7, lamp_range=1.5, flare=0.20,
+                   lo=[-0.08, -0.17, -0.06], hi=[0.08, 0.17, 0.06], parts=[
+                       dict(mesh="core", lit="dash"),
+                       dict(mesh="brow", slide=[0, 0.0075, 0.0015], breathe=[0, 0.0016, 0], talk=[0, 0.0040, 0]),
+                       dict(mesh="flank_r", slide=[0.0075, 0, 0.0020], talk=[0.0034, 0, 0]),
+                       dict(mesh="flank_l", slide=[-0.0075, 0, 0.0020], talk=[-0.0034, 0, 0]),
+                       dict(mesh="keel", slide=[0, -0.0070, -0.0012], breathe=[0, -0.0010, 0]),
+                       dict(mesh="lamp", at=list(GN_LAMP), look=[62.0, 34.0], slide=[0, 0, -0.0060], talk=[0, 0, -0.0020]),
+                       dict(mesh="vane", at=[-0.066, -0.020, 0.010], rot=[0, 0, 5.0], turn=[0, 0, 13.0], talk_turn=[0, 0, 5.0], breathe=[0, 0.0015, 0]),
+                       dict(mesh="stub", at=[0.074, 0.004, 0.012], rot=[0, 0, -7.0], turn=[0, 0, -11.0], talk_turn=[0, 0, -4.0]),
+                       dict(mesh="weight", at=[0.004, -0.172, -0.016], slide=[0, -0.012, 0], breathe=[0, -0.0050, 0], talk=[0, 0.0040, 0])]),
     "lantern": dict(build=dict(core=lantern_core, crown=lantern_crown, keel=lantern_keel, cheek=lantern_cheek, visor=lantern_visor),
                     aim="body", size=1.12, lie=0.076, lie_rot=[80, 0, 0], parts=[
                         dict(mesh="core"), dict(mesh="visor", lit="dash"),
@@ -429,7 +577,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     manifest = {"_chosen": CHOSEN, "_front": "-Z", "_origin": "centre of the body"}
     for name, V in VARIANTS.items():
-        info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y") if k in V}
+        info = {k: V[k] for k in ("aim", "size", "lie", "lie_rot", "parts", "ring_y", "glow", "lamp_range", "flare") if k in V}
         lo, hi = np.ones(3) * 9, np.ones(3) * -9
         tris = {"": 0, "_lod": 0}
         for part, fn in V["build"].items():
@@ -452,6 +600,8 @@ def main():
         ext = max(hi - lo)
         if name == "hexring":
             lo, hi = np.array((-0.104, -0.104, -0.024)), np.array((0.104, 0.104, 0.024))
+        if "lo" in V:      # the bulk the game keeps clear of things (vanes and the hanging weight stand outside it)
+            lo, hi = np.array(V["lo"]), np.array(V["hi"])
         info.update(tris=tris[""], tris_lod=tris["_lod"], lo=[round(float(x), 4) for x in lo], hi=[round(float(x), 4) for x in hi])
         manifest[name] = info
         print("%-8s tris %4d / %4d   %4.1f wide, %4.1f tall, %4.1f deep (cm, life size; drawn x%.2f)" % (

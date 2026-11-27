@@ -280,6 +280,7 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 			if not foe.boss:
 				foe_look["skin_tint"] = foe.rig.get("metal", "#888888")
 			break
+	dress_foe(foe_look)
 	var carried: String = BOSS_WEAPON.get(foe_id, FOE_WEAPON.get(str(foe.rig.get("weapon", "")), ""))
 	if carried != "":
 		foe_look.merge(weapon_model(carried))
@@ -362,6 +363,17 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	elif training:
 		hud.show_training()
 		foe_rig.recover()
+
+## A foe whose data names armour pieces (`rig.parts`, tools/gen_bosses.py) is dressed from the modular parts on the
+## base body, as the knight is, instead of wearing its class's one-piece model. Left alone when the parts are missing.
+static func dress_foe(look: Dictionary) -> void:
+	if not (look.get("parts") is Dictionary) or FighterRig.old_look:
+		return
+	var b := str(look.parts.get("body", "m"))
+	if not ArmorParts.has_part(b, ArmorParts.host, "chest"):
+		return
+	look["skin"] = ArmorParts.host_path(b)
+	look.erase("skin_tint")
 
 ## Weapons that share another weapon's model, recoloured (their own concept could not be generated).
 const MODEL_ALIAS := {"w_censer_sword": ["w_vigil_edge", "#e0b060"], "w_monarch": ["w_starfall", "#f0d080"],
@@ -614,7 +626,7 @@ func _process(delta: float) -> void:
 			if sim.rift_dir != "":
 				hud.rift.position = cam.unproject_position(foe_rig.chest_point()) - hud.rift.size * 0.5
 		Stage.FINISHER:
-			if _stage_t > 3.4:
+			if _stage_t > FINISH_HOLD:
 				_finish(true)
 		Stage.DEATH:
 			if _stage_t > 3.0:
@@ -675,6 +687,7 @@ func _footwork(dt: float) -> void:
 	# the foe turns to face at its own pace: heavy things are slow to come about
 	foe_rig.rotation.y = lerp_angle(foe_rig.rotation.y, atan2(to_foe.x, to_foe.z), 1.0 - exp(-dt * 7.0))
 
+const FINISH_HOLD := 2.8      # seconds from the killing blow to the first of the last words (was 3.4)
 func _finish(won: bool) -> void:
 	if _result_sent:
 		return

@@ -11,6 +11,16 @@ def scene(sid, *lines, once=True, new=False, title="", kind="", essential=False)
     for i, (who, text, *rest) in enumerate(lines):
         lid = "%s_%02d" % (sid, i + 1)
         L[lid] = {"speaker": who, "text": text, "dir": rest[0] if rest else ""}
+        if who == "forebear":
+            # the first of the house speaks with the body of the lineage, exactly as the knight does: the game picks
+            # <line>_m / <line>_f for speaker "player". "cast" tells tools/voices.py whose voice records it.
+            L[lid].update(speaker="player", cast="forebear")
+        elif who == "player" and sid in HEIR_SCENES:
+            L[lid]["cast"] = "heir"
+        if who == "player" and sid in ONE_BODY:
+            L[lid]["body"] = ONE_BODY[sid]      # only ever said by this body: one take, not two
+        if who == "kept":
+            L[lid]["by_body"] = True            # takes exist as <line>_m / <line>_f; <line>.ogg is the male one (see VOICE_BIBLE)
         if new:
             L[lid]["recorded"] = False
         ids.append(lid)
@@ -22,6 +32,9 @@ def scene(sid, *lines, once=True, new=False, title="", kind="", essential=False)
     if essential:
         S[sid]["essential"] = True
 N, LY, P, OR, AR, W = "narrator", "lyra", "player", "orren", "archivist", "witness"
+# Generation III's own scenes: the knight's lines in them are the Last Heir's (cast heir_m / heir_f), not the second generation's.
+HEIR_SCENES = ["gen3_arrive", "kept_approach", "kept_intro", "kept_beat", "monarch_g3_intro", "monarch_g3_death", "facility"]
+ONE_BODY = {"gen2_arrive_m": "m", "gen2_arrive_f": "f"}
 
 # ---------------------------------------------------------------- opening
 scene("opening",
@@ -160,9 +173,10 @@ scene("executioner_intro", ("executioner", "Your identity is unregistered.", "to
 scene("executioner_death", (LY, "That prison was switched back on from somewhere else. Someone is waking them. On purpose.", "alarmed, controlled"))
 scene("huntsman_intro", ("huntsman", "I have hunted what the old kings bred. I know one of their things when I see it.", "cold"), (P, "I am not theirs.", "even"),
       ("huntsman", "They all said that.", "tired"))
-scene("widow_intro", ("widow", "That stance. I knew the soldier who taught it.", "sharp, shaken"), (P, "I've never met you.", "guarded"),
-      ("widow", "No. But someone inside you has.", "bitter"))
-scene("widow_death", ("widow", "You fight like six people I buried. And none of them.", "breathless"), (LY, "She is yielding. Let her.", "urgent, soft"))
+# The Widow is mean, mocking and commanding (owner, 2026-11-27; voice Giselle at low stability). Rewritten harsher for that delivery.
+scene("widow_intro", ("widow", "That stance! I buried the soldier who taught it. Did he teach you how to die as well?", "contemptuous, loud"), (P, "I've never met you.", "guarded"),
+      ("widow", "No. But someone inside you has. Kneel, and I may let that one die quickly.", "mocking, a command"))
+scene("widow_death", ("widow", "Enough! You fight like someone I buried. Do not dare pity me.", "breathless, furious"), (LY, "She is yielding. Let her.", "urgent, soft"))
 scene("beast_intro", (LY, "That was grown, not born. Do not look for a man inside it.", "tight"))
 scene("beast_death", (LY, "They didn't pray here.", "hushed"), (P, "Then what was this place?", "low"), (LY, "A laboratory.", "plain"))
 scene("gravewarden_intro", ("gravewarden", "These are not tombs.", "old, patient"), (P, "What are they?", "quiet"),
@@ -364,7 +378,7 @@ wboss("azhurion", "victory", "azhurion", "A Moral Declined",
 wboss("forgotten_monarch", "approach", "monarch", "A Reasonable Man",
  (W, "He will be reasonable. That is the danger of him. I served reasonable men all my life.", "quiet"),
  (P, "And?", "flat"),
- (W, "And here I hang at your belt. What is decided in there is yours to decide. I shall only witness it.", "level"))
+ (W, "And here I drift at your shoulder. What is decided in there is yours to decide. I shall only witness it.", "level"))
 wboss("forgotten_monarch", "victory", "monarch", "As It Happened",
  (W, "Whatever you do next, I will set it down as it happened. That much I can still swear to.", "steady"))
 
@@ -376,10 +390,7 @@ BOSS["cathedral_beast"]["victory"].insert(0, "beast_death")
 S["beast_death"]["essential"] = True
 
 # ---- optional conversations in the sanctuary
-topic("mask", "The Mask",
- (P, "The mask. Was it your face?", "curious"),
- (W, "It was my office. One wore it to set down a judgment, so that the record had no face to bribe.", "plain"),
- (W, "It amused them, I think, to leave me in it.", "dry"))
+# ("The Mask" was removed 2026-11-27: the Witness is a free-roaming drone, not a mask carried on the belt.)
 topic("sword", "On Old Weapons",
  (P, "This sword. They say it is enchanted.", "doubtful"),
  (W, "It is a tool nobody remembers how to make. That is all an enchantment has ever been.", "dry"),
@@ -450,23 +461,33 @@ FOE_VOICE = {"ashen_sentinel": "sentinel", "hollow_executioner": "executioner", 
 SPEECH["the_kept"] = "C"
 FOE_VOICE["the_kept"] = "kept"
 # the last meeting ends on the recorded lines: the same takes, under the third generation's key
-S["monarch_g3_death"] = {"lines": list(S["monarch_death"]["lines"]), "once": True}
+# ...except the knight's answer, which is the Last Heir's own take.
+L["monarch_g3_death_03"] = dict(L["monarch_death_03"], cast="heir", recorded=False)
+S["monarch_g3_death"] = {"lines": S["monarch_death"]["lines"][:2] + ["monarch_g3_death_03"], "once": True}
 for foe, cat in SPEECH.items():
     n = sum(1 for l in L.values() if l["speaker"] == FOE_VOICE.get(foe, foe))
     assert not (cat == "A" and n), foe + " is a creature and must not speak"
     assert not (cat == "B" and n > 4), foe + " has too many lines for category B"
 COMPANION = {"discovery": {"scene": "witness_discovery", "region": "courtyard", "stage": 1}, "stage": STAGE, "boss": BOSS, "topics": TOPICS}
-# Cast. "inworld:<voice>" entries were CHOSEN BY THE OWNER from audition reel 4 (2026-11-26): the Witness, the male knight,
-# the narrator, and the plain human challenge before a fight (Sentinel, Executioner). Everything else is still the
-# provisional cast picked by name, which nobody has approved.
+# Cast. The owner's final casting is tools/cast_final.json (2026-11-27) on top of the voices approved earlier (Witness,
+# narrator, the second generation's knight, the plain challenge of the Sentinel and Executioner). "inworld:<voice>" is the
+# Inworld model (about 2 credits a take); a bare name is a preset on the second model (about half a credit).
+# NOT chosen by the owner, provisional: archivist (Onyx) and devourer (Luna). The Kept is the second generation's own voice.
 VOICES = {
- "witness": "inworld:Hamish (en)", "player_m": "inworld:Malcolm (en)", "narrator": "inworld:Graham (en)",
+ "witness": "inworld:Hamish (en)", "narrator": "inworld:Graham (en)",
+ "player_m": "inworld:Malcolm (en)", "player_f": "inworld:Victoria (en)",
+ "kept_m": "inworld:Malcolm (en)", "kept_f": "inworld:Victoria (en)",
  "sentinel": "inworld:Mortimer (en)", "executioner": "inworld:Mortimer (en)",
- # player_f = Victoria with the clarity treatment: CHOSEN BY THE OWNER (2026-11-26). Lyra, Orren and the Monarch below are the developer's picks from reel 4's measurements, not yet heard or approved:
- "lyra": "inworld:Claire (en)", "player_f": "inworld:Victoria (en)", "orren": "inworld:Callum (en)", "monarch": "inworld:Hades (en)",
- "archivist": "Onyx",
- "huntsman": "Brooks", "widow": "Sloane", "gravewarden": "Bram", "frostking": "Alistair",
- "devourer": "Luna"}
+ "archivist": "Onyx", "devourer": "Luna"}
+PITCH = {}        # semitones, applied after generation with tempo and formants kept (tools/voices.py)
+STABILITY = {}    # second model only
+for _role, _c in json.load(open("tools/cast_final.json")).items():
+    if isinstance(_c, dict):
+        VOICES[_role] = ("inworld:" if _c["model"] == "inworld" else "") + _c["voice"]
+        if _c.get("pitch"):
+            PITCH[_role] = _c["pitch"]
+        if "stability" in _c:
+            STABILITY[_role] = _c["stability"]
 # A line written after its speaker was last recorded is text-only until tools/voices.py records it: that tool keeps
 # assets/audio/vo/takes.json (file -> hash of the text it was recorded from). A new line counts as recorded when a
 # take of exactly its current text exists (for the knight's lines, the male take).
@@ -474,13 +495,13 @@ import hashlib, os
 _takes = json.load(open("assets/audio/vo/takes.json")) if os.path.exists("assets/audio/vo/takes.json") else {}
 for _lid, _l in L.items():
     if _l.get("recorded") is False:
-        _f = _lid + ("_m" if _l["speaker"] == "player" else "") + ".ogg"
+        _f = _lid + ("_" + _l.get("body", "m") if _l["speaker"] == "player" else "") + ".ogg"
         if _takes.get(_f) == hashlib.sha1(_l["text"].encode()).hexdigest()[:12]:
             del _l["recorded"]
 NAMES = {"narrator": "", "lyra": "Lyra", "player": "", "orren": "Orren", "archivist": "The Archivist", "sentinel": "Ashen Sentinel", "executioner": "Hollow Executioner",
  "huntsman": "Pale Huntsman", "widow": "Crimson Widow", "gravewarden": "Gravewarden", "frostking": "Frostbound King", "monarch": "Forgotten Monarch", "devourer": "Devourer of Names", "witness": "The Witness", "forebear": ""}
 NAMES["kept"] = "The Crownless Champion"
-OUT = {"lines": L, "scenes": S, "voices": VOICES, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}
+OUT = {"lines": L, "scenes": S, "voices": VOICES, "voice_pitch": PITCH, "voice_stability": STABILITY, "names": NAMES, "speech": SPEECH, "foe_voice": FOE_VOICE, "companion": COMPANION}
 for path in ["data/dialogue.json", "docs/DIALOGUE_DATABASE.json"]:   # the docs copy is the same file, kept for readers
     json.dump(OUT, open(path, "w"), indent=1)
 wl = [l for l in L.values() if l["speaker"] == "witness"]

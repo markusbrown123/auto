@@ -162,6 +162,8 @@ func build(config: Dictionary, as_foe: bool) -> void:
 				seg[k].visible = false
 			if cfg.get("parts") is Dictionary and not old_look:
 				wear_parts(cfg.parts)
+				if parts != null and cfg.has("parts_tint"):
+					parts.set_param(&"tint", Color(str(cfg.parts_tint)))
 			if cfg.has("skin_tint"):
 				skin.tint(Color(str(cfg.skin_tint)))
 	if cfg.get("cape", false) and skin == null:

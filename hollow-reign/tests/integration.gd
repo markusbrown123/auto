@@ -156,6 +156,7 @@ func _ready() -> void:
 	ok(bool(Game.profile.flags.get("gen1_complete", false)) and str(Game.profile.flags.get("inherited_weapon", "")) == str(Game.profile.equipped.weapon), "the hooks for the generational pass are written")
 	if m.current is TimeJump:
 		ok(m.current.years == 22 and m.current.from_gen == 1 and m.current.to_gen == 2 and int(m.current.road.arena.get_meta("generation", 0)) == 1, "time jump: twenty-two years, from the first generation's road")
+		ok(Sfx.current_music() != "" and TimeJump.VEIL_PEAK < 0.5 and m.current.still != null, "time jump: music under the years, and the weather never hides the fortress")
 		m.current.skip()
 	await get_tree().process_frame
 	await get_tree().process_frame

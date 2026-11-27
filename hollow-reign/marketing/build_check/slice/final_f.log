@@ -3,3 +3,4 @@
 [    3.7s game |     10s wall]   launch screen took 3.6 s
 [    3.7s game |     10s wall]   audio during 'launch': Master peak -200.0 mean -100.0 dB; Music peak -200.0 mean -100.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -200.0 mean -100.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [    3.7s game |     10s wall] STEP main menu
+[    5.7s game |     39s wall]   tap 'NEW LEGACY' at (313, 370), target 538 x 68

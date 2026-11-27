@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson", "t_corridor"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson", "t_corridor", "t_sfx"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -1724,3 +1724,53 @@ func t_corridor() -> void:
 	ok(absf(Corridor.side(0.4, 0.2)) >= Corridor.HALF + 0.2, "corridor: a roadside offset is pushed out")
 	Corridor.reset()
 	ok(FighterRig.ROAD_SPEED >= 1.0 and FighterRig.ROAD_SPEED <= 1.3, "road pace is in the 1.0 to 1.3 m/s range")
+
+# ------------------------------------------------------------------ sound engine: variation, polyphony, footsteps
+func t_sfx() -> void:
+	for pool: String in Sfx.POOLS:
+		var n: int = Sfx.POOLS[pool][1]
+		var seen := {}
+		var prev := 0
+		var repeated := false
+		for i in 300:
+			var k: int = Sfx._pick(pool, n)
+			repeated = repeated or k == prev
+			prev = k
+			seen[k] = true
+		ok(not repeated and seen.size() == n, "sfx %s: never the same variant twice in a row, all %d used" % [pool, n])
+		for i in range(1, n + 1):
+			if not ResourceLoader.exists("res://assets/audio/sfx/%s.wav" % (str(Sfx.POOLS[pool][0]) % i)):
+				ok(false, "sfx %s variant %d has a file" % [pool, i])
+	# polyphony: 60 whooshes 5 ms apart never leave more than the family limit sounding; the pool is never exceeded
+	Sfx._voices.clear()
+	var cap: int = Sfx.FAMILIES["whoosh"][0]
+	var worst := 0
+	var total := 0
+	for k in 60:
+		Sfx._voice("whoosh" if k % 3 else "layer", 1000 + k * 5, 900)
+		worst = maxi(worst, Sfx._active("whoosh", 1000 + k * 5))
+		total = maxi(total, Sfx._voices.size())
+	ok(worst <= cap, "sfx polyphony: whoosh voices capped at %d (peak %d)" % [cap, worst])
+	ok(total <= Sfx._pool.size(), "sfx polyphony: never more voices than players")
+	# retrigger gap
+	Sfx._gate_at.clear()
+	ok(Sfx._gate("whoosh", 5000) and not Sfx._gate("whoosh", 5030) and Sfx._gate("whoosh", 5100), "sfx: the retrigger gap swallows a too-quick second start")
+	# one footstep call is one step, on every surface; the old entry point routes to it
+	for surf in ["stone", "metal deck", "grass", "snow", "water"]:
+		Sfx._voices.clear()
+		Sfx._gate_at.clear()
+		var first := Sfx.footstep(surf, 1.6)
+		var second := Sfx.footstep(surf, 1.6)
+		ok(first and not second and Sfx._active("step", Sfx._now()) == 1, "sfx footstep %s: one call, one step" % surf)
+	Sfx._voices.clear()
+	Sfx._gate_at.clear()
+	Sfx.play("footstep", -6.0)
+	ok(Sfx._active("step", Sfx._now()) == 1, "sfx: the old footstep call plays one step")
+	for name in ["clash", "block", "parry_perfect", "guard_break", "hit_armor", "hit_flesh", "swing", "swing_heavy"]:
+		Sfx._gate_at.clear()
+		Sfx.play(name)
+	ok(Sfx._voices.size() >= 8, "sfx: every old combat name still plays")
+	for p: AudioStreamPlayer in Sfx._pool:
+		p.stop()
+	Sfx._voices.clear()
+	Sfx._gate_at.clear()

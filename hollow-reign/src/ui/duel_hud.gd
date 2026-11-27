@@ -532,7 +532,6 @@ func _ready() -> void:
 		if _struggle_cb.is_valid():
 			_struggle_cb.call())
 	rift = Rift.new()
-	rift.line = prompt
 	rift.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rift.size = Vector2(260, 260)
 	rift.visible = false
@@ -682,6 +681,7 @@ func _ready() -> void:
 	prompt = PromptLine.new()
 	root.add_child(prompt)           # under the pads and the bars (added later), over the swipe area; it takes no touch
 	cue.line = prompt
+	rift.line = prompt               # (rift was made above, before the line existed)
 	cue.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	cue.custom_minimum_size = Vector2(220, 220)
 	cue.offset_left = -110

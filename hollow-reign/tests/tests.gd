@@ -1830,15 +1830,28 @@ func t_free_combat() -> void:
 		ok(step >= 0.2 and step <= 0.30, "a light blade cuts every 0.22-0.30s (%.3fs)" % step)
 	var gs := Stats.compute(geared(2), Db.items, Db.classes)
 	ok(float(gs.swing_time) * DuelSim.CANCEL_FRAC > step * 1.3, "and the rate scales with the weapon's swing stat (greatsword %.2fs)" % (float(gs.swing_time) * DuelSim.CANCEL_FRAC))
-	# one swipe is queued, and the latest wins
+	# up to three swipes are queued in order; beyond that the newest replaces the last
 	var q := _held(true)
+	q.pl.max_stamina = 1000.0; q.pl.stamina = 1000.0
 	var qs: Array = []
 	q.ev.connect(func(n, d): if n == &"player_swing": qs.append(d.dir))
 	q.input_swipe("L"); run_for(q, 0.03)
 	q.input_swipe("U"); run_for(q, 0.03)
-	q.input_swipe("D")
-	run_for(q, 1.0)
-	ok(qs == ["L", "D"], "one swipe is queued and the latest wins (%s)" % str(qs))
+	q.input_swipe("D"); run_for(q, 0.03)
+	q.input_swipe("R"); run_for(q, 0.03)
+	q.input_swipe("UL")
+	run_for(q, 2.0)
+	ok(qs == ["L", "U", "D", "UL"], "three swipes queue in order, the newest replaces the last beyond that (%s)" % str(qs))
+	# swipes at about 7 a second all become cuts
+	var r := _held(true)
+	r.pl.max_stamina = 1000.0; r.pl.stamina = 1000.0
+	var rs: Array = []
+	r.ev.connect(func(n, d): if n == &"player_swing": rs.append(d.dir))
+	var rord := ["D", "UL", "U", "R", "L", "DR", "UR", "DL"]
+	for dd: String in rord:
+		r.input_swipe(dd); run_for(r, 0.133)
+	run_for(r, 2.0)
+	ok(rs == rord, "eight swipes 0.133 s apart land eight cuts in order (%s)" % str(rs))
 	# variety builds the count; the same line holds it once, then is read; a pause starts it over
 	var v := _held(true)
 	v.pl.max_stamina = 1000.0; v.pl.stamina = 1000.0

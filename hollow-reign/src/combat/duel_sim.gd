@@ -32,9 +32,11 @@ const BUFFER_TIME := 0.18
 ## Free cutting. A cut's time is the weapon's swing stat; its blade lands at CONTACT_FRAC of it, and from CANCEL_FRAC
 ## on, the rest (the recovery) is cut short by a queued swipe or dodge, or by the shield going up: so a flurry lands
 ## one cut every swing_time * CANCEL_FRAC seconds (0.22 s with a 0.26 s sword, 0.39 s with a 0.46 s greatsword).
-## One input is queued, the latest wins, and one queued during a cut never goes stale before that cut's cancel frame.
+## Up to QUEUE_MAX swipes are queued in order (beyond that the newest replaces the last), each thrown on the next cancel
+## frame; one queued during a cut never goes stale before that cut's cancel frame. A dodge replaces the whole queue.
 const CONTACT_FRAC := 0.6
 const CANCEL_FRAC := 0.85
+const QUEUE_MAX := 3          # swipes held while a cut plays (owner: every rapid swipe should be a cut)
 const BUFFER_SWING := 0.75
 const COMBO_PAUSE := 0.9         # seconds without a cut landing after which the variety count starts over
 const COMBO_POISE := 0.15        # more poise wear per cut for each step of the variety count
@@ -97,6 +99,7 @@ var p_roll := false
 var p_swing := {}        # pending attack swing {dir, contact, landed}
 var p_parry := {}        # {t, dir}
 var p_buffer := {}       # {kind, arg, t}
+var p_queue: Array = []  # swipes behind p_buffer, oldest first
 var p_regen_wait := 0.0
 var p_combo := 0
 var p_last_dir := ""
@@ -428,7 +431,14 @@ func input_swipe(dir: String) -> void:
 	if over or p_state == P.STRUGGLE:
 		return
 	if p_state != P.FREE:
-		p_buffer = {"kind": "swipe", "arg": dir, "t": time, "open": boss_open()}
+		var entry := {"kind": "swipe", "arg": dir, "t": time, "open": boss_open()}
+		if p_buffer.is_empty() or p_buffer.kind != "swipe":
+			p_buffer = entry
+			p_queue.clear()
+		elif p_queue.size() < QUEUE_MAX - 1:
+			p_queue.append(entry)
+		else:
+			p_queue[p_queue.size() - 1] = entry
 		return
 	if b_state == B.WINDUP:
 		if pl.stamina < PARRY_COST:
@@ -505,6 +515,7 @@ func input_dodge(side: int) -> void:
 		return
 	if p_state != P.FREE:
 		p_buffer = {"kind": "dodge", "arg": side, "t": time}
+		p_queue.clear()
 		return
 	if pl.stamina < 1.0:
 		_emit(&"exhausted")
@@ -612,13 +623,18 @@ func _tick_player(dt: float) -> void:
 		if not p_buffer.is_empty() and time - p_buffer.t <= (BUFFER_SWING if was == P.SWING else BUFFER_TIME):
 			var b := p_buffer
 			p_buffer = {}
+			if not p_queue.is_empty():
+				p_buffer = p_queue.pop_front()
+				p_buffer.t = time        # it waited its turn behind the cut now thrown: its age counts from here
 			if b.kind == "swipe":
 				_queued_open = b.get("open", false)
 				input_swipe(b.arg)
 				_queued_open = false
 			else:
 				input_dodge(b.arg)
-		p_buffer = {}
+		else:
+			p_buffer = {}
+			p_queue.clear()
 
 func _resolve_player_hit(dir: String) -> void:
 	if b_state == B.DEAD:
@@ -785,6 +801,7 @@ func _begin_struggle() -> void:
 	s_need = struggle_need()
 	s_taps = 0
 	p_buffer = {}
+	p_queue.clear()
 	b_state = B.STRUGGLE
 	b_t = STRUGGLE_TIME
 	_set_p(P.STRUGGLE, 1.0e9)
@@ -794,6 +811,7 @@ func _begin_struggle() -> void:
 func _end_struggle(won: bool) -> void:
 	_set_p(P.FREE, 0.0)
 	p_buffer = {}
+	p_queue.clear()
 	_emit(&"struggle_end", {"won": won})
 	if won:
 		stats["struggles_won"] = int(stats.get("struggles_won", 0)) + 1

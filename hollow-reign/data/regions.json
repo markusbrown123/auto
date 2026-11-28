@@ -24,7 +24,13 @@
       }
      ],
      "pouches": 1,
-     "checkpoint": true
+     "checkpoint": true,
+     "anchor": [
+      0.0,
+      3.0,
+      -68.0,
+      0.0
+     ]
     },
     {
      "prompt": "Beyond the rubble the path divides.",
@@ -50,7 +56,13 @@
        ]
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "anchor": [
+      0.0,
+      3.2,
+      -92.0,
+      0.0
+     ]
     },
     {
      "prompt": "A banner still flies on the barbican. Someone is standing under it, at attention.",
@@ -62,7 +74,13 @@
        "foe": "banneret"
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "anchor": [
+      0.0,
+      4.5,
+      -119.0,
+      0.0
+     ]
     },
     {
      "prompt": "A winch-house stands beside the inner gate. Its chain is rusted but whole.",
@@ -86,7 +104,13 @@
       }
      ],
      "pouches": 1,
-     "checkpoint": true
+     "checkpoint": true,
+     "anchor": [
+      0.0,
+      5.5,
+      -141.0,
+      0.0
+     ]
     },
     {
      "prompt": "The gate passage. It is narrow, and it is occupied.",
@@ -112,7 +136,13 @@
        "shards": 1
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "anchor": [
+      0.0,
+      5.5,
+      -152.0,
+      0.0
+     ]
     },
     {
      "prompt": "A chapel alcove survives against the keep wall. A single candle burns.",
@@ -124,7 +154,13 @@
       }
      ],
      "pouches": 1,
-     "checkpoint": true
+     "checkpoint": true,
+     "anchor": [
+      0.0,
+      6.2,
+      -184.0,
+      0.0
+     ]
     },
     {
      "prompt": "The inner ward. He is standing exactly where he was posted.",
@@ -137,7 +173,13 @@
        "optional": false
       }
      ],
-     "pouches": 1
+     "pouches": 1,
+     "anchor": [
+      0.0,
+      8.0,
+      -206.0,
+      0.0
+     ]
     }
    ]
   },

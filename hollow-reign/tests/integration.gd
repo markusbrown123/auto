@@ -176,13 +176,24 @@ func _ready() -> void:
 		m.current.skip()
 	await get_tree().process_frame
 	await get_tree().process_frame
-	ok(m.current is Approach and str(Game.run.get("region", "")) == "courtyard" and int(Game.run.stage) == 0, "new journey: the chamber leads out into the Courtyard")
-	var place: Node = m.current.backdrop if m.current is Approach else null
-	if m.current is Approach:
+	# the continuous Courtyard: the walk out is the road screen itself, down the hillside from the door (no Approach)
+	ok(m.current is Explore and m.current.route != null and m.current._walking_in and str(Game.run.get("region", "")) == "courtyard" and int(Game.run.stage) == 0,
+		"new journey: the chamber leads out into the Courtyard, on the hillside road")
+	var place: Node = m.current.backdrop if m.current is Explore else null
+	var from_door: bool = m.current is Explore and m.current.backdrop.rig.position.distance_to(CourtRoute.ENTRY) < 3.0
+	ok(from_door, "the walk begins at the door the chamber's passage comes out of (Stage 1's hand-off point)")
+	if m.current is Explore:
+		var w0: float = m.current.walked
+		await get_tree().create_timer(2.0).timeout
+		var moved: float = m.current.walked - w0
+		ok(moved > 1.6 and moved < 2.9, "the knight walks down the road at the road's pace (%.2f m in 2 s)" % moved)
 		m.current.skip()
-	await get_tree().process_frame
-	await get_tree().process_frame
-	ok(m.current is Explore and m.current.backdrop == place and is_instance_valid(place), "new journey: the walk ends on the first stop, in the same place (nothing rebuilt)")
+	for i in 900:
+		if m.current is Explore and m.current.layer != null and is_instance_valid(m.current.layer):
+			break
+		await get_tree().process_frame
+	ok(m.current is Explore and m.current.backdrop == place and is_instance_valid(place) and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(0)) < 0.3,
+		"new journey: the walk ends on the first stop, in the same place (nothing rebuilt)")
 	ok(Opening.seen_before(), "the opening is remembered as seen")
 	var loading := func() -> bool:
 		for c in get_tree().root.get_children():

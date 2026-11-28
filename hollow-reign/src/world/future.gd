@@ -12,6 +12,12 @@ extends RefCounted
 ## `fires`, `tint()`) are untouched. `--oldworld` (a dev flag) loads the earlier medieval layouts instead.
 
 static var old_world: bool = OS.get_cmdline_user_args().has("--oldworld")
+## Where `prop`, `lamp`, `tufts`, `ranges` and `sky` put what they make, when it is not the arena itself (the continuous
+## Courtyard, src/world/court_route.gd, builds each section under its own node so a section can be freed as a whole).
+static var into: Node3D = null
+
+static func _host(a: Node3D) -> Node3D:
+	return into if into != null and is_instance_valid(into) else a
 
 const MODEL := "res://assets/models/env_%s.glb"
 const LAYOUTS := ["ruin", "forest", "nave", "facade", "vault", "hall", "throne"]
@@ -156,9 +162,11 @@ class Kit:
 	var lk: Dictionary
 	var tools := {}
 	var rng := RandomNumberGenerator.new()
+	var into: Node3D               # where the merged meshes go (the arena unless a section is being built)
 
-	func _init(arena: Arena) -> void:
+	func _init(arena: Arena, parent: Node3D = null) -> void:
 		a = arena
+		into = parent if parent != null else Future._host(arena)
 		lk = Future.LOOKS[a.get_meta("future_look")]
 		rng.seed = hash(str(a.get_meta("future_look")) + "future")
 
@@ -189,7 +197,7 @@ class Kit:
 				"dim": mat = Look.glow(seam().darkened(0.45), 0.7)
 				"lamp": mat = Look.glow(Color(str(lk.lamp)).lerp(Color.WHITE, 0.25), 3.2)
 				_: mat = Future.built(a, "pale" if nm.begins_with("pale") else "alloy")
-			Highland._commit(a, "Fu_" + nm, tools[nm], mat, nm == "pale" or nm == "alloy")
+			Highland._commit(into, "Fu_" + nm, tools[nm], mat, nm == "pale" or nm == "alloy")
 
 # ---------------------------------------------------------------- shapes
 static func _box(sf: SurfaceTool, size: Vector3, at: Vector3, basis: Basis = Basis.IDENTITY) -> void:
@@ -202,10 +210,10 @@ static func _yaw(deg: float) -> Basis:
 
 ## A bulkhead wall from `from` to `to` on the ground: tall plates leaning back from the arena between alloy ribs, a
 ## flat cap, a kerb, and a line of light under the cap on some plates. `gaps` is the chance a plate is down.
-static func bulkhead(k: Kit, from: Vector3, to: Vector3, h: float, far: bool = true, gaps: float = 0.0, lean: float = 7.0) -> void:
+static func bulkhead(k: Kit, from: Vector3, to: Vector3, h: float, far: bool = true, gaps: float = 0.0, lean: float = 7.0, centre: Vector3 = Vector3.ZERO) -> void:
 	var dir := (to - from).normalized()
 	var out := Vector3(-dir.z, 0, dir.x)
-	if out.dot(from + to) < 0.0:
+	if out.dot(from + to - centre * 2.0) < 0.0:
 		var t := from
 		from = to
 		to = t
@@ -360,8 +368,8 @@ static func ring(k: Kit, at: Vector3, r: float, thick: float, a0: float = 0.5, a
 	var chan_sf := Highland._flat_tool()
 	Highland._arc(ring_sf, r, a0, a1, sec, 36)
 	Highland._arc(chan_sf, r, a0 + 0.08, a1 - 0.08, chan, 36)
-	Highland._commit(k.a, "FuRing", ring_sf, built(k.a, "pale"), not far).position = at
-	Highland._commit(k.a, "FuRingLight", chan_sf, Look.glow(k.seam(), float(k.lk.get("lit_e", 2.4))), false).position = at
+	Highland._commit(k.into, "FuRing", ring_sf, built(k.a, "pale"), not far).position = at
+	Highland._commit(k.into, "FuRingLight", chan_sf, Look.glow(k.seam(), float(k.lk.get("lit_e", 2.4))), false).position = at
 
 # ---------------------------------------------------------------- props, lights, land
 ## Stands a kit model on the ground at `pos`, `height` tall, its front turned to `yaw` degrees (0 faces +Z, the
@@ -394,7 +402,7 @@ static func prop(a: Arena, id: String, height: float, pos: Vector3, yaw: float =
 			return null
 	var holder := Node3D.new()
 	holder.name = "Fu_" + id
-	a.add_child(holder)
+	_host(a).add_child(holder)
 	holder.position = pos
 	var kit := id.begins_with("fu_") or id.begins_with("road_gate")
 	# the generated kit's models face +X as they come
@@ -435,7 +443,7 @@ static func lamp(a: Arena, at: Vector3, c: Color, energy: float, reach: float, f
 	l.omni_range = reach
 	l.omni_attenuation = 1.3
 	l.position = at
-	a.add_child(l)
+	_host(a).add_child(l)
 	if fire:
 		a.fires.append([l, energy, a.rng.randf() * 10.0])
 	return l
@@ -470,7 +478,7 @@ static func tufts(a: Arena, count: int, r0: float, r1: float) -> void:
 	mi.multimesh = mm
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	a.add_child(mi)
+	_host(a).add_child(mi)
 
 ## The country round an open arena: two ranges of hills inside the duel camera's far plane (120 m), drawn by their
 ## own light and thinned by hand (highland_far.gdshader), so they do not wash out in the arena's fog.
@@ -517,7 +525,7 @@ static func ranges(a: Arena, snowy: float = 0.0) -> void:
 	mi.mesh = sf.commit()
 	mi.material_override = mat
 	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-	a.add_child(mi)
+	_host(a).add_child(mi)
 
 ## The sky that is not Earth's, brought inside the duel camera's far plane: the banded planet low over the hills and
 ## the arc of the orbital ring (the high road's own shaders). Two draws.

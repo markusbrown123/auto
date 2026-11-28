@@ -12,6 +12,13 @@ extends Node3D
 ##   dormant(at) / wake()        dark and lying where it was left / lights in turn, rises, then follows
 ##   stowed(on)                  docked on the back plate, dark: for a scene that needs it out of frame
 ##   tuck(on)                    kept close in to the shoulder (cinematic close shots)
+## Companion behaviour on the way (Stage 1 / Stage 3 hand-off; see docs/AAA_STAGES.md):
+##   roam(on)                    free to orbit, lead ahead and inspect (off: held at the shoulder)
+##   set_points(screen, pts)     what it may drift over to and look at while the knight is near (world points)
+##   inspect(p, hold)            go and look at this point now (beside and above it, on the knight's side)
+##   fly_to(p) / fly_to(INF)     not attached to anyone: fly to a point and hover there (INF: hold where it is)
+##   continue_from(other)        take over another drone's place, speed and light (a new scene's knight is built with
+##                               a fresh drone; this makes it the same one, with no jump)
 ## One small unshadowed light at most (`lamp`); everything else is two emissive materials.
 
 signal woke
@@ -316,6 +323,41 @@ func wake(rise: float = RISE) -> void:
 	state = State.WAKING
 	_state_t = 0.0
 
+## Go and look at `p` now (only while it is free: attached, roaming, out of a fight).
+func inspect(p: Vector3, hold: float = 4.5) -> void:
+	_beat = "inspect"
+	mood = "inspect"
+	_poi = p
+	_poi_last = p
+	_beat_t = hold
+
+## The drone that last kept station by a knight, and where it was relative to that knight (and when): a drone built for
+## the next knight (a rebuilt rig, the next scene after a cut) takes up the same place instead of appearing at the
+## shoulder (see _follow). Static: it outlives the scene that freed the drone.
+static var _latest: WeakRef
+static var _last_rel := Vector3.INF
+static var _last_ms := -100000
+
+## With nobody to follow (rig == null): fly to `p` and hover there; Vector3.INF holds where it is.
+var hold_point := Vector3.INF
+func fly_to(p: Vector3) -> void:
+	hold_point = p
+
+## Become the drone `other` was: where it is, how it is moving, how lit and how attentive (no jump between scenes).
+func continue_from(other: WitnessDrone) -> void:
+	if other == null or not is_instance_valid(other):
+		return
+	global_position = other.global_position
+	_vel = other._vel
+	_placed = true
+	attention = other.attention
+	glow = other.glow
+	_ring_q = other._ring_q
+	_body_q = other._body_q
+	if state == State.DORMANT or state == State.WAKING:
+		state = State.FOLLOW
+		_tilt.basis = Basis.IDENTITY.scaled(Vector3.ONE * size)
+
 func stowed(on: bool = true) -> void:
 	if on:
 		state = State.STOWED
@@ -577,7 +619,11 @@ func _free_now() -> bool:
 
 func _follow(dt: float, calm: bool) -> void:
 	if rig == null:
-		# found but not yet with anyone: it holds where it rose
+		# found but not yet with anyone: it holds where it rose, or flies where it is sent (fly_to)
+		if hold_point != Vector3.INF:
+			var stiff0 := 6.0
+			_vel += ((hold_point - global_position) * stiff0 - _vel * 2.0 * sqrt(stiff0)) * dt
+			global_position += _vel * dt
 		if not calm:
 			global_position.y += sin(_clock * 1.7) * 0.012 * dt
 		return
@@ -599,11 +645,30 @@ func _follow(dt: float, calm: bool) -> void:
 	to = _clear_body(to, k)
 	to = _clear_view(to)
 	to.y = maxf(to.y, 0.5)
+	if not _placed:
+		# one Witness: a drone built for a new knight (a rebuilt rig, the next scene) starts where the last one was,
+		# not at the shoulder from nowhere
+		var prev: WitnessDrone = _latest.get_ref() if _latest != null else null
+		if prev != null and prev != self and is_instance_valid(prev) and prev.is_inside_tree() and prev.state == State.FOLLOW \
+				and prev.global_position.distance_to(to) < 6.0 * k:
+			continue_from(prev)
+			_latest = weakref(self)
+			return
+		if _last_rel != Vector3.INF and Time.get_ticks_msec() - _last_ms < 15000:
+			global_position = rig.global_transform * _last_rel
+			_vel = Vector3.ZERO
+			_placed = true
+			_latest = weakref(self)
+			return
 	if not _placed or global_position.distance_to(to) > 14.0 * k:
 		global_position = to
 		_vel = Vector3.ZERO
 		_placed = true
 		return
+	# what the next drone (a rebuilt knight, the next scene) starts from: this one's place beside its knight
+	_latest = weakref(self)
+	_last_rel = rig.global_transform.affine_inverse() * global_position
+	_last_ms = Time.get_ticks_msec()
 	# a critically damped spring: it arrives a little late and never overshoots; a soft one makes the long eased arcs
 	_vel += ((to - global_position) * stiff - _vel * 2.0 * sqrt(stiff)) * dt
 	global_position += _vel * dt

@@ -1007,7 +1007,13 @@ const CHAMBER_R := 6.2
 const CRADLE_AT := Vector3(-0.38, 0, -0.25)      # where the cradle model stands (its bed over the room's middle)
 const CRADLE_TALL := 1.75
 const CRADLE_YAW := 0.0
+## The room is built by src/world/chamber.gd (Stage 1 rebuild). `--oldchamber` (dev flag, for before/after
+## comparisons) builds the earlier room below instead.
+static var old_chamber: bool = OS.get_cmdline_user_args().has("--oldchamber")
 func _layout_chamber() -> void:
+	if not old_chamber:
+		Chamber.build(self)
+		return
 	var metal := Look.flat(Color("#2a2c2e"), 0.45, 0.85)
 	var amber := Look.glow(Color(theme.fire), 2.2)
 	var teal := Look.glow(Color("#5fe0c8"), 2.0)

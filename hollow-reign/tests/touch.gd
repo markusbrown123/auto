@@ -101,8 +101,9 @@ func _ready() -> void:
 	print("\ntouch:%s" % ("PASS" if failed == 0 else "%d FAILED" % failed))
 	get_tree().quit(1 if failed > 0 else 0)
 
-## The chamber's one interaction (owner, from an iPhone: the sword was behind a wall). Nothing built in the room
-## stands between the camera and the blade in the block, and a finger on the ring takes it up.
+## The chamber's sword (owner, from an iPhone: the sword was behind a wall). Nothing built in the room stands between
+## the camera and the sword standing in its holder (hilt, grip, the blade below it), and a finger on the ring takes it
+## up. (Stage 1: the holder moved beside the cradle; the points are the sword's own, not heights over the block.)
 func _sword_prompt() -> void:
 	var a := Awakening.new()
 	a.start_at = "sword"
@@ -110,8 +111,8 @@ func _sword_prompt() -> void:
 	await get_tree().create_timer(0.8).timeout
 	var cam_at: Vector3 = a.cam.global_position
 	var blocked: Array = []
-	for f: float in [0.7, 0.95, 1.2]:
-		var p: Vector3 = a._rack.global_position + Vector3(0, f, 0)
+	for f: float in [0.0, 0.25, 0.55]:
+		var p: Vector3 = a._hilt_top.lerp(a._hilt, minf(f * 4.0, 1.0)) + Vector3(0, -maxf(f - 0.25, 0.0), 0)
 		for mi: MeshInstance3D in a.arena.find_children("*", "MeshInstance3D", true, false):
 			if mi.mesh == null or not mi.is_visible_in_tree() or a._rack_sword.is_ancestor_of(mi):
 				continue

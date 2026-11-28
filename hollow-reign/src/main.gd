@@ -82,6 +82,31 @@ func _swap_live(next: Node) -> void:
 	if old:
 		old.queue_free()
 
+## A dissolve from the frame on screen to whatever `f` puts up, with no black between: for the continuous Courtyard,
+## whose road and duels are the same place (the frame is held as a picture and faded off the new one).
+func _cross_then(f: Callable, secs: float = 0.7) -> void:
+	if DisplayServer.get_name() == "headless":
+		f.call()
+		return
+	await RenderingServer.frame_post_draw
+	var img := get_viewport().get_texture().get_image()
+	var cl := CanvasLayer.new()
+	cl.layer = 49
+	add_child(cl)
+	var tr := UI.full(TextureRect.new())
+	tr.texture = ImageTexture.create_from_image(img)
+	tr.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	tr.stretch_mode = TextureRect.STRETCH_SCALE
+	tr.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cl.add_child(tr)
+	f.call()
+	if _fade_tw:
+		_fade_tw.kill()
+	_fader.color.a = 0.0
+	var tw := create_tween()
+	tw.tween_property(tr, "modulate:a", 0.0, secs).set_trans(Tween.TRANS_SINE)
+	tw.tween_callback(cl.queue_free)
+
 func _fade_then(f: Callable) -> void:
 	_fader.color = Color(FADE_BLACK, _fader.color.a)
 	var tw := create_tween()
@@ -147,6 +172,7 @@ func _menu_open(which: String) -> void:
 ## Leaves for a region behind a loading screen: building the road is one of the waits that is real.
 func _set_out(region: String, shortcut: bool) -> void:
 	Game.start_run(region, shortcut)
+	Explore.arrive = {"shortcut": true} if shortcut and int(Game.run.stage) > 0 else {}
 	LoadingScreen.show(region, show_stage)
 
 ## The start of a new journey. The opening plays the first time and is passed over after that (it can be watched
@@ -196,6 +222,7 @@ func show_arrival() -> void:
 ## is taken up where it was left.
 func resume() -> void:
 	KeptScene.sync_edge()
+	Explore.arrive = {}
 	var p: Dictionary = Game.profile
 	var tr: Dictionary = Game.transition_pending()
 	if not tr.is_empty():
@@ -431,6 +458,11 @@ func show_awakening() -> void:
 func show_approach() -> void:
 	if Game.run.is_empty():
 		Game.start_run(Db.regions[0].id)
+	if Explore.continuous() and int(Game.run.stage) == 0:
+		# the continuous Courtyard: out of the door on the hillside and down the road to the first stop, in one take
+		Explore.arrive = {"intro": true}
+		_swap(_explore(), 0.5, FADE_WHITE)
+		return
 	var ap := Approach.new()
 	ap.finished.connect(func(): _approach_done(ap))
 	_swap(ap, 0.5, FADE_WHITE)
@@ -488,13 +520,21 @@ func _explore() -> Explore:
 	e.moved_on.connect(_next_stage)
 	e.turned_back.connect(func():
 		Game.run = {}
+		Explore.arrive = {}
 		_fade_then(show_sanctuary))
 	return e
 
 func _next_stage() -> void:
+	var walk_on: bool = Explore.continuous()
 	if Game.advance_stage():
-		_fade_then(show_stage)
+		if walk_on and current is Explore and current.route != null:
+			current.travel()                # the same place: the knight walks on to the next stop
+		elif walk_on:
+			_cross_then(show_stage)         # back from a fight onto the road where it was fought
+		else:
+			_fade_then(show_stage)
 	else:
+		Explore.arrive = {}
 		_region_done()
 
 ## Into a duel. The road reads the foe's files ahead while the player is choosing, so in the ordinary case
@@ -508,7 +548,10 @@ func _enter_duel(o: Dictionary) -> void:
 			ready = false
 	if ready or not Game.profile.tutorial_done:
 		# (the first duel of a journey never shows one: whatever is still unread is read behind the fade)
-		_fade_then(func(): start_duel(o))
+		if Explore.continuous() and current is Explore:
+			_cross_then(func(): start_duel(o))
+		else:
+			_fade_then(func(): start_duel(o))
 		return
 	LoadingScreen.show(str(Game.run.get("region", "")), func(): start_duel(o), warm)
 
@@ -581,6 +624,7 @@ func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 		rewards["new_combos"] = Game.profile.combos.filter(func(id): return not _combos_before.has(id))
 		Overlays.victory(d, foe, rewards, sim, func():
 			if o.get("hidden", false):
+				Explore.arrive = {}
 				_fade_then(show_stage)      # a hidden duel is off the road: back to the stop it was found at
 			elif o.get("optional", false) or o.type == "fight" or Game.run.stage < Game.run_region().stages.size() - 1:
 				_next_stage()
@@ -590,6 +634,7 @@ func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 		# an ordinary defeat (never a fall of the house: that is Game.fall, at two authored moments only). The road is
 		# put back at the last checkpoint, at full health, and saved there before anything is shown, so that quitting
 		# from the death screen and pressing Continue lands at the same place.
+		Explore.arrive = {}
 		var summary := Game.on_death(true)
 		var region := str(summary.get("region", ""))
 		var actions := {"menu": func(): _fade_then(show_title)}
@@ -599,6 +644,7 @@ func _duel_done(d: Node, o: Dictionary, won: bool, sim: DuelSim) -> void:
 
 ## The road again from the last checkpoint (Game.on_death has already put the run there, at full health).
 func _retry_from_checkpoint(region: String) -> void:
+	Explore.arrive = {}           # the knight stands at the checkpoint's anchor
 	LoadingScreen.show(region, show_stage)
 
 func _region_done() -> void:
@@ -896,6 +942,19 @@ func _dev_boot() -> void:
 			Game.start_run("courtyard")
 			_args.erase("bot")
 			start_duel({"foe": "ashen_sentinel", "type": "boss"})
+		"routewalk":
+			# dev captures: the continuous Courtyard walked from the hillside door to the Sentinel's ward at the road's
+			# own pace, with the fights passed over (the duels are not this capture's). --pick=1:1,4:1 takes the way
+			# with that index at that stop (default: the first non-fight way, else the first); --from=<stop> begins there.
+			Game.profile.tutorial_done = true
+			Companion.mark_heard(Companion.discovery_id())
+			Game.start_run("courtyard")
+			if _args.has("from"):
+				Game.run.stage = int(_args.from)
+			else:
+				Explore.arrive = {"intro": true}
+			show_stage()
+			_route_walk()
 		"explore":
 			Game.start_run(_args.get("region", "courtyard"))
 			Game.run.stage = int(_args.get("stage", "1"))
@@ -1137,6 +1196,54 @@ func _dev_phase(node: Node, n: int) -> void:
 		await get_tree().create_timer(3.0).timeout
 	if is_instance_valid(d) and _args.has("seal_left"):
 		d.sim._seal_hit(d.sim.seal_left - int(_args.seal_left), "parry")
+
+## Dev (`--screen=routewalk`): takes a way at every stop of the continuous Courtyard as a player would, presses
+## through chests, the winch and the shrine, and walks past the fights.
+func _route_walk() -> void:
+	var picks := {}
+	for kv: String in str(_args.get("pick", "")).split(",", false):
+		var ab := kv.split(":")
+		picks[int(ab[0])] = int(ab[1])
+	var done := -1
+	while is_inside_tree():
+		await get_tree().create_timer(0.4).timeout
+		for b in find_children("*", "Button", true, false):
+			if b.is_visible_in_tree() and b.text in ["Open", "Pull", "Rest", "Onward"]:
+				await get_tree().create_timer(1.6).timeout
+				if is_instance_valid(b) and b.is_visible_in_tree():
+					b.pressed.emit()
+				break
+		if not current is Explore or current._leaving or current._staging or Story.busy or current.layer == null or not is_instance_valid(current.layer):
+			continue
+		if current.layer.get_child(0).modulate.a < 0.95 or int(Game.run.stage) == done:
+			continue
+		var stage := int(Game.run.stage)
+		done = stage
+		await get_tree().create_timer(3.5).timeout
+		var opts: Array = Game.stage_options()
+		var pick := -1
+		if picks.has(stage):
+			pick = clampi(int(picks[stage]), 0, opts.size() - 1)
+		else:
+			for i in opts.size():
+				if not opts[i].type in ["fight", "boss"]:
+					pick = i
+					break
+			if pick < 0:
+				pick = 0
+		var o: Dictionary = opts[pick]
+		print("ROUTEWALK stop %d: taking %s (%s)" % [stage + 1, str(o.label), str(o.type)])
+		if o.type == "boss":
+			print("ROUTEWALK the Sentinel's ward reached; walked %.0f m" % current.walked)
+			await get_tree().create_timer(4.0).timeout
+			get_tree().quit()
+			return
+		if o.type == "fight":
+			current._left_label = str(o.label)
+			current._leaving = true
+			_next_stage()
+		else:
+			current._choose(o, pick)
 
 ## Walks the cinematic road by itself, for recordings: takes the first choice at each stop and lets a bot fight.
 func _journey_bot() -> void:

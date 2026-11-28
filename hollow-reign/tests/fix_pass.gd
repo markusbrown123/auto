@@ -33,6 +33,7 @@ func run() -> void:
 	await _slice_look()
 	await _slice_road()
 	await _slice_save()
+	await _slice_continuous()
 	await _slice_camera()
 	_voices()
 	await _campaign()
@@ -82,7 +83,7 @@ func _slice_road() -> void:
 	var hid := false
 	for f in e.foes:
 		if f != null:
-			var p: Vector3 = (f as Node3D).position.rotated(Vector3.UP, -e.angle)
+			var p: Vector3 = ((f as Node3D).position - e.origin).rotated(Vector3.UP, -e.angle)
 			hid = hid or absf(rad_to_deg(atan2(p.x - cam.x, cam.z - p.z)) - knight_deg) < Explore.CLEAR_DEG - 0.01
 	ok(e.foes.size() == 2 and e.foes[0] != null and not hid, "road: at the gate passage the Rampart Breaker stands clear of the knight")
 	e.queue_free()
@@ -156,6 +157,113 @@ func _slice_road() -> void:
 	ok(distinct.size() >= 4 and ew.witness_shots.size() >= 6, "the Witness's first scene cuts between %d set-ups (%d cuts: %s)" % [distinct.size(), ew.witness_shots.size() - 1, str(ew.witness_shots)])
 	ew.queue_free()
 	Story.stop()
+	await frames()
+
+# ---------------------------------------------------------------- the continuous Courtyard (docs/TRAVERSAL_PLAN.md)
+func _wait_stop(m: Node, secs: float) -> bool:
+	var t := 0.0
+	while t < secs:
+		if m.current is Explore and not m.current._leaving and m.current.layer != null and is_instance_valid(m.current.layer) and m.current.layer.get_child(0).modulate.a > 0.5:
+			return true
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	return false
+
+func _press(root: Node, text: String, secs: float = 20.0) -> bool:
+	var t := 0.0
+	while t < secs:
+		for b: Button in root.find_children("*", "Button", true, false):
+			if b.is_visible_in_tree() and b.text.to_lower() == text.to_lower():
+				b.pressed.emit()
+				return true
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	return false
+
+func _slice_continuous() -> void:
+	if not CourtRoute.available():
+		ok(true, "continuous Courtyard: the kit is missing, the stop-by-stop road stands (skipped)")
+		return
+	Game.new_game()
+	Game.profile.tutorial_done = true
+	Companion.mark_heard(Companion.discovery_id())
+	for st in 7:
+		Companion.mark_heard("courtyard_%d" % st)
+	Companion.reset_cooldown()
+	var m: Node = load("res://src/main.tscn").instantiate()
+	add_child(m)
+	await frames()
+	Game.start_run("courtyard")
+	Game.run.stage = 3
+	Game.run.checkpoint = 3
+	m.show_stage()
+	ok(await _wait_stop(m, 30.0), "continuous: the road opens at the winch yard")
+	var e: Explore = m.current
+	ok(e.route != null and e.backdrop.rig.position.distance_to(CourtRoute.anchor(3)) < 0.3, "continuous: the knight stands at the anchor of the stop reached (run.stage)")
+	var held: Dictionary = {}
+	for k: int in e.route.sections:
+		held[k] = true
+	ok(held.has(3) and held.has(1) and held.has(4) and not held.has(0), "continuous: the sections either side are built, the hillside far behind is not (%s)" % str(held.keys()))
+	ok(e._props.has("3|Turn the Winch") and e._props.has("1|The Guardhouse") and e._props.has("5|Kneel"), "continuous: chests, the winch and the shrine stand in the place before they are used")
+	# the winch: walked to, pulled, and the road walked on to the next stop in the same place
+	var opts: Array = Game.stage_options()
+	e._choose(opts[0], 0)
+	ok(await _press(m, "Pull", 40.0), "continuous: the knight walks to the winch and it can be pulled")
+	await frames(30)
+	ok(await _press(m, "Onward", 20.0), "continuous: and the way on is offered")
+	ok(await _wait_stop(m, 60.0), "continuous: the walk ends at the next stop")
+	ok(m.current == e and int(Game.run.stage) == 4 and e.backdrop.rig.position.distance_to(CourtRoute.anchor(4)) < 0.3, "continuous: the same screen and place, at the gate passage (nothing rebuilt, no fade)")
+	ok(int(Game.profile.road.get("stage", -1)) == 4, "continuous: the stop reached is saved")
+	# the murder hole: a hidden room off the passage, walked into
+	opts = Game.stage_options()
+	var mh := -1
+	for i in opts.size():
+		if str(opts[i].label) == "The Murder Hole":
+			mh = i
+	ok(mh >= 0, "continuous: the murder hole is offered at the gate passage")
+	if mh >= 0:
+		e._choose(opts[mh], mh)
+		ok(await _press(m, "Open", 40.0), "continuous: the knight goes in through the gap to the chest in the hidden room")
+		var at: Vector3 = e.backdrop.rig.position
+		ok(at.x > 4.0 and not CourtRoute.floor_at(at.x, at.z).is_empty() and at.distance_to(CourtRoute.anchor(4)) > 8.0, "continuous: standing in the murder hole (%s)" % str(at.snapped(Vector3.ONE * 0.1)))
+		await frames(30)
+		_press(m, "Onward", 20.0)
+		ok(await _wait_stop(m, 90.0) and int(Game.run.stage) == 5, "continuous: out of the room and down the passage to the chapel")
+		ok(e.route.freed_log.has(1) and not e.route.sections.has(1), "continuous: the yard far behind has been freed (%s)" % str(e.route.freed_log))
+	# a fall: the checkpoint (the chapel, stop 6) at its anchor, through Retry
+	ok(Game.is_checkpoint("courtyard", 5) and int(Game.run.checkpoint) == 5, "continuous: the chapel is a checkpoint, passed")
+	Game.run.stage = 6
+	Game.on_death(true)
+	m._retry_from_checkpoint("courtyard")
+	await get_tree().create_timer(1.0).timeout
+	ok(await _wait_stop(m, 60.0) and m.current != e and int(Game.run.stage) == 5 and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(5)) < 0.3,
+		"continuous: Retry stands the knight at the checkpoint's anchor")
+	# Continue: the same
+	Game.run = {}
+	Game.load_game()
+	m.resume()
+	ok(await _wait_stop(m, 60.0) and int(Game.run.stage) == 5 and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(5)) < 0.3, "continuous: Continue stands the knight at the anchor of the stop saved")
+	# Turn Back: the sanctuary, and no road left to resume
+	_press(m.current, "Turn Back", 5.0)
+	await get_tree().create_timer(1.5).timeout
+	ok(m.current is Sanctuary and Game.run.is_empty(), "continuous: Turn Back leaves for the sanctuary")
+	# the winch gate: setting out from it walks in through the postern to the gate passage
+	m._set_out("courtyard", true)
+	await get_tree().create_timer(1.0).timeout
+	var e2 = m.current
+	ok(e2 is Explore and int(Game.run.stage) == 4 and e2._walking_in and e2.backdrop.rig.position.distance_to(CourtRoute.SHORTCUT_IN) < 3.0, "continuous: through the winch gate the road begins at the postern and walks to the gate passage")
+	ok(await _wait_stop(m, 60.0) and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(4)) < 0.3, "continuous: and stops there")
+	# a duel won on the road: the next screen walks on from where it was fought
+	Explore.arrive = {"from": 4, "label": "The Gate Passage", "at": CourtRoute.anchor(4) + Vector3(-1.0, 0, -6.0)}
+	Game.advance_stage()
+	m.show_stage()
+	await get_tree().create_timer(0.5).timeout
+	ok(m.current is Explore and m.current._walking_in and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(4) + Vector3(-1.0, 0, -6.0)) < 1.5, "continuous: after a fight the knight walks on from the place it was fought")
+	ok(await _wait_stop(m, 60.0) and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(5)) < 0.3, "continuous: to the next stop")
+	Story.stop()
+	Game.run = {}
+	Explore.arrive = {}
+	m.queue_free()
 	await frames()
 
 # ---------------------------------------------------------------- pouches, the road in the save

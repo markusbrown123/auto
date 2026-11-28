@@ -34,10 +34,13 @@ static func bearing(stage: int) -> float:
 	return stage * 0.85 - 0.4
 
 func _ready() -> void:
-	var region := Game.run_region()
 	var stage: int = Game.run.stage
 	angle = bearing(stage)
 	Game.save()                   # the road is saved at every stop reached: an app ended in the background comes back here
+	if continuous():
+		_route_ready()
+		return
+	var region := Game.run_region()
 	if adopted:
 		# the knight has just walked in, in this very place: keep it, and let the camera settle from where it is
 		backdrop = adopted
@@ -61,8 +64,19 @@ func _ready() -> void:
 			# the arrival is a slow turn of the view onto the road, not a swing: it starts gently, gathers, and settles
 			backdrop.cam_speed = 0.55
 			create_tween().tween_property(backdrop, "cam_speed", 1.6, 5.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+	_open_stop()
+
+## One stop's screen: its title and health, its line, the ways onward marked in the place and as cards, what lies
+## about (pouches, secrets), and whoever waits on a way. In the continuous Courtyard it is opened again, in the same
+## place, at every stop the knight walks to.
+func _open_stop() -> void:
+	var region := Game.run_region()
+	var stage: int = Game.run.stage
 	Sfx.ambience(str(region.amb))
 	Sfx.music_for("explore_" + str(region.id), "menu")
+	_leaving = false
+	if route:
+		_reset_stop()
 	layer = CanvasLayer.new()
 	add_child(layer)
 	var m := UI.margin(get_viewport(), 8)
@@ -117,7 +131,7 @@ func _ready() -> void:
 		if opts[i].has("foe"):
 			x = clear_x(x - 0.3) + 0.3
 		var at := _at(angle, Vector3(x - 0.3, 0, -4.6))
-		backdrop.add_prop("marker", at)
+		backdrop.add_prop("marker", at).set_meta("stop_ui", true)
 		markers.append(at)
 		_stand_foe(opts[i], at)
 		row.add_child(_card(opts[i], i))
@@ -176,7 +190,11 @@ func _say_aside(region_id: String, stage: int) -> void:
 	_aside = false
 
 func _at(a: float, v: Vector3) -> Vector3:
-	return v.rotated(Vector3.UP, a)
+	return origin + v.rotated(Vector3.UP, a)
+
+## A direction or an offset in the stop's own frame (no origin).
+func _rot(v: Vector3) -> Vector3:
+	return v.rotated(Vector3.UP, angle)
 
 ## The walking corridor of a stop (`Corridor`): from a few metres behind the knight (where the camera trails) to a way's
 ## marker, for each way onward; and, at the first stop, the line the knight has walked in on. Props the place builds
@@ -217,19 +235,31 @@ func _stand_foe(o: Dictionary, at: Vector3) -> void:
 	foes.append(null)
 	if not o.has("foe") or not Db.foes.has(str(o.foe)):
 		return
+	if route:
+		# (the continuous Courtyard stands them before the knight arrives, out of sight: see _stage_foes)
+		var key := "%d|%d" % [int(Game.run.stage), index]
+		if _staged.has(key) and is_instance_valid(_staged[key]):
+			foes[index] = _staged[key]
+			(foes[index] as Node3D).visible = true
+			return
 	var foe: Dictionary = Db.foes[str(o.foe)]
 	var files: Array = CineActor.foe_files(str(o.foe))
 	if o.type != "fight" or str(foe.rig.get("kind", "")) == "dragon":
 		_read_ahead(files, Callable())
 		return
 	_read_ahead(files, func():
+		if not is_inside_tree() or backdrop == null:
+			return
 		var f := FighterRig.new()
 		backdrop.props.add_child(f)
 		f.build(CineActor.foe_look(str(o.foe)), true)
-		f.position = at + _at(angle, Vector3(0, 0, -FOE_BEYOND))
+		f.position = at + _rot(Vector3(0, 0, -FOE_BEYOND))
 		f.rotation.y = angle + PI
 		f.time_scale = 0.6
-		foes[index] = f)
+		if route:
+			f.ground = CourtRoute.ground_y
+		if index < foes.size():
+			foes[index] = f)
 
 func _read_ahead(files: Array, then: Callable) -> void:
 	var pending: Array = []
@@ -252,6 +282,8 @@ func _read_ahead(files: Array, then: Callable) -> void:
 # ---------------------------------------------------------------- the Witness is found
 ## Where the fallen monument lies in this place (INF where the place has none).
 func _monument() -> Vector3:
+	if route:
+		return CourtRoute.MONUMENT if PropModel.exists("res://assets/models/env_statue_head.glb") else Vector3.INF
 	if backdrop.arena._theme_id == "courtyard" and PropModel.exists("res://assets/models/env_statue_head.glb"):
 		return Vector3(6.4, 0, -2.4)
 	return Vector3.INF
@@ -410,6 +442,7 @@ func _find_witness(region_id: String, stage: int) -> void:
 		backdrop.refresh_knight()
 		backdrop.rig.position = pos
 		backdrop.rig.rotation.y = angle
+		_knight_setup()
 	if relic:
 		relic.queue_free()
 		relic = null
@@ -423,7 +456,8 @@ func _scatter_pouches(frame: Control, n: int) -> void:
 	rng.seed = hash("%s|%d" % [Game.run.region, Game.run.stage])
 	for i in n:
 		var side := -1.0 if rng.randf() < 0.5 else 1.0
-		var at := _at(angle, Vector3(side * rng.randf_range(2.2, 4.2) - 0.3, 0, rng.randf_range(-6.5, -2.0)))
+		var reach := 6.5 if not route else float(CourtRoute.POUCH_REACH.get(int(Game.run.stage), 6.5))
+		var at := _at(angle, Vector3(side * rng.randf_range(2.2, 4.2) - 0.3, 0, rng.randf_range(-reach, -2.0)))
 		if Game.pouch_taken(i):
 			continue
 		var prop := backdrop.add_prop("pouch", at)
@@ -459,6 +493,8 @@ func _take_pouch(prop: Node3D, b: Button, index: int = 0) -> void:
 
 func _process(_dt: float) -> void:
 	_tick_secrets(_dt)
+	if route:
+		_route_tick(_dt)
 	_follow_cam()
 	# keep each pouch's tap target over its place in the world
 	for e in pouches:
@@ -472,6 +508,11 @@ func _walk_then(index: int, then: Callable, through: bool = false) -> void:
 	if _leaving:
 		return
 	_leaving = true
+	if route and through:
+		# the way on is walked from here along the road itself (travel), not to the marker and through it
+		create_tween().tween_property(layer.get_child(0), "modulate:a", 0.0, 0.4)
+		then.call()
+		return
 	var rig := backdrop.rig
 	var to: Vector3 = markers[index] if index < markers.size() else _at(angle, Vector3(0, 0, -4.0))
 	var dir := to - rig.position
@@ -505,6 +546,9 @@ var _cam_pull := 1.0              # 1: the follow camera at its own distance; le
 var _way := 0                     # which way onward the stop's last interaction was at
 func _follow_cam() -> void:
 	if _walk.is_empty() or backdrop == null or backdrop.rig == null:
+		return
+	if route:
+		_route_cam()
 		return
 	var rig := backdrop.rig
 	var u: float = float(_walk.u) if not Game.settings.reduce_motion else 0.0
@@ -541,6 +585,9 @@ func _reveal_then(index: int, then: Callable) -> void:
 	rig.footsteps = true
 	foe.rotation.y = atan2(dir.x, dir.z)
 	foe.time_scale = 1.0
+	if route:
+		# after the fight the knight walks on from where it was fought
+		arrive = {"from": int(Game.run.stage), "label": _left_label, "at": foe.position}
 	var tw := create_tween()
 	tw.tween_property(rig, "position", rig.position + dir * 0.3, FighterRig.road_time(dir.length() * 0.3))
 	# past the knight, low, and to the side they are not walking on: nothing of theirs crosses the lens
@@ -577,11 +624,16 @@ func _card(o: Dictionary, index: int = 0) -> Button:
 ## The choices are on screen: not faded out for a line being spoken or a staged moment. A faded control still takes
 ## touches, so a tap low on the screen during the Witness's scene or a discovery would otherwise pick a way unseen.
 func _shown() -> bool:
+	if layer == null or not is_instance_valid(layer):
+		return false
 	var ui: Control = layer.get_child(0)
 	return ui.visible and ui.modulate.a > 0.5 and not _staging and not _leaving
 
 func _choose(o: Dictionary, index: int = 0) -> void:
 	_idle = 0.0
+	_left_label = str(o.get("label", ""))
+	if route and o.type in ["fight", "boss"] and not (index < foes.size() and foes[index] != null):
+		arrive = {"from": int(Game.run.stage), "label": _left_label, "at": markers[index] if index < markers.size() else backdrop.rig.position}
 	if _aside:
 		_aside = false
 		Story.stop()              # the player has heard enough: the remark gives way to what they chose
@@ -600,16 +652,22 @@ func _interact(o: Dictionary, index: int = 0) -> void:
 	layer.get_child(0).visible = false
 	# (set to the side of the line to its marker, so the knight walks on past it afterwards and not through it)
 	_way = index
-	var mx := 0.9
-	if index < markers.size():
-		mx = (markers[index] as Vector3).rotated(Vector3.UP, -angle).x + 3.0
-	var spot := _at(angle, Vector3(mx, 0, -2.4))
-	var prop: Node3D = _shrine(spot) if o.type == "shrine" else backdrop.add_prop(o.type, spot)
-	prop.rotation.y = angle
-	if o.type == "shrine":
-		backdrop.move_camera(spot + _at(angle, Vector3(2.0, 1.25, 3.7)), spot + Vector3(0, 1.25, 0))      # the whole monument, ring and all
+	var prop: Node3D
+	if route:
+		prop = await _route_interact(o, index)
+		if not is_inside_tree():
+			return
 	else:
-		backdrop.move_camera(spot + _at(angle, Vector3(1.7, 1.3, 2.8)), spot + Vector3(0, 0.6, 0))
+		var mx := 0.9
+		if index < markers.size():
+			mx = ((markers[index] as Vector3) - origin).rotated(Vector3.UP, -angle).x + 3.0
+		var spot := _at(angle, Vector3(mx, 0, -2.4))
+		prop = _shrine(spot) if o.type == "shrine" else backdrop.add_prop(o.type, spot)
+		prop.rotation.y = angle
+		if o.type == "shrine":
+			backdrop.move_camera(spot + _rot(Vector3(2.0, 1.25, 3.7)), spot + Vector3(0, 1.25, 0))      # the whole monument, ring and all
+		else:
+			backdrop.move_camera(spot + _rot(Vector3(1.7, 1.3, 2.8)), spot + Vector3(0, 0.6, 0))
 	var verb: String = {"treasure": "Open", "shrine": "Rest", "lever": "Pull"}[o.type]
 	var l2 := CanvasLayer.new()
 	add_child(l2)
@@ -887,6 +945,8 @@ func _tell(kind: String, at: Vector3) -> Node3D:
 	return n
 
 func _quiet() -> bool:
+	if layer == null or not is_instance_valid(layer):
+		return false
 	var ui: Control = layer.get_child(0)
 	return ui.visible and ui.modulate.a > 0.95 and not _leaving and not _staging and (not Story.busy or _aside)
 
@@ -1082,6 +1142,7 @@ func _challenge(s: Dictionary, at: Vector3) -> void:
 		if not is_inside_tree():
 			return
 	_leaving = true
+	arrive = {}              # a hidden duel comes back to this very stop
 	fight.emit(Secrets.duel_option(s))
 
 ## Dev captures: find the named secret of this stop after `after` seconds, as a touch would.
@@ -1106,3 +1167,396 @@ func _witness_points() -> Array:
 		if n is Node3D and is_instance_valid(n):
 			pts.append((n as Node3D).global_position if (n as Node3D).is_inside_tree() else (n as Node3D).position)
 	return pts
+
+# ================================================================ the continuous Courtyard (docs/TRAVERSAL_PLAN.md)
+## In the Courtyard the road is one place (src/world/court_route.gd): this screen builds it once, stands the knight
+## at the anchor of `Game.run.stage` (or walks them in, see `arrive`), and from then on walks them along the road
+## from stop to stop at FighterRig.ROAD_SPEED with the camera behind them. A stop is where the walk pauses for the
+## choices; nothing is rebuilt and nothing fades between stops. Other regions keep the stop-by-stop screen above.
+
+## How the next road screen of the Courtyard begins (set before the screen is made, emptied when it is read):
+## {} at the anchor of run.stage (Retry, Continue, a hidden duel's return); {"intro": true} out of the door on the
+## hillside; {"shortcut": true} through the winch gate; {"from": stage, "label": way, "at": where} on from the place
+## a fight was won.
+static var arrive := {}
+signal _path_done
+var route: CourtRoute
+var origin := Vector3.ZERO        # the stop's anchor (the old screens stand at the world's origin)
+var _left_label := ""             # the way the knight took from this stop
+var _staged := {}                 # "stage|option index" -> the foe standing there (hidden until out of sight)
+var _props := {}                  # "stage|label" -> the chest, lever or shrine standing in the place
+var _left_foes: Array = []        # foes of stops already left (they stay where they stood)
+var _path := PackedVector3Array()
+var _path_cum := PackedFloat32Array()
+var _path_d := 0.0
+var _path_then := Callable()
+var _cam_yaw := 0.0
+var _walking_in := false
+var _cost_t := 0.0
+var _cost := false
+var _occl_was := false
+var walked := 0.0                 # metres walked on this screen (tests, the report)
+
+## Whether this road is walked as one continuous place: the Courtyard, with its kit present, the filmed road off.
+static func continuous() -> bool:
+	return not Game.run.is_empty() and str(Game.run.get("region", "")) == "courtyard" and CourtRoute.available() \
+		and not (Game.settings.cine_road and CineRoad.available("courtyard"))
+
+func _route_ready() -> void:
+	var stage: int = int(Game.run.stage)
+	_cost = OS.get_cmdline_user_args().has("--routecost")
+	angle = CourtRoute.anchor_yaw(stage)
+	origin = CourtRoute.anchor(stage)
+	var how: Dictionary = arrive
+	arrive = {}
+	var start := origin
+	var leg: Array = []
+	if how.has("intro") and stage == 0:
+		start = CourtRoute.ENTRY      # HOOK(Stage 1): the chamber's exit passage ends here
+		leg = CourtRoute.leg_points(-1, "intro")
+	elif how.has("shortcut"):
+		start = CourtRoute.SHORTCUT_IN
+		leg = CourtRoute.leg_points(-1, "shortcut")
+	elif how.has("from") and int(how.from) == stage - 1:
+		start = how.at
+		leg = CourtRoute.leg_points(stage - 1, str(how.label))
+	route = CourtRoute.new()
+	route.name = "Route"
+	backdrop = route.make_backdrop()
+	add_child(backdrop)
+	route.setup(start)
+	backdrop.refresh_knight()
+	_knight_setup()
+	backdrop.cam.make_current()
+	_occl_was = get_viewport().use_occlusion_culling
+	get_viewport().use_occlusion_culling = true
+	_world_props()
+	var rig := backdrop.rig
+	rig.position = Vector3(start.x, CourtRoute.ground_y(start.x, start.z), start.z)
+	_stage_foes(stage, true)
+	if leg.is_empty():
+		rig.rotation.y = angle
+		backdrop.cam_fov = 50.0
+		backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK), true)
+		_open_stop()
+		return
+	if leg.size() > 1 and Vector2(start.x, start.z).distance_to(Vector2(leg[0].x, leg[0].z)) < 0.8:
+		leg.pop_front()
+	var first: Vector3 = leg[0]
+	rig.rotation.y = atan2(-(first.x - start.x), -(first.z - start.z))
+	_cam_yaw = rig.rotation.y
+	var b := Basis(Vector3.UP, _cam_yaw)
+	backdrop.cam_fov = 48.0
+	backdrop.move_camera(rig.position + b * Vector3(0.9, 1.6, 3.9), rig.position + b * Vector3(-0.2, 1.3, -3.0), true)
+	Sfx.ambience(str(Game.run_region().amb))
+	Sfx.music_for("explore_courtyard", "menu", 2.5)
+	_walking_in = true
+	_walk_path(leg, func():
+		_walking_in = false
+		# the line spoken on the way out (the Awakening's) is let finish before the choices come up
+		var left := 14.0
+		while Story.busy and left > 0.0 and is_inside_tree():
+			await get_tree().process_frame
+			left -= get_process_delta_time()
+		if is_inside_tree():
+			_open_stop())
+
+func _exit_tree() -> void:
+	if route and is_inside_tree():
+		get_viewport().use_occlusion_culling = _occl_was
+
+## The knight stands on the place's own ground (feet, slope, what is underfoot).
+func _knight_setup() -> void:
+	if route == null or backdrop.rig == null:
+		return
+	backdrop.rig.ground = CourtRoute.ground_y
+	backdrop.rig.surface_id = CourtRoute.surface_at(backdrop.rig.position)
+
+## Ends the walk in (dev captures, tests, a player who taps SKIP): the knight is put at the stop.
+func skip() -> void:
+	if not _path.is_empty():
+		Story.stop()
+		_path_d = _path_cum[_path_cum.size() - 1]
+
+## The road is walked on to the stop `Game.run.stage` (already advanced by the router) by the way just taken.
+func travel() -> void:
+	var stage: int = int(Game.run.stage)
+	var leg := CourtRoute.leg_points(stage - 1, _left_label)
+	angle = CourtRoute.anchor_yaw(stage)
+	origin = CourtRoute.anchor(stage)
+	_stage_foes(stage, false)
+	if layer:
+		create_tween().tween_property(layer.get_child(0), "modulate:a", 0.0, 0.4)
+	_walk_path(leg, _open_stop)
+
+## What the last stop left on the screen is taken away (its foes stay standing where they were).
+func _reset_stop() -> void:
+	Game.save()
+	if layer and is_instance_valid(layer):
+		layer.queue_free()
+	for c: Node in backdrop.props.get_children():
+		if c.has_meta("stop_ui"):
+			c.queue_free()
+	for e: Array in pouches:
+		if is_instance_valid(e[0]):
+			e[0].queue_free()
+	for sp: Dictionary in spots:
+		if is_instance_valid(sp.get("node")):
+			sp.node.queue_free()
+	for f in foes:
+		if f != null and is_instance_valid(f):
+			_left_foes.append(f)
+	markers.clear()
+	pouches.clear()
+	spots.clear()
+	foes.clear()
+	_order.clear()
+	_idle = 0.0
+	_aside = false
+	_staging = false
+	if _cost:
+		get_tree().create_timer(2.5).timeout.connect(func():
+			if is_inside_tree():
+				print("ROUTECOST stop %d at %s: %s" % [int(Game.run.stage) + 1, str(backdrop.rig.position.snapped(Vector3.ONE * 0.1)), CourtRoute.cost_line()]))
+	_stage_foes(int(Game.run.stage) + 1, false)
+
+## Walks the knight from where they are through `points` (world; heights are the ground's), then calls `then`.
+func _walk_path(points: Array, then: Callable) -> void:
+	_leaving = true
+	var rig := backdrop.rig
+	var pts: Array = [rig.position]
+	pts.append_array(points)
+	_path = CourtRoute.path(pts)
+	_path_cum = PackedFloat32Array()
+	var d := 0.0
+	_path_cum.append(0.0)
+	for i in _path.size() - 1:
+		d += _path[i].distance_to(_path[i + 1])
+		_path_cum.append(d)
+	_path_d = 0.0
+	_path_then = then
+	_cam_yaw = rig.rotation.y if _walk.is_empty() else _cam_yaw
+	rig.walking = true
+	rig.footsteps = true
+	_walk = {"u": 0.0}
+
+func _sample(d: float) -> Vector3:
+	var n := _path_cum.size()
+	if n == 0:
+		return backdrop.rig.position
+	var lo := 0
+	var hi := n - 1
+	while hi - lo > 1:
+		var mid := (lo + hi) / 2
+		if _path_cum[mid] <= d:
+			lo = mid
+		else:
+			hi = mid
+	var seg := maxf(_path_cum[hi] - _path_cum[lo], 0.0001)
+	return _path[lo].lerp(_path[hi], clampf((d - _path_cum[lo]) / seg, 0.0, 1.0))
+
+func _route_tick(dt: float) -> void:
+	if backdrop == null or backdrop.rig == null:
+		return
+	var rig := backdrop.rig
+	if not _path.is_empty():
+		var total: float = _path_cum[_path_cum.size() - 1]
+		var step := FighterRig.ROAD_SPEED * dt
+		_path_d = minf(_path_d + step, total)
+		walked += step
+		var p := _sample(_path_d)
+		var ahead := _sample(minf(_path_d + 1.1, total))
+		rig.position = p
+		var dir := ahead - p
+		if Vector2(dir.x, dir.z).length() > 0.05:
+			rig.rotation.y = lerp_angle(rig.rotation.y, atan2(-dir.x, -dir.z), 1.0 - exp(-dt * 4.5))
+		_walk.u = _path_d / maxf(total, 0.01)
+		rig.surface_id = CourtRoute.surface_at(p)
+		if _cost:
+			_cost_t += dt
+			if _cost_t > 2.0:
+				_cost_t = 0.0
+				print("ROUTECOST walk at %s (section %d): %s" % [str(p.snapped(Vector3.ONE * 0.1)), route.zone, CourtRoute.cost_line()])
+		if _path_d >= total:
+			_path = PackedVector3Array()
+			_path_cum = PackedFloat32Array()
+			rig.walking = false
+			_walk = {}
+			# the knight settles facing the way the stop looks
+			create_tween().tween_property(rig, "rotation:y", rig.rotation.y + wrapf(angle - rig.rotation.y, -PI, PI), 0.8).set_trans(Tween.TRANS_SINE)
+			backdrop.cam_speed = 0.8
+			create_tween().tween_property(backdrop, "cam_speed", 1.6, 3.0)
+			backdrop.move_camera(_at(angle, CAM_POS), _at(angle, CAM_LOOK))
+			var then := _path_then
+			_path_then = Callable()
+			_path_done.emit()
+			if then.is_valid():
+				then.call()
+	route.update(rig.position)
+	# whoever waits further on stands where they will be met once nobody is looking
+	for key: String in _staged:
+		var f = _staged[key]
+		if f != null and is_instance_valid(f) and not f.visible and not _seen(f.global_position):
+			f.visible = true
+
+## Whether a figure standing at `p` would be seen from the camera now (in the frame, near enough, nothing between).
+func _seen(p: Vector3) -> bool:
+	var cam := backdrop.cam
+	var head := p + Vector3(0, 1.3, 0)
+	if cam.global_position.distance_to(head) > 90.0:
+		return false
+	if not cam.is_position_in_frustum(head) and not cam.is_position_in_frustum(p + Vector3(0, 0.2, 0)):
+		return false
+	return not _blocked(head) or not _blocked(p + Vector3(0, 0.4, 0))
+
+func _blocked(p: Vector3) -> bool:
+	return not CamFollow.sight_clear(backdrop.rig, [p], backdrop.cam.global_position)
+
+## The camera that walks with the knight down the road: behind and to the sword side, a little above, looking ahead
+## along the way; it comes round behind a turn slowly, and in front of anything that would come between.
+func _route_cam() -> void:
+	var rig := backdrop.rig
+	var dt := get_process_delta_time()
+	_cam_yaw = lerp_angle(_cam_yaw, rig.rotation.y, 1.0 - exp(-dt * 1.4))
+	var b := Basis(Vector3.UP, _cam_yaw)
+	var u: float = float(_walk.get("u", 0.0)) if not Game.settings.reduce_motion else 0.0
+	var eye := rig.position + b * Vector3(1.05 - 0.3 * u, 1.55 + 0.15 * u, 3.9)
+	var look := rig.position + b * Vector3(-0.25, 1.25, -3.2)
+	backdrop.cam_fov = 48.0
+	backdrop.cam_speed = 2.4
+	var head := rig.position + Vector3(0, 1.6 * rig.scale.y, 0)
+	var clear := CamFollow.clear_from(rig, [head, rig.position + Vector3(0, 1.15 * rig.scale.y, 0)], eye, 0.9)
+	_cam_pull = lerpf(_cam_pull, clear, 0.5 if clear < _cam_pull else 0.03)
+	eye = head.lerp(eye, _cam_pull)
+	if _cam_pull < 0.98:
+		backdrop.cam_speed = 7.0
+	backdrop.move_camera(eye, look)
+
+## A point in the frame of another stop of the road.
+static func _frame_at(stage: int, v: Vector3) -> Vector3:
+	return CourtRoute.anchor(stage) + v.rotated(Vector3.UP, CourtRoute.anchor_yaw(stage))
+
+static func _options_at(stage: int) -> Array:
+	var keep: int = int(Game.run.stage)
+	Game.run.stage = stage
+	var o: Array = Game.stage_options()
+	Game.run.stage = keep
+	return o
+
+static func _marker_x(opts: Array, i: int) -> float:
+	var x := (float(i) - (opts.size() - 1) * 0.5) * 3.2
+	if opts[i].has("foe"):
+		x = clear_x(x - 0.3) + 0.3
+	return x - 0.3
+
+## The foes of a stop of the road are stood where they will be met, before the knight gets there: at once when `now`
+## (the screen is being opened behind a transition), otherwise hidden until the place is out of the camera's sight.
+func _stage_foes(stage: int, now: bool) -> void:
+	var n: int = Game.run_region().stages.size()
+	if stage < 0 or stage >= n:
+		return
+	var opts := _options_at(stage)
+	for i in opts.size():
+		var o: Dictionary = opts[i]
+		var key := "%d|%d" % [stage, i]
+		if _staged.has(key) or o.type != "fight" or not o.has("foe") or not Db.foes.has(str(o.foe)):
+			continue
+		if str(Db.foes[str(o.foe)].rig.get("kind", "")) == "dragon":
+			continue
+		_staged[key] = null
+		var at := _frame_at(stage, Vector3(_marker_x(opts, i), 0, -4.6 - FOE_BEYOND))
+		at.y = CourtRoute.ground_y(at.x, at.z)
+		var yaw := CourtRoute.anchor_yaw(stage) + PI
+		var foe_id := str(o.foe)
+		_read_ahead(CineActor.foe_files(foe_id), func():
+			if not is_inside_tree() or backdrop == null:
+				return
+			var f := FighterRig.new()
+			backdrop.props.add_child(f)
+			f.build(CineActor.foe_look(foe_id), true)
+			f.position = at
+			f.rotation.y = yaw
+			f.time_scale = 0.6
+			f.ground = CourtRoute.ground_y
+			f.visible = now or not _seen(at)
+			_staged[key] = f)
+
+## The chests, levers and the shrine of the whole road stand in the place from the start, opened or pulled already
+## if they were; using one walks the knight to it.
+func _world_props() -> void:
+	var n: int = Game.run_region().stages.size()
+	for i in n:
+		var opts := _options_at(i)
+		var raw: Array = Game.run_region().stages[i].options
+		var seen := {}
+		var list: Array = []
+		for j in opts.size():
+			list.append([opts[j], j, opts.size(), opts])
+		for o2: Dictionary in raw:
+			list.append([o2, -1, 0, []])
+		for e: Array in list:
+			var o: Dictionary = e[0]
+			if not o.type in ["treasure", "lever", "shrine"] or seen.has(str(o.label)):
+				continue
+			var sp := CourtRoute.spot(i, str(o.label))
+			if int(e[1]) < 0 and sp.is_empty():
+				continue
+			seen[str(o.label)] = true
+			var at: Vector3
+			var face := CourtRoute.anchor_yaw(i)
+			if not sp.is_empty():
+				at = sp.prop
+				face = atan2(sp.stand.x - at.x, sp.stand.z - at.z)
+			else:
+				at = _frame_at(i, Vector3(_marker_x(e[3], int(e[1])) + 3.0, 0, -2.4))
+			at.y = CourtRoute.ground_y(at.x, at.z)
+			var prop: Node3D = _shrine(at) if o.type == "shrine" else backdrop.add_prop(str(o.type), at)
+			prop.rotation.y = face
+			var keep: int = int(Game.run.stage)
+			Game.run.stage = i
+			var looted: bool = o.type == "treasure" and Game.profile.get("flags", {}).has(Game._chest_flag(o))
+			Game.run.stage = keep
+			if looted and prop.get_node_or_null("Lid"):
+				prop.get_node("Lid").rotation.x = -1.9
+			if o.type == "lever" and Game.profile.get("flags", {}).has(str(o.get("flag", ""))) and prop.get_node_or_null("Arm"):
+				prop.get_node("Arm").rotation.z = -0.6
+			_props["%d|%s" % [i, str(o.label)]] = prop
+
+## Using a chest, a lever or the shrine of the road: the knight walks to it (into the guardhouse, through the gap
+## into the murder hole), the camera frames it, and the thing standing there is the one that is used.
+func _route_interact(o: Dictionary, index: int) -> Node3D:
+	var stage: int = int(Game.run.stage)
+	var key := "%d|%s" % [stage, str(o.label)]
+	var prop: Node3D = _props.get(key)
+	var sp := CourtRoute.spot(stage, str(o.label))
+	if prop == null or not is_instance_valid(prop):
+		var mx := 0.9
+		if index < markers.size():
+			mx = ((markers[index] as Vector3) - origin).rotated(Vector3.UP, -angle).x + 3.0
+		var at := _at(angle, Vector3(mx, 0, -2.4))
+		prop = _shrine(at) if o.type == "shrine" else backdrop.add_prop(str(o.type), at)
+		prop.rotation.y = angle
+		_props[key] = prop
+	var stand: Vector3 = sp.stand if not sp.is_empty() else prop.global_position + _rot(Vector3(-0.2, 0, 1.3))
+	var via: Array = sp.get("via", [])
+	var walk: Array = via.duplicate()
+	walk.append(stand)
+	_walk_path(walk, Callable())
+	await _path_done
+	if not is_inside_tree():
+		return prop
+	_leaving = false
+	var to := prop.global_position - backdrop.rig.position
+	create_tween().tween_property(backdrop.rig, "rotation:y", backdrop.rig.rotation.y + wrapf(atan2(-to.x, -to.z) - backdrop.rig.rotation.y, -PI, PI), 0.6)
+	var back := (stand - prop.global_position)
+	back.y = 0.0
+	back = back.normalized()
+	var side := back.rotated(Vector3.UP, PI * 0.5)
+	var tall: bool = o.type == "shrine"
+	var p0 := prop.global_position
+	var eye := p0 + back * (3.4 if tall else 2.5) + side * (1.3 if tall else 1.0) + Vector3(0, 1.5 if tall else 1.35, 0)
+	var clear := CamFollow.clear_from(backdrop.rig, [p0 + Vector3(0, 0.6, 0)], eye, 0.9)
+	eye = (p0 + Vector3(0, 0.8, 0)).lerp(eye, clear)
+	backdrop.cam_speed = 1.6
+	backdrop.move_camera(eye, p0 + Vector3(0, 1.25 if tall else 0.6, 0))
+	return prop

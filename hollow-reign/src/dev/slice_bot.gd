@@ -568,7 +568,8 @@ func _story_to_road() -> void:
 	await _until(func(): return main.current is Prologue, 20.0, "Generation I")
 	var beat := -1
 	var seen := ""
-	while not (main.current is Explore):
+	# (the continuous Courtyard: the road screen begins on the hillside, walking; the first stop is where it stops)
+	while not (main.current is Explore and not main.current._walking_in and main.current.layer != null):
 		await _wait(0.25)
 		var c: Node = main.current
 		var name := _screen()
@@ -579,6 +580,7 @@ func _story_to_road() -> void:
 				"Arrival": step("the heir's arrival")
 				"Awakening": step("awakening at the Inheritance Engine")
 				"Approach": step("approach")
+				"Explore": step("the walk out: the hillside road to the outer wall")
 			audit()
 		if c is Prologue and int(c.beat) != beat:
 			beat = int(c.beat)
@@ -601,6 +603,7 @@ func _story_to_road() -> void:
 	say("  the knight holds %s; profile generation %d; opening seen=%s" % [str(Game.profile.equipped.weapon), Game.generation(), str(Opening.seen_before())])
 
 var _turned_back := false
+var _cost_at := 0.0
 var _halt := false               # --until=quit: the run ends at the main menu, for a second launch to take up
 var _boss_done := false
 
@@ -624,6 +627,10 @@ func _road() -> void:
 			_snap("stuck")
 			return
 		if c is Explore:
+			if c.route != null and c._leaving and gt - _cost_at > 8.0:
+				_cost_at = gt
+				say("  walking at %s (section %d): %s" % [str(c.backdrop.rig.position.snapped(Vector3.ONE * 0.1)), c.route.zone, CourtRoute.cost_line()])
+				idle = 0.0
 			if await _stop(c):
 				idle = 0.0
 		elif c is Duel:
@@ -659,6 +666,8 @@ func _stop(e: Explore) -> bool:
 	step("courtyard stop %d: %s" % [stage + 1, str(Game.run_stage().prompt).left(60)])
 	say("  health %d / %d, gold %d, level %d" % [int(Game.run.hp), int(Game.stats().max_hp), int(Game.profile.gold), int(Game.profile.level)])
 	await _wait(1.2)
+	if e.route != null:
+		say("  continuous road: knight at %s, %.0f m walked on this screen; render %s" % [str(e.backdrop.rig.position.snapped(Vector3.ONE * 0.1)), e.walked, CourtRoute.cost_line()])
 	audit("stop")
 	_snap("stop%d" % (stage + 1))
 	# the coin lying off the path, and anything odd in the place
@@ -781,7 +790,7 @@ func _in_duel(d: Duel) -> bool:
 ## --until=retry: lets the road be walked on from the checkpoint for a while, then ends the run.
 func _retry_then_halt() -> void:
 	await get_tree().create_timer(1.0).timeout
-	await _until(func(): return main.current is Explore, 60.0, "the road at the checkpoint")
+	await _until(func(): return main.current is Explore and not main.current._leaving, 60.0, "the road at the checkpoint")
 	say("  retried: on the road at stop %d with %d of %d health" % [int(Game.run.stage) + 1, int(Game.run.hp), int(Game.stats().max_hp)])
 	await _wait(14.0)
 	_halt = true

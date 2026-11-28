@@ -253,6 +253,20 @@ scene("witness_discovery",
  (W, "The voice in the walls disapproves of me. Good. We shall get on.", "amused"),
  once=False, new=True, title="The Witness", kind="discovery", essential=True)
 
+# Stage 1 (docs/AAA_STAGES.md): the Witness is found in the awakening chamber itself, dormant in the maintenance housing
+# beside the door, which will not open without it. The recorded discovery lines are reused (02-09); Lyra's opening
+# line (the old one names the fallen plinth) and the Witness's two lines on the cradle and the door are new and text
+# only until they are recorded. The courtyard scene above stays as the fallback for a save that never saw the chamber.
+scene("witness_call",
+ (LY, "Wait. That housing by the door. It is on no plan I hold.", "puzzled, wary"),
+ once=False, new=True, title="The Witness", kind="discovery", essential=True)
+scene("witness_chamber",
+ (W, "I was set here to keep watch on that cradle. You are what it kept. I should like to see where you go.", "quiet, curious, dry"),
+ (W, "This door answers to the old seals. So, as it happens, do I.", "brisk"),
+ once=False, new=True, title="The Witness", kind="discovery", essential=True)
+_wc = S["witness_chamber"]["lines"]
+S["witness_chamber"]["lines"] = S["witness_discovery"]["lines"][1:] + _wc
+
 # ---- the Fallen Courtyard (the Witness is found at stop 1, so its first words on the region come at stop 2)
 wstage("courtyard", 2, "approach", "The Fallen Courtyard",
  (W, "So this is what became of the outer court. It had a grander name when it stood. I forget it. Mercifully.", "surveying"), kind="approach")

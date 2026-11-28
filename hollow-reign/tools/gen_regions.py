@@ -236,6 +236,15 @@ for r in R:
     for i, s in enumerate(r["stages"]):
         if i in cps: s["checkpoint"] = True
     print(r["id"], "checkpoints at stops", cps)
+# The continuous Courtyard (src/world/court_route.gd, docs/TRAVERSAL_PLAN.md): where each stop stands in the one place,
+# [x, height, z, yaw in degrees]. Its frame: the knight stands at the anchor facing -z turned by yaw; the ways onward
+# are marked 4.6 m ahead, the camera 4.2 m behind. The geometry round each anchor is built to that frame (a flat
+# place about 10 m wide and 12 m deep), so these must move with court_route.gd's FLOORS and LEGS.
+COURT_ANCHORS = [[0.0, 3.0, -68.0, 0.0], [0.0, 3.2, -92.0, 0.0], [0.0, 4.5, -119.0, 0.0], [0.0, 5.5, -141.0, 0.0],
+                 [0.0, 5.5, -152.0, 0.0], [0.0, 6.2, -184.0, 0.0], [0.0, 8.0, -206.0, 0.0]]
+assert R[0]["id"] == "courtyard"
+for i, s in enumerate(R[0]["stages"]):
+    s["anchor"] = COURT_ANCHORS[i]
 json.dump({"regions": R}, open("data/regions.json", "w"), indent=1)
 print(len(R), "regions")
 

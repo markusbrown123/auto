@@ -889,6 +889,24 @@
    "text": "The voice in the walls disapproves of me. Good. We shall get on.",
    "dir": "amused"
   },
+  "witness_call_01": {
+   "speaker": "lyra",
+   "text": "Wait. That housing by the door. It is on no plan I hold.",
+   "dir": "puzzled, wary",
+   "recorded": false
+  },
+  "witness_chamber_01": {
+   "speaker": "witness",
+   "text": "I was set here to keep watch on that cradle. You are what it kept. I should like to see where you go.",
+   "dir": "quiet, curious, dry",
+   "recorded": false
+  },
+  "witness_chamber_02": {
+   "speaker": "witness",
+   "text": "This door answers to the old seals. So, as it happens, do I.",
+   "dir": "brisk",
+   "recorded": false
+  },
   "w_courtyard_approach_01": {
    "speaker": "witness",
    "text": "So this is what became of the outer court. It had a grander name when it stood. I forget it. Mercifully.",
@@ -2095,6 +2113,33 @@
     "witness_discovery_07",
     "witness_discovery_08",
     "witness_discovery_09"
+   ],
+   "once": false,
+   "title": "The Witness",
+   "kind": "discovery",
+   "essential": true
+  },
+  "witness_call": {
+   "lines": [
+    "witness_call_01"
+   ],
+   "once": false,
+   "title": "The Witness",
+   "kind": "discovery",
+   "essential": true
+  },
+  "witness_chamber": {
+   "lines": [
+    "witness_discovery_02",
+    "witness_discovery_03",
+    "witness_discovery_04",
+    "witness_discovery_05",
+    "witness_discovery_06",
+    "witness_discovery_07",
+    "witness_discovery_08",
+    "witness_discovery_09",
+    "witness_chamber_01",
+    "witness_chamber_02"
    ],
    "once": false,
    "title": "The Witness",

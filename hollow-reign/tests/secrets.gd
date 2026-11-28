@@ -528,6 +528,9 @@ func t_road() -> void:
 	for i: int in 30:
 		await get_tree().process_frame
 	ok(e.spots.size() == 1 and str(e.spots[0].secret.id) == "cy_loose_stone" and is_instance_valid(e.spots[0].node), "the Barbican holds one hidden thing")
+	if e.route != null:
+		var sp: Vector3 = e.spots[0].node.global_position
+		ok(absf(sp.y - CourtRoute.ground_y(sp.x, sp.z)) < 0.05 and sp.distance_to(CourtRoute.anchor(2)) < 6.0, "in the continuous Courtyard it lies on the forecourt's paving, by the stop (%s)" % str(sp))
 	var fights := []
 	e.fight.connect(func(o): fights.append(o))
 	e.layer.get_child(0).modulate.a = 1.0

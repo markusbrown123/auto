@@ -58,7 +58,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	for f in ["save.json", "save.bak", "save.tmp"]:
 		DirAccess.remove_absolute(Game.save_dir_override + "/" + f)
-	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson", "t_corridor", "t_sfx", "t_free_combat", "t_block_rules"]:
+	for t in ["t_data", "t_parry", "t_dodge", "t_block", "t_attack", "t_punish", "t_phases", "t_adaptive", "t_elements", "t_meters_combos", "t_seams", "t_drain", "t_revive", "t_bots", "t_progression", "t_endings", "t_save", "t_runs", "t_lore_quests", "t_companion", "t_inventory_settings", "t_save_slots", "t_poise", "t_struggle", "t_story_beat", "t_story_options", "t_lesson", "t_corridor", "t_court_route", "t_sfx", "t_free_combat", "t_block_rules"]:
 		print("• ", t)
 		call(t)
 	print("\n%d passed, %d failed" % [passed, failed])
@@ -1724,6 +1724,60 @@ func t_corridor() -> void:
 	ok(absf(Corridor.side(0.4, 0.2)) >= Corridor.HALF + 0.2, "corridor: a roadside offset is pushed out")
 	Corridor.reset()
 	ok(FighterRig.ROAD_SPEED >= 1.0 and FighterRig.ROAD_SPEED <= 1.3, "road pace is in the 1.0 to 1.3 m/s range")
+
+# ------------------------------------------------------------------ the continuous Courtyard: one place, walkable
+func t_court_route() -> void:
+	var stages: Array = Db.region_by_id["courtyard"].stages
+	var n := stages.size()
+	for i in n:
+		var a := CourtRoute.anchor(i)
+		var row: Array = stages[i].get("anchor", [])
+		ok(row.size() == 4 and Vector3(float(row[0]), float(row[1]), float(row[2])).is_equal_approx(a) and Vector3(float(row[0]), float(row[1]), float(row[2])).is_equal_approx(Vector3(CourtRoute.ANCHORS[i][0], CourtRoute.ANCHORS[i][1], CourtRoute.ANCHORS[i][2])),
+			"route: stop %d's anchor is in the region data and agrees with the route (%s)" % [i + 1, str(a)])
+		ok(absf(CourtRoute.ground_y(a.x, a.z) - a.y) < 0.02, "route: stop %d stands on its floor (%.2f vs %.2f)" % [i + 1, CourtRoute.ground_y(a.x, a.z), a.y])
+		# the stop's own frame (markers 4.6 m ahead, the foe 1.6 m beyond, pouches to 3.8 m, the camera behind) is flat
+		var worst := 0.0
+		for v: Vector3 in [Vector3(-2.4, 0, -6.2), Vector3(2.0, 0, -6.2), Vector3(-4.2, 0, -2.0), Vector3(4.2, 0, -2.0), Vector3(1.3, 0, 4.2), Vector3(0, 0, -6.2)]:
+			var p := Explore._frame_at(i, v)
+			worst = maxf(worst, absf(CourtRoute.ground_y(p.x, p.z) - a.y))
+		ok(worst < 0.3, "route: stop %d is a flat place where its ways and foes stand (worst %.2f m)" % [i + 1, worst])
+	# every way on is walkable: no step of the ground taller than a stair's tread, and it ends at the next stop
+	var total := 0.0
+	var keys: Array = CourtRoute.LEGS.keys()
+	for key: String in keys:
+		var pts: Array = []
+		for p2: Array in CourtRoute.LEGS[key]:
+			pts.append(Vector3(float(p2[0]), 0, float(p2[1])))
+		var path := CourtRoute.path(pts)
+		var jump := 0.0
+		for j in path.size() - 1:
+			jump = maxf(jump, absf(path[j + 1].y - path[j].y))
+		ok(jump <= 0.36, "route: the way %s has no step taller than a tread (%.2f m)" % [key, jump])
+		var last: Vector3 = path[path.size() - 1]
+		var to := -1
+		if key == "intro":
+			to = 0
+		elif key == "shortcut":
+			to = 4
+		else:
+			to = int(key.split("|")[0]) + 1
+		ok(Vector2(last.x, last.z).distance_to(Vector2(CourtRoute.anchor(to).x, CourtRoute.anchor(to).z)) < 0.05, "route: the way %s ends at stop %d" % [key, to + 1])
+		if key == "intro" or key.ends_with("|"):
+			total += CourtRoute.path_length(path)
+	ok(total >= 230.0, "route: the main road is %.0f m long (230 or more)" % total)
+	var rise := CourtRoute.anchor(n - 1).y - CourtRoute.ENTRY.y
+	ok(rise >= 6.0, "route: it rises %.1f m from the hillside door to the ward" % rise)
+	# the bridge carries the road over the ravine, well above its floor
+	var mid := Vector3(4.4, 0, CourtRoute.RAVINE_Z)
+	ok(CourtRoute.ground_y(mid.x, mid.z) - CourtRoute.terrain(mid.x, mid.z) > 8.0 and CourtRoute.surface_at(mid) == "metal", "route: the bridge stands high over the ravine")
+	# the wall-walk is a way up and back down (a branch that rejoins at the barbican)
+	ok(CourtRoute.ground_y(13.6, -113.5) > 7.5 and CourtRoute.leg_points(1, "The Rampart Stair").size() > 4 and CourtRoute.leg_points(1, "The Guardhouse")[0].x < -10.0,
+		"route: at the fork one way climbs to the wall-walk and one goes through the guardhouse, and both reach the barbican")
+	# interactions stand on the floor of their place, off the knight's way
+	for k2: String in CourtRoute.SPOTS:
+		var sp := CourtRoute.spot(int(k2.split("|")[0]), k2.split("|")[1])
+		ok(not CourtRoute.floor_at(sp.prop.x, sp.prop.z).is_empty() and not CourtRoute.floor_at(sp.stand.x, sp.stand.z).is_empty(), "route: %s stands on a floor" % k2)
+	ok(CourtRoute.section_of(CourtRoute.ENTRY.z) == 0 and CourtRoute.section_of(CourtRoute.anchor(n - 1).z) == CourtRoute.SECTIONS.size() - 1, "route: the sections cover the road from the door to the ward")
 
 # ------------------------------------------------------------------ sound engine: variation, polyphony, footsteps
 func t_sfx() -> void:

@@ -46,15 +46,18 @@ var SOURCES := {
 	"art/anim/knight_set_b.glb": ["", {"fall": ["fall", false], "dive": ["dive", false], "hurt": ["wounded", true]}],
 	U1: ["ual", {"Walk_Loop": ["walk", true], "Jog_Fwd_Loop": ["jog", true], "Sprint_Loop": ["sprint", true], "Idle_Loop": ["idle", true],
 		"Sword_Idle": ["sword_idle", true], "Sword_Attack": ["sword_attack", false], "Roll": ["roll_fwd", false], "Death01": ["death", false],
-		"Hit_Chest": ["hit_chest", false], "Hit_Head": ["hit_head", false]}],
+		"Hit_Chest": ["hit_chest", false], "Hit_Head": ["hit_head", false],
+		# the awakening chamber (Stage 1): seated in the cradle, rising out of it, reaching for the sword
+		"Sitting_Idle_Loop": ["sit_idle", true], "Sitting_Exit": ["sit_exit", false], "PickUp_Table": ["pickup_table", false], "Interact": ["interact", false]}],
 	U2: ["ual", {"Sword_Regular_A": ["cut_a", false], "Sword_Regular_A_Rec": ["cut_a_rec", false], "Sword_Regular_B": ["cut_b", false], "Sword_Regular_B_Rec": ["cut_b_rec", false],
 		"Sword_Regular_C": ["cut_c", false], "Sword_Regular_Combo": ["combo3", false], "Sword_Heavy_Combo": ["heavy_combo", false], "Sword_Dash": ["lunge", false],
 		"Sword_Block": ["sword_block", false], "Idle_Shield_Loop": ["shield_idle", true], "Shield_OneShot": ["shield_bash", false], "Shield_Dash": ["shield_dash", false],
-		"Idle_Shield_Break": ["guard_break", false], "Hit_Knockback": ["knockback", false]}],
+		"Idle_Shield_Break": ["guard_break", false], "Hit_Knockback": ["knockback", false], "LayToIdle": ["lay_to_idle", false]}],
 	EX: ["exp", {"UnarmedRollLeft": ["roll_l", false], "UnarmedRollRight": ["roll_r", false], "UnarmedRollBackward": ["roll_back", false],
 		"UnarmedDodgeLeft": ["step_l", false], "UnarmedDodgeRight": ["step_r", false], "UnarmedDodgeBackward": ["step_back", false],
 		"UnarmedGetHitF1": ["hit_f", false], "UnarmedGetHitB1": ["hit_b", false], "UnarmedGetHitL1": ["hit_l", false], "UnarmedGetHitR1": ["hit_r", false],
-		"UnarmedStunned": ["stunned", true], "UnarmedBlockGetHit1": ["block_hit", false], "UnarmedKnockdown1": ["knockdown", false], "UnarmedDeath1": ["death_b", false]}],
+		"UnarmedStunned": ["stunned", true], "UnarmedBlockGetHit1": ["block_hit", false], "UnarmedKnockdown1": ["knockdown", false], "UnarmedDeath1": ["death_b", false],
+		"UnarmedGetup1": ["getup", false], "UnarmedPickup": ["pickup_low", false]}],
 }
 
 func _to_root(n: Node3D, root: Node) -> Transform3D:

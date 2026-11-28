@@ -130,7 +130,9 @@ Nothing here has run on a phone; stills and recordings are from the software ren
 `Explore._route_cam` while the knight walks between stops (`src/world/court_route.gd`): behind and to the sword side,
 (1.05 → 0.75, 1.55 → 1.7, 3.9) m in a frame that turns with the walker but late (its yaw follows the knight's at a rate of 1.4/s,
 so a corner is a slow arc, never a swing), looking 3.2 m ahead at 1.25 m, 48 degrees, the Backdrop's eased glide (`cam_speed` 2.4).
-Heights follow the knight (stairs, the wall-walk) through the glide. Obstruction: `CamFollow.clear_from` (Stage 2's) pulls the lens in
+Heights follow the knight (stairs, the wall-walk) through the glide. Where a wall stands close on the sword side (the
+wall-walk's curtain, the gate passage) the camera crosses to the other shoulder (when the sword side would be pulled in below
+70% and the other side is clearer by 20%), easing over in about a second, and returns once the sword side is fully open. Obstruction: `CamFollow.clear_from` (Stage 2's) pulls the lens in
 toward the head in front of whatever would come between (the guardhouse walls, the passage, the murder hole), quickly (rate 7), and
 lets it back out slowly. Arriving at a stop the camera glides (0.8 → 1.6 over 3 s) to the stop's own view (`Explore.CAM_POS`
 in the stop's frame). Interactions walk the knight to the thing and frame it from the side it was approached from, pulled in front

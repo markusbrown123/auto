@@ -666,6 +666,8 @@ func _stop(e: Explore) -> bool:
 				await tap(b0)
 				return true
 		return false
+	if Game.run.is_empty():
+		return false              # (the road was just left by Turn Back: the screen is fading out)
 	var stage: int = int(Game.run.stage)
 	step("courtyard stop %d: %s" % [stage + 1, str(Game.run_stage().prompt).left(60)])
 	say("  health %d / %d, gold %d, level %d" % [int(Game.run.hp), int(Game.stats().max_hp), int(Game.profile.gold), int(Game.profile.level)])

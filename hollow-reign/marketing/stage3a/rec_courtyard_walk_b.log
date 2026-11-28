@@ -1,0 +1,64 @@
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+Vulkan 1.4.335 - Forward Mobile - Using Device #0: Unknown - llvmpipe (LLVM 20.1.2, 256 bits)
+
+Movie Maker mode enabled, recording movie in 1280×720 @ 30 FPS...
+WARNING: Current available space on disk is low (7.80 GiB). MovieWriter will fail during movie recording if the disk runs out of available space.
+     at: begin (servers/movie_writer/movie_writer.cpp:113)
+ROUTECOST stop 4 at (0.0, 5.5, -141.0): draws=159 primitives=258705 objects=439 video_mem=167.7MB
+ROUTEWALK stop 4: taking Turn the Winch (lever)
+ROUTECOST walk at (-1.8, 5.5, -142.3) (section 3): draws=106 primitives=209002 objects=106 video_mem=167.7MB
+ROUTECOST walk at (-3.7, 5.5, -143.6) (section 3): draws=103 primitives=206798 objects=103 video_mem=167.7MB
+ROUTECOST walk at (-4.4, 5.5, -144.7) (section 3): draws=111 primitives=277339 objects=111 video_mem=168.2MB
+ROUTECOST walk at (-2.3, 5.5, -145.3) (section 3): draws=93 primitives=246485 objects=93 video_mem=168.2MB
+ROUTECOST walk at (-0.2, 5.5, -146.1) (section 3): draws=89 primitives=236315 objects=89 video_mem=168.2MB
+ROUTECOST walk at (0.0, 5.5, -148.3) (section 3): draws=116 primitives=279283 objects=116 video_mem=168.2MB
+ROUTECOST walk at (0.0, 5.5, -150.6) (section 3): draws=106 primitives=289399 objects=106 video_mem=168.2MB
+ROUTECOST stop 5 at (0.0, 5.5, -152.0): draws=128 primitives=288151 objects=416 video_mem=168.9MB
+ROUTEWALK stop 5: taking The Murder Hole (treasure)
+ROUTECOST walk at (0.2, 5.5, -152.8) (section 3): draws=129 primitives=292841 objects=129 video_mem=168.9MB
+ROUTECOST walk at (0.7, 5.5, -154.9) (section 3): draws=103 primitives=277909 objects=103 video_mem=168.9MB
+ROUTECOST walk at (1.3, 5.5, -157.1) (section 3): draws=101 primitives=278055 objects=101 video_mem=168.9MB
+ROUTECOST walk at (1.6, 5.5, -159.3) (section 3): draws=97 primitives=280709 objects=97 video_mem=168.9MB
+ROUTECOST walk at (1.8, 5.6, -161.5) (section 3): draws=95 primitives=267385 objects=95 video_mem=168.9MB
+ROUTECOST walk at (2.7, 5.7, -163.3) (section 3): draws=68 primitives=242357 objects=68 video_mem=168.9MB
+ROUTECOST walk at (4.9, 5.7, -163.4) (section 3): draws=60 primitives=139615 objects=60 video_mem=168.9MB
+ROUTECOST walk at (2.9, 5.7, -163.5) (section 3): draws=64 primitives=136557 objects=64 video_mem=169.2MB
+ROUTECOST walk at (1.2, 5.7, -164.9) (section 3): draws=105 primitives=201819 objects=105 video_mem=169.2MB
+ROUTECOST walk at (0.7, 5.8, -167.0) (section 3): draws=109 primitives=204035 objects=109 video_mem=169.2MB
+ROUTECOST walk at (0.2, 5.9, -169.2) (section 3): draws=108 primitives=203365 objects=108 video_mem=169.2MB
+ROUTECOST walk at (0.0, 6.0, -171.5) (section 3): draws=108 primitives=201947 objects=108 video_mem=169.2MB
+ROUTECOST walk at (0.0, 6.1, -173.7) (section 3): draws=109 primitives=198111 objects=109 video_mem=169.2MB
+ROUTECOST walk at (0.0, 6.2, -175.9) (section 3): draws=108 primitives=198063 objects=108 video_mem=169.2MB
+ROUTECOST walk at (0.0, 6.2, -178.2) (section 4): draws=107 primitives=197623 objects=107 video_mem=168.9MB
+ROUTECOST walk at (0.0, 6.2, -180.4) (section 4): draws=106 primitives=197583 objects=106 video_mem=168.9MB
+ROUTECOST walk at (0.0, 6.2, -182.7) (section 4): draws=100 primitives=188289 objects=100 video_mem=168.9MB
+ROUTECOST stop 6 at (0.0, 6.2, -184.0): draws=121 primitives=199079 objects=321 video_mem=168.8MB
+ROUTEWALK stop 6: taking Kneel (shrine)
+ROUTECOST walk at (-0.8, 6.2, -184.3) (section 4): draws=109 primitives=196901 objects=109 video_mem=168.8MB
+ROUTECOST walk at (-2.9, 6.2, -185.1) (section 4): draws=97 primitives=190005 objects=97 video_mem=168.8MB
+ROUTECOST walk at (-5.0, 6.2, -185.9) (section 4): draws=92 primitives=178751 objects=92 video_mem=168.8MB
+ROUTECOST walk at (-6.3, 6.2, -186.7) (section 4): draws=98 primitives=183225 objects=98 video_mem=168.8MB
+ROUTECOST walk at (-4.2, 6.2, -187.5) (section 4): draws=68 primitives=183923 objects=68 video_mem=168.8MB
+ROUTECOST walk at (-2.1, 6.2, -188.2) (section 4): draws=68 primitives=183923 objects=68 video_mem=168.8MB
+ROUTECOST walk at (-0.2, 6.2, -189.2) (section 4): draws=68 primitives=178987 objects=68 video_mem=168.8MB
+ROUTECOST walk at (0.0, 6.2, -191.4) (section 4): draws=69 primitives=196831 objects=69 video_mem=168.8MB
+ROUTECOST walk at (0.0, 6.6, -193.5) (section 4): draws=66 primitives=186237 objects=66 video_mem=168.8MB
+ROUTECOST walk at (0.0, 7.3, -195.5) (section 4): draws=64 primitives=185961 objects=64 video_mem=168.8MB
+ROUTECOST walk at (0.0, 8.0, -197.5) (section 4): draws=64 primitives=182213 objects=64 video_mem=168.8MB
+ROUTECOST walk at (0.0, 8.0, -199.7) (section 4): draws=63 primitives=185515 objects=63 video_mem=168.8MB
+ROUTECOST walk at (0.0, 8.0, -201.9) (section 4): draws=58 primitives=177325 objects=58 video_mem=168.8MB
+ROUTECOST walk at (0.0, 8.0, -204.2) (section 4): draws=58 primitives=177325 objects=58 video_mem=168.8MB
+ROUTECOST stop 7 at (0.0, 8.0, -206.0): draws=76 primitives=181903 objects=352 video_mem=173.5MB
+ROUTEWALK stop 7: taking The Inner Ward (boss)
+ROUTEWALK the Sentinel's ward reached; walked 87 m
+--------------------------------------------------------------------------------
+Done recording movie at path: /tmp/hr_stage3a_courtyard_walk_b.avi
+5084 frames at 30 FPS (movie length: 00:02:49:14), recorded in 00:38:34 (7% of real-time speed).
+CPU render time: 5.55 seconds (average: 1.09 ms/frame)
+GPU render time: 2085.83 seconds (average: 410.27 ms/frame)
+Encoding time: 70.62 seconds (average: 13.89 ms/frame)
+--------------------------------------------------------------------------------
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

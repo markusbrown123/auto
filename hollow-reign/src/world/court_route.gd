@@ -9,8 +9,8 @@ extends Node3D
 ##
 ## Built in code from the far-future kit (src/world/future.gd: bulkheads, spires, merged by material) and its props
 ## (env_fu_*, env_road_*, env_rubble, env_statue_head, env_banner), on a ground of its own (court_ground.gdshader).
-## Streamed: five sections, each under its own node and merged by material; the two either side of the knight's are
-## kept, the rest are freed. A section is built a little at a time (a few milliseconds a frame) while it is still a
+## Streamed: five sections, each under its own node and merged by material; three ahead of the knight's and two behind
+## are kept, the rest are freed. A section is built a little at a time (a few milliseconds a frame) while it is still a
 ## section or more ahead, behind a wall or a turn, and shown when it is complete. A far layer (the sea, the mountains,
 ## the sky, the keep and its spires, the colossus on the ridge) is built once and stays.
 ##
@@ -71,7 +71,12 @@ const FLOORS := [
 	[-21.0, 21.0, -198.0, -240.0, 8.0, 8.0, 0, "z", "stone"],
 ]
 ## The spine of the hill road: [z, height]. The natural ground follows it near the road.
-const SPINE := [[80.0, -0.2], [56.0, 0.0], [44.0, 0.2], [14.0, 0.8], [0.0, 1.4], [-20.0, 2.0], [-34.0, 2.62], [-52.0, 2.92], [-56.0, 3.0], [-300.0, 3.0]]
+## (Inside the walls it follows the paving up, so that the ground under the yards is never far below them.)
+const SPINE := [[80.0, -0.2], [56.0, 0.0], [44.0, 0.2], [14.0, 0.8], [0.0, 1.4], [-20.0, 2.0], [-34.0, 2.62], [-52.0, 2.92], [-56.0, 3.0],
+	[-80.0, 3.2], [-106.0, 3.2], [-112.0, 4.5], [-127.0, 4.5], [-137.0, 5.5], [-158.0, 5.5], [-176.0, 6.2], [-192.0, 6.2], [-198.0, 8.0], [-300.0, 8.0]]
+## Where across its stop's frame a fight's foe stands when the road screen's own placement would put it in a wall
+## (the gate passage is 6 m wide: the Breaker stands in its mouth, a little to the right of the line, clear of the knight).
+const FOE_X := {4: 0.4}
 const RAVINE_Z := -43.0
 
 ## The ways on from each stop: "stage|label" (the way's label) or "stage|" (any other). World (x, z); the height is

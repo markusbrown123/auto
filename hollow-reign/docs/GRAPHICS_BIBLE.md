@@ -339,7 +339,10 @@ One place from the hillside door to the inner ward, same rule as above: natural 
 - **Far**: the mountains (`Future.ranges` scaled ×7 round the route), the planet and the orbital arc (×6), the broken
   tether in the sea, the keep and two spires: built once, always drawn, no shadows.
 
-**Cost** (software renderer, 960×540, `--screen=routewalk --routecost`; nothing has run on a phone):
-see the Stage 3A report in `marketing/stage3a/` (`ROUTECOST` lines). At the stops: 139-192 draws, 244k-363k primitives,
-168-177 MB video memory; walking: about 157 draws, 322k primitives. The slice's courtyard duel was 400-550k primitives and
-about 150 MB, so primitives are under it and video memory is 15-25 MB over it (the far layer and five sections' textures).
+**Cost** (software renderer, 1280×720 window, `--screen=routewalk --routecost`, logs in `marketing/stage3a/`; nothing has run on
+a phone). At the seven stops: 193/376k/172 MB (Breach), 184/310k/173 (yard), 138/224k/173 (barbican), 159-161/243-249k/168-181
+(winch yard), 128/279k/169 (inner gate), 121/199k/169 (chapel), 76/182k/170-174 (ward) as draws/primitives/video memory.
+Walking (142 samples every 2 s): 49-185 draws (mean 115), 75k-436k primitives (mean 245k), 147-181 MB. In a whole slice run (duels
+and the opening's scenes cached) the road read 220-242 MB. The slice's courtyard duel budget was 400-550k primitives and about
+150 MB: primitives are under it everywhere; video memory is 0-30 MB over it on the road alone and about 90 MB over it late in a full
+run (the far layer, five sections' textures, and whatever the earlier scenes left cached).

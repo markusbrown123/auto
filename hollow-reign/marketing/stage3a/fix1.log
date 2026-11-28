@@ -1,0 +1,11 @@
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+render t=14.0 draw_calls=166 primitives=284195 objects=1016 video_mem=166.3MB nodes=476
+render t=18.0 draw_calls=157 primitives=284925 objects=699 video_mem=166.3MB nodes=476
+ROUTEWALK stop 5: taking The Murder Hole (treasure)
+render t=22.0 draw_calls=121 primitives=285145 objects=121 video_mem=166.3MB nodes=476
+render t=25.0 draw_calls=101 primitives=285047 objects=101 video_mem=166.3MB nodes=476
+render t=28.0 draw_calls=94 primitives=188671 objects=94 video_mem=166.3MB nodes=476
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)
+ERROR: 4 resources still in use at exit (run with --verbose for details).
+   at: clear (core/io/resource.cpp:810)

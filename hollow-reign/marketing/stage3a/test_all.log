@@ -1,0 +1,130 @@
+== tests
+• t_data
+• t_parry
+• t_dodge
+• t_block
+• t_attack
+• t_punish
+• t_phases
+• t_adaptive
+• t_elements
+• t_meters_combos
+• t_seams
+• t_drain
+• t_revive
+• t_bots
+    hollow_soldier       skilled:   6.1s  taken   0  parries 2/2  dodges 0
+    ashen_sentinel       skilled:  39.0s  taken   0  parries 7/7  dodges 1
+    ashen_sentinel       sloppy-timing win rate: 6/6
+    ashen_sentinel       turtle win rate: 0/4
+    pale_huntsman        skilled:  36.1s  taken   0  parries 9/9  dodges 0
+    pale_huntsman        sloppy-timing win rate: 6/6
+    pale_huntsman        turtle win rate: 0/4
+    hollow_executioner   skilled:  34.2s  taken   0  parries 6/6  dodges 0
+    hollow_executioner   sloppy-timing win rate: 5/6
+    hollow_executioner   turtle win rate: 0/4
+    crimson_widow        skilled:  35.4s  taken   0  parries 9/9  dodges 0
+    crimson_widow        sloppy-timing win rate: 6/6
+    crimson_widow        turtle win rate: 0/4
+    cathedral_beast      skilled:  33.3s  taken   0  parries 7/7  dodges 1
+    cathedral_beast      sloppy-timing win rate: 6/6
+    cathedral_beast      turtle win rate: 0/4
+    gravewarden          skilled:  51.1s  taken   0  parries 9/9  dodges 0
+    gravewarden          sloppy-timing win rate: 6/6
+    gravewarden          turtle win rate: 0/4
+    cinder_whelp         skilled:   7.7s  taken   0  parries 1/1  dodges 1
+    cinder_wyrm          skilled:  92.0s  taken   0  parries 12/12  dodges 13
+    cinder_wyrm          sloppy-timing win rate: 5/6
+    cinder_wyrm          turtle win rate: 0/4
+    rimewyrm             skilled:  94.2s  taken   0  parries 13/13  dodges 12
+    rimewyrm             sloppy-timing win rate: 6/6
+    rimewyrm             turtle win rate: 0/4
+    frostbound_king      skilled: 109.5s  taken   0  parries 23/23  dodges 0
+    frostbound_king      sloppy-timing win rate: 3/6
+    frostbound_king      turtle win rate: 0/4
+    soul_eater           skilled:   6.6s  taken   0  parries 2/2  dodges 0
+    devourer             skilled:  82.0s  taken   0  parries 20/20  dodges 2
+    devourer             sloppy-timing win rate: 6/6
+    devourer             turtle win rate: 0/4
+    forgotten_monarch    skilled: 119.3s  taken   0  parries 27/27  dodges 3
+    forgotten_monarch    sloppy-timing win rate: 2/6
+    forgotten_monarch    turtle win rate: 0/4
+    gate_colossus        skilled:  22.6s  taken   0  parries 2/2  dodges 3
+    pike_sergeant        skilled:   8.9s  taken   0  parries 2/2  dodges 0
+    veil_dancer          skilled:   6.0s  taken   0  parries 1/1  dodges 1
+    maulbeast            skilled:   6.4s  taken   0  parries 2/2  dodges 0
+    bell_ringer          skilled:  17.1s  taken   0  parries 2/2  dodges 2
+    tomb_mummer          skilled:   6.1s  taken   0  parries 1/1  dodges 1
+    frost_drake          skilled:  10.7s  taken   0  parries 1/1  dodges 2
+    the_unburied         skilled:  12.7s  taken   0  parries 2/2  dodges 1
+    herald               skilled:   7.8s  taken   0  parries 2/2  dodges 0
+• t_progression
+• t_endings
+• t_save
+• t_runs
+• t_lore_quests
+• t_companion
+• t_inventory_settings
+• t_save_slots
+• t_poise
+• t_struggle
+• t_story_beat
+    story-beat scenes not yet written (the pause is skipped for these): widow_beat, frostking_beat, monarch_beat, huntsman_beat
+• t_story_options
+• t_lesson
+• t_corridor
+• t_court_route
+• t_sfx
+• t_free_combat
+• t_block_rules
+3901 passed, 0 failed
+== equipment
+• t_data
+• t_sources
+• t_totals
+• t_migration
+• t_preview
+• t_equip
+• t_compare
+• t_stats_reach_the_duel
+• t_items_reach_the_duel
+• t_weight_sets_requirements
+• t_basic_swords
+    balanced   Sentinel in  38.7s   53 swings  5.3 per opening  38.1 damage a cut   647 stamina   soldier  7.0s  banneret  4.7s
+    light      Sentinel in  51.0s   70 swings  5.4 per opening  28.6 damage a cut   733 stamina   soldier  5.0s  banneret  4.8s
+    heavy      Sentinel in  42.6s   43 swings  3.9 per opening  48.3 damage a cut   748 stamina   soldier  4.5s  banneret  6.4s
+    precision  Sentinel in  40.1s   60 swings  6.0 per opening  34.0 damage a cut   658 stamina   soldier  7.1s  banneret  4.7s
+• t_shields
+• t_mods
+• t_shop
+• t_rewards
+• t_guards
+• t_discovery
+• t_cosmetics
+• t_mastery
+• t_loop
+• t_persistence
+3829 passed, 0 failed
+equipment: PASS
+== generations
+• t_data
+• t_migration
+• t_new_journey
+• t_falls_and_defeats
+• t_bodies
+• t_director
+• t_monarch
+• t_echo
+    Light      hp  5575  blow 43  { "dodge_open": 0.8 }  skilled: 4/4, fastest 79s, 0 damage taken a fight; mashing: 0/3
+    Heavy      hp 17035  blow 116  { "parry_open": 0.9, "dodge_open": 0.8, "block_tax": 1.4 }  skilled: 4/4, fastest 127s, 0 damage taken a fight; mashing: 0/3
+    Twin       hp 21098  blow 44  { "parry_open": 0.9, "dodge_open": 0.8 }  skilled: 4/4, fastest 48s, 0 damage taken a fight; mashing: 0/3
+    Shieldless hp 11657  blow 75  { "parry_open": 0.9 }  skilled: 4/4, fastest 83s, 0 damage taken a fight; mashing: 0/3
+• t_endings
+• t_companion
+• t_campaign
+    II: guardians 12, regions 8, routes 5, wins 34
+    III: completion 50.7%, courtyard stops 8
+• t_checkpoints
+580 passed, 0 failed
+generations: PASS
+== secrets

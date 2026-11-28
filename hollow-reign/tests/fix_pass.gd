@@ -260,6 +260,23 @@ func _slice_continuous() -> void:
 	await get_tree().create_timer(0.5).timeout
 	ok(m.current is Explore and m.current._walking_in and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(4) + Vector3(-1.0, 0, -6.0)) < 1.5, "continuous: after a fight the knight walks on from the place it was fought")
 	ok(await _wait_stop(m, 60.0) and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(5)) < 0.3, "continuous: to the next stop")
+	# Stage 1's hand-off: the chamber's passage ends at its doorway and the road takes the knight and the Witness over
+	Game.new_game()
+	Game.profile.tutorial_done = true
+	Game.run = {}
+	Explore.arrive = {}
+	m.show_awakening()
+	await frames(10)
+	var aw = m.current
+	ok(aw is Awakening and aw.handoff, "hand-off: the chamber is told the road will take over at its doorway")
+	if aw is Awakening and aw.knight != null and aw.drone != null:
+		aw.reached_exit.emit(aw.knight, aw.drone)
+		await frames(6)
+		var e3 = m.current
+		ok(e3 is Explore and e3.route != null and e3._walking_in and int(Game.run.stage) == 0 and e3.backdrop.rig.position.distance_to(CourtRoute.ENTRY) < 4.0,
+			"hand-off: the knight walks out of the hillside door onto the causeway (no Approach, no white) (%s, %s)" % [str(e3), str(e3.backdrop.rig.position) if e3 is Explore else ""])
+		ok(e3 is Explore and e3.backdrop.rig.drone != null and Companion.witness_found(), "hand-off: the Witness comes out with the knight")
+		ok(e3 is Explore and e3.backdrop.rig.shield != null and e3.backdrop.rig.shield.visible, "hand-off: the shield is back on the arm outside")
 	Story.stop()
 	Game.run = {}
 	Explore.arrive = {}

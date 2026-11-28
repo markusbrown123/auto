@@ -1777,6 +1777,16 @@ func t_court_route() -> void:
 	for k2: String in CourtRoute.SPOTS:
 		var sp := CourtRoute.spot(int(k2.split("|")[0]), k2.split("|")[1])
 		ok(not CourtRoute.floor_at(sp.prop.x, sp.prop.z).is_empty() and not CourtRoute.floor_at(sp.stand.x, sp.stand.z).is_empty(), "route: %s stands on a floor" % k2)
+	# every fight's foe stands on the paving of its stop, not in a wall or under the floor
+	for i2 in n:
+		var opts: Array = stages[i2].options
+		for j in opts.size():
+			if str(opts[j].type) != "fight":
+				continue
+			var fx: float = float(CourtRoute.FOE_X.get(i2, Explore._marker_x(opts, j))) if j == 0 else Explore._marker_x(opts, j)
+			var fp := Explore._frame_at(i2, Vector3(fx, 0, -4.6 - Explore.FOE_BEYOND))
+			ok(not CourtRoute.floor_at(fp.x, fp.z).is_empty() and absf(CourtRoute.ground_y(fp.x, fp.z) - CourtRoute.anchor(i2).y) < 0.4,
+				"route: stop %d's foe (%s) stands on its paving (%s)" % [i2 + 1, str(opts[j].label), str(fp)])
 	ok(CourtRoute.section_of(CourtRoute.ENTRY.z) == 0 and CourtRoute.section_of(CourtRoute.anchor(n - 1).z) == CourtRoute.SECTIONS.size() - 1, "route: the sections cover the road from the door to the ward")
 
 # ------------------------------------------------------------------ sound engine: variation, polyphony, footsteps

@@ -450,9 +450,43 @@ func show_awakening() -> void:
 	a.auto = _args.has("auto")
 	a.start_at = str(_args.get("from", ""))
 	a.finished.connect(func():
+		if a.has_meta("handed_over"):
+			return                    # (the continuous Courtyard took the knight over at the doorway)
 		Game.take_fallen_weapon()     # the blade the first of the house left in the block (a no-op when there is none)
 		show_approach())
+	if Game.run.is_empty() or str(Game.run.get("region", "")) == "courtyard":
+		# Stage 1's hand-off: the chamber's passage ends at its outer doorway (Chamber.EXIT_END); the continuous Courtyard
+		# picks the knight and the Witness up there, at the hillside door (CourtRoute.ENTRY), with no white between
+		a.handoff = true
+		a.reached_exit.connect(func(knight: CineActor, witness: WitnessDrone): _walk_out_of_chamber(a, knight, witness))
 	_swap(a, 0.0)
+
+## The doorway of the chamber's passage becomes the door in the hillside: the same framing behind the walking knight,
+## dissolved (never faded) from the passage's dark onto the daylight of the causeway; the Witness keeps its place
+## (mapped from the chamber onto the route by Chamber.to_world). Where the continuous road is not available the
+## Approach takes over as before.
+func _walk_out_of_chamber(a: Awakening, knight: CineActor, witness: WitnessDrone) -> void:
+	if Game.run.is_empty():
+		Game.start_run(Db.regions[0].id)
+	if not Explore.continuous() or int(Game.run.stage) != 0:
+		a.handoff = false
+		a.skip()
+		return
+	Game.take_fallen_weapon()
+	Companion.mark_heard(Companion.discovery_id())      # (the Witness was found in the chamber: it is the knight's own now)
+	var xf := Chamber.to_world(CourtRoute.ENTRY, CourtRoute.ENTRY_YAW)
+	var arrive := {"intro": true, "from_chamber": true}
+	if witness != null and is_instance_valid(witness):
+		arrive["witness"] = witness
+		arrive["witness_at"] = xf * witness.global_position
+	if knight != null and is_instance_valid(knight):
+		arrive["knight_yaw"] = (xf.basis * knight.global_basis).get_euler().y
+	Explore.arrive = arrive
+	a.set_meta("handed_over", true)
+	_cross_then(func():
+		var e := _explore()
+		_swap(e, 0.0)
+		a.skip(), 1.0)
 
 ## Out into the first region, in one take up to the road's first stop.
 func show_approach() -> void:
@@ -945,7 +979,8 @@ func _dev_boot() -> void:
 		"routewalk":
 			# dev captures: the continuous Courtyard walked from the hillside door to the Sentinel's ward at the road's
 			# own pace, with the fights passed over (the duels are not this capture's). --pick=1:1,4:1 takes the way
-			# with that index at that stop (default: the first non-fight way, else the first); --from=<stop> begins there.
+			# with that index at that stop (default: the first non-fight way, else the first); --from=<stop> begins there;
+			# --until=<stop> ends on arriving there.
 			Game.profile.tutorial_done = true
 			Companion.mark_heard(Companion.discovery_id())
 			Game.start_run("courtyard")
@@ -1208,7 +1243,7 @@ func _route_walk() -> void:
 	while is_inside_tree():
 		await get_tree().create_timer(0.4).timeout
 		for b in find_children("*", "Button", true, false):
-			if b.is_visible_in_tree() and b.text in ["Open", "Pull", "Rest", "Onward"]:
+			if b.is_visible_in_tree() and b.text.to_lower() in ["open", "pull", "rest", "onward"]:
 				await get_tree().create_timer(1.6).timeout
 				if is_instance_valid(b) and b.is_visible_in_tree():
 					b.pressed.emit()
@@ -1219,6 +1254,11 @@ func _route_walk() -> void:
 			continue
 		var stage := int(Game.run.stage)
 		done = stage
+		if _args.has("until") and stage >= int(_args.until):
+			print("ROUTEWALK stop %d reached; walked %.0f m" % [stage + 1, current.walked])
+			await get_tree().create_timer(3.0).timeout
+			get_tree().quit()
+			return
 		await get_tree().create_timer(3.5).timeout
 		var opts: Array = Game.stage_options()
 		var pick := -1

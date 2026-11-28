@@ -162,3 +162,69 @@ ERROR: Condition "!is_inside_tree()" is true. Returning: false
 [  350.1s game |  10251s wall]   walking at (0.0, 5.6, -162.4) (section 3): draws=86 primitives=176486 objects=86 video_mem=218.0MB
 [  358.2s game |  10469s wall]   walking at (0.0, 6.0, -171.5) (section 3): draws=107 primitives=186562 objects=107 video_mem=218.0MB
 [  366.3s game |  10627s wall]   walking at (0.0, 6.2, -180.5) (section 4): draws=105 primitives=187134 objects=105 video_mem=217.7MB
+[  384.3s game |  11025s wall]   audio during 'duel 3: Rampart Breaker': Master peak -2.7 mean -15.5 dB; Music peak -11.7 mean -22.8 dB; Dialogue peak -9.5 mean -59.2 dB; Combat peak -23.9 mean -79.5 dB; Ambience peak -20.7 mean -26.8 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -9.2 mean -67.2 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  384.3s game |  11025s wall] STEP courtyard stop 6: A chapel alcove survives against the keep wall. A single can
+[  384.3s game |  11025s wall]   health 160 / 160, gold 76, level 2
+[  385.5s game |  11046s wall]   continuous road: knight at (0.0, 6.2, -184.0), 32 m walked on this screen; render draws=100 primitives=185942 objects=543 video_mem=217.9MB
+[  385.5s game |  11046s wall]   tap 'a pouch' at (877, 455), target 84 x 84
+[  386.1s game |  11058s wall]   pouch: gold 76 -> 85
+[  386.1s game |  11058s wall]   ways onward: ["Kneel"]; taking 'Kneel' (shrine)
+[  386.1s game |  11058s wall]   tap 'Kneel' at (640, 639), target 1216 x 114
+[  387.5s game |  11082s wall]   walking at (-1.4, 6.2, -184.5) (section 4): draws=99 primitives=175118 objects=99 video_mem=217.7MB
+[  394.6s game |  11199s wall]   tap 'REST' at (640, 360), target 220 x 60
+[  397.1s game |  11247s wall]   tap 'ONWARD' at (640, 421), target 260 x 60
+[  397.5s game |  11255s wall]   walking at (-6.3, 6.2, -186.7) (section 4): draws=99 primitives=178860 objects=99 video_mem=217.7MB
+[  405.6s game |  11359s wall]   walking at (0.0, 6.2, -191.5) (section 4): draws=65 primitives=175788 objects=65 video_mem=217.7MB
+[  413.7s game |  11481s wall]   walking at (0.0, 8.0, -199.9) (section 4): draws=60 primitives=164254 objects=60 video_mem=217.7MB
+[  427.8s game |  11671s wall]   audio during 'courtyard stop 6: A chapel alcove survives against the keep wall. A single can': Master peak -3.5 mean -15.7 dB; Music peak -11.7 mean -22.7 dB; Dialogue peak -8.6 mean -55.3 dB; Combat peak -43.9 mean -100.0 dB; Ambience peak -20.7 mean -27.2 dB; Interface peak -18.1 mean -72.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  427.8s game |  11671s wall] STEP courtyard stop 7: The inner ward. He is standing exactly where he was posted.
+[  427.8s game |  11671s wall]   health 160 / 160, gold 85, level 2
+[  429.0s game |  11688s wall]   continuous road: knight at (0.0, 8.0, -206.0), 64 m walked on this screen; render draws=84 primitives=171918 objects=481 video_mem=222.5MB
+[  429.0s game |  11688s wall]   tap 'a pouch' at (438, 432), target 84 x 84
+[  429.6s game |  11697s wall]   pouch: gold 85 -> 101
+[  429.6s game |  11697s wall]   ways onward: ["The Inner Ward"]; taking 'The Inner Ward' (boss)
+[  429.6s game |  11697s wall]   tap 'The Inner Ward' at (640, 639), target 1216 x 114
+[  431.1s game |  11716s wall]   walking at (0.0, 8.0, -207.5) (section 4): draws=76 primitives=165024 objects=473 video_mem=222.4MB
+[  433.3s game |  11746s wall]   duel begins: The Ashen Sentinel (knight 160 hp)
+[  433.5s game |  11752s wall]   audio during 'courtyard stop 7: The inner ward. He is standing exactly where he was posted.': Master peak -6.3 mean -14.7 dB; Music peak -11.4 mean -21.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.8 mean -26.5 dB; Interface peak -22.9 mean -67.5 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  433.5s game |  11752s wall] STEP duel 4: The Ashen Sentinel — meaning to lose
+[  481.6s game |  12411s wall]   widest gap between the fighters: 4.1 m
+[  485.9s game |  12474s wall]   duel over after 52 s: LOST. knight 0 / 160 hp. parried 0, blocked 0, dodged 0, blows taken 10, cuts landed 0
+[  489.0s game |  12517s wall]   result screen up: [Retry from checkpoint]. gold 101, level 2, xp 115, inventory 8, deaths 1
+[  489.0s game |  12517s wall]   tap 'RETRY FROM CHECKPOINT' at (640, 454), target 470 x 72
+[  490.7s game |  12554s wall]   audio during 'duel 4: The Ashen Sentinel — meaning to lose': Master peak -1.0 mean -14.0 dB; Music peak -11.1 mean -21.0 dB; Dialogue peak -2.9 mean -44.9 dB; Combat peak -2.1 mean -49.9 dB; Ambience peak -21.2 mean -27.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -11.3 mean -68.3 dB; CombatL peak -6.2 mean -64.6 dB; CombatR peak -1.1 mean -54.7 dB
+[  490.7s game |  12554s wall] STEP courtyard stop 6: A chapel alcove survives against the keep wall. A single can
+[  490.7s game |  12554s wall]   health 160 / 160, gold 101, level 2
+[  491.9s game |  12579s wall]   continuous road: knight at (0.0, 6.2, -184.0), 0 m walked on this screen; render draws=98 primitives=178144 objects=453 video_mem=226.2MB
+[  491.9s game |  12579s wall]   ways onward: ["Kneel"]; taking 'Kneel' (shrine)
+[  491.9s game |  12579s wall]   tap 'Kneel' at (640, 639), target 1216 x 114
+[  493.3s game |  12609s wall]   walking at (-1.4, 6.2, -184.5) (section 4): draws=99 primitives=175118 objects=99 video_mem=226.2MB
+[  500.4s game |  12769s wall]   tap 'REST' at (640, 360), target 220 x 60
+[  502.9s game |  12823s wall]   tap 'ONWARD' at (640, 421), target 260 x 60
+[  503.3s game |  12833s wall]   walking at (-6.3, 6.2, -186.7) (section 4): draws=102 primitives=184436 objects=102 video_mem=226.2MB
+[  511.4s game |  12949s wall]   walking at (0.0, 6.2, -191.5) (section 4): draws=64 primitives=172974 objects=64 video_mem=226.2MB
+[  519.7s game |  13055s wall]   walking at (0.0, 8.0, -200.1) (section 4): draws=61 primitives=167068 objects=61 video_mem=226.2MB
+[  526.3s game |  13139s wall]   audio during 'courtyard stop 6: A chapel alcove survives against the keep wall. A single can': Master peak -5.8 mean -14.8 dB; Music peak -11.4 mean -21.5 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -35.5 mean -90.6 dB; Ambience peak -21.1 mean -26.3 dB; Interface peak -15.8 mean -72.5 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  526.3s game |  13139s wall] STEP courtyard stop 7: The inner ward. He is standing exactly where he was posted.
+[  526.3s game |  13139s wall]   health 160 / 160, gold 101, level 2
+[  527.6s game |  13155s wall]   continuous road: knight at (0.0, 8.0, -206.0), 32 m walked on this screen; render draws=76 primitives=163398 objects=473 video_mem=226.2MB
+[  527.6s game |  13155s wall]   ways onward: ["The Inner Ward"]; taking 'The Inner Ward' (boss)
+[  527.6s game |  13155s wall]   tap 'The Inner Ward' at (640, 639), target 1216 x 114
+[  529.1s game |  13175s wall]   walking at (0.0, 8.0, -207.6) (section 4): draws=76 primitives=165024 objects=473 video_mem=226.2MB
+[  531.2s game |  13205s wall]   duel begins: The Ashen Sentinel (knight 160 hp)
+[  531.4s game |  13211s wall]   audio during 'courtyard stop 7: The inner ward. He is standing exactly where he was posted.': Master peak -8.3 mean -15.4 dB; Music peak -13.6 mean -22.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.0 mean -25.9 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  531.4s game |  13211s wall] STEP duel 5: The Ashen Sentinel
+[  565.7s game |  13680s wall]   widest gap between the fighters: 4.4 m
+[  606.9s game |  14385s wall]   duel over after 75 s: WON. knight 160 / 160 hp. parried 4, blocked 1, dodged 1, blows taken 0, cuts landed 32
+[  609.8s game |  14436s wall]   result screen up: [Continue]. gold 401, level 3, xp 152, inventory 10, deaths 1
+[  609.8s game |  14436s wall]   tap 'CONTINUE' at (639, 670), target 300 x 60
+[  611.0s game |  14455s wall]   audio during 'duel 5: The Ashen Sentinel': Master peak -1.0 mean -15.7 dB; Music peak -11.2 mean -25.1 dB; Dialogue peak -2.4 mean -45.1 dB; Combat peak -3.1 mean -51.1 dB; Ambience peak -13.1 mean -26.8 dB; Interface peak -12.4 mean -72.7 dB; Cinematics peak -9.9 mean -63.7 dB; CombatL peak -2.1 mean -59.9 dB; CombatR peak -5.5 mean -65.9 dB
+[  611.0s game |  14455s wall] STEP after the guardian
+[  613.5s game |  14483s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [I  THE FALLEN COURTYARD], [II  THE BLACKWOOD], [SET OUT], [REST]
+[  613.5s game |  14483s wall]   cleared ["courtyard"]; defeated { "hollow_soldier": 1, "banneret": 1, "rampart_brute": 1, "ashen_sentinel": 1 }; gold 401; level 3; inventory ["w_dawnline", "s_plank", "a_worn_helm", "a_worn_chest", "a_worn_gauntlets", "a_worn_legs", "a_garrison_gauntlets", "w_knight_sword", "s_tower", "a_ash_helm"]
+[  613.5s game |  14483s wall]   tap 'REST' at (640, 441), target 260 x 60
+[  615.2s game |  14501s wall]   what comes next: regions open: ["courtyard", "blackwood"]
+[  615.2s game |  14501s wall]   audio during 'after the guardian': Master peak -1.0 mean -20.0 dB; Music peak -23.7 mean -30.5 dB; Dialogue peak -4.5 mean -34.3 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.2 mean -31.4 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  615.2s game |  14501s wall] SLICE RUN ENDED at step 'after the guardian'. fights 5, defeats 1, taps missed 0, stuck 0, longest held frame 0.1 s, assist false, audit notes 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

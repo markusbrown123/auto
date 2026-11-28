@@ -1200,6 +1200,10 @@ var _path_cum := PackedFloat32Array()
 var _path_d := 0.0
 var _path_then := Callable()
 var _cam_yaw := 0.0
+var _interacted := false          # the knight has just used a chest, the winch or the shrine (see _walk_path)
+var _snap_cam := false
+var _cam_side := 1.0               # which shoulder the road camera is over (1: the sword side)
+var _cam_x := 1.0
 var _walking_in := false
 var _cost_t := 0.0
 var _cost := false
@@ -1255,10 +1259,22 @@ func _route_ready() -> void:
 		leg.pop_front()
 	var first: Vector3 = leg[0]
 	rig.rotation.y = atan2(-(first.x - start.x), -(first.z - start.z))
+	if how.has("knight_yaw"):
+		rig.rotation.y = float(how.knight_yaw)
 	_cam_yaw = rig.rotation.y
 	var b := Basis(Vector3.UP, _cam_yaw)
 	backdrop.cam_fov = 48.0
-	backdrop.move_camera(rig.position + b * Vector3(0.9, 1.6, 3.9), rig.position + b * Vector3(-0.2, 1.3, -3.0), true)
+	if how.has("from_chamber"):
+		# Stage 1's hand-off: the framing the chamber's passage ended on (behind, close, a little high), out in daylight
+		backdrop.cam_fov = 50.0
+		backdrop.move_camera(rig.position + b * Vector3(0.3, 1.8, 2.7), rig.position + b * Vector3(0.0, 1.35, -3.0), true)
+	else:
+		backdrop.move_camera(rig.position + b * Vector3(0.9, 1.6, 3.9), rig.position + b * Vector3(-0.2, 1.3, -3.0), true)
+	# the Witness comes out of the passage with the knight: it keeps its place and its motion (WitnessDrone.continue_from)
+	var w0 = how.get("witness")
+	if w0 is WitnessDrone and is_instance_valid(w0) and rig.drone != null:
+		rig.drone.continue_from(w0)
+		rig.drone.global_position = how.get("witness_at", rig.drone.global_position)
 	Sfx.ambience(str(Game.run_region().amb))
 	Sfx.music_for("explore_courtyard", "menu", 2.5)
 	_walking_in = true
@@ -1349,6 +1365,13 @@ func _walk_path(points: Array, then: Callable) -> void:
 	_path_d = 0.0
 	_path_then = then
 	_cam_yaw = rig.rotation.y if _walk.is_empty() else _cam_yaw
+	if _interacted and _path.size() > 4:
+		# walking away from a thing just used (in a room, as often as not): the camera is put behind the way out at once
+		# rather than swung round through the walls to get there
+		_interacted = false
+		var d0 := _path[mini(8, _path.size() - 1)] - _path[0]
+		_cam_yaw = atan2(-d0.x, -d0.z)
+		_snap_cam = true
 	rig.walking = true
 	rig.footsteps = true
 	_walk = {"u": 0.0}
@@ -1433,17 +1456,31 @@ func _route_cam() -> void:
 	_cam_yaw = lerp_angle(_cam_yaw, rig.rotation.y, 1.0 - exp(-dt * 1.4))
 	var b := Basis(Vector3.UP, _cam_yaw)
 	var u: float = float(_walk.get("u", 0.0)) if not Game.settings.reduce_motion else 0.0
-	var eye := rig.position + b * Vector3(1.05 - 0.3 * u, 1.55 + 0.15 * u, 3.9)
-	var look := rig.position + b * Vector3(-0.25, 1.25, -3.2)
+	var head := rig.position + Vector3(0, 1.6 * rig.scale.y, 0)
+	var pts: Array = [head, rig.position + Vector3(0, 1.15 * rig.scale.y, 0)]
+	# the sword side by default; where a wall stands close on that side (the wall-walk, the passage) the camera goes
+	# over to the other shoulder, slowly, and comes back only when the sword side is clearly open again
+	var want_side := _cam_side
+	var right := CamFollow.clear_from(rig, pts, rig.position + b * Vector3(1.05, 1.6, 3.9), 0.9)
+	var left := CamFollow.clear_from(rig, pts, rig.position + b * Vector3(-1.05, 1.6, 3.9), 0.9)
+	if _cam_side > 0.0 and right < 0.7 and left > right + 0.2:
+		want_side = -1.0
+	elif _cam_side < 0.0 and right > 0.95:
+		want_side = 1.0
+	_cam_side = want_side
+	_cam_x = lerpf(_cam_x, _cam_side, 1.0 - exp(-get_process_delta_time() * 1.2))
+	var eye := rig.position + b * Vector3((1.05 - 0.3 * u) * _cam_x, 1.55 + 0.15 * u, 3.9)
+	var look := rig.position + b * Vector3(-0.25 * _cam_x, 1.25, -3.2)
 	backdrop.cam_fov = 48.0
 	backdrop.cam_speed = 2.4
-	var head := rig.position + Vector3(0, 1.6 * rig.scale.y, 0)
-	var clear := CamFollow.clear_from(rig, [head, rig.position + Vector3(0, 1.15 * rig.scale.y, 0)], eye, 0.9)
+	var clear := CamFollow.clear_from(rig, pts, eye, 0.9)
 	_cam_pull = lerpf(_cam_pull, clear, 0.5 if clear < _cam_pull else 0.03)
 	eye = head.lerp(eye, _cam_pull)
 	if _cam_pull < 0.98:
-		backdrop.cam_speed = 7.0
-	backdrop.move_camera(eye, look)
+		# (in a tight place the glide itself would carry the lens through the wall it is avoiding: it is all but set)
+		backdrop.cam_speed = 7.0 if _cam_pull > 0.8 else 24.0
+	backdrop.move_camera(eye, look, _snap_cam)
+	_snap_cam = false
 
 ## A point in the frame of another stop of the road.
 static func _frame_at(stage: int, v: Vector3) -> Vector3:
@@ -1477,7 +1514,8 @@ func _stage_foes(stage: int, now: bool) -> void:
 		if str(Db.foes[str(o.foe)].rig.get("kind", "")) == "dragon":
 			continue
 		_staged[key] = null
-		var at := _frame_at(stage, Vector3(_marker_x(opts, i), 0, -4.6 - FOE_BEYOND))
+		var fx: float = float(CourtRoute.FOE_X.get(stage, _marker_x(opts, i))) if i == 0 else _marker_x(opts, i)
+		var at := _frame_at(stage, Vector3(fx, 0, -4.6 - FOE_BEYOND))
 		at.y = CourtRoute.ground_y(at.x, at.z)
 		var yaw := CourtRoute.anchor_yaw(stage) + PI
 		var foe_id := str(o.foe)
@@ -1563,6 +1601,7 @@ func _route_interact(o: Dictionary, index: int) -> Node3D:
 	if not is_inside_tree():
 		return prop
 	_leaving = false
+	_interacted = true
 	var to := prop.global_position - backdrop.rig.position
 	create_tween().tween_property(backdrop.rig, "rotation:y", backdrop.rig.rotation.y + wrapf(atan2(-to.x, -to.z) - backdrop.rig.rotation.y, -PI, PI), 0.6)
 	var back := (stand - prop.global_position)
@@ -1577,8 +1616,8 @@ func _route_interact(o: Dictionary, index: int) -> Node3D:
 	var eye := Vector3.ZERO
 	var best := -1.0
 	for sgn: float in [1.0, -1.0]:
-		var e2 := p0 + back * (3.0 if tall else 1.7) + side * sgn * (1.6 if tall else 1.5) + Vector3(0, 1.5 if tall else 1.4, 0)
-		var look := p0 + Vector3(0, 1.1, 0)      # (above the thing itself, or the thing would block its own view)
+		var e2 := p0 + back * (3.0 if tall else 2.7) + side * sgn * (1.6 if tall else 1.9) + Vector3(0, 1.5 if tall else 1.55, 0)
+		var look := p0 + back * 0.8 + Vector3(0, 1.1, 0)      # (just in front of the thing, or it would block its own view)
 		var seg := e2 - look
 		var t := clampf((chest - look).dot(seg) / seg.length_squared(), 0.0, 1.0)
 		var gap := (look + seg * t).distance_to(chest)

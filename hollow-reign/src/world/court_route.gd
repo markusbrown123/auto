@@ -98,6 +98,8 @@ const SPOTS := {
 	"4|The Murder Hole": {"prop": [6.7, -163.4], "stand": [5.0, -163.4], "via": [[1.5, -158.0], [2.0, -163.3], [3.4, -163.3]]},
 	"5|Kneel": {"prop": [-8.7, -187.0], "stand": [-6.7, -186.6], "via": []},
 }
+## Rooms under a roof: no turf grows in them [x0, x1, z0, z1].
+const ROOFED := [[-16.5, -7.5, -95.5, -106.5], [-12.5, -5.5, -140.0, -149.0], [2.8, 8.0, -160.5, -166.5], [-12.5, -6.0, -183.0, -191.0], [-3.5, 3.5, -127.0, -137.0], [-3.5, 3.5, -158.5, -176.0]]
 ## How far ahead (local -z) of a stop's anchor its pouches may lie, where a wall closes the place in.
 const POUCH_REACH := {4: 3.8, 3: 5.0}
 
@@ -665,6 +667,12 @@ static func near_way(x: float, z: float, clear: float = 1.9) -> bool:
 				return true
 	return false
 
+static func _roofed(x: float, z: float) -> bool:
+	for r: Array in ROOFED:
+		if x > float(r[0]) and x < float(r[1]) and z < float(r[2]) and z > float(r[3]):
+			return true
+	return false
+
 ## What has gathered on the paving of a yard since nobody swept it: turf in the joints and along the walls, broken
 ## stone, never on a way the knight walks or in a stop's own place.
 func _clutter(n: Node3D, x0: float, x1: float, z0: float, z1: float, seed_n: int) -> void:
@@ -677,7 +685,7 @@ func _clutter(n: Node3D, x0: float, x1: float, z0: float, z1: float, seed_n: int
 		var x := rng.randf_range(x0, x1)
 		var z := rng.randf_range(minf(z0, z1), maxf(z0, z1))
 		var f := floor_at(x, z)
-		if f.is_empty() or int(f[6]) > 0 or absf(float(f[4]) - float(f[5])) > 0.01 or near_way(x, z):
+		if f.is_empty() or int(f[6]) > 0 or absf(float(f[4]) - float(f[5])) > 0.01 or near_way(x, z) or _roofed(x, z):
 			continue
 		var y := ground_y(x, z)
 		# along the walls more than in the open
@@ -1116,7 +1124,9 @@ func _winch(n: Node3D, k: Future.Kit) -> void:
 	Future._box(k.tool("lit"), Vector3(5.0, 0.08, 0.06), Vector3(0, 11.3, -156.95))
 	_occluder(n, Vector3(-9.5, 10.0, -158.0), Vector3(12.6, 8.6, 1.6))
 	_occluder(n, Vector3(9.5, 10.0, -158.0), Vector3(12.6, 8.6, 1.6))
-	_portcullis(n, "inner", Vector3(0, 5.5, -157.2), 5.8, 5.6, open)
+	# (the road past the winch yard is only reached through this gate: beyond stop 4 it stands open whatever the flags say)
+	var past: bool = not Game.run.is_empty() and int(Game.run.get("stage", 0)) >= 4
+	_portcullis(n, "inner", Vector3(0, 5.5, -157.2), 5.8, 5.6, open or past)
 	# the postern at the head of the lane: the winch gate
 	_portcullis(n, "postern", Vector3(-13.25, 5.5, -137.6), 4.4, 4.0, open)
 	Future._box(k.alloy(false), Vector3(5.6, 1.2, 1.2), Vector3(-13.25, 10.0, -137.6))

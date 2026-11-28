@@ -1,0 +1,14 @@
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+ROUTECOST stop 2 at (0.0, 3.2, -92.0): draws=163 primitives=339817 objects=427 video_mem=185.0MB
+ROUTEWALK stop 2: taking The Guardhouse (treasure)
+ROUTECOST walk at (-1.1, 3.2, -94.0) (section 1): draws=167 primitives=386976 objects=167 video_mem=185.0MB
+ROUTECOST walk at (-2.1, 3.2, -95.9) (section 1): draws=153 primitives=375328 objects=153 video_mem=185.0MB
+ROUTECOST walk at (-3.4, 3.2, -97.8) (section 1): draws=128 primitives=301054 objects=128 video_mem=185.0MB
+ROUTECOST walk at (-5.0, 3.2, -99.3) (section 1): draws=96 primitives=210864 objects=96 video_mem=185.0MB
+ROUTECOST walk at (-6.7, 3.2, -100.8) (section 1): draws=88 primitives=202484 objects=88 video_mem=185.0MB
+ROUTECOST walk at (-8.8, 3.2, -101.0) (section 1): draws=59 primitives=179287 objects=59 video_mem=185.0MB
+ROUTECOST walk at (-11.1, 3.2, -101.0) (section 1): draws=44 primitives=91980 objects=44 video_mem=185.0MB
+render t=38.0 draw_calls=60 primitives=164305 objects=63 video_mem=185.0MB nodes=563
+render t=41.0 draw_calls=78 primitives=200604 objects=81 video_mem=185.0MB nodes=563
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

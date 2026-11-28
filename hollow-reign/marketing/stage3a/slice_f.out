@@ -67,3 +67,98 @@ WARNING: All audio drivers failed, falling back to the dummy driver.
 [  184.0s game |   5702s wall]   tap 'CONTINUE' at (640, 670), target 300 x 60
 [  185.5s game |   5766s wall]   walking at (-0.1, 4.5, -124.2) (section 2): draws=100 primitives=159339 objects=100 video_mem=186.2MB
 [  193.8s game |   6101s wall]   walking at (0.0, 5.2, -133.5) (section 2): draws=97 primitives=145546 objects=97 video_mem=186.2MB
+[  219.2s game |   7030s wall]   audio during 'duel 2: Banneret': Master peak -1.0 mean -16.4 dB; Music peak -11.4 mean -23.8 dB; Dialogue peak -6.3 mean -57.6 dB; Combat peak -29.5 mean -90.7 dB; Ambience peak -20.7 mean -27.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -10.5 mean -65.5 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  219.2s game |   7030s wall] STEP courtyard stop 4: A winch-house stands beside the inner gate. Its chain is rus
+[  219.2s game |   7030s wall]   health 160 / 160, gold 242, level 2
+[  220.4s game |   7057s wall]   continuous road: knight at (0.0, 5.5, -141.0), 18 m walked on this screen; render draws=176 primitives=242958 objects=658 video_mem=194.2MB
+[  220.4s game |   7057s wall]   tap 'a pouch' at (290, 472), target 84 x 84
+[  221.1s game |   7074s wall]   pouch: gold 242 -> 257
+[  221.1s game |   7074s wall]   ways onward: ["Turn the Winch"]; taking 'Turn the Winch' (lever)
+[  221.1s game |   7074s wall]   tap 'Turn the Winch' at (640, 639), target 1216 x 114
+[  222.6s game |   7108s wall]   walking at (-1.3, 5.5, -141.9) (section 3): draws=125 primitives=229824 objects=125 video_mem=194.1MB
+[  228.7s game |   7250s wall]   tap 'PULL' at (640, 360), target 220 x 60
+[  231.0s game |   7311s wall]   tap 'ONWARD' at (640, 441), target 260 x 60
+[  231.5s game |   7325s wall]   walking at (-4.6, 5.5, -144.6) (section 3): draws=118 primitives=249216 objects=118 video_mem=194.1MB
+[  239.8s game |   7514s wall]   walking at (0.0, 5.5, -150.7) (section 3): draws=116 primitives=277060 objects=116 video_mem=194.1MB
+[  258.5s game |   7992s wall]   audio during 'courtyard stop 4: A winch-house stands beside the inner gate. Its chain is rus': Master peak -1.0 mean -15.8 dB; Music peak -11.4 mean -22.8 dB; Dialogue peak -2.8 mean -49.7 dB; Combat peak -26.1 mean -86.0 dB; Ambience peak -20.7 mean -27.4 dB; Interface peak -21.7 mean -83.1 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  258.5s game |   7992s wall] STEP courtyard stop 5: The gate passage. It is narrow, and it is occupied.
+[  258.5s game |   7992s wall]   health 160 / 160, gold 257, level 2
+[  259.7s game |   8020s wall]   continuous road: knight at (0.0, 5.5, -152.0), 36 m walked on this screen; render draws=154 primitives=279320 objects=696 video_mem=194.2MB
+[  259.7s game |   8020s wall]   tap 'a pouch' at (254, 460), target 84 x 84
+[  260.4s game |   8037s wall]   pouch: gold 257 -> 266
+[  260.4s game |   8037s wall]   tap 'something odd (cy_charcoal_sketch)' at (268, 468), target 96 x 96
+[  273.4s game |   8261s wall]   secrets known: 1 -> 2
+[  273.4s game |   8261s wall]   audio during 'courtyard stop 5: The gate passage. It is narrow, and it is occupied.': Master peak -7.2 mean -17.6 dB; Music peak -12.1 mean -24.5 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.7 mean -29.0 dB; Interface peak -21.6 mean -66.9 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  273.4s game |   8261s wall] STEP turning back to the sanctuary
+[  273.8s game |   8271s wall]   tap 'TURN BACK' at (1173, 54), target 150 x 60
+SCRIPT ERROR: Invalid access to property or key 'stage' on a base object of type 'Dictionary'.
+          at: SliceBot._stop (res://src/dev/slice_bot.gd:669)
+          GDScript backtrace (most recent call first):
+              [0] _stop (res://src/dev/slice_bot.gd:669)
+              [1] _road (res://src/dev/slice_bot.gd:638)
+              [2] _wait (res://src/dev/slice_bot.gd:137)
+[  274.6s game |   8297s wall]   audio during 'turning back to the sanctuary': Master peak -6.7 mean -14.5 dB; Music peak -12.4 mean -21.8 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -18.4 mean -25.4 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  274.6s game |   8297s wall] STEP sanctuary
+[  277.1s game |   8335s wall]   tabs: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [I  THE FALLEN COURTYARD], [SET OUT], [BY THE WINCH GATE]. purse: 266 GOLD
+4 SHARDS
+[  277.1s game |   8335s wall]   audio during 'sanctuary': Master peak -8.0 mean -14.7 dB; Music peak -13.7 mean -23.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.5 mean -23.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  277.1s game |   8335s wall] STEP sanctuary: Armory
+[  277.1s game |   8335s wall]   tap 'ARMORY' at (197, 53), target 103 x 63
+[  280.2s game |   8438s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [SORT: EQUIPPED FIRST], [GRID], [Favourite: cannot be sold], [UPGRADE], [Helms: Wayfarer Helm], [—], [Cuirasses: Wayfarer Cuirass], [Gauntlets: Wayfarer Gauntlets], [Greaves: Wayfarer Greaves], [—], [ATTACK], [CLOSE UP], [−], [+], [Weapons: Silver Vow], [Shields: Splintered Heater], [Off Hand: nothing worn], [—], [—], [INSPECT]
+[  282.2s game |   8495s wall]   tap 'EQUIP' at (108, 660), target 140 x 60
+[  283.8s game |   8535s wall]   equipped before { "weapon": "w_dawnline", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  283.8s game |   8535s wall]   equipped after  { "weapon": "w_dawnline", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_garrison_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  283.8s game |   8535s wall]   audio during 'sanctuary: Armory': Master peak -6.9 mean -14.2 dB; Music peak -12.3 mean -21.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.5 mean -23.6 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  283.8s game |   8535s wall] STEP sanctuary: Shop
+[  283.8s game |   8535s wall]   tap 'SHOP' at (305, 53), target 96 x 63
+[  287.0s game |   8609s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [−], [+], [BUY], [ALL WARES], [BLADES], [SHIELDS], [ARMOUR], [TRINKETS], [MATERIALS], [SELL]
+[  287.0s game |   8609s wall]   gold 266; catalogue 23 entries; dearest within reach: w_knight_sword (260)
+[  288.5s game |   8652s wall]   tap 'BUY' at (911, 530), target 250 x 76
+[  289.6s game |   8682s wall]   tap 'BUY' at (764, 419), target 220 x 60
+[  290.7s game |   8709s wall]   bought w_knight_sword? owns=true gold 266 -> 6; purse shows '6 GOLD
+4 SHARDS'
+[  292.3s game |   8741s wall]   purse label after the count: '6 GOLD
+4 SHARDS'
+[  292.3s game |   8741s wall]   tap 'EQUIP' at (681, 531), target 374 x 76
+ERROR: Condition "!is_inside_tree()" is true. Returning: false
+   at: can_process (scene/main/node.cpp:902)
+[  293.5s game |   8762s wall]   equipped now: { "weapon": "w_knight_sword", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_garrison_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  293.5s game |   8762s wall]   audio during 'sanctuary: Shop': Master peak -1.0 mean -20.2 dB; Music peak -21.5 mean -30.3 dB; Dialogue peak -3.4 mean -36.2 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.5 mean -32.1 dB; Interface peak -11.6 mean -60.8 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  293.5s game |   8762s wall] STEP sanctuary: Forge
+[  293.5s game |   8762s wall]   tap 'FORGE' at (409, 53), target 96 x 63
+[  296.6s game |   8839s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [WORK], [PATTERNS], [Courtyard Longsword], [Wayfarer Cuirass], [Wayfarer Greaves], [Garrison Gauntlets], [Wayfarer Helm], [Splintered Heater], [Silver Vow], [Wayfarer Gauntlets]
+[  296.6s game |   8839s wall]   nothing at the forge could be paid for (gold 6, shards 4, materials { "m_iron": 2 })
+[  296.6s game |   8839s wall]   audio during 'sanctuary: Forge': Master peak -16.1 mean -23.5 dB; Music peak -21.2 mean -30.9 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -25.9 mean -33.5 dB; Interface peak -35.9 mean -75.4 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  296.6s game |   8839s wall] STEP sanctuary: Settings, quit to the menu
+[  296.6s game |   8839s wall]   tap 'SETTINGS' at (781, 53), target 110 x 63
+[  298.7s game |   8870s wall]   (scrolled to reach 'RETURN TO TITLE')
+[  298.8s game |   8871s wall]   tap 'RETURN TO TITLE' at (1141, 532), target 182 x 60
+[  299.3s game |   8880s wall]   audio during 'sanctuary: Settings, quit to the menu': Master peak -1.0 mean -14.2 dB; Music peak -22.0 mean -32.9 dB; Dialogue peak -5.2 mean -21.6 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -25.6 mean -32.1 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  299.3s game |   8880s wall] STEP main menu again
+[  301.3s game |   8919s wall]   menu: [CONTINUE], [WORLD MAP], [LEGACIES], [CHARACTER], [EQUIPMENT], [CHRONICLE], [TRAINING], [SETTINGS], [CREDITS], [NEW LEGACY], [WATCH THE OPENING]  ·  status line: The Broken Crown   ·   Level 2   ·   Chapter I, The Fallen Courtyard
+[  301.7s game |   8926s wall]   tap 'CONTINUE' at (294, 413), target 500 x 76
+[  302.1s game |   8937s wall]   audio during 'main menu again': Master peak -15.4 mean -22.4 dB; Music peak -21.4 mean -29.2 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -30.9 mean -35.1 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  302.1s game |   8937s wall] STEP sanctuary after Continue
+[  304.1s game |   8966s wall]   setting out: by the short way
+[  304.1s game |   8966s wall]   tap 'BY THE WINCH GATE' at (1039, 654), target 393 x 60
+[  304.6s game |   8978s wall]   loading took 0.5 s of game time (12.1 s wall)
+[  304.9s game |   8988s wall]   walking at (-12.7, 5.5, -138.7) (section 3): draws=148 primitives=191874 objects=412 video_mem=221.4MB
+[  313.0s game |   9257s wall]   walking at (-5.8, 5.5, -144.6) (section 3): draws=105 primitives=220644 objects=105 video_mem=219.1MB
+[  321.1s game |   9511s wall]   walking at (-0.2, 5.5, -151.5) (section 3): draws=101 primitives=261422 objects=101 video_mem=219.1MB
+[  322.9s game |   9566s wall]   audio during 'sanctuary after Continue': Master peak -6.9 mean -15.5 dB; Music peak -11.8 mean -22.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.8 mean -26.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  322.9s game |   9566s wall] STEP courtyard stop 5: The gate passage. It is narrow, and it is occupied.
+[  322.9s game |   9566s wall]   health 160 / 160, gold 6, level 2
+[  324.1s game |   9595s wall]   continuous road: knight at (0.0, 5.5, -152.0), 19 m walked on this screen; render draws=140 primitives=268074 objects=600 video_mem=219.1MB
+[  324.1s game |   9595s wall]   ways onward: ["The Gate Passage", "The Murder Hole"]; taking 'The Gate Passage' (fight)
+[  324.1s game |   9595s wall]   tap 'The Gate Passage' at (333, 639), target 602 x 114
+[  326.4s game |   9634s wall]   duel begins: Rampart Breaker (knight 160 hp)
+[  326.4s game |   9641s wall]   audio during 'courtyard stop 5: The gate passage. It is narrow, and it is occupied.': Master peak -7.4 mean -15.0 dB; Music peak -13.2 mean -21.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.0 mean -26.4 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  326.4s game |   9641s wall] STEP duel 3: Rampart Breaker
+[  334.9s game |   9870s wall]   widest gap between the fighters: 3.5 m
+[  337.7s game |   9942s wall]   duel over after 11 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 11
+[  340.5s game |  10004s wall]   result screen up: [Continue]. gold 76, level 2, xp 115, inventory 8, deaths 0
+[  340.5s game |  10004s wall]   tap 'CONTINUE' at (640, 586), target 300 x 60
+[  342.0s game |  10040s wall]   walking at (-3.2, 3.4, -158.2) (section 3): draws=67 primitives=136106 objects=67 video_mem=218.0MB
+[  350.1s game |  10251s wall]   walking at (0.0, 5.6, -162.4) (section 3): draws=86 primitives=176486 objects=86 video_mem=218.0MB
+[  358.2s game |  10469s wall]   walking at (0.0, 6.0, -171.5) (section 3): draws=107 primitives=186562 objects=107 video_mem=218.0MB
+[  366.3s game |  10627s wall]   walking at (0.0, 6.2, -180.5) (section 4): draws=105 primitives=187134 objects=105 video_mem=217.7MB

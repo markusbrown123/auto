@@ -106,8 +106,8 @@ func _place(dt: float = 0.0) -> void:
 	var c := _clear(eye)
 	# (in at once, out again over a second or so: a post going by does not pump the lens)
 	_pull = c if dt <= 0.0 else lerpf(_pull, c, 1.0 - exp(-dt * (18.0 if c < _pull else 1.6)))
-	if _pull < 0.999:
-		var who: Node3D = follow if (follow and is_instance_valid(follow)) else subject
+	var who: Node3D = follow if (follow and is_instance_valid(follow)) else (subject if (subject and is_instance_valid(subject)) else null)
+	if _pull < 0.999 and who:
 		var head := who.global_position + Vector3(0, 1.6 * who.scale.y, 0)
 		eye = head.lerp(eye, _pull)
 	global_position = eye + sway

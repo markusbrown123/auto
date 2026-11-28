@@ -566,9 +566,10 @@ func _witness_line(who: String, line_id: String) -> void:
 			_flicker = 0.0
 			Sfx.play("swell", -12.0, 1.6)
 		"witness_discovery_03", "witness_discovery_06":
-			var face := head
-			var p := face + (cup - face).normalized() * 0.95 + side * 0.2
-			cam.cut(p, face, 34.0)
+			# the knight's questions: in profile from the knight's left, a little ahead, the housing's light on the face
+			# (from the housing itself the face was against the light and read as black)
+			var p := head + side * 1.3 - inward * 0.3 + Vector3(0, -0.05, 0)
+			cam.cut(p, head.lerp(cup, 0.25), 36.0)
 		"witness_discovery_04", "witness_discovery_05":
 			# (from the side away from the knight, who stands a little to the other side of the housing)
 			var c2 := cup + inward * 1.15 - side * 0.8 + Vector3(0, 0.18, 0)

@@ -1242,7 +1242,9 @@ func _route_ready() -> void:
 	_world_props()
 	var rig := backdrop.rig
 	rig.position = Vector3(start.x, CourtRoute.ground_y(start.x, start.z), start.z)
+	# (this stop's foes and the next stop's are stood at once: the screen opens behind a transition)
 	_stage_foes(stage, true)
+	_stage_foes(stage + 1, true)
 	if leg.is_empty():
 		rig.rotation.y = angle
 		backdrop.cam_fov = 50.0
@@ -1329,6 +1331,7 @@ func _reset_stop() -> void:
 			if is_inside_tree():
 				print("ROUTECOST stop %d at %s: %s" % [int(Game.run.stage) + 1, str(backdrop.rig.position.snapped(Vector3.ONE * 0.1)), CourtRoute.cost_line()]))
 	_stage_foes(int(Game.run.stage) + 1, false)
+	_stage_foes(int(Game.run.stage) + 2, false)      # (two stops ahead: time for the place to be out of sight once)
 
 ## Walks the knight from where they are through `points` (world; heights are the ground's), then calls `then`.
 func _walk_path(points: Array, then: Callable) -> void:

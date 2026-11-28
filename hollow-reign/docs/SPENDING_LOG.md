@@ -174,3 +174,6 @@ Six samples (ElevenLabs v4 via Higgsfield): main character Sterling (lowered 2),
 
 ## 2026-11-28: merchant Irish-accent auditions
 Owner asked for more merchant options with an Irish accent. Three ElevenLabs v4 takes (Grady, Emmett, Barrett) with an accent tag, 0.92 credits each = 2.76 credits. Two Qwen TTS attempts were refused before generation (no charge). Main character space-helmet versions made from the existing take with filters only (no cost). Files: marketing/audition/hero_merchant_round/.
+
+## 2026-11-28: merchant brogue round
+Three ElevenLabs v4 takes (Barrett, Grady, Harrison), 1.15 credits each = 3.45 credits (balance now 780.03 including the concept pass running in parallel). Hero voice change applied from kept masters: no cost.

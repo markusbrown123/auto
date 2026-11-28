@@ -71,6 +71,11 @@ static func paint(ci: CanvasItem, k: String, at: Vector2, h: float, color: Color
 			ci.draw_line(at + Vector2(0.2, 0.8) * h, at + Vector2(0.88, 0.12) * h, color, w * 1.5, true)
 			ci.draw_line(at + Vector2(0.2, 0.52) * h, at + Vector2(0.48, 0.8) * h, color, w * 1.3, true)
 			ci.draw_line(at + Vector2(0.08, 0.92) * h, at + Vector2(0.26, 0.74) * h, color, w * 2.2, true)
+		"offhand":
+			# a short parrying blade, held point up in the other hand
+			ci.draw_line(at + Vector2(0.5, 0.62) * h, at + Vector2(0.5, 0.08) * h, color, w * 1.5, true)
+			ci.draw_line(at + Vector2(0.28, 0.62) * h, at + Vector2(0.72, 0.62) * h, color, w * 1.3, true)
+			ci.draw_line(at + Vector2(0.5, 0.64) * h, at + Vector2(0.5, 0.92) * h, color, w * 2.2, true)
 		"shield":
 			_poly(ci, at, h, [Vector2(0.14, 0.1), Vector2(0.86, 0.1), Vector2(0.86, 0.5), Vector2(0.5, 0.95), Vector2(0.14, 0.5)], color, w)
 			ci.draw_line(at + Vector2(0.5, 0.1) * h, at + Vector2(0.5, 0.95) * h, Color(color, 0.6), w * 0.7, true)

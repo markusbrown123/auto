@@ -8,3 +8,5 @@ merchant_workshop_wide CREATE [   "5c81eecb-3c97-43c2-b38a-4f70c7c20899" ] ERR
 merchant_counter_portrait CREATE [   "c8c42160-3f88-423b-912f-545f2610d817" ] ERR 
 monarch_full_body CREATE  ERR Error: {"actions":[{"type":"upgrade_plan"}],"billing_period":"monthly","concurrent_jobs_limit":8,"error_type":"rate_limit_reached","job_set_type":"gpt_image_2_6","plan_type":"plus","use_unlim":false,"workspace":{"role":"owner","type":"private"}}
 monarch_throne_hall CREATE  ERR Error: {"actions":[{"type":"upgrade_plan"}],"billing_period":"monthly","concurrent_jobs_limit":8,"error_type":"rate_limit_reached","job_set_type":"gpt_image_2_6","plan_type":"plus","use_unlim":false,"workspace":{"role":"owner","type":"private"}}
+monarch_full_body CREATE [   "0e9f7292-4cbc-48ca-815b-7712ea772bef" ] ERR 
+monarch_throne_hall CREATE [   "b8a24376-4f51-4fb7-ad36-a9bdfec9d4ad" ] ERR 

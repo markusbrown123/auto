@@ -165,3 +165,6 @@ Pilot of 3 sword-clash takes on mirelo_text_to_audio, 2.0 s each, 0.50 credits e
 
 ## 2026-11-27: female protagonist voice, round 1 (three samples)
 Owner asked for a deeper, darker heroine. Three samples on one line (Elodie, Karen, Soraya; ElevenLabs v4 via Higgsfield). Higgsfield balance 827.35 -> 826.66 (0.69 credits). Samples in marketing/audition/heroine_round1/. Full re-record of her 59 lines waits for the owner's pick.
+
+## 2026-11-28: music audition, three directions (owner approved ~30 credits)
+Three 60 s instrumental cues on ElevenLabs Music v2.5 via Higgsfield, all on one new recurring theme (D minor: D, F, A, up to C, back to A): menu theme, cliffside journey, boss battle. Higgsfield balance 826.66 -> 800.50 (26.16 credits). Files: marketing/audio_pass/music_audition/ (loudness-normalised copies), art/music_audition/ (as delivered). Nothing else generated; nobody has listened yet.

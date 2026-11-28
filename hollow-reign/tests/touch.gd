@@ -110,7 +110,7 @@ func _sword_prompt() -> void:
 	await get_tree().create_timer(0.8).timeout
 	var cam_at: Vector3 = a.cam.global_position
 	var blocked: Array = []
-	for f: float in [0.3, 0.6, 0.95]:
+	for f: float in [0.7, 0.95, 1.2]:
 		var p: Vector3 = a._rack.global_position + Vector3(0, f, 0)
 		for mi: MeshInstance3D in a.arena.find_children("*", "MeshInstance3D", true, false):
 			if mi.mesh == null or not mi.is_visible_in_tree() or a._rack_sword.is_ancestor_of(mi):
@@ -131,10 +131,15 @@ func _sword_prompt() -> void:
 	ok(ring != null and ring.visible and view.encloses(ring.get_global_rect()), "the TAKE UP YOUR SWORD ring is on screen")
 	if ring != null:
 		var at := ring.get_global_rect().get_center()
-		_touch(4, at, true)
-		await get_tree().process_frame
-		_touch(4, at, false)
-		await get_tree().process_frame
+		# through Input, the path a finger takes (a control lying over the ring would take the touch)
+		for down: bool in [true, false]:
+			var e := InputEventScreenTouch.new()
+			e.index = 4
+			e.position = at
+			e.pressed = down
+			Input.parse_input_event(e)
+			await get_tree().process_frame
+			await get_tree().process_frame
 		ok(a._taken, "a finger on the ring takes up the sword (under it: %s)" % str(get_viewport().gui_get_hovered_control()))
 	a.skip()
 	a.queue_free()

@@ -3,7 +3,8 @@
 
 Usage: tools/dev/audiolog_report.py <audiolog.tsv> [slice.log]
 
-With the slice bot's step log the timeline is cut at its STEP lines (both files use the game clock). Per segment:
+With the slice bot's step log the timeline is cut at its STEP lines (both files use the game clock); without one, where
+the current screen changes. Per segment:
 step sounds played and swallowed by the retrigger gap, steps per second, steps per rig, steps from a rig that was
 not moving (speed under 0.05 m/s), from a rig not visible, the most rigs with footsteps on at once, the armour
 layers (jingle, armor) and everything else that started.
@@ -79,6 +80,13 @@ def report(rows, segs):
 def main():
     rows = load(sys.argv[1])
     segs = steps_of(sys.argv[2]) if len(sys.argv) > 2 else []
+    if not segs:
+        # no step log: cut where the router's current screen changes (the once-a-second "rigs" line names it)
+        last = None
+        for r in rows:
+            if r["kind"] == "rigs" and r["who"].startswith("screen=") and r["who"] != last:
+                last = r["who"]
+                segs.append((r["t"] if segs else 0.0, last[7:]))      # (late by up to a second)
     report(rows, segs)
     # whole-run step stacks, to show which code put the feet down
     st = Counter(r["stack"].split(" < ")[1] if " < " in r["stack"] else r["stack"] for r in rows if r["kind"] in ("pool", "step_gated") and r["name"].startswith("step_"))

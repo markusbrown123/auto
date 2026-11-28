@@ -1768,6 +1768,9 @@ func t_sfx() -> void:
 	Sfx._gate_at.clear()
 	Sfx.play("footstep", -6.0)
 	ok(Sfx._active("step", Sfx._now()) == 1, "sfx: the old footstep call plays one step")
+	# the armour settling is occasional: one layer, and never again inside its gap whoever asks
+	Sfx._gate_at.clear()
+	ok(Sfx.armour(1.0) and not Sfx.armour(1.2), "sfx armour: one settle, then nothing inside 2.5 s")
 	for name in ["clash", "block", "parry_perfect", "guard_break", "hit_armor", "hit_flesh", "swing", "swing_heavy"]:
 		Sfx._gate_at.clear()
 		Sfx.play(name)

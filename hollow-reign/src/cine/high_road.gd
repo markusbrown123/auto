@@ -45,7 +45,7 @@ func stride(a: float, b: float) -> void:
 	if _walk:
 		_walk.kill()
 	_walk = create_tween()
-	_walk.tween_property(self, "s", b, absf(b - a) / WALK)
+	_walk.tween_property(self, "s", b, absf(b - a) / WALK).from(a)      # (from `a`, whatever else wrote `s` before its first step)
 
 func stand(at: float) -> void:
 	if _walk:

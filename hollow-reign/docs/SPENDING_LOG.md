@@ -168,3 +168,6 @@ Owner asked for a deeper, darker heroine. Three samples on one line (Elodie, Kar
 
 ## 2026-11-28: music audition, three directions (owner approved ~30 credits)
 Three 60 s instrumental cues on ElevenLabs Music v2.5 via Higgsfield, all on one new recurring theme (D minor: D, F, A, up to C, back to A): menu theme, cliffside journey, boss battle. Higgsfield balance 826.66 -> 800.50 (26.16 credits). Files: marketing/audio_pass/music_audition/ (loudness-normalised copies), art/music_audition/ (as delivered). Nothing else generated; nobody has listened yet.
+
+## 2026-11-28: main character and merchant voice auditions (owner approved ~2 credits)
+Six samples (ElevenLabs v4 via Higgsfield): main character Sterling (lowered 2), Holden, Desmond on one line; merchant Orren: Barrett, Grady, Emmett on one line. 2.76 credits (800.50 -> 797.74). Files: marketing/audition/hero_merchant_round/. Current voices unchanged until the owner approves.

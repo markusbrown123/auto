@@ -29,7 +29,7 @@ const POOLS := {
 ## Rapid swipes therefore cannot stack into a wall, and one footstep call cannot become two steps.
 const FAMILIES := {"metal": [4, 0.04], "parry": [2, 0.12], "break": [2, 0.2], "hit": [4, 0.04], "flesh": [4, 0.04],
 	"whoosh": [3, 0.07], "layer": [8, 0.0], "step": [2, 0.08],
-	"shield": [3, 0.06], "foley": [3, 0.08], "fall": [2, 0.3]}
+	"shield": [3, 0.06], "foley": [3, 0.08], "fall": [2, 0.3], "armour": [1, 2.5]}
 ## Named events: the first layer is the sound itself (it takes the retrigger gap), the rest are added with an
 ## optional delay "at" (s), a "vol" trim (dB), a minimum "min" intensity and a "chance".
 const EVENTS := {
@@ -136,7 +136,11 @@ func _process(delta: float) -> void:
 		for n: Node in get_tree().root.find_children("*", "Node3D", true, false):
 			if n.has_method("_log_name") and bool(n.get("footsteps")):
 				rigs.append(n.call("_log_name", "-"))
+		var m := get_tree().root.get_node_or_null("Main")
+		var cur: Variant = m.get("current") if m else null
+		log_who = "screen=" + (str((cur as Node).get_script().resource_path.get_file()) if cur is Node and (cur as Node).get_script() else "-")
 		alog("rigs", str(rigs.size()), "", 0.0, 1.0)
+		log_who = ""
 		for r: String in rigs:
 			_alog.store_line("\t\trig\t%s" % r)
 
@@ -253,6 +257,16 @@ func footstep(surface: String = "", weight: float = 1.0, vol_db: float = 0.0, pi
 	_gate_at["step"] = _now()   # a cold stream load inside _launch must not count against the retrigger gap
 	if jingle and weight >= 0.9 and randf() < clampf(0.2 + 0.4 * (weight - 0.9), 0.0, 0.6):
 		_launch("jingle", _pick("jingle", _n("jingle")), v - 20.0, pitch * randf_range(0.9, 1.1), -1.0, 0.0)
+	return true
+
+## Armour settling as a figure sets off or comes to a stand: one quiet plate-and-mail layer (the `jingle` pool until
+## recorded armour-movement files replace it), never more than one at a time and never twice inside 2.5 s whoever asks.
+## The caller decides when a weight shift is worth it (FighterRig: a start or a stop, with its own cooldown).
+func armour(weight: float = 1.0, vol_db: float = 0.0) -> bool:
+	if _n("jingle") < 1 or not _gate("armour", _now()):
+		return false
+	weight = clampf(weight, 0.4, 2.5)
+	_launch("jingle", _pick("jingle", _n("jingle")), vol_db - 20.0 + 4.0 * (weight - 1.0), randf_range(0.92, 1.05), -1.0, 0.0)
 	return true
 
 ## Number of variants of a pool: the listed count, or more when higher-numbered files exist (generated extras:

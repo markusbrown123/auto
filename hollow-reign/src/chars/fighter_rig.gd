@@ -880,7 +880,9 @@ static var foot_log: Array = []      # dev: [frame, side] for every footfall, wh
 static var log_feet := false
 var _last_fall := {"Left": -9.0, "Right": -9.0}
 var _last_fall_any := -9.0
+var _last_armour := -99.0           # when this figure's armour was last heard settling (see `_footfall`)
 var _speed_now := 0.0                # ground covered this frame, m/s (what `_travel` measured)
+var _step_len := 0.0                 # how far the foot of the last stance step travelled (rig metres)
 
 ## One sound for one foot put down: never two for a plant, never two feet inside a tenth of a second, none unless it was
 ## walking. The surface is what the foot is on; the weight is the armour's (a fighter in the open is heavier than one
@@ -889,6 +891,7 @@ func _footfall(side: String) -> void:
 	var now := _clock
 	if now - float(_last_fall[side]) < 0.3 or now - _last_fall_any < 0.12:
 		return
+	var prev_any := _last_fall_any
 	_last_fall[side] = now
 	_last_fall_any = now
 	_impact = clampf(_walk_amount, 0.4, 1.0)
@@ -898,19 +901,25 @@ func _footfall(side: String) -> void:
 		return
 	var weight := (0.62 if combat_steps else 0.85 + 0.3 * (bulk - 1.0)) * clampf(_walk_amount + 0.25, 0.4, 1.0)
 	var surface := _surface_now()
+	# (the step sits under the music and the voices at the level this call always had: -6 dB walking, -9 in a duel)
+	var vol := (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0)
 	if Sfx.logging():
 		Sfx.log_who = _log_name(side)
 	if Sfx.has_method("footstep"):
-		Sfx.call("footstep", surface, weight)
+		Sfx.call("footstep", surface, weight, vol, 1.0, false)      # no armour layer on the step itself: see below
+		# the armour is heard settling only when a walk sets off after standing, and then not again for six seconds
+		if not combat_steps and prev_any < now - 1.0 and now - _last_armour > 6.0:
+			_last_armour = now
+			Sfx.call("armour", weight, vol)
 	else:
-		Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
+		Sfx.play("footstep", vol, 1.0 / maxf(0.7, scale.x))
 	Sfx.log_who = ""
 
 ## Dev (audio log): which rig this is and what it is doing, for the line its footfall writes.
 func _log_name(side: String) -> String:
 	var spd := _speed_now
-	return "%s#%d %s walking=%s amt=%.2f spd=%.2f vis=%s mode=%d combat=%s" % [str(get_path()).get_file(), get_instance_id() % 100000, side,
-		str(walking), _walk_amount, spd, str(is_visible_in_tree()), int(mode), str(combat_steps)]
+	return "%s#%d %s walking=%s amt=%.2f spd=%.2f vis=%s mode=%d combat=%s len=%.2f" % [str(get_path()).get_file(), get_instance_id() % 100000, side,
+		str(walking), _walk_amount, spd, str(is_visible_in_tree()), int(mode), str(combat_steps), _step_len]
 
 func _surface_now() -> String:
 	if ground.is_valid() and ground.get_method() == &"height":
@@ -2888,6 +2897,7 @@ func _feet_step(dt: float) -> void:
 			lift = pow(sin(PI * u), 0.6) * float(f.lift)
 			if u >= 1.0:
 				f.step = false
+				_step_len = Vector2((f.at as Vector3).x - (f.from as Vector3).x, (f.at as Vector3).z - (f.from as Vector3).z).length() / s
 				if _ft_still < 0.3:
 					_footfall(side)      # (a foot set down to square the stance of a figure that is standing is not a step)
 		var at_b: Vector3 = inv * (f.at as Vector3)

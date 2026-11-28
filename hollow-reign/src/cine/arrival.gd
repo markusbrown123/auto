@@ -48,8 +48,10 @@ func _run() -> void:
 	if _over:
 		return
 	# they set off, and the game's name comes up over the road
-	road.hero.walking = true
-	create_tween().tween_property(road, "s", 30.0 + 6.5 * HighRoad.WALK, 6.5)
+	# (the road's own stride, so the next shot's stride stops it: a tween of our own on `road.s` outlived this walk by a
+	# frame, and the next shot's walk then took its start from it and ran the walker 300 m in 12 s at 25 m/s, six
+	# footfalls a second)
+	road.stride(road.s, 30.0 + 6.5 * HighRoad.WALK)
 	if show_name:
 		cards.show_item(cards.logo, 3.6)
 	if not await _w(6.4):

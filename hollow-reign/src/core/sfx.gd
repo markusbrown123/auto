@@ -73,6 +73,12 @@ var _amb: AudioStreamPlayer
 var _amb_name := ""
 var _layer: AudioStreamPlayer
 var _layer_tween: Tween
+## Dev: `-- --audiolog=<file>` writes one line for every sound start (and every footstep request) to that file:
+## game clock, kind, name/file, bus, volume, pitch, who asked (`log_who`, set by the caller) and the calling stack.
+## Off by default; nothing is computed while it is off.
+var _alog: FileAccess
+var _alog_t := 0.0              # game clock since launch, seconds (scaled delta, so it is the clock a fixed-fps run keeps)
+var log_who := ""               # dev: the caller of the next logged sound names itself here (a rig's path and state)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -116,6 +122,40 @@ func _ready() -> void:
 	_amb.volume_db = -8.0
 	add_child(_amb)
 	Game.apply_settings()
+	for a: String in OS.get_cmdline_user_args():
+		if a.begins_with("--audiolog="):
+			_alog = FileAccess.open(a.trim_prefix("--audiolog="), FileAccess.WRITE)
+			if _alog:
+				_alog.store_line("t\tframe\tkind\tname\tbus\tvol_db\tpitch\twho\tstack")
+
+func _process(delta: float) -> void:
+	_alog_t += delta
+	if _alog and floori(_alog_t) != floori(_alog_t - delta):
+		# once a second: every rig in the tree that could put a foot down, and what it is doing
+		var rigs: Array = []
+		for n: Node in get_tree().root.find_children("*", "Node3D", true, false):
+			if n.has_method("_log_name") and bool(n.get("footsteps")):
+				rigs.append(n.call("_log_name", "-"))
+		alog("rigs", str(rigs.size()), "", 0.0, 1.0)
+		for r: String in rigs:
+			_alog.store_line("\t\trig\t%s" % r)
+
+func logging() -> bool:
+	return _alog != null
+
+## Dev: one line of the audio log (see `_alog`). Callers outside this script use it for the players they own.
+func alog(kind: String, name: String, bus: String = "", vol_db: float = 0.0, pitch: float = 1.0) -> void:
+	if _alog == null:
+		return
+	var st: Array = []
+	for f: Dictionary in get_stack().slice(1):
+		if str(f.source).ends_with("sfx.gd"):
+			continue
+		st.append("%s:%d %s" % [str(f.source).get_file(), int(f.line), str(f.function)])
+		if st.size() >= 5:
+			break
+	_alog.store_line("%.3f\t%d\t%s\t%s\t%s\t%.1f\t%.3f\t%s\t%s" % [_alog_t, Engine.get_process_frames(), kind, name, bus, vol_db, pitch, log_who, " < ".join(st)])
+	_alog.flush()
 
 func _stream(path: String, loop: bool = false) -> AudioStream:
 	if not _cache.has(path):
@@ -155,6 +195,8 @@ func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float 
 	p.volume_db = vol_db
 	p.pitch_scale = pt
 	p.play()
+	if _alog:
+		alog("sfx", file, p.bus, vol_db, pt)
 
 ## A named combat event: `intensity` 0.1-2 (1 is a normal strike) scales level, nudges pitch down when harder and
 ## decides which layers and, for "swing", which whoosh weight (under 0.6 light, over 1.25 heavy) play. Returns false
@@ -201,6 +243,8 @@ func footstep(surface: String = "", weight: float = 1.0, vol_db: float = 0.0, pi
 	var sf: String = SURFACES.get(key, SURFACES.get(default_surface, "stone"))
 	var pool := "step_" + sf
 	if not _gate("step", _now()):
+		if _alog:
+			alog("step_gated", pool, "", vol_db, pitch)
 		return false
 	weight = clampf(weight, 0.4, 2.5)
 	var v := vol_db + 6.0 * (weight - 1.0)
@@ -303,6 +347,8 @@ func _launch(pool: String, idx: int, vol_db: float, pitch: float, jitter: float,
 	p.volume_db = vol_db + randf_range(-float(spec[3]), float(spec[3]))
 	p.pitch_scale = pt
 	p.play(randf() * PREROLL * 0.9)
+	if _alog:
+		alog("pool", str(spec[0]) % idx, p.bus, p.volume_db, pt)
 
 ## Picks a bespoke track when one has been produced, else the fallback.
 func music_for(preferred: String, fallback: String, fade: float = 1.5) -> void:
@@ -312,6 +358,8 @@ func music(track: String, fade: float = 1.5) -> void:
 	if track == _music_name:
 		return
 	_music_name = track
+	if _alog:
+		alog("music", track, "Music", -5.0)
 	set_intensity("explore" if (track.begins_with("explore") or track == "menu") else "combat")
 	set_layer("", 0.5)
 	var old: AudioStreamPlayer = _music[_music_i]
@@ -362,6 +410,8 @@ func set_layer(track: String, fade: float = 1.2) -> void:
 	if s == null:
 		return
 	_layer.stream = s
+	if _alog:
+		alog("music_layer", track, "Music", -5.0)
 	_layer.volume_db = -40.0
 	_layer.play(_music[_music_i].get_playback_position())
 	_layer_tween.tween_property(_layer, "volume_db", -5.0, fade)
@@ -371,6 +421,8 @@ func ambience(track: String) -> void:
 	if track == _amb_name:
 		return
 	_amb_name = track
+	if _alog:
+		alog("ambience", track, "Ambience", _amb.volume_db)
 	_amb.stop()
 	if track != "":
 		var s := _stream("res://assets/audio/amb/%s.ogg" % track, true)

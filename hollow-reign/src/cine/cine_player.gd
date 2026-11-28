@@ -65,6 +65,8 @@ func _make(clip: String) -> VideoStreamPlayer:
 	add_child(p)
 	_fit(p)
 	p.play()
+	if Sfx.logging():
+		Sfx.alog("video", path(clip).get_file(), p.bus, p.volume_db)
 	metrics.peak_players = maxi(metrics.peak_players, get_child_count() - 1)
 	return p
 

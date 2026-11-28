@@ -880,6 +880,7 @@ static var foot_log: Array = []      # dev: [frame, side] for every footfall, wh
 static var log_feet := false
 var _last_fall := {"Left": -9.0, "Right": -9.0}
 var _last_fall_any := -9.0
+var _speed_now := 0.0                # ground covered this frame, m/s (what `_travel` measured)
 
 ## One sound for one foot put down: never two for a plant, never two feet inside a tenth of a second, none unless it was
 ## walking. The surface is what the foot is on; the weight is the armour's (a fighter in the open is heavier than one
@@ -897,10 +898,19 @@ func _footfall(side: String) -> void:
 		return
 	var weight := (0.62 if combat_steps else 0.85 + 0.3 * (bulk - 1.0)) * clampf(_walk_amount + 0.25, 0.4, 1.0)
 	var surface := _surface_now()
+	if Sfx.logging():
+		Sfx.log_who = _log_name(side)
 	if Sfx.has_method("footstep"):
 		Sfx.call("footstep", surface, weight)
 	else:
 		Sfx.play("footstep", (-9.0 if combat_steps else -6.0) + 3.0 * (bulk - 1.0), 1.0 / maxf(0.7, scale.x))
+	Sfx.log_who = ""
+
+## Dev (audio log): which rig this is and what it is doing, for the line its footfall writes.
+func _log_name(side: String) -> String:
+	var spd := _speed_now
+	return "%s#%d %s walking=%s amt=%.2f spd=%.2f vis=%s mode=%d combat=%s" % [str(get_path()).get_file(), get_instance_id() % 100000, side,
+		str(walking), _walk_amount, spd, str(is_visible_in_tree()), int(mode), str(combat_steps)]
 
 func _surface_now() -> String:
 	if ground.is_valid() and ground.get_method() == &"height":
@@ -932,6 +942,7 @@ func _process(delta: float) -> void:
 	_present_tick(dt)
 	# stride phase advances with ground actually covered, so feet never slide
 	var moved := _travel(dt)
+	_speed_now = moved / maxf(dt, 0.0001)
 	_last_world = global_position
 	if (walking or _lag_on) and moved < 1.0:
 		_walk_phase += moved / _stride_now() * PI

@@ -184,6 +184,8 @@ func play(id: String, force: bool = false, aside: bool = false, lift: float = 0.
 			var s: AudioStream = load(path)
 			_player.stream = s
 			_player.play()
+			if Sfx.logging():
+				Sfx.alog("voice", s.resource_path.get_file(), "Dialogue", _player.volume_db)
 			hold = s.get_length() + 0.45
 		_skip = false
 		var t := 0.0

@@ -56,3 +56,7 @@ Plan and status:
 - Stage E (new, after Stage 4 because it shares the shop/armory files): equipment and shop redesign plus the grey-knight
   and material audit.
 - Then Stage 5 (audio, on the picks), Stage 6 (title, menus, loading), Stage 7 (QA, sequential full playthroughs, build doc).
+- 2026-11-28: the owner rejected every recorded effect on the sheet (music and voice still open) and chose the free Sonniss
+  GDC bundles. sonniss.com refuses this container (Cloudflare "Just a moment" page, also in a headless browser), so the
+  owner downloads the chosen packs on the Mac and shares them; raw files go only in git-ignored art/sfx_src/ (the licence
+  allows use in the game, not redistribution of the library). Until then the synthesised effects stay.

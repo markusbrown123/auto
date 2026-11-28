@@ -405,6 +405,16 @@ func _draw_over() -> void:
 				var d := 9.0
 				var dc := c + Vector2(0, -size.y * 0.36 * s)
 				_over.draw_colored_polygon(PackedVector2Array([dc + Vector2(0, -d), dc + Vector2(d, 0), dc + Vector2(0, d), dc + Vector2(-d, 0)]), Color(UI.GOLD, a))
+		elif str(e.get("badge", "")) != "" and near > 0.6:
+			# the middle piece's standing: owned, for sale (and whether it can be paid for), locked
+			var bf := UI.font("head")
+			var bt := str(e.badge)
+			var bw := bf.get_string_size(bt, HORIZONTAL_ALIGNMENT_LEFT, -1, 16).x + 20.0
+			var bc: Color = e.get("badge_col", UI.BONE)
+			var ba := a * (near - 0.6) / 0.4
+			_over.draw_rect(Rect2(top + Vector2(-bw * 0.5, 0), Vector2(bw, 26.0)), Color(0.04, 0.04, 0.05, 0.85 * ba))
+			_over.draw_rect(Rect2(top + Vector2(-bw * 0.5, 0), Vector2(bw, 26.0)), Color(bc, 0.7 * ba), false, 1.0)
+			_over.draw_string(bf, top + Vector2(-bw * 0.5, 19.0), bt, HORIZONTAL_ALIGNMENT_CENTER, bw, 16, Color(bc, ba))
 		if e.get("fav", false):
 			var sh := 22.0 * s
 			InvGlyph.paint(_over, "star", c + Vector2(size.y * 0.3 * s, -size.y * 0.36 * s), sh, Color(UI.GOLD, a), 1)

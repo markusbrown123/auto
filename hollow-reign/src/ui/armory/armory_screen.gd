@@ -522,7 +522,7 @@ func _show_grid(on: bool) -> void:
 	var p := UI.panel(Color(0.03, 0.03, 0.036, 0.97), UI.GOLD_DIM)
 	p.get_theme_stylebox("panel").set_content_margin_all(8)
 	UI.full(p)
-	p.get_theme_stylebox("panel").content_margin_top = 62      # under the heading, which stays on top with its Grid button
+	p.get_theme_stylebox("panel").content_margin_top = 8
 	carousel.get_parent().add_child(p)
 	carousel.get_parent().move_child(p, carousel.get_index() + 1)
 	_grid = p
@@ -537,7 +537,7 @@ func _show_grid(on: bool) -> void:
 	for i in entries.size():
 		var e: Dictionary = entries[i]
 		var b := Button.new()
-		b.custom_minimum_size = Vector2(maxf(200.0, (carousel.size.x - 34.0) / 2.0 - 6.0), 60)
+		b.custom_minimum_size = Vector2(maxf(140.0, (carousel.size.x - 34.0) / 2.0 - 6.0), 60)
 		b.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		b.focus_mode = Control.FOCUS_NONE
 		b.text = str(e.name)

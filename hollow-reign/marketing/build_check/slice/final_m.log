@@ -123,3 +123,45 @@
 [  395.4s game |   3073s wall]   tap 'a pouch' at (389, 426), target 84 x 84
 [  396.0s game |   3078s wall]   pouch: gold 260 -> 276
 [  396.0s game |   3078s wall]   tap 'something odd (cy_charcoal_sketch)' at (293, 460), target 96 x 96
+[  409.1s game |   3157s wall]   secrets known: 1 -> 2
+[  409.1s game |   3157s wall]   audio during 'courtyard stop 5: The gate passage. It is narrow, and it is occupied.': Master peak -5.7 mean -17.1 dB; Music peak -11.5 mean -24.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.5 mean -28.8 dB; Interface peak -16.2 mean -54.4 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  409.1s game |   3157s wall] STEP turning back to the sanctuary
+[  409.5s game |   3160s wall]   tap 'TURN BACK' at (1173, 54), target 150 x 60
+[  410.2s game |   3170s wall]   audio during 'turning back to the sanctuary': Master peak -10.4 mean -15.8 dB; Music peak -15.1 mean -23.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.4 mean -25.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  410.2s game |   3170s wall] STEP sanctuary
+[  412.7s game |   3183s wall]   tabs: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [I  THE FALLEN COURTYARD], [SET OUT], [BY THE WINCH GATE]. purse: 276 GOLD
+4 SHARDS
+[  412.7s game |   3183s wall]   audio during 'sanctuary': Master peak -6.8 mean -15.2 dB; Music peak -12.1 mean -22.5 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.1 mean -24.7 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  412.7s game |   3183s wall] STEP sanctuary: Armory
+[  412.7s game |   3183s wall]   tap 'ARMORY' at (197, 53), target 103 x 63
+[  415.9s game |   3236s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [Helms], [Armour Suits], [Pauldrons], [Gauntlets], [Greaves], [Boots], [Weapons], [Shields], [Rings], [Relics], [SORT: EQUIPPED FIRST], [GRID], [UPGRADE], [INSPECT], [Favourite: cannot be sold], [PREVIEW ATTACK], [FULL BODY]
+[  417.9s game |   3271s wall]   tap 'EQUIP' at (232, 668), target 133 x 60
+[  419.5s game |   3300s wall]   equipped before { "weapon": "w_dawnline", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  419.5s game |   3300s wall]   equipped after  { "weapon": "w_dawnline", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_garrison_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  419.5s game |   3300s wall]   audio during 'sanctuary: Armory': Master peak -5.0 mean -14.2 dB; Music peak -12.3 mean -21.2 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.4 mean -24.4 dB; Interface peak -13.1 mean -58.8 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  419.5s game |   3300s wall] STEP sanctuary: Shop
+[  419.5s game |   3300s wall]   tap 'SHOP' at (305, 53), target 96 x 63
+[  422.6s game |   3347s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [WARES], [MATERIALS], [SELL], [ALL], [BLADES], [SHIELDS], [ARMOUR], [TRINKETS], [BUY]
+[  422.6s game |   3347s wall]   gold 276; catalogue 23 entries; dearest within reach: w_knight_sword (260)
+[  424.1s game |   3370s wall]   tap 'BUY' at (1111, 524), target 250 x 76
+[  425.3s game |   3389s wall]   tap 'BUY' at (764, 419), target 220 x 60
+[  426.4s game |   3407s wall]   bought w_knight_sword? owns=true gold 276 -> 16; purse shows '16 GOLD
+4 SHARDS'
+[  428.0s game |   3433s wall]   purse label after the count: '16 GOLD
+4 SHARDS'
+[  428.0s game |   3433s wall]   tap 'EQUIP' at (897, 524), target 341 x 76
+[  429.1s game |   3452s wall]   equipped now: { "weapon": "w_knight_sword", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_garrison_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  429.1s game |   3452s wall]   audio during 'sanctuary: Shop': Master peak -1.0 mean -20.4 dB; Music peak -17.1 mean -30.1 dB; Dialogue peak -2.0 mean -35.7 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.6 mean -32.5 dB; Interface peak -26.0 mean -72.8 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  429.1s game |   3452s wall] STEP sanctuary: Forge
+[  429.1s game |   3452s wall]   tap 'FORGE' at (409, 53), target 96 x 63
+[  432.3s game |   3502s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [WORK], [PATTERNS], [Courtyard Longsword], [Wayfarer Cuirass], [Wayfarer Greaves], [Garrison Gauntlets], [Wayfarer Helm], [Splintered Heater], [Silver Vow], [Wayfarer Gauntlets]
+[  432.3s game |   3502s wall]   nothing at the forge could be paid for (gold 16, shards 4, materials {  })
+[  432.3s game |   3502s wall]   audio during 'sanctuary: Forge': Master peak -1.0 mean -20.1 dB; Music peak -21.5 mean -31.4 dB; Dialogue peak -4.5 mean -33.7 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -25.8 mean -31.9 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  432.3s game |   3502s wall] STEP sanctuary: Settings, quit to the menu
+[  432.3s game |   3502s wall]   tap 'SETTINGS' at (781, 53), target 110 x 63
+[  434.4s game |   3519s wall]   (scrolled to reach 'RETURN TO TITLE')
+[  434.5s game |   3519s wall]   tap 'RETURN TO TITLE' at (1141, 532), target 182 x 60
+[  434.9s game |   3525s wall]   audio during 'sanctuary: Settings, quit to the menu': Master peak -15.3 mean -21.7 dB; Music peak -20.3 mean -28.9 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -25.4 mean -32.0 dB; Interface peak -35.9 mean -74.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  434.9s game |   3525s wall] STEP main menu again
+[  436.9s game |   3541s wall]   menu: [CONTINUE], [WORLD MAP], [LEGACIES], [CHARACTER], [EQUIPMENT], [CHRONICLE], [TRAINING], [SETTINGS], [CREDITS], [NEW LEGACY]  ·  status line: The Broken Crown   ·   Maren   ·   Level 2   ·   Chapter I, The Fallen Courtyard
+[  437.3s game |   3543s wall]   tap 'CONTINUE' at (294, 274), target 500 x 76

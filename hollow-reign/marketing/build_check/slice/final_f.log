@@ -158,3 +158,25 @@
 [  397.9s game |   3108s wall] STEP sanctuary after Continue
 [  399.9s game |   3122s wall]   setting out: by the short way
 [  399.9s game |   3122s wall]   tap 'BY THE WINCH GATE' at (1039, 654), target 393 x 60
+[  400.3s game |   3128s wall]   loading took 0.5 s of game time (5.7 s wall)
+[  401.5s game |   3139s wall]   audio during 'sanctuary after Continue': Master peak -6.8 mean -16.6 dB; Music peak -12.1 mean -24.8 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.6 mean -25.2 dB; Interface peak -37.0 mean -77.8 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  401.5s game |   3139s wall] STEP courtyard stop 5: The gate passage. It is narrow, and it is occupied.
+[  401.5s game |   3139s wall]   health 160 / 160, gold 14, level 2
+[  402.7s game |   3148s wall]   ways onward: ["The Gate Passage", "The Murder Hole"]; taking 'The Gate Passage' (fight)
+[  402.7s game |   3148s wall]   DEFECT no card on screen for 'The Gate Passage'
+[  405.1s game |   3163s wall]   duel begins: Gate Colossus (knight 160 hp)
+[  405.2s game |   3167s wall]   audio during 'courtyard stop 5: The gate passage. It is narrow, and it is occupied.': Master peak -7.0 mean -16.1 dB; Music peak -14.4 mean -23.2 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -12.9 mean -52.9 dB; Ambience peak -22.3 mean -26.8 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  405.2s game |   3167s wall] STEP duel 3: Gate Colossus
+[  417.0s game |   3284s wall]   widest gap between the fighters: 4.3 m
+[  419.8s game |   3313s wall]   duel over after 15 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 15
+[  422.6s game |   3340s wall]   result screen up: [Continue]. gold 124, level 2, xp 175, inventory 10, deaths 0
+[  422.6s game |   3340s wall]   tap 'CONTINUE' at (639, 646), target 300 x 60
+[  438.2s game |   3439s wall]   audio during 'duel 3: Gate Colossus': Master peak -1.0 mean -14.8 dB; Music peak -12.1 mean -23.3 dB; Dialogue peak -2.3 mean -38.1 dB; Combat peak -4.9 mean -47.6 dB; Ambience peak -20.7 mean -27.4 dB; Interface peak -21.3 mean -77.0 dB; Cinematics peak -9.7 mean -53.1 dB; CombatL peak -3.9 mean -54.7 dB; CombatR peak -16.2 mean -68.9 dB
+[  438.2s game |   3439s wall] STEP courtyard stop 6: A chapel alcove survives against the keep wall. A single can
+[  438.2s game |   3439s wall]   health 160 / 160, gold 124, level 2
+[  439.4s game |   3447s wall]   tap 'a pouch' at (863, 450), target 84 x 84
+[  440.0s game |   3451s wall]   pouch: gold 124 -> 136
+[  440.0s game |   3451s wall]   ways onward: ["Kneel"]; taking 'Kneel' (shrine)
+[  440.0s game |   3451s wall]   DEFECT no card on screen for 'Kneel'
+[  442.1s game |   3464s wall]   tap 'REST' at (640, 360), target 220 x 60
+[  444.5s game |   3477s wall]   tap 'ONWARD' at (640, 421), target 260 x 60

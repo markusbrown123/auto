@@ -1,3 +1,5 @@
+**2026-11-28: iPhone test build 2 is ready** — see `docs/IPHONE_BUILD_2.md` (checks, changes, known issues, update and install steps, phone checklist). The owner and his brother test it before any further changes: no new features and no asset spending until they report.
+
 # HANDOFF — read this first (written 2026-11-27, for the next session on a cheaper model)
 
 **Goal:** a polished, playable first-boss build (Generation I opening → road → Ashen Sentinel) on the owner's iPhone, without burning usage. The game imports and runs on the owner's Mac.

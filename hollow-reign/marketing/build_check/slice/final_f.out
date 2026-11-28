@@ -207,3 +207,27 @@ ERROR: Condition "!is_inside_tree()" is true. Returning: false
 [  440.0s game |   3451s wall]   DEFECT no card on screen for 'Kneel'
 [  442.1s game |   3464s wall]   tap 'REST' at (640, 360), target 220 x 60
 [  444.5s game |   3477s wall]   tap 'ONWARD' at (640, 421), target 260 x 60
+[  459.7s game |   3570s wall]   audio during 'courtyard stop 6: A chapel alcove survives against the keep wall. A single can': Master peak -1.0 mean -16.0 dB; Music peak -11.5 mean -23.7 dB; Dialogue peak -3.3 mean -39.9 dB; Combat peak -31.8 mean -74.5 dB; Ambience peak -20.7 mean -28.4 dB; Interface peak -14.4 mean -52.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  459.7s game |   3570s wall] STEP courtyard stop 7: The inner ward. He is standing exactly where he was posted.
+[  459.7s game |   3570s wall]   health 160 / 160, gold 136, level 2
+[  460.9s game |   3576s wall]   tap 'a pouch' at (442, 431), target 84 x 84
+[  461.5s game |   3579s wall]   pouch: gold 136 -> 149
+[  461.5s game |   3579s wall]   ways onward: ["The Inner Ward"]; taking 'The Inner Ward' (boss)
+[  461.5s game |   3579s wall]   DEFECT no card on screen for 'The Inner Ward'
+[  465.4s game |   3600s wall]   duel begins: The Ashen Sentinel (knight 160 hp)
+[  465.5s game |   3602s wall]   audio during 'courtyard stop 7: The inner ward. He is standing exactly where he was posted.': Master peak -2.9 mean -13.4 dB; Music peak -12.4 mean -19.9 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -11.5 mean -53.8 dB; Ambience peak -18.4 mean -26.4 dB; Interface peak -10.0 mean -49.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  465.5s game |   3602s wall] STEP duel 4: The Ashen Sentinel
+[  514.0s game |   3942s wall]   widest gap between the fighters: 4.3 m
+[  555.1s game |   4228s wall]   duel over after 90 s: WON. knight 160 / 160 hp. parried 5, blocked 0, dodged 0, blows taken 0, cuts landed 32
+[  558.1s game |   4248s wall]   result screen up: [Continue]. gold 449, level 3, xp 212, inventory 16, deaths 0
+[  558.1s game |   4248s wall]   tap 'CONTINUE' at (640, 670), target 300 x 60
+[  559.3s game |   4256s wall]   audio during 'duel 4: The Ashen Sentinel': Master peak -1.0 mean -14.7 dB; Music peak -11.2 mean -24.7 dB; Dialogue peak -2.1 mean -36.0 dB; Combat peak -2.8 mean -42.3 dB; Ambience peak -15.9 mean -27.3 dB; Interface peak -13.7 mean -62.7 dB; Cinematics peak -5.8 mean -57.2 dB; CombatL peak -1.9 mean -52.6 dB; CombatR peak -2.3 mean -53.6 dB
+[  559.3s game |   4256s wall] STEP after the guardian
+[  561.8s game |   4267s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [I  THE FALLEN COURTYARD], [II  THE BLACKWOOD], [SET OUT], [REST]
+[  561.8s game |   4267s wall]   cleared ["courtyard"]; defeated { "hollow_soldier": 1, "banneret": 1, "gate_colossus": 1, "ashen_sentinel": 1 }; gold 449; level 3; inventory ["w_dawnline", "s_plank", "a_worn_helm", "a_worn_chest", "a_worn_gauntlets", "a_worn_legs", "a_garrison_gauntlets", "w_woodcutter", "w_knight_sword", "a_ash_shoulders", "s_tower", "a_ash_chest", "r_ember", "a_ash_helm", "a_ash_legs", "a_ash_boots"]
+[  561.8s game |   4267s wall]   tap 'REST' at (640, 441), target 260 x 60
+[  563.5s game |   4273s wall]   what comes next: regions open: ["courtyard", "blackwood"]
+[  563.5s game |   4273s wall]   audio during 'after the guardian': Master peak -1.0 mean -17.3 dB; Music peak -20.3 mean -30.0 dB; Dialogue peak -4.5 mean -27.8 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.8 mean -32.2 dB; Interface peak -35.2 mean -77.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  563.5s game |   4273s wall] SLICE RUN ENDED at step 'after the guardian'. fights 4, defeats 0, taps missed 1, stuck 0, longest held frame 0.1 s, assist false, audit notes 0
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

@@ -238,9 +238,14 @@ func _stand_foe(o: Dictionary, at: Vector3) -> void:
 	if route:
 		# (the continuous Courtyard stands them before the knight arrives, out of sight: see _stage_foes)
 		var key := "%d|%d" % [int(Game.run.stage), index]
-		if _staged.has(key) and is_instance_valid(_staged[key]):
+		if _staged.has(key) and _staged[key] != null and is_instance_valid(_staged[key]):
 			foes[index] = _staged[key]
+			if not (foes[index] as Node3D).visible:
+				print("ROUTE NOTE stop %d: a foe was stood while the place was in view" % (int(Game.run.stage) + 1))
 			(foes[index] as Node3D).visible = true
+			return
+		if _staged.has(key):
+			_want[key] = index         # still being read: it is handed over when it stands
 			return
 	var foe: Dictionary = Db.foes[str(o.foe)]
 	var files: Array = CineActor.foe_files(str(o.foe))
@@ -792,6 +797,9 @@ func _resolve(o: Dictionary, prop: Node3D) -> void:
 			create_tween().tween_property(prop.get_node("Arm"), "rotation:z", -0.6, 0.5).set_trans(Tween.TRANS_BACK)
 			Sfx.play("guard_break", -8.0, 0.7)
 			Game.pull_lever(o)
+			if route and str(o.get("flag", "")) == "courtyard_gate":
+				route.open_gate("inner")
+				route.open_gate("postern", 4.0)
 			heading = "A Way Opens"
 			lines.append("%s will stay open." % Game.run_region().shortcut.label)
 			lines.append("You may begin from here when you return.")
@@ -1184,6 +1192,7 @@ var route: CourtRoute
 var origin := Vector3.ZERO        # the stop's anchor (the old screens stand at the world's origin)
 var _left_label := ""             # the way the knight took from this stop
 var _staged := {}                 # "stage|option index" -> the foe standing there (hidden until out of sight)
+var _want := {}                   # "stage|option index" -> this stop's foe slot waiting for one still being read
 var _props := {}                  # "stage|label" -> the chest, lever or shrine standing in the place
 var _left_foes: Array = []        # foes of stops already left (they stay where they stood)
 var _path := PackedVector3Array()
@@ -1310,6 +1319,7 @@ func _reset_stop() -> void:
 	pouches.clear()
 	spots.clear()
 	foes.clear()
+	_want.clear()
 	_order.clear()
 	_idle = 0.0
 	_aside = false
@@ -1479,7 +1489,11 @@ func _stage_foes(stage: int, now: bool) -> void:
 			f.time_scale = 0.6
 			f.ground = CourtRoute.ground_y
 			f.visible = now or not _seen(at)
-			_staged[key] = f)
+			_staged[key] = f
+			if _want.has(key) and stage == int(Game.run.stage) and int(_want[key]) < foes.size():
+				foes[int(_want[key])] = f
+				f.visible = true
+				_want.erase(key))
 
 ## The chests, levers and the shrine of the whole road stand in the place from the start, opened or pulled already
 ## if they were; using one walks the knight to it.

@@ -180,3 +180,12 @@ Three ElevenLabs v4 takes (Barrett, Grady, Harrison), 1.15 credits each = 3.45 c
 
 ## 2026-11-28: presentation pass concepts (owner approved, ceiling 17 credits)
 Ten GPT Image 2.6 images at 2k: three logo concepts at quality medium (1.75 each) and three app icons, two armour-merchant and two Forgotten Monarch concepts at low (1.25 each) = **14.00 credits**, confirmed line by line in `higgsfield account transactions`. Higgsfield balance **797.74 -> 777.53** (20.21); the other 6.21 in that window were six Eleven v4 voice jobs from a concurrent voice-audition pass, not this one. (The balance read 800.50 at the very start; 2.76 of Eleven v4 spend from that other pass landed before the first image.) No failures or refusals; two creates were rejected by the 8-concurrent-job limit before any job existed (no charge) and were submitted again once. Files, prompts and job ids: marketing/presentation_pass/concepts/README.md.
+
+## 2026-11-28: merchant Orren re-recorded (owner's pick: Barrett, Scottish brogue)
+His 4 lines (intro 01–03, idle 01) on ElevenLabs v4 via Higgsfield, 3.45 credits (logged late; amount from commit 15a11f1). Old takes in art/vo_masters/orren_prev/ (not in git).
+
+## 2026-11-28: Forgotten Monarch v2, one Tripo model (owner approved "the king")
+From the approved concept `art/concept/monarch_v2.png` (= marketing/presentation_pass/concepts/monarch_full_body.png): `tools/tripo.py art/concept/monarch_v2.png monarch_v2`. One attempt, none repeated.
+- Model task `9277922d-f516-45d5-adea-f01a8be4b71f` 110 credits, rig check free (riggable biped), rig task `721c8f9e-c6be-4365-84a8-877bb2f49c2c` 25 credits = **135 credits = $1.35**.
+- Tripo balance before **6,100.00**, after **5,965.00**, frozen 0.00. Graphics allocation spent: $32.85 + $1.35 = **$34.20** of $100.
+- Not yet wired into the game: the concept's sword and cloak are part of the mesh (cloak weighted to the arm). Integration is a Stage 4 task.

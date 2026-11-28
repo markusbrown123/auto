@@ -1,4 +1,4 @@
-# Continuous Courtyard traversal: plan (2026-11-28, not started)
+# Continuous Courtyard traversal: plan (2026-11-28; steps 1-3, 6, 7 done in Stage 3A, steps 4-5 are Stage 3B)
 
 Owner (after phone play): "we're not really walking ... new monsters just show up ... should be a real story and they come up, not just spawn in."
 
@@ -26,3 +26,21 @@ No purchases needed. Missing pieces: climb/drop/kneel-rise clips, a portcullis t
 - Exploration: branches with real geometry — optional rooms (guardhouse interior, chapel crypt), stairs to the wall-walk, a bridge over the moat or a ravine, elevation changes, hidden areas behind breakable or levered gates; choices at forks are made in the world (the guided walk goes where you tap), rewards placed in the world (chests, lore objects, optional foes); backtracking to visited places where it makes sense (e.g. the winch shortcut back to the yard).
 - Merchant: Orren works in a real workshop at the sanctuary (forge, anvil, racks of weapons and armour, tools, warm light); the shop and forge screens open in that space.
 - Consistency audit: list every moment where something appears, disappears or happens without a reason (foes, props, the Witness, cutscene characters, pickups, doors) across the whole slice, then fix each as part of the stages above.
+
+## Stage 3A (2026-11-28): what was built
+- `src/world/court_route.gd` (`CourtRoute`): the place, its floors (`FLOORS`: what is drawn is what `ground_y` answers), the
+  ways between stops (`LEGS`), where interactions stand (`SPOTS`), streaming (five sections, built a few ms a frame ahead,
+  freed two behind; merged by material per section; visibility ranges; box occluders in the walls), the air of each place
+  (`AIR`). New shader `court_ground.gdshader` (turf, earth, rock by slope, mapped from three sides).
+- Route (main way, about 245 m, 0 m to 8 m; the wall-walk reaches 7.8 m over a 3.2 m yard):
+  hillside door z +56 → causeway along the sea cliff (x up to 10.5, the cliff at 15-21) → ravine bridge z -34..-52
+  (the falls off the west hill and over the sea cliff) → terrace, **stop 1 the Breach** (z -68, 3.0 m) → over the rubble
+  → **stop 2 the rubble yard** (z -92, 3.2 m): left the guardhouse (a room, the chest inside), right the stair to the
+  wall-walk (7.8 m) and down into the forecourt; both rejoin → **stop 3 the barbican forecourt** (z -116.5, 4.5 m) →
+  through the barbican → **stop 4 the winch yard** (z -141, 5.5 m): the winch-house, the well, the postern of the lane back
+  down to the yard (the winch gate: the shortcut) → **stop 5 the inner gate** (z -152) → the gate passage (the murder hole
+  off it through a gap: the hidden room) → **stop 6 the chapel court** (z -184, 6.2 m) → nine steps → **stop 7 the inner
+  ward** (z -206, 8.0 m) under the keep.
+- Hooks: `CourtRoute.ENTRY` / `_entry_door` (Stage 1's chamber exit), `witness_hook`, `foe_spots` and `gates` (Stage 3B).
+- Not done here (3B): foe entrances, duels in place, bodies remaining, animated props with sound (the portcullises only
+  slide up on a tween when the winch is turned).

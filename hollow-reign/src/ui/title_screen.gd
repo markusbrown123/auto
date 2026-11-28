@@ -129,6 +129,13 @@ func _clear() -> void:
 		c.queue_free()
 
 func _logo() -> void:
+	var crown := TextureRect.new()   # the chosen emblem (logo A, the broken crown)
+	crown.texture = load("res://assets/ui/logo_crown.png")
+	crown.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	crown.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	crown.custom_minimum_size = Vector2(0, 170)
+	crown.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	menu.add_child(crown)
 	var t := UI.label("HOLLOW REIGN", 64, UI.BONE, "title")
 	t.add_theme_constant_override("outline_size", 0)
 	menu.add_child(t)

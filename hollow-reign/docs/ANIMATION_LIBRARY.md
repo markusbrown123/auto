@@ -1,6 +1,6 @@
 # Animation library
 
-One baked library, `assets/anim/humanoid.res` (**169 clips, 2.75 MB**, 221 s of motion; it was 41 clips and 0.80 MB before the bought packs went in), built by `tools/bake_anims.gd` from sources kept
+One baked library, `assets/anim/humanoid.res` (**176 clips, 2.9 MB**; Stage 1 added `sit_idle`, `sit_exit`, `pickup_table`, `interact` (UAL 1), `lay_to_idle` (UAL 2), `getup`, `pickup_low` (Explosive), of which the awakening uses `getup`; 169 clips, 2.75 MB, 221 s of motion before that; it was 41 clips and 0.80 MB before the bought packs went in), built by `tools/bake_anims.gd` from sources kept
 outside the build (`art/anim_src/`, `art/anim/`). Each clip stores every bone's model-space turn away from rest in a
 canonical frame (fighter faces -Z, Y up), so any humanoid with the standard bone names plays it (`src/chars/skin_driver.gd`).
 Every clip has the same 23 tracks: rotation for 22 bones (hips, three spine bones, neck, head, both shoulders, upper arms, forearms and **hands**, both legs to the toes) and one hip position track. Fingers are not baked; the grip is closed by code.

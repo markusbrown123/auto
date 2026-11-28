@@ -363,9 +363,10 @@ func _take_sword() -> void:
 	var up := create_tween()
 	up.tween_property(self, "_reach_at", _hilt + Vector3(0, 0.42, 0) + front * 0.1, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	up.parallel().tween_property(self, "_lean", 0.0, 0.9).set_trans(Tween.TRANS_SINE)
-	var low := Vector3(spot.x, 0, spot.z) + front * 1.55 - side * 0.55 + Vector3(0, 0.75, 0)
-	cam.cut(low, knight.position + Vector3(0, 1.3, 0) - front * 0.25, 36.0)
-	cam.move(low + front * 0.25 + Vector3(0, 0.1, 0), knight.position + Vector3(0, 1.4, 0) - front * 0.25, 3.0)
+	# (from beside the holder, low, looking up past the blade at the knight's face: the holder's frame behind it)
+	var low := Vector3(_hilt.x, 0, _hilt.z) - front * 0.15 - side * 1.0 + Vector3(0, 0.85, 0)
+	cam.cut(low, knight.position + Vector3(0, 1.45, 0), 38.0)
+	cam.move(low + front * 0.2 + Vector3(0, 0.08, 0), knight.position + Vector3(0, 1.5, 0), 3.0)
 	var flare := create_tween()
 	flare.tween_property(_rack_light, "light_energy", 6.0, 0.5)
 	flare.tween_property(_rack_light, "light_energy", 1.2, 1.6)
@@ -506,8 +507,8 @@ func _wake_witness() -> void:
 	_face_to(cup, 0.5)
 	# close on the housing, the knight's hand coming into frame
 	var side := inward.cross(Vector3.UP)
-	var close := cup + inward * 0.95 - side * 0.55 + Vector3(0, 0.12, 0)
-	cam.cut(close, cup + Vector3(0, -0.02, 0), 38.0)
+	var close := cup + inward * 1.25 - side * 0.75 + Vector3(0, 0.2, 0)
+	cam.cut(close, cup + Vector3(0, -0.02, 0), 42.0)
 	cam.move(close + (cup - close) * 0.12, cup, 5.0)
 	# the hand on the lid; it gives, and slides up into the body
 	_reach_at = cup + inward * 0.12 + Vector3(0, 0.02, 0)
@@ -562,8 +563,9 @@ func _witness_line(who: String, line_id: String) -> void:
 			var p := face + (cup - face).normalized() * 0.95 + side * 0.2
 			cam.cut(p, face, 34.0)
 		"witness_discovery_04", "witness_discovery_05":
-			var c2 := cup + inward * 0.8 + side * 0.4 + Vector3(0, 0.05, 0)
-			cam.cut(c2, drone.global_position, 36.0)
+			# (from the side away from the knight, who stands a little to the other side of the housing)
+			var c2 := cup + inward * 1.15 - side * 0.8 + Vector3(0, 0.18, 0)
+			cam.cut(c2, drone.global_position, 40.0)
 			cam.move(c2 + (drone.global_position - c2) * 0.1, drone.global_position, 5.0)
 		"witness_discovery_07":
 			# "Lift me down": the knight's hand to the prongs; they open; it comes up and out of the cup

@@ -1,0 +1,10 @@
+[    0.1s game |      0s wall] slice run: body=m weapon=default die=["1"] window=(960, 540) safe margins={ "l": 24.0, "r": 24.0, "t": 16.0, "b": 16.0 } preset=Balanced
+[    0.1s game |      0s wall] STEP launch
+[    3.7s game |     34s wall]   launch screen took 3.6 s
+[    3.7s game |     34s wall]   audio during 'launch': Master peak -200.0 mean -100.0 dB; Music peak -200.0 mean -100.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -200.0 mean -100.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    3.7s game |     34s wall] STEP main menu
+[    5.7s game |    121s wall]   tap 'NEW LEGACY' at (131, 761), target 174 x 60
+[    5.9s game |    124s wall]   TAP MISSED: 'NEW LEGACY' did not receive the touch (under: nothing). Calling its handler.
+[    6.7s game |    165s wall]   audio during 'main menu': Master peak -6.4 mean -15.4 dB; Music peak -11.8 mean -22.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.7 mean -26.7 dB; Interface peak -37.0 mean -76.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    6.7s game |    165s wall] STEP character select
+[   16.7s game |    563s wall] STUCK waiting for character select after 10 s (screen TitleScreen). On screen: [CONTINUE], [WORLD MAP], [LEGACIES], [CHARACTER], [EQUIPMENT], [CHRONICLE], [TRAINING], [SETTINGS], [CREDITS], [NEW LEGACY], [KEEP MY LEGACY], [BEGIN ANEW]

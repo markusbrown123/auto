@@ -1042,8 +1042,9 @@ func _solve(dt: float) -> void:
 				blade_t = gp[1]
 			elif polish and (rest_carry or _at_ease()) and not combat_steps and not two_handed:
 				# at ease: the sword low at the side, its point forward and down
-				hand_t = Vector3(0.34, 0.9 + breathe, -0.04) if not (loco and _at_ease()) else Vector3(0.28, 0.9 + breathe, -0.09)
-				blade_t = Vector3(0.1, -0.42, -0.9).normalized()
+				hand_t = Vector3(0.34, 0.9 + breathe, -0.04) if not (loco and _at_ease()) else Vector3(0.3, 0.9 + breathe, -0.1)
+				# (at ease the point goes forward, down and out to the sword side: clear of the thigh and greave in front of it)
+				blade_t = Vector3(0.1, -0.42, -0.9).normalized() if not (loco and _at_ease()) else EASE_BLADE.normalized()
 			elif _at_ease() and two_handed:
 				# at ease with a long blade: the hilt low at the right hip, the point down and forward, clear of the feet
 				hand_t = Vector3(0.28, 0.86 + breathe, -0.14)
@@ -3048,6 +3049,8 @@ func _feet_walk(dt: float) -> void:
 		# (a figure turned on the spot, as in a menu, is not held by its feet: they lock only while it travels or stands on terrain)
 		# (while the stride is only beginning or dying away the pose is part stance, part walk: both feet count as down)
 		var down := up < 0.035 + 0.1 * (1.0 - smoothstep(0.3, 0.8, _walk_amount))
+		if loco and f.lock and up < 0.06 + 0.1 * (1.0 - smoothstep(0.3, 0.8, _walk_amount)):
+			down = true      # (a planted foot is let go only once the stride has really lifted it: one that the clip barely raises, as at a stop, is not skimmed along the floor)
 		if not down:
 			f["air"] = maxf(float(f.get("air", 0.0)), up)
 		if down and not f.lock and not f.has("hop"):
@@ -3129,7 +3132,7 @@ var _dock_lift := 0.0         # metres the body is raised so that it rolls over 
 
 ## The blade of a sword carried on the walk: low, point forward and down, swinging a little with the arm that holds it.
 func _carry_dir(clip_dir: Vector3) -> Vector3:
-	var d := Vector3(0.16, -0.3, -0.94).normalized()      # (clear of the thigh that swings past the hand)
+	var d := (Vector3(0.16, -0.3, -0.94) if not loco else Vector3(0.26, -0.32, -0.91)).normalized()      # (clear of the thigh that swings past the hand, and of the bulkiest greaves)
 	return d.slerp(clip_dir, 0.12).normalized() if d.dot(clip_dir) > -0.9 else d
 
 ## For a roll a strapped shield is slung onto the back (between the shoulders, face outward) so that nothing of it
@@ -3165,6 +3168,7 @@ var injury := 0.0
 var breath_hold := -1.0
 const EASE_CLIP := "idle"      # the free library's relaxed standing idle (UAL1 Idle_Loop), body only
 const EASE_W := 0.45
+const EASE_BLADE := Vector3(0.62, -0.7, -0.42)      # the at-ease sword: down, out to the sword side and a little forward, the point by the foot, clear of thigh and greave (normalised where used)
 const CALM_MOTION := 0.12      # share of an idle loop's own motion played when calm (SkinDriver.idle_motion)
 const CALM_RATE := 0.32        # and of its pace (the packs' 1.33 s loop becomes about 4.2 s)
 const EXERT_FALL := 10.0       # seconds for exertion to fall to a third

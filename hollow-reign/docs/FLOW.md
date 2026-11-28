@@ -24,8 +24,8 @@ Story: `docs/CAMPAIGN_SCRIPT.md`, "The Inherited Oath". Shots: `docs/CINEMATIC_S
 | 4 | **Time jump** | `cine/time_jump.gd` | about 12 s | The one view in Generation I's state, "TWENTY-TWO YEARS", white, the same view in Generation II's state, 0.5 s to black. |
 | 5 | **Arrival** | `cine/arrival.gd` | about 45 s | The same view from black with the player's knight; the line; the game's name; four shots up the road; 0.6 s to black at the gate. |
 | 6 | Awakening (the Inheritance Engine) | `cine/awakening.gd` | about 36 s plus one tap | Unchanged. Ends walking into the white of the door. |
-| 7 | Approach | `cine/approach.gd` | about 9 s | Out of the same white behind the same knight; mid-walk the camera lifts and widens to show where the road leads, then comes down to the road screen's view. |
-| 8 | First stop of the road | `ui/explore.gd` | — | No transition: the road screen takes over the place the Approach built. |
+| 7 | The walk out (Courtyard, since Stage 3A) | `ui/explore.gd` + `world/court_route.gd` | about 80 s | Out of the same white at the door in the hillside (`CourtRoute.ENTRY`), down the causeway along the sea cliff, over the ravine bridge, to the terrace before the breach. It is the road screen itself, walking (`Explore.arrive = {intro}`); `Explore.skip()` ends it. `cine/approach.gd` is kept for the stop-by-stop roads and `--oldroad`. |
+| 8 | First stop of the road | `ui/explore.gd` | — | No transition: the walk stops at the first stop's anchor and the choices come up. |
 | 9 | The foe is shown, the lesson, the first real duel, rewards | as before | | as before |
 
 To the first stop of Generation II's road a first-time player who skips nothing sees about 6 minutes, of which the two Generation I duels are about a minute and a quarter of play. These figures are summed from the scenes' own timers and the length of the lines (new lines are text-only and are held for 1.4 s plus a fifteenth of a second a character); the chain has not been played through in one sitting on the build machine, and the guardian duel's length is a guess until a person has fought it. With SKIP used on every beat it is under 20 seconds.
@@ -139,6 +139,23 @@ The knight is `Duel.player_look()`: the chosen body and whatever is equipped.
 The region's own arena, built once. The knight walks 11 m to the stop's standing point with the camera at the offset the
 Awakening ended on. On arrival the camera eases to the road screen's view; if `first_road` is still being spoken the
 knight waits for it (at most 14 s), then the road screen adopts the place.
+
+### The continuous Courtyard (Stage 3A, 2026-11-28; docs/TRAVERSAL_PLAN.md)
+The Courtyard's road is one place (`src/world/court_route.gd`, `CourtRoute`), walked; every other region keeps the stop-by-stop
+screen. `Explore.continuous()` decides (the Courtyard, the kit present, the filmed road off, no `--oldroad`).
+- **Stops are anchors** (`anchor` on each Courtyard stage in `data/regions.json`, authored in `tools/gen_regions.py`): a flat place
+  in the level; the stop's frame (markers 4.6 m ahead, foes 1.6 m beyond, camera behind) is the old screen's frame moved there.
+- **Between stops** the knight walks the way taken (`CourtRoute.LEGS`, "stage|label") at `FighterRig.ROAD_SPEED` with the road
+  camera behind (`Explore._route_cam`, pulled in front of walls with `CamFollow.clear_from`). `moved_on` no longer fades:
+  `Main._next_stage` calls `Explore.travel()` on the same screen. Chests, the winch and the shrine stand in the place from the
+  start (`Explore._world_props`, opened/pulled already if they were); using one walks the knight to it (`CourtRoute.SPOTS`).
+- **Fights** still open a separate `Duel` (Stage 3B will fight in place), entered and left with a dissolve of the last frame
+  (`Main._cross_then`), never black. After a win the next road screen walks on from where the foe stood
+  (`Explore.arrive = {from, label, at}`). Foes of the next stop are stood out of the camera's sight (`Explore._stage_foes`).
+- **Retry, Continue, Turn Back** are unchanged in the save (version 5); Retry and Continue stand the knight at the anchor of
+  `run.stage`. Setting out by the winch gate (the shortcut) walks in through the postern (`CourtRoute.SHORTCUT_IN`).
+- Dev: `--screen=routewalk [--from=<stop>] [--pick=1:1,4:1] [--routecost]` walks the whole road at its own pace, fights passed
+  over, printing the render cost at every stop and every 2 s of walking.
 
 ### The Witness (Courtyard, second stop)
 `Companion` picks `witness_discovery` for the stop. On the real-time road the scene is staged (`Explore._find_witness`):

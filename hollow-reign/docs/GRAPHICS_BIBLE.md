@@ -193,8 +193,17 @@ plane of 6000 (CineCam and the menu's vista set it).
   ribs with a column of light in each, plated walls, guide lines in the floor, and at the head a ceramic ring on end
   with the throne in its mouth. The Generation I scenes and both Generation I duels use it (the duels by lending the
   foe record another `arena` for their length); the gothic `throne` theme is untouched for the later game.
-- **Engine room** (`chamber`): ribs up the wall with light channels, a cradle with hoops and a head unit, cables
-  across the floor, banks of readouts, a metal band in the floor, ground mist.
+- **Engine room** (`chamber`), rebuilt in Stage 1 (`src/world/chamber.gd`, `chamber_surface.gdshader`; the earlier
+  room stays behind the dev flag `--oldchamber`): twelve bays of chamfered plating between gunmetal ribs that rise into
+  a ribbed vault and meet at an oculus (the room's one working lamp, a shadowed spot on the cradle, with dust hanging in
+  its beam); a stasis cradle flush in the deck (articulated bed, side rails, a cage of bronze hoops that swings back, a
+  head unit with canisters and gauges, seal clamps with small lamps, life-support lines from the oculus and floor
+  trenches with gratings); a console; the sword holder (stepped plinth, slotted block, clamp arms, engraved bronze
+  frame, a hooded spot); the Witness's maintenance housing by the door; Lyra's grille; a barred bulkhead door (slab
+  rises into the lintel); a ribbed passage to an outer doorway; two dead stasis pods. No light strips: light comes
+  from the oculus, two caged maintenance lamps, small round lenses, a cool high bounce and a lifted ambient. Surfaces:
+  triplanar panel sheet + the gear kit's worn steel + generated scratches, dust on up faces, rust/verdigris runs,
+  a height-based occlusion term. All geometry merged by material (six draws) plus the moving parts.
 
 ### Measured cost (software renderer, 1280x720, engine monitors after 4 s; not a device measurement)
 The envelope is the Balanced courtyard duel in `PERFORMANCE_REPORT.md`: 133 draws, 549k primitives, 351 MB.

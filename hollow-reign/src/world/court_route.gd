@@ -32,7 +32,7 @@ const ENTRY_YAW := 0.0
 const SHORTCUT_IN := Vector3(-13.0, 5.5, -138.5)
 const MONUMENT := Vector3(7.0, 3.2, -88.5)        # the fallen head in the rubble yard (Explore._find_witness)
 ## Fallback anchors [x, y, z, yaw]; data/regions.json (tools/gen_regions.py) is the source.
-const ANCHORS := [[0.0, 3.0, -68.0, 0.0], [0.0, 3.2, -92.0, 0.0], [0.0, 4.5, -119.0, 0.0], [0.0, 5.5, -141.0, 0.0],
+const ANCHORS := [[0.0, 3.0, -68.0, 0.0], [0.0, 3.2, -92.0, 0.0], [0.0, 4.5, -116.5, 0.0], [0.0, 5.5, -141.0, 0.0],
 	[0.0, 5.5, -152.0, 0.0], [0.0, 6.2, -184.0, 0.0], [0.0, 8.0, -206.0, 0.0]]
 ## Sections by z (from, to): hill, outer wall and rubble yard, barbican, winch yard and gate passage, chapel and ward.
 const SECTIONS := [[72.0, -62.0], [-62.0, -110.0], [-110.0, -137.0], [-137.0, -176.0], [-176.0, -300.0]]
@@ -79,10 +79,10 @@ const RAVINE_Z := -43.0
 const LEGS := {
 	"intro": [[0.0, 56.0], [0.4, 44.0], [1.6, 31.0], [5.0, 18.0], [9.0, 4.0], [10.5, -10.0], [8.0, -22.0], [5.0, -30.5], [4.6, -35.0], [4.3, -51.0], [2.5, -57.0], [0.6, -63.0], [0.0, -68.0]],
 	"0|": [[0.0, -73.5], [0.0, -77.5], [0.0, -82.0], [-0.5, -88.0], [0.0, -92.0]],
-	"1|The Guardhouse": [[-12.6, -101.0], [-9.4, -101.0], [-7.0, -101.2], [-4.0, -105.0], [-1.0, -110.0], [0.0, -115.0], [0.0, -119.0]],
-	"1|The Rampart Stair": [[1.3, -97.5], [9.5, -95.0], [13.25, -95.6], [13.25, -109.5], [13.6, -113.5], [13.0, -115.75], [12.0, -115.75], [5.0, -115.75], [2.0, -117.2], [0.0, -119.0]],
-	"1|": [[0.0, -98.0], [0.0, -106.0], [0.0, -112.0], [0.0, -119.0]],
-	"2|": [[0.0, -124.5], [0.0, -128.0], [0.0, -136.0], [0.0, -141.0]],
+	"1|The Guardhouse": [[-12.6, -101.0], [-9.4, -101.0], [-7.0, -101.2], [-4.0, -105.0], [-1.0, -110.0], [0.0, -113.0], [0.0, -116.5]],
+	"1|The Rampart Stair": [[1.3, -97.5], [9.5, -95.0], [13.25, -95.6], [13.25, -109.5], [13.6, -113.5], [13.0, -115.75], [12.0, -115.75], [5.0, -115.75], [2.0, -116.4], [0.0, -116.5]],
+	"1|": [[0.0, -98.0], [0.0, -106.0], [0.0, -112.0], [0.0, -116.5]],
+	"2|": [[0.0, -122.0], [0.0, -128.0], [0.0, -136.0], [0.0, -141.0]],
 	"3|": [[0.0, -146.0], [0.0, -152.0]],
 	"4|The Murder Hole": [[5.0, -163.4], [3.0, -163.3], [1.2, -164.6], [0.0, -170.0], [0.0, -176.0], [0.0, -184.0]],
 	"4|": [[0.0, -158.0], [0.0, -166.0], [0.0, -176.0], [0.0, -184.0]],
@@ -785,6 +785,14 @@ func _portcullis(n: Node3D, gate: String, at: Vector3, w: float, h: float, open:
 	gates[gate] = g
 	return g
 
+## Raises a portcullis that is down (the winch was turned). Stage 3B gives it its sound and its weight.
+func open_gate(gate: String, secs: float = 3.0) -> void:
+	var g: Node3D = gates.get(gate)
+	if g == null or not is_instance_valid(g) or bool(g.get_meta("open", false)):
+		return
+	g.set_meta("open", true)
+	create_tween().tween_property(g, "position:y", g.position.y + float(g.get_meta("rise")), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
 # ================================================================ the far layer (built once, always there)
 func _far_layer() -> void:
 	# the sea: a plane from the foot of the cliff to the horizon
@@ -1073,7 +1081,9 @@ func _barbican(n: Node3D, k: Future.Kit) -> void:
 	Future._box(k.pale(false), Vector3(4.4, 6.0, 1.4), c + Vector3(11.0, 3.0, 2.0))
 	_occluder(n, c + Vector3(0, 5.0, 0), Vector3(14.0, 10.0, 9.0))
 	_clutter(n, -12.0, 12.0, -106.0, -127.0, 62)
-	await _prop(n, "banner", 4.2, c + Vector3(0, 5.9, 5.4), 0.0, 0.0, 0)
+	# the banner that still flies, hung on the face of the west tower beside the gate (the banneret stands under it)
+	await _prop(n, "banner", 4.6, c + Vector3(-4.2, 1.4, 5.4), 0.0, 0.0, 0)
+	Future._box(k.alloy(false), Vector3(2.0, 0.16, 0.5), c + Vector3(-4.2, 6.1, 5.3))
 	for sx3: float in [-1.0, 1.0]:
 		Future.beacon(k, Vector3(sx3 * 4.6, 4.5, -125.4), 2.5, sx3 * 20.0)
 		_lamp(n, Vector3(sx3 * 4.6, 6.6, -125.4), Color(arena.theme.fire), 1.8, 8.0, true)

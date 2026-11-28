@@ -1,0 +1,6 @@
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+ROUTECOST stop 3 at (0.0, 4.5, -119.0): draws=139 primitives=265806 objects=423 video_mem=177.1MB
+render t=2.5 draw_calls=139 primitives=265806 objects=423 video_mem=177.1MB nodes=558
+render t=11.0 draw_calls=163 primitives=272142 objects=1042 video_mem=177.1MB nodes=558
+WARNING: ObjectDB instances leaked at exit (run with --verbose for details).
+     at: cleanup (core/object/object.cpp:2641)

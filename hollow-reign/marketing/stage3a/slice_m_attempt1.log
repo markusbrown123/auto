@@ -1,0 +1,25 @@
+[    0.1s game |      0s wall] slice run: body=m weapon=default die=["1"] window=(960, 540) safe margins={ "l": 24.0, "r": 24.0, "t": 16.0, "b": 16.0 } preset=Balanced
+[    0.1s game |      0s wall] STEP launch
+[    3.7s game |     21s wall]   launch screen took 3.6 s
+[    3.7s game |     21s wall]   audio during 'launch': Master peak -200.0 mean -100.0 dB; Music peak -200.0 mean -100.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -200.0 mean -100.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    3.7s game |     21s wall] STEP main menu
+[    5.7s game |    128s wall]   tap 'NEW LEGACY' at (313, 455), target 538 x 68
+[    6.7s game |    161s wall]   audio during 'main menu': Master peak -7.8 mean -15.4 dB; Music peak -13.0 mean -23.1 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.3 mean -26.5 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    6.7s game |    161s wall] STEP character select
+[    6.7s game |    161s wall]   tap 'name field' at (336, 524), target 600 x 60
+[    7.2s game |    181s wall]   name typed: Maren
+[    8.2s game |    225s wall]   tap 'CHOOSE A BLADE' at (426, 602), target 420 x 60
+[    8.3s game |    232s wall]   audio during 'character select': Master peak -7.3 mean -11.4 dB; Music peak -12.0 mean -17.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.1 mean -26.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    8.3s game |    232s wall] STEP starting sword
+[   10.9s game |    369s wall]   sword in the middle: w_dawnline (wanted w_dawnline, 1 drags)
+[   11.4s game |    390s wall]   tap 'RISE' at (426, 637), target 420 x 60
+[   11.5s game |    397s wall]   saved? slot 2 exists=true  weapon=w_dawnline body=m name=Maren
+[   11.5s game |    397s wall]   audio during 'starting sword': Master peak -5.0 mean -11.6 dB; Music peak -11.5 mean -17.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -26.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   11.5s game |    397s wall] STEP generation I
+[   12.1s game |    458s wall]   audio during 'generation I': Master peak -8.7 mean -11.7 dB; Music peak -15.1 mean -18.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.9 mean -26.1 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   12.1s game |    458s wall] STEP generation I, beat 1
+[   14.2s game |    613s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   15.3s game |    700s wall]   audio during 'generation I, beat 1': Master peak -7.6 mean -14.3 dB; Music peak -13.0 mean -20.1 dB; Dialogue peak -27.3 mean -66.9 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -29.1 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   15.3s game |    700s wall] STEP generation I, beat 2
+[   15.3s game |    700s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   15.4s game |    706s wall]   duel begins: Throne Guard (knight 286 hp)

@@ -33,7 +33,7 @@ const SHORTCUT_IN := Vector3(-13.0, 5.5, -138.5)
 const MONUMENT := Vector3(7.0, 3.2, -88.5)        # the fallen head in the rubble yard (Explore._find_witness)
 ## Fallback anchors [x, y, z, yaw]; data/regions.json (tools/gen_regions.py) is the source.
 const ANCHORS := [[0.0, 3.0, -68.0, 0.0], [0.0, 3.2, -92.0, 0.0], [0.0, 4.5, -116.5, 0.0], [0.0, 5.5, -141.0, 0.0],
-	[0.0, 5.5, -152.0, 0.0], [0.0, 6.2, -184.0, 0.0], [0.0, 8.0, -206.0, 0.0]]
+	[0.0, 5.5, -152.0, 0.0], [0.0, 6.2, -184.0, 22.0], [0.0, 8.0, -206.0, 0.0]]
 ## Sections by z (from, to): hill, outer wall and rubble yard, barbican, winch yard and gate passage, chapel and ward.
 const SECTIONS := [[72.0, -62.0], [-62.0, -110.0], [-110.0, -137.0], [-137.0, -176.0], [-176.0, -300.0]]
 const KEEP := 2                   # sections behind the knight's that are kept built
@@ -859,6 +859,13 @@ func _far_layer() -> void:
 	Future._box(k.alloy(true), Vector3(48, 2.0, 24), keep_c + Vector3(0, 30.5, -2))
 	Future._box(k.pale(true), Vector3(30, 12, 16), keep_c + Vector3(0, 37.5, -4))
 	Future._box(k.tool("lit"), Vector3(26, 0.25, 0.3), keep_c + Vector3(0, 26.0, 9.1))
+	# the keep's face: setback bands, buttresses, slit windows with a little of the old light left in them
+	for y2: float in [9.0, 18.0, 27.0]:
+		Future._box(k.alloy(true), Vector3(47.0, 0.9, 1.2), keep_c + Vector3(0, y2, 9.4))
+	for xb in range(-21, 22, 6):
+		Future._box(k.alloy(true), Vector3(1.4, 30.0, 2.4), keep_c + Vector3(float(xb), 15.0, 9.6))
+		for y3: float in [12.5, 21.5]:
+			Future._box(k.tool("dim" if (xb + int(y3)) % 4 != 0 else "lit"), Vector3(0.5, 3.2, 0.2), keep_c + Vector3(float(xb) + 3.0, y3, 9.05))
 	for sx: float in [-1.0, 1.0]:
 		Future.spire(k, keep_c + Vector3(sx * 24.0, 0, 2.0), 52.0, 5.0, true, sx > 0.0, 0.3)
 	Future.spire(k, keep_c + Vector3(-6, 30, -6), 46.0, 4.0, true, false, 0.9)
@@ -1015,8 +1022,8 @@ func _outer(n: Node3D, k: Future.Kit) -> void:
 	Future._box(k.tool("lit"), Vector3(0.06, 0.07, 44.0), Vector3(15.55, 7.0, -101.0))
 	_occluder(n, Vector3(16.4, 6.5, -101.0), Vector3(1.4, 6.4, 48.0))
 	# the stair's side wall and the wall-walk's inner rail
-	Future._box(k.alloy(false), Vector3(0.4, 1.0, 22.0), Vector3(11.8, 8.3, -106.0))
-	Future._box(k.pale(false), Vector3(0.6, 2.6, 14.5), Vector3(11.6, 4.2, -102.2))
+	Future._box(k.alloy(false), Vector3(0.4, 1.0, 7.5), Vector3(11.8, 8.3, -113.25))
+	Future._box(k.pale(false), Vector3(0.6, 2.6, 12.0), Vector3(11.6, 4.2, -103.5))
 	await _tick()
 	# the guardhouse: a room of its own, its door hanging from one hinge (x -16..-8, z -96..-106)
 	var gh := Vector3(-12.0, 3.2, -101.0)

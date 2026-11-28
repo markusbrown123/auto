@@ -1,0 +1,70 @@
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+Vulkan 1.4.335 - Forward Mobile - Using Device #0: Unknown - llvmpipe (LLVM 20.1.2, 256 bits)
+
+Movie Maker mode enabled, recording movie in 1280×720 @ 30 FPS...
+WARNING: Current available space on disk is low (7.94 GiB). MovieWriter will fail during movie recording if the disk runs out of available space.
+     at: begin (servers/movie_writer/movie_writer.cpp:113)
+ROUTECOST walk at (0.1, 0.0, 53.7) (section 0): draws=128 primitives=236380 objects=128 video_mem=147.3MB
+ROUTECOST walk at (0.2, 0.0, 51.5) (section 0): draws=125 primitives=231360 objects=125 video_mem=147.3MB
+ROUTECOST walk at (0.2, 0.1, 49.3) (section 0): draws=125 primitives=231360 objects=125 video_mem=147.3MB
+ROUTECOST walk at (0.3, 0.1, 47.0) (section 0): draws=125 primitives=231360 objects=125 video_mem=147.3MB
+ROUTECOST walk at (0.4, 0.1, 44.8) (section 0): draws=125 primitives=238390 objects=125 video_mem=147.3MB
+ROUTECOST walk at (0.5, 0.2, 42.5) (section 0): draws=124 primitives=231438 objects=124 video_mem=147.3MB
+ROUTECOST walk at (0.7, 0.2, 40.3) (section 0): draws=126 primitives=239014 objects=126 video_mem=147.3MB
+ROUTECOST walk at (0.9, 0.3, 38.1) (section 0): draws=126 primitives=234078 objects=126 video_mem=147.3MB
+ROUTECOST walk at (1.2, 0.3, 35.9) (section 0): draws=126 primitives=245120 objects=126 video_mem=147.3MB
+ROUTECOST walk at (1.4, 0.3, 33.6) (section 0): draws=126 primitives=240184 objects=126 video_mem=147.3MB
+ROUTECOST walk at (1.6, 0.4, 31.4) (section 0): draws=126 primitives=245120 objects=126 video_mem=147.3MB
+ROUTECOST walk at (2.1, 0.4, 29.2) (section 0): draws=126 primitives=240184 objects=126 video_mem=147.3MB
+ROUTECOST walk at (2.6, 0.5, 27.0) (section 0): draws=126 primitives=245120 objects=126 video_mem=147.3MB
+ROUTECOST walk at (3.2, 0.5, 24.9) (section 0): draws=126 primitives=240184 objects=126 video_mem=147.3MB
+ROUTECOST walk at (3.8, 0.6, 22.7) (section 0): draws=126 primitives=240184 objects=126 video_mem=147.3MB
+ROUTECOST walk at (4.3, 0.6, 20.5) (section 0): draws=126 primitives=240184 objects=126 video_mem=147.3MB
+ROUTECOST walk at (4.9, 0.7, 18.4) (section 0): draws=127 primitives=242585 objects=127 video_mem=147.3MB
+ROUTECOST walk at (5.5, 0.7, 16.2) (section 0): draws=129 primitives=250223 objects=129 video_mem=147.3MB
+ROUTECOST walk at (6.1, 0.7, 14.1) (section 0): draws=127 primitives=233555 objects=127 video_mem=147.3MB
+ROUTECOST walk at (6.7, 0.8, 11.9) (section 0): draws=128 primitives=239905 objects=128 video_mem=147.3MB
+ROUTECOST walk at (7.4, 0.8, 9.8) (section 0): draws=128 primitives=234969 objects=128 video_mem=147.3MB
+ROUTECOST walk at (8.0, 0.9, 7.6) (section 0): draws=128 primitives=239905 objects=128 video_mem=147.3MB
+ROUTECOST walk at (8.6, 0.9, 5.5) (section 0): draws=129 primitives=236145 objects=129 video_mem=147.3MB
+ROUTECOST walk at (9.1, 1.0, 3.3) (section 0): draws=129 primitives=245257 objects=129 video_mem=147.3MB
+ROUTECOST walk at (9.3, 1.1, 1.0) (section 0): draws=130 primitives=243316 objects=130 video_mem=147.3MB
+ROUTECOST walk at (9.6, 1.1, -1.2) (section 0): draws=131 primitives=250842 objects=131 video_mem=147.3MB
+ROUTECOST walk at (9.8, 1.2, -3.4) (section 0): draws=129 primitives=250842 objects=129 video_mem=147.3MB
+ROUTECOST walk at (10.0, 1.2, -5.6) (section 0): draws=132 primitives=273477 objects=132 video_mem=147.3MB
+ROUTECOST walk at (10.3, 1.3, -7.9) (section 0): draws=134 primitives=276059 objects=134 video_mem=147.3MB
+ROUTECOST walk at (10.4, 1.3, -10.1) (section 0): draws=136 primitives=275925 objects=136 video_mem=147.3MB
+ROUTECOST walk at (10.0, 1.4, -12.3) (section 0): draws=137 primitives=276517 objects=137 video_mem=147.3MB
+ROUTECOST walk at (9.6, 1.5, -14.5) (section 0): draws=137 primitives=276517 objects=137 video_mem=147.3MB
+ROUTECOST walk at (9.1, 1.6, -16.7) (section 0): draws=137 primitives=281453 objects=137 video_mem=147.3MB
+ROUTECOST walk at (8.7, 1.7, -18.9) (section 0): draws=137 primitives=276517 objects=137 video_mem=147.3MB
+ROUTECOST walk at (8.2, 1.8, -21.1) (section 0): draws=137 primitives=273279 objects=137 video_mem=147.3MB
+ROUTECOST walk at (7.6, 2.0, -23.2) (section 0): draws=126 primitives=263171 objects=126 video_mem=147.3MB
+ROUTECOST walk at (6.8, 2.1, -25.3) (section 0): draws=134 primitives=271717 objects=134 video_mem=147.3MB
+ROUTECOST walk at (6.1, 2.3, -27.4) (section 0): draws=136 primitives=272065 objects=136 video_mem=147.3MB
+ROUTECOST walk at (5.3, 2.4, -29.5) (section 0): draws=136 primitives=272213 objects=136 video_mem=147.3MB
+ROUTECOST walk at (4.9, 2.5, -31.7) (section 0): draws=140 primitives=275270 objects=140 video_mem=147.3MB
+ROUTECOST walk at (4.7, 2.6, -33.9) (section 0): draws=142 primitives=273322 objects=142 video_mem=147.3MB
+ROUTECOST walk at (4.6, 2.7, -36.2) (section 0): draws=133 primitives=278746 objects=133 video_mem=147.3MB
+ROUTECOST walk at (4.5, 2.7, -38.4) (section 0): draws=144 primitives=274206 objects=144 video_mem=147.3MB
+ROUTECOST walk at (4.5, 2.7, -40.6) (section 0): draws=135 primitives=280882 objects=135 video_mem=147.3MB
+ROUTECOST walk at (4.5, 2.8, -42.9) (section 0): draws=138 primitives=275982 objects=138 video_mem=147.3MB
+ROUTECOST walk at (4.4, 2.8, -45.1) (section 0): draws=143 primitives=291148 objects=143 video_mem=147.3MB
+ROUTECOST walk at (4.4, 2.8, -47.4) (section 0): draws=154 primitives=286924 objects=154 video_mem=147.3MB
+ROUTECOST walk at (4.3, 2.9, -49.6) (section 0): draws=155 primitives=292052 objects=155 video_mem=147.3MB
+ROUTECOST walk at (4.1, 2.9, -51.8) (section 0): draws=146 primitives=295405 objects=146 video_mem=147.3MB
+ROUTECOST walk at (3.4, 2.9, -54.0) (section 0): draws=146 primitives=300341 objects=146 video_mem=147.3MB
+ROUTECOST walk at (2.8, 2.9, -55.9) (section 0): draws=156 primitives=300527 objects=156 video_mem=147.3MB
+ROUTECOST walk at (2.2, 3.0, -58.0) (section 0): draws=152 primitives=297671 objects=152 video_mem=147.3MB
+ROUTECOST walk at (1.5, 3.0, -60.1) (section 0): draws=146 primitives=297911 objects=146 video_mem=147.3MB
+ROUTECOST walk at (0.8, 3.0, -62.3) (section 1): draws=144 primitives=295085 objects=144 video_mem=147.4MB
+ROUTECOST walk at (0.4, 3.0, -64.5) (section 1): draws=172 primitives=355591 objects=172 video_mem=147.6MB
+ROUTECOST walk at (0.2, 3.0, -66.7) (section 1): draws=176 primitives=357292 objects=176 video_mem=147.6MB
+ROUTECOST stop 1 at (0.0, 3.0, -68.0): draws=193 primitives=376378 objects=457 video_mem=171.9MB
+ROUTEWALK stop 1: taking The Breach (fight)
+ROUTECOST walk at (0.0, 3.0, -68.9) (section 1): draws=185 primitives=390436 objects=185 video_mem=171.9MB
+ROUTECOST walk at (0.0, 3.0, -71.1) (section 1): draws=184 primitives=432032 objects=184 video_mem=171.9MB
+ROUTECOST walk at (0.0, 3.0, -73.4) (section 1): draws=183 primitives=435872 objects=183 video_mem=171.9MB
+ROUTECOST walk at (0.0, 3.2, -75.6) (section 1): draws=174 primitives=425812 objects=174 video_mem=171.9MB
+ROUTECOST walk at (0.0, 3.7, -77.8) (section 1): draws=176 primitives=430820 objects=176 video_mem=171.9MB
+ROUTECOST walk at (0.0, 3.3, -80.0) (section 1): draws=168 primitives=339638 objects=168 video_mem=171.9MB

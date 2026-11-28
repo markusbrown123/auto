@@ -492,6 +492,10 @@ func _run() -> void:
 		return
 	await press("New Legacy")
 	await _wait(0.8)
+	if _find("Begin anew") != null:
+		say("  a legacy is already under way on this machine: beginning anew beside it")
+		await press("Begin anew")
+		await _wait(0.8)
 	if _find("Begin here") != null:
 		step("save slot")
 		audit()

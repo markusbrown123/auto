@@ -1,0 +1,69 @@
+Godot Engine v4.6.stable.official.89cea1439 - https://godotengine.org
+Vulkan 1.4.335 - Forward Mobile - Using Device #0: Unknown - llvmpipe (LLVM 20.1.2, 256 bits)
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1342:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5208:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5731:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2721:(snd_pcm_open_noupdate) Unknown PCM default
+ERROR: Condition "status < 0" is true. Returning: ERR_CANT_OPEN
+   at: init_output_device (drivers/alsa/audio_driver_alsa.cpp:90)
+WARNING: All audio drivers failed, falling back to the dummy driver.
+     at: initialize (servers/audio/audio_server.cpp:247)
+
+[    0.1s game |      0s wall] STEP on the road at stop 1 (checkpoint 0)
+[    8.2s game |    487s wall]   audio during 'on the road at stop 1 (checkpoint 0)': Master peak -5.3 mean -22.5 dB; Music peak -21.5 mean -31.0 dB; Dialogue peak -10.3 mean -53.4 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.7 mean -32.7 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    8.2s game |    487s wall] STEP courtyard stop 1: The outer wall has fallen in on itself. Something in garriso
+[    8.2s game |    487s wall]   health 160 / 160, gold 0, level 1
+[    9.5s game |    529s wall]   continuous road: knight at (0.0, 3.0, -68.0), 0 m walked on this screen; render draws=204 primitives=371055 objects=710 video_mem=172.6MB
+[    9.5s game |    529s wall]   tap 'a pouch' at (311, 487), target 84 x 84
+[   10.1s game |    560s wall]   pouch: gold 0 -> 14
+[   10.1s game |    560s wall]   ways onward: ["The Breach"]; taking 'The Breach' (fight)
+[   10.1s game |    560s wall]   tap 'The Breach' at (640, 639), target 1216 x 114
+[   11.6s game |    646s wall]   walking at (0.0, 3.0, -69.6) (section 1): draws=157 primitives=322053 objects=157 video_mem=172.8MB
+[   11.9s game |    659s wall]   duel begins: Hollow Soldier (knight 160 hp)
+[   12.0s game |    679s wall]   audio during 'courtyard stop 1: The outer wall has fallen in on itself. Something in garriso': Master peak -7.5 mean -15.5 dB; Music peak -12.5 mean -22.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.7 mean -26.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   12.0s game |    679s wall] STEP duel 1: Hollow Soldier
+[   19.0s game |   1061s wall]   widest gap between the fighters: 3.2 m
+[   21.8s game |   1167s wall]   duel over after 10 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 13
+[   24.7s game |   1256s wall]   result screen up: [Continue]. gold 54, level 1, xp 60, inventory 6, deaths 0
+[   24.7s game |   1256s wall]   tap 'CONTINUE' at (640, 628), target 300 x 60
+[   26.1s game |   1311s wall]   walking at (-0.1, 3.2, -75.6) (section 1): draws=170 primitives=391733 objects=170 video_mem=185.9MB
+[   34.1s game |   1540s wall]   walking at (-0.2, 3.2, -84.5) (section 1): draws=173 primitives=349838 objects=173 video_mem=185.9MB
+[   95.4s game |   2875s wall]   audio during 'duel 1: Hollow Soldier': Master peak -1.0 mean -18.9 dB; Music peak -12.1 mean -26.9 dB; Dialogue peak -2.3 mean -45.1 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -30.5 dB; Interface peak -22.2 mean -82.5 dB; Cinematics peak -9.7 mean -71.1 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   95.4s game |   2875s wall] STEP courtyard stop 2: Beyond the rubble the path divides.
+[   95.4s game |   2875s wall]   health 160 / 160, gold 54, level 1
+[   96.7s game |   2908s wall]   continuous road: knight at (0.0, 3.2, -92.0), 18 m walked on this screen; render draws=182 primitives=346500 objects=682 video_mem=187.0MB
+[   96.7s game |   2908s wall]   tap 'a pouch' at (400, 434), target 84 x 84
+[   97.3s game |   2926s wall]   pouch: gold 54 -> 63
+[   97.3s game |   2926s wall]   ways onward: ["The Guardhouse", "The Rampart Stair"]; taking 'The Guardhouse' (treasure)
+[   97.3s game |   2926s wall]   tap 'The Guardhouse' at (333, 639), target 602 x 114
+[   98.8s game |   2966s wall]   walking at (-0.8, 3.2, -93.4) (section 1): draws=168 primitives=340217 objects=168 video_mem=186.9MB
+[  107.2s game |   3201s wall]   walking at (-6.4, 3.2, -100.6) (section 1): draws=90 primitives=195937 objects=90 video_mem=186.9MB
+[  114.7s game |   3363s wall]   tap 'OPEN' at (640, 360), target 220 x 60
+[  117.0s game |   3394s wall]   tap 'ONWARD' at (640, 461), target 260 x 60
+[  117.4s game |   3405s wall]   walking at (-12.2, 3.2, -101.0) (section 1): draws=106 primitives=175341 objects=106 video_mem=187.1MB
+[  125.8s game |   3578s wall]   walking at (-4.4, 3.2, -104.5) (section 1): draws=144 primitives=294119 objects=144 video_mem=187.1MB
+[  134.1s game |   3815s wall]   walking at (-0.2, 4.5, -112.6) (section 2): draws=100 primitives=207191 objects=100 video_mem=187.1MB
+[  156.4s game |   4825s wall]   audio during 'courtyard stop 2: Beyond the rubble the path divides.': Master peak -3.7 mean -15.4 dB; Music peak -11.4 mean -22.2 dB; Dialogue peak -8.7 mean -63.5 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.2 mean -26.9 dB; Interface peak -14.9 mean -79.4 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  156.4s game |   4825s wall] STEP courtyard stop 3: A banner still flies on the barbican. Someone is standing un
+[  156.4s game |   4825s wall]   health 160 / 160, gold 123, level 1
+[  157.6s game |   4863s wall]   continuous road: knight at (0.0, 4.5, -116.5), 58 m walked on this screen; render draws=149 primitives=218305 objects=664 video_mem=187.9MB
+[  157.6s game |   4863s wall]   tap 'a pouch' at (183, 481), target 84 x 84
+[  158.3s game |   4883s wall]   pouch: gold 123 -> 132
+[  158.3s game |   4883s wall]   tap 'something odd (cy_loose_stone)' at (963, 465), target 96 x 96
+[  170.4s game |   5162s wall]   secrets known: 0 -> 1
+[  170.4s game |   5162s wall]   ways onward: ["The Barbican"]; taking 'The Barbican' (fight)
+[  170.4s game |   5162s wall]   tap 'The Barbican' at (640, 639), target 1216 x 114
+[  171.9s game |   5218s wall]   walking at (0.0, 4.5, -118.1) (section 2): draws=90 primitives=153943 objects=90 video_mem=188.0MB
+[  172.2s game |   5233s wall]   duel begins: Banneret (knight 160 hp)
+[  172.2s game |   5247s wall]   audio during 'courtyard stop 3: A banner still flies on the barbican. Someone is standing un': Master peak -5.3 mean -16.8 dB; Music peak -11.4 mean -23.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.6 mean -28.4 dB; Interface peak -22.2 mean -75.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  172.2s game |   5247s wall] STEP duel 2: Banneret
+[  178.1s game |   5511s wall]   widest gap between the fighters: 3.2 m
+[  180.9s game |   5602s wall]   duel over after 9 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 11
+[  184.0s game |   5702s wall]   result screen up: [Continue]. gold 242, level 2, xp 15, inventory 7, deaths 0
+[  184.0s game |   5702s wall]   tap 'CONTINUE' at (640, 670), target 300 x 60
+[  185.5s game |   5766s wall]   walking at (-0.1, 4.5, -124.2) (section 2): draws=100 primitives=159339 objects=100 video_mem=186.2MB
+[  193.8s game |   6101s wall]   walking at (0.0, 5.2, -133.5) (section 2): draws=97 primitives=145546 objects=97 video_mem=186.2MB

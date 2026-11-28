@@ -93,6 +93,10 @@ func _ready() -> void:
 	_dormant_witness()
 	cam = CineCam.new()
 	add_child(cam)
+	# set shots are framed by hand (nothing is pulled in front of them); the walks ride with the knight and keep clear
+	# of the machines (CineCam's avoidance, on only while riding). `subject` keeps CineCam's pull-in safe either way.
+	cam.subject = knight
+	cam.avoid = false
 	ui = CanvasLayer.new()
 	ui.layer = 40
 	add_child(ui)
@@ -167,8 +171,8 @@ func _run() -> void:
 			_to_door()
 		return
 	# 1. dark; the clamp lamps of the seal, then the oculus lamp comes up on a figure lying in the cradle
-	cam.cut(Vector3(-1.15, 0.62, 0.55), Vector3(0.05, 0.22, -0.45), 38.0)
-	cam.move(Vector3(-1.05, 0.66, 0.7), Vector3(0.05, 0.24, -0.45), 8.0)
+	cam.cut(Vector3(-1.35, 0.7, 0.45), Vector3(0.05, 0.22, -0.45), 38.0)
+	cam.move(Vector3(-1.25, 0.74, 0.6), Vector3(0.05, 0.24, -0.45), 8.0)
 	create_tween().tween_property(_veil, "color:a", 0.0, 2.4)
 	create_tween().tween_property(_key, "light_energy", 5.0, 3.2).set_trans(Tween.TRANS_SINE)
 	await _wait(2.6)
@@ -187,8 +191,9 @@ func _run() -> void:
 	if _over:
 		return
 	# 3. "Can you hear me?": a first breath, the fingers, the head comes off the bed toward the voice
-	cam.cut(Vector3(-1.05, 0.62, -1.15), Vector3(0.1, 0.25, -0.5), 36.0)
-	cam.move(Vector3(-0.95, 0.68, -1.0), Vector3(0.1, 0.28, -0.5), 6.0)
+	# (from the bed's side at its middle: the opened cage stands up at the head end and would cross a lens there)
+	cam.cut(Vector3(-1.3, 0.78, 0.3), Vector3(0.1, 0.25, -0.5), 36.0)
+	cam.move(Vector3(-1.2, 0.8, 0.15), Vector3(0.1, 0.28, -0.5), 6.0)
 	Story.play("awakening", true)
 	knight.breath_hold = 0.6           # the first breaths after years: heard and seen, until the knight is up (Stage 2 API)
 	var w := create_tween()
@@ -251,8 +256,8 @@ func _run() -> void:
 
 ## The shot the sword is offered in: past the knight to the holder, the whole of it lit.
 func _frame_sword() -> void:
-	cam.cut(Vector3(-1.25, 1.8, 3.55), Vector3(1.15, 1.0, -0.4), 50.0)
-	cam.move(Vector3(-0.95, 1.7, 3.35), Vector3(1.25, 1.0, -0.45), 6.0)
+	cam.cut(Vector3(-0.35, 1.7, 2.75), Vector3(1.55, 1.0, -0.45), 46.0)
+	cam.move(Vector3(-0.15, 1.65, 2.6), Vector3(1.6, 1.0, -0.5), 6.0)
 
 ## Gets up out of the cradle on the get-up clip, slowed; the lying layer hands over to it as it starts.
 func _get_up() -> void:
@@ -361,7 +366,7 @@ func _take_sword() -> void:
 	# drawn up out of the holder: the camera low and in front, the light on the blade
 	Sfx.play("draw", -4.0, 0.9)
 	var up := create_tween()
-	up.tween_property(self, "_reach_at", _hilt + Vector3(0, 0.42, 0) + front * 0.1, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	up.tween_property(self, "_reach_at", _hilt + Vector3(0, 0.26, 0) + front * 0.16, 1.0).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	up.parallel().tween_property(self, "_lean", 0.0, 0.9).set_trans(Tween.TRANS_SINE)
 	# (from beside the holder, low, looking up past the blade at the knight's face: the holder's frame behind it)
 	var low := Vector3(_hilt.x, 0, _hilt.z) - front * 0.15 - side * 1.0 + Vector3(0, 0.85, 0)
@@ -411,6 +416,7 @@ func _to_door() -> void:
 	var by_housing := Vector3(-0.9, 0, -3.5)
 	var at_door := Vector3(0.15, 0, -4.55)
 	cam.ride(knight, Vector3(0.85, 1.7, 3.1), Vector3(0.0, 1.35, -3.0))
+	cam.avoid = true
 	cam.fov = 48.0
 	# round the head of the cradle (its machine and the opened cage), then along the wall toward the door
 	if knight.position.x > 0.8:
@@ -428,6 +434,7 @@ func _to_door() -> void:
 		return
 	knight.walking = false
 	cam.let_go()
+	cam.avoid = false
 	# the door does not answer: the lamp over it stays red, the bars knock in their brackets
 	var door_view := at_door + Vector3(1.3, 1.45, 1.9)
 	cam.move(door_view, Vector3(-0.2, 1.7, Chamber.DOOR_Z), 1.6, 46.0)
@@ -507,7 +514,7 @@ func _wake_witness() -> void:
 	_face_to(cup, 0.5)
 	# close on the housing, the knight's hand coming into frame
 	var side := inward.cross(Vector3.UP)
-	var close := cup + inward * 1.25 - side * 0.75 + Vector3(0, 0.2, 0)
+	var close := cup + inward * 0.95 - side * 1.15 + Vector3(0, 0.22, 0)
 	cam.cut(close, cup + Vector3(0, -0.02, 0), 42.0)
 	cam.move(close + (cup - close) * 0.12, cup, 5.0)
 	# the hand on the lid; it gives, and slides up into the body
@@ -577,7 +584,7 @@ func _witness_line(who: String, line_id: String) -> void:
 			r.tween_callback(func():
 				_open_prongs()
 				Sfx.play("rattle", -12.0, 1.5)
-				drone.fly_to(cup + inward * 0.42 + Vector3(0, 0.3, 0)))
+				drone.fly_to(cup + inward * 0.36 + side * 0.4 + Vector3(0, 0.42, 0)))      # out of the cup, up, to the knight's left (the camera's side)
 			r.tween_property(self, "_reach_w", 0.0, 0.7).set_trans(Tween.TRANS_SINE).set_delay(0.3)
 			var two := cup.lerp(knight.position, 0.5) + side * 1.9 + inward * 0.6 + Vector3(0, 1.45, 0)
 			cam.cut(two, cup.lerp(head, 0.5) + Vector3(0, -0.1, 0), 44.0)
@@ -590,7 +597,7 @@ func _witness_line(who: String, line_id: String) -> void:
 		"witness_chamber_01":
 			# the cradle, and the knight it kept
 			drone.look_at_point(Chamber.CRADLE_AT + Vector3(0, 0.4, 0), 2.2)
-			var p2 := head + Vector3(0, -0.15, 0) - (Chamber.CRADLE_AT - head).normalized() * 1.2 + side * 0.4
+			var p2 := cup.lerp(knight.position, 0.5) + side * 1.7 + inward * 0.9 + Vector3(0, 1.55, 0)
 			cam.move(p2, drone.global_position.lerp(head, 0.5), 3.0, 42.0)
 		"witness_chamber_02":
 			# "This door answers to the old seals": it goes to the lock
@@ -641,8 +648,10 @@ func _open_door() -> void:
 ## Out through the door and down the passage, the camera behind, the Witness ahead; to the outer doorway.
 func _leave() -> void:
 	Story.play("first_road", true)
-	cam.ride(knight, Vector3(0.75, 1.62, 3.3), Vector3(0.1, 1.3, -3.0))
-	cam.fov = 46.0
+	# (the passage is 2.6 m wide: the camera rides close behind and a little high, inside it, not pulled through the frames)
+	cam.ride(knight, Vector3(0.3, 1.8, 2.7), Vector3(0.0, 1.35, -3.0))
+	cam.avoid = true
+	cam.fov = 50.0
 	for i in Chamber.EXIT_PATH.size():
 		var p: Vector3 = Chamber.EXIT_PATH[i]
 		var last := i == Chamber.EXIT_PATH.size() - 1

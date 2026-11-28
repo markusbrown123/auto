@@ -1568,9 +1568,22 @@ func _route_interact(o: Dictionary, index: int) -> Node3D:
 	var side := back.rotated(Vector3.UP, PI * 0.5)
 	var tall: bool = o.type == "shrine"
 	var p0 := prop.global_position
-	var eye := p0 + back * (3.4 if tall else 2.5) + side * (1.3 if tall else 1.0) + Vector3(0, 1.5 if tall else 1.35, 0)
-	var clear := CamFollow.clear_from(backdrop.rig, [p0 + Vector3(0, 0.6, 0)], eye, 0.9)
-	eye = (p0 + Vector3(0, 0.8, 0)).lerp(eye, clear)
+	# from beside the knight, never through them: of the two sides, the one whose line to the thing passes furthest
+	# from the knight's chest, then brought in front of any wall
+	var chest := backdrop.rig.position + Vector3(0, 1.2, 0)
+	var eye := Vector3.ZERO
+	var best := -1.0
+	for sgn: float in [1.0, -1.0]:
+		var e2 := p0 + back * (3.0 if tall else 1.7) + side * sgn * (1.6 if tall else 1.5) + Vector3(0, 1.5 if tall else 1.4, 0)
+		var look := p0 + Vector3(0, 1.1, 0)      # (above the thing itself, or the thing would block its own view)
+		var seg := e2 - look
+		var t := clampf((chest - look).dot(seg) / seg.length_squared(), 0.0, 1.0)
+		var gap := (look + seg * t).distance_to(chest)
+		var c2 := CamFollow.clear_from(backdrop.rig, [look], e2, 0.9)
+		var score := gap * 2.0 + c2
+		if score > best:
+			best = score
+			eye = look.lerp(e2, c2)
 	backdrop.cam_speed = 1.6
 	backdrop.move_camera(eye, p0 + Vector3(0, 1.25 if tall else 0.6, 0))
 	return prop

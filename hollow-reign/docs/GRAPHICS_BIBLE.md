@@ -318,3 +318,28 @@ stream across the road under a footbridge, over the banded cliff in one fall to 
 **The Fallen Courtyard** gets, behind its walls, a ring of the makers' ceramic on the horizon and a tower, the broken
 tether, in the north-east (`Future._court_sights`).
 `src/dev/sights_view.tscn` shoots each landmark from a free camera.
+
+## The continuous Courtyard (Stage 3A, 2026-11-28; `src/world/court_route.gd`)
+One place from the hillside door to the inner ward, same rule as above: natural land, far-future building, old.
+- **Land**: a height field per section (2 m cells) and a coarse far field to the west (12 m), drawn with
+  `court_ground.gdshader`: turf (`floor_blackwood` grain, two drifting tones) on gentle slopes, earth, then rock
+  (`floor_roost`, mapped from three sides) on the cliff and the ravine walls; dark and wet near the sea. Faceted rocks
+  (`Highland._crag_mesh`) in one batch per section: the cliff's lip, sea stacks, outcrops, the breach's heaped stone,
+  broken stone on the paving. Grass tufts (`grass_sway`) on the turf and in the joints of the yards (never on a way).
+- **Water**: the falls off the west hill into the ravine, the stream along its floor and over the sea cliff
+  (`highland_water`), the sea (`highland_sea`, a flat depth so no shoreline band).
+- **Built**: the kit's bulkheads for the walls (leaning away from each yard's own centre: `Future.bulkhead(..., centre)`),
+  spires for the barbican's towers and the keep, the paving and treads as slabs of the kit's ceramic and alloy
+  (`Future.built`, retinted), the guardhouse, winch-house, murder hole and chapel alcove as plain built rooms with one warm
+  lamp each; the keep's face has setback bands, buttresses and slit windows (a few still lit).
+- **Props**: `fu_husk`, `fu_wreck`, `fu_pylon`, `fu_wall`, `fu_engine`, `fu_colossus` (7.6 m in the ward, 46 m on the
+  west ridge as a landmark), `fu_tower`, `road_dead_tree`, `statue_head` (the Witness's monument), `rubble`, `banner`.
+- **Air** (`CourtRoute.AIR`, eased as the knight crosses sections): hill fog 0.0024 (the sea and the mountains read),
+  yards 0.0045-0.005, the winch yard and passage 0.007 and dimmer, the ward 0.006 with a warm haze and embers.
+- **Far**: the mountains (`Future.ranges` scaled ×7 round the route), the planet and the orbital arc (×6), the broken
+  tether in the sea, the keep and two spires: built once, always drawn, no shadows.
+
+**Cost** (software renderer, 960×540, `--screen=routewalk --routecost`; nothing has run on a phone):
+see the Stage 3A report in `marketing/stage3a/` (`ROUTECOST` lines). At the stops: 139-192 draws, 244k-363k primitives,
+168-177 MB video memory; walking: about 157 draws, 322k primitives. The slice's courtyard duel was 400-550k primitives and
+about 150 MB, so primitives are under it and video memory is 15-25 MB over it (the far layer and five sections' textures).

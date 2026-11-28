@@ -1,0 +1,18 @@
+{
+ "image": "art/concept/merchant_v1.png",
+ "model": {
+  "task_id": "54ad119e-c0ac-4d19-be7a-c9ccf687082e",
+  "credits": 110.0
+ },
+ "rig_check": {
+  "credits": 0.0,
+  "output": {
+   "riggable": true,
+   "rig_type": "biped"
+  }
+ },
+ "rig": {
+  "task_id": "26824442-c488-400d-b901-40056ea60cb8",
+  "credits": 25.0
+ }
+}

@@ -708,7 +708,9 @@ static func _holder(a: Arena, k: Kit) -> void:
 	bevel(bronze, Vector3(0.66, 1.7, 0.03), x * _xf(Vector3(0, 1.3, back + 0.02)), 0.01)
 	for r in 6:
 		bevel(dark, Vector3(0.56, 0.015, 0.012), x * _xf(Vector3(0, 0.62 + r * 0.27, back + 0.04)), 0.004)
-	bevel(cer, Vector3(0.3, 0.1, 0.36), x * _xf(Vector3(0, 2.62, back + 0.16), 0.0, -18.0), 0.03)
+	# the lamp: a hooded head on an arm that reaches forward from the arch, so its light falls on the blade's face
+	tube(dark, bez(x * Vector3(0, 2.5, back), x * Vector3(0, 2.75, back + 0.2), x * Vector3(0, 2.7, 0.45), x * Vector3(0, 2.45, 0.62), 10), 0.03, 6)
+	bevel(cer, Vector3(0.26, 0.12, 0.3), x * _xf(Vector3(0, 2.42, 0.66), 0.0, 38.0), 0.03)
 	# the clamp arms: they rise from the plinth and close on the blade; they part when it is taken
 	for sx2: float in [-1.0, 1.0]:
 		var arm := Node3D.new()
@@ -988,10 +990,10 @@ static func _pods(a: Arena) -> void:
 static func _lights(a: Arena) -> void:
 	var env := a.env
 	env.ambient_light_color = Color("#3e4744")
-	env.ambient_light_energy = 1.3
+	env.ambient_light_energy = 1.6
 	env.fog_light_color = Color("#1e2624")
 	env.fog_density = 0.028
-	env.tonemap_exposure = 1.45
+	env.tonemap_exposure = 1.55
 	a.sun.light_energy = 0.0
 	a.sun.shadow_enabled = false
 	_readout(a)
@@ -1011,14 +1013,14 @@ static func _lights(a: Arena) -> void:
 	rack.name = "RackLight"
 	rack.light_color = Color("#ffe2b8")
 	rack.light_energy = 0.0
-	rack.spot_range = 4.0
-	rack.spot_angle = 24.0
+	rack.spot_range = 4.2
+	rack.spot_angle = 26.0
 	rack.spot_attenuation = 0.6
 	rack.shadow_enabled = false
 	var rx := Transform3D(Basis(Vector3.UP, deg_to_rad(HOLDER_YAW)), HOLDER_AT)
-	rack.position = rx * Vector3(0, 2.56, -0.2)
+	rack.position = rx * Vector3(0, 2.36, 0.62)
 	a.add_child(rack)
-	rack.look_at(HOLDER_AT + Vector3(0, 0.9, 0))
+	rack.look_at(HOLDER_AT + Vector3(0, 0.85, 0))
 	var ly := OmniLight3D.new()
 	ly.name = "Lyra"
 	ly.light_color = Color("#a8e6dc")
@@ -1204,3 +1206,9 @@ static func lock_door_now(a: Arena) -> void:
 	var door := a.get_node_or_null("Door") as Node3D
 	if door:
 		door.position.y = 1.65
+
+## Stage 3 hand-off: the transform that carries a point of this room into a world whose door is at `entry`, facing
+## `entry_yaw` (radians; 0 faces -Z), so that EXIT_END lands on it. E.g. CourtRoute: to_world(CourtRoute.ENTRY,
+## CourtRoute.ENTRY_YAW) * knight.position is where the knight stands on the route when the passage ends.
+static func to_world(entry: Vector3, entry_yaw: float) -> Transform3D:
+	return Transform3D(Basis(Vector3.UP, entry_yaw), entry) * EXIT_END.affine_inverse()

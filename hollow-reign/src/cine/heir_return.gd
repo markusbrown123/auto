@@ -164,10 +164,12 @@ func _take() -> void:
 	Sfx.play("armor", -8.0)
 	_rack_light.light_energy = 5.0
 	create_tween().tween_property(_rack_light, "light_energy", 0.5, 0.9)
-	# (Stage 4: in profile from beside the holder, the blade and the face both in the picture; from the room side
-	# the camera came up close behind the knight's back)
+	# (Stage 4: cut, not moved, to the knight's sword side beside the holder: the blade and the face both in the
+	# picture; the move from the room side passed close behind the knight's back)
 	var side := front.cross(Vector3.UP)
-	cam.move(_rack.position - side * 1.75 + front * 0.2 + Vector3(0, 1.4, 0), knight.position + Vector3(0, 1.25, 0), 1.6)
+	var three := _rack.position - side * 1.75 + front * 0.2 + Vector3(0, 1.4, 0)
+	cam.cut(three, knight.position + Vector3(0, 1.25, 0), 44.0)
+	cam.move(three + front * 0.15, knight.position + Vector3(0, 1.3, 0), 2.0)
 	if not await _w(1.5):
 		return
 	if _held("taken"):
@@ -180,7 +182,7 @@ func _take() -> void:
 	# (Stage 4: from the passage, looking back into the room through the open door: the heir comes toward the lens
 	# with the daylight of the passage on them and goes past it into the white. Riding behind, the camera sat close
 	# on the knight's back in the narrow passage, as it did in the Awakening.)
-	cam.cut(Vector3(0.5, 1.6, -7.6), Vector3(0.6, 1.3, -2.4), 44.0)
+	cam.cut(Vector3(0.5, 1.6, -6.9), Vector3(0.7, 1.3, -2.4), 42.0)
 	var going := (knight.position.distance_to(Vector3(1.35, 0, -2.4)) + 2.2 + 4.8) / WALK
 	cam.move(Vector3(0.4, 1.65, -11.6), Vector3(0.1, 1.3, -5.0), going, 46.0)
 	await walk(knight, Vector3(1.35, 0, -2.4), WALK).finished

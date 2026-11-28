@@ -31,3 +31,153 @@ ERROR: Condition "!is_inside_tree()" is true. Returning: false
    at: can_process (scene/main/node.cpp:902)
 [   10.5s game |     98s wall]   audio during 'character select': Master peak -6.0 mean -11.0 dB; Music peak -11.4 mean -16.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.4 mean -26.1 dB; Interface peak -37.0 mean -78.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [   10.5s game |     98s wall] STEP starting sword
+[   13.1s game |    167s wall]   sword in the middle: w_dawnline (wanted w_dawnline, 1 drags)
+[   13.6s game |    181s wall]   tap 'RISE' at (426, 637), target 420 x 60
+[   13.7s game |    185s wall]   saved? slot 1 exists=true  weapon=w_dawnline body=f name=Ysolde
+[   13.7s game |    185s wall]   audio during 'starting sword': Master peak -6.4 mean -11.7 dB; Music peak -11.2 mean -17.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.3 mean -26.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   13.7s game |    185s wall] STEP generation I
+[   14.3s game |    212s wall]   audio during 'generation I': Master peak -8.6 mean -12.3 dB; Music peak -13.7 mean -18.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.1 mean -25.8 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   14.3s game |    212s wall] STEP generation I, beat 1
+[   16.4s game |    273s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   17.4s game |    299s wall]   audio during 'generation I, beat 1': Master peak -1.0 mean -13.1 dB; Music peak -11.2 mean -19.1 dB; Dialogue peak -8.2 mean -44.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.3 mean -28.7 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   17.4s game |    299s wall] STEP generation I, beat 2
+[   17.4s game |    299s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   17.6s game |    301s wall]   duel begins: Throne Guard (knight 286 hp)
+[   18.4s game |    326s wall]   audio during 'generation I, beat 2': Master peak -15.8 mean -21.1 dB; Music peak -27.4 mean -33.5 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.3 mean -27.6 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   18.4s game |    326s wall] STEP generation I, beat 3
+[   60.6s game |    822s wall]   audio during 'generation I, beat 3': Master peak -1.0 mean -19.7 dB; Music peak -17.9 mean -59.5 dB; Dialogue peak -12.8 mean -68.3 dB; Combat peak -3.1 mean -40.9 dB; Ambience peak -20.7 mean -26.3 dB; Interface peak -16.8 mean -69.5 dB; Cinematics peak -7.5 mean -53.1 dB; CombatL peak -5.1 mean -54.3 dB; CombatR peak -3.8 mean -48.8 dB
+[   60.6s game |    822s wall] STEP generation I, beat 4
+[   60.6s game |    822s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   61.6s game |    832s wall]   audio during 'generation I, beat 4': Master peak -5.5 mean -18.8 dB; Music peak -41.3 mean -47.5 dB; Dialogue peak -10.5 mean -34.6 dB; Combat peak -14.8 mean -43.6 dB; Ambience peak -23.0 mean -28.1 dB; Interface peak -26.8 mean -56.6 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   61.6s game |    832s wall] STEP generation I, beat 5
+[   61.6s game |    832s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   62.6s game |    846s wall]   audio during 'generation I, beat 5': Master peak -18.2 mean -22.1 dB; Music peak -39.4 mean -48.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -23.2 mean -27.1 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   62.6s game |    846s wall] STEP time jump
+[   64.2s game |    861s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   65.3s game |    875s wall]   audio during 'time jump': Master peak -16.6 mean -21.0 dB; Music peak -29.8 mean -48.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.6 mean -26.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   65.3s game |    875s wall] STEP the heir's arrival
+[   66.9s game |    892s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   67.9s game |    903s wall]   audio during 'the heir's arrival': Master peak -1.0 mean -18.8 dB; Music peak -200.0 mean -100.0 dB; Dialogue peak -6.0 mean -32.7 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.7 mean -27.6 dB; Interface peak -37.0 mean -74.9 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   67.9s game |    903s wall] STEP awakening at the Inheritance Engine
+[   89.0s game |   1051s wall]   the prompt is up: TAKE UP YOUR SWORD
+[   90.0s game |   1058s wall]   tap 'TAKE UP YOUR SWORD' at (871, 358), target 190 x 190
+[  106.3s game |   1166s wall]   audio during 'awakening at the Inheritance Engine': Master peak -1.0 mean -18.7 dB; Music peak -11.3 mean -32.3 dB; Dialogue peak -2.3 mean -31.8 dB; Combat peak -11.4 mean -63.1 dB; Ambience peak -21.3 mean -31.9 dB; Interface peak -17.1 mean -78.3 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -10.4 mean -70.9 dB; CombatR peak -200.0 mean -100.0 dB
+[  106.3s game |   1166s wall] STEP approach
+[  116.2s game |   1221s wall]   audio during 'approach': Master peak -5.3 mean -20.2 dB; Music peak -13.3 mean -27.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -10.5 mean -51.6 dB; Ambience peak -21.7 mean -31.9 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  116.2s game |   1221s wall] STEP first stop of the road
+[  116.2s game |   1221s wall]   the knight holds w_dawnline; profile generation 2; opening seen=true
+[  124.2s game |   1266s wall]   audio during 'first stop of the road': Master peak -1.0 mean -17.3 dB; Music peak -12.1 mean -28.0 dB; Dialogue peak -4.6 mean -29.7 dB; Combat peak -37.7 mean -84.8 dB; Ambience peak -21.3 mean -33.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  124.2s game |   1266s wall] STEP courtyard stop 1: The outer wall has fallen in on itself. Something in garriso
+[  124.2s game |   1266s wall]   health 160 / 160, gold 0, level 1
+[  125.4s game |   1272s wall]   tap 'a pouch' at (308, 489), target 84 x 84
+[  126.1s game |   1276s wall]   pouch: gold 0 -> 15
+[  126.1s game |   1276s wall]   ways onward: ["The Breach"]; taking 'The Breach' (fight)
+[  126.1s game |   1276s wall]   DEFECT no card on screen for 'The Breach'
+[  128.1s game |   1288s wall]   duel begins: Hollow Soldier  [the lesson] (knight 160 hp)
+[  128.4s game |   1292s wall]   audio during 'courtyard stop 1: The outer wall has fallen in on itself. Something in garriso': Master peak -6.2 mean -15.9 dB; Music peak -13.9 mean -23.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -31.6 mean -72.8 dB; Ambience peak -21.3 mean -26.4 dB; Interface peak -17.2 mean -55.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  128.4s game |   1292s wall] STEP duel 0: Hollow Soldier (the lesson)
+[  172.0s game |   1605s wall]   duel over after 44 s: WON. knight 112 / 160 hp. parried 1, blocked 1, dodged 1, blows taken 0, cuts landed 28
+[  172.0s game |   1605s wall]   widest gap between the fighters: 2.6 m
+[  172.3s game |   1609s wall]   duel begins: Hollow Soldier (knight 160 hp)
+[  172.4s game |   1611s wall]   audio during 'duel 0: Hollow Soldier (the lesson)': Master peak -1.0 mean -12.2 dB; Music peak -13.4 mean -18.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -2.7 mean -41.4 dB; Ambience peak -20.7 mean -26.2 dB; Interface peak -16.4 mean -59.9 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -1.7 mean -47.1 dB; CombatR peak -5.4 mean -48.4 dB
+[  172.4s game |   1611s wall] STEP duel 1: Hollow Soldier
+[  179.1s game |   1661s wall]   pausing mid-fight
+[  179.1s game |   1661s wall]   tap 'II' at (1224, 48), target 64 x 64
+[  179.2s game |   1662s wall]   TAP MISSED: 'II' did not receive the touch (under: /root/Main/@Node3D@1924/@CanvasLayer@2098/@ColorRect@2099). Calling its handler.
+[  180.7s game |   1673s wall]   paused=true; on screen: [II], [PERFORMANCE], [BALANCED], [HIGH], [30], [60], [120], [ON], [SMALL], [MEDIUM], [LARGE], [ON], [OFF], [OFF], [OFF], [ON], [OFF], [OFF], [PRIVACY POLICY], [CREDITS], [RESUME], [YIELD]
+[  182.7s game |   1687s wall]   tap 'RESUME' at (524, 592), target 220 x 60
+[  183.4s game |   1693s wall]   resumed; paused=false
+[  184.3s game |   1700s wall]   widest gap between the fighters: 3.2 m
+[  187.1s game |   1718s wall]   duel over after 15 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 13
+[  190.1s game |   1739s wall]   result screen up: [Continue]. gold 55, level 1, xp 60, inventory 6, deaths 0
+[  190.1s game |   1739s wall]   tap 'CONTINUE' at (640, 607), target 300 x 60
+[  245.0s game |   1977s wall]   audio during 'duel 1: Hollow Soldier': Master peak -1.0 mean -16.2 dB; Music peak -13.0 mean -26.8 dB; Dialogue peak -2.1 mean -29.8 dB; Combat peak -6.7 mean -52.8 dB; Ambience peak -20.7 mean -31.4 dB; Interface peak -16.5 mean -64.8 dB; Cinematics peak -9.1 mean -55.8 dB; CombatL peak -5.7 mean -57.8 dB; CombatR peak -5.7 mean -65.7 dB
+[  245.0s game |   1977s wall] STEP courtyard stop 2: Beyond the rubble the path divides.
+[  245.0s game |   1977s wall]   health 160 / 160, gold 55, level 1
+[  246.2s game |   1984s wall]   tap 'a pouch' at (414, 431), target 84 x 84
+[  246.9s game |   1987s wall]   pouch: gold 55 -> 64
+[  246.9s game |   1987s wall]   ways onward: ["The Guardhouse", "The Rampart Stair"]; taking 'The Guardhouse' (treasure)
+[  246.9s game |   1987s wall]   DEFECT no card on screen for 'The Guardhouse'
+[  249.1s game |   2000s wall]   tap 'OPEN' at (640, 360), target 220 x 60
+[  251.4s game |   2011s wall]   tap 'ONWARD' at (640, 461), target 260 x 60
+[  277.1s game |   2166s wall]   audio during 'courtyard stop 2: Beyond the rubble the path divides.': Master peak -1.0 mean -14.9 dB; Music peak -11.5 mean -22.8 dB; Dialogue peak -2.7 mean -36.3 dB; Combat peak -29.2 mean -72.8 dB; Ambience peak -20.7 mean -27.7 dB; Interface peak -12.4 mean -61.6 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  277.1s game |   2166s wall] STEP courtyard stop 3: A banner still flies on the barbican. Someone is standing un
+[  277.1s game |   2166s wall]   health 160 / 160, gold 124, level 1
+[  278.3s game |   2173s wall]   tap 'a pouch' at (195, 477), target 84 x 84
+[  279.0s game |   2177s wall]   pouch: gold 124 -> 137
+[  279.0s game |   2177s wall]   tap 'something odd (cy_loose_stone)' at (957, 465), target 96 x 96
+[  291.0s game |   2233s wall]   secrets known: 0 -> 1
+[  291.0s game |   2233s wall]   ways onward: ["The Barbican"]; taking 'The Barbican' (fight)
+[  291.0s game |   2233s wall]   DEFECT no card on screen for 'The Barbican'
+[  293.1s game |   2244s wall]   duel begins: Banneret (knight 160 hp)
+[  293.2s game |   2246s wall]   audio during 'courtyard stop 3: A banner still flies on the barbican. Someone is standing un': Master peak -4.0 mean -16.9 dB; Music peak -11.4 mean -23.9 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -13.4 mean -64.9 dB; Ambience peak -20.7 mean -28.4 dB; Interface peak -10.1 mean -50.3 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  293.2s game |   2246s wall] STEP duel 2: Banneret
+[  299.0s game |   2290s wall]   widest gap between the fighters: 3.2 m
+[  301.8s game |   2308s wall]   duel over after 9 s: WON. knight 160 / 160 hp. parried 2, blocked 0, dodged 0, blows taken 0, cuts landed 11
+[  304.6s game |   2329s wall]   result screen up: [Continue]. gold 247, level 2, xp 15, inventory 8, deaths 0
+[  304.6s game |   2329s wall]   tap 'CONTINUE' at (639, 670), target 300 x 60
+[  323.8s game |   2427s wall]   audio during 'duel 2: Banneret': Master peak -1.0 mean -15.0 dB; Music peak -13.5 mean -25.0 dB; Dialogue peak -3.7 mean -34.2 dB; Combat peak -4.7 mean -44.7 dB; Ambience peak -20.7 mean -27.9 dB; Interface peak -11.1 mean -58.3 dB; Cinematics peak -7.2 mean -47.9 dB; CombatL peak -6.0 mean -53.9 dB; CombatR peak -3.7 mean -50.3 dB
+[  323.8s game |   2427s wall] STEP courtyard stop 4: A winch-house stands beside the inner gate. Its chain is rus
+[  323.8s game |   2427s wall]   health 160 / 160, gold 247, level 2
+[  325.0s game |   2433s wall]   tap 'a pouch' at (326, 461), target 84 x 84
+[  325.6s game |   2436s wall]   pouch: gold 247 -> 259
+[  325.6s game |   2436s wall]   ways onward: ["Turn the Winch"]; taking 'Turn the Winch' (lever)
+[  325.6s game |   2436s wall]   DEFECT no card on screen for 'Turn the Winch'
+[  327.7s game |   2444s wall]   tap 'PULL' at (640, 360), target 220 x 60
+[  330.1s game |   2454s wall]   tap 'ONWARD' at (640, 441), target 260 x 60
+[  354.3s game |   2623s wall]   audio during 'courtyard stop 4: A winch-house stands beside the inner gate. Its chain is rus': Master peak -1.0 mean -15.5 dB; Music peak -11.5 mean -23.1 dB; Dialogue peak -1.9 mean -38.7 dB; Combat peak -12.2 mean -59.8 dB; Ambience peak -20.7 mean -27.9 dB; Interface peak -14.5 mean -66.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  354.3s game |   2623s wall] STEP courtyard stop 5: The gate passage. It is narrow, and it is occupied.
+[  354.3s game |   2623s wall]   health 160 / 160, gold 259, level 2
+[  355.5s game |   2632s wall]   tap 'a pouch' at (389, 426), target 84 x 84
+[  356.1s game |   2638s wall]   pouch: gold 259 -> 274
+[  356.1s game |   2638s wall]   tap 'something odd (cy_charcoal_sketch)' at (293, 460), target 96 x 96
+[  369.2s game |   2716s wall]   secrets known: 1 -> 2
+[  369.2s game |   2716s wall]   audio during 'courtyard stop 5: The gate passage. It is narrow, and it is occupied.': Master peak -6.5 mean -17.8 dB; Music peak -11.7 mean -24.8 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -28.9 dB; Interface peak -16.4 mean -54.6 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  369.2s game |   2716s wall] STEP turning back to the sanctuary
+[  369.6s game |   2719s wall]   tap 'TURN BACK' at (1173, 54), target 150 x 60
+SCRIPT ERROR: Invalid access to property or key 'stage' on a base object of type 'Dictionary'.
+          at: SliceBot._stop (res://src/dev/slice_bot.gd:653)
+          GDScript backtrace (most recent call first):
+              [0] _stop (res://src/dev/slice_bot.gd:653)
+              [1] _road (res://src/dev/slice_bot.gd:622)
+              [2] _wait (res://src/dev/slice_bot.gd:137)
+[  370.3s game |   2729s wall]   audio during 'turning back to the sanctuary': Master peak -7.6 mean -15.8 dB; Music peak -13.5 mean -23.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -17.2 mean -25.9 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  370.3s game |   2729s wall] STEP sanctuary
+[  372.8s game |   2743s wall]   tabs: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [I  THE FALLEN COURTYARD], [SET OUT], [BY THE WINCH GATE]. purse: 274 GOLD
+4 SHARDS
+[  372.8s game |   2743s wall]   audio during 'sanctuary': Master peak -6.5 mean -15.0 dB; Music peak -11.3 mean -22.8 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.8 mean -24.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  372.8s game |   2743s wall] STEP sanctuary: Armory
+[  372.8s game |   2743s wall]   tap 'ARMORY' at (197, 53), target 103 x 63
+[  375.9s game |   2797s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [Helms], [Armour Suits], [Pauldrons], [Gauntlets], [Greaves], [Boots], [Weapons], [Shields], [Rings], [Relics], [SORT: EQUIPPED FIRST], [GRID], [UPGRADE], [INSPECT], [Favourite: cannot be sold], [PREVIEW ATTACK], [FULL BODY]
+[  377.9s game |   2831s wall]   tap 'EQUIP' at (232, 668), target 133 x 60
+[  379.6s game |   2859s wall]   equipped before { "weapon": "w_dawnline", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_worn_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  379.6s game |   2859s wall]   equipped after  { "weapon": "w_dawnline", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_garrison_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  379.6s game |   2859s wall]   audio during 'sanctuary: Armory': Master peak -5.8 mean -14.1 dB; Music peak -12.4 mean -21.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -16.4 mean -23.5 dB; Interface peak -37.0 mean -83.1 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  379.6s game |   2859s wall] STEP sanctuary: Shop
+[  379.6s game |   2859s wall]   tap 'SHOP' at (305, 53), target 96 x 63
+[  382.7s game |   2908s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [WARES], [MATERIALS], [SELL], [ALL], [BLADES], [SHIELDS], [ARMOUR], [TRINKETS], [BUY]
+[  382.7s game |   2908s wall]   gold 274; catalogue 22 entries; dearest within reach: w_knight_sword (260)
+[  384.2s game |   2933s wall]   tap 'BUY' at (1111, 524), target 250 x 76
+[  385.3s game |   2951s wall]   tap 'BUY' at (764, 419), target 220 x 60
+[  386.5s game |   2969s wall]   bought w_knight_sword? owns=true gold 274 -> 14; purse shows '14 GOLD
+4 SHARDS'
+[  388.1s game |   2993s wall]   purse label after the count: '14 GOLD
+4 SHARDS'
+[  388.1s game |   2993s wall]   tap 'EQUIP' at (897, 524), target 341 x 76
+ERROR: Condition "!is_inside_tree()" is true. Returning: false
+   at: can_process (scene/main/node.cpp:902)
+[  389.2s game |   3011s wall]   equipped now: { "weapon": "w_knight_sword", "shield": "s_plank", "helm": "a_worn_helm", "chest": "a_worn_chest", "gauntlets": "a_garrison_gauntlets", "legs": "a_worn_legs", "ring": <null>, "relic": <null>, "shoulders": <null>, "boots": <null>, "offhand": <null> }
+[  389.2s game |   3011s wall]   audio during 'sanctuary: Shop': Master peak -1.0 mean -20.4 dB; Music peak -18.0 mean -30.5 dB; Dialogue peak -3.4 mean -36.9 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.1 mean -32.1 dB; Interface peak -11.7 mean -60.9 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  389.2s game |   3011s wall] STEP sanctuary: Forge
+[  389.2s game |   3011s wall]   tap 'FORGE' at (409, 53), target 96 x 63
+[  392.3s game |   3059s wall]   on screen: [JOURNEY], [ARMORY], [SHOP], [FORGE], [CHARACTER], [JOURNAL], [SETTINGS], [WORK], [PATTERNS], [Courtyard Longsword], [Wayfarer Cuirass], [Wayfarer Greaves], [Garrison Gauntlets], [Wayfarer Helm], [Splintered Heater], [Blackwood Hatchet], [Silver Vow], [Wayfarer Gauntlets]
+[  392.3s game |   3059s wall]   nothing at the forge could be paid for (gold 14, shards 4, materials { "m_iron": 1 })
+[  392.3s game |   3059s wall]   audio during 'sanctuary: Forge': Master peak -1.0 mean -20.5 dB; Music peak -21.5 mean -32.0 dB; Dialogue peak -2.2 mean -32.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -25.4 mean -33.5 dB; Interface peak -37.0 mean -76.4 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  392.3s game |   3059s wall] STEP sanctuary: Settings, quit to the menu
+[  392.3s game |   3059s wall]   tap 'SETTINGS' at (781, 53), target 110 x 63
+[  394.5s game |   3074s wall]   (scrolled to reach 'RETURN TO TITLE')
+[  394.5s game |   3075s wall]   tap 'RETURN TO TITLE' at (1141, 532), target 182 x 60
+[  395.0s game |   3080s wall]   audio during 'sanctuary: Settings, quit to the menu': Master peak -17.1 mean -22.6 dB; Music peak -22.1 mean -29.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -25.9 mean -32.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  395.0s game |   3080s wall] STEP main menu again
+[  397.0s game |   3097s wall]   menu: [CONTINUE], [WORLD MAP], [LEGACIES], [CHARACTER], [EQUIPMENT], [CHRONICLE], [TRAINING], [SETTINGS], [CREDITS], [NEW LEGACY]  ·  status line: The Broken Crown   ·   Ysolde   ·   Level 2   ·   Chapter I, The Fallen Courtyard
+[  397.4s game |   3100s wall]   tap 'CONTINUE' at (294, 274), target 500 x 76

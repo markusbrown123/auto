@@ -33,3 +33,26 @@ Stage 3 is split: 3A (route, streaming, continuous explore; running), 3B (foe en
   hand, per-line business). Bench: `tools/dev/workshop_bench.tscn`.
 - **Asked of other owners**: the Monarch's death in `duel.gd` (kneel instead of `die()`); the Witness's halo size in close
   shots (`witness_drone.gd`; the Awakening halves it locally); the Forge tab still shows the hall, not the workshop.
+
+## Owner directive for Phone Test 03 (2026-11-28, evening)
+Priorities: finish the castle environments and continuous traversal; finish the awakening room, sword pickup and get-up;
+a proper Witness introduction (never appearing at random); fix the checkpoint Retry failure; investigate the "untextured
+grey knight" and check every equipment material; finish the cutscenes. Merchant and Monarch: the $2.70 for both models is
+already spent and logged (no new purchase); they must be rigged and animated, and the merchant needs a working workshop.
+Equipment: full shop/armory redesign (see the knight wearing every selection, rotate and inspect, compare stats, buy, the
+change shows in gameplay and cutscenes, text never covers the character). Audio: one audition sheet for every remaining
+decision, approved together. Performance: expensive renders and playthroughs run one at a time; no duplicate recordings or
+test copies; iPhone budget kept through the castle rebuild. Final standard: an actual playthrough from startup to the
+Sentinel's defeat and back to the sanctuary. Stop only for decisions that need approval; spend nothing beyond approval.
+
+Plan and status:
+- Retry check: passes on a quiet machine (fix_pass PASS, knight at the chapel anchor); the earlier failure was load. Re-run
+  in Stage 7.
+- Audition sheet (every remaining sound, music and voice decision, picks saved for Claude to read):
+  https://claude.ai/artifact/JxJBpYqxgYCq2abb4Mx5mG. 14 recorded-sound categories (free), 3 music cues against the current
+  tracks (free) plus the full chapter soundtrack (up to 80 credits, asks approval), 7 unrecorded first-chapter lines
+  (about 14 credits, asks approval). Stage 5 waits for the picks.
+- Stage 3C (environment) and Stage 4 (cinematics, merchant, Monarch) resumed after the container restart.
+- Stage E (new, after Stage 4 because it shares the shop/armory files): equipment and shop redesign plus the grey-knight
+  and material audit.
+- Then Stage 5 (audio, on the picks), Stage 6 (title, menus, loading), Stage 7 (QA, sequential full playthroughs, build doc).

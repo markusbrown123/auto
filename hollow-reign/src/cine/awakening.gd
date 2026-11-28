@@ -459,10 +459,11 @@ func _hide_shield() -> void:
 func _to_door() -> void:
 	var by_housing := Vector3(-0.9, 0, -3.5)
 	var at_door := Vector3(0.15, 0, -4.55)
-	# (Stage 4: seen from the open side of the room, high, as the knight goes round the cradle's head and along the
-	# wall; riding behind, the camera went into the machinery by the holder and a third of the picture was black)
-	cam.cut(Vector3(-2.8, 2.0, -0.2), Vector3(0.0, 1.0, -3.3), 46.0)
-	cam.move(Vector3(-2.5, 1.95, -0.7), Vector3(-0.3, 1.1, -4.0), 7.0)
+	# (Stage 4: from beside the door, looking back into the room: the knight comes round the cradle's head toward
+	# the lens with the room's light on them; riding behind, the camera went into the machinery by the holder and a
+	# third of the picture was black)
+	cam.cut(Vector3(1.7, 1.75, -5.0), Vector3(-0.3, 1.2, -2.6), 46.0)
+	cam.move(Vector3(1.55, 1.7, -4.8), Vector3(-0.4, 1.3, -3.6), 7.0)
 	# round the head of the cradle (its machine and the opened cage), then along the wall toward the door
 	if knight.position.x > 0.8:
 		await _walk_to(Vector3(1.45, 0, -2.5))

@@ -186,6 +186,39 @@ func _ready() -> void:
 	a._upgrade.pressed.emit()
 	await get_tree().process_frame
 	ok(s.tab == "Blacksmith" and s._smith_focus == "w_knight_sword" and s.armory == null, "Upgrade opens the forge on that item")
+	# --- the layout: a tile for every slot, nothing drawn over the knight, a piece for sale leads to the shop
+	s.show_tab("Armory")
+	await get_tree().process_frame
+	a = s.armory
+	await settle(a)
+	await get_tree().process_frame
+	ok(Db.EQUIP_SLOTS.all(func(sl): return a._rail.has(sl)), "every equipment slot has a tile (%d)" % a._rail.size())
+	var sr: Rect2 = a.stage_rect()
+	var over: Array = []
+	var panels: Array = [a.carousel, a._stats_head, a._equip, a._upgrade, a._compare, a._inspect_btn, a._name, a._note, a._tag]
+	panels.append_array(a._rail.values())
+	for c: Control in panels:
+		if c.is_visible_in_tree() and c.get_global_rect().intersects(sr):
+			over.append(c.name)
+	var mid_x := sr.get_center().x / s.get_viewport().get_visible_rect().size.x
+	ok(over.is_empty() and sr.size.y > 300.0 and absf(mid_x - 0.5) < 0.04, "the knight's stage is in the middle and clear of every panel and tile (%s, %s)" % [str(sr), str(over)])
+	var sale := ""
+	for e2: Dictionary in Game.shop_catalog():
+		if sale == "" and e2.available and str(e2.slot) in ArmoryScreen.RAIL:
+			sale = str(e2.id)
+	a._enter_slot(str(Db.item(sale).slot), sale)
+	await settle(a)
+	ok(sale != "" and a._centre_id() == sale and a._equip.disabled and not a._upgrade.disabled and a._upgrade.text == "TO THE SHOP"
+		and ArmoryScreen.state_of(sale)[3] in ["affordable", "dear"], "a piece Orren sells reads as for sale and offers the way to his counter (%s)" % sale)
+	a._upgrade.pressed.emit()
+	await get_tree().process_frame
+	ok(s.tab == "Shop" and s.screen is ShopScreen and (s.screen as ShopScreen).sel == sale, "which opens the shop with that piece in the middle")
+	ok(not Game.owns(sale), "and nothing was bought on the way")
+	s.show_tab("Armory")
+	await get_tree().process_frame
+	s.armory._enter_slot("offhand")
+	await settle(s.armory)
+	ok(s.armory.entries.is_empty() and s.armory._note.text != "" and s.armory._equip.disabled, "the off hand, empty for now, says so")
 	s.queue_free()
 	await get_tree().process_frame
 	print("\narmory: %s" % ("PASS" if failed == 0 else "%d FAILED" % failed))

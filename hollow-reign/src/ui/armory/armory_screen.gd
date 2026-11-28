@@ -245,9 +245,14 @@ func _build() -> void:
 	_equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_equip.pressed.connect(_do_equip)
 	acts.add_child(_equip)
-	_upgrade = _btn("Upgrade", 128, 20)
+	_upgrade = _btn("Upgrade", 146, 18)
 	_upgrade.tooltip_text = "Take it to Orren's forge"
-	_upgrade.pressed.connect(func(): host.call("open_forge", _centre_id()))
+	_upgrade.pressed.connect(func():
+		var id := _centre_id()
+		if not Game.owns(id) and Game.buy_price(id) > 0:
+			host.call("open_shop", id)
+		else:
+			host.call("open_forge", id))
 	acts.add_child(_upgrade)
 	# ---------------- the two columns of slot tiles either side of the knight
 	for col: Array in [LEFT_COL, RIGHT_COL]:
@@ -763,6 +768,12 @@ func _fill_detail() -> void:
 	_equip.text = "LOCKED" if not own else (("EQUIPPED" if slot == "weapon" else "REMOVE") if worn else "EQUIP")
 	_upgrade.disabled = not own or slot not in UPGRADABLE or (slot != "weapon" and Game.upgrade_level(id) >= Stats.MAX_UPGRADE)
 	_upgrade.text = "PERFECTED" if own and slot in UPGRADABLE and slot != "weapon" and Game.upgrade_level(id) >= Stats.MAX_UPGRADE else "UPGRADE"
+	_upgrade.tooltip_text = "Take it to Orren's forge"
+	if not own and Game.buy_price(id) > 0:
+		# a piece Orren sells: the way to it is his counter
+		_upgrade.disabled = false
+		_upgrade.text = "TO THE SHOP"
+		_upgrade.tooltip_text = "Orren sells this for %d gold" % Game.buy_price(id)
 	_compare.disabled = worn
 	_inspect_btn.disabled = false
 	_fav.disabled = not own

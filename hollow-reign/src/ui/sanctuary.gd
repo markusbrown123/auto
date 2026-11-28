@@ -34,6 +34,7 @@ var stage: Control              # the open space beside the panel, where the kni
 var armory: ArmoryScreen        # the equipment screen (src/ui/armory/), alive only while its tab is open
 var _panel: Control             # the right-hand panel the other tabs fill; the armoury uses the whole width instead
 var _smith_focus := ""          # item the armoury sent to the forge: listed first there
+var _shop_focus := ""           # item the armoury sent to the shop: in the middle of its row
 var _forging := false
 var _dev := {}                  # capture harness: --item=<id> --mastery=<n> --smith=<mode> --forge=<id>
 
@@ -179,6 +180,12 @@ func open_forge(id: String) -> void:
 	smith_mode = "Upgrade"
 	_smith_focus = id
 	show_tab("Blacksmith")
+
+## From the armoury, for a piece Orren sells: the shop's wares, with that piece in the middle of the row.
+func open_shop(id: String) -> void:
+	shop_mode = "Wares"
+	_shop_focus = id
+	show_tab("Shop")
 
 ## Capture harness: a known purse and bench.  --gold=<n>  --mats=<id>:<n>,...  --edge=<weapon id>:<fights>
 ##   --mods=<weapon id>:<track>[:<ore>],...   (forge work applied at once, paid for from a purse topped up for it)
@@ -357,7 +364,8 @@ func _tab_blacksmith() -> void:
 ## Orren's counter: wares (with what is still locked), the materials stall, and what he buys.
 func _tab_shop() -> void:
 	_orren_remark()
-	var item := ""
+	var item := _shop_focus
+	_shop_focus = ""
 	if _dev.has("item"):
 		item = str(_dev.item)
 		_dev.erase("item")

@@ -1,0 +1,149 @@
+body m · limits { "sink": -2.0, "float": 3.0, "blade": 6, "shield": 6, "seam": 3.0 }
+
+a_worn_helm  Wayfarer Helm  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_garrison_helm  Garrison Helm  low +1.2 · seams neck 4.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_black_helm  Blackwood Helm  low +1.2 · seams neck 4.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_ash_helm  Ashen Helm  low +1.2 · seams neck 9.0!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_vigil_helm  Vigil Helm  low +1.2 · seams neck 4.4 shoulder 4.6 elbow 1.9 waist 3.1 ankle 2.7
+a_frost_helm  Rimebound Helm  low +1.2 · seams neck 7.5!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_regal_helm  Monarch's Helm  low +1.2 · seams neck 10.2!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_hollow_helm  Hollowed Helm  low +1.2 · seams neck 8.1!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_wyrm_helm  Broodscale Helm  low +1.2 · seams neck 11.6!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_worn_chest  Wayfarer Cuirass  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_garrison_chest  Garrison Cuirass  low +1.2 · seams neck 6.5!! shoulder 4.0 elbow 2.2 waist 6.6!! ankle 2.7
+a_black_chest  Blackwood Cuirass  low +1.2 · seams neck 2.7 shoulder 5.7 elbow 2.2 waist 7.1!! ankle 2.7
+a_ash_chest  Ashen Cuirass  low +1.2 · seams neck 2.5 shoulder 4.6 elbow 2.2 waist 6.0 ankle 2.7
+a_vigil_chest  Vigil Cuirass  low +1.2 · seams neck 5.4 shoulder 3.8 elbow 2.2 waist 6.2!! ankle 2.7
+a_frost_chest  Rimebound Cuirass  low +1.2 · seams neck 2.3 shoulder 4.9 elbow 2.2 waist 4.8 ankle 2.7
+a_regal_chest  Monarch's Cuirass  low +1.2 · seams neck 2.2 shoulder 3.3 elbow 2.2 waist 5.4 ankle 2.7
+a_hollow_chest  Hollowed Cuirass  low +1.2 · seams neck 2.8 shoulder 3.5 elbow 2.2 waist 5.8 ankle 2.7
+a_wyrm_chest  Broodscale Hauberk  low +1.2 · seams neck 4.0 shoulder 3.8 elbow 2.2 waist 5.1 ankle 2.7
+a_worn_shoulders  Wayfarer Pauldrons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_garrison_shoulders  Garrison Pauldrons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_black_shoulders  Blackwood Spaulders  low +1.2 · seams neck 3.2 shoulder 6.3 elbow 2.3 waist 3.1 ankle 2.7
+a_ash_shoulders  Ashen Pauldrons  low +1.2 · seams neck 3.2 shoulder 8.2!! elbow 2.1 waist 3.1 ankle 2.7
+a_vigil_shoulders  Vigil Mantle  low +1.2 · seams neck 3.2 shoulder 4.6 elbow 1.9 waist 3.1 ankle 2.7
+a_frost_shoulders  Rimebound Pauldrons  low +1.2 · seams neck 3.2 shoulder 6.5 elbow 2.1 waist 3.1 ankle 2.7
+a_regal_shoulders  Monarch's Pauldrons  low +1.2 · seams neck 3.2 shoulder 7.8!! elbow 2.2 waist 3.1 ankle 2.7
+a_hollow_shoulders  Hollowed Spaulders  low +1.2 · seams neck 3.2 shoulder 7.4!! elbow 1.9 waist 3.1 ankle 2.7
+a_wyrm_shoulders  Broodscale Pauldrons  low +1.2 · seams neck 3.2 shoulder 6.4 elbow 2.3 waist 3.1 ankle 2.7
+a_worn_gauntlets  Wayfarer Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_garrison_gauntlets  Garrison Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.3 waist 3.1 ankle 2.7
+a_black_gauntlets  Blackwood Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 1.8 waist 3.1 ankle 2.7
+a_ash_gauntlets  Ashen Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 1.6 waist 3.1 ankle 2.7
+a_vigil_gauntlets  Vigil Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.1 waist 3.1 ankle 2.7
+a_frost_gauntlets  Rimebound Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.3 waist 3.1 ankle 2.7
+a_regal_gauntlets  Monarch's Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 1.9 waist 3.1 ankle 2.7
+a_hollow_gauntlets  Hollowed Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_wyrm_gauntlets  Broodscale Gauntlets  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.3 waist 3.1 ankle 2.7
+a_worn_legs  Wayfarer Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_garrison_legs  Garrison Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 5.8 ankle 2.9
+a_black_legs  Blackwood Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 6.4!! ankle 3.1
+a_ash_legs  Ashen Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 6.0 ankle 2.5
+a_vigil_legs  Vigil Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 5.9 ankle 4.4
+a_frost_legs  Rimebound Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 4.2 ankle 2.3
+a_regal_legs  Monarch's Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.3 ankle 3.0
+a_hollow_legs  Hollowed Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 5.4 ankle 3.0
+a_wyrm_legs  Broodscale Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.4 ankle 2.6
+a_worn_boots  Wayfarer Boots  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_garrison_boots  Garrison Sabatons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_black_boots  Blackwood Treads  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 3.0
+a_ash_boots  Ashen Sabatons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.6
+a_vigil_boots  Vigil Sabatons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.1
+a_frost_boots  Rimebound Sabatons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.2
+a_regal_boots  Monarch's Sabatons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.4
+a_hollow_boots  Hollowed Treads  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_wyrm_boots  Broodscale Sabatons  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.3
+w_rusted_sword  Wayfarer's Blade  low +1.1 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 4.0 elbow 2.1 waist 3.0 ankle 2.6
+w_knight_sword  Courtyard Longsword  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_ashen_great  Sentinel's Burden  low +1.3 · blade 1/2 · shield 0/0 · seams neck 3.5 shoulder 4.1 elbow 2.1 waist 3.2 ankle 2.5
+w_woodcutter  Blackwood Hatchet  low +1.1 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.0 waist 3.0 ankle 2.6
+w_headsman  Headsman's Promise  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_twin_fangs  Widow's Fangs  low +1.3 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+w_pilgrim_blades  Pilgrim Knives  low +1.2 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_censer_sword  Ashbrand  low +1.1 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.6
+w_crypt_great  Gravewarden's Zweihander  low +1.3 · blade 1/2 · shield 0/0 · seams neck 3.5 shoulder 4.1 elbow 2.1 waist 3.2 ankle 2.5
+w_frost_great  Winter's Verdict  low +1.2 · blade 1/2 · shield 0/0 · seams neck 3.6 shoulder 4.0 elbow 2.1 waist 3.2 ankle 2.7
+w_rime_sword  Rimeglass Sabre  low +1.1 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.0 waist 3.0 ankle 2.6
+w_monarch  Eternal Edge  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_oath_axe  Oathbreaker  low +1.3 · blade 1/1 · shield 0/0 · seams neck 3.5 shoulder 4.1 elbow 2.1 waist 3.2 ankle 2.5
+w_ember_fangs  Embertwin  low +1.3 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+w_wyrmfang  Wyrmfang  low +1.3 · blade 1/2 · shield 0/0 · seams neck 3.5 shoulder 4.1 elbow 2.1 waist 3.2 ankle 2.5
+w_hunger  The Twin Hungers  low +1.3 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+w_dawnline  Silver Vow  low +1.1 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.6
+w_vigil_edge  Nightward  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_starfall  Veilcutter  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_throneshard  King's Remnant  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_cold_resolve  Cold Resolve  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_twin_relics  Twin Relics  low +1.3 · blade 0/39 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+w_seconds_edge  The Second's Edge  low +1.1 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.6
+s_plank  Splintered Heater  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+s_garrison  Garrison Kite  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.2 waist 3.0 ankle 2.7
+s_tower  Sentinel Bulwark  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+s_reliquary  Reliquary Door  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.2 waist 3.0 ankle 2.7
+s_rime  Glacier Ward  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.2 waist 3.0 ankle 2.7
+s_scale  Broodscale Aegis  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.2 waist 3.0 ankle 2.7
+s_round  Gatehouse Round  low +1.2 · blade 0/0 · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+set worn  low +1.1 · seams neck 3.2 shoulder 4.1 elbow 2.1 waist 3.1 ankle 2.6
+set garrison  low +1.2 · seams neck 3.8 shoulder 5.1 elbow 2.0 waist 2.7 ankle 2.5
+set black  low +1.2 · seams neck 3.2 shoulder 6.5 elbow 1.4 waist 2.4 ankle 2.9
+set ash  low +1.2 · seams neck 7.8!! shoulder 7.0 elbow 1.7 waist 2.2 ankle 2.0
+set vigil  low +1.2 · seams neck 4.5 shoulder 3.6 elbow 1.3 waist 2.6 ankle 3.0
+set frost  low +1.2 · seams neck 6.1 shoulder 5.1 elbow 1.7 waist 1.6 ankle 2.0
+set regal  low +1.2 · seams neck 10.5!! shoulder 6.1 elbow 1.3 waist 2.3 ankle 2.0
+set hollow  low +1.2 · seams neck 4.4 shoulder 5.6 elbow 1.6 waist 1.8 ankle 2.5
+set wyrm  low +1.2 · seams neck 10.9!! shoulder 6.0 elbow 1.6 waist 1.9 ankle 2.0
+mix 1 ["frost", "black", "black", "regal", "ash", "vigil"]  low +1.2 · seams neck 6.6!! shoulder 6.5 elbow 1.6 waist 2.8 ankle 1.4
+mix 2 ["garrison", "hollow", "garrison", "black", "hollow", "worn"]  low +1.2 · seams neck 6.4!! shoulder 5.6 elbow 1.1 waist 1.8 ankle 3.0
+mix 3 ["worn", "ash", "wyrm", "frost", "garrison", "black"]  low +1.2 · seams neck 2.5 shoulder 6.2 elbow 2.0 waist 2.0 ankle 3.0
+mix 4 ["hollow", "regal", "vigil", "ash", "black", "garrison"]  low +1.2 · seams neck 6.6!! shoulder 4.0 elbow 1.5 waist 4.1 ankle 2.9
+mix 5 ["black", "worn", "worn", "garrison", "worn", "hollow"]  low +1.2 · seams neck 4.2 shoulder 4.1 elbow 2.3 waist 3.1 ankle 2.7
+mix 6 ["wyrm", "frost", "regal", "hollow", "wyrm", "ash"]  low +1.2 · seams neck 9.7!! shoulder 7.1 elbow 1.9 waist 1.8 ankle 2.1
+w_knight_sword + s_plank (regal set)  low +1.3 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.9 elbow 1.3 waist 2.2 ankle 2.0
+w_knight_sword + s_tower (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_knight_sword + s_scale (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_ashen_great + <null> (regal set)  low +1.4 · blade 2/1 · shield 0/0 · seams neck 10.7!! shoulder 6.0 elbow 1.3 waist 2.2 ankle 1.9
+w_headsman + s_plank (regal set)  low +1.3 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.9 elbow 1.3 waist 2.2 ankle 2.0
+w_headsman + s_tower (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_headsman + s_scale (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_twin_fangs + <null> (regal set)  low +1.5 · blade 0/41 !! · shield 0/0 · seams neck 10.7!! shoulder 5.8 elbow 1.3 waist 2.1 ankle 1.9
+w_monarch + s_plank (regal set)  low +1.3 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.9 elbow 1.3 waist 2.2 ankle 2.0
+w_monarch + s_tower (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_monarch + s_scale (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+
+flagged (35):
+a_ash_helm  Ashen Helm  low +1.2 · seams neck 9.0!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_frost_helm  Rimebound Helm  low +1.2 · seams neck 7.5!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_regal_helm  Monarch's Helm  low +1.2 · seams neck 10.2!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_hollow_helm  Hollowed Helm  low +1.2 · seams neck 8.1!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_wyrm_helm  Broodscale Helm  low +1.2 · seams neck 11.6!! shoulder 4.1 elbow 2.2 waist 3.1 ankle 2.7
+a_garrison_chest  Garrison Cuirass  low +1.2 · seams neck 6.5!! shoulder 4.0 elbow 2.2 waist 6.6!! ankle 2.7
+a_black_chest  Blackwood Cuirass  low +1.2 · seams neck 2.7 shoulder 5.7 elbow 2.2 waist 7.1!! ankle 2.7
+a_vigil_chest  Vigil Cuirass  low +1.2 · seams neck 5.4 shoulder 3.8 elbow 2.2 waist 6.2!! ankle 2.7
+a_ash_shoulders  Ashen Pauldrons  low +1.2 · seams neck 3.2 shoulder 8.2!! elbow 2.1 waist 3.1 ankle 2.7
+a_regal_shoulders  Monarch's Pauldrons  low +1.2 · seams neck 3.2 shoulder 7.8!! elbow 2.2 waist 3.1 ankle 2.7
+a_hollow_shoulders  Hollowed Spaulders  low +1.2 · seams neck 3.2 shoulder 7.4!! elbow 1.9 waist 3.1 ankle 2.7
+a_black_legs  Blackwood Greaves  low +1.2 · seams neck 3.2 shoulder 4.1 elbow 2.2 waist 6.4!! ankle 3.1
+w_twin_fangs  Widow's Fangs  low +1.3 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+w_pilgrim_blades  Pilgrim Knives  low +1.2 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.0 ankle 2.7
+w_ember_fangs  Embertwin  low +1.3 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+w_hunger  The Twin Hungers  low +1.3 · blade 0/41 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+w_twin_relics  Twin Relics  low +1.3 · blade 0/39 !! · shield 0/0 · seams neck 3.4 shoulder 3.9 elbow 2.1 waist 3.2 ankle 2.5
+set ash  low +1.2 · seams neck 7.8!! shoulder 7.0 elbow 1.7 waist 2.2 ankle 2.0
+set regal  low +1.2 · seams neck 10.5!! shoulder 6.1 elbow 1.3 waist 2.3 ankle 2.0
+set wyrm  low +1.2 · seams neck 10.9!! shoulder 6.0 elbow 1.6 waist 1.9 ankle 2.0
+mix 1 ["frost", "black", "black", "regal", "ash", "vigil"]  low +1.2 · seams neck 6.6!! shoulder 6.5 elbow 1.6 waist 2.8 ankle 1.4
+mix 2 ["garrison", "hollow", "garrison", "black", "hollow", "worn"]  low +1.2 · seams neck 6.4!! shoulder 5.6 elbow 1.1 waist 1.8 ankle 3.0
+mix 4 ["hollow", "regal", "vigil", "ash", "black", "garrison"]  low +1.2 · seams neck 6.6!! shoulder 4.0 elbow 1.5 waist 4.1 ankle 2.9
+mix 6 ["wyrm", "frost", "regal", "hollow", "wyrm", "ash"]  low +1.2 · seams neck 9.7!! shoulder 7.1 elbow 1.9 waist 1.8 ankle 2.1
+w_knight_sword + s_plank (regal set)  low +1.3 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.9 elbow 1.3 waist 2.2 ankle 2.0
+w_knight_sword + s_tower (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_knight_sword + s_scale (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_ashen_great + <null> (regal set)  low +1.4 · blade 2/1 · shield 0/0 · seams neck 10.7!! shoulder 6.0 elbow 1.3 waist 2.2 ankle 1.9
+w_headsman + s_plank (regal set)  low +1.3 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.9 elbow 1.3 waist 2.2 ankle 2.0
+w_headsman + s_tower (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_headsman + s_scale (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_twin_fangs + <null> (regal set)  low +1.5 · blade 0/41 !! · shield 0/0 · seams neck 10.7!! shoulder 5.8 elbow 1.3 waist 2.1 ankle 1.9
+w_monarch + s_plank (regal set)  low +1.3 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.9 elbow 1.3 waist 2.2 ankle 2.0
+w_monarch + s_tower (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0
+w_monarch + s_scale (regal set)  low +1.2 · blade 0/0 · shield 0/0 · seams neck 10.6!! shoulder 5.8 elbow 1.3 waist 2.3 ankle 2.0

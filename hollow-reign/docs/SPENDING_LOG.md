@@ -177,3 +177,6 @@ Owner asked for more merchant options with an Irish accent. Three ElevenLabs v4 
 
 ## 2026-11-28: merchant brogue round
 Three ElevenLabs v4 takes (Barrett, Grady, Harrison), 1.15 credits each = 3.45 credits (balance now 780.03 including the concept pass running in parallel). Hero voice change applied from kept masters: no cost.
+
+## 2026-11-28: presentation pass concepts (owner approved, ceiling 17 credits)
+Ten GPT Image 2.6 images at 2k: three logo concepts at quality medium (1.75 each) and three app icons, two armour-merchant and two Forgotten Monarch concepts at low (1.25 each) = **14.00 credits**, confirmed line by line in `higgsfield account transactions`. Higgsfield balance **797.74 -> 777.53** (20.21); the other 6.21 in that window were six Eleven v4 voice jobs from a concurrent voice-audition pass, not this one. (The balance read 800.50 at the very start; 2.76 of Eleven v4 spend from that other pass landed before the first image.) No failures or refusals; two creates were rejected by the 8-concurrent-job limit before any job existed (no charge) and were submitted again once. Files, prompts and job ids: marketing/presentation_pass/concepts/README.md.

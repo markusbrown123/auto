@@ -249,7 +249,7 @@ static func build(it: Dictionary, body: String = "m", dark: bool = false, mod = 
 	return root
 
 ## One armour part standing alone: the mesh the knight wears, in its own finish, about one unit across at its
-## widest, centred, its front toward the viewer. (A pair, gauntlets or greaves, stands as the pair.)
+## widest (three quarters of the row's height), centred, its front toward the viewer. (A pair, gauntlets or greaves, stands as the pair.)
 static func _part(parent: Node3D, part: Array, body: String) -> bool:
 	var mesh: ArrayMesh = _held.get(part[2]) if _held.get(part[2]) is ArrayMesh else ArmorParts.mesh_of(body, str(part[0]), str(part[1]))
 	if mesh == null:
@@ -260,7 +260,7 @@ static func _part(parent: Node3D, part: Array, body: String) -> bool:
 	ap.body = body
 	mi.set_surface_override_material(0, ap._own_material(str(part[0])))
 	var box := mesh.get_aabb()
-	var k: float = 1.0 / maxf(maxf(box.size.x, box.size.y), 0.01)
+	var k: float = 0.74 / maxf(maxf(box.size.x, box.size.y), 0.01)
 	var face := Basis(Vector3.UP, PI)          # the knight's front is -Z in its own space; the viewer stands at +Z
 	mi.transform = Transform3D(face.scaled(Vector3.ONE * k), -(face * box.get_center()) * k)
 	parent.add_child(mi)

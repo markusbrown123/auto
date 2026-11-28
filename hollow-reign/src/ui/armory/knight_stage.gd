@@ -108,8 +108,8 @@ func aim(rect: Rect2, vs: Vector2, bone: String, snap: bool) -> void:
 	var top := knight_top()
 	var y0 := -0.06
 	var y1 := top + 0.1
-	# fit the height, and the width too (an arm and a shield out to the side need about 0.62 of the height)
-	var ppm := minf(rect.size.y / (y1 - y0), rect.size.x / ((y1 - y0) * 0.62))
+	# fit the height, and the width too (a blade held out and a shield need about 0.7 of the height)
+	var ppm := minf(rect.size.y / (y1 - y0), rect.size.x / ((y1 - y0) * 0.7))
 	var t := tan(deg_to_rad(FOV * 0.5))
 	var hh_full := vs.y * 0.5 / ppm                     # half the screen's height in metres at the knight
 	var d_full := hh_full / t

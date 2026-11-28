@@ -457,11 +457,10 @@ func _enter_slot(s: String, want_item: String = "") -> void:
 	slot = s
 	_show_grid(false)
 	entries = _build_entries()
-	# a whole suit is a five-megabyte skinned model with its own textures: keep only the three that can be on show
-	carousel.keep = 3 if slot == "chest" else 7
-	carousel.zoom = 1.0 if slot == "chest" else (1.2 if slot == "weapon" else 1.08)       # the middle piece is shown large
+	carousel.keep = 7
+	carousel.zoom = 1.2 if slot == "weapon" else 1.08       # the middle piece is shown large
 	carousel.drop = 0.0
-	ItemModel.keep = 4 if slot == "chest" else 10
+	ItemModel.keep = 10
 	var at := 0
 	var equipped = Game.profile.equipped.get(slot)
 	for i in entries.size():
@@ -849,14 +848,18 @@ func _preview_now(id: String, animate: bool) -> void:
 		_finish_preview()
 
 func _paths_for(id: String) -> Array:
+	return preview_paths(id)
+
+## The model files the knight needs in memory before it can be dressed in `id` (loaded in the background).
+static func preview_paths(id: String) -> Array:
 	var it: Dictionary = Db.item(id)
 	if it.is_empty():
 		return []
 	var out: Array = []
 	var body := str(Game.profile.get("body", "m"))
 	# (what the knight is dressed from: the rig still draws the older hand-held models)
-	if it.slot == "chest" and ItemModel.is_full_suit(it, body):
-		out.append(ItemModel.suit_path(it, body))
+	if Db.ARMOUR_SLOTS.has(str(it.slot)):
+		out.append_array(ItemModel.paths(it, body))
 	elif it.slot == "weapon":
 		out.append(str(Duel.weapon_model(str(it.id)).weapon_model))
 	elif it.slot == "shield":

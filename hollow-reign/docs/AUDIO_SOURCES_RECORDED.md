@@ -116,3 +116,35 @@ Everything else in this ledger is CC0: no attribution required (credit is option
 | `footsteps/step_metal_b_01.wav`, `footsteps/step_metal_b_02.wav`, `footsteps/step_metal_b_03.wav`, `footsteps/step_metal_b_04.wav`, `footsteps/step_metal_b_05.wav`, `footsteps/step_metal_b_06.wav`, `footsteps/step_metal_b_07.wav`, `footsteps/step_metal_b_08.wav` | Metal Steps | Phil25 | https://freesound.org/people/Phil25/sounds/208101/ | CC0 1.0 Universal (public domain dedication), http://creativecommons.org/publicdomain/zero/1.0/ | not required | Freesound **preview** used (hq Ogg Vorbis, lossy, about 100-190 kbps), not the original (original: wav, 44100 Hz, 2 ch). Measured: 18.0 s, peak -6.7 dBFS, floor10 -200.0 dBFS. Author's description: "Me stepping on a metal plate couple of times. Nothing much to say... Enjoy!" | 8 events cut from one take; e.g. cut 5.86-6.06 s from the source, 30 Hz high-pass, 2 ms fade-in / 30 ms fade-out, peak -3 dBFS | `footsteps_metal_sequence_b.mp3` |
 | `footsteps/step_stone_a_01.wav`, `footsteps/step_stone_a_02.wav`, `footsteps/step_stone_a_03.wav`, `footsteps/step_stone_a_04.wav`, `footsteps/step_stone_a_05.wav`, `footsteps/step_stone_a_06.wav`, `footsteps/step_stone_a_07.wav`, `footsteps/step_stone_a_08.wav` | Footsteps Knight - Walk & run, courtyard | Vrymaa | https://freesound.org/people/Vrymaa/sounds/770068/ | CC0 1.0 Universal (public domain dedication), http://creativecommons.org/publicdomain/zero/1.0/ | not required | Freesound **preview** used (hq Ogg Vorbis, lossy, about 100-190 kbps), not the original (original: wav, 48000 Hz, 1 ch). Measured: 56.7 s, peak 0.8 dBFS, floor10 -60.4 dBFS. Author's description: "Walking / patrolling / running with heavy boots and several belts in an empty courtyard with stone floor. * No background noise. * No reverb nor echo. * Clean sound, close range. Recorded with Iphone or Thomann micro t.b" | 8 events cut from one take; e.g. cut 1.75-2.10 s from the source, 30 Hz high-pass, 2 ms fade-in / 30 ms fade-out, peak -3 dBFS | `footsteps_stone_sequence_a.mp3` |
 | `footsteps/step_stone_b_01.wav`, `footsteps/step_stone_b_02.wav`, `footsteps/step_stone_b_03.wav`, `footsteps/step_stone_b_04.wav`, `footsteps/step_stone_b_05.wav`, `footsteps/step_stone_b_06.wav`, `footsteps/step_stone_b_07.wav`, `footsteps/step_stone_b_08.wav` | Footsteps_Mountain_Boots_Rock_Walk_Sequence_Mono.wav | Nox_Sound | https://freesound.org/people/Nox_Sound/sounds/558472/ | CC0 1.0 Universal (public domain dedication), http://creativecommons.org/publicdomain/zero/1.0/ | not required | Freesound **preview** used (hq Ogg Vorbis, lossy, about 100-190 kbps), not the original (original: wav, 48000 Hz, 1 ch). Measured: 19.1 s, peak -8.7 dBFS, floor10 -200.0 dBFS. Author's description: "Footsteps Walk on Rock (x20)- Mountain Boots. You can edit it with Reaper/Audacity/etc. Gear : Rode NTG4+ File: 48khz, 24 bit, Mono, Wav." | 8 events cut from one take; e.g. cut 0.00-0.49 s from the source, 30 Hz high-pass, 2 ms fade-in / 30 ms fade-out, peak -3 dBFS | `footsteps_stone_sequence_b.mp3` |
+
+## Gaps: where nothing fully acceptable was found
+
+Each category has two candidates, but several are stand-ins rather than the real thing. In plain terms:
+
+| Category | What is missing | What the audition uses instead |
+|---|---|---|
+| Footsteps, armoured | No recording of plate sabatons or armoured boots on any surface under CC0 or CC BY | Heavy boots with belts (stone a), a knight with chainmail (dirt a, grass a), hiking or mountain boots (stone b), ordinary shoes (metal a, metal b, grass b) |
+| Footsteps, metal | No armoured boots on a metal deck or grating | Shoes on a metal bathtub (a), stepping on a metal plate (b) |
+| Footsteps, dirt b and grass b | Not recorded as dirt or grass | Mud and soil steps (Vehicle), and Fantozzi "Sand" steps, which their uploader says "sound like grass too" |
+| Armour movement | Real plate armour, not straps | a: a reconstruction Lorica Segmentata (Roman plate), the closest real armour found. b: harness straps hitting carabiners and hooks, not armour |
+| Shield block | No recording of a real shield, wood or metal, being struck | a: an axe haft (wood) struck by a sabre (steel on wood). b: a metal ladder hitting a wooden plank, with reverb and EQ the author added |
+| Parry ring | No recording made as a parry | Blade-on-blade takes chosen for the longest ring: sabre/katana hilt on blade (a), a sword/knife clash (b) |
+| Direct hit (flesh) | Nothing recorded on real meat under an acceptable licence | Foley: wet paper towels and a sloshed bottle (a), a wooden bat on a "zombie" prop (b) |
+| Heavy weapon impact | No heavy weapon on armour or on a body | A mace striking a sword blade (a), a plate armour drop (b) |
+| Fire | Nothing missing, but see the loudness note | Both loops reached only -36 LUFS. The crackle peaks prevent more gain unless a limiter is used, and no limiter was used |
+| Clashes, swings, ambience | Nothing missing | |
+
+Sources that were found and **rejected**:
+- Sonniss GDC bundles and Kenney packs, because of the brief's licence and network rules.
+- OGA "Battle Sound Effects" and similar packs with mixed GPL / CC-BY-SA terms (share-alike).
+- Anything CC BY-NC, for example several Vrymaa items marked BY-NC 4.0.
+- Freesound "Shield Bash Impact" by Hybrid_V: a designed effect made for a mod of a commercial game, so it falls under "never use audio from existing games".
+- Kitchen-knife "sword" foley under CC BY 3.0 (Goten151), because better CC0 material exists.
+- OGA "Fleshy Fight Sounds" (OGA-BY 3.0), kept out to stay with CC0 and CC BY only.
+- Thimras "Metal footsteps on concrete" (OGA, CC0) was downloaded but not used, because it is unclear what the "metal foot" is. It is an easy extra stone candidate if wanted.
+
+### What would close the gaps
+1. **Lossless originals from Freesound.** The API key used here allows search and the lossy previews only. Original downloads need OAuth2, which means the owner authorising an app token on their Freesound account, or downloading the files themselves with a free account. Every Freesound row above has its page URL, so the same cuts can be redone from the WAV or FLAC.
+2. **More searches with that access:** "sabaton", "armored footsteps", "plate armor walk", "sword hits shield", "wooden shield impact", "buckler", "meat punch foley", "cabbage stab", "chainmail walk", "metal grate footsteps boots". The few results seen for these were designed effects, NonCommercial, or kitchen foley.
+3. **Recording it ourselves**, for shield blocks and armoured steps in particular. This is cheap if a reenactor's kit is available; no free recording of either was found.
+

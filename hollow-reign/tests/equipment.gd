@@ -16,7 +16,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(Game.save_dir_override)
 	wipe()
 	for t: String in ["t_data", "t_sources", "t_totals", "t_migration", "t_preview", "t_equip", "t_compare", "t_stats_reach_the_duel", "t_items_reach_the_duel",
-			"t_weight_sets_requirements", "t_basic_swords", "t_shields", "t_mods", "t_shop", "t_rewards", "t_guards", "t_discovery", "t_cosmetics", "t_mastery", "t_loop"]:
+			"t_weight_sets_requirements", "t_basic_swords", "t_shields", "t_mods", "t_shop", "t_rewards", "t_guards", "t_discovery", "t_cosmetics", "t_mastery", "t_loop", "t_persistence"]:
 		print("• ", t)
 		call(t)
 	wipe()
@@ -410,7 +410,7 @@ func t_compare() -> void:
 	var then := Game.preview_stats("weapon", "w_ashen_great")
 	for r: Dictionary in rows:
 		if r.key != "element":
-			var k: float = 100.0 if r.key == "block_eff" else 1.0
+			var k: float = 100.0 if r.key in ["block_eff", "mitigation"] else 1.0
 			ok(is_equal_approx(r.now, float(now[r.key]) * k) and is_equal_approx(r.then, float(then[r.key]) * k) and is_equal_approx(r.delta, r.then - r.now), "row %s is the equipped figure against the previewed one" % r.key)
 	ok(Game.compare("helm", "w_ashen_great").is_empty(), "comparing in the wrong slot gives nothing")
 	ok(JSON.stringify(Game.compare("w_ashen_great")) == JSON.stringify(rows), "the one-argument form is the same comparison")
@@ -1297,3 +1297,81 @@ func t_shop() -> void:
 	ok(not Game.shop_catalog().any(func(e): return e.id == "w_oath_axe"), "Oathbreaker is not offered the first time round")
 	Game.start_ng_plus(true)
 	ok(Game.shop_catalog().any(func(e): return e.id == "w_oath_axe" and e.available), "it is in the shop for those who return")
+
+## What the equipment screens leave behind: purchases, what is worn, forge levels and weapon work. Read back from the file.
+func gear_state() -> Dictionary:
+	return {"inventory": (Game.profile.inventory as Array).duplicate(), "equipped": (Game.profile.equipped as Dictionary).duplicate(),
+		"upgrades": (Game.profile.upgrades as Dictionary).duplicate(), "mods": JSON.stringify(Game.profile.get("mods", {})), "gold": int(Game.profile.gold)}
+
+func same_gear(a: Dictionary, b: Dictionary) -> bool:
+	var ia: Array = a.inventory.duplicate()
+	var ib: Array = b.inventory.duplicate()
+	ia.sort()
+	ib.sort()
+	return ia == ib and JSON.stringify(a.equipped) == JSON.stringify(b.equipped) and JSON.stringify(a.upgrades) == JSON.stringify(b.upgrades) \
+		and a.mods == b.mods and int(a.gold) == int(b.gold)
+
+## The app is closed and opened again: nothing in memory, the journey read from its slot.
+func relaunch() -> bool:
+	Game.profile = {}
+	Game.run = {}
+	return Game.load_slot(1)
+
+## Buy, equip, unequip and upgrade survive a save, a relaunch, a fall that is taken back to the checkpoint
+## (Retry), a fall that ends the road, and the backup file when the main save is damaged.
+func t_persistence() -> void:
+	fresh()
+	Game.profile.gold = 60000
+	Game.profile.shards = 400
+	for m: String in Db.materials:
+		Game.profile.materials[m] = 60
+	Game.profile.cleared = ["courtyard", "blackwood"]
+	Game.on_victory("ashen_sentinel", 50.0)
+	# buy one of each kind the shop has in stock, and wear it
+	var bought: Array = []
+	for e: Dictionary in Game.shop_catalog():
+		var sl := str(e.slot)
+		if e.available and not bought.any(func(x): return str(Db.item(x).slot) == sl) and sl in ["weapon", "shield", "helm", "chest", "legs", "gauntlets", "shoulders", "boots", "ring"]:
+			if Game.buy(str(e.id)):
+				bought.append(str(e.id))
+	ok(bought.size() >= 4, "pieces of several kinds were bought (%s)" % str(bought))
+	var on_file = JSON.parse_string(FileAccess.get_file_as_string(Game.slot_file(1)))
+	ok(on_file is Dictionary and bought.all(func(id): return JSON.stringify(on_file).contains(id)), "a purchase is on disk at once, without a separate save")
+	var armour := ""
+	for id: String in bought:
+		if Db.item(id).slot != "weapon" or not Db.classes[Db.item(id).cls].two_handed:
+			ok(Game.equip(id), "%s is worn" % id)
+		if armour == "" and Db.ARMOUR_SLOTS.has(str(Db.item(id).slot)):
+			armour = id
+	ok(armour != "" and Game.upgrade(armour) and Game.upgrade(armour), "an armour piece is forged twice (%s)" % armour)
+	var w := str(Game.profile.equipped.weapon)
+	ok(Game.mod(w, "grip") or Game.mod(w, "blade") or Game.mod(w, "sharpen"), "the worn blade has forge work (%s)" % w)
+	# something taken off stays off
+	var ring = Game.profile.equipped.get("ring")
+	if ring != null:
+		Game.unequip("ring")
+	var want := gear_state()
+	ok(relaunch() and same_gear(gear_state(), want), "after a relaunch: the same pieces held and worn, the same forge levels and gold")
+	ok(Game.profile.equipped.get("ring") == null, "a removed ring is still off after a relaunch")
+	# a fall on the road, taken back to the checkpoint (Retry), then the app closed
+	Game.start_run("courtyard")
+	Game.run.stage = 3
+	Game.run.checkpoint = 2
+	var before_death := gear_state()
+	Game.on_death(true)
+	ok(not Game.run.is_empty(), "the fall put the knight back on the road")
+	ok(same_gear(gear_state(), before_death), "a fall keeps every piece, the forge work and the purse")
+	ok(relaunch() and same_gear(gear_state(), before_death), "and so does the save it wrote (Retry from the checkpoint, then a relaunch)")
+	# a fall that ends the road
+	Game.start_run("courtyard")
+	Game.on_death(false)
+	ok(relaunch() and same_gear(gear_state(), before_death), "a fall that ends the road keeps the gear on disk too")
+	# a damaged save: the backup written before it still has the gear
+	Game.equip(bought[0])
+	Game.save()
+	var f := FileAccess.open(Game.slot_file(1), FileAccess.WRITE)
+	f.store_string("{ not json")
+	f.close()
+	Game.profile = {}
+	ok(Game.load_slot(1) and (Game.profile.inventory as Array).has(bought[0]) and str(Game.profile.equipped.get(Db.item(bought[0]).slot)) == bought[0],
+		"with the save damaged, the backup still holds the purchases and what was worn")

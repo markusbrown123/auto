@@ -2,12 +2,17 @@ class_name ShopScreen
 extends Control
 ## Orren's counter: what he sells (and what he will sell later, shown locked with the line that says when),
 ## a stall of shards and ore, and what he will buy.
-## Left: the wares as a row to flick through, the middle one large and turning, its neighbours smaller and dimmed
-## (`ItemCarousel`, the armoury's). Right: the gold held, the piece's name and rank, its mastery, the two or three
-## figures that matter most against what is worn, Compare for the rest, and the price beside one large Buy.
+## A dark, warm stage (KnightStage "forge"). Left: the knight full height, wearing the piece being looked at
+## (drag to turn, pinch / wheel / + - to zoom). Middle: the wares as a row to flick through, the middle one large
+## and turning (`ItemCarousel`, the armoury's; tap it to hold it alone, close and turnable), then the piece's
+## name and rank, where it stands (owned, for sale, too dear, locked and why), every figure it changes against
+## what is worn, and the price beside one large Buy. Right: a short list of categories.
 ## Browsing writes nothing: only Buy, the stall's buttons, Sell and Equip change the journey.
 
 const MODES := ["Wares", "Materials", "Sell"]
+## The category list down the right: [label, mode, filter index into FILTERS, glyph].
+const CATEGORIES := [["All Wares", "Wares", 0, "star"], ["Blades", "Wares", 1, "weapon"], ["Shields", "Wares", 2, "shield"], ["Armour", "Wares", 3, "chest"],
+	["Trinkets", "Wares", 4, "ring"], ["Materials", "Materials", 0, "keen"], ["Sell", "Sell", 0, "relic"]]
 const FILTERS := [["All", []], ["Blades", ["weapon"]], ["Shields", ["shield"]], ["Armour", ["helm", "chest", "shoulders", "gauntlets", "legs", "boots"]], ["Trinkets", ["ring", "relic"]]]
 const CONFIRM_FROM := 500          # a purchase at or above this, or taking most of the purse, asks first
 
@@ -23,9 +28,17 @@ var buy_btn: Button
 var sell_btn: Button
 var dialog: Control
 var inspect: ArmoryInspect
+var stage_view: KnightStage
+var previewing := ""               # the piece the knight is shown wearing ("" = what is equipped)
 
-var _modes: HBoxContainer
-var _filters: HBoxContainer
+var _modes: VBoxContainer          # the category list
+var _pad: Control                  # the knight's part of the screen
+var _foot: Control
+var _dress_want := "?"
+var _dress_paths: Array = []
+var _dress_due := -1.0
+var _dressed := "?"
+var _first := true
 var _list: VBoxContainer
 var _scroll: ScrollContainer
 var _case: Control
@@ -45,33 +58,54 @@ func _init(sanctuary: Node, start_mode: String = "Wares", start_item: String = "
 func _ready() -> void:
 	UI.full(self)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var scrim := UI.full(ColorRect.new())
-	scrim.color = Color(0.01, 0.01, 0.014, 0.74)
-	scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	scrim.offset_left = -40
-	scrim.offset_right = 40
-	scrim.offset_bottom = 40
-	add_child(scrim)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 12)
+	row.add_theme_constant_override("separation", 10)
 	UI.full(row)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(row)
-	# --- the wares
-	var left := VBoxContainer.new()
-	left.add_theme_constant_override("separation", 6)
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left.size_flags_stretch_ratio = 1.25
-	row.add_child(left)
-	_modes = HBoxContainer.new()
-	_modes.add_theme_constant_override("separation", 6)
-	left.add_child(_modes)
-	_filters = HBoxContainer.new()
-	_filters.add_theme_constant_override("separation", 4)
-	left.add_child(_filters)
-	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.86), Color(0.3, 0.27, 0.2))
+	# --- the knight, full height on the dark stage; only its zoom buttons under its feet
+	_pad = Control.new()
+	_pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_pad.size_flags_stretch_ratio = 0.8
+	_pad.mouse_filter = Control.MOUSE_FILTER_STOP
+	_pad.gui_input.connect(func(e: InputEvent):
+		if stage_view:
+			stage_view.handle(e))
+	row.add_child(_pad)
+	var foot := HBoxContainer.new()
+	_foot = foot
+	foot.alignment = BoxContainer.ALIGNMENT_CENTER
+	foot.add_theme_constant_override("separation", 6)
+	foot.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	foot.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_pad.add_child(foot)
+	for z: Array in [["−", 1.18], ["+", 1.0 / 1.18]]:
+		var zb := UI.button(str(z[0]), 26, 60)
+		zb.focus_mode = Control.FOCUS_NONE
+		zb.tooltip_text = "Zoom out" if z[1] > 1.0 else "Zoom in"
+		zb.pressed.connect(func():
+			if stage_view:
+				stage_view.zoom_by(float(z[1])))
+		foot.add_child(zb)
+	# --- the wares and the counter
+	var p := UI.panel(Color(0.025, 0.02, 0.02, 0.9), Color(0.3, 0.25, 0.18))
+	p.get_theme_stylebox("panel").set_content_margin_all(8)
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	p.size_flags_stretch_ratio = 1.0
+	p.custom_minimum_size.x = 420
+	row.add_child(p)
+	UI.corners(p, UI.GOLD_DIM, 12.0)
+	_right = p
+	var mid := VBoxContainer.new()
+	mid.add_theme_constant_override("separation", 4)
+	p.add_child(mid)
+	var case := UI.panel(Color(0.012, 0.01, 0.01, 0.9), Color(0.24, 0.2, 0.15))
 	case.get_theme_stylebox("panel").set_content_margin_all(1)
 	case.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	left.add_child(case)
+	case.size_flags_stretch_ratio = 0.8
+	case.custom_minimum_size.y = 120
+	mid.add_child(case)
 	_case = case
 	carousel = ItemCarousel.new()
 	carousel.body = str(Game.profile.get("body", "m"))
@@ -80,24 +114,38 @@ func _ready() -> void:
 	carousel.centred.connect(func(_i: int): _on_centre())
 	carousel.settled.connect(func(_i: int): _on_centre())
 	carousel.tapped.connect(func(_i: int): open_inspect())
-	UI.corners(case, UI.GOLD_DIM, 12.0)
 	_scroll = ScrollContainer.new()
 	_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	left.add_child(_scroll)
+	mid.add_child(_scroll)
 	_list = VBoxContainer.new()
 	_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_list.add_theme_constant_override("separation", 4)
 	_scroll.add_child(_list)
-	# --- the counter
-	var p := UI.panel(Color(0.03, 0.03, 0.036, 0.92), Color(0.3, 0.27, 0.2))
-	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	row.add_child(p)
-	_right = p
 	_info = VBoxContainer.new()
-	_info.add_theme_constant_override("separation", 3)
-	p.add_child(_info)
-	UI.corners(p, UI.GOLD_DIM, 12.0)
+	_info.add_theme_constant_override("separation", 2)
+	_info.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	mid.add_child(_info)
+	# --- the short category list
+	var cp := UI.panel(Color(0.02, 0.018, 0.018, 0.88), Color(0.26, 0.22, 0.16))
+	cp.get_theme_stylebox("panel").set_content_margin_all(6)
+	cp.custom_minimum_size.x = 196
+	row.add_child(cp)
+	var csc := ScrollContainer.new()
+	csc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	cp.add_child(csc)
+	_modes = VBoxContainer.new()
+	_modes.add_theme_constant_override("separation", 4)
+	_modes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	csc.add_child(_modes)
+	# the knight: the armoury's rig (authored idles), on Orren's dark stage
+	host.backdrop.rig_script = ArmoryRig
+	host.backdrop.cam_speed = 5.0
+	host.backdrop.cam_drift = 0.12
+	host.backdrop.studio(true, -1.0, int(Game.settings.get("quality", 2)) > 0)
+	stage_view = KnightStage.new(host.backdrop, "forge")
+	host.backdrop.refresh_knight()
+	_stance()
 	refresh()
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--shop_demo="):
@@ -112,6 +160,17 @@ func leave() -> void:
 	if dialog and is_instance_valid(dialog):
 		dialog.queue_free()
 	ItemModel.clear()
+	if stage_view:
+		stage_view.close()
+		stage_view = null
+	var bd: Backdrop = host.backdrop
+	bd.rig_script = null
+	bd.studio(false)
+	bd.cam_speed = 1.6
+	bd.cam_drift = 1.0
+	bd.cam_fov = 50.0
+	previewing = ""
+	bd.refresh_knight()
 
 ## The journey changed (a purchase, a sale, anything): the lists are read again; the selection is kept when it can be.
 func on_profile() -> void:
@@ -130,25 +189,40 @@ func catalogue() -> Array:
 
 func refresh() -> void:
 	GearUI.clear(_modes)
-	for m: String in MODES:
-		var b := GearUI.chip(m, m == mode, 150)
-		b.pressed.connect(func(): set_mode(m))
+	for c: Array in CATEGORIES:
+		var on: bool = str(c[1]) == mode and (mode != "Wares" or int(c[2]) == filter)
+		var b := GearUI.chip(str(c[0]), on, 0, 18)
+		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		b.add_theme_constant_override("h_separation", 10)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var g := InvGlyph.new(str(c[3]), UI.GOLD if on else UI.DIM, 1 if str(c[3]) == "star" else 0, 22.0)
+		g.set_anchors_and_offsets_preset(Control.PRESET_CENTER_LEFT)
+		g.offset_left = 10
+		g.offset_right = 32
+		g.offset_top = -11
+		g.offset_bottom = 11
+		g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(g)
+		for st in ["normal", "hover", "pressed"]:
+			var sb2 := (b.get_theme_stylebox(st) as StyleBox).duplicate()
+			sb2.content_margin_left = 42
+			b.add_theme_stylebox_override(st, sb2)
+		b.pressed.connect(func():
+			Sfx.play("ui_tap", -6.0)
+			if str(c[1]) == "Wares":
+				if mode != "Wares":
+					set_mode("Wares")
+				filter = int(c[2])
+				bought = ""
+				refresh()
+			else:
+				set_mode(str(c[1])))
 		_modes.add_child(b)
-	GearUI.clear(_filters)
-	_filters.visible = mode == "Wares"
-	for i in FILTERS.size():
-		var fb := GearUI.chip(str(FILTERS[i][0]), i == filter, 0, 16)
-		fb.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		fb.pressed.connect(func():
-			filter = i
-			bought = ""
-			refresh())
-		_filters.add_child(fb)
 	GearUI.clear(_list)
 	_buttons.clear()
 	_case.visible = mode != "Materials"
 	_scroll.visible = mode == "Materials"
-	_right.visible = mode != "Materials"
+	_info.visible = mode != "Materials"
 	match mode:
 		"Wares": _fill_wares()
 		"Materials": _fill_materials()
@@ -185,9 +259,10 @@ func _on_centre() -> void:
 
 func _row_entry(id: String, locked: bool) -> Dictionary:
 	var it: Dictionary = Db.item(id)
+	var st := ArmoryScreen.state_of(id)
 	return {"id": id, "slot": str(it.slot), "name": str(it.name), "color": Db.rarity_color(it) if not locked else Db.rarity_color(it).lerp(Color(0.35, 0.35, 0.37), 0.5),
 		"metal": str(it.get("look", {}).get("metal", it.get("look", {}).get("color", "#b8b4aa"))), "locked": locked, "dark": false,
-		"equipped": Game.is_equipped(id), "fav": Game.is_favourite(id)}
+		"equipped": Game.is_equipped(id), "fav": Game.is_favourite(id), "badge": str(st[0]) if str(st[3]) != "equipped" else "", "badge_col": st[1]}
 
 ## Fills the row. It is rebuilt only when what it holds has changed, so a purchase or a sale does not throw the
 ## pieces away and build them again.
@@ -295,7 +370,15 @@ func _fill_detail() -> void:
 	var ttl := UI.title(str(it.name) + ("  +%d" % lvl if lvl > 0 else ""), 28, col)
 	ttl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_info.add_child(ttl)
-	_info.add_child(GearUI.kind_row(it, col))
+	var kr := GearUI.kind_row(it, col)
+	var st := ArmoryScreen.state_of(sel)
+	var gap := Control.new()
+	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	kr.add_child(gap)
+	if str(st[2]) != "":
+		kr.add_child(InvGlyph.new(str(st[2]), st[1], 1, 18.0))
+	kr.add_child(UI.label(str(st[0]), 18, st[1], "head"))
+	_info.add_child(kr)
 	_mastery_line(it)
 	if sel == bought:
 		_after_purchase(it)
@@ -338,15 +421,15 @@ func _compare_block(id: String) -> void:
 	_info.add_child(head)
 	var changed: Array = Game.compare(str(it.slot), id).filter(func(r): return int(r.better) != 0 or r.now_text != r.then_text)
 	var grid := GridContainer.new()
-	grid.columns = 2 if compare_on else 1
+	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 20)
 	grid.add_theme_constant_override("v_separation", -3)
 	_info.add_child(grid)
-	for r in changed.slice(0, 8 if compare_on else 3):
-		grid.add_child(GearUI.effect(r))
+	for r in changed.slice(0, 12 if compare_on else 4):
+		grid.add_child(GearUI.effect(r, 20))
 	if changed.is_empty():
 		grid.add_child(UI.label("No change to your numbers", GearUI.TEXT, UI.DIM))
-	if changed.size() > 3:
+	if changed.size() > 4:
 		var cmp := GearUI.chip("Compare" if not compare_on else "Fewer", compare_on, 150)
 		cmp.pressed.connect(func():
 			compare_on = not compare_on
@@ -455,6 +538,54 @@ func open_inspect() -> void:
 	inspect = ArmoryInspect.new(GearUI.inspect_entry(sel), str(Game.profile.get("body", "m")), str(Db.item(sel).get("desc", "")))
 	(host.get("layer") as Node).add_child(inspect)
 
+# ================================================================ the knight
+## The breathing idle: the weapon's guard for a blade or shield, arms down for armour; turned a little toward the wares.
+func _stance() -> void:
+	var bd: Backdrop = host.backdrop
+	var r := bd.rig as ArmoryRig
+	if r == null:
+		return
+	r.motion = 0.0 if Game.settings.reduce_motion else 1.0
+	var sl := str(Db.item(previewing).get("slot", ""))
+	var clip: String = str(ArmoryScreen.IDLE.get(str(bd.look_now.get("weapon", "sword")), "ss_idle")) if sl in ["weapon", "shield"] else "idle"
+	r.idle_clip = clip if SkinDriver.has_clip(clip) else ""
+	bd.knight_yaw = wrapf(PI + (-0.7 if sl == "shield" else 0.4) + (stage_view.yaw_user if stage_view else 0.0), -PI, PI)
+	bd.turn_knight(0.0)
+
+## What the knight should be shown wearing for the piece in the middle: the piece itself when it can be worn.
+func _want_on_knight() -> String:
+	if mode == "Materials" or sel == "":
+		return ""
+	var it: Dictionary = Db.item(sel)
+	if it.is_empty() or not Db.EQUIP_SLOTS.has(str(it.get("slot", ""))) or Game.is_equipped(sel):
+		return ""
+	return sel
+
+## Dresses the knight once the models it needs are in memory (they load in the background).
+func _dress_tick(delta: float) -> void:
+	if _dress_due >= 0.0:
+		_dress_due -= delta
+		if _dress_due < 0.0:
+			_dress_paths = ArmoryScreen.preview_paths(_dress_want)
+			ItemModel.want(_dress_paths)
+	if _dress_due < 0.0 and _dress_want != _dressed and ItemModel.ready(_dress_paths):
+		_dressed = _dress_want
+		previewing = _dress_want
+		host.backdrop.dress_knight(Game.trial_profile(_dress_want) if _dress_want != "" else {})
+		_stance()
+
+func _process_stage(delta: float) -> void:
+	var want := _want_on_knight()
+	if want != _dress_want:
+		_dress_want = want
+		_dress_due = 0.0 if _first else 0.12
+	_dress_tick(delta)
+	if stage_view and _pad:
+		var r := _pad.get_global_rect()
+		r.size.y -= _foot.size.y + 10.0
+		stage_view.aim(r, get_viewport().get_visible_rect().size, "Spine2", _first)
+	_first = false
+
 # ================================================================ spending
 ## Buy, asking first when it is a large part of the purse. Returns true when a question was put instead of buying.
 func ask_buy(id: String) -> bool:
@@ -490,6 +621,7 @@ func ask_sell(id: String) -> void:
 ##   sell  equip  inspect  close  mat:<id> (one unit)  scroll:<pixels>
 func _process(delta: float) -> void:
 	_clock += delta
+	_process_stage(delta)
 	while not _demo.is_empty() and _clock >= float(_demo[0][0]):
 		var st: Array = _demo.pop_front()
 		var a := str(st[2])

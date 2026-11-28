@@ -1,9 +1,9 @@
 class_name ItemModel
 extends RefCounted
-## The 3D piece shown for an item in the armoury's carousel and in Inspect, and the models it needs.
-## Weapons and shields are their real hand-held models; a chest piece is its whole suit on a stand, because
-## a suit is one model. Helms, gauntlets, greaves, rings and relics have no geometry: `has_model` is false
-## for them and the screens draw a medallion instead.
+## The 3D piece shown for an item in the armoury's carousel, the shop's row and Inspect, and the models it needs.
+## Weapons and shields are their real hand-held models; every armour piece with a part of its own (`part_ready`) is
+## that part's mesh, exactly the geometry the knight wears, standing alone. Rings and relics have no geometry:
+## `has_model` is false for them and the screens draw a medallion instead.
 ## Loading never blocks: `want` starts a background load, `ready` says when `build` can run without a hitch.
 
 static var keep := 10            # loaded scenes held for reuse; older ones are let go (the screen lowers it for whole suits)
@@ -79,8 +79,21 @@ static func gear_sword(g: String, mod: Dictionary) -> Node3D:
 	return GearModel.spawn(g, 0.0, false, GearModel.mod_from_visual(g, {"blade_tier": int(mod.get("blade_tier", 0)), "grip_tier": int(mod.get("grip_tier", 0)),
 		"ore": str(mod.get("ore", "steel")), "ore_id": "", "keen": bool(mod.get("keen", false))}))
 
+## The worn part an armour item is: [suit, part slot, file], or [] when it has none of its own.
+static func part_of(it: Dictionary, body: String = "m") -> Array:
+	if not Db.ARMOUR_SLOTS.has(str(it.get("slot", ""))) or not bool(it.get("part_ready", false)) or FighterRig.old_look:
+		return []
+	var suit := str(it.get("part", ""))
+	var ps := str(it.get("part_slot", it.slot))
+	if suit == "" or not ArmorParts.has_part(body, suit, ps):
+		return []
+	return [suit, ps, "%s%s_%s_%s.res" % [ArmorParts._d(body), body, suit, ps]]
+
 ## The model files this item is drawn from ([] when it has none).
 static func paths(it: Dictionary, body: String = "m", mod = null) -> Array:
+	var part := part_of(it, body)
+	if not part.is_empty():
+		return [part[2]]
 	var g := gear_id(it)
 	if g != "" and str(it.get("slot", "")) in ["weapon", "shield"]:
 		if str(it.slot) == "weapon" and _has_parts(g):
@@ -170,7 +183,10 @@ static func build(it: Dictionary, body: String = "m", dark: bool = false, mod = 
 	tilt.add_child(pivot)
 	var ok := false
 	var g := gear_id(it)
-	match str(it.slot) if g == "" or str(it.slot) == "chest" else "gear_" + str(it.slot):
+	var part := part_of(it, body)
+	match "part" if not part.is_empty() else (str(it.slot) if g == "" or str(it.slot) == "chest" else "gear_" + str(it.slot)):
+		"part":
+			ok = _part(pivot, part, body)
 		"gear_weapon":
 			# life size, +Y to the tip, origin in the hand: one-handed blades keep their sizes against each other
 			var info: Dictionary = GearModel.info(g)
@@ -231,6 +247,24 @@ static func build(it: Dictionary, body: String = "m", dark: bool = false, mod = 
 		for mi in root.find_children("*", "MeshInstance3D", true, false):
 			(mi as MeshInstance3D).material_override = mat
 	return root
+
+## One armour part standing alone: the mesh the knight wears, in its own finish, about one unit across at its
+## widest, centred, its front toward the viewer. (A pair, gauntlets or greaves, stands as the pair.)
+static func _part(parent: Node3D, part: Array, body: String) -> bool:
+	var mesh: ArrayMesh = _held.get(part[2]) if _held.get(part[2]) is ArrayMesh else ArmorParts.mesh_of(body, str(part[0]), str(part[1]))
+	if mesh == null:
+		return false
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	var ap := ArmorParts.new()
+	ap.body = body
+	mi.set_surface_override_material(0, ap._own_material(str(part[0])))
+	var box := mesh.get_aabb()
+	var k: float = 1.0 / maxf(maxf(box.size.x, box.size.y), 0.01)
+	var face := Basis(Vector3.UP, PI)          # the knight's front is -Z in its own space; the viewer stands at +Z
+	mi.transform = Transform3D(face.scaled(Vector3.ONE * k), -(face * box.get_center()) * k)
+	parent.add_child(mi)
+	return true
 
 ## A suit on its stand: the whole model, 1.12 units tall, feet at -0.56, facing +Z, arms let down from the rest pose.
 static func _suit(parent: Node3D, path: String, it: Dictionary, body: String) -> bool:

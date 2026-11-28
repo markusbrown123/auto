@@ -217,6 +217,12 @@ static func blocked(x: float, z: float, r: float = 0.5) -> bool:
 			return true
 	if x > -15.8 - r and x < -10.7 + r and z < -104.0 and z > -138.5:
 		return true                                    # the lane up to the postern
+	# Stage 3B's own pieces: the gate passage's barricade (RouteKit.barricade, 5.4 m at (0, -165.4)) and where its
+	# pieces are thrown when it gives way, the dormant guardian's seat behind it, the stair-foot guard post
+	if absf(x) < 3.0 + r and z < -159.4 + r and z > -168.6 - r:
+		return true
+	if x > 12.0 - r and x < 16.2 + r and z < -88.6 + r and z > -94.2 - r:
+		return true
 	return CourtRoute.near_way(x, z, 1.9 + r)
 
 # ================================================================ merged geometry
@@ -1238,7 +1244,8 @@ static func _barbican(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d:
 	B.at("cloth", Vector3(6.2, 0, -127), false).card(Vector3(5.5, 14.2, -127.6), Vector3(1.4, 0, 0), Vector3(0, -5.2, 0), 2, 8, Color(0.36, 0.08, 0.06, 0.8))
 	B.at("iron", Vector3(6.2, 0, -127), false).box(Vector3(1.8, 0.1, 0.1), _xf(Vector3(6.2, 14.25, -127.65)))
 	# the forecourt: a barricade, the rack, stores, a cart, the dead, soot
-	_barricade(B, rng, _on(6.2, -121.4), _on(10.6, -123.2))
+	if not blocked(8.4, -122.3, 1.6):
+		_barricade(B, rng, _on(6.2, -121.4), _on(10.6, -123.2))
 	_rack(B, rng, _on(-11.6, -127.4), 0.0)
 	for bp: Array in [[11.4, -127.0], [12.1, -126.6], [11.8, -125.9]]:
 		_barrel(B, rng, _on(float(bp[0]), float(bp[1])))
@@ -1328,7 +1335,7 @@ static func _winch(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d: No
 		tr.box(Vector3(6.0, 0.5, 0.62), _xf(Vector3(0, 11.85, zp)))
 	for zc: float in [-164.5, -168.5, -172.5]:
 		_chain(B, Vector3(rng.randf_range(-1.6, 1.6), 12.0, zc), Vector3(rng.randf_range(-1.6, 1.6), 12.0, zc - 1.2), 1.4, 0.1)
-	_bones(B, rng, Vector3(-2.5, 0, -160.5), 4)
+	_bones(B, rng, Vector3(-2.45, 0, -158.6), 4)
 	_bones(B, rng, Vector3(2.4, 0, -175.0), 3)
 	_corpse(B, rng, _on(-2.45, -172.5), PI * 0.5, "sit")
 

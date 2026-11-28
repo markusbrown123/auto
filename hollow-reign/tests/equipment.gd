@@ -433,7 +433,7 @@ func t_stats_reach_the_duel() -> void:
 		var st: Dictionary = base.duplicate(true)
 		st[key] = float(st[key]) * float(bumps[key])
 		ok(differs(base, st), "the duel reads %s" % key)
-	for pair: Array in [["mitigation", 0.25], ["block_eff", 0.35], ["resist", 60.0], ["shield_blocks", -3.0]]:
+	for pair: Array in [["mitigation", 0.25], ["block_eff", 0.35], ["resist", 60.0], ["shield_blocks", -3.0], ["shield_regen", 6.0]]:
 		var st: Dictionary = base.duplicate(true)
 		st[pair[0]] = float(st[pair[0]]) + float(pair[1])
 		ok(differs(base, st), "the duel reads %s" % pair[0])
@@ -448,7 +448,7 @@ func t_stats_reach_the_duel() -> void:
 	ok(hi.defense > lo.defense and hi.mitigation > lo.mitigation and differs(lo, hi), "defence becomes mitigation, and the duel reads it")
 	# every row of the comparison is one of the keys proven above
 	for r: Array in Game.COMPARE_ROWS:
-		ok(bumps.has(r[1]) or r[1] in ["defense", "dodge_cost", "block_eff", "resist", "shield_blocks", "footwork"], "comparison row %s is a number the duel reads" % r[1])
+		ok(bumps.has(r[1]) or r[1] in ["defense", "mitigation", "dodge_cost", "block_eff", "resist", "shield_blocks", "shield_regen", "footwork"], "comparison row %s is a number the duel reads" % r[1])
 	ok(is_equal_approx(base.footwork, 100.0 / base.dodge_cost), "footwork is the dodge cost, turned so that more is better")
 	# and the keys that are only for the screens change nothing
 	var extra: Dictionary = base.duplicate(true)

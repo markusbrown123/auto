@@ -38,10 +38,13 @@
   "who": "The Crimson Widow. Owner chose the mean, aggressive delivery (widow_round2/widow_evil__5_Giselle.mp3). Her lines must be rewritten harsher to suit; she keeps her younger look. Treatment: bass +2 at 160 Hz, presence +2.5 at 2.8 kHz, light room."
  },
  "orren": {
-  "voice": "Callum (en)",
-  "model": "inworld",
+  "voice": "Barrett",
   "pitch": -3,
-  "who": "Orren. Existing takes lowered in place."
+  "who": "Orren. Existing takes lowered in place.",
+  "provider": "eleven",
+  "stability": 0.35,
+  "text_prefix": "[thick Scottish brogue, big hearty boisterous blacksmith, warm and gruff, laughing a little] ",
+  "note": "Owner's choice 2026-11-28 (audition merchant_7_Barrett_brogue). Lines recorded by a one-off script with the text prefix; old Callum takes in art/vo_masters/orren_prev/."
  },
  "monarch": {
   "voice": "Hades (en)",

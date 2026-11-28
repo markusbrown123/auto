@@ -1418,10 +1418,10 @@ func trial_profile(id: String) -> Dictionary:
 
 ## [label, stat key, display scale, format, +1 when higher is better / -1 when lower is]
 const COMPARE_ROWS := [
-	["Damage", "attack", 1.0, "%.1f", 1], ["Defence", "defense", 1.0, "%.0f", 1], ["Health", "max_hp", 1.0, "%.0f", 1],
+	["Damage", "attack", 1.0, "%.1f", 1], ["Defence", "defense", 1.0, "%.0f", 1], ["Protection", "mitigation", 100.0, "%.0f%%", 1], ["Health", "max_hp", 1.0, "%.0f", 1],
 	["Stamina", "max_stamina", 1.0, "%.0f", 1], ["Stamina recovery", "stamina_regen", 1.0, "%.1f/s", 1], ["Swing time", "swing_time", 1.0, "%.2fs", -1], ["Swing cost", "swing_cost", 1.0, "%.0f", -1],
 	["Stagger damage", "crit_mult", 1.0, "×%.2f", 1], ["Guard", "block_eff", 100.0, "%.0f%%", 1], ["Resistance", "resist", 1.0, "%.0f", 1],
-	["Guard damage", "guard_dmg", 1.0, "×%.2f", 1], ["Shield blocks", "shield_blocks", 1.0, "%.0f", 1], ["Footwork", "footwork", 1.0, "%.0f%%", 1],
+	["Guard damage", "guard_dmg", 1.0, "×%.2f", 1], ["Shield blocks", "shield_blocks", 1.0, "%.0f", 1], ["Shield recovery", "shield_regen", 1.0, "%.1fs", -1], ["Footwork", "footwork", 1.0, "%.0f%%", 1],
 ]
 
 ## What changes if this item is put on: one row per stat, each

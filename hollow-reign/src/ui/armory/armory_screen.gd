@@ -1,42 +1,48 @@
 class_name ArmoryScreen
 extends Control
-## The armoury: the collection as a swipe carousel on the left, the live knight on the right wearing a
-## preview of whatever is in the middle of the row. Nothing here writes to the save except Equip, Remove,
-## Favourite and Sort; browsing dresses the backdrop's knight from `Game.trial_profile` (a copy).
+## The armoury (equipment screen). The knight stands full height in the middle of the screen on a clean, lit
+## display stage (KnightStage), and nothing is ever drawn over it: the equipment slots are icon tiles in a column
+## down each side of the figure (armour on the left, hands and trinkets on the right), the collection of the open
+## slot is a swipe row in the panel at the far left, and the comparison against what is worn is the panel at the
+## far right. Drag turns the knight, pinch / wheel / + - zoom toward the part being looked at.
+## Nothing here writes to the save except Equip, Remove, Favourite and Sort; browsing dresses the backdrop's
+## knight from `Game.trial_profile` (a copy).
 ##
-## One function shows an item on the knight: `apply_preview(slot, id)`. Today the hand-held pieces and the
-## chest piece (a whole suit model) change what is seen; helm, gauntlets, greaves, ring and relic change
-## numbers only, and the screen says so. When armour parts become real, only that function has to learn them.
+## One function shows an item on the knight: `apply_preview(slot, id)`.
 
-## Every slot of Db.EQUIP_SLOTS that has items (the off hand has none yet and is left off the rail), armour from the head down.
-const RAIL := ["helm", "chest", "shoulders", "gauntlets", "legs", "boots", "weapon", "shield", "ring", "relic"]
-const TITLE := {"weapon": "Weapons", "shield": "Shields", "helm": "Helms", "chest": "Armour Suits", "shoulders": "Pauldrons", "gauntlets": "Gauntlets", "legs": "Greaves",
-	"boots": "Boots", "ring": "Rings", "relic": "Relics"}
+## The two columns of slot tiles, from the head down; every slot of Db.EQUIP_SLOTS has a tile.
+const LEFT_COL := ["helm", "shoulders", "chest", "gauntlets", "legs", "boots"]
+const RIGHT_COL := ["weapon", "shield", "offhand", "ring", "relic"]
+const RAIL := LEFT_COL + RIGHT_COL
+const TITLE := {"weapon": "Weapons", "shield": "Shields", "offhand": "Off Hand", "helm": "Helms", "chest": "Cuirasses", "shoulders": "Pauldrons",
+	"gauntlets": "Gauntlets", "legs": "Greaves", "boots": "Boots", "ring": "Rings", "relic": "Relics"}
 const GOOD := Color("#8fb37a")
 const BAD := Color("#c2574a")
 const FOV := 36.0
 const UPGRADABLE := ["weapon", "shield", "helm", "chest", "shoulders", "gauntlets", "legs", "boots"]
-## Where the camera goes for each slot: [bone or "" for the whole body, metres above that point, distance, height on screen 0..1,
-## the knight's facing (radians; PI faces the camera, more shows its right side), stance].
-## The feet stay in frame in every one of them: a slot's view is the whole knight, turned to show that part and a
-## little nearer than the full-body view, never a crop.
+## For each slot: [the bone a close-up goes to, the knight's facing (radians; 0 faces the camera, more shows its
+## right side), stance ("rest": arms down; "arms": the weapon's guard)]. Entering a slot always shows the whole
+## knight, turned to show that part; the close-up (Close Up, a double tap, or zooming) goes to the bone.
 const FOCUS := {
-	"": ["", 0.0, 4.25, 0.485, 0.0, ""],
-	"helm": ["Hips", 0.0, 3.6, 0.462, 0.25, "rest"],
-	"chest": ["Hips", 0.0, 3.6, 0.462, 0.2, "rest"],
-	"shoulders": ["Hips", 0.0, 3.6, 0.462, 0.45, "rest"],
-	"gauntlets": ["Hips", 0.0, 3.6, 0.462, 0.3, "rest"],
-	"legs": ["Hips", 0.0, 3.6, 0.462, 0.25, "rest"],
-	"boots": ["Hips", 0.0, 3.6, 0.462, 0.3, "rest"],
-	"weapon": ["Hips", 0.0, 3.75, 0.462, 0.55, "arms"],
-	"shield": ["Hips", 0.0, 3.6, 0.462, -0.8, "arms"],
-	"ring": ["", 0.0, 4.25, 0.485, 0.2, "rest"],
-	"relic": ["", 0.0, 4.25, 0.485, 0.2, "rest"],
+	"": ["", 0.0, ""],
+	"helm": ["Head", 0.25, "rest"],
+	"chest": ["Spine2", 0.2, "rest"],
+	"shoulders": ["RightArm", 0.45, "rest"],
+	"gauntlets": ["RightForeArm", 0.3, "rest"],
+	"legs": ["RightLeg", 0.25, "rest"],
+	"boots": ["RightFoot", 0.3, "rest"],
+	"weapon": ["RightHand", 0.55, "arms"],
+	"shield": ["LeftForeArm", -0.8, "arms"],
+	"offhand": ["LeftHand", -0.5, "arms"],
+	"ring": ["RightHand", 0.2, "rest"],
+	"relic": ["", 0.2, "rest"],
 }
+const CLOSE_ZOOM := 0.42           # how near Close Up goes (KnightStage.zoom)
 const IDLE := {"sword": "ss_idle", "axe": "ss_idle", "greatsword": "th_idle", "dual": "dw_idle"}
 const PACK := {"sword": "ss", "axe": "ss", "greatsword": "th", "dual": "dw"}
 ## Cuts looked at on the knight and found to start and end in the stance; the metadata rule below is the fallback.
 const ATTACK_PREFER := {"ss": "ss_cut_r_high", "th": "th_cut_dl2", "dw": "dw_cut_r"}
+const TILE_W := 78.0
 
 var host: Node                    # the Sanctuary (open_forge, refresh_purse, layer)
 var backdrop: Backdrop
@@ -45,11 +51,13 @@ var entries: Array = []
 var previewing := ""              # the item the knight wears that is not equipped ("" = the equipped look)
 var compare_on := false
 var last_change := ""            # what the last apply_preview changed on the figure
-var focused := true               # camera on the slot's body region (false: whole body)
+var focused := false              # the camera is close on the slot's part (false: the whole knight)
 var carousel: ItemCarousel
 var inspect: ArmoryInspect
+var stage_view: KnightStage
 
 var _rail := {}
+var _cols: Array = []
 var _title: Label
 var _count: Label
 var _sort: Button
@@ -57,10 +65,12 @@ var _grid_btn: Button
 var _grid: Control
 var _name: Label
 var _meta: HBoxContainer
+var _state: Label
 var _note: Label
 var _extra: Label                 # set progress, an unmet requirement, a keen edge
-var _stats: GridContainer
+var _stats: VBoxContainer
 var _stats_head: Label
+var _mastery: HBoxContainer
 var _equip: Button
 var _upgrade: Button
 var _compare: Button
@@ -73,10 +83,6 @@ var _foot: Control
 var _tag: Label
 var _act: Button
 var _focus_btn: Button
-var _zoom := 1.0
-var _yaw_user := 0.0
-var _touches := {}
-var _pinch0 := 0.0
 var _detail_due := -1.0           # seconds until the stat block is brought up to date
 var _preview_due := -1.0          # seconds until the knight is dressed in the middle item
 var _preview_want := ""
@@ -87,8 +93,6 @@ var _preview_waiting := false
 var _last_settle := -10.0
 var _rapid := false
 var _clock := 0.0
-var _focus_tick := 0.0
-var _focus_point := Vector3(0, 0.975, 0)
 var _first_frame := true
 var _clip_meta := {}
 var _demo: Array = []
@@ -109,12 +113,13 @@ func _ready() -> void:
 	if v is Dictionary:
 		_clip_meta = v.get("clips", {})
 	_build()
-	# the knight: the armoury's own rig, studio light, a longer lens
+	# the knight: the armoury's own rig, studio light, a longer lens, on the display stage
 	backdrop.rig_script = ArmoryRig
 	backdrop.cam_speed = 5.0
-	backdrop.cam_drift = 0.2
+	backdrop.cam_drift = 0.12
 	backdrop.cam_fov = FOV
 	backdrop.studio(true, -1.0, int(Game.settings.get("quality", 2)) > 0)
+	stage_view = KnightStage.new(backdrop, "studio")
 	backdrop.refresh_knight()
 	_rig_ready()
 	_enter_slot(slot, str(get_meta("start_item")))
@@ -131,6 +136,9 @@ func leave() -> void:
 		inspect.queue_free()
 	previewing = ""
 	ItemModel.clear()
+	if stage_view:
+		stage_view.close()
+		stage_view = null
 	backdrop.rig_script = null
 	backdrop.studio(false)
 	backdrop.cam_speed = 1.6
@@ -144,69 +152,46 @@ func _btn(text: String, w: float, size: int = 20) -> Button:
 	b.focus_mode = Control.FOCUS_NONE
 	return b
 
+func _side_panel() -> PanelContainer:
+	var p := UI.panel(Color(0.025, 0.025, 0.03, 0.9), Color(0.26, 0.24, 0.19))
+	p.get_theme_stylebox("panel").set_content_margin_all(8)
+	p.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	p.size_flags_stretch_ratio = 1.0
+	p.custom_minimum_size.x = 300
+	UI.corners(p, UI.GOLD_DIM, 10.0)
+	return p
+
+func _clipped(text: String, size: int, color: Color, kind: String = "body") -> Label:
+	var l := UI.label(text, size, color, kind)
+	l.clip_text = true
+	l.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	return l
+
 func _build() -> void:
-	# a dark ground behind the collection, thinning out toward the knight
-	var grad := Gradient.new()
-	grad.offsets = PackedFloat32Array([0.0, 0.5, 0.64])
-	grad.colors = PackedColorArray([Color(0.01, 0.01, 0.014, 0.8), Color(0.01, 0.01, 0.014, 0.72), Color(0.01, 0.01, 0.014, 0.0)])
-	var gt := GradientTexture2D.new()
-	gt.gradient = grad
-	gt.width = 256
-	gt.height = 4
-	var scrim := TextureRect.new()
-	scrim.texture = gt
-	scrim.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	scrim.stretch_mode = TextureRect.STRETCH_SCALE
-	scrim.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UI.full(scrim)
-	scrim.offset_left = -40
-	scrim.offset_bottom = 40
-	add_child(scrim)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	UI.full(row)
 	add_child(row)
-	# --- the slot rail
-	# two columns of five: ten slots in one column cannot each be a full touch height on a phone
-	var rail := GridContainer.new()
-	rail.columns = 2
-	rail.add_theme_constant_override("h_separation", 4)
-	rail.add_theme_constant_override("v_separation", 4)
-	row.add_child(rail)
-	for s: String in RAIL:
-		var b := Button.new()
-		b.custom_minimum_size = Vector2(62, UI.TAP)
-		b.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		b.focus_mode = Control.FOCUS_NONE
-		b.tooltip_text = str(TITLE[s])
-		var g := InvGlyph.new(s, UI.DIM, 0, 30.0)
-		g.name = "Glyph"
-		g.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-		g.offset_left = -15
-		g.offset_right = 15
-		g.offset_top = -15
-		g.offset_bottom = 15
-		b.add_child(g)
-		b.pressed.connect(func():
-			Sfx.play("ui_tap", -6.0)
-			if s == slot:
-				_set_focus(not focused)
-			else:
-				_enter_slot(s))
-		rail.add_child(b)
-		_rail[s] = b
-	# --- the collection
+	# ---------------- far left: the collection of the open slot
+	var lp := _side_panel()
+	row.add_child(lp)
 	var left := VBoxContainer.new()
-	left.add_theme_constant_override("separation", 3)
-	left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	left.size_flags_stretch_ratio = 1.08
+	left.add_theme_constant_override("separation", 2)
 	left.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	row.add_child(left)
-	var case := UI.panel(Color(0.02, 0.02, 0.026, 0.82), Color(0.3, 0.27, 0.2))
+	lp.add_child(left)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 8)
+	_title = UI.title("", 22)
+	head.add_child(_title)
+	_count = _clipped("", 20, UI.DIM)
+	head.add_child(_count)
+	left.add_child(head)
+	var case := UI.panel(Color(0.012, 0.012, 0.016, 0.9), Color(0.2, 0.19, 0.16))
 	case.get_theme_stylebox("panel").set_content_margin_all(1)
 	case.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	case.custom_minimum_size.y = 120      # the least it can be while a spoken line lifts the hub's bottom edge on a phone
+	case.custom_minimum_size.y = 110     # the least it can be while a spoken line lifts the hub's bottom edge on a phone
 	left.add_child(case)
 	carousel = ItemCarousel.new()
 	carousel.body = str(Game.profile.get("body", "m"))
@@ -214,91 +199,31 @@ func _build() -> void:
 	carousel.centred.connect(_on_centred)
 	carousel.settled.connect(_on_settled)
 	carousel.tapped.connect(func(_i: int): _open_inspect())
-	# the row's heading and its two buttons lie over the top of the case, so the case itself can be tall
-	var over := MarginContainer.new()
-	over.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	for side: String in ["left", "right", "top"]:
-		over.add_theme_constant_override("margin_" + side, 8)
-	case.add_child(over)
-	var head := HBoxContainer.new()
-	head.add_theme_constant_override("separation", 10)
-	_title = UI.title("", 24)
-	head.add_child(_title)
-	_count = UI.label("", 22, UI.DIM)
-	_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_count.clip_text = true
-	_count.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	head.add_child(_count)
-	_sort = UI.button("", 17, 0)
-	_sort.focus_mode = Control.FOCUS_NONE
+	_name = _clipped("", 24, UI.BONE, "head")
+	left.add_child(_name)
+	_meta = HBoxContainer.new()
+	_meta.add_theme_constant_override("separation", 8)
+	_meta.custom_minimum_size.y = 26
+	left.add_child(_meta)
+	_note = _clipped("", 20, UI.DIM)
+	left.add_child(_note)
+	_extra = _clipped("", 20, UI.GOLD_DIM.lightened(0.25))
+	left.add_child(_extra)
+	var tools := HBoxContainer.new()
+	tools.add_theme_constant_override("separation", 6)
+	left.add_child(tools)
+	_sort = _btn("", 0, 16)
+	_sort.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sort.clip_text = true
 	_sort.pressed.connect(func():
 		var mode := str(Game.profile.get("inv_sort", "equipped"))
 		Game.set_sort(Game.SORTS[(Game.SORTS.find(mode) + 1) % Game.SORTS.size()])
 		_enter_slot(slot, _centre_id()))
-	head.add_child(_sort)
-	_grid_btn = UI.button("Grid", 17, 84)
-	_grid_btn.focus_mode = Control.FOCUS_NONE
+	tools.add_child(_sort)
+	_grid_btn = _btn("Grid", 84, 16)
 	_grid_btn.pressed.connect(func(): _show_grid(_grid == null))
-	head.add_child(_grid_btn)
-	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	head.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
-	over.add_child(head)
-	UI.corners(case, UI.GOLD_DIM, 12.0)
-	_name = UI.title("", 26, UI.BONE)
-	_name.clip_text = true
-	_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	left.add_child(_name)
-	_meta = HBoxContainer.new()
-	_meta.add_theme_constant_override("separation", 10)
-	_meta.custom_minimum_size.y = 28
-	left.add_child(_meta)
-	_note = UI.label("", 22, UI.DIM)
-	_note.clip_text = true
-	_note.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	left.add_child(_note)
-	_extra = UI.label("", 22, UI.GOLD_DIM.lightened(0.25))
-	_extra.clip_text = true
-	_extra.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	left.add_child(_extra)
-	var plate := UI.panel(Color(0.03, 0.03, 0.036, 0.86), Color(0.22, 0.2, 0.16))
-	plate.get_theme_stylebox("panel").set_content_margin_all(8)
-	left.add_child(plate)
-	# a fixed height, so the row above never changes size from one item to the next; a long comparison scrolls
-	var psc := ScrollContainer.new()
-	psc.custom_minimum_size.y = 108
-	psc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	plate.add_child(psc)
-	var pv := VBoxContainer.new()
-	pv.add_theme_constant_override("separation", 0)
-	pv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	psc.add_child(pv)
-	_stats_head = UI.label("", 18, UI.DIM, "head")
-	pv.add_child(_stats_head)
-	_stats = GridContainer.new()
-	_stats.columns = 2
-	_stats.add_theme_constant_override("h_separation", 22)
-	_stats.add_theme_constant_override("v_separation", -5)
-	pv.add_child(_stats)
-	var acts := HBoxContainer.new()
-	acts.add_theme_constant_override("separation", 6)
-	left.add_child(acts)
-	_acts = acts
-	_equip = _btn("Equip", 0, 22)
-	_equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_equip.pressed.connect(_do_equip)
-	acts.add_child(_equip)
-	_upgrade = _btn("Upgrade", 118)
-	_upgrade.pressed.connect(func(): host.call("open_forge", _centre_id()))
-	acts.add_child(_upgrade)
-	_compare = _btn("Compare", 120)
-	_compare.pressed.connect(func():
-		compare_on = not compare_on
-		_fill_detail())
-	acts.add_child(_compare)
-	_inspect_btn = _btn("Inspect", 108)
-	_inspect_btn.pressed.connect(_open_inspect)
-	acts.add_child(_inspect_btn)
-	_fav = _btn("", 62)
+	tools.add_child(_grid_btn)
+	_fav = _btn("", 64)
 	_fav.tooltip_text = "Favourite: cannot be sold"
 	_fav_star = InvGlyph.new("star", UI.DIM, 0, 26.0)
 	_fav_star.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -311,43 +236,153 @@ func _build() -> void:
 		Game.toggle_favourite(_centre_id())
 		_sync_flags()
 		_fill_detail())
-	acts.add_child(_fav)
-	# --- the knight's side: drag turns, pinch or wheel zooms, two taps go back to the whole figure
-	_pad = Control.new()
-	_pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_pad.size_flags_stretch_ratio = 1.0
-	_pad.mouse_filter = Control.MOUSE_FILTER_STOP
-	_pad.gui_input.connect(_pad_input)
-	row.add_child(_pad)
-	var pill := UI.panel(Color(0.03, 0.03, 0.036, 0.82), Color(0.3, 0.27, 0.2))
-	pill.get_theme_stylebox("panel").set_content_margin_all(6)
-	pill.get_theme_stylebox("panel").content_margin_left = 14
-	pill.get_theme_stylebox("panel").content_margin_right = 14
-	pill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	pill.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
-	pill.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	pill.offset_top = 4
-	_pad.add_child(pill)
-	_tag = UI.label("", 22, UI.GOLD, "head")
-	pill.add_child(_tag)
+	tools.add_child(_fav)
+	var acts := HBoxContainer.new()
+	acts.add_theme_constant_override("separation", 6)
+	left.add_child(acts)
+	_acts = acts
+	_equip = _btn("Equip", 0, 22)
+	_equip.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_equip.pressed.connect(_do_equip)
+	acts.add_child(_equip)
+	_upgrade = _btn("Upgrade", 128, 20)
+	_upgrade.tooltip_text = "Take it to Orren's forge"
+	_upgrade.pressed.connect(func(): host.call("open_forge", _centre_id()))
+	acts.add_child(_upgrade)
+	# ---------------- the two columns of slot tiles either side of the knight
+	for col: Array in [LEFT_COL, RIGHT_COL]:
+		var c := VBoxContainer.new()
+		c.add_theme_constant_override("separation", 8)
+		c.alignment = BoxContainer.ALIGNMENT_CENTER
+		c.custom_minimum_size.x = TILE_W
+		c.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_cols.append(c)
+		for s: String in col:
+			c.add_child(_tile(s, col == LEFT_COL))
+		c.resized.connect(_size_tiles.bind(c))
+		if col == LEFT_COL:
+			row.add_child(c)
+			# ---------------- the middle: the knight, unobstructed; only its own controls sit under its feet
+			_pad = Control.new()
+			_pad.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			_pad.size_flags_stretch_ratio = 1.35
+			_pad.mouse_filter = Control.MOUSE_FILTER_STOP
+			_pad.gui_input.connect(_pad_input)
+			row.add_child(_pad)
+			_build_foot()
+		else:
+			row.add_child(c)
+	# ---------------- far right: what it does against what is worn, and the ways on from here
+	var rp := _side_panel()
+	row.add_child(rp)
+	var right := VBoxContainer.new()
+	right.add_theme_constant_override("separation", 4)
+	right.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rp.add_child(right)
+	_tag = _clipped("", 20, UI.GOLD, "head")
+	right.add_child(_tag)
+	_state = _clipped("", 20, UI.BONE, "bold")
+	right.add_child(_state)
+	right.add_child(UI.rule(Color(0.3, 0.27, 0.2)))
+	_stats_head = _clipped("", 17, UI.DIM, "head")
+	right.add_child(_stats_head)
+	var psc := ScrollContainer.new()
+	psc.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	psc.custom_minimum_size.y = 60
+	psc.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	right.add_child(psc)
+	_stats = VBoxContainer.new()
+	_stats.add_theme_constant_override("separation", -4)
+	_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	psc.add_child(_stats)
+	_mastery = HBoxContainer.new()
+	_mastery.add_theme_constant_override("separation", 8)
+	right.add_child(_mastery)
+	var racts := HBoxContainer.new()
+	racts.add_theme_constant_override("separation", 6)
+	right.add_child(racts)
+	_compare = _btn("Compare", 0, 20)
+	_compare.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_compare.tooltip_text = "Equipped figures beside these"
+	_compare.pressed.connect(func():
+		compare_on = not compare_on
+		_fill_detail())
+	racts.add_child(_compare)
+	_inspect_btn = _btn("Inspect", 0, 20)
+	_inspect_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_inspect_btn.tooltip_text = "The piece alone, close, to turn"
+	_inspect_btn.pressed.connect(_open_inspect)
+	racts.add_child(_inspect_btn)
+
+func _tile(s: String, left_side: bool) -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(TILE_W, UI.TAP)
+	b.focus_mode = Control.FOCUS_NONE
+	b.tooltip_text = str(TITLE[s])
+	b.set_meta("left", left_side)
+	var g := InvGlyph.new(s, UI.DIM, 0, 32.0)
+	g.name = "Glyph"
+	g.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	g.offset_left = -16
+	g.offset_right = 16
+	g.offset_top = -19
+	g.offset_bottom = 13
+	g.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(g)
+	# the worn piece's forge level, small, under the icon
+	var lv := UI.label("", 14, UI.DIM, "bold")
+	lv.name = "Level"
+	lv.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lv.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	lv.offset_top = -20
+	lv.offset_bottom = -1
+	lv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(lv)
+	b.pressed.connect(func():
+		Sfx.play("ui_tap", -6.0)
+		if s == slot:
+			_set_focus(not focused)
+		else:
+			_enter_slot(s))
+	_rail[s] = b
+	return b
+
+## The tiles are square when there is room and never shorter than a finger.
+func _size_tiles(c: VBoxContainer) -> void:
+	var n := c.get_child_count()
+	if n == 0:
+		return
+	var h := clampf((c.size.y - 8.0 * (n - 1)) / n, UI.TAP, TILE_W)
+	for t: Control in c.get_children():
+		t.custom_minimum_size.y = h
+
+func _build_foot() -> void:
 	var foot := HBoxContainer.new()
 	_foot = foot
 	foot.alignment = BoxContainer.ALIGNMENT_CENTER
-	foot.add_theme_constant_override("separation", 8)
+	foot.add_theme_constant_override("separation", 6)
 	foot.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	foot.grow_vertical = Control.GROW_DIRECTION_BEGIN
 	foot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_pad.add_child(foot)
-	_act = _btn("Preview Attack", 232)
+	_act = _btn("Attack", 120, 18)
 	_act.pressed.connect(func():
 		if slot == "shield":
 			preview_block()
 		else:
 			preview_attack())
 	foot.add_child(_act)
-	_focus_btn = _btn("Full Body", 168)
+	_focus_btn = _btn("Close Up", 140, 18)
 	_focus_btn.pressed.connect(func(): _set_focus(not focused))
 	foot.add_child(_focus_btn)
+	for z: Array in [["−", 1.18], ["+", 1.0 / 1.18]]:
+		var zb := _btn(str(z[0]), 60, 26)
+		zb.tooltip_text = "Zoom out" if z[1] > 1.0 else "Zoom in"
+		zb.pressed.connect(func():
+			stage_view.zoom_by(float(z[1]))
+			focused = stage_view.zoom < 0.99
+			_focus_btn.text = "FULL BODY" if focused else "CLOSE UP")
+		foot.add_child(zb)
 
 # ================================================================ the collection
 func _entry(id: String) -> Dictionary:
@@ -356,10 +391,29 @@ func _entry(id: String) -> Dictionary:
 	# never come across: a silhouette, no name, and the line that says where such a thing might be had
 	var unknown: bool = Game.item_state(id) == "undiscovered"
 	var kind: String = str(Db.classes[it.cls].name) if it.slot == "weapon" else str(Db.SLOT_NAME[it.slot])
+	var st := state_of(id)
 	return {"id": id, "slot": str(it.slot), "name": ("Unknown " + kind) if unknown else str(it.name),
 		"color": Db.rarity_color(it) if own else Db.rarity_color(it).lerp(Color(0.35, 0.35, 0.37), 0.55),
 		"metal": str(it.get("look", {}).get("metal", it.get("look", {}).get("color", "#b8b4aa"))),
-		"locked": not own, "dark": unknown, "equipped": Game.is_equipped(id), "fav": Game.is_favourite(id)}
+		"locked": not own, "dark": unknown, "equipped": Game.is_equipped(id), "fav": Game.is_favourite(id),
+		"badge": str(st[0]) if str(st[3]) != "equipped" else "", "badge_col": st[1]}
+
+## How an item stands for this knight, one of five plain states, as [short tag, colour, glyph, state id]:
+## equipped, owned, for sale and affordable, for sale and too dear, locked (with no price, or not yet found).
+static func state_of(id: String) -> Array:
+	if Game.is_equipped(id):
+		return ["EQUIPPED", UI.GOLD, "", "equipped"]
+	if Game.owns(id):
+		return ["OWNED", UI.BONE, "", "owned"]
+	if Game.item_state(id) == "undiscovered":
+		return ["UNKNOWN", UI.DIM, "lock", "locked"]
+	var price := Game.buy_price(id)
+	if price > 0:
+		var gold := int(Game.profile.get("gold", 0))
+		if gold >= price:
+			return ["FOR SALE · %d GOLD" % price, GOOD, "", "affordable"]
+		return ["%d GOLD · %d SHORT" % [price, price - gold], BAD, "", "dear"]
+	return ["LOCKED", UI.GOLD_DIM.lightened(0.3), "lock", "locked"]
 
 ## What is held, in the chosen order, then what this journey has still to offer: the pieces already come across
 ## (in Orren's stock, seen, heard of) by rank, then the ones never met, as silhouettes.
@@ -406,7 +460,7 @@ func _enter_slot(s: String, want_item: String = "") -> void:
 	# a whole suit is a five-megabyte skinned model with its own textures: keep only the three that can be on show
 	carousel.keep = 3 if slot == "chest" else 7
 	carousel.zoom = 1.0 if slot == "chest" else (1.2 if slot == "weapon" else 1.08)       # the middle piece is shown large
-	carousel.drop = 0.03 if slot == "chest" else 0.08                                     # (and clear of the heading over the top of the case)
+	carousel.drop = 0.0
 	ItemModel.keep = 4 if slot == "chest" else 10
 	var at := 0
 	var equipped = Game.profile.equipped.get(slot)
@@ -419,17 +473,18 @@ func _enter_slot(s: String, want_item: String = "") -> void:
 	for e: Dictionary in entries:
 		if not e.locked:
 			held += 1
-	_count.text = "%d of %d" % [held, entries.size()]
+	_count.text = "%d of %d held" % [held, entries.size()] if not entries.is_empty() else ""
 	_sort.text = "SORT: " + str(Game.SORT_NAME[str(Game.profile.get("inv_sort", "equipped"))]).to_upper()
 	_act.visible = slot in ["weapon", "shield"]
-	_act.text = "PREVIEW BLOCK" if slot == "shield" else "PREVIEW ATTACK"
+	_act.text = "BLOCK" if slot == "shield" else "ATTACK"
+	_act.tooltip_text = "Preview a block" if slot == "shield" else "Preview a cut"
 	_paint_rail()
 	_fill_light()
 	_fill_detail()
-	_zoom = 1.0
-	_yaw_user = 0.0
+	if stage_view:
+		stage_view.yaw_user = 0.0
 	if changed or _first_frame:
-		focused = true
+		focused = false
 	_preview_now(_centre_id(), false)
 	_apply_stance()
 	_set_focus(focused)
@@ -439,15 +494,21 @@ func _paint_rail() -> void:
 		var b: Button = _rail[s]
 		var id = Game.profile.equipped.get(s)
 		var edge: Color = Db.rarity_color(Db.item(str(id))) if id != null else Color(0.24, 0.23, 0.21)
-		for state in ["normal", "hover", "pressed"]:
-			var sb := UI.box(Color(0.05, 0.05, 0.06, 0.9) if s != slot else Color(0.1, 0.09, 0.07, 0.95), UI.GOLD if s == slot else Color(0.2, 0.19, 0.17), 1, 2, 2)
-			sb.border_width_left = 4
+		# the worn piece's rank colours the edge that faces the knight; the open slot is ringed in gold
+		var toward := "border_width_right" if bool(b.get_meta("left")) else "border_width_left"
+		for state in ["normal", "hover", "pressed", "disabled"]:
+			var sb := UI.box(Color(0.04, 0.04, 0.05, 0.88) if s != slot else Color(0.12, 0.1, 0.07, 0.96), UI.GOLD if s == slot else Color(0.2, 0.19, 0.17), 2 if s == slot else 1, 3, 2)
+			sb.set(toward, 5)
 			if s != slot:
 				sb.border_color = edge
 			b.add_theme_stylebox_override(state, sb)
 		var g: InvGlyph = b.get_node("Glyph")
-		g.color = UI.GOLD if s == slot else (UI.BONE if id != null else Color(0.45, 0.43, 0.4))
+		g.color = UI.GOLD if s == slot else (UI.BONE if id != null else Color(0.4, 0.38, 0.35))
 		g.queue_redraw()
+		var lv: Label = b.get_node("Level")
+		var n := Game.upgrade_level(str(id)) if id != null else 0
+		lv.text = ("+%d" % n) if n > 0 else ("—" if id == null and s != "offhand" else "")
+		b.tooltip_text = str(TITLE[s]) + (": " + str(Db.item(str(id)).name) if id != null else ": nothing worn")
 
 # ---------------------------------------------------------------- grid
 func _show_grid(on: bool) -> void:
@@ -530,8 +591,12 @@ func _fill_light() -> void:
 		_meta.remove_child(c)
 		c.queue_free()
 	if entries.is_empty():
-		_name.text = ""
-		_note.text = ""
+		_name.text = str(TITLE[slot]).to_upper()
+		_name.add_theme_color_override("font_color", UI.DIM)
+		_note.text = empty_note(slot)
+		_extra.text = ""
+		_state.text = ""
+		GearUI.clear(_mastery)
 		return
 	var e: Dictionary = entries[carousel.index]
 	var it: Dictionary = Db.item(str(e.id))
@@ -542,20 +607,12 @@ func _fill_light() -> void:
 	var kind: String = "%s · %s" % [Game.rarity_name(it), Db.classes[it.cls].name if it.slot == "weapon" else Db.SLOT_NAME[it.slot]]
 	if it.has("weight") and Db.equipment.weights.has(it.weight) and not e.dark:
 		kind += " · " + str(Db.equipment.weights[it.weight].name)
-	_meta.add_child(UI.label(kind if not e.dark else "Not yet found", 22, e.color))
-	var gap := Control.new()
-	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_meta.add_child(gap)
-	if not e.locked:
-		var tier := Game.mastery_tier(str(e.id))
-		var marks := InvGlyph.new("marks", UI.GOLD, tier if it.slot == "weapon" else (1 if tier == 3 else 0), 16.0)
-		marks.total = 3 if it.slot == "weapon" else 1
-		marks.custom_minimum_size.x = 16.0 * (2.9 if it.slot == "weapon" else 1.0)
-		_meta.add_child(UI.label("Mastery", 22, UI.DIM))
-		_meta.add_child(marks)
-		_meta.add_child(UI.label("%d/%d" % [Game.mastery_points(str(e.id)), Stats.mastery_needed(it)], 22, UI.GOLD if tier == 3 else UI.BONE))
-		if slot in UPGRADABLE:
-			_meta.add_child(UI.label("· +%d/%d" % [lvl, Stats.MAX_UPGRADE], 22, UI.DIM))
+	var kl := _clipped(kind if not e.dark else "Not yet found", 20, e.color)
+	_meta.add_child(kl)
+	_fill_mastery(e, it, lvl)
+	var st := state_of(str(e.id))
+	_state.text = str(st[0])
+	_state.add_theme_color_override("font_color", st[1])
 	_note.text = note_for(it)
 	_note.add_theme_color_override("font_color", UI.GOLD_DIM.lightened(0.2) if e.locked else UI.DIM)
 	var ex := extra_for(it)
@@ -645,7 +702,10 @@ func _stat_row(k: String, v: String, col: Color = UI.BONE, better: int = 0, delt
 	if better != 0:
 		row.add_child(InvGlyph.new("up" if better > 0 else "down", col, 0, 13.0))
 	if delta != "":
-		row.add_child(UI.label(delta, 22, col, "bold"))
+		var dl := UI.label(delta, 20, col, "bold")
+		dl.custom_minimum_size.x = 64
+		dl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(dl)
 	_stats.add_child(row)
 
 func _delta_text(r: Dictionary) -> String:
@@ -655,7 +715,8 @@ func _delta_text(r: Dictionary) -> String:
 		"swing_time": return sg + "%.2fs" % mag
 		"crit_mult": return sg + "%.2f" % mag
 		"attack": return sg + "%.1f" % mag
-		"block_eff": return sg + "%.0f%%" % mag
+		"block_eff", "mitigation": return sg + "%.0f%%" % mag
+		"shield_regen": return sg + "%.1fs" % mag
 	return sg + "%.0f" % mag
 
 ## The stat block: always against what is equipped. A green up-arrow is better and a red down-arrow worse
@@ -667,6 +728,7 @@ func _fill_detail() -> void:
 	_compare.add_theme_color_override("font_color", UI.GOLD if compare_on else UI.BONE)
 	if entries.is_empty():
 		_stats_head.text = ""
+		_tag.text = ""
 		for b: Button in [_equip, _upgrade, _compare, _inspect_btn, _fav]:
 			b.disabled = true
 		return
@@ -701,6 +763,7 @@ func _fill_detail() -> void:
 	_equip.disabled = not own or (worn and slot == "weapon")
 	_equip.text = "LOCKED" if not own else (("EQUIPPED" if slot == "weapon" else "REMOVE") if worn else "EQUIP")
 	_upgrade.disabled = not own or slot not in UPGRADABLE or (slot != "weapon" and Game.upgrade_level(id) >= Stats.MAX_UPGRADE)
+	_upgrade.text = "PERFECTED" if own and slot in UPGRADABLE and slot != "weapon" and Game.upgrade_level(id) >= Stats.MAX_UPGRADE else "UPGRADE"
 	_compare.disabled = worn
 	_inspect_btn.disabled = false
 	_fav.disabled = not own
@@ -747,7 +810,7 @@ func _apply_stance() -> void:
 	var r := _rig()
 	if r == null:
 		return
-	var stance: String = FOCUS[slot][5]
+	var stance: String = FOCUS[slot][2]
 	var clip: String = str(IDLE.get(_weapon_class(), "ss_idle"))
 	if stance == "rest" and SkinDriver.has_clip("idle"):
 		clip = "idle"
@@ -771,7 +834,7 @@ func apply_preview(preview_slot: String, id: String) -> String:
 		_rig_ready()
 	else:
 		_apply_stance()
-	_tag.text = ("PREVIEW · " + str(entries[carousel.index].name).to_upper()) if previewing != "" and not entries.is_empty() else "EQUIPPED"
+	_tag.text = ("ON THE KNIGHT: PREVIEW" if previewing != "" else "ON THE KNIGHT: EQUIPPED") if not entries.is_empty() else ""
 	_tag.add_theme_color_override("font_color", UI.GOLD if previewing != "" else UI.DIM)
 	return changed
 
@@ -885,57 +948,63 @@ func _after_act() -> void:
 	if r and not r.act_finished.is_connected(_apply_stance):
 		r.act_finished.connect(_apply_stance)
 
+## Mastery of the piece in the middle, in the right-hand panel: the marks, how far, and its forge level.
+func _fill_mastery(e: Dictionary, it: Dictionary, lvl: int) -> void:
+	GearUI.clear(_mastery)
+	if e.locked or it.is_empty():
+		return
+	var tier := Game.mastery_tier(str(e.id))
+	var marks := InvGlyph.new("marks", UI.GOLD, tier if it.slot == "weapon" else (1 if tier == 3 else 0), 16.0)
+	marks.total = 3 if it.slot == "weapon" else 1
+	marks.custom_minimum_size.x = 16.0 * (2.9 if it.slot == "weapon" else 1.0)
+	_mastery.add_child(UI.label("Mastery", 20, UI.DIM))
+	_mastery.add_child(marks)
+	_mastery.add_child(UI.label("%d/%d" % [Game.mastery_points(str(e.id)), Stats.mastery_needed(it)], 20, UI.GOLD if tier == 3 else UI.BONE))
+	if slot in UPGRADABLE:
+		_mastery.add_child(UI.label("· Forged +%d/%d" % [lvl, Stats.MAX_UPGRADE], 20, UI.DIM))
+
+## What an empty slot says (only the off hand is empty for every knight: nothing is made for it yet).
+static func empty_note(s: String) -> String:
+	if s == "offhand":
+		var w = Game.profile.get("equipped", {}).get("weapon")
+		if w != null and str(Db.item(str(w)).get("cls", "")) == "dual":
+			return "Your paired blades fill both hands"
+		return "Nothing is made for the off hand yet"
+	return "Nothing of this kind yet. The road provides."
+
 # ---------------------------------------------------------------- camera
+## Close up on the slot's part (true) or the whole knight (false). The knight is turned to show the part either way.
 func _set_focus(on: bool) -> void:
-	focused = on and FOCUS[slot][0] != ""
-	_zoom = 1.0
-	_focus_btn.text = "FULL BODY" if focused else "FOCUS"
-	_focus_btn.disabled = FOCUS[slot][0] == ""
-	_focus_tick = 0.0
-	backdrop.knight_yaw = wrapf(PI + float(FOCUS[slot][4]) + _yaw_user, -PI, PI)
+	focused = on and str(FOCUS[slot][0]) != ""
+	if stage_view:
+		stage_view.zoom = CLOSE_ZOOM if focused else 1.0
+	_focus_btn.text = "FULL BODY" if focused else "CLOSE UP"
+	_focus_btn.disabled = str(FOCUS[slot][0]) == ""
+	backdrop.knight_yaw = wrapf(PI + float(FOCUS[slot][1]) + (stage_view.yaw_user if stage_view else 0.0), -PI, PI)
 	backdrop.turn_knight(0.0)
 
+## The rectangle the knight must fill: the middle of the screen between the two columns of tiles, above its buttons.
+func stage_rect() -> Rect2:
+	var r := _pad.get_global_rect()
+	var foot_h := _foot.size.y + 10.0 if _foot else 70.0
+	r.size.y -= foot_h
+	r.position.y += 4.0
+	r.size.y -= 4.0
+	return r
+
 func _aim(snap: bool) -> void:
-	var f: Array = FOCUS[slot if focused else ""]
-	var p := Vector3(0, 0.975, 0)
-	var r := backdrop.rig
-	if str(f[0]) != "" and r and r.skin and r.skin.bone.has(str(f[0])):
-		p = r.body.global_transform * r.skin.point(str(f[0])) + Vector3(0, float(f[1]), 0)
-	_focus_point = p if snap else _focus_point.lerp(p, 0.5)
-	var vs := get_viewport().get_visible_rect().size
-	var d: float = float(f[2]) * _zoom
-	var half_h := d * tan(deg_to_rad(FOV * 0.5))
-	var half_w := half_h * vs.x / vs.y
-	var rect := _pad.get_global_rect()
-	var fx: float = clampf((rect.position.x + rect.size.x * 0.5) / vs.x, 0.5, 0.9) if rect.size.x > 8.0 else 0.775
-	var fy: float = float(f[3])
-	var at := Vector3(_focus_point.x - (fx * 2.0 - 1.0) * half_w, _focus_point.y - (0.5 - fy) * 2.0 * half_h, 0.0)
-	backdrop.move_camera(at + Vector3(0, 0, _focus_point.z + d), at + Vector3(0, 0, _focus_point.z), snap or bool(Game.settings.reduce_motion))
+	if stage_view == null:
+		return
+	stage_view.aim(stage_rect(), get_viewport().get_visible_rect().size, str(FOCUS[slot][0]), snap)
 
 func _pad_input(e: InputEvent) -> void:
-	if e is InputEventScreenTouch:
-		if e.pressed:
-			_touches[e.index] = e.position
-			if e.double_tap:
-				_set_focus(not focused)
-		else:
-			_touches.erase(e.index)
-		_pinch0 = 0.0
-	elif e is InputEventScreenDrag:
-		_touches[e.index] = e.position
-		if _touches.size() >= 2:
-			var k: Array = _touches.keys()
-			var dist: float = (_touches[k[0]] as Vector2).distance_to(_touches[k[1]])
-			if _pinch0 > 0.0 and dist > 1.0:
-				_zoom = clampf(_zoom * _pinch0 / dist, 0.4, 1.15)
-			_pinch0 = dist
-		else:
-			_yaw_user = wrapf(_yaw_user + e.relative.x * 0.012, -PI, PI)
-			backdrop.turn_knight(e.relative.x * 0.012)
-	elif e is InputEventMouseButton and e.pressed and e.button_index in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_DOWN]:
-		_zoom = clampf(_zoom * (0.9 if e.button_index == MOUSE_BUTTON_WHEEL_UP else 1.1), 0.4, 1.15)
-	elif e is InputEventMagnifyGesture:
-		_zoom = clampf(_zoom / e.factor, 0.4, 1.15)
+	if stage_view == null:
+		return
+	if stage_view.handle(e) == "double":
+		_set_focus(not focused)
+		return
+	focused = stage_view.zoom < 0.99
+	_focus_btn.text = "FULL BODY" if focused else "CLOSE UP"
 
 # ---------------------------------------------------------------- inspect
 func _open_inspect() -> void:
@@ -958,9 +1027,6 @@ func _process(delta: float) -> void:
 			_preview_now(_preview_want, true)
 	if _preview_waiting and ItemModel.ready(_preview_paths):
 		_finish_preview()
-	_focus_tick -= delta
-	if _focus_tick <= 0.0 or _first_frame:
-		_focus_tick = 0.2
 	_aim(_first_frame)
 	_first_frame = false
 	_run_demo(delta)
@@ -1007,8 +1073,8 @@ func _run_demo(delta: float) -> void:
 			"sort": _sort.pressed.emit()
 			"focus": _set_focus(true)
 			"full": _set_focus(false)
-			"zoom": _zoom = float(a)
-			"turn":
-				_yaw_user += float(a)
-				backdrop.turn_knight(float(a))
+			"zoom":
+				stage_view.zoom = clampf(float(a), KnightStage.ZOOM_MIN, KnightStage.ZOOM_MAX)
+				focused = stage_view.zoom < 0.99
+			"turn": stage_view.turn(float(a))
 			"upgrade": _upgrade.pressed.emit()

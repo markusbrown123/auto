@@ -98,8 +98,10 @@ func _run() -> void:
 		return
 	face(knight, Vector3(0, 0, 0.0), 0.7)
 	# the cradle, with nobody at its foot
-	cam.cut(Vector3(-1.9, 1.15, 4.6), Vector3(0.2, 0.7, 0.9), 40.0)
-	cam.move(Vector3(-1.5, 1.2, 4.9), Vector3(0.4, 0.8, 0.4), 8.0)
+	# (clear of the machine pylon that stands at about (-1.64, 4.93): from further out the camera ended inside it, and
+	# its amber band filled the frame)
+	cam.cut(Vector3(-1.9, 1.15, 4.0), Vector3(0.2, 0.7, 0.9), 40.0)
+	cam.move(Vector3(-1.5, 1.2, 4.2), Vector3(0.4, 0.8, 0.4), 8.0)
 	if not await _w(1.2):
 		return
 	if not await _say("gen3_engine"):

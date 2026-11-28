@@ -29,7 +29,7 @@ const POOLS := {
 ## Rapid swipes therefore cannot stack into a wall, and one footstep call cannot become two steps.
 const FAMILIES := {"metal": [4, 0.04], "parry": [2, 0.12], "break": [2, 0.2], "hit": [4, 0.04], "flesh": [4, 0.04],
 	"whoosh": [3, 0.07], "layer": [8, 0.0], "step": [2, 0.08],
-	"shield": [3, 0.06], "foley": [3, 0.08], "fall": [2, 0.3], "armour": [1, 2.5]}
+	"shield": [3, 0.06], "foley": [3, 0.08], "fall": [2, 0.3], "armour": [1, 2.5], "breath": [1, 14.0]}
 ## Named events: the first layer is the sound itself (it takes the retrigger gap), the rest are added with an
 ## optional delay "at" (s), a "vol" trim (dB), a minimum "min" intensity and a "chance".
 const EVENTS := {
@@ -182,6 +182,8 @@ func play(sound: String, vol_db: float = 0.0, pitch: float = 1.0, jitter: float 
 		return
 	if sound == "parry_perfect":
 		sound = "parry"
+	if sound.ends_with("_breath") and not breathing_ok(sound):
+		return
 	if EVENTS.has(sound) and _n(str(EVENTS[sound][0].pool)) > 0:     # "roll" keeps its old single file until roll_1.wav exists
 		event(sound, 1.0, vol_db, pitch, jitter)
 		return
@@ -267,6 +269,40 @@ func armour(weight: float = 1.0, vol_db: float = 0.0) -> bool:
 		return false
 	weight = clampf(weight, 0.4, 2.5)
 	_launch("jingle", _pick("jingle", _n("jingle")), vol_db - 20.0 + 4.0 * (weight - 1.0), randf_range(0.92, 1.05), -1.0, 0.0)
+	return true
+
+# ---------------------------------------------------------------- breathing (locomotion pass, 2026-11-28)
+## Breathing is heard only when the moment asks for it (exhaustion, a wound, getting one's breath back after a fight,
+## a scene that calls for it), never as a constant: one breath sound at a time, and never two inside 14 s whoever asks
+## (family "breath"). A creature's breathing (`*_breath`, e.g. the Sentinel's 2 s exhale on a slam) goes through the same
+## gate. `breath(need)` is what a figure asks with: `need` 0..1 (FighterRig: exertion, injury), nothing under 0.55.
+## The knight has no breath recordings yet (`breath_m_*`, `breath_f_*`): until they exist `breath` plays nothing.
+var _breath_log: Array = []     # dev: [game seconds, need, played] for every ask (the loco probe reads it)
+
+func breathing_ok(sound: String) -> bool:
+	var ok := _gate("breath", _now())
+	if _alog and not ok:
+		alog("breath_gated", sound)
+	return ok
+
+func breath(body: String = "m", need: float = 1.0, vol_db: float = 0.0) -> bool:
+	_breath_log.append([_alog_t, need, false])
+	if need < 0.55:
+		return false
+	var heavy := need > 0.8
+	var file := "breath_%s_%s" % [body, "heavy" if heavy else "low"]
+	var s := _stream("res://assets/audio/sfx/%s.wav" % file)
+	if s == null or not _gate("breath", _now()):
+		return false
+	var p := _voice("breath", _now(), int(s.get_length() * 1000.0) + 30)
+	p.stream = s
+	p.bus = "Combat"
+	p.volume_db = vol_db - 14.0 + 6.0 * (need - 0.55)
+	p.pitch_scale = randf_range(0.97, 1.03)
+	p.play()
+	_breath_log[-1][2] = true
+	if _alog:
+		alog("sfx", file, p.bus, p.volume_db, p.pitch_scale)
 	return true
 
 ## Number of variants of a pool: the listed count, or more when higher-numbered files exist (generated extras:

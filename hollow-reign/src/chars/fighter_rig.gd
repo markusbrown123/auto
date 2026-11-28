@@ -631,6 +631,7 @@ const FINISH_CLIP := {"Heavy": "sword_attack", "Guard-breaking": "shield_dash", 
 func swing(dir: Vector2, time: float, finish: String = "") -> void:
 	if _present == "recall":
 		_present_stop()        # a cut thrown while the weapon is still forming: it is whole at once
+	exert(0.07 if finish == "" else 0.12)
 	_finish = finish
 	_pin_t = 0.0
 	_brace_t = 0.0
@@ -651,6 +652,7 @@ func swing(dir: Vector2, time: float, finish: String = "") -> void:
 
 var _parry_t := 0.0
 func parry(dir: Vector2) -> void:
+	exert(0.04)
 	_parry_t = 0.5
 	_arc_dir = Vector3(dir.x * mirror, dir.y, 0).normalized()
 	_swing = 0.16
@@ -665,12 +667,14 @@ func recover() -> void:
 		_root_target = Vector3(0, 0, -0.1)
 
 func stagger() -> void:
+	exert(0.15)
 	_pin_t = 0.0
 	if mode != Mode.DEAD:
 		_go(Mode.STAGGER)
 		_root_target = Vector3(0, 0, 0.45)
 
 func hurt() -> void:
+	exert(0.15)
 	_pin_t = 0.0
 	_brace_t = 0.0
 	if mode != Mode.DEAD:
@@ -824,6 +828,7 @@ func brace(world_point: Vector3, hold: float = 0.3) -> void:
 	_solve(0.0)
 
 func dodge(side: float) -> void:
+	exert(0.09)
 	_dodge_side = side
 	_rolling = false
 	if parts != null:
@@ -834,6 +839,7 @@ func dodge(side: float) -> void:
 ## Turn the sidestep in progress into a roll.
 var _rolling := false
 func roll(side: float) -> void:
+	exert(0.08)
 	_dodge_side = side
 	_rolling = true
 	if parts != null:
@@ -949,6 +955,7 @@ func _process(delta: float) -> void:
 	_parry_t = maxf(0.0, _parry_t - dt)
 	_au_tick(dt)
 	_present_tick(dt)
+	_breath_tick(dt)
 	# stride phase advances with ground actually covered, so feet never slide
 	var moved := _travel(dt)
 	_speed_now = moved / maxf(dt, 0.0001)
@@ -968,8 +975,11 @@ func _process(delta: float) -> void:
 		_step_i = step_i
 		if not (polish and skin != null and skin.ok) and _walk_amount > 0.35 and mode != Mode.DODGE and moved < 0.12:
 			_footfall("Left" if step_i % 2 == 0 else "Right")
-	_walk_amount = lerpf(_walk_amount, _walk_want(moved, dt), 1.0 - exp(-dt * 7.0))
+	var ww := _walk_want(moved, dt)
+	# (the stride dies with the pace: no steps are taken over ground the body is no longer covering)
+	_walk_amount = lerpf(_walk_amount, ww, 1.0 - exp(-dt * (13.0 if (loco and ww < _walk_amount and not combat_steps) else 7.0)))
 	_impact = maxf(0.0, _impact - dt * 5.0)
+	_impact_s = lerpf(_impact_s, _impact, 1.0 - exp(-dt * 28.0)) if dt > 0.0 else _impact_s
 	_solve(dt)
 
 func _out_of_helm(p: Vector3) -> Vector3:
@@ -1018,7 +1028,7 @@ func _solve(dt: float) -> void:
 	var twist_t := -0.25
 	var crouch_t := 0.04 + hunch * 0.1
 	var direct := false
-	var breathe := _osc(1.7) * 0.012
+	var breathe := _breathe_y()
 	match mode:
 		Mode.GUARD:
 			hand_t.y += breathe
@@ -1030,10 +1040,14 @@ func _solve(dt: float) -> void:
 				var gp := _guard_pose(breathe)
 				hand_t = gp[0]
 				blade_t = gp[1]
-			elif polish and rest_carry and not combat_steps and not two_handed:
+			elif polish and (rest_carry or _at_ease()) and not combat_steps and not two_handed:
 				# at ease: the sword low at the side, its point forward and down
 				hand_t = Vector3(0.34, 0.9 + breathe, -0.04)
 				blade_t = Vector3(0.1, -0.42, -0.9).normalized()
+			elif _at_ease() and two_handed:
+				# at ease with a long blade: the hilt low at the right hip, the point down and forward, clear of the feet
+				hand_t = Vector3(0.28, 0.86 + breathe, -0.14)
+				blade_t = Vector3(-0.05, -0.38, -0.92).normalized()
 		Mode.WINDUP:
 			var rise := minf(_dur * 0.5, 0.5)
 			var sweep_start := _dur - _swing * 0.5
@@ -1249,8 +1263,8 @@ func _solve(dt: float) -> void:
 			skin.flash(_flash)
 
 func _pose() -> void:
-	body.position = _root + _lag + Vector3(0, _dock_lift - 0.032 * _impact, 0)      # (a footfall has weight: the body gives a little as the foot lands)
-	body.rotation.y = _lag_yaw
+	body.position = _root + _lag + Vector3(0, _dock_lift - (0.022 * _impact_s if loco else 0.032 * _impact), 0)      # (a footfall has weight: the body gives a little as the foot lands)
+	body.rotation.y = _lag_yaw + _face_off
 	var pel := Vector3(0, 0.96 - _crouch * 0.6, 0)
 	if cfg.get("wraith", false):
 		pel.y += 0.22 + sin(_clock * 1.9) * 0.07
@@ -1259,7 +1273,7 @@ func _pose() -> void:
 	var cb := Basis.from_euler(Vector3(-_lean, _twist, 0))
 	var chest_pos := pel + cb * Vector3(0, 0.42, 0)
 	chest.transform = Transform3D(cb, chest_pos)
-	head.rotation = Vector3(_lean * 0.75, -_twist * 0.8 + _head_lead, 0)
+	head.rotation = Vector3(_lean * 0.75 + _glance.y, -_twist * 0.8 + _head_lead + _glance.x, 0)
 	var sw := 0.245 * bulk + 0.05
 	var sh_r := chest_pos + cb * Vector3(sw, 0.24, 0)
 	var sh_l := chest_pos + cb * Vector3(-sw, 0.24, 0)
@@ -1290,7 +1304,7 @@ func _pose() -> void:
 			bl = ap[1]
 		if _stance_on() and mode == Mode.GUARD and _au.is_empty():
 			# an offset pair: the off blade lower and nearer, its point at the opponent's belly
-			hl = Vector3(-0.27, 1.0 + _osc(1.7) * 0.012, -0.24)
+			hl = Vector3(-0.27, 1.0 + _breathe_y(), -0.24)
 			bl = Vector3(0.24, 0.36, -0.9).normalized()
 	elif has_shield:
 		hl = Vector3(-0.05, 1.3, -0.42) if blocking else Vector3(-0.3, 1.08, -0.24)
@@ -1298,7 +1312,7 @@ func _pose() -> void:
 			# a strapped shield faces where the outside of the forearm faces: the forearm is carried across the body
 			hl = Vector3(-0.08, 1.15, -0.37)
 			if _stance_on():
-				hl = Vector3(-0.17, 1.12 + _osc(1.7) * 0.01 + _osc(0.83) * 0.012, -0.4)      # at the ribs, angled across the body
+				hl = Vector3(-0.17, 1.12 + _breathe_y() * 0.85 + _osc(0.83) * 0.012 * _breath_scale(), -0.4)      # at the ribs, angled across the body
 		if _brace_t > 0.0:
 			# the shield goes to where the blow lands, then is driven back toward the body by it
 			_brace_t -= get_process_delta_time() * time_scale
@@ -1724,6 +1738,10 @@ func _pick_clip() -> void:
 			Mode.GUARD:
 				if _walk_amount > 0.01 and not combat_steps:
 					n = "walk"; t = _walk_phase / TAU * SkinDriver.clip_length("walk") / WALK_CYCLES; w = _walk_amount
+				elif _at_ease() and authored and SkinDriver.has_clip(EASE_CLIP):
+					# standing at ease: the free library's relaxed idle under the body (legs, hips, trunk, head), its breathing
+					# played small and slow (SkinDriver.idle_motion); the arms stay on the carry at rest
+					n = EASE_CLIP; t = _clock; w = EASE_W
 				elif combat_steps:
 					n = "shield_idle" if has_shield else "sword_idle"
 					t = _clock; w = 0.55 * (1.0 - _walk_amount)
@@ -2632,7 +2650,7 @@ func _stance_on() -> bool:
 
 ## Where the sword hand and the blade rest in a fight: sword up and angled at the opponent's face, not held upright.
 func _guard_pose(breathe: float) -> Array:
-	var drift := _osc(0.83) * 0.03
+	var drift := _osc(0.83) * 0.03 * _breath_scale()
 	if two_handed:
 		# middle guard: hilt at the belt, both hands on it, the point at the opponent's throat
 		return [Vector3(0.15, 1.0 + breathe - hunch * 0.3, -0.36), Vector3(-0.17 + drift, 0.74, -0.64).normalized()]
@@ -2649,6 +2667,8 @@ var _vis_v := Vector3.ZERO
 var _vis_ok := false
 var _speed := 0.0             # metres a second over the ground (rig units)
 var _slope_now := 0.0         # rise per metre along the way the body faces
+var _vis_gy := 0.0            # the ground height the body rides at (smoothed over the feet's reach)
+var _vis_gy_ok := false
 
 ## Distance covered this frame (rig units). Out of combat the body follows whoever moves the rig as a damped mass
 ## does: it gathers way over the first half second, turns through an arc, and comes to rest half a pace later.
@@ -2661,18 +2681,31 @@ func _travel(dt: float) -> float:
 		_vis = global_position
 		_vis_v = Vector3.ZERO
 		_vis_ok = true
+		_vis_gy_ok = false
 		_lag = Vector3.ZERO
 		_lag_on = false
 		_lag_yaw = 0.0
 		_head_lead = 0.0
 		_slope_now = 0.0
 		_speed = raw / maxf(dt, 0.001)
+		_turn_tick(dt, false)
 		return raw
+	_turn_tick(dt, true)
 	const W := 6.5      # (a damped mass: it takes about 0.7 s to gather way and as long to come to rest)
 	var prev := _vis
 	_vis_v += ((global_position - _vis) * W * W - _vis_v * 2.0 * W) * dt
 	_vis += _vis_v * dt
-	_vis.y = float(ground.call(_vis.x, _vis.z)) if ground.is_valid() else global_position.y
+	if ground.is_valid() and loco:
+		# (the body rides the ground as the feet find it: over steps the hips go up a smooth ramp, not a stair at a time)
+		var gf: Vector3 = global_transform.basis.z.normalized() * -0.2 * s
+		var g_mid := 0.0
+		for k: float in [-2.0, -1.0, 0.0, 1.0, 2.0]:
+			g_mid += float(ground.call(_vis.x + gf.x * k, _vis.z + gf.z * k)) / 5.0
+		_vis_gy = g_mid if not _vis_gy_ok else lerpf(_vis_gy, g_mid, 1.0 - exp(-dt * 6.0))
+		_vis_gy_ok = true
+		_vis.y = _vis_gy
+	else:
+		_vis.y = float(ground.call(_vis.x, _vis.z)) if ground.is_valid() else global_position.y
 	var d := Vector2(_vis.x - prev.x, _vis.z - prev.z).length() / s
 	_speed = d / dt
 	_lag = global_transform.affine_inverse() * _vis
@@ -2695,7 +2728,7 @@ func _travel(dt: float) -> float:
 func _stride_now() -> float:
 	if _walk_clip_ok():
 		# the clip's own stride on this skeleton, shortened on a climb
-		return skin.clip_stride(WALK_CLIP) * 0.5 * STRIDE_FIT * (1.0 - 0.5 * clampf(_slope_now, 0.0, 0.5))
+		return skin.clip_stride(WALK_CLIP) * 0.5 * STRIDE_FIT * (1.0 - 0.5 * clampf(_slope_now, 0.0, 0.5) - (0.35 * clampf(-_slope_now, 0.0, 0.5) if loco else 0.0))
 	return STRIDE * (0.62 if combat_steps else 1.0)
 const STRIDE_FIT := 1.0       # share of a foot's whole sweep that is made on the ground (1: the clip's own stride, so a foot the clip plants is planted on the ground too)
 ## How fast the knight walks a road, metres a second. The walk clip's own pace on this skeleton is about 0.96 (see
@@ -2705,6 +2738,7 @@ const ROAD_SPEED := 1.12
 static func road_time(metres: float) -> float:
 	return metres / ROAD_SPEED
 var _impact := 0.0            # the weight of the last footfall: 1 as a foot comes down, gone in a fifth of a second
+var _impact_s := 0.0          # the same, eased in over two or three frames (the body gives; it does not jolt)
 var _head_lead := 0.0         # how far the head has turned ahead of the body, into a bend
 
 func _walk_clip_ok() -> bool:
@@ -2811,12 +2845,14 @@ func _feet_mode() -> int:
 		return 3
 	# come to a stand: the feet are where the last strides left them and step in under the body; then they are let be
 	# (a figure turned on the spot in a menu is not held by its feet)
-	return 1 if (_since_walk < 1.6 or walking or _lag_on or ground.is_valid()) else 0
+	return 1 if (_since_walk < 1.6 or walking or _lag_on or ground.is_valid() or _at_ease()) else 0
 
 func _feet_pass() -> void:
 	var m := _feet_mode()
 	var dt := get_process_delta_time() * time_scale
 	_since_walk = 0.0 if _walk_amount > 0.05 else _since_walk + dt
+	if loco and ((m == 1 and _ft.is_empty() and not _fw.is_empty()) or (m == 3 and _fw.is_empty() and not _ft.is_empty())):
+		_ft_drop = -_ft_drop      # (the walk keeps the hips' drop as a negative offset, the stance as a positive one)
 	if m == 1 and _ft.is_empty() and not _fw.is_empty():
 		for side: String in _fw:      # from the walk: each foot is where it last stood
 			_ft[side] = {"at": _fw[side].at, "yaw": global_rotation.y + body.rotation.y + skin.foot_yaw(side), "step": false, "t": 0.0, "dur": 0.2, "from": _fw[side].at, "fyaw": 0.0, "lift": 0.06}
@@ -2892,6 +2928,12 @@ func _feet_step(dt: float) -> void:
 			f.t = float(f.t) + dt
 			var u := clampf(float(f.t) / float(f.dur), 0.0, 1.0)
 			var to: Vector3 = (home[side] as Vector3) + Vector3(vel.x, 0, vel.z) * 0.09      # it lands a little ahead of the body's travel
+			if loco and not combat_steps:
+				# (out of a fight the place it lands is chosen by the middle of the step: a body still turning over it does
+				# not drag the last of the way along the floor)
+				if u < 0.55 or not f.has("to"):
+					f["to"] = to
+				to = f.to
 			f.at = (f.from as Vector3).lerp(to, smoothstep(0.18, 0.82, u))      # it travels while it is off the floor
 			f.yaw = lerp_angle(float(f.fyaw), yaw_w + skin.foot_yaw(side), u)
 			lift = pow(sin(PI * u), 0.6) * float(f.lift)
@@ -2901,13 +2943,15 @@ func _feet_step(dt: float) -> void:
 				if _ft_still < 0.3:
 					_footfall(side)      # (a foot set down to square the stance of a figure that is standing is not a step)
 		var at_b: Vector3 = inv * (f.at as Vector3)
-		at_b.y = (inv * Vector3((f.at as Vector3).x, float(ground.call((f.at as Vector3).x, (f.at as Vector3).z)), (f.at as Vector3).z)).y if ground.is_valid() else 0.0
+		at_b.y = (inv * Vector3((f.at as Vector3).x, (float(_foot_ground(f.at, xf.basis)[0]) if loco else float(ground.call((f.at as Vector3).x, (f.at as Vector3).z))), (f.at as Vector3).z)).y if ground.is_valid() else 0.0
 		need = maxf(need, -at_b.y)
 		put[side] = [at_b, lift, clampf(wrapf(float(f.yaw) - (yaw_w + skin.foot_yaw(side)), -PI, PI), -0.7, 0.7)]
 		need = maxf(need, skin.point(side + "UpLeg").distance_to(at_b + Vector3(0, skin.ankle_height(side) + lift, 0)) - skin.leg_len(side) * 0.97)
-	_ft_drop = lerpf(_ft_drop, clampf(need, 0.0, 0.16), 0.5)
-	if _ft_drop > 0.002:
-		skin.shift_hips(Vector3(0, -_ft_drop, 0))
+	# (out of a fight the hips settle onto a lower step over a quarter of a second, not in two frames)
+	_ft_drop = lerpf(_ft_drop, clampf(need, 0.0, 0.16), (1.0 - exp(-dt * 9.0)) if (loco and not combat_steps and dt > 0.0) else 0.5)
+	if _ft_drop > 0.002 or absf(_shift_x) > 0.0005:
+		# (at ease the weight goes over one leg: the hips move over that foot, the feet stay where they stand)
+		skin.shift_hips(Vector3(_shift_x, -_ft_drop - absf(_shift_x) * 0.25, 0))
 	for side: String in ["Left", "Right"]:
 		skin.step_foot(side, put[side][0], put[side][1], put[side][2])
 
@@ -3002,7 +3046,8 @@ func _feet_walk(dt: float) -> void:
 			f.lock = true
 			f.at = w + (f.off as Vector3)
 			f.off = Vector3.ZERO
-		elif f.lock and (not down or Vector2(w.x - (f.at as Vector3).x, w.z - (f.at as Vector3).z).length() > 0.45 * s):
+		elif f.lock and (not down or (Vector2(w.x - (f.at as Vector3).x, w.z - (f.at as Vector3).z).length() > 0.45 * s and (_walk_amount > 0.5 or not loco))):
+			# (coming to a stand, a foot left behind is not dragged in along the floor: the stance steps it in, lifted)
 			f.lock = false
 			f.off = (f.at as Vector3) - w
 		if not f.lock:
@@ -3010,14 +3055,44 @@ func _feet_walk(dt: float) -> void:
 			f.at = w + (f.off as Vector3)
 		var at: Vector3 = f.at
 		var gy: float = float(ground.call(at.x, at.z)) if ground.is_valid() else xf.origin.y
+		var fp := pitch
+		if ground.is_valid() and loco:
+			# the whole foot stands on the ground: heel and ball, so a foot over a step's edge is on the step, not in it;
+			# a foot in the air rises ahead of a step it is coming to (and never drops into the gap at once)
+			var fg := _foot_ground(at, xf.basis)
+			if f.lock:
+				if not f.has("gy"):
+					f["gy"] = fg[0]
+				# (set down from wherever the swing had it: the last of the way onto a lower step is eased, not dropped)
+				var c0: float = float(f.get("sy", f.gy))
+				f["sy"] = move_toward(c0, float(f.gy), dt * 1.6) if dt > 0.0 else float(f.gy)
+				gy = float(f.sy)
+			else:
+				f.erase("gy")
+				var fwd: Vector3 = -xf.basis.z.normalized()
+				var ahead := float(ground.call(at.x + fwd.x * 0.28 * s, at.z + fwd.z * 0.28 * s))
+				var want := maxf(float(fg[0]), ahead)
+				var cur: float = float(f.get("sy", want))
+				f["sy"] = move_toward(cur, want, dt * (2.4 if want > cur else 1.2)) if dt > 0.0 else want
+				gy = maxf(float(f.sy), float(fg[0]))
+			fp = float(fg[1])
+		else:
+			f.erase("gy")
 		var b: Vector3 = inv * Vector3(at.x, gy, at.z)
-		floor_lo = minf(floor_lo, b.y)
-		put[side] = [Vector3(b.x, b.y + a.y, b.z), pitch * clampf(1.0 - up / 0.08, 0.0, 1.0)]
+		if f.lock or not loco:
+			floor_lo = minf(floor_lo, b.y)      # (a foot in the air does not pull the hips down to where it is going)
+		put[side] = [Vector3(b.x, b.y + a.y, b.z), fp * clampf(1.0 - up / 0.08, 0.0, 1.0)]
 	# the hips come down to the lower foot (the higher knee bends more), never up past where the pose has them
-	var drop := clampf(floor_lo, -0.3, 0.0)
+	var drop := clampf(floor_lo, -0.3, 0.0) if floor_lo < 1e8 else 0.0
 	for side: String in ["Left", "Right"]:
 		drop = minf(drop, -(skin.point(side + "UpLeg").distance_to(put[side][0]) - skin.leg_len(side) * 0.985))
-	_ft_drop = lerpf(_ft_drop, clampf(drop, -0.35, 0.0), 1.0 - exp(-dt * 12.0)) if dt > 0.0 else _ft_drop
+	if loco and dt > 0.0:
+		# (down onto a lower step at no more than a metre a second: the hips sink with the stride, they do not drop)
+		var want_d := clampf(drop, -0.35, 0.0)
+		var nd := lerpf(_ft_drop, want_d, 1.0 - exp(-dt * (8.0 if want_d < _ft_drop else 14.0)))
+		_ft_drop = maxf(nd, _ft_drop - 1.0 * dt) if want_d < _ft_drop else nd
+	else:
+		_ft_drop = lerpf(_ft_drop, clampf(drop, -0.35, 0.0), 1.0 - exp(-dt * 12.0)) if dt > 0.0 else _ft_drop
 	if absf(_ft_drop) > 0.002:
 		skin.shift_hips(Vector3(0, _ft_drop, 0))
 	for side: String in ["Left", "Right"]:
@@ -3052,3 +3127,144 @@ func _dock(held: Transform3D, caps: Array) -> Transform3D:
 ## Behind a raised shield the sword keeps its own guard (the pack's block holds it low and level across the body).
 func _block_guard() -> bool:
 	return _stance_on() and has_shield
+
+# ================================================================ locomotion pass: breathing, at ease, turning on the spot (2026-11-28)
+## How winded the figure is, 0 (calm) to 1 (spent). Blows, sidesteps, rolls and wounds raise it (`exert`); it falls back
+## over about ten seconds of rest. It decides how much breathing shows: calm, the chest and head barely move (a breath
+## every four to five seconds, under a centimetre); spent, the packs' stances heave as they were authored.
+## `injury` (0..1, a screen may set it from lost health) and `breath_hold` (0..1, a scene's own call for heavy
+## breathing; < 0 none) keep it up. Only the knight (mirror > 0) is calmed: foes keep their authored idles.
+## `--oldloco` (or `FighterRig.loco = false`) plays what was there before this pass, for before/after recordings.
+static var loco: bool = not OS.get_cmdline_user_args().has("--oldloco")
+var exertion := 0.0
+var injury := 0.0
+var breath_hold := -1.0
+const EASE_CLIP := "idle"      # the free library's relaxed standing idle (UAL1 Idle_Loop), body only
+const EASE_W := 0.7
+const CALM_MOTION := 0.12      # share of an idle loop's own motion played when calm (SkinDriver.idle_motion)
+const CALM_RATE := 0.32        # and of its pace (the packs' 1.33 s loop becomes about 4.2 s)
+const EXERT_FALL := 10.0       # seconds for exertion to fall to a third
+var _breath_ph := 0.0
+var _breath_amt := 0.0         # the need for breath as shown, eased
+var _breath_ask := 0.0         # seconds until the next audible breath may be asked for
+var _glance := Vector2.ZERO    # the head's slow look about, at ease (yaw, pitch)
+var _glance_to := Vector2.ZERO
+var _glance_t := 4.0
+var _shift_x := 0.0            # weight carried over one leg, at ease (metres of hip shift)
+var _shift_to := 0.0
+var _shift_t := 6.0
+var _face_off := 0.0           # the body's yaw behind the rig's own, while it turns on the spot
+var _yaw_prev := 0.0
+var _yaw_ok := false
+var _rng_ease: RandomNumberGenerator
+
+func exert(amount: float) -> void:
+	exertion = clampf(exertion + amount, 0.0, 1.0)
+
+## 0..1: how much breath this figure needs at the moment.
+func breath_need() -> float:
+	var need := maxf(exertion, injury * 0.7)
+	if breath_hold >= 0.0:
+		need = maxf(need, breath_hold)
+	if combat_steps:
+		need = maxf(need, 0.18)      # (in a fight the guard is held with some effort, never at rest)
+	return clampf(need, 0.0, 1.0)
+
+## 1 for a foe (its authored idles untouched); for the knight, how much of the old breathing to keep.
+func _breath_scale() -> float:
+	if mirror < 0.0 or not polish or not loco:
+		return 1.0
+	return lerpf(0.25, 1.0, _breath_amt)
+
+## The procedural breath: how far the hands rise with it this frame (metres).
+func _breathe_y() -> float:
+	if mirror < 0.0 or not polish or loop_period > 0.0 or not loco:
+		return _osc(1.7) * 0.012
+	return sin(_breath_ph) * lerpf(0.003, 0.012, _breath_amt)
+
+## Standing out of combat as the knight: the relaxed stance (not in a menu that poses the figure itself).
+func _at_ease() -> bool:
+	return polish and loco and mirror > 0.0 and not combat_steps and skin != null and skin.ok and get("idle_clip") == null \
+		and mode == Mode.GUARD and test_clip == "" and not cfg.get("wraith", false)
+
+func _breath_tick(dt: float) -> void:
+	if dt <= 0.0:
+		return
+	exertion *= exp(-dt / EXERT_FALL)
+	var need := breath_need()
+	_breath_amt = lerpf(_breath_amt, need, 1.0 - exp(-dt * (3.0 if need > _breath_amt else 0.6)))
+	_breath_ph += dt * lerpf(1.4, 2.6, _breath_amt)      # (4.5 s a breath calm, 2.4 s spent)
+	if skin != null and skin.ok and mirror > 0.0 and polish and loco:
+		skin.idle_motion = lerpf(CALM_MOTION, 1.0, _breath_amt)
+		skin.idle_rate = lerpf(CALM_RATE, 1.0, _breath_amt)
+	# heard only when it is needed, and seldom (Sfx.breath has its own 14 s gate)
+	_breath_ask -= dt
+	if _breath_ask <= 0.0:
+		_breath_ask = 2.0
+		if loco and mirror > 0.0 and need >= 0.55 and visible and (combat_steps or footsteps) and mode != Mode.DEAD:
+			Sfx.breath(str(Game.profile.get("body", "m")), need)
+	_ease_tick(dt)
+
+## At ease the knight is never a statue and never a loop: now and then the weight goes over onto the other leg, and the
+## eyes move off and back (each after 6 to 13 s, at random); between them nothing but the slow breath moves.
+func _ease_tick(dt: float) -> void:
+	if _rng_ease == null:
+		_rng_ease = RandomNumberGenerator.new()
+		_rng_ease.seed = get_instance_id()
+		_shift_t = _rng_ease.randf_range(3.0, 7.0)
+	var on: bool = _at_ease() and _walk_amount < 0.05 and not Game.settings.reduce_motion
+	if on:
+		_shift_t -= dt
+		if _shift_t <= 0.0:
+			_shift_t = _rng_ease.randf_range(6.0, 13.0)
+			_shift_to = (0.016 if _shift_to <= 0.0 else -0.016) * _rng_ease.randf_range(0.6, 1.0)
+		_glance_t -= dt
+		if _glance_t <= 0.0:
+			_glance_t = _rng_ease.randf_range(5.0, 11.0)
+			_glance_to = Vector2(_rng_ease.randf_range(-0.22, 0.22), _rng_ease.randf_range(-0.04, 0.06)) if _glance_to == Vector2.ZERO else Vector2.ZERO
+	else:
+		_shift_to = 0.0
+		_glance_to = Vector2.ZERO
+	_shift_x = lerpf(_shift_x, _shift_to, 1.0 - exp(-dt * 1.6))
+	_glance = _glance.lerp(_glance_to, 1.0 - exp(-dt * 1.8))
+
+## Turning on the spot: the rig's facing may be set at once by whoever moves it; the body follows at a person's pace
+## (up to about 190 degrees a second, easing in and out) and the feet step round under it (`_feet_step`). A change of
+## more than 115 degrees in one frame is a cut and is taken at once.
+func _turn_tick(dt: float, on: bool) -> void:
+	var yaw := global_rotation.y
+	if not _yaw_ok or not on or not loco:
+		_yaw_prev = yaw
+		_yaw_ok = true
+		_face_off = 0.0
+		return
+	var d := wrapf(yaw - _yaw_prev, -PI, PI)
+	_yaw_prev = yaw
+	if absf(d) > 2.0:
+		_face_off = 0.0
+		return
+	_face_off = clampf(_face_off - d, -2.6, 2.6)
+	var rate := clampf(absf(_face_off) * 5.0, 0.4, 3.3)
+	_face_off = move_toward(_face_off, 0.0, rate * dt)
+
+## The ground under a whole foot whose ankle is at `at` (world): [height it stands at, toe-up pitch]. Heel and ball are
+## both asked; over a step's edge the foot stands on the higher (flat), on a slope it lies along it.
+func _foot_ground(at: Vector3, basis: Basis) -> Array:
+	var s := maxf(scale.x, 0.01)
+	var fwd := (-basis.z).normalized()
+	var heel := at - fwd * 0.06 * s
+	var ball := at + fwd * 0.16 * s
+	var gh := float(ground.call(heel.x, heel.z))
+	var gb := float(ground.call(ball.x, ball.z))
+	var ga := float(ground.call(at.x, at.z))
+	var tip := at + fwd * 0.24 * s
+	var gt := float(ground.call(tip.x, tip.z))
+	var top := maxf(maxf(ga, gt), maxf(gh, gb))
+	var rise := gb - gh
+	var pitch := 0.0
+	if absf(rise) < 0.22 * s * 0.45 and gt < maxf(gh, gb) + 0.06 * s:
+		# (a slope under 24 degrees, and no step's edge under the toes: the foot lies along it; otherwise it stands flat
+		# on the highest part of the ground under it)
+		pitch = atan(rise / (0.22 * s))
+		top = maxf(ga, (gh + gb) * 0.5)
+	return [top, pitch]

@@ -1011,6 +1011,9 @@ func _layout_chamber() -> void:
 	var metal := Look.flat(Color("#2a2c2e"), 0.45, 0.85)
 	var amber := Look.glow(Color(theme.fire), 2.2)
 	var teal := Look.glow(Color("#5fe0c8"), 2.0)
+	# the walls, the block and the rubble are the machine's plating (the ribs' panel sheet, darker), not the soft
+	# noise stone of the old layouts: that read as a blurred, smeared texture behind every shot in this room
+	mat_stone = Highland.built(Color("#3e4246"), 0.4, 0.62, 0.5)
 	var n := 22
 	for i in n:
 		var a := TAU * (i + 0.5) / n

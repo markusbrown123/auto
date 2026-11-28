@@ -20,24 +20,24 @@ const GOOD := Color("#8fb37a")
 const BAD := Color("#c2574a")
 const FOV := 36.0
 const UPGRADABLE := ["weapon", "shield", "helm", "chest", "shoulders", "gauntlets", "legs", "boots"]
-## For each slot: [the bone a close-up goes to, the knight's facing (radians; 0 faces the camera, more shows its
-## right side), stance ("rest": arms down; "arms": the weapon's guard)]. Entering a slot always shows the whole
+## For each slot: [the bone a close-up goes to (KnightStage.bone_point), the knight's facing (radians; 0 faces the
+## camera, more shows its right side), stance ("rest": arms down; "arms": the weapon's guard), the close-up's zoom
+## (small parts closer, a blade or a shield only as near as keeps the whole piece clear of the panels)]. Entering a slot always shows the whole
 ## knight, turned to show that part; the close-up (Close Up, a double tap, or zooming) goes to the bone.
 const FOCUS := {
-	"": ["", 0.0, ""],
-	"helm": ["Head", 0.25, "rest"],
-	"chest": ["Spine2", 0.2, "rest"],
-	"shoulders": ["RightArm", 0.45, "rest"],
-	"gauntlets": ["RightForeArm", 0.3, "rest"],
-	"legs": ["RightLeg", 0.25, "rest"],
-	"boots": ["RightFoot", 0.3, "rest"],
-	"weapon": ["RightHand", 0.55, "arms"],
-	"shield": ["LeftForeArm", -0.8, "arms"],
-	"offhand": ["LeftHand", -0.5, "arms"],
-	"ring": ["RightHand", 0.2, "rest"],
-	"relic": ["", 0.2, "rest"],
+	"": ["", 0.0, "", 1.0],
+	"helm": ["Head", 0.25, "rest", 0.4],
+	"chest": ["Spine2", 0.2, "rest", 0.55],
+	"shoulders": ["RightArm", 0.45, "rest", 0.5],
+	"gauntlets": ["RightForeArm", 0.3, "rest", 0.5],
+	"legs": ["RightLeg", 0.25, "rest", 0.6],
+	"boots": ["RightFoot", 0.3, "rest", 0.45],
+	"weapon": ["@blade", 0.55, "arms", 0.85],
+	"shield": ["@shield", -0.8, "arms", 0.75],
+	"offhand": ["LeftHand", -0.5, "arms", 0.55],
+	"ring": ["RightHand", 0.2, "rest", 0.45],
+	"relic": ["", 0.2, "rest", 1.0],
 }
-const CLOSE_ZOOM := 0.42           # how near Close Up goes (KnightStage.zoom)
 const IDLE := {"sword": "ss_idle", "axe": "ss_idle", "greatsword": "th_idle", "dual": "dw_idle"}
 const PACK := {"sword": "ss", "axe": "ss", "greatsword": "th", "dual": "dw"}
 ## Cuts looked at on the knight and found to start and end in the stance; the metadata rule below is the fallback.
@@ -714,6 +714,8 @@ func _stat_row(k: String, v: String, col: Color = UI.BONE, better: int = 0, delt
 
 func _delta_text(r: Dictionary) -> String:
 	var mag := absf(float(r.delta))
+	if mag < 0.5 and str(r.key) not in ["swing_time", "crit_mult", "attack"]:
+		return ("+" if float(r.delta) > 0.0 else "−") + "%.1f" % mag      # (a real change too small for whole numbers)
 	var sg := "+" if float(r.delta) > 0.0 else "−"
 	match str(r.key):
 		"swing_time": return sg + "%.2fs" % mag
@@ -991,7 +993,7 @@ static func empty_note(s: String) -> String:
 func _set_focus(on: bool) -> void:
 	focused = on and str(FOCUS[slot][0]) != ""
 	if stage_view:
-		stage_view.zoom = CLOSE_ZOOM if focused else 1.0
+		stage_view.zoom = float(FOCUS[slot][3]) if focused else 1.0
 	_focus_btn.text = "FULL BODY" if focused else "CLOSE UP"
 	_focus_btn.disabled = str(FOCUS[slot][0]) == ""
 	backdrop.knight_yaw = wrapf(PI + float(FOCUS[slot][1]) + (stage_view.yaw_user if stage_view else 0.0), -PI, PI)

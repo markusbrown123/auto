@@ -147,7 +147,9 @@ func _run() -> void:
 	# from here the camera does not leave him
 	cam.cut(hero.position + Vector3(-0.9, 0.55, 0.5), monarch.position + Vector3(0, 2.0, 0), 34.0)
 	cam.follow = null
-	cam.move(hero.position + Vector3(-1.1, 0.6, 0.8), SEAL + Vector3(-3.0, 2.0, 2.4), 6.0)
+	# (held on where he stands, SEAL + (-4.3, 0, 3.4): the earlier aim, a point 2 m up and less than half a metre from
+	# the camera, tipped it straight up at the dark roof for the rest of the exchange)
+	cam.move(hero.position + Vector3(-1.1, 0.6, 0.8), SEAL + Vector3(-4.3, 1.8, 3.4), 6.0)
 	if not await _spoken():
 		return
 	await walk(monarch, hero.position + Vector3(-1.3, 0, 1.5), 1.3).finished

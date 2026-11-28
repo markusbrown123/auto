@@ -1,5 +1,44 @@
 # Inventory, forge and settings: how it works and what is not there yet
 
+## Equipment and shop pass (2026-11-28, Addendum 7 section 3)
+Captures: `marketing/equipment_pass/before/` and `after/` (1560x720 with `--notch=87,0,87,39`, 2532x1170, 2796x1290), the
+combination sheets in `marketing/equipment_pass/combinations/`. Software-rendered only; nothing has run on a phone.
+- **The stage** (`src/ui/armory/knight_stage.gd`, `KnightStage`): a seamless dark cove behind and under the knight, a soft
+  pool of light and a thin ring at its feet; the place's own scenery is hidden while it is up (lights kept) and given back
+  on leaving. Two moods: `studio` (the armoury, cool and even) and `forge` (the shop, dark with a warm ember glow).
+  `aim(rect, …)` fits the whole knight, feet to crown, into one rectangle of the screen; zoom (0.32 – 1) closes in toward
+  the slot's bone. Drag turns, pinch / wheel / trackpad pinch / the − + buttons zoom.
+- **Armoury layout** (Destiny-style): the knight is centred and nothing is drawn over it. Slot tiles in a column each side
+  (`ArmoryScreen.LEFT_COL` helm, pauldrons, cuirass, gauntlets, greaves, boots; `RIGHT_COL` weapon, shield, off hand, ring,
+  relic: every slot of `Db.EQUIP_SLOTS`), each tile 60 – 78 px, the worn piece's rank colour on the edge facing the knight,
+  its forge level under the icon. Far left: the open slot's row (`ItemCarousel`), name, rank, the honest note, set / edge line,
+  Sort / Grid / Favourite, Equip and Upgrade. Far right: what is on the knight (preview or equipped), the piece's standing,
+  the full comparison against what is worn (one column, green up / red down with the signed change), mastery and forge level,
+  Compare and Inspect. Under the knight's feet: Attack / Block (weapon, shield), Close Up / Full Body, − +.
+  `tests/armory.gd` checks the knight's rectangle is centred and that no panel or tile intersects it.
+- **Standing of a piece** (`ArmoryScreen.state_of`): EQUIPPED (gold), OWNED, FOR SALE · N GOLD (green), N GOLD · M SHORT (red),
+  LOCKED / UNKNOWN (lock). Shown on the middle piece in the row (carousel `badge`), in the armoury's right panel and on the
+  shop counter. A piece Orren sells reads "To the Shop" in the armoury and opens the shop on it (`Sanctuary.open_shop`);
+  Upgrade still opens the forge on an owned piece.
+- **Armour pieces are drawn as their own part mesh** in the row and in Inspect (`ItemModel.part_of`, `_part`): the exact
+  geometry the knight wears, in its finish, standing alone. Rings and relics keep the medallion. The knight's preview now waits
+  only for the part file (not a whole suit model).
+- **Comparison rows** gained Protection (the mitigation the duel reads, %) and Shield recovery (seconds per returned block,
+  lower is better): with Damage, Defence, Health, Stamina, Stamina recovery, Swing time, Swing cost, Stagger, Guard, Resistance,
+  Guard damage, Shield blocks and Footwork that covers damage, protection, stamina, swing speed, block count and recovery and
+  mobility. `tests/equipment.gd` and `tests/tests.gd` were updated for the two rows (scale and direction).
+- **Shop layout** (Infinity Blade-style): the knight full height on the left of a dark warm stage, wearing the piece in the
+  middle of the row (after its models load; drag / zoom as in the armoury); the row, the piece's standing, all changed figures
+  in two columns and Buy in the middle; a short category list on the right (All Wares, Blades, Shields, Armour, Trinkets,
+  Materials, Sell). The modes and filters are the same as before (`set_mode`, `filter`).
+- **Persistence** (`tests/equipment.gd` `t_persistence`): purchases are on disk at once; bought, worn, removed, forged and
+  modded state survives a relaunch, a fall taken back to the checkpoint (`Game.on_death(true)`), a fall that ends the road, and
+  a damaged main save (the backup is read).
+- **Combination driver** `tools/dev/equip_sheet.tscn` (see its header): every armour piece, weapon and shield on the
+  armoury's knight, both bodies, then the nine complete sets, six mixes and each weapon class with three shields; front / side /
+  back sheets and `<body>_report.txt` with the floor, blade-through-body (idle and the armoury's preview cut), shield-through-body
+  (idle and block), seam ring mismatch and missing texture / mesh checks.
+
 ## Follow-up pass (2026-11-26, later): what changed on the Armory
 - The rail is `Db.EQUIP_SLOTS` without the off hand (it has no items): helm, chest, pauldrons, gauntlets, greaves, boots, weapon, shield, ring, relic.
 - The case is taller (about 300 px at 720p instead of 225) with its heading, Sort and Grid laid over its top edge, and the middle piece is drawn at 1.25× (`ItemCarousel.zoom`; 1.1× for whole suits). The EQUIPPED tag moved under the piece.

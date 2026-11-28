@@ -197,9 +197,9 @@ func _ready() -> void:
 	var over: Array = []
 	var panels: Array = [a.carousel, a._stats_head, a._equip, a._upgrade, a._compare, a._inspect_btn, a._name, a._note, a._tag]
 	panels.append_array(a._rail.values())
-	for c: Control in panels:
-		if c.is_visible_in_tree() and c.get_global_rect().intersects(sr):
-			over.append(c.name)
+	for pc: Control in panels:
+		if pc.is_visible_in_tree() and pc.get_global_rect().intersects(sr):
+			over.append(pc.name)
 	var mid_x := sr.get_center().x / s.get_viewport().get_visible_rect().size.x
 	ok(over.is_empty() and sr.size.y > 300.0 and absf(mid_x - 0.5) < 0.04, "the knight's stage is in the middle and clear of every panel and tile (%s, %s)" % [str(sr), str(over)])
 	var sale := ""

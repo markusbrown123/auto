@@ -260,7 +260,7 @@ static func _part(parent: Node3D, part: Array, body: String) -> bool:
 	ap.body = body
 	mi.set_surface_override_material(0, ap._own_material(str(part[0])))
 	var box := mesh.get_aabb()
-	var k: float = 0.74 / maxf(maxf(box.size.x, box.size.y), 0.01)
+	var k: float = 0.7 / maxf(maxf(box.size.x, box.size.y), maxf(box.size.z, 0.01))      # (it turns: its depth counts too)
 	var face := Basis(Vector3.UP, PI)          # the knight's front is -Z in its own space; the viewer stands at +Z
 	mi.transform = Transform3D(face.scaled(Vector3.ONE * k), -(face * box.get_center()) * k)
 	parent.add_child(mi)

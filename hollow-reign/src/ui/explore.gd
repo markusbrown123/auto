@@ -501,6 +501,7 @@ func _walk_then(index: int, then: Callable, through: bool = false) -> void:
 ## them so there is room in front for the road; it drifts round and up as the walk goes on. No cuts, and nothing but
 ## the corridor (kept clear of props) is crossed by it. With Reduce motion the offsets are fixed.
 var _walk := {}
+var _cam_pull := 1.0              # 1: the follow camera at its own distance; less: brought in front of something in the way
 var _way := 0                     # which way onward the stop's last interaction was at
 func _follow_cam() -> void:
 	if _walk.is_empty() or backdrop == null or backdrop.rig == null:
@@ -512,7 +513,16 @@ func _follow_cam() -> void:
 	var ahead := b * Vector3(-0.25, 1.2, -2.8)
 	backdrop.cam_fov = 46.0
 	backdrop.cam_speed = 1.7
-	backdrop.move_camera(rig.position + back, rig.position + ahead)
+	var eye := rig.position + back
+	if FighterRig.loco:
+		# nothing drawn comes between the camera and the knight: it is brought in, quickly, in front of what would
+		var head := rig.position + Vector3(0, 1.6 * rig.scale.y, 0)
+		var clear := CamFollow.clear_from(rig, [head, rig.position + Vector3(0, 1.15 * rig.scale.y, 0)], eye, 0.9)
+		_cam_pull = lerpf(_cam_pull, clear, 0.5 if clear < _cam_pull else 0.03)
+		eye = head.lerp(eye, _cam_pull)
+		if _cam_pull < 0.98:
+			backdrop.cam_speed = 7.0
+	backdrop.move_camera(eye, rig.position + ahead)
 
 ## The foe on the road is shown before steel is drawn: the knight starts toward it, and the camera goes low
 ## and looks up at what is waiting. The duel opens on the same two figures facing each other.

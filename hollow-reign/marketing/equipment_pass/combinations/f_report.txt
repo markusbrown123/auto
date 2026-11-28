@@ -1,4 +1,4 @@
-body f · limits { "sink": -2.0, "float": 3.0, "blade": 6, "shield": 6, "seam": 3.0 }
+body f · sheets: front | side | back per entry · limits { "sink": -2.0, "float": 3.0, "blade": 6, "shield": 6, "seam": 3.0 }
 
 a_worn_helm  Wayfarer Helm  low +1.2 · seams neck 6.0 shoulder 3.3 elbow 1.9 waist 3.0 ankle 3.6
 a_garrison_helm  Garrison Helm  low +1.2 · seams neck 2.7 shoulder 3.3 elbow 1.9 waist 3.0 ankle 3.6

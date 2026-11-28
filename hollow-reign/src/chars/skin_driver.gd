@@ -844,6 +844,11 @@ func _overlay(arms: bool) -> void:
 	var map := _track_map(clip)
 	var src_dir: Dictionary = a.get_meta("rest_dir", {})
 	var t := fposmod(clip_t, a.length) if a.loop_mode != Animation.LOOP_NONE else clampf(clip_t, 0.0, a.length)
+	var calm := IDLE_LOOPS.has(clip) and (idle_motion < 0.999 or idle_rate < 0.999)
+	var t_ref := 0.0
+	if calm:
+		t = fposmod(_idle_time(clip), a.length)
+		t_ref = _idle_ref(clip)
 	var back := _canon.inverse()
 	var full_b := {}      # the clip's own turn of the hips and legs, at full weight
 	var pre := {}         # the trunk as the procedural pose had it, before any bone of it is turned by the clip
@@ -853,6 +858,8 @@ func _overlay(arms: bool) -> void:
 	if not arms and map.has("_pos"):
 		# hip height as a fraction of standing height; travel only for whole-body clips
 		var hp: Vector3 = a.position_track_interpolate(map["_pos"], t)
+		if calm:
+			hp = a.position_track_interpolate(map["_pos"], t_ref).lerp(hp, idle_motion)
 		var h: float = rest["Hips"].origin.y
 		var cur: Transform3D = skel.get_bone_global_pose(bone["Hips"])
 		var want := Vector3(cur.origin.x, hp.y * h, cur.origin.z)
@@ -863,6 +870,8 @@ func _overlay(arms: bool) -> void:
 		if not map.has(b) or not bone.has(b) or _is_arm(b) != arms:
 			continue
 		var d := Basis(a.rotation_track_interpolate(map[b], t))
+		if calm:
+			d = Basis(a.rotation_track_interpolate(map[b], t_ref).slerp(a.rotation_track_interpolate(map[b], t), idle_motion))
 		if _my_dir.has(b) and src_dir.has(b):
 			# line this skeleton's limb up with the source's rest limb first (A-pose against T-pose)
 			d = d * Basis(Quaternion(_my_dir[b], src_dir[b]))
@@ -890,12 +899,50 @@ func _overlay(arms: bool) -> void:
 				mixed = Basis(Vector3.UP, -(yaw - signf(yaw) * TRUNK_YAW)) * mixed
 		skel.set_bone_global_pose(i, Transform3D(mixed, origin))
 	if not arms and map.has("_pos") and full_b.has("Hips"):
-		var hip_y: float = a.position_track_interpolate(map["_pos"], t).y * rest["Hips"].origin.y
+		var hip_y: float = (a.position_track_interpolate(map["_pos"], t_ref).lerp(a.position_track_interpolate(map["_pos"], t), idle_motion) if calm else a.position_track_interpolate(map["_pos"], t)).y * rest["Hips"].origin.y
 		for side: String in ["Left", "Right"]:
 			if full_b.has(side + "UpLeg") and full_b.has(side + "Leg"):
 				_clip_ankle[side] = hip_y + ((full_b["Hips"] as Basis) * (rest[side + "UpLeg"].origin - rest["Hips"].origin)).y \
 					+ ((full_b[side + "UpLeg"] as Basis) * (rest[side + "Leg"].origin - rest[side + "UpLeg"].origin)).y \
 					+ ((full_b[side + "Leg"] as Basis) * (rest[side + "Foot"].origin - rest[side + "Leg"].origin)).y
+
+# ---------------------------------------------------------------- breathing in the idle loops (locomotion pass)
+## The packs' standing loops are fighting idles that heave the chest 5 cm and the head 6 cm every 1.33 s (45 breaths a
+## minute): read as constant hard breathing. Each idle loop is played about a pose of its own (`_idle_ref`: the frame
+## whose hip height is the loop's median), with its motion scaled by `idle_motion` (0 holds that pose, 1 plays the clip
+## as authored) and its pace by `idle_rate`. The rig sets both each frame from how winded the figure is
+## (`FighterRig.exertion`); left at 1 (a foe, a menu that never sets them) the clips play as before.
+const IDLE_LOOPS := ["ss_idle", "ss_idle2", "th_idle", "th_idle2", "dw_idle", "dw_idle2", "idle", "sword_idle", "shield_idle", "ss_block_idle", "ss_block2_idle"]
+var idle_motion := 1.0
+var idle_rate := 1.0
+var _idle_clock := {}          # clip -> [the caller's last clip_t, the slowed time played]
+static var _idle_refs := {}
+
+func _idle_time(cn: String) -> float:
+	var e: Array = _idle_clock.get(cn, [clip_t, clip_t * idle_rate])
+	var d := clip_t - float(e[0])
+	if d >= 0.0 and d < 0.5:
+		e[1] = float(e[1]) + d * idle_rate      # (a change of pace never jumps the pose: only the time still to come is slowed)
+	elif d != 0.0:
+		e[1] = clip_t * idle_rate
+	e[0] = clip_t
+	_idle_clock[cn] = e
+	return float(e[1])
+
+func _idle_ref(cn: String) -> float:
+	if _idle_refs.has(cn):
+		return _idle_refs[cn]
+	var a: Animation = _lib.get_animation(cn)
+	var map := _track_map(cn)
+	var best := 0.0
+	if map.has("_pos"):
+		var ys: Array = []
+		for i in 24:
+			ys.append([a.position_track_interpolate(map["_pos"], a.length * i / 24.0).y, a.length * i / 24.0])
+		ys.sort_custom(func(x, y): return x[0] < y[0])
+		best = ys[12][1]
+	_idle_refs[cn] = best
+	return best
 
 ## The grip sits in the palm, not at the wrist.
 func _palm(side: String, wrist: Vector3) -> Vector3:
@@ -1044,3 +1091,54 @@ func clip_stride(cn: String) -> float:
 			out += (hi - lo) * root.scale.y * (root.global_transform.affine_inverse() * skel.global_transform).basis.get_scale().y
 	_stride[cn] = maxf(out, 0.3)
 	return _stride[cn]
+
+## Metres of ground a whole cycle of an in-place walk clip covers on this skeleton, measured as a planted foot moves:
+## how fast each foot travels back under the hips while it is at its lowest (within 2.5 cm of the floor), times the
+## clip's length. This is the distance at which a foot the clip puts down stays put on the ground when the clip is played
+## at its own pace; `clip_stride` (the whole sweep of both feet) is longer, since a foot is also swept while it lifts
+## and lands. Locomotion pass: the road walk's pace is matched to this.
+var _gspeed := {}
+func clip_ground_stride(cn: String) -> float:
+	if _gspeed.has(cn):
+		return _gspeed[cn]
+	var out := clip_stride(cn)
+	if has_clip(cn):
+		var a: Animation = _lib.get_animation(cn)
+		var map := _track_map(cn)
+		var src_dir: Dictionary = a.get_meta("rest_dir", {})
+		var k: float = root.scale.y * (root.global_transform.affine_inverse() * skel.global_transform).basis.get_scale().y
+		const N := 96
+		var tot := 0.0
+		var cnt := 0
+		for side: String in ["Left", "Right"]:
+			var pts: Array = []
+			for i in N + 1:
+				var t := a.length * i / float(N)
+				var o := Vector3.ZERO
+				var d_par := Basis.IDENTITY
+				var prev := ""
+				for b: String in ["Hips", side + "UpLeg", side + "Leg", side + "Foot"]:
+					if prev != "":
+						o += d_par * (rest[b].origin - rest[prev].origin)
+					if map.has(b):
+						var d := Basis(a.rotation_track_interpolate(map[b], t))
+						if _my_dir.has(b) and src_dir.has(b):
+							d = d * Basis(Quaternion(_my_dir[b], src_dir[b]))
+						d_par = d * _canon
+					prev = b
+				if map.has("_pos"):
+					o.y += a.position_track_interpolate(map["_pos"], t).y * rest["Hips"].origin.y
+				pts.append(o * k)
+			var lo := 1e9
+			for p: Vector3 in pts:
+				lo = minf(lo, p.y)
+			for i in N:
+				var p0: Vector3 = pts[i]
+				var p1: Vector3 = pts[i + 1]
+				if p0.y < lo + 0.025 and p1.y < lo + 0.025 and p1.z > p0.z:
+					tot += (p1.z - p0.z) / (a.length / N)
+					cnt += 1
+		if cnt > 4:
+			out = tot / cnt * a.length
+	_gspeed[cn] = out
+	return out

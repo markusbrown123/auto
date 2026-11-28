@@ -93,9 +93,16 @@ func knight_top() -> float:
 		return (r.body.global_transform * r.skin.point("Head")).y + 0.2
 	return 1.95
 
-## World position of a bone of the knight ("" = the middle of the figure).
+## World position of a bone of the knight ("" = the middle of the figure; "@blade" the middle of the blade in hand,
+## "@shield" the middle of the shield's board).
 func bone_point(bone: String) -> Vector3:
 	var r := backdrop.rig
+	if bone == "@blade" and r and r.weapon_r and r.weapon_r.get_child_count() > 0:
+		return r.weapon_r.global_transform * Vector3(0, r.weapon_len * 0.4 / maxf(r.weapon_r.global_transform.basis.get_scale().y, 0.001), 0)
+	if bone == "@shield" and r and r.shield and r.shield.get_child_count() > 0:
+		return r.shield.global_transform * r._sh_c
+	if bone.begins_with("@"):
+		bone = "RightHand" if bone == "@blade" else "LeftForeArm"
 	if bone != "" and r and r.skin and r.skin.bone.has(bone):
 		return r.body.global_transform * r.skin.point(bone)
 	return Vector3(0, knight_top() * 0.5, 0)
@@ -108,8 +115,8 @@ func aim(rect: Rect2, vs: Vector2, bone: String, snap: bool) -> void:
 	var top := knight_top()
 	var y0 := -0.06
 	var y1 := top + 0.1
-	# fit the height, and the width too (a blade held out and a shield need about 0.7 of the height)
-	var ppm := minf(rect.size.y / (y1 - y0), rect.size.x / ((y1 - y0) * 0.7))
+	# fit the height, and the width too (a blade held out to one side reaches about half the height from the middle)
+	var ppm := minf(rect.size.y / (y1 - y0), rect.size.x / ((y1 - y0) * 0.95))
 	var t := tan(deg_to_rad(FOV * 0.5))
 	var hh_full := vs.y * 0.5 / ppm                     # half the screen's height in metres at the knight
 	var d_full := hh_full / t

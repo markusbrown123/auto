@@ -16,7 +16,7 @@ extends Node3D
 ##   xvfb-run -a -s "-screen 0 960x440x24" godot --path . --rendering-method mobile --resolution 960x440 --fixed-fps 30 \
 ##       res://tools/dev/equip_sheet.tscn -- --out=<dir> --body=m|f [--only=items|combos] [--slots=helm,weapon] [--noshots]
 
-const VIEWS := [["front", 0.0], ["side", PI * 0.5], ["back", PI]]
+const VIEWS := [["front", PI], ["side", PI * 0.5], ["back", 0.0]]          # (the knight faces -Z; the camera is at +Z)
 const ARMOUR := ["helm", "chest", "shoulders", "gauntlets", "legs", "boots"]
 const LIMITS := {"sink": -2.0, "float": 3.0, "blade": 6, "shield": 6, "seam": 3.0}
 var base_seams := {}
@@ -433,7 +433,7 @@ func _run() -> void:
 				await _one("hands", "%s + %s (regal set)" % [w, str(sh)], p3, true, "attack")
 	_write_sheets()
 	var f := FileAccess.open("%s/%s_report.txt" % [out, body], FileAccess.WRITE)
-	f.store_string("body %s · limits %s\n\n%s\n\nflagged (%d):\n%s\n" % [body, str(LIMITS), "\n".join(report), flagged.size(), "\n".join(flagged)])
+	f.store_string("body %s · sheets: front | side | back per entry · limits %s\n\n%s\n\nflagged (%d):\n%s\n" % [body, str(LIMITS), "\n".join(report), flagged.size(), "\n".join(flagged)])
 	f.close()
 	print("equip_sheet %s: %d entries, %d flagged" % [body, report.size(), flagged.size()])
 	get_tree().quit()

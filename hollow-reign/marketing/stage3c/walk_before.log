@@ -160304,3 +160304,1888 @@ ERROR: Condition "!v.is_finite()" is true.
    at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
 ERROR: Condition "!v.is_finite()" is true.
    at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ROUTECOST walk at (9.8, 1.5, -13.2) (section 0): draws=188 primitives=292059 objects=188 video_mem=187.1MB
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:150)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:151)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:152)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:158)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:158)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:159)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:868)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:192)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:197)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:198)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1422)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1521)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1525)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:150)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:151)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:152)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:158)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:158)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:159)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:868)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:192)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:197)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:198)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1422)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1521)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1525)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:150)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:151)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:152)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:158)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:158)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:159)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:868)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:192)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:197)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:198)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1422)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1521)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1525)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:150)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:151)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:152)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:156)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:158)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:158)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:159)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:164)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:165)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:868)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:895)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _overlay (res://src/chars/skin_driver.gd:891)
+       [1] drive (res://src/chars/skin_driver.gd:168)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:192)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] drive (res://src/chars/skin_driver.gd:197)
+       [1] _pose (res://src/chars/fighter_rig.gd:1378)
+       [2] _solve (res://src/chars/fighter_rig.gd:1260)
+       [3] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] drive (res://src/chars/skin_driver.gd:198)
+       [2] _pose (res://src/chars/fighter_rig.gd:1378)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:213)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] drive (res://src/chars/skin_driver.gd:214)
+       [4] _pose (res://src/chars/fighter_rig.gd:1378)
+       [5] _solve (res://src/chars/fighter_rig.gd:1260)
+       [6] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:134)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _pose_bone (res://src/chars/skin_driver.gd:102)
+       [1] _aim (res://src/chars/skin_driver.gd:111)
+       [2] _limb (res://src/chars/skin_driver.gd:135)
+       [3] _leg_to (res://src/chars/skin_driver.gd:994)
+       [4] step_foot (res://src/chars/skin_driver.gd:1017)
+       [5] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [6] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [7] drive (res://src/chars/skin_driver.gd:247)
+       [8] _pose (res://src/chars/fighter_rig.gd:1378)
+       [9] _solve (res://src/chars/fighter_rig.gd:1260)
+       [10] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] _leg_to (res://src/chars/skin_driver.gd:995)
+       [1] step_foot (res://src/chars/skin_driver.gd:1017)
+       [2] _feet_step (res://src/chars/fighter_rig.gd:2969)
+       [3] _feet_pass (res://src/chars/fighter_rig.gd:2891)
+       [4] drive (res://src/chars/skin_driver.gd:247)
+       [5] _pose (res://src/chars/fighter_rig.gd:1378)
+       [6] _solve (res://src/chars/fighter_rig.gd:1260)
+       [7] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1422)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1521)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Basis [X: (nan, nan, nan), Y: (nan, nan, nan), Z: (nan, nan, nan)] must be normalized in order to be casted to a Quaternion. Use get_rotation_quaternion() or call orthonormalized() if the Basis contains linearly independent vectors.
+   at: get_quaternion (core/math/basis.cpp:716)
+   GDScript backtrace (most recent call first):
+       [0] grip (res://src/chars/skin_driver.gd:422)
+       [1] _fit_props (res://src/chars/fighter_rig.gd:1525)
+       [2] _pose (res://src/chars/fighter_rig.gd:1381)
+       [3] _solve (res://src/chars/fighter_rig.gd:1260)
+       [4] _process (res://src/chars/fighter_rig.gd:983)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)
+ERROR: Condition "!v.is_finite()" is true.
+   at: instance_set_transform (servers/rendering/renderer_scene_cull.cpp:991)

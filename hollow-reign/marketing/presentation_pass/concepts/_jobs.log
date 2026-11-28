@@ -1,0 +1,10 @@
+logo_a_broken_crown CREATE [   "a6a4715e-d97b-4394-b8a1-60c56ca1e032" ] ERR 
+icon_b_blade_seal CREATE [   "6cf0559e-d9ad-4762-bf5a-4a4a4be55c3f" ] ERR 
+icon_a_broken_crown CREATE [   "f41afb54-083b-4a56-ac61-38aa8c0cab18" ] ERR 
+logo_c_machine_halo CREATE [   "13adc6c9-761d-4a44-9f34-8de3aa4bb355" ] ERR 
+logo_b_blade_seal CREATE [   "b0269091-406a-4243-92e7-cb4984366208" ] ERR 
+icon_c_machine_halo CREATE [   "f991dedb-1110-44b5-9057-56c967e191eb" ] ERR 
+merchant_workshop_wide CREATE [   "5c81eecb-3c97-43c2-b38a-4f70c7c20899" ] ERR 
+merchant_counter_portrait CREATE [   "c8c42160-3f88-423b-912f-545f2610d817" ] ERR 
+monarch_full_body CREATE  ERR Error: {"actions":[{"type":"upgrade_plan"}],"billing_period":"monthly","concurrent_jobs_limit":8,"error_type":"rate_limit_reached","job_set_type":"gpt_image_2_6","plan_type":"plus","use_unlim":false,"workspace":{"role":"owner","type":"private"}}
+monarch_throne_hall CREATE  ERR Error: {"actions":[{"type":"upgrade_plan"}],"billing_period":"monthly","concurrent_jobs_limit":8,"error_type":"rate_limit_reached","job_set_type":"gpt_image_2_6","plan_type":"plus","use_unlim":false,"workspace":{"role":"owner","type":"private"}}

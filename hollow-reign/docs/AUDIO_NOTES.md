@@ -74,3 +74,37 @@ Options:
 Whatever is added, the pools and layers here accept it without engine changes: drop `clash_7.wav` etc. in place with 4 ms of leading silence (or skip the offset) and raise the count in `POOLS`.
 
 Recommendation: spend about $0.10 on 6 `mirelo_text_to_audio` clashes and whooshes, and listen to them next to the current set before deciding anything bigger. Total spend even for all 80 files stays under about $3, far inside the $100 cap, but it needs your approval first.
+
+## Opening audio forensics and the audio log (2026-11-28)
+
+Full report: `marketing/audio_pass/opening_audio_forensics.md`. Nobody has listened to the result.
+
+### The audio log (dev only, off by default)
+`-- --audiolog=<file>` (read in `Sfx._ready`) writes a tab-separated line for every sound start: game clock (scaled
+delta, so a `--fixed-fps` run keeps the game's own time), frame, kind, name or file, bus, volume dB, pitch, who asked
+and the calling stack (five frames from `get_stack()`; empty in a release export). Kinds: `pool` (a pooled combat or
+footstep variant), `sfx` (a flat sound), `step_gated` (a footstep the step family's 80 ms gap swallowed), `music`,
+`music_layer`, `ambience`, `voice` (`Story`, Dialogue bus), `video` (a `CinePlayer` clip; those are muted at -80 dB).
+Once a second a `rigs` line names the router's current screen and lists every rig with `footsteps` on (path, walking,
+stride amount, speed, visible, mode, duel stepping, last stance-step length). `FighterRig._footfall` names itself in
+`Sfx.log_who` before it calls `Sfx.footstep`, so each step line says which figure put a foot down and what it was doing.
+Nothing is computed while the flag is off. `tools/dev/audiolog_report.py <log> [slice log]` summarises a log per
+slice-bot step or per screen.
+
+Example: `godot --headless --path . --fixed-fps 60 --quit-after 33000 -- --screen=prologue --auto --audiolog=/tmp/a.tsv`
+(Generation I with a bot fighting, the years, the arrival, the Engine, the walk out, the first stop). The engine's
+retrigger gaps run on wall-clock milliseconds, so a headless run that is faster than real time shows many
+`step_gated` lines that a phone would play; count requests, not plays, from such runs.
+
+### What changed
+- `src/cine/arrival.gd`: the heir's first walk is the road's own `stride`, and `HighRoad.stride` tweens `s` explicitly
+  `from(a)`. Before, the arrival's own tween on `road.s` outlived its walk by a frame and the next shot's walk took its
+  start from it: shot 3 ran the walker about 300 m in 12 s (25 m/s) and the feet came down 6 to 7 times a second.
+- `FighterRig._footfall`: the step is played at the level the call always had before the pooled engine took it over
+  (-6 dB walking, -9 dB in a duel, +3 dB per unit of bulk); since that hand-over it had been passed no level and played
+  6 to 9 dB louder, at about the level of a sword clash. No footfall in a figure's first 0.75 s (its feet only catch up
+  with where it was put: two or three steps at the start of every duel). The step no longer carries the jingle layer.
+- Armour movement: `Sfx.armour(weight, vol_db)` (family `armour`: one voice, 2.5 s gap), called by `_footfall` only on
+  the first footfall of a walk that sets off after a second of standing, and at most once every 6 s per figure, never in
+  a duel; 20 dB under the step. It uses the `jingle` pool until recorded armour-movement files exist: replace the
+  `jingle_N.wav` files, or point `armour()` at a new pool.

@@ -897,8 +897,8 @@ func _footfall(side: String) -> void:
 	_impact = clampf(_walk_amount, 0.4, 1.0)
 	if log_feet:
 		foot_log.append([Engine.get_process_frames(), side])
-	if not footsteps:
-		return
+	if not footsteps or now < 0.75:
+		return      # (in its first moments a figure's feet only catch up with where it was put down: that is not a step)
 	var weight := (0.62 if combat_steps else 0.85 + 0.3 * (bulk - 1.0)) * clampf(_walk_amount + 0.25, 0.4, 1.0)
 	var surface := _surface_now()
 	# (the step sits under the music and the voices at the level this call always had: -6 dB walking, -9 in a duel)

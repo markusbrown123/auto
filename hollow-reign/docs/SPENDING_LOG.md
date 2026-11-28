@@ -171,3 +171,6 @@ Three 60 s instrumental cues on ElevenLabs Music v2.5 via Higgsfield, all on one
 
 ## 2026-11-28: main character and merchant voice auditions (owner approved ~2 credits)
 Six samples (ElevenLabs v4 via Higgsfield): main character Sterling (lowered 2), Holden, Desmond on one line; merchant Orren: Barrett, Grady, Emmett on one line. 2.76 credits (800.50 -> 797.74). Files: marketing/audition/hero_merchant_round/. Current voices unchanged until the owner approves.
+
+## 2026-11-28: merchant Irish-accent auditions
+Owner asked for more merchant options with an Irish accent. Three ElevenLabs v4 takes (Grady, Emmett, Barrett) with an accent tag, 0.92 credits each = 2.76 credits. Two Qwen TTS attempts were refused before generation (no charge). Main character space-helmet versions made from the existing take with filters only (no cost). Files: marketing/audition/hero_merchant_round/.

@@ -6,3 +6,7 @@ Main character, line "I die, and I wake here. What does that make me?", stabilit
 3. Desmond (114 Hz).
 Merchant (Orren the smith), line "That sword is older than my entire bloodline. Try not to drop it. Bring me shards and coin, and I will remind your armour what shape it was.", stability 0.5:
 1. Barrett (109 Hz). 2. Grady (119 Hz). 3. Emmett (130 Hz, the slowest speaker in the catalogue).
+
+Round 2 (owner: "more merchant, think Irish accent"; hero "space echo, Destiny style"):
+- merchant_4_Grady_irish, merchant_5_Emmett_irish, merchant_6_Barrett_irish: same line with an Irish-accent tag. The tag was not spoken (durations unchanged); whether the accent came through is unverified.
+- hero_1_Sterling_low2_space_light / _space_strong: the chosen take with a space-helmet comms filter, two strengths (no cost).

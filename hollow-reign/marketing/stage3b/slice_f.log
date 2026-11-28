@@ -17,3 +17,12 @@
 [   13.7s game |    259s wall]   saved? slot 2 exists=true  weapon=w_dawnline body=f name=Ysolde
 [   13.7s game |    259s wall]   audio during 'starting sword': Master peak -5.9 mean -11.8 dB; Music peak -11.2 mean -17.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.3 mean -26.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [   13.7s game |    259s wall] STEP generation I
+[   14.3s game |    300s wall]   audio during 'generation I': Master peak -7.4 mean -11.7 dB; Music peak -11.9 mean -17.1 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.9 mean -25.7 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   14.3s game |    300s wall] STEP generation I, beat 1
+[   16.4s game |    359s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   17.4s game |    389s wall]   audio during 'generation I, beat 1': Master peak -1.0 mean -14.0 dB; Music peak -13.3 mean -20.7 dB; Dialogue peak -2.7 mean -37.4 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.3 mean -29.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   17.4s game |    389s wall] STEP generation I, beat 2
+[   17.4s game |    389s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   17.6s game |    391s wall]   duel begins: Throne Guard (knight 286 hp)
+[   18.4s game |    417s wall]   audio during 'generation I, beat 2': Master peak -15.2 mean -21.2 dB; Music peak -27.0 mean -33.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -23.0 mean -28.3 dB; Interface peak -25.7 mean -55.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   18.4s game |    417s wall] STEP generation I, beat 3

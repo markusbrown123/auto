@@ -36,3 +36,12 @@ ERROR: Condition "!is_inside_tree()" is true. Returning: false
 [   12.9s game |    249s wall]   saved? slot 2 exists=true  weapon=w_dawnline body=m name=Maren
 [   12.9s game |    249s wall]   audio during 'starting sword': Master peak -6.1 mean -12.1 dB; Music peak -11.6 mean -17.8 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.3 mean -26.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [   12.9s game |    249s wall] STEP generation I
+[   13.5s game |    284s wall]   audio during 'generation I': Master peak -7.4 mean -10.8 dB; Music peak -12.0 mean -16.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.1 mean -26.4 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   13.5s game |    284s wall] STEP generation I, beat 1
+[   15.7s game |    343s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   16.7s game |    370s wall]   audio during 'generation I, beat 1': Master peak -1.0 mean -14.2 dB; Music peak -11.9 mean -20.6 dB; Dialogue peak -2.6 mean -40.7 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.9 mean -29.3 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   16.7s game |    370s wall] STEP generation I, beat 2
+[   16.7s game |    370s wall]   tap 'SKIP  ›' at (1183, 116), target 146 x 60
+[   16.8s game |    372s wall]   duel begins: Throne Guard (knight 286 hp)
+[   17.7s game |    404s wall]   audio during 'generation I, beat 2': Master peak -15.4 mean -20.4 dB; Music peak -26.9 mean -33.3 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -20.7 mean -27.0 dB; Interface peak -62.7 mean -92.3 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   17.7s game |    404s wall] STEP generation I, beat 3

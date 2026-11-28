@@ -42,7 +42,7 @@ func _ready() -> void:
 	Game.profile = Game.default_profile()
 	Game.profile.body = str(_args.get("body", "m"))
 	_room()
-	rig = (CineActor.new() if _args.has("actor") else FighterRig.new())
+	rig = (CineActor.new() if (_args.has("actor") or _probe == "hold") else FighterRig.new())
 	add_child(rig)
 	rig.build(Duel.player_look(), false)
 	rig.footsteps = true
@@ -73,6 +73,9 @@ func _ready() -> void:
 		cam.look_at(_pos + Vector3(0, 1.05, 0))
 	if _probe == "tired":
 		_exert()
+	if _probe == "hold":
+		# a story scene's knight holding the free library's standing idle as a whole-body clip (the awakening does this)
+		(rig as CineActor).hold("idle", 0.0)
 
 ## Exertion as the duel leaves it: a run of cuts, two sidesteps and a roll, then the guard is held.
 func _exert() -> void:
@@ -245,7 +248,7 @@ func _period(key: String, axis: int) -> float:
 
 func _report() -> void:
 	print("== loco probe: %s body=%s frames=%d" % [_probe, Game.profile.body, _log.size()])
-	if _probe in ["idle", "guard", "tired"]:
+	if _probe in ["idle", "guard", "tired", "hold"]:
 		var from := 8.0 if _probe == "tired" else 0.0
 		if from > 0.0:
 			var keep: Array = []
@@ -273,6 +276,20 @@ func _idle_block() -> void:
 	for n: String in ["Spine2", "Head", "LeftArm", "RightArm", "Hips"]:
 		var k := n + "_l"
 		print("  %-8s p2p cm  x %.2f  y %.2f  z %.2f   period(y) %.2f s" % [n, _detrend_p2p(k, 0), _detrend_p2p(k, 1), _detrend_p2p(k, 2), _period(k, 1)])
+	# breathing apart from slow weight shifts: what is left after a 3 s running mean is taken out
+	for n2: String in ["Spine2", "Head"]:
+		var k2 := n2 + "_l"
+		var lo := 1e9
+		var hi := -1e9
+		for i in range(45, _log.size() - 45):
+			var m := 0.0
+			for j in range(i - 45, i + 45):
+				m += (_log[j][k2] as Vector3).y
+			var v: float = (_log[i][k2] as Vector3).y - m / 90.0
+			lo = minf(lo, v)
+			hi = maxf(hi, v)
+		if hi > lo:
+			print("  %-8s breathing band (faster than 3 s) p2p y %.2f cm" % [n2, (hi - lo) * 100.0])
 	var clip_n := ""
 	for s: Dictionary in _log:
 		if float(s.clip_w) > 0.05:
@@ -304,6 +321,7 @@ func _walk_block() -> void:
 		var down := false
 		var acc := 0.0
 		var last := Vector3.ZERO
+		var last_t := Vector3.ZERO
 		for s: Dictionary in _log:
 			var a: Vector3 = s[side + "Foot"]
 			var is_down: bool = a.y - _gy(a.x, a.z) < float(rest_h[side]) + 0.03
@@ -311,7 +329,10 @@ func _walk_block() -> void:
 				acc = 0.0
 				plants.append([float(s.t), side, a, float(s.amt)])
 			elif is_down and down:
-				acc += Vector2(a.x - last.x, a.z - last.z).length()
+				# (a foot rolling over its toes moves its ankle but not its toes, and landing heel first the other way round:
+				# what slides is what moves of the part that bears the weight, the less of the two)
+				var tw: Vector3 = s[side + "ToeBase"]
+				acc += minf(Vector2(a.x - last.x, a.z - last.z).length(), Vector2(tw.x - last_t.x, tw.z - last_t.z).length())
 			elif not is_down and down:
 				slides.append([acc, float(s.t), side])
 				if _args.has("verbose") and acc > 0.03:
@@ -321,6 +342,7 @@ func _walk_block() -> void:
 					worst_at = float(s.t)
 			down = is_down
 			last = a
+			last_t = s[side + "ToeBase"]
 		if down:
 			slides.append([acc, _t, side])
 	plants.sort_custom(func(x, y): return x[0] < y[0])
@@ -432,7 +454,7 @@ func _room() -> void:
 	var z := 8.0
 	while z > -40.0:
 		var z2 := z - 0.04
-		for x0 in range(-10, 4):
+		for x0 in range(-16, 4):
 			var x1 := float(x0)
 			var x2 := x1 + 1.0
 			var c := Color(0.42, 0.42, 0.38) if (int(floor(-z * 2.0)) + x0) % 2 == 0 else Color(0.33, 0.34, 0.31)

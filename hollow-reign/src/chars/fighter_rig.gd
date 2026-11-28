@@ -1042,12 +1042,17 @@ func _solve(dt: float) -> void:
 				blade_t = gp[1]
 			elif polish and (rest_carry or _at_ease()) and not combat_steps and not two_handed:
 				# at ease: the sword low at the side, its point forward and down
-				hand_t = Vector3(0.34, 0.9 + breathe, -0.04)
+				hand_t = Vector3(0.34, 0.9 + breathe, -0.04) if not (loco and _at_ease()) else Vector3(0.28, 0.9 + breathe, -0.09)
 				blade_t = Vector3(0.1, -0.42, -0.9).normalized()
 			elif _at_ease() and two_handed:
 				# at ease with a long blade: the hilt low at the right hip, the point down and forward, clear of the feet
 				hand_t = Vector3(0.28, 0.86 + breathe, -0.14)
 				blade_t = Vector3(-0.05, -0.38, -0.92).normalized()
+			if _at_ease():
+				# standing at ease: upright, square to the way ahead, knees all but straight (no fighting crouch or coil)
+				lean_t = 0.03 + hunch
+				twist_t = 0.0
+				crouch_t = 0.005 + hunch * 0.1
 		Mode.WINDUP:
 			var rise := minf(_dur * 0.5, 0.5)
 			var sweep_start := _dur - _swing * 0.5
@@ -1313,6 +1318,8 @@ func _pose() -> void:
 			hl = Vector3(-0.08, 1.15, -0.37)
 			if _stance_on():
 				hl = Vector3(-0.17, 1.12 + _breathe_y() * 0.85 + _osc(0.83) * 0.012 * _breath_scale(), -0.4)      # at the ribs, angled across the body
+			elif _at_ease() and mode == Mode.GUARD:
+				hl = Vector3(-0.28, 0.95 + _breathe_y() * 0.5, -0.08)      # at ease: the arm hangs, the board along the leg
 		if _brace_t > 0.0:
 			# the shield goes to where the blow lands, then is driven back toward the body by it
 			_brace_t -= get_process_delta_time() * time_scale
@@ -1340,6 +1347,11 @@ func _pose() -> void:
 	var stance := 0.22 + 0.12 * bulk
 	var f_r := Vector3(stance, 0, 0.16) - Vector3(_root.x * 0.35, 0, _root.z * 0.3)
 	var f_l := Vector3(-stance, 0, -0.2) - Vector3(_root.x * 0.35, 0, _root.z * 0.3)
+	if _at_ease():
+		# at ease the feet are under the hips, a little apart and a little turned out, one just ahead of the other
+		var w0 := 0.1 + 0.02 * bulk
+		f_r = Vector3(w0, 0, 0.03)
+		f_l = Vector3(-w0, 0, -0.04)
 	if mode == Mode.DEAD:
 		f_r.z += 0.25
 		f_l.z += 0.1
@@ -3038,7 +3050,7 @@ func _feet_walk(dt: float) -> void:
 		var down := up < 0.035 + 0.1 * (1.0 - smoothstep(0.3, 0.8, _walk_amount))
 		if not down:
 			f["air"] = maxf(float(f.get("air", 0.0)), up)
-		if down and not f.lock:
+		if down and not f.lock and not f.has("hop"):
 			# the foot has come down after being up: that is the step, and the one place it is heard
 			if float(f.get("air", 0.0)) > 0.025 and _walk_amount > 0.3:
 				_footfall(side)
@@ -3050,8 +3062,19 @@ func _feet_walk(dt: float) -> void:
 			# (coming to a stand, a foot left behind is not dragged in along the floor: the stance steps it in, lifted)
 			f.lock = false
 			f.off = (f.at as Vector3) - w
+			if loco and down:
+				# (left behind by the stride while still on the floor, as at a start from a stand: it is picked up and
+				# carried to the stride's place in a quick step, not drawn across the ground)
+				f["hop"] = 0.0
+				f["off0"] = f.off
 		if not f.lock:
-			f.off = (f.off as Vector3) * exp(-dt * 12.0)
+			if f.has("hop"):
+				f.hop = minf(1.0, float(f.hop) + dt / 0.26)
+				f.off = (f.off0 as Vector3) * (1.0 - smoothstep(0.15, 0.85, float(f.hop)))
+				if float(f.hop) >= 1.0:
+					f.erase("hop")
+			else:
+				f.off = (f.off as Vector3) * exp(-dt * 12.0)
 			f.at = w + (f.off as Vector3)
 		var at: Vector3 = f.at
 		var gy: float = float(ground.call(at.x, at.z)) if ground.is_valid() else xf.origin.y
@@ -3081,7 +3104,8 @@ func _feet_walk(dt: float) -> void:
 		var b: Vector3 = inv * Vector3(at.x, gy, at.z)
 		if f.lock or not loco:
 			floor_lo = minf(floor_lo, b.y)      # (a foot in the air does not pull the hips down to where it is going)
-		put[side] = [Vector3(b.x, b.y + a.y, b.z), fp * clampf(1.0 - up / 0.08, 0.0, 1.0)]
+		var hop_up := sin(PI * float(f.hop)) * 0.075 if f.has("hop") else 0.0
+		put[side] = [Vector3(b.x, b.y + a.y + hop_up, b.z), fp * clampf(1.0 - up / 0.08, 0.0, 1.0)]
 	# the hips come down to the lower foot (the higher knee bends more), never up past where the pose has them
 	var drop := clampf(floor_lo, -0.3, 0.0) if floor_lo < 1e8 else 0.0
 	for side: String in ["Left", "Right"]:
@@ -3140,7 +3164,7 @@ var exertion := 0.0
 var injury := 0.0
 var breath_hold := -1.0
 const EASE_CLIP := "idle"      # the free library's relaxed standing idle (UAL1 Idle_Loop), body only
-const EASE_W := 0.7
+const EASE_W := 0.45
 const CALM_MOTION := 0.12      # share of an idle loop's own motion played when calm (SkinDriver.idle_motion)
 const CALM_RATE := 0.32        # and of its pace (the packs' 1.33 s loop becomes about 4.2 s)
 const EXERT_FALL := 10.0       # seconds for exertion to fall to a third

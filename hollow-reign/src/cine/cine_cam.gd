@@ -96,7 +96,10 @@ func _clear(eye: Vector3) -> float:
 
 func _place(dt: float = 0.0) -> void:
 	var f := _frame()
-	var sway := Vector3(sin(_clock * 0.31) * drift, sin(_clock * 0.43) * drift * 0.5, cos(_clock * 0.23) * drift)
+	var dr := drift
+	if FighterRig.loco and follow and is_instance_valid(follow):
+		dr = minf(dr, 0.03)      # (riding with a walker the frame is held steady: the walk is the movement in it)
+	var sway := Vector3(sin(_clock * 0.31) * dr, sin(_clock * 0.43) * dr * 0.5, cos(_clock * 0.23) * dr)
 	if Game.settings.reduce_motion:
 		sway = Vector3.ZERO
 	var eye: Vector3 = f[0]

@@ -344,7 +344,71 @@ vertices through the face of the board); states `circle`, `shove`, `road`; `dodg
 the floor as the duel carries them; `--strip=<fps> --view=duel|side|front|back|q` writes one view as a strip of frames;
 `--slope=<deg>` walks the `road` state up a slope with a 16 cm rock step; `--strides` prints clip strides and travel curves.
 
+### Locomotion pass: breathing, at ease, turns, steps and slopes, camera (2026-11-28, AAA Stage 2)
+
+No clip added (still 169). Code: "locomotion pass" at the end of `src/chars/fighter_rig.gd`, "breathing in the idle loops"
+in `src/chars/skin_driver.gd`, `src/cine/cam_follow.gd` (new), `CineCam` ride and pull-in, `Explore._follow_cam` pull-in,
+`Sfx.breath` / the breath gate. `--oldloco` (or `FighterRig.loco = false`) plays everything as it was, for comparisons.
+Measured with `src/dev/loco_probe.tscn` (`-- --probe=idle|guard|tired|hold|walk|course [--body=f] [--oldloco] [--verbose]`;
+headless prints numbers, with a window and `--write-movie` it films the same test course with `CamFollow`).
+Recordings and contact sheets: `marketing/locomotion_pass/` (`before_*` = `--oldloco`).
+
+- **Breathing by need.** `FighterRig.exertion` (0..1) rises with cuts (+0.07, a combo's last +0.12), parries, sidesteps,
+  rolls, staggers and wounds, and falls to a third in 10 s; `injury` (0..1, for a screen to set from lost health) and
+  `breath_hold` (0..1, a scene's call for heavy breathing, -1 none) hold it up; a duel's guard never goes under 0.18.
+  From it: `SkinDriver.idle_motion` (12% of an idle loop's own motion when calm, all of it when spent; the loop is played
+  about its median pose) and `idle_rate` (32% of its pace calm: the packs' 1.33 s stance loop becomes ~4.2 s), and the
+  procedural breath (3 mm at 4.5 s calm to 12 mm at 2.4 s spent; guard drift and shield bob scaled the same way). Applies to
+  every idle loop the knight plays (duel stance, armoury and shop idles, story holds of `idle`); **foes are untouched**.
+- **At ease** (the knight out of combat, not in a menu that poses it): upright, square, knees nearly straight, feet
+  hip-width under the body, sword low at the side, shield hanging on the arm along the leg; the free library's relaxed
+  `idle` under the body at 45%; every 6-13 s (at random, per figure) the weight goes onto the other leg (1-1.6 cm of hip
+  over a planted foot) and the eyes wander off and back. Off with Reduce Motion.
+- **Turning on the spot.** The rig may be turned at once by whoever moves it; the body follows at up to ~190°/s, eased,
+  and the feet step round under it (a step's landing place is fixed half-way through it, so a turning body never drags a
+  foot). A change over 115° in one frame is a cut and is taken at once.
+- **Walk.** The clip's pace stays locked to the ground (phase from distance; measured planted-foot travel 1.46 m a cycle
+  on the knight, `SkinDriver.clip_ground_stride`). New: the stride fades out faster than the pace at a stop; a foot left
+  behind on the floor at a start or stop is picked up and stepped (0.26 s, 7.5 cm lift), never drawn across the ground;
+  the footfall dip is eased in (2.2 cm) instead of a one-frame 3.2 cm drop.
+- **Slopes and steps** (any `ground` callable): the body rides a 1 m running average of the ground (no stair-by-stair
+  hip jumps); each foot stands on the highest of heel, ankle, ball and toe tip (flat on a step's edge, along a slope under
+  24°), a swinging foot rises ahead of a step it is coming to and a planted one is eased onto a lower step; only planted
+  feet pull the hips down, and the hips sink at most 1 m/s; stride shortens 35% per unit of downhill as well as uphill.
+  Fixed on the way: the stance and the walk kept the hips' drop with opposite signs, so every stop on uneven ground threw
+  the hips up by the drop (16 cm on the test stairs).
+- **Camera.** `CamFollow` (road and story walks): damped position (0.55 s), yaw (0.9 s) and height (0.8 s: no bob per
+  stair), pulled in in front of anything drawn between it and the head or chest (in within a frame or two, out over ~1 s).
+  The test runs on what is drawn (`RenderingServer.instances_cull_ray` + a cached `TriangleMesh` per mesh): the game has
+  no colliders. Skinned meshes (people), small props and meshes over 60k triangles are not tested.
+
+| Measured (`loco_probe`, 30 fps, knight_m / knight_f) | before (`--oldloco`) | after |
+|---|---|---|
+| Duel guard: chest / head rise and fall, period | 4.9 / 6.0 cm at 1.33 s (45 a minute); f 5.4 / 6.0 | 1.6 / 1.9 cm at 3.0 s; f 1.7 / 1.9 |
+| Same, breathing band only (3 s running mean removed) | 4.4 / 5.4 cm | 1.4 / 1.7 cm |
+| Guard after five cuts, two sidesteps, a roll, a wound (first 4 s) | 4.9 cm at 1.33 s (no change) | 3.1 cm at 1.9 s, falling |
+| Story hold of `idle` (CineActor): head, period | 1.6 cm up / 3.8 cm fore-aft at 1.25 s | 0.2 / 0.5 cm at 3.9 s |
+| Standing out of combat (plain rig): chest breathing band | 0.0 cm: a statue in a half guard | 0.3 cm; 2.3 cm weight shift every 6-13 s |
+| Foot slide, worst plant, flat walk with stops, 90/180° turns, a bend | m 19.7 cm, f 19.7 cm (the 180° turn) | m 0.4 cm, f 8.2 cm (one stop) |
+| Plants over 3 cm | m 3 of 48, f 4 of 46 | m 0 of 53, f 2 of 50 |
+| Hips' turn, worst frame | 37.5° (1125°/s) | 7.6° (229°/s) |
+| Stride on but body under 0.2 m/s ("walking in place") | 0.30 s per run | 0.10 s |
+| Course (12° ramp up/down, 6 stairs up and down): worst slide | 24.1 cm (both) | m 3.3, f 5.3 cm |
+| Course: worst hips jump in one frame | m 16.9, f 15.8 cm | m 4.8, f 5.3 cm |
+| Course: deepest a foot goes into the ground | m 18.8, f 22.3 cm | m 3.6, f 6.9 cm |
+| Walk: step, cadence, clip rate against ground | 0.79 m, 93/min, 1.01 (f 0.85 m, 89/min) | unchanged |
+
+Not done: the packs' `Walk_Fw_Start/End` are still not baked (the damped start and stop and the picked-up first step stand
+in); no turn-in-place clips (the Explosive `UnarmedTurn*` exist in `art/anim_src` but are unarmed); stairs and slopes are
+judged only on the test course (Stage 3 has none yet); nothing has been seen on a phone.
+
 ### Rig API added
+Locomotion pass: `ground: Callable` (x, z) -> y, already there, now also drives foot height per heel/ball/toe, the body's
+smoothed ride height and the stride on slopes; `exert(amount)`, `exertion`, `injury`, `breath_hold`, `breath_need() -> float`;
+static `loco`; `SkinDriver.idle_motion`, `idle_rate`, `clip_ground_stride(clip)`; `CamFollow` (`cam`, `target`, `offset`,
+`look_ahead`, `follow_time`, `turn_time`, `height_time`, `avoid`, static `clear_from(figure, [points], eye, min_dist)`,
+`sight_clear`); `CineCam.avoid`, `subject`, `ride_turn`, `--camlog`.
+
 
 `sheath(instant := false) -> float`, `draw(instant := false) -> float` (seconds it will take), `is_sheathed() -> bool`, `preview_attack(dir := "R", time := 0.5) -> float`, `preview_block(hold := 1.0) -> float` (seconds until back in guard), `au_set() -> String`, `combo_book: Array`, static `authored: bool`, static `clip_meta(name) -> Dictionary`. `ArmoryRig` overrides `_pick_clip`; the authored layer runs after it (`_au_apply`), so these work there too while an attack, block or draw is in progress.
 

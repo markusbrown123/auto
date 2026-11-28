@@ -108,3 +108,24 @@ retrigger gaps run on wall-clock milliseconds, so a headless run that is faster 
   the first footfall of a walk that sets off after a second of standing, and at most once every 6 s per figure, never in
   a duel; 20 dB under the step. It uses the `jingle` pool until recorded armour-movement files exist: replace the
   `jingle_N.wav` files, or point `armour()` at a new pool.
+
+## Breathing (locomotion pass, 2026-11-28)
+
+Nobody has listened to any of this.
+
+Measured with `--audiolog` before the change: the knight has **no breathing sound at all** (no `breath_*` or `effort_*`
+file exists; 2 minutes idle at an explore stop, the awakening and the prologue logged none). The breathing that is heard is
+the **Ashen Sentinel's**: `Duel._creature("growl")` plays `guardian_breath` (a 2.15 s exhale, -8 dB) on every slam, and
+`guardian_effort_1/2` on every other blow: 17 voice sounds in 83 s of a bot duel, a breath-like sound every ~5 s, 6 of them
+the long exhale.
+
+- `Sfx` voice family `breath`: one breath at a time and **never two inside 14 s**, whoever asks. Every `Sfx.play` of a
+  name ending `_breath` (the Sentinel's, the beast's, the dragon's exhale; not the dragon's fire, which is `dragon_fire`)
+  passes through it (`breath_gated` in the audio log when swallowed). Efforts on blows are unchanged.
+- `Sfx.breath(body, need)`: the knight's own breathing, asked for by `FighterRig` at most every 2 s and only when its
+  `breath_need()` (exertion after blows, sidesteps and rolls; a screen-set injury; a scene's `breath_hold`) is 0.55 or more;
+  plays `breath_<body>_low.wav` or `breath_<body>_heavy.wav` (over 0.8) 14 dB down, through the same 14 s gate. **These files
+  do not exist**: until they are recorded or generated (with the owner's go-ahead) it plays nothing. Calm idle, walking and
+  dialogue never ask.
+- Not changed (other owners): `Duel._creature` still asks for the Sentinel's exhale on each slam (now gated to one in 14 s);
+  if it should go entirely, `duel.gd` line ~828 can use `"effort"` for slams too.

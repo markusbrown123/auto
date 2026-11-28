@@ -181,3 +181,7 @@ ERROR: Condition "!is_inside_tree()" is true. Returning: false
 [  395.0s game |   3080s wall] STEP main menu again
 [  397.0s game |   3097s wall]   menu: [CONTINUE], [WORLD MAP], [LEGACIES], [CHARACTER], [EQUIPMENT], [CHRONICLE], [TRAINING], [SETTINGS], [CREDITS], [NEW LEGACY]  ·  status line: The Broken Crown   ·   Ysolde   ·   Level 2   ·   Chapter I, The Fallen Courtyard
 [  397.4s game |   3100s wall]   tap 'CONTINUE' at (294, 274), target 500 x 76
+[  397.9s game |   3108s wall]   audio during 'main menu again': Master peak -9.1 mean -17.2 dB; Music peak -14.3 mean -23.8 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -23.2 mean -29.4 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[  397.9s game |   3108s wall] STEP sanctuary after Continue
+[  399.9s game |   3122s wall]   setting out: by the short way
+[  399.9s game |   3122s wall]   tap 'BY THE WINCH GATE' at (1039, 654), target 393 x 60

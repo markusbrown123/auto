@@ -204,10 +204,15 @@ func _buttons() -> Array:
 func _label_of(b: Button) -> String:
 	if b.text != "":
 		return b.text
+	# the largest text on the button is its name (a card's small heading is 18 since the text-size pass)
+	var best := ""
+	var best_size := 17
 	for l in b.find_children("*", "Label", true, false):
-		if (l as Label).text != "" and (l as Label).get_theme_font_size("font_size") >= 18:
-			return (l as Label).text
-	return b.tooltip_text
+		var sz: int = (l as Label).get_theme_font_size("font_size")
+		if (l as Label).text != "" and sz > best_size:
+			best = (l as Label).text
+			best_size = sz
+	return best if best != "" else b.tooltip_text
 
 func _texts() -> Array:
 	var out: Array = []

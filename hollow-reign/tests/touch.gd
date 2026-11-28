@@ -97,8 +97,48 @@ func _ready() -> void:
 	ok(paused[0] == 1, "the pause button answers a second finger while the shield is held (%d)" % paused[0])
 	dt.queue_free()
 	await get_tree().process_frame
-	print("\ntouch: %s" % ("PASS" if failed == 0 else "%d FAILED" % failed))
+	await _sword_prompt()
+	print("\ntouch:%s" % ("PASS" if failed == 0 else "%d FAILED" % failed))
 	get_tree().quit(1 if failed > 0 else 0)
+
+## The chamber's one interaction (owner, from an iPhone: the sword was behind a wall). Nothing built in the room
+## stands between the camera and the blade in the block, and a finger on the ring takes it up.
+func _sword_prompt() -> void:
+	var a := Awakening.new()
+	a.start_at = "sword"
+	add_child(a)
+	await get_tree().create_timer(0.8).timeout
+	var cam_at: Vector3 = a.cam.global_position
+	var blocked: Array = []
+	for f: float in [0.3, 0.6, 0.95]:
+		var p: Vector3 = a._rack.global_position + Vector3(0, f, 0)
+		for mi: MeshInstance3D in a.arena.find_children("*", "MeshInstance3D", true, false):
+			if mi.mesh == null or not mi.is_visible_in_tree() or a._rack_sword.is_ancestor_of(mi):
+				continue
+			var inv := mi.global_transform.affine_inverse()
+			var from := inv * cam_at
+			var to := inv * p
+			if not mi.mesh.get_aabb().grow(0.01).intersects_segment(from, to):
+				continue
+			var faces := mi.mesh.get_faces()
+			for i in range(0, faces.size(), 3):
+				if Geometry3D.segment_intersects_triangle(from, to, faces[i], faces[i + 1], faces[i + 2]) != null:
+					blocked.append("%s@%.2f" % [mi.name, f])
+					break
+	ok(blocked.is_empty(), "the sword in the block is in plain view from the chamber camera (blocked by: %s)" % str(blocked))
+	var ring: Control = a._prompt
+	var view := get_viewport().get_visible_rect()
+	ok(ring != null and ring.visible and view.encloses(ring.get_global_rect()), "the TAKE UP YOUR SWORD ring is on screen")
+	if ring != null:
+		var at := ring.get_global_rect().get_center()
+		_touch(4, at, true)
+		await get_tree().process_frame
+		_touch(4, at, false)
+		await get_tree().process_frame
+		ok(a._taken, "a finger on the ring takes up the sword (under it: %s)" % str(get_viewport().gui_get_hovered_control()))
+	a.skip()
+	a.queue_free()
+	await get_tree().process_frame
 
 func _touch(index: int, pos: Vector2, pressed: bool) -> void:
 	var e := InputEventScreenTouch.new()

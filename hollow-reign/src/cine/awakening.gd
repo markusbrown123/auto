@@ -96,7 +96,7 @@ func _run() -> void:
 		_key.light_energy = 3.2
 		_rack_light.light_energy = 2.2
 		_veil.color.a = 0.0
-		cam.cut(Vector3(1.2, 2.3, 6.0), Vector3(0.9, 1.0, -1.0), 50.0)
+		cam.cut(Vector3(1.1, 2.35, 5.15), Vector3(0.9, 1.0, -1.0), 52.0)
 		_turn_to(_rack.position, 0.9)
 		_offer_sword()
 		return
@@ -138,8 +138,10 @@ func _run() -> void:
 	if _over:
 		return
 	# "Then it worked": the whole room, the sword in its block, the door at the back
-	cam.cut(Vector3(0.7, 2.5, 6.0), Vector3(0.8, 1.0, -1.0), 50.0)
-	cam.move(Vector3(1.2, 2.3, 6.0), Vector3(0.9, 1.0, -1.0), 6.0)
+	# (inside the ring of wall panels, whose inner face is 5.85 m out: from further back the nearest panel fills the
+	# right of a phone's wide frame and hides the block)
+	cam.cut(Vector3(0.7, 2.55, 5.2), Vector3(0.8, 1.0, -1.0), 52.0)
+	cam.move(Vector3(1.1, 2.35, 5.15), Vector3(0.9, 1.0, -1.0), 6.0)
 	Sfx.music_for("hub", "sanctuary", 2.5)
 	create_tween().tween_property(_rack_light, "light_energy", 2.2, 1.6)
 	await _story_end()

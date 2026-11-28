@@ -106,7 +106,7 @@ func _run() -> void:
 		return
 	# the block, and what stands in it
 	face(knight, _rack.position, 0.8)
-	cam.cut(Vector3(1.2, 2.3, 6.0), Vector3(0.9, 1.0, -1.0), 50.0)
+	cam.cut(Vector3(1.1, 2.35, 5.15), Vector3(0.9, 1.0, -1.0), 52.0)
 	Sfx.play("levelup", -12.0, 0.7)
 	if not await _w(0.9):
 		return

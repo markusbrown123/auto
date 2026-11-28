@@ -62,6 +62,9 @@ var _reach_w := 0.0              # 0..1: the sword hand is placed by IK on `_rea
 var _reach_at := Vector3.ZERO
 var _reach_dir := Vector3.DOWN
 var _reach_curl := -1.0          # <0: leave the fingers to the rig
+var _look_drone := false         # the knight's eyes follow the Witness while it talks and moves (Stage 4)
+var _try_w := 0.0                # 0..1: the free (left) hand closed on the door's lock bar at `_try_at` (Stage 4)
+var _try_at := Vector3.ZERO
 var _held := false               # the standing copy rides the hand
 var _held_o := Transform3D.IDENTITY
 var _held_k := 0.0               # 0..1: from the grip as taken to the rig's own way of holding it
@@ -93,6 +96,7 @@ func _ready() -> void:
 	_lay = 1.0
 	_stand_sword()
 	_dormant_witness()
+	_build_memory()
 	cam = CineCam.new()
 	add_child(cam)
 	# set shots are framed by hand (nothing is pulled in front of them); the walks ride with the knight and keep clear
@@ -267,6 +271,9 @@ func _run() -> void:
 	rev += (grille - face).normalized().cross(Vector3.UP) * 0.25
 	cam.cut(rev, face, 34.0)
 	cam.move(rev + (face - rev).normalized() * 0.15, face, 4.0)
+	# "I remember dying here.": the pause before "But" is the forebear's death at the foot of this cradle, for a moment
+	if await _wait_line(1.0, 5):
+		await _memory_flash(rev, face)
 	await _line(6)
 	if _over:
 		return
@@ -282,6 +289,66 @@ func _run() -> void:
 		return
 	_face_to(_rack.position, 1.0)
 	_offer_sword()
+
+## The inherited memory (Stage 4, the owner's direction on awakening_06): the first of the house, weathered, sat
+## down at the foot of the cradle in the alarm's red light, as the Prologue leaves them. Built hidden with the room
+## (the same look Prologue.forebear_look() dresses), seen only in the flash.
+var _memory: CineActor
+var _memory_red: OmniLight3D
+func _build_memory() -> void:
+	_memory = CineActor.new()
+	add_child(_memory)
+	_memory.build(Prologue.forebear_look(), false)
+	Prologue.weather(_memory)
+	_memory.position = SEAT
+	_memory.rotation.y = PI
+	_memory.hold("wounded", 0.0)
+	_memory.visible = false
+	_memory_red = OmniLight3D.new()
+	_memory_red.light_color = Color("#ff4a22")
+	_memory_red.light_energy = 1.6
+	_memory_red.omni_range = 7.0
+	_memory_red.position = SEAT + Vector3(0.8, 2.6, -1.6)
+	_memory_red.visible = false
+	add_child(_memory_red)
+
+## Waits `t` seconds while line `i` of the scene is still the one showing (false if the scene moved on).
+func _wait_line(t: float, i: int) -> bool:
+	await _wait(t)
+	return not _over and _line_now() == i
+
+## A white flash, under a second of the forebear low and close at the cradle's foot, a flash back to the face.
+func _memory_flash(back_at: Vector3, back_to: Vector3) -> void:
+	var white: ColorRect = UI.full(ColorRect.new())
+	white.color = Color(1.0, 0.95, 0.88, 0.0)
+	white.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ui.add_child(white)
+	Sfx.play("swell", -12.0, 0.45)
+	var t := create_tween()
+	t.tween_property(white, "color:a", 0.85, 0.09)
+	await t.finished
+	if _over:
+		white.queue_free()
+		return
+	knight.visible = false
+	_memory.visible = true
+	_memory_red.visible = true
+	cam.cut(Vector3(0.75, 0.42, 3.45), Vector3(0.0, 0.72, 1.7), 40.0)
+	cam.move(Vector3(0.85, 0.46, 3.6), Vector3(0.0, 0.74, 1.7), 1.2)
+	Sfx.play("thump", -14.0, 0.45)
+	t = create_tween()
+	t.tween_property(white, "color:a", 0.22, 0.2)       # (a haze stays over it: it is remembered, not seen)
+	t.tween_interval(0.75)
+	t.tween_property(white, "color:a", 0.85, 0.09)
+	await t.finished
+	_memory.visible = false
+	_memory_red.visible = false
+	knight.visible = true
+	cam.cut(back_at, back_to, 34.0)
+	cam.move(back_at + (back_to - back_at).normalized() * 0.15, back_to, 3.0)
+	t = create_tween()
+	t.tween_property(white, "color:a", 0.0, 0.35)
+	t.tween_callback(white.queue_free)
 
 ## The blade's own lights come up (with the holder's lamp) for the offer, and go down once it is in the hand.
 func _light_blade(time: float) -> void:
@@ -458,7 +525,7 @@ func _hide_shield() -> void:
 ## To the door, past the housing (its lamp catches as the knight goes by); the door will not open.
 func _to_door() -> void:
 	var by_housing := Vector3(-0.9, 0, -3.5)
-	var at_door := Vector3(0.15, 0, -4.55)
+	var at_door := Vector3(0.15, 0, -5.12)     # (Stage 4: close enough to put a hand on the bars)
 	# (Stage 4: from beside the door, looking back into the room: the knight comes round the cradle's head toward
 	# the lens with the room's light on them; riding behind, the camera went into the machinery by the holder and a
 	# third of the picture was black)
@@ -484,14 +551,30 @@ func _to_door() -> void:
 	# the door does not answer: the lamp over it stays red, the bars knock in their brackets
 	var door_view := at_door + Vector3(1.3, 1.45, 1.9)
 	cam.move(door_view, Vector3(-0.2, 1.7, Chamber.DOOR_Z), 1.6, 46.0)
-	await _wait(0.7)
+	_face_to(Vector3(0.1, 0, Chamber.DOOR_Z), 0.4)
+	await _wait(0.5)
 	if _over:
 		return
-	Sfx.play("thump", -6.0, 0.7)
-	Sfx.play("rattle", -8.0, 0.65)
-	_knock_bars()
-	_blink_door_lamp()
-	await _wait(1.2)
+	# Stage 4: the knight tries it: the free hand closes on the lower lock bar and hauls at it, twice; it does not give
+	_try_at = Vector3(-0.12, 1.02, Chamber.DOOR_Z + 0.47)
+	var push := create_tween()
+	push.tween_property(self, "_try_w", 1.0, 0.55).set_trans(Tween.TRANS_SINE)
+	push.parallel().tween_property(self, "_lean", 0.1, 0.55).set_trans(Tween.TRANS_SINE)
+	push.tween_callback(func():
+		Sfx.play("thump", -6.0, 0.7)
+		Sfx.play("rattle", -8.0, 0.65)
+		_knock_bars()
+		_blink_door_lamp())
+	push.tween_property(self, "_lean", 0.2, 0.18)
+	push.tween_property(self, "_lean", 0.08, 0.35).set_trans(Tween.TRANS_SINE)
+	push.tween_callback(func(): Sfx.play("thump", -10.0, 0.75))
+	push.tween_property(self, "_lean", 0.2, 0.18)
+	push.tween_property(self, "_lean", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
+	push.parallel().tween_property(self, "_try_w", 0.0, 0.6).set_trans(Tween.TRANS_SINE)
+	await push.finished
+	if _over:
+		return
+	await _wait(0.3)
 	if _over:
 		return
 	# and in the housing beside it, the light comes and goes, harder
@@ -610,6 +693,8 @@ func _witness_line(who: String, line_id: String) -> void:
 			# "Ah. At last.": the seam catches, it lifts a finger's breadth in its cup, its ring turns to the knight
 			drone.wake(0.035)
 			drone.look_at_point(head)
+			_look_drone = true
+			create_tween().tween_property(self, "_look_w", 0.9, 0.5)
 			_flicker = 0.0
 			Sfx.play("swell", -12.0, 1.6)
 		"witness_discovery_03", "witness_discovery_06":
@@ -708,6 +793,8 @@ func _small_halo() -> void:
 ## room, the daylight on them), then from behind for the last stretch, the framing the Courtyard picks up at the door.
 ## (Riding behind the whole way the camera sat close on the knight's back in the narrow passage.)
 func _leave() -> void:
+	_look_drone = false
+	_look_w = 0.0
 	Story.play("first_road", true)
 	cam.let_go()
 	cam.avoid = false
@@ -832,6 +919,8 @@ func _process(delta: float) -> void:
 	if _prompt:
 		_prompt.visible = not cam.is_position_behind(_prompt_at)
 		_prompt.position = cam.unproject_position(_prompt_at) - _prompt.size * 0.5
+	if _look_drone and drone:
+		_look = drone.global_position
 	_drive_body()
 
 ## The layers over the rig's pose: the waking body on the bed, the head turned to what it looks at, the bow and the
@@ -877,6 +966,15 @@ func _drive_body() -> void:
 		s.grip_at("Right", palm0.lerp(inv * _reach_at, w), dir)
 	if _reach_curl >= 0.0:
 		s.curl("Right", _reach_curl)
+	if _try_w > 0.001:
+		var body_l := knight.body.global_transform
+		var wrist_l: Vector3 = sk.get_bone_global_pose(s.bone["LeftHand"]).origin
+		var palm_l: Vector3 = s._back * s._palm("Left", wrist_l)
+		var axis_l := s.hand_axis("Left")
+		var bar := (body_l.basis.inverse() * Vector3.RIGHT).normalized()
+		var wl := smoothstep(0.0, 1.0, _try_w)
+		s.grip_at("Left", palm_l.lerp(body_l.affine_inverse() * _try_at, wl), bar if axis_l == Vector3.ZERO or axis_l.dot(bar) < -0.95 else axis_l.slerp(bar, wl).normalized())
+		s.curl("Left", lerpf(0.12, 0.85, wl))
 	if _held:
 		var h := _hand_xf()
 		var o := _held_o

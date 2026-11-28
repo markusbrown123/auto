@@ -879,6 +879,13 @@ static func _grave(B: Bins, rng: RandomNumberGenerator, p: Vector3, yaw: float) 
 	B.at("rubble", p).box(Vector3(0.7, 0.08, 1.6), _xf(p + Vector3(0, 0.0, 0) + Basis(Vector3.UP, yaw) * Vector3(0, 0, 0.9), yaw, 0.0, rng.randf_range(-0.04, 0.04)), _shade(rng, 0.6, 0.8))
 
 ## A paving slab lifted and broken (roots, frost or a falling stone did it).
+## A placed model is drawn only within `reach` metres.
+static func _near(n: Node, reach: float) -> void:
+	for g: Node in [n] + n.find_children("*", "GeometryInstance3D", true, false):
+		if g is GeometryInstance3D:
+			(g as GeometryInstance3D).visibility_range_end = reach
+			(g as GeometryInstance3D).visibility_range_end_margin = 6.0
+
 static func _slab(B: Bins, rng: RandomNumberGenerator, p: Vector3) -> void:
 	for k in rng.randi_range(1, 3):
 		var q := p + Vector3(rng.randf_range(-0.5, 0.5), 0, rng.randf_range(-0.5, 0.5))
@@ -1012,7 +1019,7 @@ static func _dress_box_wall(B: Bins, rng: RandomNumberGenerator, bw: Array, sec:
 		_bay(B, rng, foot, dir, face, seg, h, false, Vector3.UP, sec, weeds)
 	if bool(bw[8]):
 		# crenels on the wall-head, a corbelled band under them
-		var top := a.y + h
+		var top := h                                 # (a and e are already at the foot's height)
 		var m := int(length / 1.3)
 		var sb := B.at("stone", a, false, true)
 		var yaw := atan2(dir.x, dir.z)
@@ -1020,7 +1027,7 @@ static func _dress_box_wall(B: Bins, rng: RandomNumberGenerator, bw: Array, sec:
 			if rng.randf() < 0.1:
 				continue
 			var mh := rng.randf_range(0.8, 1.0)
-			sb.box(Vector3(0.6, mh, 0.72), _xf(a + dir * (j + 0.5) * length / m + Vector3(0, top + mh * 0.5, 0) + face * 0.25, yaw), Color.WHITE)
+			sb.box(Vector3(0.6, mh, 0.72), _xf(a + dir * (j + 0.5) * length / m + Vector3(0, top + mh * 0.5, 0) + face * 0.05, yaw), Color.WHITE)
 		B.at("trim", a, false, true).box(Vector3(0.6, 0.3, length + 0.1), _xf((a + e) * 0.5 + Vector3(0, top - 0.3, 0) + face * 0.12, yaw))
 
 # ================================================================ the places
@@ -1352,6 +1359,7 @@ static func _ward(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, host: 
 	_decal(B, Vector3(-9.4, 0, -187.0), 3.2, Color(0.05, 0.045, 0.04, 0.4), rng)
 	var lying = await route._prop(host, "statue", 3.6, Vector3(-11.8, 6.2, -179.4), 90.0, 0.0, 0)
 	if lying != null and is_instance_valid(lying):
+		_near(lying, 60.0)
 		# toppled: lying along the north wall, its feet to the west
 		(lying as Node3D).rotate_object_local(Vector3.RIGHT, PI * 0.5 - 0.06)
 		(lying as Node3D).position.y += 0.8
@@ -1421,7 +1429,9 @@ static func _ward(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, host: 
 		var pl := Vector3(sx3 * 7.4, 8.0, -241.4)
 		B.at("stone", pl, false, true).box(Vector3(2.5, 1.0, 2.5), _xf(pl + Vector3(0, 0.5, 0)))
 		B.at("trim", pl, false, true).box(Vector3(2.8, 0.25, 2.8), _xf(pl + Vector3(0, 1.1, 0)))
-		await route._prop(host, "statue", 7.2, pl + Vector3(0, 1.2, 0), sx3 * -8.0, 0.0, 1)
+		var sta = await route._prop(host, "statue", 7.2, pl + Vector3(0, 1.2, 0), sx3 * -8.0, 0.0, 1)
+		if sta != null and is_instance_valid(sta):
+			_near(sta, 80.0)      # (a 9k-triangle model: from the outer yards it is a few pixels, not worth its shadow)
 		var bz := Vector3(sx3 * 4.6, 8.0, -239.2)
 		_brazier(B, bz, 2.3, true)
 		route._lamp(host, bz + Vector3(0, 2.2, 0), FIRE, 1.7, 9.0, true)

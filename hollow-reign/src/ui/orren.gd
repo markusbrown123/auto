@@ -12,9 +12,11 @@ extends Node3D
 ##   lean     both hands on the anvil, weight forward, watching the knight
 ## When he speaks (Story.speaker == "orren") he puts down what he holds, faces the knight and talks: the head and the
 ## free hand move with the loudness of his own recorded line (ENV, measured from assets/audio/vo/orren_*.ogg, 50 ms
-## steps), since the model has no jaw to open, and each line has its own business: on "older than my entire bloodline"
+## steps), since the model has no jaw to open, and each line has its own business: on "older than my whole line"
 ## he points at the knight's sword, on "I just remind it" he takes up the hammer and taps the anvil with the words, and
-## the line about legendary weapons is said over a blade he is holding. He greets the knight when the shop opens.
+## the line about caring for a blade is said to a blade he holds, his eyes on it, not on the knight; on his first
+## line his look goes down the knight's kit and back, and he beckons once. (Plain business, no comic beats.)
+## He greets the knight when the shop opens.
 
 signal struck(at: Vector3)          # the hammer met the bar (world position): the workshop answers with sparks and sound
 
@@ -95,11 +97,16 @@ func talking() -> bool:
 
 ## How loud his line is now, 0..1.
 func voice() -> float:
-	var env: Array = ENV.get(_line, [])
-	if env.is_empty() or not talking():
+	if not talking():
 		return 0.0
 	var p: AudioStreamPlayer = Story.get("_player")
-	var at := p.get_playback_position() if p != null and p.playing else _talk_t
+	var env: Array = ENV.get(_line, [])
+	if env.is_empty() or p == null or not p.playing:
+		# a line with no recording (or a rewritten one, its old take no longer matching): a plain speaking rhythm,
+		# phrases of about a second and a half with a breath between, so the head still goes with the words
+		var ph := fmod(_talk_t, 1.8)
+		return 0.0 if ph > 1.45 else 0.55 + 0.35 * absf(sin(_talk_t * 6.3)) * smoothstep(0.0, 0.15, ph)
+	var at := p.get_playback_position()
 	var i := int(at / ENV_STEP)
 	if i < 0 or i >= env.size() - 1:
 		return 0.0
@@ -233,8 +240,16 @@ func _pose_for(a: String, t: float) -> Dictionary:
 			p.grip_r = 0.1
 			# each line has its own business (TALK_HOLDS says what is in the hand for it)
 			match _line:
+				"orren_intro_01":
+					# "So you're the one she woke. Come here. Let's see what you've brought me.": a look that goes down
+					# the knight's kit and back up (a craftsman sizing up a job), one short beckon of the free hand
+					var down := smoothstep(0.6, 1.4, _talk_t) * (1.0 - smoothstep(2.2, 3.0, _talk_t))
+					p.head_rot = _look_basis(knight_at, -0.55 * down) * Basis(Vector3.RIGHT, -0.1 * _beat_prev)
+					var beck := smoothstep(2.6, 3.0, _talk_t) * (1.0 - smoothstep(3.7, 4.2, _talk_t))
+					p.hand_r = p.hand_r.lerp(Vector3(0.26, 1.2 + 0.05 * sin(_talk_t * 7.0) * beck, -0.46), beck)
+					p.grip_r = lerpf(0.1, 0.45, beck)
 				"orren_intro_02":
-					# "That sword is older than my entire bloodline": a finger toward the knight's sword hand
+					# "That sword's older than my whole line": a finger toward the knight's sword hand
 					var at := _local(knight_at + Vector3(0.3, 1.0, 0.0))
 					var reach := (at - Vector3(0.2, 1.4, 0)).normalized()
 					p.hand_r = Vector3(0.2, 1.4, 0).lerp(Vector3(0.2, 1.4, 0) + reach * 0.62, smoothstep(0.4, 1.2, _talk_t) * (1.0 - smoothstep(3.6, 4.4, _talk_t)))
@@ -244,11 +259,16 @@ func _pose_for(a: String, t: float) -> Dictionary:
 					p.hand_r = anvil + Vector3(0.1, 0.26 + _beat_prev * 0.2, 0.12)
 					p.grip_r = 1.0
 				"orren_idle_01":
-					# "legendary weapons": said over a blade he holds up and does not look at
-					p.hand_r = Vector3(0.16, 1.26, -0.34)
-					p.hand_l = Vector3(-0.04, 1.48, -0.5)
+					# "A fine blade's no use if you don't know how to care for it.": said to the work, not the knight:
+					# the blade held across him, his eyes on it, the thumb of the free hand drawn slowly along the flat
+					p.yaw = to_knight + 0.45
+					p.chest_rot = Basis(Vector3.RIGHT, -0.12) * Basis(Vector3.UP, -0.15)
+					p.hand_r = Vector3(0.16, 1.22, -0.34)
+					var along := 0.5 - 0.5 * cos(_talk_t * 1.1)
+					p.hand_l = Vector3(0.02, 1.3, -0.4).lerp(Vector3(-0.1, 1.46, -0.56), along)
+					p.head_rot = Basis(Vector3.UP, -0.2) * Basis(Vector3.RIGHT, -0.32 - 0.04 * _beat_prev)
 					p.grip_r = 1.0
-					p.grip_l = 0.45
+					p.grip_l = 0.3
 	return p
 
 # ---------------------------------------------------------------- what he holds

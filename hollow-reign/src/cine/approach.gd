@@ -16,7 +16,7 @@ signal finished
 
 const DIST := 11.0
 const WALK := FighterRig.ROAD_SPEED
-const BEHIND := Vector3(0.75, 1.62, 3.3)
+const BEHIND := Vector3(0.35, 1.62, 3.3)       # (Stage 4: at 0.75 across, the roadside posts went by a hand from the lens)
 const AHEAD := Vector3(0.1, 1.3, -3.0)
 const LAG := 0.66                # how far the eased camera trails a walker at this pace
 ## Where each shot begins, as how much of the walk is done (shot 1 starts at 0).
@@ -90,7 +90,7 @@ func _track(snap: bool = false) -> void:
 			var lag := Vector3(0, 0, -LAG) if not cut else Vector3.ZERO
 			var rise := smoothstep(0.0, CUT_BACK, done)
 			backdrop.cam_fov = 50.0
-			backdrop.move_camera(p + _at(BEHIND + Vector3(0.2, 0.25, 0.3) * rise + lag), p + _at(AHEAD + Vector3(-0.2, 0.3, -2.0) * rise + lag), cut)
+			backdrop.move_camera(p + _at(BEHIND + Vector3(0.0, 0.25, 0.3) * rise + lag), p + _at(AHEAD + Vector3(-0.2, 0.3, -2.0) * rise + lag), cut)
 		1:
 			# low on the road ahead of them, looking back: the walker comes on down the middle of the frame
 			var along := smoothstep(CUT_BACK, CUT_REVEAL, done)

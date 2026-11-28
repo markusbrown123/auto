@@ -115,4 +115,25 @@ ROUTECOST stop 4 at (0.0, 5.5, -141.0): draws=264 primitives=379359 objects=544 
 ROUTEWALK stop 4: taking Turn the Winch (lever)
 ROUTECOST walk at (-1.1, 5.5, -141.7) (section 3): draws=253 primitives=367443 objects=253 video_mem=211.9MB
 ROUTECOST walk at (-3.0, 5.5, -143.0) (section 3): draws=160 primitives=232587 objects=160 video_mem=211.9MB
-ROUTECOST walk at (-4.9, 5.5, -144.2) (section 3): draws=153 primit
+ROUTECOST walk at (-4.9, 5.5, -144.2) (section 3): draws=153 primitives=227593 objects=153 video_mem=211.9MB
+ROUTECOST walk at (-4.4, 5.5, -145.0) (section 3): draws=119 primitives=207463 objects=119 video_mem=211.9MB
+ROUTECOST walk at (-2.3, 5.5, -145.5) (section 3): draws=97 primitives=188955 objects=97 video_mem=211.9MB
+ROUTECOST walk at (-0.2, 5.5, -146.2) (section 3): draws=148 primitives=262223 objects=148 video_mem=211.9MB
+ROUTECOST walk at (0.0, 5.5, -148.4) (section 3): draws=213 primitives=365631 objects=213 video_mem=211.9MB
+ROUTECOST walk at (0.0, 5.5, -150.7) (section 3): draws=213 primitives=361895 objects=213 video_mem=211.9MB
+ROUTECOST stop 5 at (0.0, 5.5, -152.0): draws=222 primitives=358515 objects=510 video_mem=212.0MB
+ROUTEWALK stop 5: taking The Murder Hole (treasure)
+ROUTECOST walk at (0.2, 5.5, -152.8) (section 3): draws=203 primitives=390071 objects=203 video_mem=212.0MB
+ROUTECOST walk at (0.7, 5.5, -154.9) (section 3): draws=189 primitives=380463 objects=189 video_mem=212.0MB
+ROUTECOST walk at (1.3, 5.5, -157.1) (section 3): draws=186 primitives=378387 objects=186 video_mem=212.0MB
+ROUTECOST walk at (1.6, 5.5, -159.3) (section 3): draws=181 primitives=375427 objects=181 video_mem=212.0MB
+ROUTECOST walk at (1.8, 5.6, -161.5) (section 3): draws=178 primitives=374191 objects=178 video_mem=212.0MB
+ROUTECOST walk at (2.7, 5.7, -163.3) (section 3): draws=147 primitives=367129 objects=147 video_mem=212.0MB
+ROUTECOST walk at (4.9, 5.7, -163.4) (section 3): draws=129 primitives=244377 objects=129 video_mem=212.0MB
+ROUTECOST walk at (2.9, 5.7, -163.3) (section 3): draws=201 primitives=322309 objects=201 video_mem=212.0MB
+ROUTECOST walk at (1.9, 5.6, -161.7) (section 3): draws=231 primitives=358848 objects=231 video_mem=212.0MB
+ROUTECOST walk at (1.6, 5.5, -159.5) (section 3): draws=213 primitives=331472 objects=213 video_mem=212.0MB
+ROUTECOST walk at (1.3, 5.5, -157.3) (section 3): draws=190 primitives=291604 objects=190 video_mem=212.0MB
+ROUTECOST walk at (0.8, 5.5, -155.1) (section 3): draws=186 primitives=272180 objects=186 video_mem=212.0MB
+ROUTECOST walk at (0.2, 5.5, -152.9) (section 3): draws=180 primitives=302400 objects=180 video_mem=212.0MB
+ROUTECOST stop 5 at (0.0, 5.5, -152.0): draws=224 primitives=396903 objects=549 video_mem=211.9MB

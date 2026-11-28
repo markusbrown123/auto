@@ -31,6 +31,15 @@ Stage 3 is split: 3A (route, streaming, continuous explore; running), 3B (foe en
 - **Orren's workshop**: the shop is held in it (`src/ui/workshop.gd`, built by `KnightStage` "forge"; `--noworkshop`
   gives the plain cove back); Orren is `src/ui/orren.gd` (procedural work over the `idle` clip, voice-driven head and
   hand, per-line business). Bench: `tools/dev/workshop_bench.tscn`.
+- **Direction pass, recorded** (`marketing/stage4/clips`, normal speed, 24-30 fps, Performance preset): the two
+  reverse shots, the sword's key light, the halved halo, the get-up blend and the passage shot from ahead were in code
+  before the restart and read correctly in `awakening_m`; after it: the walk to the door is now seen from beside the
+  door (riding behind, the camera went into the machinery and a third of the frame was black), and HeirReturn cuts to
+  the knight's sword side for the take (the move passed behind the knight's back) and is shot from the passage on the
+  way out (the camera rode close behind in the passage). Still not right: the dip to black between the time jump and
+  the Arrival (main.gd's swap); the cradle's bronze rails cross the seated forebear in the Prologue's last shots; the
+  Approach's first shot (gen 3) passes a roadside post that fills a third of the frame; the knight is lit dimly on the
+  walk to the door.
 - **Asked of other owners**: the Monarch's death in `duel.gd` (kneel instead of `die()`); the Witness's halo size in close
   shots (`witness_drone.gd`; the Awakening halves it locally); the Forge tab still shows the hall, not the workshop.
 

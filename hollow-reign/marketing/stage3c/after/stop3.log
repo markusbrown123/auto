@@ -1,0 +1,3 @@
+ROUTECOST stop 4 at (0.0, 5.5, -141.0): draws=245 primitives=379405 objects=525 video_mem=190.3MB
+render t=2.5 draw_calls=245 primitives=379405 objects=525 video_mem=190.3MB nodes=665
+render t=11.0 draw_calls=273 primitives=384929 objects=1135 video_mem=190.3MB nodes=665

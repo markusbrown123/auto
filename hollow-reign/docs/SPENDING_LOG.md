@@ -193,3 +193,16 @@ From the approved concept `art/concept/monarch_v2.png` (= marketing/presentation
 ## 2026-11-28: armour merchant Orren, full-body image + one Tripo model (owner approved ~1.75 cr + $1.35)
 The approved merchant concepts hide his legs, so one full-body A-pose image was made first, from `merchant_counter_portrait.png` as the reference: GPT Image 2.6, 2k, quality medium, **1.75 credits** (Higgsfield 774.08 -> 772.33). File `art/concept/merchant_v1.png` (copy in marketing/presentation_pass/concepts/merchant_full_body.png).
 Then `tools/tripo.py art/concept/merchant_v1.png merchant_v1`: model task `54ad119e-c0ac-4d19-be7a-c9ccf687082e` 110 credits, rig check free (riggable biped), rig task `26824442-c488-400d-b901-40056ea60cb8` 25 credits = **135 credits = $1.35**. Tripo balance 5,965.00 -> **5,830.00**. Graphics allocation spent: **$35.55** of $100. One attempt each, none repeated. Not yet wired into the game (Stage 4).
+
+## 2026-11-28: sound packs approved (owner buys them directly)
+The owner rejected every free recorded effect and approved the "core pair" of paid packs, to be bought by the owner
+(paid directly, outside the generation caps, like the Game Dev Hero animation bundle). Prices are from store search
+results, not the live pages (this container cannot open those stores); the owner confirms at checkout.
+- Gamemaster Audio, Pro Sound Collection: about $39.20 (Sonniss sale) to $47 (gamemasteraudio.com); take the 16-bit/44.1 kHz
+  download (about 1.8 GB). Footsteps on all surfaces, cloth foley, male and female vocal efforts, magic, sci-fi, monster
+  vocals, whooshes, UI. Licence (seller's site): royalty-free, commercial use, no attribution.
+- Double Trouble Audio, Medieval Armor Impacts & Movement: about $35 on Sonniss or A Sound Effect ($20 on the Unity Asset
+  Store; the non-Unity copy is preferred so the licence is not tied to Unity). Plate, chainmail and leather movement and
+  footsteps, armour hits, shields, parries.
+Total about $59 to $82. Raw files only in git-ignored art/sfx_src/; only processed in-game sounds are committed.
+Animation: free sources only (Mixamo with the owner's Adobe login, Quaternius CC0). No purchase.

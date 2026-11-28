@@ -206,3 +206,11 @@ results, not the live pages (this container cannot open those stores); the owner
   footsteps, armour hits, shields, parries.
 Total about $59 to $82. Raw files only in git-ignored art/sfx_src/; only processed in-game sounds are committed.
 Animation: free sources only (Mixamo with the owner's Adobe login, Quaternius CC0). No purchase.
+
+## 2026-11-28: Chapter I voice audition (owner asked for a short audition before the full set)
+Ten takes of the owner's revised lines in the cast already chosen, via `tools/voices.py ... --files=` (one job at a time):
+opening_04, opening_05 (Graham); awakening_06_m (Sterling), awakening_06_f (Victoria); witness_chamber_01, sentinel_retry_01
+(Hamish); courtyard_1_01, sentinel_memory_03 (Claire); orren_intro_01, orren_intro_02 (Barrett). Planned 15.4 credits;
+account **772.33 -> 757.18 = 15.15 credits (about $0.63)**. These are the game's takes (assets/audio/vo/), so approved ones
+are not paid twice. Unauditioned: nobody has listened to them. Audition page: https://claude.ai/artifact/25kt5rjMp1w5D7wk2BZ4z2
+Not spent: the remaining 15 Chapter I takes (about 25-27 credits) wait for the owner's approval on that page.

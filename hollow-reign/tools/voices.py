@@ -15,7 +15,7 @@ waiting on it, so a run that dies or times out picks the paid job up again inste
 for in the account's recent jobs before a new one is created. A network error fails that line, not the run.
 Pitch is lowered once, here, and noted in lowered.json. Loudness is set by measurement to the median of the earlier takes.
 
-Usage: tools/voices.py [scene_id ...] [--plan] [--only=role,role] [--ceiling=220] [--limit=N]
+Usage: tools/voices.py [scene_id ...] [--plan] [--only=role,role] [--ceiling=220] [--limit=N] [--files=a.ogg,b.ogg]
 Nobody has listened to anything this makes."""
 import hashlib, json, os, re, shutil, subprocess, sys, tempfile, time
 
@@ -210,6 +210,8 @@ def model_of(role):
     c = D["voices"][role]
     return ("inworld", c[8:]) if c.startswith("inworld:") else ("eleven", c)
 
+# --files=a.ogg,b.ogg: only these takes (an audition of a few lines from larger scenes)
+FILES = set(next((x[8:].split(",") for x in ARGS if x.startswith("--files=")), []))
 jobs = []          # (line id, role, base speaker, file)
 wanted = [a for a in sys.argv[1:] if not a.startswith("--")] or list(D["scenes"])
 seen = set()
@@ -227,7 +229,7 @@ for sid in sorted(wanted, key=lambda s: (priority(s), list(D["scenes"]).index(s)
             roles = [(sp, "")]
         for role, suffix in roles:
             f = "%s%s.ogg" % (lid, suffix)
-            if role not in D["voices"] or f in seen or (ONLY and role not in ONLY):
+            if role not in D["voices"] or f in seen or (ONLY and role not in ONLY) or (FILES and f not in FILES):
                 continue
             seen.add(f)
             recast = bool(ONLY) and JOBS.get(f, {}).get("voice") != model_of(role)[1]   # --only=: a take made with another voice is redone

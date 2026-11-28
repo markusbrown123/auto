@@ -106,6 +106,18 @@
    "role": "kept_m",
    "status": "done",
    "voice": "Malcolm (en)"
+  },
+  {
+   "credits": 0.46,
+   "file": "awakening_06_m.ogg",
+   "hash": "095aac39d763",
+   "id": "81320a20-e918-4cbd-b91f-f384bfad554a",
+   "lufs": -18.4,
+   "model": "eleven",
+   "peak": -4.8,
+   "role": "player_m",
+   "status": "done",
+   "voice": "Sterling"
   }
  ],
  "awakening_02_m.ogg": {
@@ -130,13 +142,24 @@
   "status": "done",
   "voice": "Sterling"
  },
+ "awakening_06_f.ogg": {
+  "credits": 2.0,
+  "hash": "4585f38a9bb3",
+  "id": "a2b206a3-cf93-46e1-841d-bdf1a242fa15",
+  "lufs": -18.4,
+  "model": "inworld",
+  "peak": -2.9,
+  "role": "player_f",
+  "status": "done",
+  "voice": "Victoria (en)"
+ },
  "awakening_06_m.ogg": {
   "credits": 0.46,
-  "hash": "095aac39d763",
-  "id": "81320a20-e918-4cbd-b91f-f384bfad554a",
+  "hash": "4585f38a9bb3",
+  "id": "ac96dd38-92a0-4174-9f39-80ad0b34b8b1",
   "lufs": -18.4,
   "model": "eleven",
-  "peak": -4.8,
+  "peak": -4.6,
   "role": "player_m",
   "status": "done",
   "voice": "Sterling"
@@ -192,6 +215,17 @@
   "lufs": -18.3,
   "model": "inworld",
   "peak": -3.5,
+  "role": "lyra",
+  "status": "done",
+  "voice": "Claire (en)"
+ },
+ "courtyard_1_01.ogg": {
+  "credits": 2.0,
+  "hash": "8fb396a5c269",
+  "id": "14b97d45-ea46-4e54-bb83-e54c33907243",
+  "lufs": -18.5,
+  "model": "inworld",
+  "peak": -1.7,
   "role": "lyra",
   "status": "done",
   "voice": "Claire (en)"
@@ -1274,6 +1308,50 @@
   "status": "done",
   "voice": "Hades (en)"
  },
+ "opening_04.ogg": {
+  "credits": 2.0,
+  "hash": "28d05190e97c",
+  "id": "647c222a-8f6c-4273-b4a5-5359c44d9757",
+  "lufs": -18.6,
+  "model": "inworld",
+  "peak": -1.6,
+  "role": "narrator",
+  "status": "done",
+  "voice": "Graham (en)"
+ },
+ "opening_05.ogg": {
+  "credits": 2.0,
+  "hash": "32199f91cda3",
+  "id": "69356626-0e57-404b-927f-a60f34235f65",
+  "lufs": -18.5,
+  "model": "inworld",
+  "peak": -1.8,
+  "role": "narrator",
+  "status": "done",
+  "voice": "Graham (en)"
+ },
+ "orren_intro_01.ogg": {
+  "credits": 0.46,
+  "hash": "c1de2ec418b7",
+  "id": "a8f5fd89-0a4b-4774-be90-02168471d8d7",
+  "lufs": -18.5,
+  "model": "eleven",
+  "peak": -3.5,
+  "role": "orren",
+  "status": "done",
+  "voice": "Barrett"
+ },
+ "orren_intro_02.ogg": {
+  "credits": 0.46,
+  "hash": "49c18a4e6685",
+  "id": "8c9e7a84-8bbe-4350-8ee4-8644cad55c09",
+  "lufs": -18.4,
+  "model": "eleven",
+  "peak": -3.4,
+  "role": "orren",
+  "status": "done",
+  "voice": "Barrett"
+ },
  "sentinel_death_02_m.ogg": {
   "credits": 0.46,
   "hash": "19f7b197d092",
@@ -1295,6 +1373,28 @@
   "role": "player_m",
   "status": "done",
   "voice": "Sterling"
+ },
+ "sentinel_memory_03.ogg": {
+  "credits": 2.0,
+  "hash": "52dda7ffed81",
+  "id": "b7a7d192-cbfe-4e8a-89fe-630308bba848",
+  "lufs": -18.3,
+  "model": "inworld",
+  "peak": -1.7,
+  "role": "lyra",
+  "status": "done",
+  "voice": "Claire (en)"
+ },
+ "sentinel_retry_01.ogg": {
+  "credits": 2.0,
+  "hash": "59f562a4f643",
+  "id": "d42d4511-049b-431f-a658-00f83fe5a35e",
+  "lufs": -18.4,
+  "model": "inworld",
+  "peak": -2.0,
+  "role": "witness",
+  "status": "done",
+  "voice": "Hamish (en)"
  },
  "throne_0_g3_01.ogg": {
   "credits": 2.0,
@@ -1581,6 +1681,17 @@
   "role": "widow",
   "status": "done",
   "voice": "Giselle"
+ },
+ "witness_chamber_01.ogg": {
+  "credits": 2.0,
+  "hash": "c7d1b27e9685",
+  "id": "65e45ec7-abbc-4335-bba2-58034496e69f",
+  "lufs": -18.6,
+  "model": "inworld",
+  "peak": -1.5,
+  "role": "witness",
+  "status": "done",
+  "voice": "Hamish (en)"
  },
  "witness_discovery_03_m.ogg": {
   "credits": 0.46,

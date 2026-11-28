@@ -102,6 +102,12 @@ func mark_heard(id: String) -> void:
 	if id == discovery_id():
 		Game.profile.flags[FOUND_FLAG] = true
 
+## The first chest opened in a region that has a remark for it ("companion" "chest": {region: scene}). Heard once.
+func on_chest(region_id: String) -> void:
+	var id := scene_for(str(_c().get("chest", {}).get(region_id, "")))
+	if id != "" and _wanted(id, true):
+		await _say([id])
+
 ## The duel calls these as steel is drawn and when the fight is decided.
 func enter_combat(duel: Node) -> void:
 	_duel = weakref(duel)

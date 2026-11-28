@@ -345,7 +345,47 @@ func lay_down(st: int, rig: Node3D, foe_id: String) -> void:
 	# (it has fallen: once it has come to rest it is a held pose, no longer worked on)
 	get_tree().create_timer(2.5).timeout.connect(func():
 		if is_instance_valid(rig):
-			rig.process_mode = Node.PROCESS_MODE_DISABLED)
+			rig.process_mode = Node.PROCESS_MODE_DISABLED
+			_ember(rig))
+
+## What Lyra points at after the first fight ("There's still light"): under the plate of the fallen, the light that
+## worked it has not quite gone out. It breathes, slowly. Only the latest body has a lamp (one small light, no shadow);
+## the others keep the glow alone, so a road of bodies costs one light.
+var _ember_lamp: OmniLight3D
+func _ember(rig: Node3D) -> void:
+	var r := rig as FighterRig
+	if r == null or not is_instance_valid(r) or r.chest == null or r.get_node_or_null("Ember") != null:
+		return
+	var c: Color = r.mat_glow.albedo_color if r.mat_glow != null else Color(1.0, 0.5, 0.25)
+	var g := MeshInstance3D.new()
+	g.name = "Ember"
+	var sm := SphereMesh.new()
+	sm.radius = 0.06
+	sm.height = 0.09
+	sm.radial_segments = 8
+	sm.rings = 4
+	g.mesh = sm
+	var m := Look.glow(c, 2.2)
+	g.material_override = m
+	g.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	g.process_mode = Node.PROCESS_MODE_PAUSABLE      # the body itself is held still; its light is not
+	r.add_child(g)
+	g.global_position = r.chest_point() + Vector3(0, 0.1, 0)
+	if _ember_lamp != null and is_instance_valid(_ember_lamp):
+		_ember_lamp.visible = false      # (kept, hidden: its breathing tween still holds it)
+	var l := OmniLight3D.new()
+	l.light_color = c
+	l.light_energy = 0.5
+	l.omni_range = 1.3
+	l.shadow_enabled = false
+	l.position = Vector3(0, 0.12, 0)
+	g.add_child(l)
+	_ember_lamp = l
+	var tw := g.create_tween().set_loops()
+	tw.tween_property(m, "emission_energy_multiplier", 0.7, 2.4).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(l, "light_energy", 0.15, 2.4).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(m, "emission_energy_multiplier", 2.2, 1.8).set_trans(Tween.TRANS_SINE)
+	tw.parallel().tween_property(l, "light_energy", 0.5, 1.8).set_trans(Tween.TRANS_SINE)
 
 ## A body of this run laid again in a road opened anew (it fell before the checkpoint the road is opened at).
 func _lay_again(b: Dictionary) -> void:
@@ -367,7 +407,8 @@ func _lay_again(b: Dictionary) -> void:
 		laid.append(f)
 		ex.get_tree().create_timer(0.5).timeout.connect(func():
 			if is_instance_valid(f):
-				f.process_mode = Node.PROCESS_MODE_DISABLED)
+				f.process_mode = Node.PROCESS_MODE_DISABLED
+				_ember(f))
 	var e := CourtRoute.encounter(int(b.stage), id)
 	if e.has("barricade") and not props.has(int(b.stage)):
 		var bar := RouteKit.barricade(ex.backdrop.props, ex.route.arena, _ground(e.barricade), 5.4)

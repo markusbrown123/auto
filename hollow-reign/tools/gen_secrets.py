@@ -53,7 +53,7 @@ S("cy_second_candle", "The Second Candle", "return", "courtyard", 5, TAP,
   lore_text="After the gate lost its keeper a second light appeared in the alcove. It was not carried there. The maintenance point registered one fewer body in service and, for the first time in three centuries, marked it.")
 S("cy_charcoal_sketch", "A Charcoal Sketch", "sketch", "courtyard", 4, TAP,
   "Somebody left their working-out in the gate passage.",
-  (LY, "A drawing. Not of here. Keep it. Somebody wanted a place found again.", "curious"),
+  (LY, "Not of here. Somebody wanted that place found again. Keep it.", "curious, quick; 'Keep it' firm"),
   "A square of hide, rolled tight and pushed into a crack: a charcoal drawing of a spring under a hanging tree.",
   dict(shards=1), tell="scroll", pos=(-3.0, -2.2), spoil=("crack", "hide", "roll", "scroll"),
   solution="Tap the rolled hide wedged between two stones on the left of the gate passage.",
@@ -132,7 +132,7 @@ S("th_parade_sword", "The Parade Sword of the Ninth Jubilee", "oddity", "throne"
   lore_text="Commissioned by a guild that wished to be noticed, at a weight no arm could lift twice. The blade is soft gold over softer iron; the hilt has nine enamelled royal portraits, two of them of the same king. It was carried in one procession, by four men. Orren, shown it, was silent for some time and then asked to be left alone with his anvil.")
 S("cy_cycle_count", "The Cycle Count", "cycle", "courtyard", 0, TAP,
   "The Breach looks different to someone who has already seen how this ends.",
-  (LY, "That mark was not there the first time. Or it was, and you could not see it yet. I do not know which frightens me more.", "unsteady"),
+  (LY, "That mark was not there the first time. Or you could not see it. I cannot tell which is worse.", "unsteady; the second sentence slower"),
   "A line of small cuts in the fallen wall, at eye height, and a fresh one at the end. It is made with the edge you are carrying.",
   dict(trophy="t_cycle_tally", title="ti_twice_walked", shards=6), tell="blade", pos=(2.9, -3.0), when=dict(ng_min=1), rare=True,
   spoil=("ending", "new game", "cycle", "again", "second"),

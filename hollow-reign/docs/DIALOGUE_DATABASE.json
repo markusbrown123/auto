@@ -17,13 +17,13 @@
   },
   "opening_04": {
    "speaker": "narrator",
-   "text": "But even eternity could not protect them from the people they ruled.",
-   "dir": "harder"
+   "text": "Eternity did not save them from the people they ruled.",
+   "dir": "harder, level; no rise at the end"
   },
   "opening_05": {
    "speaker": "narrator",
-   "text": "The crowns shattered. Their kingdoms fell. And for three hundred years, humanity believed itself free.",
-   "dir": "elegiac"
+   "text": "Their crowns fell. For three hundred years, we believed ourselves free.",
+   "dir": "elegiac; a breath after 'fell', almost warm on 'free'"
   },
   "opening_06": {
    "speaker": "narrator",
@@ -57,8 +57,8 @@
   },
   "awakening_06": {
    "speaker": "player",
-   "text": "Things I couldn't possibly have seen.",
-   "dir": "unsettled"
+   "text": "I remember dying here. But it wasn't me.",
+   "dir": "low, unsettled, not dramatic; a pause before 'But'"
   },
   "awakening_07": {
    "speaker": "lyra",
@@ -82,23 +82,26 @@
   },
   "courtyard_1_01": {
    "speaker": "lyra",
-   "text": "Look at its armour. Under the plate there is light. That is not rust moving it.",
-   "dir": "uneasy"
+   "text": "Look beneath the armour. There's still light. Something was keeping it alive.",
+   "dir": "uneasy, precise; slows on 'still light'"
   },
   "courtyard_2_01": {
    "speaker": "lyra",
-   "text": "It salutes before it strikes. Someone taught it manners, three hundred years ago.",
-   "dir": "wry"
+   "text": "It salutes before it strikes. Somebody drilled it. The drill is all that is left.",
+   "dir": "precise, unsettled; flat and slow on the last sentence",
+   "recorded": false
   },
   "courtyard_3_01": {
    "speaker": "lyra",
-   "text": "That winch will hold. Most things they built still do. That is rather the problem.",
-   "dir": "dry"
+   "text": "The winch should hold. Strange how much of their work still does.",
+   "dir": "matter of fact, then quieter; curious, uneasy",
+   "recorded": false
   },
   "courtyard_4_01": {
    "speaker": "lyra",
-   "text": "Careful. The big ones were made for breaking gates. You are much smaller than a gate.",
-   "dir": "light"
+   "text": "That one was built to break gates. When it swings, move aside.",
+   "dir": "quick, low; plain advice",
+   "recorded": false
   },
   "courtyard_5_01": {
    "speaker": "lyra",
@@ -556,18 +559,20 @@
   },
   "sentinel_memory_01": {
    "speaker": "archivist",
-   "text": "Record incomplete. Witness deceased. Memory retained.",
-   "dir": "calm, broken cadence"
+   "text": "Record incomplete. Observer lost. Memory retained.",
+   "dir": "calm, broken cadence; equal weight on each pair",
+   "recorded": false
   },
   "sentinel_memory_02": {
    "speaker": "archivist",
-   "text": "Subject: gate sergeant, forty-one years of service. Volunteered. He was told it would be for one winter.",
-   "dir": "even"
+   "text": "Subject: gate sergeant. Forty-one years in service. Volunteered. Term promised: one winter.",
+   "dir": "even, a clerk reading; a small gap before 'one winter'",
+   "recorded": false
   },
   "sentinel_memory_03": {
    "speaker": "lyra",
-   "text": "They were people. All of them. Remember that when the next one raises its sword.",
-   "dir": "quiet"
+   "text": "They were people. All of them.",
+   "dir": "quiet, not a lecture; then silence"
   },
   "sanctuary_return_01": {
    "speaker": "lyra",
@@ -581,13 +586,13 @@
   },
   "orren_intro_01": {
    "speaker": "orren",
-   "text": "So you're what she woke up. Hm.",
-   "dir": "gravel, unimpressed"
+   "text": "So you're the one she woke. Come here. Let's see what you've brought me.",
+   "dir": "Scots, gravel, unhurried; a craftsman sizing up a job"
   },
   "orren_intro_02": {
    "speaker": "orren",
-   "text": "That sword is older than my entire bloodline. Try not to drop it.",
-   "dir": "dry"
+   "text": "That sword's older than my whole line. Mind you don't drop it.",
+   "dir": "dry; 'Mind you' a plain warning, not a joke"
   },
   "orren_intro_03": {
    "speaker": "orren",
@@ -596,8 +601,9 @@
   },
   "orren_idle_01": {
    "speaker": "orren",
-   "text": "People spend their lives searching for legendary weapons. Most of them wouldn't know what to do with one.",
-   "dir": "dry"
+   "text": "A fine blade's no use if you don't know how to care for it.",
+   "dir": "to the work, not the knight; plain",
+   "recorded": false
   },
   "rebirth_0_01": {
    "speaker": "lyra",
@@ -866,8 +872,9 @@
   },
   "witness_discovery_05": {
    "speaker": "witness",
-   "text": "And to rather less than I ought. They took a good deal out of me before they shut that door.",
-   "dir": "lighter than it should be"
+   "text": "And rather less than I ought. They cut a good deal out of me before they shut me away.",
+   "dir": "lighter than it should be; the smile goes on 'shut me away'",
+   "recorded": false
   },
   "witness_discovery_06": {
    "speaker": "player",
@@ -876,8 +883,9 @@
   },
   "witness_discovery_07": {
    "speaker": "witness",
-   "text": "If I knew that, I should be a happier ornament. Lift me down. I weigh very little, and I know this road.",
-   "dir": "brisk"
+   "text": "If I knew, I should be a happier ornament. Lift me out. I weigh very little, and I know this road.",
+   "dir": "brisk; 'Lift me out' a request, never an order",
+   "recorded": false
   },
   "witness_discovery_08": {
    "speaker": "lyra",
@@ -891,21 +899,31 @@
   },
   "witness_call_01": {
    "speaker": "lyra",
-   "text": "Wait. That housing by the door. It is on no plan I hold.",
-   "dir": "puzzled, wary",
+   "text": "The door won't open. That device beside it... it isn't on any of my plans.",
+   "dir": "puzzled, then wary; slower after the pause, eyes on the device",
    "recorded": false
   },
   "witness_chamber_01": {
    "speaker": "witness",
-   "text": "I was set here to keep watch on that cradle. You are what it kept. I should like to see where you go.",
-   "dir": "quiet, curious, dry",
-   "recorded": false
+   "text": "They set me here to watch that cradle. You are what it kept. Let me see you safely out.",
+   "dir": "quiet, curious; 'what it kept' plain, not ominous"
   },
   "witness_chamber_02": {
    "speaker": "witness",
    "text": "This door answers to the old seals. So, as it happens, do I.",
    "dir": "brisk",
    "recorded": false
+  },
+  "w_courtyard_chest_01": {
+   "speaker": "witness",
+   "text": "Garrison issue. Somebody counted every piece out. I have a terrible feeling it was me.",
+   "dir": "dry, peering in; the last clause rueful, not comic",
+   "recorded": false
+  },
+  "sentinel_retry_01": {
+   "speaker": "witness",
+   "text": "Again, then. Take your time. Watch his blade.",
+   "dir": "low, steady; encouragement, not mockery"
   },
   "w_courtyard_approach_01": {
    "speaker": "witness",
@@ -1501,8 +1519,8 @@
   },
   "sx_cy_charcoal_sketch_01": {
    "speaker": "lyra",
-   "text": "A drawing. Not of here. Keep it. Somebody wanted a place found again.",
-   "dir": "curious",
+   "text": "Not of here. Somebody wanted that place found again. Keep it.",
+   "dir": "curious, quick; 'Keep it' firm",
    "recorded": false
   },
   "sx_bw_dark_lantern_01": {
@@ -1561,8 +1579,8 @@
   },
   "sx_cy_cycle_count_01": {
    "speaker": "lyra",
-   "text": "That mark was not there the first time. Or it was, and you could not see it yet. I do not know which frightens me more.",
-   "dir": "unsteady",
+   "text": "That mark was not there the first time. Or you could not see it. I cannot tell which is worse.",
+   "dir": "unsteady; the second sentence slower",
    "recorded": false
   },
   "monarch_g3_death_03": {
@@ -2145,6 +2163,20 @@
    "title": "The Witness",
    "kind": "discovery",
    "essential": true
+  },
+  "w_courtyard_chest": {
+   "lines": [
+    "w_courtyard_chest_01"
+   ],
+   "once": false,
+   "title": "Garrison Issue",
+   "kind": "landmark"
+  },
+  "sentinel_retry": {
+   "lines": [
+    "sentinel_retry_01"
+   ],
+   "once": true
   },
   "w_courtyard_approach": {
    "lines": [
@@ -2944,7 +2976,7 @@
   },
   "stage": {
    "courtyard": {
-    "2": [
+    "0": [
      "w_courtyard_approach"
     ],
     "3": [
@@ -3212,6 +3244,9 @@
     "id": "w_talk_choice",
     "after": "citadel"
    }
-  ]
+  ],
+  "chest": {
+   "courtyard": "w_courtyard_chest"
+  }
  }
 }

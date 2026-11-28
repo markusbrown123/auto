@@ -823,6 +823,10 @@ func _resolve(o: Dictionary, prop: Node3D) -> void:
 				lines.append("%d shard%s" % [got.shards, "" if got.shards == 1 else "s"])
 			if lines.is_empty():
 				lines.append("Already emptied.")
+			elif route:
+				await Companion.on_chest(str(Game.run_region().id))      # the Witness looks in: the first chest only
+				if not is_inside_tree():
+					return
 		"shrine":
 			Sfx.play("levelup", -6.0, 0.8)
 			var heal := Game.rest_at_shrine()

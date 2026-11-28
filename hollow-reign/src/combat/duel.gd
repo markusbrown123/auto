@@ -734,6 +734,7 @@ func _footwork(dt: float) -> void:
 	# the foe turns to face at its own pace: heavy things are slow to come about
 	foe_rig.rotation.y = lerp_angle(foe_rig.rotation.y, atan2(to_foe.x, to_foe.z), 1.0 - exp(-dt * 7.0))
 
+const MEMORY_SILENCE := 2.6   # seconds of silence after a guardian's memory record, before anyone remarks on it
 const FINISH_HOLD := 2.8      # seconds from the killing blow to the first of the last words (was 3.4)
 func _finish(won: bool) -> void:
 	if _result_sent:
@@ -745,7 +746,10 @@ func _finish(won: bool) -> void:
 		# last words, what the dead leave behind, and then what the companions make of it
 		if _voice_key != "" and not story.get("quiet_end", false):
 			await Story.play(_voice_key + "_death")
+			var remembered := Story.pending(_voice_key + "_memory")
 			await Story.play(_voice_key + "_memory")
+			if remembered and is_inside_tree():
+				await get_tree().create_timer(MEMORY_SILENCE).timeout     # nobody speaks: the record is left to sit
 		if not story.get("quiet_end", false):
 			await Companion.on_victory(str(foe.id))
 		if not is_inside_tree():

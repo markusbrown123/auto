@@ -42,8 +42,8 @@ scene("opening",
  (N, "Once, men begged the gods to spare them from death.", "slow, grave"),
  (N, "Then men became gods.", "quiet awe"),
  (N, "They built bodies that could not grow old. Thrones that could not be inherited. Kingdoms that could not escape them.", "measured"),
- (N, "But even eternity could not protect them from the people they ruled.", "harder"),
- (N, "The crowns shattered. Their kingdoms fell. And for three hundred years, humanity believed itself free.", "elegiac"),
+ (N, "Eternity did not save them from the people they ruled.", "harder, level; no rise at the end"),
+ (N, "Their crowns fell. For three hundred years, we believed ourselves free.", "elegiac; a breath after 'fell', almost warm on 'free'"),
  (N, "We were wrong.", "near whisper"))
 scene("awakening",
  (LY, "Can you hear me?", "tentative, through old machinery"),
@@ -51,17 +51,17 @@ scene("awakening",
  (LY, "Someone who has been waiting a very long time.", "relief held back"),
  (P, "What happened here?", "wary"),
  (LY, "That depends. What do you remember?", "careful"),
- (P, "Things I couldn't possibly have seen.", "unsettled"),
+ (P, "I remember dying here. But it wasn't me.", "low, unsettled, not dramatic; a pause before 'But'"),
  (LY, "Then it worked.", "quiet wonder"))
 scene("first_road",
  (LY, "The doors above you open onto what was a fortress. Walk. Your body remembers how, even if you don't.", "gentle"),
  (LY, "Tap where you want to go. If something stands in the way, it has been standing there a long time.", "dry"))
 # ---------------------------------------------------------------- chapter I: the courtyard
 scene("courtyard_0", (LY, "Those statues were kings once. People prayed to them. Some of them answered.", "low"))
-scene("courtyard_1", (LY, "Look at its armour. Under the plate there is light. That is not rust moving it.", "uneasy"))
-scene("courtyard_2", (LY, "It salutes before it strikes. Someone taught it manners, three hundred years ago.", "wry"))
-scene("courtyard_3", (LY, "That winch will hold. Most things they built still do. That is rather the problem.", "dry"))
-scene("courtyard_4", (LY, "Careful. The big ones were made for breaking gates. You are much smaller than a gate.", "light"))
+scene("courtyard_1", (LY, "Look beneath the armour. There's still light. Something was keeping it alive.", "uneasy, precise; slows on 'still light'"))
+scene("courtyard_2", (LY, "It salutes before it strikes. Somebody drilled it. The drill is all that is left.", "precise, unsettled; flat and slow on the last sentence"))
+scene("courtyard_3", (LY, "The winch should hold. Strange how much of their work still does.", "matter of fact, then quieter; curious, uneasy"))
+scene("courtyard_4", (LY, "That one was built to break gates. When it swings, move aside.", "quick, low; plain advice"))
 scene("courtyard_5", (LY, "Rest. That candle is not a candle, but it will not hurt you.", "soft"))
 scene("courtyard_6", (LY, "He is still at his post. He has not been told that there is nothing left behind him.", "sad"))
 scene("sentinel_intro",
@@ -172,18 +172,18 @@ scene("sentinel_death",
  (P, "It ended centuries ago.", "gentle"),
  ("sentinel", "Then why did no one return for me?", "a child's question"))
 scene("sentinel_memory",
- (AR, "Record incomplete. Witness deceased. Memory retained.", "calm, broken cadence"),
- (AR, "Subject: gate sergeant, forty-one years of service. Volunteered. He was told it would be for one winter.", "even"),
- (LY, "They were people. All of them. Remember that when the next one raises its sword.", "quiet"))
+ (AR, "Record incomplete. Observer lost. Memory retained.", "calm, broken cadence; equal weight on each pair"),
+ (AR, "Subject: gate sergeant. Forty-one years in service. Volunteered. Term promised: one winter.", "even, a clerk reading; a small gap before 'one winter'"),
+ (LY, "They were people. All of them.", "quiet, not a lecture; then silence"))
 scene("sanctuary_return",
  (LY, "You came back by the door this time. I prefer it.", "warm"),
  (LY, "There is a smith here. He does not trust you. He is very good. Let him look at that sword.", "amused"))
 scene("orren_intro",
- (OR, "So you're what she woke up. Hm.", "gravel, unimpressed"),
- (OR, "That sword is older than my entire bloodline. Try not to drop it.", "dry"),
+ (OR, "So you're the one she woke. Come here. Let's see what you've brought me.", "Scots, gravel, unhurried; a craftsman sizing up a job"),
+ (OR, "That sword's older than my whole line. Mind you don't drop it.", "dry; 'Mind you' a plain warning, not a joke"),
  (OR, "Bring me shards and coin. Your armour remembers its shape. I just remind it.", "matter of fact"))
 scene("orren_idle",
- (OR, "People spend their lives searching for legendary weapons. Most of them wouldn't know what to do with one.", "dry"), once=False)
+ (OR, "A fine blade's no use if you don't know how to care for it.", "to the work, not the knight; plain"), once=False)
 # ---------------------------------------------------------------- resurrection (one at random)
 for i, t in enumerate(["You returned sooner than I expected.", "Your body has recovered. Your memories are another matter.",
         "You remembered something this time, didn't you?", "The system is learning from you.", "You're becoming someone it cannot predict.",
@@ -246,9 +246,9 @@ scene("witness_discovery",
  (W, "Ah. At last. I had begun to suspect the dead were better company.", "dry, unhurried, from the dark"),
  (P, "What are you?", "guarded"),
  (W, "A witness to rather more than I would care to remember.", "wry"),
- (W, "And to rather less than I ought. They took a good deal out of me before they shut that door.", "lighter than it should be"),
+ (W, "And rather less than I ought. They cut a good deal out of me before they shut me away.", "lighter than it should be; the smile goes on 'shut me away'"),
  (P, "Who did?", "direct"),
- (W, "If I knew that, I should be a happier ornament. Lift me down. I weigh very little, and I know this road.", "brisk"),
+ (W, "If I knew, I should be a happier ornament. Lift me out. I weigh very little, and I know this road.", "brisk; 'Lift me out' a request, never an order"),
  (LY, "I do not know what that is. I do not like not knowing.", "low, to the player"),
  (W, "The voice in the walls disapproves of me. Good. We shall get on.", "amused"),
  once=False, new=True, title="The Witness", kind="discovery", essential=True)
@@ -258,17 +258,29 @@ scene("witness_discovery",
 # line (the old one names the fallen plinth) and the Witness's two lines on the cradle and the door are new and text
 # only until they are recorded. The courtyard scene above stays as the fallback for a save that never saw the chamber.
 scene("witness_call",
- (LY, "Wait. That housing by the door. It is on no plan I hold.", "puzzled, wary"),
+ (LY, "The door won't open. That device beside it... it isn't on any of my plans.", "puzzled, then wary; slower after the pause, eyes on the device"),
  once=False, new=True, title="The Witness", kind="discovery", essential=True)
 scene("witness_chamber",
- (W, "I was set here to keep watch on that cradle. You are what it kept. I should like to see where you go.", "quiet, curious, dry"),
+ (W, "They set me here to watch that cradle. You are what it kept. Let me see you safely out.", "quiet, curious; 'what it kept' plain, not ominous"),
  (W, "This door answers to the old seals. So, as it happens, do I.", "brisk"),
  once=False, new=True, title="The Witness", kind="discovery", essential=True)
 _wc = S["witness_chamber"]["lines"]
 S["witness_chamber"]["lines"] = S["witness_discovery"]["lines"][1:] + _wc
 
+# The first chest opened in a region (Companion.on_chest; once, never at every chest). Text only until recorded.
+CHEST = {}
+def wchest(region, title, *lines):
+    sid = "w_%s_chest" % region
+    scene(sid, *lines, once=False, new=True, title=title, kind="landmark")
+    CHEST[region] = sid
+wchest("courtyard", "Garrison Issue",
+ (W, "Garrison issue. Somebody counted every piece out. I have a terrible feeling it was me.", "dry, peering in; the last clause rueful, not comic"))
+# A later attempt at the Sentinel after a fall (duel.gd plays "<voice key>_retry" over the intro card, once): the Witness
+# steadies the knight. Not canon: it says nothing of dying. The Sentinel's four lines are all used (category B).
+scene("sentinel_retry", (W, "Again, then. Take your time. Watch his blade.", "low, steady; encouragement, not mockery"), new=True)
+
 # ---- the Fallen Courtyard (the Witness is found at stop 1, so its first words on the region come at stop 2)
-wstage("courtyard", 2, "approach", "The Fallen Courtyard",
+wstage("courtyard", 0, "approach", "The Fallen Courtyard",
  (W, "So this is what became of the outer court. It had a grander name when it stood. I forget it. Mercifully.", "surveying"), kind="approach")
 wstage("courtyard", 3, "gate", "Thirteen Banners",
  (W, "That gate once bore the banners of thirteen kings. Now look at it. Eternity has a peculiar sense of humour.", "dry"))
@@ -504,7 +516,7 @@ for foe, cat in SPEECH.items():
     n = sum(1 for l in L.values() if l["speaker"] == FOE_VOICE.get(foe, foe))
     assert not (cat == "A" and n), foe + " is a creature and must not speak"
     assert not (cat == "B" and n > 4), foe + " has too many lines for category B"
-COMPANION = {"discovery": {"scene": "witness_discovery", "region": "courtyard", "stage": 1}, "stage": STAGE, "boss": BOSS, "topics": TOPICS}
+COMPANION = {"discovery": {"scene": "witness_discovery", "region": "courtyard", "stage": 1}, "stage": STAGE, "boss": BOSS, "topics": TOPICS, "chest": CHEST}
 # Cast. The owner's final casting is tools/cast_final.json (2026-11-27) on top of the voices approved earlier (Witness,
 # narrator, the second generation's knight, the plain challenge of the Sentinel and Executioner). "inworld:<voice>" is the
 # Inworld model (about 2 credits a take); a bare name is a preset on the second model (about half a credit).
@@ -532,6 +544,12 @@ VOICES["kept_m"] = VOICES["player_m"]
 for _d in (PITCH, STABILITY, TEMPO):
     if "player_m" in _d:
         _d["kept_m"] = _d["player_m"]
+# Chapter I rewrite (owner's decisions 2026-11-28, docs/SCRIPT_CH1_DECISIONS.md). Each of these had a take of its old
+# words: it is text only until a take of the new words exists (the check below clears the mark when one does).
+for _lid in ["opening_04", "opening_05", "awakening_06", "courtyard_1_01", "courtyard_2_01", "courtyard_3_01", "courtyard_4_01",
+             "sentinel_memory_01", "sentinel_memory_02", "sentinel_memory_03", "orren_intro_01", "orren_intro_02", "orren_idle_01",
+             "witness_discovery_05", "witness_discovery_07"]:
+    L[_lid]["recorded"] = False
 # A line written after its speaker was last recorded is text-only until tools/voices.py records it: that tool keeps
 # assets/audio/vo/takes.json (file -> hash of the text it was recorded from). A new line counts as recorded when a
 # take of exactly its current text exists (for the knight's lines, the male take).

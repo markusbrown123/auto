@@ -863,7 +863,11 @@ func t_companion() -> void:
 	ok(few, "category B guardians have at most four lines")
 	ok(Companion.speech("cathedral_beast") == "A" and Companion.speech("cinder_wyrm") == "A" and Companion.speech("hollow_soldier") == "A", "beasts, dragons and lesser foes are creatures")
 	ok(Companion.speech("ashen_sentinel") == "B" and Companion.speech("forgotten_monarch") == "C" and Companion.speech("devourer") == "D", "guardian categories")
-	ok(not Story.has_scene("sentinel_retry") and Story.has_scene("sentinel_intro") and Story.has_scene("sentinel_death"), "the Sentinel keeps only its challenge and last words")
+	var chest_id := str(Story.data.get("companion", {}).get("chest", {}).get("courtyard", ""))
+	ok(Story.has_scene(chest_id) and Companion.speakers(chest_id) == ["witness"] and not bool(Story.data.scenes[chest_id].get("once", true)), "the Courtyard's first chest has the Witness's remark (heard once, through profile.heard)")
+	# a later meeting has a retry line, but it is the Witness's: the Sentinel itself says nothing more than before
+	var retry_ok := not Story.has_scene("sentinel_retry") or Companion.speakers("sentinel_retry") == ["witness"]
+	ok(retry_ok and Story.has_scene("sentinel_intro") and Story.has_scene("sentinel_death"), "the Sentinel keeps only its challenge and last words (its retry line is the Witness's)")
 	# silent until found
 	var quiet := true
 	for id: String in Companion.pick_stage("courtyard", 0) + Companion.pick_boss_approach("ashen_sentinel") + Companion.pick_victory("ashen_sentinel") + Companion.pick_boss_approach("cathedral_beast"):

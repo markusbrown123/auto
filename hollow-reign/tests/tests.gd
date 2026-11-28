@@ -955,9 +955,9 @@ func t_inventory_settings() -> void:
 			if r.key == "element":
 				good = good and r.then_text == (str(then.element).capitalize() if then.element != null else "None")
 				continue
-			var k: float = 100.0 if r.key == "block_eff" else 1.0
+			var k: float = 100.0 if r.key in ["block_eff", "mitigation"] else 1.0
 			var d: float = (float(then[r.key]) - float(now[r.key])) * k
-			var lower_better: bool = r.key in ["swing_time", "swing_cost"]
+			var lower_better: bool = r.key in ["swing_time", "swing_cost", "shield_regen"]
 			var want := 0 if is_zero_approx(d) else (1 if (d > 0.0) != lower_better else -1)
 			good = good and is_equal_approx(float(r.delta), d) and int(r.better) == want
 		ok(good, "comparison for %s matches Stats.compute" % id)

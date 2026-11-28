@@ -269,12 +269,31 @@ var _voice_key := ""
 var _intro_talk := false
 
 
+## Where the knight and the foe stand from the duel's middle as it opens (the road stands them there before it begins).
+static func stand_off(f: Dictionary) -> Array:
+	var g := 2.5 + (float(f.rig.scale) - 1.0) * 1.5
+	return [g * 0.5, g * 0.5 + float(f.get("footwork", {"keep": 0.7}).get("keep", 0.7))]
+
+## Fought where it was met (Stage 3B): {xf: the duel's frame in the world, arena: the place's Arena, cam: the road
+## camera's transform and fov to come from}. Empty: the duel builds its own arena at the origin.
+var place := {}
+const BLEND := 1.4
+var _blend_t := -1.0
+var _blend_from := Transform3D.IDENTITY
+var _blend_fov := 50.0
+
 func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	foe = Db.foes[foe_id]
 	var region: Dictionary = Db.region_by_id.get(foe.region, Db.regions[0])
-	arena = Arena.new()
-	add_child(arena)
-	arena.build(Arena.theme_for(region.theme, str(foe.get("arena", ""))))
+	place = opts.get("place", {})
+	if not place.is_empty() and place.get("arena") is Arena and is_instance_valid(place.arena):
+		transform = place.xf
+		arena = place.arena
+	else:
+		place = {}
+		arena = Arena.new()
+		add_child(arena)
+		arena.build(Arena.theme_for(region.theme, str(foe.get("arena", ""))))
 	fx = Fx.new()
 	add_child(fx)
 	fx.ground = Color(arena.theme.floor)
@@ -337,10 +356,16 @@ func setup(foe_id: String, opts: Dictionary = {}) -> void:
 	cam = Camera3D.new()
 	cam.fov = 58.0
 	cam.near = 0.1
-	cam.far = 120.0
+	cam.far = 120.0 if place.is_empty() else 4000.0
 	add_child(cam)
 	cam.make_current()
 	director = CamDirector.new(self, cam)
+	if place.has("cam"):
+		_blend_from = place.cam
+		_blend_fov = float(place.get("fov", 50.0))
+		_blend_t = 0.0
+		cam.global_transform = _blend_from
+		cam.fov = _blend_fov
 
 	hud = DuelHud.new()
 	add_child(hud)
@@ -728,7 +753,23 @@ func _finish(won: bool) -> void:
 	finished.emit(won, sim)
 
 func _camera(delta: float) -> void:
+	if place.is_empty():
+		director.update(delta, _trauma, _clock)
+		return
+	# fought where they met: the director works in the duel's own frame (it was written for a duel at the world's
+	# origin), so for the moment it takes the frame is put there; the camera is a child and comes back with it
+	var xf := transform
+	transform = Transform3D.IDENTITY
 	director.update(delta, _trauma, _clock)
+	transform = xf
+	if _blend_t >= 0.0:
+		# from the road's own camera into the fight's, without a cut
+		_blend_t += delta
+		var w := smoothstep(0.0, 1.0, clampf(_blend_t / BLEND, 0.0, 1.0))
+		cam.global_transform = _blend_from.interpolate_with(cam.global_transform, w)
+		cam.fov = lerpf(_blend_fov, cam.fov, w)
+		if _blend_t >= BLEND:
+			_blend_t = -1.0
 
 func shake(amount: float) -> void:
 	_trauma = minf(1.0, _trauma + amount)
@@ -745,7 +786,7 @@ func sparks(at: Vector3, dir: Vector3, amount: int = 18, color: Color = Color(1.
 ## Where on the ground a body stands.
 func _feet(rig: Node3D) -> Vector3:
 	var c: Vector3 = rig.chest_point()
-	return Vector3(c.x, 0.0, c.z)
+	return Vector3(c.x, global_position.y, c.z)
 
 ## The way sparks leave a deflected blow: back against its travel across the screen, upward, and a little away from the camera.
 func _deflect_dir(a: Dictionary) -> Vector3:
@@ -899,7 +940,7 @@ func _on_ev(n: StringName, d: Dictionary) -> void:
 			Sfx.play("shield_scrape", -6.0, 0.8)
 			Game.haptic(40, 0.8)
 			if "director" in self and director:
-				director.cue("struggle", {"on": true, "at": _struggle_pt})
+				director.cue("struggle", {"on": true, "at": to_local(_struggle_pt)})
 		&"struggle_tap":
 			var u: float = float(d.n) / maxf(float(d.need), 1.0)
 			_struggle_lock(maxf(0.3, sim.b_t + 0.2))
@@ -1175,7 +1216,7 @@ func _on_strike(d: Dictionary) -> void:
 		fx.element(str(a.element), meet if str(d.result) != "hit" else player_rig.chest_point(), _deflect_dir(a))
 	match d.result:
 		"parried":
-			director.cue("clash", {"at": meet, "perfect": d.perfect})
+			director.cue("clash", {"at": to_local(meet), "perfect": d.perfect})
 			player_rig.guard()
 			player_rig.clash(meet, 0.3 if d.perfect else 0.22)
 			sparks(meet, _deflect_dir(a), Fx.BUDGET.perfect if d.perfect else Fx.BUDGET.parry, Color(1.0, 0.82, 0.5), 6.5 if d.perfect else 5.0)

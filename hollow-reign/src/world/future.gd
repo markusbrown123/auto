@@ -88,9 +88,9 @@ static func built(a: Arena, kind: String) -> ShaderMaterial:
 	return m
 
 ## The generated props' material for this region (one for each source material and region).
-static func _prop_mat(a: Arena, src: BaseMaterial3D, id: String) -> ShaderMaterial:
+static func _prop_mat(a: Arena, src: BaseMaterial3D, id: String, court: bool = false) -> ShaderMaterial:
 	var look_id: String = a.get_meta("future_look")
-	var key := "fuprop_%d_%s" % [src.get_instance_id(), look_id]
+	var key := "fuprop_%d_%s%s" % [src.get_instance_id(), look_id, "_court" if court else ""]
 	if Look._cache.has(key):
 		return Look._cache[key]
 	var lk: Dictionary = LOOKS[look_id]
@@ -103,7 +103,9 @@ static func _prop_mat(a: Arena, src: BaseMaterial3D, id: String) -> ShaderMateri
 	if orm:
 		m.set_shader_parameter("orm_tex", orm)
 	m.set_shader_parameter("tint", Color(str(lk.prop)))
-	m.set_shader_parameter("seam", Color(str(lk.seam)))
+	m.set_shader_parameter("seam", Color(str(lk.seam)).darkened(0.55) if court else Color(str(lk.seam)))
+	if court:
+		m.set_shader_parameter("seam_e", 0.9)       # the makers' light, nearly out under the fortress's stone
 	m.set_shader_parameter("snow", float(lk.get("snow", 0.0)))
 	if id in AMBER_LIT:
 		m.set_shader_parameter("key", Vector3(1.0, 0.1, -1.25))
@@ -163,12 +165,17 @@ class Kit:
 	var tools := {}
 	var rng := RandomNumberGenerator.new()
 	var into: Node3D               # where the merged meshes go (the arena unless a section is being built)
+	## Building the continuous Courtyard (a section of src/world/court_route.gd or its far layer): the walls, towers,
+	## beacons, masts and doors are its masonry (`_court_*` below) and CourtDress dresses each section on commit.
+	var court := false
+	var walls: Array = []          # (court) each wall as laid, for CourtDress
 
 	func _init(arena: Arena, parent: Node3D = null) -> void:
 		a = arena
 		into = parent if parent != null else Future._host(arena)
 		lk = Future.LOOKS[a.get_meta("future_look")]
 		rng.seed = hash(str(a.get_meta("future_look")) + "future")
+		court = CourtDress.wanted(into)
 
 	func tool(nm: String) -> SurfaceTool:
 		if not tools.has(nm):
@@ -185,8 +192,13 @@ class Kit:
 		return Color(str(lk.seam))
 
 	func commit() -> void:
+		if court:
+			CourtDress.retexture(into)
 		for nm: String in tools:
-			var mat: Material
+			var mat: Material = CourtDress.kit_mat(nm, a) if court else null
+			if mat != null:
+				Highland._commit(into, "Fu_" + nm, tools[nm], mat, nm in ["pale", "alloy", "wood", "iron"])
+				continue
 			match nm:
 				"bark": mat = Look.stone(Color("#2a241e"), 0.5, 0.95, "bark")
 				"ice": mat = Look.flat(Color("#a8d0e8"), 0.14, 0.2)
@@ -198,6 +210,8 @@ class Kit:
 				"lamp": mat = Look.glow(Color(str(lk.lamp)).lerp(Color.WHITE, 0.25), 3.2)
 				_: mat = Future.built(a, "pale" if nm.begins_with("pale") else "alloy")
 			Highland._commit(into, "Fu_" + nm, tools[nm], mat, nm == "pale" or nm == "alloy")
+		if court:
+			CourtDress.dress(self)
 
 # ---------------------------------------------------------------- shapes
 static func _box(sf: SurfaceTool, size: Vector3, at: Vector3, basis: Basis = Basis.IDENTITY) -> void:
@@ -211,6 +225,9 @@ static func _yaw(deg: float) -> Basis:
 ## A bulkhead wall from `from` to `to` on the ground: tall plates leaning back from the arena between alloy ribs, a
 ## flat cap, a kerb, and a line of light under the cap on some plates. `gaps` is the chance a plate is down.
 static func bulkhead(k: Kit, from: Vector3, to: Vector3, h: float, far: bool = true, gaps: float = 0.0, lean: float = 7.0, centre: Vector3 = Vector3.ZERO) -> void:
+	if k.court:
+		_court_wall(k, from, to, h, far, gaps, lean, centre)
+		return
 	var dir := (to - from).normalized()
 	var out := Vector3(-dir.z, 0, dir.x)
 	if out.dot(from + to - centre * 2.0) < 0.0:
@@ -263,6 +280,9 @@ static func monolith(k: Kit, at: Vector3, h: float, w: float, yaw: float = 0.0, 
 
 ## A spire: a hexagonal taper in three setbacks with alloy collars, slits of light up its faces and fins near the head.
 static func spire(k: Kit, at: Vector3, h: float, r: float, far: bool = true, broken: bool = false, turn: float = 0.0) -> void:
+	if k.court:
+		_court_tower(k, at, h, r, far, broken, turn)
+		return
 	var pale := k.pale(far)
 	var alloy := k.alloy(far)
 	var y := 0.0
@@ -299,6 +319,9 @@ static func mast(k: Kit, at: Vector3, h: float, far: bool = true, blade: float =
 		at = Corridor.clear(at, 0.3, "mast")
 		if at == Vector3.INF:
 			return
+	if k.court:
+		_court_post(k, at, h)
+		return
 	var alloy := k.alloy(far)
 	Highland._prism(alloy, at, 0.09, 0.05, h, 5)
 	Highland._prism(alloy, at, 0.26, 0.12, 0.22, 5)
@@ -312,6 +335,9 @@ static func beacon(k: Kit, at: Vector3, h: float, yaw: float = 0.0) -> void:
 		at = Corridor.clear(at, 0.5, "beacon")
 		if at == Vector3.INF:
 			return
+	if k.court:
+		_court_brazier(k, at, h, yaw)
+		return
 	var b := _yaw(yaw)
 	var alloy := k.alloy(false)
 	for i in 3:
@@ -369,7 +395,7 @@ static func ring(k: Kit, at: Vector3, r: float, thick: float, a0: float = 0.5, a
 	Highland._arc(ring_sf, r, a0, a1, sec, 36)
 	Highland._arc(chan_sf, r, a0 + 0.08, a1 - 0.08, chan, 36)
 	Highland._commit(k.into, "FuRing", ring_sf, built(k.a, "pale"), not far).position = at
-	Highland._commit(k.into, "FuRingLight", chan_sf, Look.glow(k.seam(), float(k.lk.get("lit_e", 2.4))), false).position = at
+	Highland._commit(k.into, "FuRingLight", chan_sf, Look.glow(k.seam().darkened(0.5) if k.court else k.seam(), 0.7 if k.court else float(k.lk.get("lit_e", 2.4))), false).position = at
 
 # ---------------------------------------------------------------- props, lights, land
 ## Stands a kit model on the ground at `pos`, `height` tall, its front turned to `yaw` degrees (0 faces +Z, the
@@ -421,7 +447,7 @@ static func prop(a: Arena, id: String, height: float, pos: Vector3, yaw: float =
 			for si in mi.mesh.get_surface_count():
 				var src := mi.get_active_material(si) as BaseMaterial3D
 				if src != null and src.albedo_texture != null:
-					mi.set_surface_override_material(si, _prop_mat(a, src, id))
+					mi.set_surface_override_material(si, _prop_mat(a, src, id, CourtDress.wanted(_host(a))))
 		# background: coarser detail early, and coarser still away from the ring
 		mi.lod_bias = (0.4 if d < 12.0 else 0.2) * (0.45 if perf else 1.0)
 		if id in COARSE:
@@ -732,6 +758,9 @@ static func drift(k: Kit, at: Vector3, size: Vector3, yaw: float = 0.0) -> void:
 
 ## A console: a low desk of alloy with a sloped face and a strip of readouts, most of them dead.
 static func console(k: Kit, at: Vector3, yaw: float, w: float = 2.6) -> void:
+	if k.court:
+		_court_table(k, at, yaw, w)
+		return
 	var b := _yaw(yaw)
 	_box(k.alloy(true), Vector3(w, 0.8, 0.7), at + Vector3(0, 0.4, 0), b)
 	_box(k.pale(true), Vector3(w * 0.96, 0.08, 0.6), at + b * Vector3(0, 0.92, 0.08), b * Basis(Vector3.RIGHT, deg_to_rad(18.0)))
@@ -757,6 +786,9 @@ static func plates(k: Kit, from: Vector3, to: Vector3, h: float, slots: String =
 
 ## A door in an interior wall at `at` (the middle of its sill), facing +Z: frame, two dark leaves, a seam of light.
 static func door(k: Kit, at: Vector3, w: float, h: float) -> void:
+	if k.court:
+		_court_gate(k, at, w, h)
+		return
 	var alloy := k.alloy(true)
 	for sx: float in [-1.0, 1.0]:
 		Highland._beam(alloy, at + Vector3(sx * (w * 0.5 + 0.5), 0, 0.2), at + Vector3(sx * (w * 0.42 + 0.4), h + 0.3, 0.2), 0.9, 1.1)
@@ -990,3 +1022,224 @@ static func _throne(a: Arena, k: Kit) -> void:
 	for b: Vector3 in [Vector3(-4.4, 0, -6.0), throne_beacon_east, Vector3(-4.4, 0, 5.0), Vector3(4.4, 0, 5.0)]:
 		beacon(k, b, 2.6, 0.0)
 		lamp(a, b + Vector3(0, 2.2, 0), fire, 1.8, 8.5, true)
+
+# ================================================================ the continuous Courtyard's masonry (Kit.court)
+## In the continuous Courtyard (src/world/court_route.gd, Stage 3C) the kit's walls, towers, beacons, masts and doors
+## are the fortress's masonry: the walls keep their footprint, height and breaks but are coursed stone with a plinth,
+## string courses, a corbelled parapet with merlons, arrow slits and stepped buttresses; towers are round with a
+## gallery, crenels and a slate cone (or a broken crown); beacons are iron braziers; masts are lantern posts and banner
+## poles; the door is a gate of three receding orders. Where the masonry is broken the makers' metal shows through,
+## with a little of its light. Materials are CourtDress's (stone, trim, roof, wood, iron, cloth, flame).
+
+## A curtain wall from `from` to `to`: same arguments as `bulkhead`. Recorded in `k.walls` for CourtDress.
+static func _court_wall(k: Kit, from: Vector3, to: Vector3, h: float, far: bool, gaps: float, lean: float, centre: Vector3) -> void:
+	var dir := (to - from).normalized()
+	var out := Vector3(-dir.z, 0, dir.x)
+	if out.dot(from + to - centre * 2.0) < 0.0:
+		var t := from
+		from = to
+		to = t
+		dir = -dir
+		out = -out
+	var flat := Basis(dir, Vector3.UP, out)
+	var b := Basis(dir, deg_to_rad(lean * 0.3)) * flat
+	var length := from.distance_to(to)
+	var n := maxi(1, int(round(length / 3.4)))
+	var seg := length / n
+	var th := 1.3 if h < 15.0 else 2.0
+	var pale := k.pale(far)
+	var trim := k.alloy(far)
+	var tops: Array = []
+	for i in n:
+		var foot := from + dir * (i + 0.5) * seg
+		var down := k.rng.randf() < gaps
+		var ph := h * (k.rng.randf_range(0.42, 0.68) if down else k.rng.randf_range(0.9, 0.97))
+		tops.append(-ph if down else ph)
+		_box(pale, Vector3(seg + 0.02, ph, th), foot + b * Vector3(0, ph * 0.5, 0), b)
+		if down:
+			# the broken top: courses stepped back where the stones came away; the makers' metal inside
+			for s in 3:
+				var w := seg * k.rng.randf_range(0.2, 0.45)
+				var x := k.rng.randf_range(-seg * 0.5 + w * 0.5, seg * 0.5 - w * 0.5)
+				var sh := k.rng.randf_range(0.3, 1.4)
+				_box(pale, Vector3(w, sh, th * k.rng.randf_range(0.5, 0.95)), foot + b * Vector3(x, ph + sh * 0.5 - 0.05, k.rng.randf_range(-0.15, 0.15)), b)
+			if k.rng.randf() < 0.6:
+				var mx := k.rng.randf_range(-seg * 0.3, seg * 0.3)
+				Highland._beam(k.tool("machine"), foot + b * Vector3(mx, ph * 0.6, 0), foot + b * Vector3(mx + 0.35, ph + 1.5, 0.1), 0.24, 0.32)
+				_box(k.tool("dim"), Vector3(0.05, 0.8, 0.05), foot + b * Vector3(mx + 0.2, ph + 0.4, -0.17), b)
+			continue
+		# the parapet: merlons on the outer half of the top, a corbelled band under it, a string course lower down
+		var m := maxi(2, int(seg / 1.25))
+		for j in m:
+			if k.rng.randf() < 0.12:
+				continue
+			var mh := k.rng.randf_range(0.8, 1.0)
+			_box(pale, Vector3(seg / m * 0.56, mh, th * 0.42), foot + b * Vector3(-seg * 0.5 + (j + 0.5) * seg / m, ph + mh * 0.5, th * 0.29), b)
+		_box(trim, Vector3(seg + 0.04, 0.34, th + 0.36), foot + b * Vector3(0, ph - 0.55, 0), b)
+		_box(trim, Vector3(seg + 0.04, 0.2, th + 0.2), foot + b * Vector3(0, ph * 0.56, 0), b)
+		if ph > 5.5 and i % 2 == 1:
+			# an arrow slit through the bay, with a sill and a head
+			for side: float in [-1.0, 1.0]:
+				_box(k.tool("dark"), Vector3(0.13, 1.25, 0.05), foot + b * Vector3(0, ph * 0.74, side * (th * 0.5 + 0.005)), b)
+				for dy: float in [-0.7, 0.7]:
+					_box(trim, Vector3(0.5, 0.14, 0.12), foot + b * Vector3(0, ph * 0.74 + dy, side * (th * 0.5 + 0.03)), b)
+	# stepped buttresses on the side of the place it encloses (where nobody walks), pilasters on the outer face
+	var every := 1 if h < 15.0 else 2
+	for i in n + 1:
+		if i % every != 0:
+			continue
+		var f2 := from + dir * i * seg
+		var bh := h * 0.78
+		var bp := f2 - out * (th * 0.5 + 0.85)
+		if not CourtDress.blocked(bp.x, bp.z, 0.9):
+			_box(pale, Vector3(1.05, bh * 0.42, 1.7), bp + Vector3(0, bh * 0.21, 0), flat)
+			_box(pale, Vector3(0.82, bh, 0.95), f2 - out * (th * 0.5 + 0.47) + Vector3(0, bh * 0.5, 0), flat)
+			_box(trim, Vector3(0.95, 0.22, 1.3), f2 - out * (th * 0.5 + 0.55) + Vector3(0, bh + 0.08, 0), flat * Basis(Vector3.RIGHT, -0.55))
+			_box(trim, Vector3(1.2, 0.2, 1.85), bp + Vector3(0, bh * 0.42 + 0.06, 0), flat * Basis(Vector3.RIGHT, -0.35))
+		_box(trim, Vector3(0.62, h * 0.9, 0.3), f2 + out * (th * 0.5 + 0.12) + Vector3(0, h * 0.45, 0), flat)
+	_box(trim, Vector3(length + 0.3, 0.85, th + 0.6), (from + to) * 0.5 + Vector3(0, 0.3, 0), Basis(dir, Vector3.UP, out))
+	k.walls.append({"from": from, "to": to, "h": h, "out": out, "dir": dir, "th": th, "tops": tops, "seg": seg, "far": far, "b": b})
+
+## A round tower (the kit's spire, `spire` arguments): battered foot, two string courses, a machicolated gallery on
+## corbels, crenels, a slate cone and finial; or, broken, a ragged crown with the makers' ribs standing out of it.
+static func _court_tower(k: Kit, at: Vector3, h: float, r: float, far: bool, broken: bool, turn: float) -> void:
+	var pale := k.pale(far)
+	var trim := k.alloy(far)
+	var sides := 12
+	var body := h * (0.76 if not broken else 0.86)
+	Highland._prism(pale, at, r * 1.14, r * 0.98, h * 0.12, sides, turn)
+	Highland._prism(pale, at + Vector3(0, h * 0.12, 0), r * 0.98, r * 0.9, body - h * 0.12, sides, turn)
+	for f: float in [0.12, 0.45]:
+		var rr := lerpf(r * 0.98, r * 0.9, (f - 0.12) / 0.64) + 0.14
+		Highland._prism(trim, at + Vector3(0, h * f - 0.14, 0), rr, rr, 0.28, sides, turn)
+	# slits on four sides at three heights
+	for lv in 3:
+		var y := h * (0.25 + lv * 0.17)
+		for q in 4:
+			var ang := turn + q * PI * 0.5 + lv * 0.4
+			var d := Vector3(sin(ang), 0, cos(ang))
+			var rr2 := lerpf(r * 0.98, r * 0.9, clampf((y / h - 0.12) / 0.64, 0.0, 1.0))
+			_box(k.tool("dark"), Vector3(0.16 + r * 0.02, 1.2 + r * 0.06, 0.1), at + d * (rr2 * 0.965) + Vector3(0, y, 0), Basis(Vector3.UP, ang))
+	var top := body
+	var gr := r * 1.1
+	if broken:
+		# the crown is gone: stumps of the parapet on one side, the makers' ribs standing out of the core
+		for j in sides:
+			if k.rng.randf() < 0.45:
+				continue
+			var ang2 := turn + (j + 0.5) * TAU / sides
+			var hh := k.rng.randf_range(0.4, 2.2)
+			_box(pale, Vector3(r * 0.5, hh, r * 0.3), at + Vector3(sin(ang2), 0, cos(ang2)) * r * 0.82 + Vector3(0, top + hh * 0.5 - 0.1, 0), Basis(Vector3.UP, ang2))
+		for f3 in 3:
+			var ang3 := turn + f3 * TAU / 3.0 + 0.4
+			var d3 := Vector3(sin(ang3), 0, cos(ang3)) * r * 0.3
+			Highland._beam(k.tool("machine"), at + d3 + Vector3(0, top - 1.0, 0), at + d3 * 1.3 + Vector3(0, top + h * k.rng.randf_range(0.04, 0.09), 0), r * 0.09)
+		return
+	Highland._prism(trim, at + Vector3(0, top - 1.0, 0), r * 0.9, gr, 1.0, sides, turn)
+	Highland._prism(pale, at + Vector3(0, top, 0), gr, gr, 1.1, sides, turn)
+	for j2 in sides:
+		var ang4 := turn + (j2 + 0.5) * TAU / sides
+		_box(pale, Vector3(gr * 0.3, 1.0, 0.45), at + Vector3(sin(ang4), 0, cos(ang4)) * (gr - 0.22) + Vector3(0, top + 1.6, 0), Basis(Vector3.UP, ang4))
+	var cone := maxf(h - top - 1.1, r * 1.6)
+	Highland._prism(k.tool("roof"), at + Vector3(0, top + 1.1, 0), gr * 0.86, 0.06, cone, sides, turn)
+	Highland._prism(k.tool("iron"), at + Vector3(0, top + 1.1 + cone - 0.1, 0), 0.06, 0.02, maxf(1.2, r * 0.4), 5)
+
+## An iron brazier on three legs (the kit's beacon, `beacon` arguments): its fire is the route's own lamp over it.
+static func _court_brazier(k: Kit, at: Vector3, h: float, yaw: float) -> void:
+	var iron := k.tool("iron")
+	var bowl := h * 0.52
+	var bas := _yaw(yaw)
+	for i in 3:
+		var d := bas * Vector3(sin(i * TAU / 3.0), 0, cos(i * TAU / 3.0))
+		Highland._beam(iron, at + d * 0.42 + Vector3(0, 0.02, 0), at + d * 0.16 + Vector3(0, bowl, 0), 0.055)
+		_box(iron, Vector3(0.12, 0.05, 0.12), at + d * 0.43 + Vector3(0, 0.025, 0))
+	Highland._prism(iron, at + Vector3(0, bowl * 0.45, 0), 0.25, 0.25, 0.05, 8)
+	Highland._prism(iron, at + Vector3(0, bowl, 0), 0.18, 0.5, 0.34, 8, 0.2)
+	Highland._prism(iron, at + Vector3(0, bowl + 0.31, 0), 0.54, 0.54, 0.06, 8, 0.2)
+	Highland._prism(k.tool("coal"), at + Vector3(0, bowl + 0.2, 0), 0.44, 0.38, 0.12, 8, 0.6)
+	var fh := maxf(h - bowl, 0.9) * 1.05
+	var q := QuadMesh.new()
+	q.size = Vector2(0.78, fh)
+	for c in 3:
+		k.tool("flame").append_from(q, 0, Transform3D(Basis(Vector3.UP, yaw + c * PI / 3.0), at + Vector3(0, bowl + 0.25 + fh * 0.5, 0)))
+
+## A timber lantern post by the road (the kit's mast below 4 m), or a banner pole with its standard (taller).
+static func _court_post(k: Kit, at: Vector3, h: float) -> void:
+	var wood := k.tool("wood")
+	var iron := k.tool("iron")
+	var lean := Basis(Vector3.FORWARD, k.rng.randf_range(-0.05, 0.05)) * Basis(Vector3.RIGHT, k.rng.randf_range(-0.04, 0.04))
+	if h < 4.0:
+		var top := at + lean * Vector3(0, h, 0)
+		_box(wood, Vector3(0.17, h + 0.3, 0.17), at + lean * Vector3(0, (h - 0.3) * 0.5, 0), lean)
+		_box(wood, Vector3(0.7, 0.1, 0.1), top + Vector3(0.28, -0.12, 0))
+		Highland._beam(wood, top + Vector3(0.0, -0.6, 0), top + Vector3(0.45, -0.14, 0), 0.07)
+		# the lantern, hung from the arm: a cage of iron round a small flame
+		var lp := top + Vector3(0.55, -0.55, 0)
+		Highland._beam(iron, lp + Vector3(0, 0.42, 0), top + Vector3(0.55, -0.12, 0), 0.02)
+		Highland._prism(iron, lp + Vector3(0, 0.22, 0), 0.13, 0.03, 0.14, 4, PI * 0.25)
+		Highland._prism(iron, lp + Vector3(0, -0.2, 0), 0.12, 0.12, 0.04, 4, PI * 0.25)
+		for c in 4:
+			var ang := PI * 0.25 + c * PI * 0.5
+			_box(iron, Vector3(0.02, 0.42, 0.02), lp + Vector3(sin(ang), 0, cos(ang)) * 0.12)
+		_box(k.tool("lamp"), Vector3(0.07, 0.14, 0.07), lp + Vector3(0, -0.06, 0))
+		return
+	Highland._prism(iron, at, 0.11, 0.07, h, 6)
+	_box(iron, Vector3(1.5, 0.08, 0.08), at + Vector3(0, h - 0.3, 0))
+	Highland._prism(iron, at + Vector3(0, h, 0), 0.07, 0.01, 0.5, 4)
+	var pm := PlaneMesh.new()
+	pm.size = Vector2(1.3, h * 0.5)
+	pm.subdivide_width = 2
+	pm.subdivide_depth = 6
+	k.tool("cloth").append_from(pm, 0, Transform3D(Basis(Vector3.RIGHT, PI * 0.5), at + Vector3(0, h - 0.34 - h * 0.25, 0.06)))
+
+## A great gate (the kit's door, `door` arguments): three receding orders of jambs under pointed arches of voussoirs,
+## two leaves of oak with iron straps and rings, a carved roundel over them.
+static func _court_gate(k: Kit, at: Vector3, w: float, h: float) -> void:
+	var pale := k.pale(false)
+	var trim := k.alloy(false)
+	for o in 3:
+		var ww := w * 0.5 + 0.35 + o * 0.6
+		var z := at.z + 0.45 + o * 0.5
+		var spring := at.y + h * 0.62
+		for sx: float in [-1.0, 1.0]:
+			_box(pale if o != 1 else trim, Vector3(0.62, spring - at.y, 0.6), Vector3(at.x + sx * (ww + 0.31), at.y + (spring - at.y) * 0.5, z))
+			_box(trim, Vector3(0.8, 0.3, 0.75), Vector3(at.x + sx * (ww + 0.31), spring + 0.1, z))
+		# a drop arch: two arcs of radius 1.4 ww whose centres stand 0.4 ww either side of the middle
+		var rr := ww * 1.4 + 0.31
+		var top_a := acos(0.4 * ww / rr)
+		for sx2: float in [-1.0, 1.0]:
+			var cx := at.x - sx2 * 0.4 * ww
+			var segs := 7
+			for v in segs:
+				var a0 := top_a * float(v) / segs
+				var a1 := top_a * float(v + 1) / segs
+				var p0 := Vector3(cx + sx2 * rr * cos(a0), spring + 0.25 + rr * sin(a0), z)
+				var p1 := Vector3(cx + sx2 * rr * cos(a1), spring + 0.25 + rr * sin(a1), z)
+				Highland._beam(pale if o != 1 else trim, p0, p1, 0.6, 0.6)
+	# the leaves, the straps, the rings, the roundel
+	for sx3: float in [-1.0, 1.0]:
+		_box(k.tool("wood"), Vector3(w * 0.5 - 0.04, h, 0.26), at + Vector3(sx3 * w * 0.25, h * 0.5, 0.3))
+		for y2: float in [0.12, 0.38, 0.64, 0.88]:
+			_box(k.tool("iron"), Vector3(w * 0.5 - 0.2, 0.14, 0.05), at + Vector3(sx3 * w * 0.25, h * y2, 0.45))
+		Highland._prism(k.tool("iron"), at + Vector3(sx3 * 0.45, h * 0.45, 0.46), 0.22, 0.22, 0.05, 10, 0.0, Vector3.ONE)
+	_box(pale, Vector3(w + 0.2, 0.5, 0.5), at + Vector3(0, h + 0.25, 0.35))
+	var ring := CylinderMesh.new()
+	ring.top_radius = 1.0
+	ring.bottom_radius = 1.0
+	ring.height = 0.3
+	ring.radial_segments = 16
+	ring.rings = 1
+	trim.append_from(ring, 0, Transform3D(Basis(Vector3.RIGHT, PI * 0.5), at + Vector3(0, h + 1.6, 0.4)))
+	_box(k.tool("dim"), Vector3(0.06, 1.3, 0.04), at + Vector3(0, h + 1.6, 0.57))
+
+## A guard's table and bench (the kit's console, `console` arguments).
+static func _court_table(k: Kit, at: Vector3, yaw: float, w: float) -> void:
+	var b := _yaw(yaw)
+	var wood := k.tool("wood")
+	_box(wood, Vector3(w, 0.08, 0.85), at + Vector3(0, 0.82, 0), b)
+	for sx: float in [-1.0, 1.0]:
+		for sz: float in [-1.0, 1.0]:
+			_box(wood, Vector3(0.09, 0.8, 0.09), at + b * Vector3(sx * (w * 0.5 - 0.12), 0.4, sz * 0.33), b)
+	_box(wood, Vector3(w * 0.85, 0.06, 0.32), at + b * Vector3(0, 0.45, 0.75), b * Basis(Vector3.FORWARD, 0.05))
+	Highland._prism(k.tool("iron"), at + b * Vector3(w * 0.25, 0.86, 0.1), 0.08, 0.06, 0.22, 6)
+	Highland._prism(k.tool("iron"), at + b * Vector3(-w * 0.2, 0.86, -0.15), 0.12, 0.13, 0.03, 8)

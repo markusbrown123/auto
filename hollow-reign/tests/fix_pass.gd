@@ -34,6 +34,7 @@ func run() -> void:
 	await _slice_road()
 	await _slice_save()
 	await _slice_continuous()
+	await _slice_in_place()
 	await _slice_camera()
 	_voices()
 	await _campaign()
@@ -227,8 +228,20 @@ func _slice_continuous() -> void:
 		var at: Vector3 = e.backdrop.rig.position
 		ok(at.x > 4.0 and not CourtRoute.floor_at(at.x, at.z).is_empty() and at.distance_to(CourtRoute.anchor(4)) > 8.0, "continuous: standing in the murder hole (%s)" % str(at.snapped(Vector3.ONE * 0.1)))
 		await frames(30)
+		ok(e._room.has("eye") and e.backdrop.cam.global_position.distance_to(e._room.eye) < 1.0, "continuous: inside the murder hole the camera is in the room with the knight, not behind the jamb")
 		_press(m, "Onward", 20.0)
-		ok(await _wait_stop(m, 90.0) and int(Game.run.stage) == 5, "continuous: out of the room and down the passage to the chapel")
+		# (Stage 3B) whoever holds the passage is still there: the way on runs past them, so it is back out to them
+		ok(await _wait_stop(m, 90.0) and int(Game.run.stage) == 4 and e.backdrop.rig.position.distance_to(CourtRoute.anchor(4)) < 0.3,
+			"continuous: out of the room and back to the passage's mouth, where its holder still stands")
+		var left: Array = Game.stage_options()
+		ok(left.size() == 1 and str(left[0].type) == "fight", "continuous: and the only way on now is through them (%s)" % str(left.map(func(o): return o.label)))
+		# the passage walked once they are dealt with (the duel is Stage 3B's _slice_in_place)
+		e._leaving = true
+		e._left_label = "The Gate Passage"
+		if e.life.foe_at(4):
+			e.life.foe_at(4).queue_free()
+		m._next_stage()
+		ok(await _wait_stop(m, 90.0) and int(Game.run.stage) == 5, "continuous: down the passage to the chapel")
 		ok(e.route.freed_log.has(1) and not e.route.sections.has(1), "continuous: the yard far behind has been freed (%s)" % str(e.route.freed_log))
 	# a fall: the checkpoint (the chapel, stop 6) at its anchor, through Retry
 	ok(Game.is_checkpoint("courtyard", 5) and int(Game.run.checkpoint) == 5, "continuous: the chapel is a checkpoint, passed")
@@ -668,3 +681,91 @@ func _scenes() -> void:
 		scene.queue_free()
 		await frames(2)
 	Game.new_game()
+
+# ---------------------------------------------------------------- Stage 3B: met as themselves, fought where met
+func _slice_in_place() -> void:
+	if not CourtRoute.available():
+		ok(true, "in place: the kit is missing (skipped)")
+		return
+	Game.new_game()
+	Game.profile.tutorial_done = true
+	Companion.mark_heard(Companion.discovery_id())
+	for st in 7:
+		Companion.mark_heard("courtyard_%d" % st)
+	Companion.reset_cooldown()
+	var m: Node = load("res://src/main.tscn").instantiate()
+	add_child(m)
+	await frames()
+	Game.start_run("courtyard")
+	Game.run.stage = 2
+	Game.run.checkpoint = 0
+	m.show_stage()
+	ok(await _wait_stop(m, 40.0), "in place: the road opens at the barbican")
+	var e: Explore = m.current
+	await get_tree().create_timer(1.5).timeout
+	# everyone met from here on is in the place already, where they were left
+	var post: Array = CourtRoute.encounter(2, "banneret").post
+	var ban := e.life.foe_at(2)
+	ok(ban != null and ban.visible and Vector2(ban.global_position.x, ban.global_position.z).distance_to(Vector2(float(post[0]), float(post[1]))) < 0.3,
+		"in place: the banneret stands under his banner before anyone has chosen to fight him")
+	ok(e.life.foe_at(4) != null and e.life.foe_at(6) != null, "in place: the gate passage's holder and the Sentinel are at their posts ahead already")
+	ok(e.life.notes.is_empty(), "in place: nobody was stood in view (%s)" % str(e.life.notes))
+	var opts: Array = Game.stage_options()
+	var fi := -1
+	for i in opts.size():
+		if str(opts[i].type) == "fight":
+			fi = i
+	e._choose(opts[fi], fi)
+	var t := 0.0
+	var saw_meet := false
+	while not m.current is Duel and t < 60.0:
+		saw_meet = saw_meet or (e._meet_cam and ban.global_position.distance_to(Vector3(float(post[0]), ban.global_position.y, float(post[1]))) > 0.5)
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	ok(saw_meet, "in place: the banneret steps out from under the banner to meet the knight")
+	var d = m.current
+	ok(d is Duel and m.parked == e and e.is_inside_tree() and d.arena == e.route.arena and d.place.size() > 0, "in place: the duel is fought in the road's own place (no arena of its own, the road held under it)")
+	if not d is Duel:
+		m.queue_free()
+		return
+	var kn: Vector3 = e.backdrop.rig.global_position
+	await frames(2)
+	ok(d.player_rig.global_position.distance_to(kn) < 0.35 and not e.backdrop.rig.visible, "in place: the duel's knight stands where the road's knight stood (%.2f m)" % d.player_rig.global_position.distance_to(kn))
+	ok(d.find_children("*", "Arena", false, false).is_empty(), "in place: no separate arena is built")
+	# the fight: its rules are the duel's own; here it is decided at once
+	t = 0.0
+	while d.stage != Duel.Stage.FIGHT and t < 20.0:
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	var guard := 0
+	while not d.sim.over and guard < 20:
+		d.sim._damage_boss(99999.0, {"dir": "D"})
+		guard += 1
+	var fell: Vector3 = d.foe_rig.global_position
+	ok(await _press(m, "Continue", 40.0), "in place: won, and the victory is shown over the place")
+	t = 0.0
+	while m.current != e and t < 10.0:
+		await get_tree().process_frame
+		t += get_process_delta_time()
+	ok(m.current == e and m.parked == null and e.route != null, "in place: the same road screen carries on after it (nothing rebuilt)")
+	var body: Node3D = null
+	for b: Node3D in e.life.laid:
+		if is_instance_valid(b):
+			body = b
+	ok(body != null and body.global_position.distance_to(fell) < 0.5 and body.get_parent() == e.backdrop.props, "in place: the banneret lies where he fell")
+	ok(RouteLife.fallen(2), "in place: and is remembered as fallen for this run")
+	ok(await _wait_stop(m, 60.0) and int(Game.run.stage) == 3, "in place: the knight walks on from where the fight was to the winch yard")
+	ok(is_instance_valid(body) and body.is_inside_tree(), "in place: the body is still lying there after the walk on")
+	# a road opened again in the same run (here from the winch yard) lays the fallen down again; Retry from an earlier
+	# checkpoint stands them up again
+	Explore.arrive = {}
+	m.show_stage()
+	await get_tree().create_timer(2.0).timeout
+	var e2: Explore = m.current
+	ok(e2.life.laid.size() >= 1 and e2.life.foe_at(2) == null, "in place: opened again in the same run, the banneret lies where he fell")
+	Game.run.stage = 0
+	ok(RouteLife.bodies_now().is_empty(), "in place: from a checkpoint before him, he stands again")
+	Game.run = {}
+	Explore.arrive = {}
+	m.queue_free()
+	await frames()

@@ -700,13 +700,15 @@ func _beat_fall(me: int) -> void:
 	# the sword goes into the block, and stays there: what was found goes out through it
 	_driven(arena, rack)
 	hero.release(0.9)
-	hero.set_armed(false)
-	var blade := Node3D.new()
+	# the very blade from the hand (gear model or kit model, with whatever was done to it), point down in the block
+	var blade: Node3D = hero.weapon_r.duplicate()
 	rack.add_child(blade)
-	var look: Dictionary = hero.cfg
-	var length := PropModel.weapon(blade, str(look.get("weapon_model", "")), str(look.get("weapon", "sword")), look.get("weapon_tint"), float(look.get("weapon_scale", 1.0)))
+	blade.visible = true
+	hero.set_armed(false)
+	var length: float = maxf(hero.weapon_len, 0.6)
+	blade.transform = Transform3D.IDENTITY
 	blade.rotation = Vector3(PI, 0.4, 0.06)
-	blade.position = Vector3(0, 0.42 + maxf(length, 0.6) * 0.86, 0)
+	blade.position = Vector3(0, 0.42 + length * 0.86, 0)
 	Sfx.play("swing", -6.0, 0.7)
 	Sfx.play("levelup", -8.0, 0.5)
 	var flare := create_tween()

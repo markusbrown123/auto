@@ -1788,6 +1788,56 @@ func t_court_route() -> void:
 			ok(not CourtRoute.floor_at(fp.x, fp.z).is_empty() and absf(CourtRoute.ground_y(fp.x, fp.z) - CourtRoute.anchor(i2).y) < 0.4,
 				"route: stop %d's foe (%s) stands on its paving (%s)" % [i2 + 1, str(opts[j].label), str(fp)])
 	ok(CourtRoute.section_of(CourtRoute.ENTRY.z) == 0 and CourtRoute.section_of(CourtRoute.anchor(n - 1).z) == CourtRoute.SECTIONS.size() - 1, "route: the sections cover the road from the door to the ward")
+	# Stage 3B: everyone met on the road is somewhere in it before they are met, has a reason to be there, and the fight
+	# is fought on a floor where both stand at the duel's own distances
+	for st: int in CourtRoute.ENCOUNTERS:
+		var opts2: Array = stages[st].options
+		var ids: Array = []
+		for o2: Dictionary in opts2:
+			if str(o2.type) in ["fight", "boss"]:
+				ids.append_array(o2.get("foes", [o2.foe]))
+		ok(not ids.is_empty(), "encounters: stop %d has a fight to meet" % (st + 1))
+		for id: String in ids:
+			var e := CourtRoute.encounter(st, id)
+			ok(str(e.get("why", "")).length() > 20 and str(e.how) in ["patrol", "door", "banner", "barricade", "wake", "post"], "encounters: stop %d's %s is there for a reason (%s)" % [st + 1, id, str(e.how)])
+			ok(not CourtRoute.floor_at(float(e.post[0]), float(e.post[1])).is_empty(), "encounters: %s waits on a floor before it is met" % id)
+			for q: Array in e.get("out", []) + e.get("beat", []):
+				ok(not CourtRoute.floor_at(float(q[0]), float(q[1])).is_empty(), "encounters: %s's way out is on a floor (%s)" % [id, str(q)])
+			var so: Array = Duel.stand_off(Db.foes[id])
+			var fr := CourtRoute.duel_frame(e, float(so[0]), float(so[1]))
+			var k: Vector3 = fr.knight
+			var f: Vector3 = fr.foe
+			ok(not CourtRoute.floor_at(k.x, k.z).is_empty() and not CourtRoute.floor_at(f.x, f.z).is_empty() and absf(k.y - f.y) < 0.15,
+				"encounters: %s is fought on level paving where it is met (knight %s, foe %s)" % [id, str(k.snapped(Vector3.ONE * 0.1)), str(f.snapped(Vector3.ONE * 0.1))])
+			ok(absf(k.distance_to(f) - float(so[0]) - float(so[1])) < 0.05 and (fr.xf as Transform3D).origin.distance_to(k.lerp(f, float(so[0]) / (float(so[0]) + float(so[1])))) < 0.05,
+				"encounters: %s's duel opens exactly where the two stand (Duel.stand_off)" % id)
+	ok(CourtRoute.encounter(4, "gate_colossus").how == "wake" and not CourtRoute.encounter(4, "gate_colossus").has("barricade") and CourtRoute.encounter(4, "rampart_brute").has("barricade"),
+		"encounters: at the gate passage the Breaker comes through a barricade and the Colossus wakes")
+	# the barricade's pieces come to rest off the middle of the passage, where the road runs
+	var root := Node3D.new()
+	add_child(root)
+	var ar := Arena.new()
+	ar.set_meta("future_look", "courtyard")
+	ar.theme = Arena.THEMES["courtyard"]
+	root.add_child(ar)
+	var bar := RouteKit.barricade(root, ar, Vector3.ZERO, 5.4)
+	RouteKit.broken(bar)
+	var clear := true
+	for c: Node in bar.get_children():
+		if c is Node3D and c.has_meta("to"):
+			for mi: MeshInstance3D in c.find_children("*", "MeshInstance3D", true, false):
+				var bb: AABB = (c as Node3D).transform * mi.get_aabb()
+				clear = clear and (bb.position.x > 0.55 or bb.end.x < -0.55)
+	ok(clear and bar.get_child_count() > 6, "encounters: the broken barricade leaves the way through the passage clear")
+	# a chest is a modelled thing with a lid on a hinge, the winch has a crank, a ratchet and a chain
+	var ch := RouteKit.chest(root, ar, Vector3.ZERO)
+	var w := RouteKit.winch(root, ar, Vector3(0, 0, 3), Vector3(-3, 2, 3))
+	ok(ch.get_node_or_null("Lid") != null and ch.find_children("*", "MeshInstance3D", true, false).size() >= 5, "props: the chest is modelled, its lid a part of its own")
+	ok(w.get_node_or_null("Crank") != null and w.get_node_or_null("Chain") != null and w.get_node_or_null("Pawl") != null, "props: the winch has its crank, pawl and chain")
+	var h0 := RouteKit.handle_at(w)
+	w.get_node("Crank").rotation.x = PI * 0.5
+	ok(RouteKit.handle_at(w).distance_to(h0) > 0.4, "props: the crank's handle goes round with it")
+	root.queue_free()
 
 # ------------------------------------------------------------------ sound engine: variation, polyphony, footsteps
 func t_sfx() -> void:

@@ -674,6 +674,16 @@ func _stop(e: Explore) -> bool:
 	await _wait(1.2)
 	if e.route != null:
 		say("  continuous road: knight at %s, %.0f m walked on this screen; render %s" % [str(e.backdrop.rig.position.snapped(Vector3.ONE * 0.1)), e.walked, CourtRoute.cost_line()])
+		if e.life != null:
+			# (Stage 3B) who lives here: at their posts, and nobody stood in view
+			var at_posts: Array = []
+			for st: int in e.life.foes:
+				var f = e.life.foe_at(st)
+				if f != null:
+					at_posts.append("%d:%s%s" % [st + 1, str(f.get_meta("foe", "")), "" if f.visible else " (not yet shown)"])
+			say("  on the road: %s; lying where they fell: %d" % [", ".join(at_posts), e.life.laid.filter(func(b): return is_instance_valid(b)).size()])
+			for n: String in e.life.notes:
+				_note("DEFECT a foe was stood in view: " + n)
 	audit("stop")
 	_snap("stop%d" % (stage + 1))
 	# the coin lying off the path, and anything odd in the place

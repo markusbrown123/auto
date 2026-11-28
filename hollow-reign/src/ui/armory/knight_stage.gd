@@ -29,6 +29,7 @@ var _touches := {}
 var _pinch0 := 0.0
 var _focus_p := Vector3(0, 0.95, 0)
 var _arena_hidden: Array = []
+var workshop: Workshop           # the shop's room and Orren (mood "forge"), or null
 
 func _init(bd: Backdrop, mood: String = "studio") -> void:
 	backdrop = bd
@@ -44,6 +45,12 @@ func _init(bd: Backdrop, mood: String = "studio") -> void:
 	back.material_override = _mat(BACK_SHADER, m)
 	back.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	root.add_child(back)
+	if mood == "forge" and not OS.get_cmdline_user_args().has("--noworkshop"):
+		# the shop is held in Orren's workshop (src/ui/workshop.gd): the room and the smith stand in place of the cove's
+		# back wall; the lit floor under the knight stays
+		back.visible = false
+		workshop = Workshop.new()
+		root.add_child(workshop)
 	var fl := MeshInstance3D.new()
 	var p := PlaneMesh.new()
 	p.size = Vector2(16, 9)

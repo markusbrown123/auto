@@ -79,6 +79,57 @@ const SPINE := [[80.0, -0.2], [56.0, 0.0], [44.0, 0.2], [14.0, 0.8], [0.0, 1.4],
 const FOE_X := {4: 0.4}
 const RAVINE_Z := -43.0
 
+## HOOK(Stage 3B): who is met on the road, where they are before they are met, and why they are there (src/world/route_life.gd).
+## post: where they stand or sit [x, z]; yaw: the way they face there (degrees, 0 = -Z, 90 = -X); how: what they are doing
+## (patrol: walking `beat` to and fro; door: posted in a doorway, steps out along `out`; banner: at attention under the
+## barbican's banner, salutes and steps forward; barricade: behind the barricade at `barricade`, smashes through and walks
+## out along `out`; wake: sitting dormant, rises; post: standing guard, as posted). meet: the middle of the fight where it
+## is fought [x, z] and face: the way the knight faces across it (degrees). blocks: the way on runs past them, so a
+## cache of the same stop is reached first and the knight comes back to them. by_foe: another of the stop's pool is met
+## differently. Every one of them is in the place from the start and can be seen from the road before it is met.
+const ENCOUNTERS := {
+	0: {"how": "patrol", "post": [-5.5, -72.6], "yaw": 90.0, "beat": [[-5.5, -72.6], [5.0, -72.6]], "meet": [0.0, -69.7], "face": 0.0,
+		"why": "a sentry of the old garrison, still walking the line of the breach it was set to watch"},
+	1: {"how": "door", "post": [14.0, -91.4], "yaw": 90.0, "out": [[12.2, -91.4], [11.2, -92.6]], "meet": [8.4, -93.2], "face": -90.0,
+		"why": "the stair-foot post: the way up to the wall-walk is watched from its door"},
+	2: {"how": "banner", "post": [-4.2, -124.6], "yaw": 180.0, "meet": [-2.0, -120.6], "face": 15.0,
+		"why": "the barbican's last officer, at attention under the banner he still keeps flying"},
+	4: {"how": "barricade", "post": [0.3, -167.0], "yaw": 180.0, "barricade": [0.0, -165.4], "out": [[0.2, -162.0], [0.3, -158.4]],
+		"meet": [0.3, -153.6], "face": 0.0, "blocks": true,
+		"why": "the last of the defenders, behind the barricade they threw across the gate passage",
+		"by_foe": {"gate_colossus": {"how": "wake", "post": [0.0, -167.6], "yaw": 180.0, "out": [[0.0, -162.0], [0.2, -158.4]],
+			"why": "the gate's own guardian, left sitting in the passage when the garrison fell, waiting to be needed"}}},
+	6: {"how": "post", "post": [0.0, -212.2], "yaw": 180.0, "meet": [0.0, -209.2], "face": 0.0,
+		"why": "the Sentinel, standing where he was posted, in front of the keep"},
+}
+
+## The encounter of a stop for the foe met there ({} where nobody is met).
+static func encounter(stage: int, foe_id: String = "") -> Dictionary:
+	var e: Dictionary = ENCOUNTERS.get(stage, {})
+	if e.is_empty():
+		return {}
+	var out := e.duplicate()
+	out.erase("by_foe")
+	if foe_id != "" and (e.get("by_foe", {}) as Dictionary).has(foe_id):
+		out.merge(e.by_foe[foe_id], true)
+		if out.how != "barricade":
+			out.erase("barricade")
+	return out
+
+## Where the knight and the foe stand as the duel opens, and the duel's own frame (src/combat/duel.gd `place`): the middle
+## of the fight, turned so that the knight looks along -Z. `near` and `far` are the knight's and the foe's distances
+## from the middle (Duel.stand_off).
+static func duel_frame(e: Dictionary, near: float, far: float) -> Dictionary:
+	var c := Vector3(float(e.meet[0]), 0, float(e.meet[1]))
+	c.y = ground_y(c.x, c.z)
+	var yaw := deg_to_rad(float(e.face))
+	var back := Basis(Vector3.UP, yaw) * Vector3(0, 0, 1)
+	var k := c + back * near
+	var f := c - back * far
+	k.y = ground_y(k.x, k.z)
+	f.y = ground_y(f.x, f.z)
+	return {"xf": Transform3D(Basis(Vector3.UP, yaw), c), "knight": k, "foe": f, "yaw": yaw}
+
 ## The ways on from each stop: "stage|label" (the way's label) or "stage|" (any other). World (x, z); the height is
 ## the ground's. The first point is where the knight is when the way begins (a marker, a chest, the foe's place).
 const LEGS := {
@@ -97,14 +148,16 @@ const LEGS := {
 ## Where an interaction of a stop stands in the world (in place of the road screen's own placement beside a marker):
 ## prop: the thing (x, z); stand: where the knight stands to use it; via: what is walked through on the way there.
 const SPOTS := {
-	"1|The Guardhouse": {"prop": [-14.0, -101.0], "stand": [-12.6, -101.0], "via": [[-3.0, -97.5], [-7.0, -101.2], [-9.4, -101.0]]},
-	"3|Turn the Winch": {"prop": [-6.6, -144.5], "stand": [-5.0, -144.5], "via": []},
+	"1|The Guardhouse": {"prop": [-14.0, -101.0], "stand": [-12.6, -101.0], "via": [[-3.0, -97.5], [-7.0, -101.2], [-9.4, -101.0]],
+		"room": {"door": [-8.6, -101.0], "eye": [-9.0, 6.0, -104.9], "look": [-12.8, 4.3, -100.6]}},
+	"3|Turn the Winch": {"prop": [-6.6, -144.5], "stand": [-5.65, -144.75], "via": []},
 	"3|The Well": {"prop": [6.6, -144.5], "stand": [5.0, -144.5], "via": []},
-	"4|The Murder Hole": {"prop": [6.7, -163.4], "stand": [5.0, -163.4], "via": [[1.5, -158.0], [2.0, -163.3], [3.4, -163.3]]},
+	"4|The Murder Hole": {"prop": [6.7, -163.4], "stand": [5.0, -163.4], "via": [[1.5, -158.0], [2.0, -163.3], [3.4, -163.3]],
+		"room": {"door": [3.4, -163.3], "eye": [4.2, 7.45, -165.65], "look": [6.3, 6.1, -163.2]}},
 	"5|Kneel": {"prop": [-8.7, -187.0], "stand": [-6.7, -186.6], "via": []},
 }
 ## Rooms under a roof: no turf grows in them [x0, x1, z0, z1].
-const ROOFED := [[-16.5, -7.5, -95.5, -106.5], [-12.5, -5.5, -140.0, -149.0], [2.8, 8.0, -160.5, -166.5], [-12.5, -6.0, -183.0, -191.0], [-3.5, 3.5, -127.0, -137.0], [-3.5, 3.5, -158.5, -176.0]]
+const ROOFED := [[12.4, 15.8, -89.0, -93.8], [-16.5, -7.5, -95.5, -106.5], [-12.5, -5.5, -140.0, -149.0], [2.8, 8.0, -160.5, -166.5], [-12.5, -6.0, -183.0, -191.0], [-3.5, 3.5, -127.0, -137.0], [-3.5, 3.5, -158.5, -176.0]]
 ## How far ahead (local -z) of a stop's anchor its pouches may lie, where a wall closes the place in.
 const POUCH_REACH := {4: 3.8, 3: 5.0}
 
@@ -167,7 +220,12 @@ static func spot(stage: int, label: String) -> Dictionary:
 	var via: Array = []
 	for p: Array in s.via:
 		via.append(Vector3(float(p[0]), 0, float(p[1])))
-	return {"prop": Vector3(float(s.prop[0]), 0, float(s.prop[1])), "stand": Vector3(float(s.stand[0]), 0, float(s.stand[1])), "via": via}
+	var out := {"prop": Vector3(float(s.prop[0]), 0, float(s.prop[1])), "stand": Vector3(float(s.stand[0]), 0, float(s.stand[1])), "via": via}
+	if s.has("room"):
+		var r: Dictionary = s.room
+		out["room"] = {"door": Vector3(float(r.door[0]), 0, float(r.door[1])), "eye": Vector3(float(r.eye[0]), float(r.eye[1]), float(r.eye[2])),
+			"look": Vector3(float(r.look[0]), float(r.look[1]), float(r.look[2]))}
+	return out
 
 ## The floor rectangle under (x, z), or an empty array.
 static func floor_at(x: float, z: float) -> Array:
@@ -798,13 +856,38 @@ func _portcullis(n: Node3D, gate: String, at: Vector3, w: float, h: float, open:
 	gates[gate] = g
 	return g
 
-## Raises a portcullis that is down (the winch was turned). Stage 3B gives it its sound and its weight.
-func open_gate(gate: String, secs: float = 3.0) -> void:
+## Raises a portcullis that is down (the winch was turned): it jolts as the chain takes its weight, rises in the
+## judder of a heavy thing pulled up through rusted guides, grinding, the chain running, and stops with a knock in
+## its slot. Sounds are the game's own events; nobody here has heard how they sit together.
+func open_gate(gate: String, secs: float = 3.0, quiet: bool = false) -> void:
 	var g: Node3D = gates.get(gate)
 	if g == null or not is_instance_valid(g) or bool(g.get_meta("open", false)):
 		return
 	g.set_meta("open", true)
-	create_tween().tween_property(g, "position:y", g.position.y + float(g.get_meta("rise")), secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	var y0 := g.position.y
+	var rise := float(g.get_meta("rise"))
+	if not quiet:
+		Sfx.play("thump", -6.0, 0.55)
+		Sfx.play("rattle", -8.0, 0.6)
+	var st := {"next": 0.25}
+	var tw := create_tween()
+	tw.tween_interval(0.25)
+	tw.tween_method(func(u: float):
+		# a judder on the way up: the guides catch and let go
+		g.position.y = y0 + rise * u + sin(u * 41.0) * 0.012 * (1.0 - u)
+		if not quiet and u >= float(st.next) and u < 0.98:
+			st.next = u + 0.22
+			Sfx.play("shield_scrape", -11.0, 0.5 + 0.05 * u)
+			Sfx.play("rattle", -14.0, 0.65), 0.0, 1.0, secs).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if not quiet:
+		tw.tween_callback(func():
+			Sfx.play("thump", -5.0, 0.6)
+			Sfx.play("crack", -12.0, 0.5))
+	g.set_meta("tween", tw)
+
+func gate_open(gate: String) -> bool:
+	var g = gates.get(gate)
+	return g != null and is_instance_valid(g) and bool(g.get_meta("open", false))
 
 # ================================================================ the far layer (built once, always there)
 func _far_layer() -> void:
@@ -1034,6 +1117,24 @@ func _outer(n: Node3D, k: Future.Kit) -> void:
 		Future._box(k.alloy(false), Vector3(1.0, 7.0, 0.8), Vector3(15.2, 6.7, float(z2)))
 	Future._box(k.tool("lit"), Vector3(0.06, 0.07, 44.0), Vector3(15.55, 7.0, -101.0))
 	_occluder(n, Vector3(16.4, 6.5, -101.0), Vector3(1.4, 6.4, 48.0))
+	# the stair-foot guard post against the curtain: a room the size of a sentry's, its door open on the yard, a light
+	# left burning inside (whoever keeps the stair stands in that door: ENCOUNTERS[1])
+	var gp := Vector3(14.1, 3.2, -91.4)
+	Future._box(k.pale(false), Vector3(3.0, 4.0, 0.4), gp + Vector3(0, 2.0, 2.2))
+	Future._box(k.pale(false), Vector3(3.0, 4.0, 0.4), gp + Vector3(0, 2.0, -2.2))
+	Future._box(k.pale(false), Vector3(0.4, 4.0, 1.4), gp + Vector3(-1.5, 2.0, 1.5))
+	Future._box(k.pale(false), Vector3(0.4, 4.0, 1.4), gp + Vector3(-1.5, 2.0, -1.5))
+	Future._box(k.pale(false), Vector3(0.4, 1.3, 1.6), gp + Vector3(-1.5, 3.35, 0))
+	Future._box(k.alloy(false), Vector3(3.5, 0.3, 4.9), gp + Vector3(0, 4.15, 0))
+	for sz: float in [-0.86, 0.86]:
+		Future._box(k.alloy(false), Vector3(0.5, 2.8, 0.14), gp + Vector3(-1.5, 1.4, sz))
+	Future._box(k.alloy(false), Vector3(0.55, 0.16, 1.9), gp + Vector3(-1.5, 2.76, 0))
+	Future._box(k.tool("lit"), Vector3(0.05, 0.05, 1.2), gp + Vector3(-1.78, 2.95, 0))
+	# the door leaf, swung back against the wall outside; the dark of the room behind the sentry
+	Future._box(k.tool("dark"), Vector3(0.08, 2.6, 1.5), gp + Vector3(-2.15, 1.32, 1.35), Basis(Vector3.UP, -1.25))
+	Future._box(k.tool("dark"), Vector3(0.1, 3.6, 3.9), gp + Vector3(1.35, 1.8, 0))
+	Future._box(k.alloy(false), Vector3(0.6, 0.9, 1.2), gp + Vector3(0.9, 0.45, 1.3))
+	_lamp(n, gp + Vector3(0.6, 2.6, -0.8), Color("#ffb878"), 0.9, 4.5)
 	# the stair's side wall and the wall-walk's inner rail
 	Future._box(k.alloy(false), Vector3(0.4, 1.0, 7.5), Vector3(11.8, 8.3, -113.25))
 	Future._box(k.pale(false), Vector3(0.6, 2.6, 12.0), Vector3(11.6, 4.2, -103.5))
@@ -1307,12 +1408,13 @@ func witness_hook() -> Array:
 	return [MONUMENT]
 
 ## HOOK(Stage 3B): where each fight of the road is met (the stop's anchor and the way the foe will come from).
+## (Stage 3B: the data is ENCOUNTERS; this is the short form kept for whoever reads it.)
 static func foe_spots() -> Dictionary:
-	return {0: {"enter": "climbs the breach rubble", "from": Vector3(0, 3.75, -78.5)},
-		1: {"enter": "drops from the wall-walk", "from": Vector3(13.0, 7.8, -111.0)},
-		2: {"enter": "steps out of the barbican door", "from": Vector3(0, 4.5, -128.0)},
-		4: {"enter": "the portcullis is raised by the winch; marches out of the passage", "from": Vector3(0, 5.6, -166.0)},
-		6: {"enter": "rises from kneeling", "from": Vector3(0, 8.0, -212.2)}}
+	var out := {}
+	for st: int in ENCOUNTERS:
+		var e: Dictionary = ENCOUNTERS[st]
+		out[st] = {"enter": str(e.how), "why": str(e.why), "from": Vector3(float(e.post[0]), ground_y(float(e.post[0]), float(e.post[1])), float(e.post[1]))}
+	return out
 
 ## The render cost of the frame just drawn (software renderer here; nothing has run on a phone).
 static func cost_line() -> String:

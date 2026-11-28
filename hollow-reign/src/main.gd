@@ -8,6 +8,7 @@ var _shots: Array = []
 var _shot_dir := ""
 var _t := 0.0
 var _args := {}
+var parked: Explore               # the Courtyard's road, held under a duel fought where it was met (Stage 3B)
 var _combos_before: Array = []     # sequences known when a duel began, to name the ones found in it
 
 func _ready() -> void:
@@ -62,8 +63,9 @@ const FADE_WHITE := Color(1.0, 0.97, 0.9)
 ## Replaces the screen and fades in from `from` over `fade` seconds (0: at once, for scenes that open on their own black).
 func _swap(next: Node, fade: float = 0.7, from: Color = FADE_BLACK) -> void:
 	get_tree().paused = false
-	if current:
+	if current and current != parked:
 		current.queue_free()
+	_let_road_go(next)
 	current = next
 	add_child(next)
 	_fader.color = Color(from, 1.0 if fade > 0.0 else 0.0)
@@ -79,8 +81,40 @@ func _swap_live(next: Node) -> void:
 	var old := current
 	current = next
 	add_child(next)
-	if old:
+	if old and old != parked:
 		old.queue_free()
+	_let_road_go(next)
+
+## A road held under a duel goes once the next screen is anything but a duel fought on it.
+func _let_road_go(next: Node) -> void:
+	if parked != null and is_instance_valid(parked) and not next is Duel and next != parked:
+		parked.queue_free()
+		parked = null
+
+## The road the duel is being fought on, as the duel is to take it up: where (the duel's frame), in what place (the
+## road's arena), and the camera it comes from. Empty: not fought on the road.
+func _in_place() -> Dictionary:
+	if parked == null or not is_instance_valid(parked) or parked.meeting.is_empty():
+		return {}
+	var p: Dictionary = parked.meeting.duplicate()
+	var c := get_viewport().get_camera_3d()
+	if c:
+		p["cam"] = c.global_transform
+		p["fov"] = c.fov
+	return p
+
+## Back onto the road from a duel won on it: the same place, the knight walks on from where it stood.
+func _resume_road() -> void:
+	var d := current
+	var e := parked
+	_cross_then(func():
+		parked = null
+		current = e
+		get_tree().paused = false
+		e.unpark(d)
+		if is_instance_valid(d) and d != e:
+			d.queue_free()
+		e.travel(), 0.5)
 
 ## A dissolve from the frame on screen to whatever `f` puts up, with no black between: for the continuous Courtyard,
 ## whose road and duels are the same place (the frame is held as a picture and faded off the new one).
@@ -563,6 +597,8 @@ func _next_stage() -> void:
 	if Game.advance_stage():
 		if walk_on and current is Explore and current.route != null:
 			current.travel()                # the same place: the knight walks on to the next stop
+		elif walk_on and parked != null and is_instance_valid(parked):
+			_resume_road()                  # won where it was met: the road was under the duel all along
 		elif walk_on:
 			_cross_then(show_stage)         # back from a fight onto the road where it was fought
 		else:
@@ -583,6 +619,10 @@ func _enter_duel(o: Dictionary) -> void:
 	if ready or not Game.profile.tutorial_done:
 		# (the first duel of a journey never shows one: whatever is still unread is read behind the fade)
 		if Explore.continuous() and current is Explore:
+			if current.route != null and not current.meeting.is_empty():
+				parked = current              # fought where it was met: the road stays, under the duel
+				_cross_then(func(): start_duel(o), 0.45)
+				return
 			_cross_then(func(): start_duel(o))
 		else:
 			_fade_then(func(): start_duel(o))
@@ -604,8 +644,11 @@ func start_duel(o: Dictionary) -> void:
 		Game.profile.tutorial_done = true
 		Game.save()
 		var l := Duel.new()
+		var lp := _in_place()
 		_swap(l)
-		l.setup(o.foe, {"lesson": true, "skip_intro": true})
+		l.setup(o.foe, {"lesson": true, "skip_intro": true, "place": lp})
+		if not lp.is_empty():
+			parked.park()
 		l.hud.pause_pressed.connect(func():
 			# (the pause button was dead in the lesson) leaving it unfinished leaves it to be offered again
 			Overlays.pause(l, func(): pass, func():
@@ -613,16 +656,25 @@ func start_duel(o: Dictionary) -> void:
 				Game.save()
 				Game.run = {}
 				_fade_then(show_sanctuary)))
-		l.finished.connect(func(_w, _s): _fade_then(func(): start_duel(o)))
+		l.finished.connect(func(_w, _s):
+			if parked != null and is_instance_valid(parked):
+				_cross_then(func(): start_duel(o), 0.45)
+			else:
+				_fade_then(func(): start_duel(o)))
 		return
 	var d := Duel.new()
+	var place := _in_place()
 	_swap(d)
 	var duel_opts := {"start_hp": Game.run.hp, "ng": Game.profile.ng}
+	if not place.is_empty():
+		duel_opts["place"] = place
 	if _args.has("bot"):
 		duel_opts["autoplay"] = true
 		duel_opts["bot_style"] = DuelBot.Style.SKILLED
 	_story_opts(kind, duel_opts)
 	d.setup(o.foe, duel_opts)
+	if not place.is_empty():
+		parked.park()
 	_story_hooks(kind, d, o)
 	Secrets.watch(d.sim, o)
 	d.hud.pause_pressed.connect(func():
@@ -984,8 +1036,18 @@ func _dev_boot() -> void:
 			Game.profile.tutorial_done = true
 			Companion.mark_heard(Companion.discovery_id())
 			Game.start_run("courtyard")
+			if _args.has("want"):
+				# --want=4:gate_colossus: a run whose pools put that foe at that stop (captures of each encounter)
+				var wv := str(_args.want).split(":")
+				for sd in 2000:
+					Game.run.seed = sd
+					Game.run.stage = int(wv[0])
+					if Game.stage_options().any(func(o): return str(o.get("foe", "")) == wv[1]):
+						break
+				Game.run.stage = 0
 			if _args.has("from"):
 				Game.run.stage = int(_args.from)
+				Game.run.checkpoint = Game.checkpoint_at_or_before("courtyard", int(_args.from))
 			else:
 				Explore.arrive = {"intro": true}
 			show_stage()
@@ -1243,7 +1305,7 @@ func _route_walk() -> void:
 	while is_inside_tree():
 		await get_tree().create_timer(0.4).timeout
 		for b in find_children("*", "Button", true, false):
-			if b.is_visible_in_tree() and b.text.to_lower() in ["open", "pull", "rest", "onward"]:
+			if b.is_visible_in_tree() and b.text.to_lower() in ["open", "pull", "rest", "onward", "continue"]:
 				await get_tree().create_timer(1.6).timeout
 				if is_instance_valid(b) and b.is_visible_in_tree():
 					b.pressed.emit()
@@ -1266,13 +1328,17 @@ func _route_walk() -> void:
 			pick = clampi(int(picks[stage]), 0, opts.size() - 1)
 		else:
 			for i in opts.size():
-				if not opts[i].type in ["fight", "boss"]:
+				if (opts[i].type in ["fight", "boss"]) == _args.has("fight"):
 					pick = i
 					break
 			if pick < 0:
 				pick = 0
 		var o: Dictionary = opts[pick]
 		print("ROUTEWALK stop %d: taking %s (%s)" % [stage + 1, str(o.label), str(o.type)])
+		if o.type in ["fight", "boss"] and _args.has("fight"):
+			# (--fight: met and fought where they are, by the duel's own bot (--bot))
+			current._choose(o, pick)
+			continue
 		if o.type == "boss":
 			print("ROUTEWALK the Sentinel's ward reached; walked %.0f m" % current.walked)
 			await get_tree().create_timer(4.0).timeout

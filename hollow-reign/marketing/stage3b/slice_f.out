@@ -31,3 +31,8 @@ ERROR: Condition "!is_inside_tree()" is true. Returning: false
    at: can_process (scene/main/node.cpp:902)
 [   10.5s game |    153s wall]   audio during 'character select': Master peak -6.8 mean -12.5 dB; Music peak -13.0 mean -18.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.1 mean -26.1 dB; Interface peak -35.2 mean -71.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
 [   10.5s game |    153s wall] STEP starting sword
+[   13.1s game |    238s wall]   sword in the middle: w_dawnline (wanted w_dawnline, 1 drags)
+[   13.6s game |    254s wall]   tap 'RISE' at (426, 637), target 420 x 60
+[   13.7s game |    259s wall]   saved? slot 2 exists=true  weapon=w_dawnline body=f name=Ysolde
+[   13.7s game |    259s wall]   audio during 'starting sword': Master peak -5.9 mean -11.8 dB; Music peak -11.2 mean -17.6 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.3 mean -26.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   13.7s game |    259s wall] STEP generation I

@@ -34,14 +34,16 @@ func _ready() -> void:
 	var h := 1.95 * float(look.get("scale", 1.0))
 	DirAccess.make_dir_recursive_absolute(a[1])
 	var views := {"front": Vector3(0, h * 0.55, h * 2.0), "three": Vector3(h * 1.4, h * 0.6, h * 1.4), "side": Vector3(h * 2.0, h * 0.55, 0), "back": Vector3(0, h * 0.6, -h * 2.0)}
-	var poses := ["guard", "swing", "seat", "die"] if a.size() <= 3 or a[3] == "all" else a[3].split(",")
+	var poses: Array = ["guard", "swing", "seat", "die"] if a.size() <= 3 or a[3] == "all" else Array(a[3].split(","))
 	for pose: String in poses:
 		match pose:
 			"swing":
 				rig.swing(Vector2(1, 0), 0.6)
-			"seat":
-				var seat := CineSeat.make(rig, 0.6 * rig.scale.y)
+			"seat", "slump", "kneel":
+				var seat := CineSeat.make(rig, (0.6 if pose == "seat" else 0.42) * rig.scale.y)
 				seat.amount = 1.0
+				seat.slump = 1.0 if pose != "seat" else 0.0
+				seat.kneel = pose == "kneel"
 			"die":
 				for c in rig.get_children():
 					if c is CineSeat:

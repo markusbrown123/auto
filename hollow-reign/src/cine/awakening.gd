@@ -66,6 +66,8 @@ var _held := false               # the standing copy rides the hand
 var _held_o := Transform3D.IDENTITY
 var _held_k := 0.0               # 0..1: from the grip as taken to the rig's own way of holding it
 var _lean := 0.0                 # radians: the chest bowed toward what the hand reaches for
+var _blade_key: SpotLight3D      # the light along the standing blade's face, while it waits to be taken
+var _blade_rim: OmniLight3D      # and the small one behind it
 
 func _ready() -> void:
 	process_priority = 100
@@ -119,20 +121,44 @@ func _stand_sword() -> void:
 	# how far the blade runs below the grip, from the model itself (+Y is along the blade in the weapon's frame)
 	var lo := 0.0
 	var hi := 0.0
+	var wide := Vector2.ZERO          # the blade's extent across X and across Z: the smaller is through its flat
 	for mi: MeshInstance3D in _rack_sword.find_children("*", "MeshInstance3D", true, false):
 		var into := (_rack_sword.global_transform.affine_inverse() * mi.global_transform) if mi.is_inside_tree() else _rel(mi, _rack_sword)
 		var box := into * mi.get_aabb()
 		lo = minf(lo, box.position.y)
 		hi = maxf(hi, box.end.y)
+		if box.end.y > 0.3:
+			wide = Vector2(maxf(wide.x, box.size.x), maxf(wide.y, box.size.z))
 	if hi <= 0.05:
 		hi = maxf(knight.weapon_len, 0.7)
 	var point: Node3D = _rack.get_node("SwordPoint")
 	var face := Basis(Vector3.UP, deg_to_rad(Chamber.HOLDER_YAW))
-	# blade down, its edge turned across the holder (flat toward the knight's approach)
-	var b := face * Basis(Vector3.FORWARD, PI) * Basis(Vector3.UP, PI * 0.5)
+	# blade down, its flat toward the knight's approach (and the camera that waits there). Which local axis goes
+	# through the flat differs between the kit models and the hand-modelled ones: it is measured (Stage 4: the
+	# fixed turn left the kit sword edge-on, a thin line in the dark)
+	var b := face * Basis(Vector3.FORWARD, PI) * (Basis(Vector3.UP, PI * 0.5) if wide.x < wide.y else Basis())
 	_hilt = point.global_position + Vector3(0, hi - 0.03, 0)
 	_hilt_top = _hilt + Vector3(0, -lo, 0)
 	_rack_sword.global_transform = Transform3D(b, _hilt)
+	# Stage 4: the blade has to read at once in the dark room: a narrow light along its face from the cradle's side
+	# (the steel catches it), and a small cool light behind it in the frame, so its edges stand off the bronze
+	var front := face * Vector3(0, 0, 1)
+	var mid := (point.global_position + _hilt) * 0.5
+	_blade_key = SpotLight3D.new()
+	_blade_key.light_color = Color("#fff1dc")
+	_blade_key.light_energy = 0.0
+	_blade_key.light_specular = 2.2
+	_blade_key.spot_range = 4.0
+	_blade_key.spot_angle = 13.0
+	_blade_key.spot_attenuation = 0.4
+	add_child(_blade_key)
+	_blade_key.look_at_from_position(mid + front * 1.35 + face * Vector3(-0.55, 0, 0) + Vector3(0, 1.1, 0), mid)
+	_blade_rim = OmniLight3D.new()
+	_blade_rim.light_color = Color("#bfe6ff")
+	_blade_rim.light_energy = 0.0
+	_blade_rim.omni_range = 0.9
+	_blade_rim.position = mid - front * 0.22 + Vector3(0, 0.25, 0)
+	add_child(_blade_rim)
 
 static func _rel(n: Node3D, up_to: Node3D) -> Transform3D:
 	var t := Transform3D.IDENTITY
@@ -148,6 +174,7 @@ func _dormant_witness() -> void:
 	drone = WitnessDrone.new()
 	add_child(drone)
 	drone.build()
+	_small_halo()
 	drone.dormant(Chamber.housing_cup() + Vector3(0, -0.05, 0), deg_to_rad(30.0))
 
 # ================================================================ the scene
@@ -155,6 +182,7 @@ func _run() -> void:
 	if start_at == "sword" or start_at == "door":
 		_stand_now()
 		_rack_light.light_energy = 3.0
+		_light_blade(0.0)
 		_key.light_energy = 3.2
 		_veil.color.a = 0.0
 		Story.stop()
@@ -245,6 +273,7 @@ func _run() -> void:
 	# 6. "Then it worked": the holder lights; the whole room, the sword in its cradle beside the machine
 	Sfx.music_for("hub", "sanctuary", 2.5)
 	create_tween().tween_property(_rack_light, "light_energy", 3.0, 1.8).set_trans(Tween.TRANS_SINE)
+	_light_blade(1.8)
 	Sfx.play("swell", -14.0, 0.7)
 	_frame_sword()
 	_look = _hilt
@@ -254,10 +283,22 @@ func _run() -> void:
 	_face_to(_rack.position, 1.0)
 	_offer_sword()
 
-## The shot the sword is offered in: past the knight to the holder, the whole of it lit.
+## The blade's own lights come up (with the holder's lamp) for the offer, and go down once it is in the hand.
+func _light_blade(time: float) -> void:
+	if _blade_key == null:
+		return
+	if time <= 0.0:
+		_blade_key.light_energy = 7.0
+		_blade_rim.light_energy = 1.4
+		return
+	create_tween().tween_property(_blade_key, "light_energy", 7.0, time).set_trans(Tween.TRANS_SINE)
+	create_tween().tween_property(_blade_rim, "light_energy", 1.4, time).set_trans(Tween.TRANS_SINE)
+
+## The shot the sword is offered in: over the knight's shoulder to the holder, close enough that the blade is the
+## brightest line in the picture (Stage 4: from further back it read as a thin dark line in the dark room).
 func _frame_sword() -> void:
-	cam.cut(Vector3(-0.35, 1.7, 2.75), Vector3(1.55, 1.0, -0.45), 46.0)
-	cam.move(Vector3(-0.15, 1.65, 2.6), Vector3(1.6, 1.0, -0.5), 6.0)
+	cam.cut(Vector3(-0.2, 1.68, 2.15), Vector3(1.85, 1.0, -0.5), 40.0)
+	cam.move(Vector3(-0.05, 1.6, 1.95), Vector3(1.9, 0.95, -0.52), 6.0)
 
 ## Gets up out of the cradle on the get-up clip, slowed; the lying layer hands over to it as it starts.
 func _get_up() -> void:
@@ -279,9 +320,10 @@ func _get_up() -> void:
 		return
 	# standing: the rig's own stance takes over from the clip's last frame
 	knight.time_scale = 1.0
-	knight.release(1.1)
+	# (the clip ends standing: a short blend onto the rig's own stance, so nothing is seen to slide; it was 1.1 s)
+	knight.release(0.45)
 	create_tween().tween_property(knight, "breath_hold", 0.25, 2.0)
-	await _wait(0.9)
+	await _wait(0.5)
 	get_tree().create_timer(2.5).timeout.connect(func(): knight.breath_hold = -1.0)
 
 ## Straight to standing at the foot of the bed (dev starts).
@@ -354,6 +396,8 @@ func _take_sword() -> void:
 	# the grip: from here the blade is in the hand
 	_held = true
 	_held_o = _hand_xf().affine_inverse() * _rack_sword.global_transform
+	create_tween().tween_property(_blade_key, "light_energy", 1.5, 1.2)
+	create_tween().tween_property(_blade_rim, "light_energy", 0.0, 1.2)
 	knight.set_armed(true)
 	knight.weapon_r.visible = false
 	_hide_shield()
@@ -454,7 +498,8 @@ func _to_door() -> void:
 	_face_to(cup, 1.0)
 	_look = cup
 	_look_w = 1.0
-	var ots := _over_shoulder(knight.position + Vector3(0, 1.7, 0), cup, 1.35, -0.45)
+	# (further back and wider than the knight's shoulder: close in, the back filled half the picture)
+	var ots := _over_shoulder(knight.position + Vector3(0, 1.7, 0), cup, 1.85, -0.8)
 	cam.cut(ots[0], ots[1], 42.0)
 	cam.move(ots[0] + (cup - ots[0]).normalized() * 0.35, cup, 4.0)
 	Story.play("witness_call", true)
@@ -646,16 +691,34 @@ func _open_door() -> void:
 		return
 	_leave()
 
-## Out through the door and down the passage, the camera behind, the Witness ahead; to the outer doorway.
+## The Witness's light is drawn for a figure seen at a distance; in this room's close shots its halo (the manifest's
+## 30 cm) covered the knight's shoulder. Here it is drawn at half that: far off, WitnessDrone still keeps it a
+## readable size on screen. (A setting of WitnessDrone's own would be better: see docs/AAA_STAGES.md, Stage 4.)
+const HALO := 0.15
+func _small_halo() -> void:
+	var f = drone.get("_flare")
+	if f is MeshInstance3D and (f as MeshInstance3D).mesh is QuadMesh:
+		((f as MeshInstance3D).mesh as QuadMesh).size = Vector2(HALO, HALO)
+		drone.set("_flare_d", HALO)
+
+## Out through the door and down the passage, the Witness ahead; to the outer doorway.
+## Stage 4: the passage is shot first from ahead (the knight and the Witness coming toward the lens out of the dark
+## room, the daylight on them), then from behind for the last stretch, the framing the Courtyard picks up at the door.
+## (Riding behind the whole way the camera sat close on the knight's back in the narrow passage.)
 func _leave() -> void:
 	Story.play("first_road", true)
-	# (the passage is 2.6 m wide: the camera rides close behind and a little high, inside it, not pulled through the frames)
-	cam.ride(knight, Vector3(0.3, 1.8, 2.7), Vector3(0.0, 1.35, -3.0))
-	cam.avoid = true
-	cam.fov = 50.0
+	cam.let_go()
+	cam.avoid = false
+	cam.cut(Vector3(0.5, 1.55, -8.4), Vector3(0.0, 1.45, -4.6), 44.0)
+	cam.move(Vector3(0.45, 1.6, -9.6), Vector3(0.0, 1.45, -6.4), maxf(knight.position.distance_to(Vector3(0, 0, -7.2)) / WALK, 1.0))
 	for i in Chamber.EXIT_PATH.size():
 		var p: Vector3 = Chamber.EXIT_PATH[i]
 		var last := i == Chamber.EXIT_PATH.size() - 1
+		if last:
+			# the last stretch from behind, high enough to clear the frames' sills, far enough to see the doorway
+			cam.ride(knight, Vector3(0.35, 2.0, 3.3), Vector3(0.0, 1.4, -3.0))
+			cam.avoid = true
+			cam.fov = 50.0
 		if last and not handoff:
 			var d := knight.position.distance_to(p)
 			var tw2 := create_tween()

@@ -1059,6 +1059,17 @@ static func _lights(a: Arena) -> void:
 	bounce.light_specular = 0.15
 	bounce.position = Vector3(0.6, 3.3, 2.2)
 	a.add_child(bounce)
+	# Stage 4: the door end of the room (the walk past the housing to the door) was black in the moving shots: a low,
+	# cool spill there, as if from the door lamp's housing and the plating, so the figure reads against the wall
+	var door_fill := OmniLight3D.new()
+	door_fill.name = "DoorFill"
+	door_fill.light_color = Color("#9fb0b4")
+	door_fill.light_energy = 0.55
+	door_fill.omni_range = 5.5
+	door_fill.omni_attenuation = 1.2
+	door_fill.light_specular = 0.1
+	door_fill.position = Vector3(-0.6, 2.7, DOOR_Z + 2.2)
+	a.add_child(door_fill)
 	for spec: Array in [[2, Color("#ffcf96")], [10, Color("#d8e6e0")]]:
 		var bx := bay_xf(int(spec[0]))
 		var m := OmniLight3D.new()

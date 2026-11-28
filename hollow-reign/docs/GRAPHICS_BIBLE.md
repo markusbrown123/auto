@@ -346,3 +346,68 @@ Walking (142 samples every 2 s): 49-185 draws (mean 115), 75k-436k primitives (m
 and the opening's scenes cached) the road read 220-242 MB. The slice's courtyard duel budget was 400-550k primitives and about
 150 MB: primitives are under it everywhere; video memory is 0-30 MB over it on the road alone and about 90 MB over it late in a full
 run (the far layer, five sections' textures, and whatever the earlier scenes left cached).
+
+## The Courtyard's environment detail (Stage 3C, 2026-11-28; `src/world/court_dress.gd`)
+Owner direction: places that feel AAA (attention to detail, atmosphere, storytelling; Dark Souls, Elden Ring and
+Destiny 1 as the bar; nothing copied). For the continuous Courtyard only, the rule above changes to: **a medieval
+fortress on the surface, the far future kept underneath it and quiet** (the makers' metal where masonry broke, the
+kit's props with their seams nearly out, the ring on the keep, the broken tether at sea). The duel arenas, the high
+road and the other regions are untouched (the court mode only switches on under a `CourtRoute`).
+Judged on software-rendered captures only (`marketing/stage3c/`); nothing has been seen on a device.
+
+**How it hooks in.** No change to `court_route.gd`. `Future.Kit` notices that its host is a `CourtRoute` section
+(`SectionN`) or its far layer (`Far`) and runs in *court mode*: `bulkhead`, `spire`, `beacon`, `mast`, `door` and
+`console` build masonry instead (`Future._court_wall/_court_tower/_court_brazier/_court_post/_court_gate/_court_table`),
+`commit` swaps the materials, joins the kit's wood/iron/dark tools into one mesh and calls `CourtDress.dress(kit)`,
+which dresses that section (in the background, inside the route's per-frame build budget) or the keep's face.
+`CourtDress.build(route, i, host)` is the same entry if Stage 3B ever wants to call it by hand.
+
+**Materials** (no new textures: the patterns are worked out in the shaders; the grain is the rock texture the route
+already loads):
+- `court_stone.gdshader`: coursed masonry laid in each face's own plane (courses of their own height, blocks of their
+  own length, tone and offset, bevelled and chipped arrises, recessed joints, the odd stone fallen out), rock grain per
+  block, broad stains and blackening that ignore the blocks, rain streaks, earth and damp and moss at a wall's foot
+  (the route's ground height comes from a 512x1 strip, `CourtDress.lut()`: spine height, sea-cliff x, the way's x),
+  moss on what faces up, darker and smoother toward the sea cliff. Its paving mode lays flagstones on faces turned up:
+  stones gone to earth and moss, cracked stones, grass in joints, trodden-in dirt, damp hollows and standing water
+  (kept rough: a mirror-smooth puddle reflected the white sky and read as snow), the walked way paler and smoother.
+  Instances: stone, trim (string courses, plinths, caps), roof (slate), pave, tread, rubble.
+- `court_prop.gdshader`: wood, iron (pitted, rusting), bone and rag in one material, told apart by vertex alpha.
+- `court_cloth.gdshader` (banners: wind in the vertex, torn hem and holes by a *constant* alpha scissor, faded,
+  a device of a ring over a bar or a chevron), `court_ivy.gdshader` (two offset grids of leaves, dense in the body,
+  thinning at the sides, hanging strands, some leaves brown), `court_flame.gdshader` (additive crossed cards),
+  `court_decal.gdshader` (soot, old blood, damp, wax, moss on the ground).
+- `court_ground.gdshader` (the route's land) gained dry and lush turf, clover, trodden earth along the causeway, strata,
+  water streaks and lichen on rock, moss on ledges; the route's crags use it too (`turf_bias`: moss only on their
+  flattest tops) instead of flat dark stone. Trap found here: the shared noise texture is 256 px and tiles; sampled
+  above about 0.3 per metre it repeats visibly (rows of identical "hooks" on slopes, a dotted look on walls). Keep its
+  frequencies low or offset them per block.
+
+**What is built** (per section; everything merged by material, small things in 40 m cells with visibility ranges):
+- Walls: plinth, buttresses stepped and weathered on the enclosed side (left out where a way passes), pilasters on the
+  outer face, string course, corbelled band, merlons with a few missing, arrow slits with sills; broken bays step down
+  with the makers' rib and a dim seam showing. Towers: battered foot, two courses, slits, a machicolated gallery,
+  crenels, slate cone and finial, or a ragged crown. Box walls (curtain, inner wall, gatehouse ruin, chapel wall)
+  get crenels and corbels; arches of voussoirs over the barbican and inner gates and across the gate passage.
+- Along every wall's foot and face: heaps of fallen masonry (big under broken bays), stains, weeds, ivy, barrels and
+  crates, the dead sitting against the wall, bones, a chain from the wall-head, torch brackets.
+- The hillside door: a portal cut in the rock (three receding orders, a lintel, a carved roundel, hewn blocks the hill
+  grows over), the facility's plated and framed passage behind it in chamber.gd's make, a torn leaf in its mouth, ivy.
+- The hill: waymarker stones, a dry-stone field wall, the dead of a fight on the causeway with spears, arrows and an
+  overturned cart, two cairns; the bridge gets parapets and corbels; before the breach a failed siege (a ram under its
+  broken roof, a ladder on the wall, scaffolding where they tried to mend it from outside).
+- The yards: stores, carts, weapon racks, scaffolding, a barricade of stakes, the winch's chain to the gate, the well's
+  frame and bucket, firewood, lifted paving, chips, soot under braziers.
+- Chapel court: graves, candles and bones in the alcove, a toppled statue (the kit's `env_statue`).
+- The ward: the kneeling colossus chained to rings in the floor, its paving broken round it, the weapons and shields of
+  those who tried it heaped at its knees with candles; the dead along the walls; banners from the wall-walks; the keep's
+  gate (three orders, oak leaves with straps) between two statues (`env_statue`) and two lit braziers (the only new
+  lights: two omni lights in the route's own fire list). The keep's face: two rows of lancets (a few with a little warm
+  light left), a rose over the gate, a gallery on corbels, four long banners, crenels on both blocks, ivy.
+- Kept clear (`CourtDress.blocked`): every way (`CourtRoute.near_way` + 0.4-0.9 m), each stop's anchor (8.5 m), each
+  encounter's duel middle (`ENCOUNTERS.meet`, 8 m), foe posts, patrol beats, entrance paths and barricades, every
+  interaction's prop, stand and approach, the hillside door, the shortcut's postern, the Witness's monument, the lane.
+
+**Dev flags**: `--nodress` (the route exactly as Stage 3A built it), `--dressbare` (masonry without dressing),
+`--dresscam=x,y,z,yaw,pitch` (a still camera, for views the road camera never turns to), and with `--routecost` the
+log prints each section's kit and dressing triangles and build time.

@@ -74,6 +74,15 @@ def trunk_weights(P, names, bp, lateral_axis):
     W *= (1.0 - top)[:, None]
     W[left, sh_l] += top[left]
     W[~left, sh_r] += top[~left]
+    # below the hips the hem goes with both thighs together (half each, so a stride is averaged and the cloak does
+    # not tear down the back), reaching all thigh by the knees: a figure that falls lays its cloak down with its legs
+    # instead of standing it up off the floor on the hips
+    knee = bp[names.index("LeftLeg")][1]
+    legs = smooth(ys[0] - 0.02, knee + 0.04, y)
+    legs = 1.0 - legs
+    W *= (1.0 - legs)[:, None]
+    W[:, names.index("LeftUpLeg")] += legs * 0.5
+    W[:, names.index("RightUpLeg")] += legs * 0.5
     return W
 
 

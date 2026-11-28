@@ -1,0 +1,14 @@
+[    0.1s game |      0s wall] slice run: body=f weapon=default die=[] window=(640, 360) safe margins={ "l": 24.0, "r": 24.0, "t": 16.0, "b": 16.0 } preset=Balanced
+[    0.1s game |      0s wall] STEP launch
+[    3.7s game |     20s wall]   launch screen took 3.6 s
+[    3.7s game |     20s wall]   audio during 'launch': Master peak -200.0 mean -100.0 dB; Music peak -200.0 mean -100.0 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -200.0 mean -100.0 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    3.7s game |     20s wall] STEP main menu
+[    5.7s game |     64s wall]   tap 'NEW LEGACY' at (313, 455), target 538 x 68
+[    6.7s game |     82s wall]   audio during 'main menu': Master peak -6.6 mean -13.6 dB; Music peak -11.4 mean -20.4 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -22.1 mean -26.2 dB; Interface peak -200.0 mean -100.0 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[    6.7s game |     82s wall] STEP character select
+[    7.1s game |     89s wall]   tap 'THE BLADE' at (488, 185), target 295 x 60
+[    8.8s game |    121s wall]   tap 'name field' at (336, 524), target 600 x 60
+[    9.3s game |    131s wall]   name typed: Ysolde
+[   10.4s game |    151s wall]   tap 'CHOOSE A BLADE' at (426, 602), target 420 x 60
+[   10.5s game |    153s wall]   audio during 'character select': Master peak -6.8 mean -12.5 dB; Music peak -13.0 mean -18.7 dB; Dialogue peak -200.0 mean -100.0 dB; Combat peak -200.0 mean -100.0 dB; Ambience peak -21.1 mean -26.1 dB; Interface peak -35.2 mean -71.2 dB; Cinematics peak -200.0 mean -100.0 dB; CombatL peak -200.0 mean -100.0 dB; CombatR peak -200.0 mean -100.0 dB
+[   10.5s game |    153s wall] STEP starting sword

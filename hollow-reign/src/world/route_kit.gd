@@ -251,10 +251,10 @@ static func barricade(parent: Node3D, arena: Arena, at: Vector3, w: float) -> No
 	# [kind, size, position, rotation (deg), thrown to (local), thrown rotation (deg)]
 	var pieces := [
 		["plate", Vector3(1.5, 1.7, 0.12), Vector3(-1.45, 0.85, 0.0), Vector3(-6, 8, 4), Vector3(-2.0, 0.12, 1.4), Vector3(-90, 30, 0)],
-		["plate", Vector3(1.4, 1.55, 0.12), Vector3(0.0, 0.78, 0.15), Vector3(4, -3, -3), Vector3(-1.2, 0.1, 3.4), Vector3(-92, -20, 6)],
+		["plate", Vector3(1.4, 1.55, 0.12), Vector3(0.0, 0.78, 0.15), Vector3(4, -3, -3), Vector3(-1.55, 0.1, 3.4), Vector3(-92, -8, 6)],
 		["plate", Vector3(1.5, 1.8, 0.12), Vector3(1.45, 0.9, -0.05), Vector3(-3, -10, -5), Vector3(1.9, 0.12, 2.2), Vector3(-88, 15, -4)],
-		["beam", Vector3(0.14, 0.14, w + 0.4), Vector3(0.0, 1.15, 0.32), Vector3(0, 90, 6), Vector3(-1.7, 0.08, 4.6), Vector3(0, 70, 0)],
-		["beam", Vector3(0.14, 0.14, w + 0.2), Vector3(0.1, 0.5, 0.34), Vector3(0, 90, -4), Vector3(1.6, 0.08, 4.2), Vector3(0, 110, 0)],
+		["beam", Vector3(0.14, 0.14, w + 0.4), Vector3(0.0, 1.15, 0.32), Vector3(0, 90, 6), Vector3(-2.05, 0.08, 4.6), Vector3(0, 3, 0)],
+		["beam", Vector3(0.14, 0.14, w + 0.2), Vector3(0.1, 0.5, 0.34), Vector3(0, 90, -4), Vector3(1.75, 0.08, 4.2), Vector3(0, -4, 0)],
 		["crate", Vector3(0.8, 0.7, 0.7), Vector3(-1.9, 0.35, 0.7), Vector3(0, 20, 0), Vector3(-2.15, 0.35, 0.9), Vector3(0, 34, 0)],
 		["crate", Vector3(0.6, 0.55, 0.6), Vector3(1.0, 1.85, -0.1), Vector3(0, -15, 8), Vector3(2.1, 0.28, 5.4), Vector3(0, 60, 90)],
 	]

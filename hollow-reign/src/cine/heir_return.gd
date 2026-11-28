@@ -50,12 +50,17 @@ func _stand_sword() -> void:
 	_rack_sword.top_level = true
 	_rack_sword.visible = true
 	var hi := 0.0
+	var wide := Vector2.ZERO          # extent across X and across Z along the blade: the smaller goes through the flat
 	for mi: MeshInstance3D in _rack_sword.find_children("*", "MeshInstance3D", true, false):
-		hi = maxf(hi, ((_rack_sword.global_transform.affine_inverse() * mi.global_transform) * mi.get_aabb()).end.y)
+		var box := (_rack_sword.global_transform.affine_inverse() * mi.global_transform) * mi.get_aabb()
+		hi = maxf(hi, box.end.y)
+		if box.end.y > 0.3:
+			wide = Vector2(maxf(wide.x, box.size.x), maxf(wide.y, box.size.z))
 	if hi <= 0.05:
 		hi = maxf(knight.weapon_len, 0.7)
 	var point: Node3D = _rack.get_node("SwordPoint")
-	var b := Basis(Vector3.UP, deg_to_rad(Chamber.HOLDER_YAW)) * Basis(Vector3.FORWARD, PI) * Basis(Vector3.UP, PI * 0.5)
+	# its flat toward the room, as the Awakening stands it (measured: the kit and the hand-modelled blades differ)
+	var b := Basis(Vector3.UP, deg_to_rad(Chamber.HOLDER_YAW)) * Basis(Vector3.FORWARD, PI) * (Basis(Vector3.UP, PI * 0.5) if wide.x < wide.y else Basis())
 	_rack_sword.global_transform = Transform3D(b, point.global_position + Vector3(0, hi - 0.03, 0))
 	_rack_light = OmniLight3D.new()
 	_rack_light.light_color = Color("#7fe6d8")
@@ -139,12 +144,22 @@ func _take() -> void:
 	await walk(knight, spot, WALK).finished
 	if _over:
 		return
+	face(knight, _rack.position, 0.4)
 	if not await _w(0.4):
 		return
+	# Stage 4: a reach to the hilt at the holder's height, and the blade comes out of it in the hand at the grip
+	# (it was swapped into the hand standing still)
+	if SkinDriver.has_clip("pickup_table"):
+		knight.hold("pickup_table", 0.25)
+		if not await _w(0.5):
+			return
 	# steel in the hand: the very blade, with what was done to it
 	take_sword()
 	_rack_sword.visible = false
 	knight.set_armed(true)
+	Chamber.open_clamps(arena, 0.35)
+	if SkinDriver.has_clip("pickup_table"):
+		get_tree().create_timer(0.35).timeout.connect(func(): if is_instance_valid(knight): knight.release(0.6))
 	Sfx.play("swing", -6.0, 0.8)
 	Sfx.play("armor", -8.0)
 	_rack_light.light_energy = 5.0

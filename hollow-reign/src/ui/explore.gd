@@ -654,6 +654,12 @@ func _choose(o: Dictionary, index: int = 0) -> void:
 		"fight", "boss":
 			if route and life and index < foes.size() and foes[index] != null and is_instance_valid(foes[index]):
 				_meet_then(index, o)
+			elif route and life and OS.is_debug_build():
+				print("ROUTE NOTE stop %d: %s not met in place (foes %s, stood %s)" % [int(Game.run.stage) + 1, str(o.get("foe", "")), str(foes), str(life.foes.keys())])
+				if index < foes.size() and foes[index] != null:
+					_reveal_then(index, func(): fight.emit(o))
+				else:
+					_walk_then(index, func(): fight.emit(o))
 			elif index < foes.size() and foes[index] != null:
 				_reveal_then(index, func(): fight.emit(o))
 			else:

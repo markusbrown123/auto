@@ -92,7 +92,7 @@ const ENCOUNTERS := {
 		"why": "a sentry of the old garrison, still walking the line of the breach it was set to watch"},
 	1: {"how": "door", "post": [14.0, -91.4], "yaw": 90.0, "out": [[12.2, -91.4], [11.2, -92.6]], "meet": [8.4, -93.2], "face": -90.0,
 		"why": "the stair-foot post: the way up to the wall-walk is watched from its door"},
-	2: {"how": "banner", "post": [-4.2, -124.6], "yaw": 180.0, "meet": [-2.0, -120.6], "face": 15.0,
+	2: {"how": "banner", "post": [-6.2, -124.0], "yaw": 180.0, "meet": [-2.0, -120.6], "face": 15.0,
 		"why": "the barbican's last officer, at attention under the banner he still keeps flying"},
 	4: {"how": "barricade", "post": [0.3, -167.0], "yaw": 180.0, "barricade": [0.0, -165.4], "out": [[0.2, -162.0], [0.3, -158.4]],
 		"meet": [0.3, -153.6], "face": 0.0, "blocks": true,

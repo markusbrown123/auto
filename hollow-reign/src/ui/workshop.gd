@@ -13,7 +13,7 @@ extends Node3D
 
 const FLOOR_Y := 0.0
 const ORREN_AT := Vector3(0.28, 0.0, -2.95)
-const ANVIL_AT := Vector3(0.24, 0.0, -2.2)
+const ANVIL_AT := Vector3(0.22, 0.0, -2.42)
 
 var orren: Orren
 var _forge_light: OmniLight3D
@@ -303,7 +303,7 @@ func _tech_bench(at: Vector3) -> void:
 		_box(Vector3(0.24, 0.08, 0.02), Vector3(-0.42 + i * 0.28, 0.6, 0.27), Look.flat(Color("#3a3d40"), 0.5, 0.6), Vector3.ZERO, n)
 	# the screen, tilted back, faint teal
 	_box(Vector3(0.5, 0.34, 0.05), Vector3(0.3, 1.18, -0.22), alloy, Vector3(-0.3, 0, 0), n)
-	_box(Vector3(0.42, 0.26, 0.01), Vector3(0.3, 1.185, -0.19), Look.glow(Color("#3fb8a8"), 0.9), Vector3(-0.3, 0, 0), n)
+	_box(Vector3(0.42, 0.26, 0.01), Vector3(0.3, 1.185, -0.19), Look.glow(Color("#174039"), 0.14), Vector3(-0.3, 0, 0), n)
 	# the lens on its arm
 	_cyl(0.025, 0.025, 0.5, Vector3(-0.4, 1.15, -0.2), _brass, Vector3(0.2, 0, 0), 8, n)
 	_cyl(0.02, 0.02, 0.4, Vector3(-0.3, 1.42, -0.05), _brass, Vector3(0, 0, -1.0), 8, n)
@@ -312,7 +312,7 @@ func _tech_bench(at: Vector3) -> void:
 	ring.outer_radius = 0.135
 	_mesh(ring, Vector3(-0.15, 1.38, 0.05), _brass, Vector3(PI * 0.5, 0, 0.3), n)
 	_cyl(0.11, 0.11, 0.01, Vector3(-0.15, 1.38, 0.05), Look.flat(Color(0.7, 0.8, 0.85), 0.05, 0.2), Vector3(PI * 0.5, 0, 0.3), 16, n)
-	var l := _light(at + Vector3(0.3, 1.3, 0.2), Color("#5fd0c0"), 0.35, 1.6)
+	var l := _light(at + Vector3(0.3, 1.3, 0.2), Color("#5fd0c0"), 0.2, 1.4)
 	l.light_specular = 0.2
 
 func _grindstone(at: Vector3) -> void:
@@ -362,10 +362,11 @@ func _props_for_orren() -> void:
 	var blade := Node3D.new()
 	add_child(blade)
 	PropModel.weapon(blade, "res://assets/models/w_knight_sword.glb", "sword", null, 0.95)
-	blade.position = Vector3(0.8, 0.96, -2.6)
+	blade.position = Vector3(0.84, 0.965, -2.72)
 	blade.rotation = Vector3(-PI * 0.5, 0.4, 0)
-	var rag := _box(Vector3(0.16, 0.22, 0.02), Vector3(-0.05, 0.85, -2.62), Look.flat(Color("#6b5a44"), 0.95))
-	rag.rotation = Vector3(0.1, 0.0, 0.2)
+	# the rag lies folded on the bench's corner by his hand
+	var rag := _box(Vector3(0.16, 0.22, 0.02), Vector3(0.86, 0.975, -2.42), Look.flat(Color("#6b5a44"), 0.95))
+	rag.rotation = Vector3(-PI * 0.5, 0.0, 0.35)
 	orren.add_prop("hammer", hammer)
 	orren.add_prop("tongs", tongs)
 	orren.add_prop("blade", blade)

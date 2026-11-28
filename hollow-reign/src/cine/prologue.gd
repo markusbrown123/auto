@@ -688,9 +688,12 @@ func _beat_fall(me: int) -> void:
 		return
 	# the sword leaves the hand: raised in both, and driven down into the block (the two-handed downward cut, at half
 	# speed so that it is a deed and not a blow), seen from below the block's edge
-	cam.cut(rack.position + Vector3(1.7, 0.5, 2.0), rack.position + Vector3(-0.35, 1.2, 0.15), 42.0)
-	cam.move(rack.position + Vector3(1.35, 0.55, 1.7), rack.position + Vector3(-0.25, 1.0, 0.1), 2.4)
-	var strike := "th_cut_d"
+	# (Stage 4: a little further off than it was, so the raised arms and the blade are inside the frame and the shield
+	# on the arm is not across the lens)
+	cam.cut(rack.position + Vector3(2.3, 0.75, 2.5), rack.position + Vector3(-0.35, 1.25, 0.1), 44.0)
+	cam.move(rack.position + Vector3(2.0, 0.78, 2.2), rack.position + Vector3(-0.3, 1.1, 0.1), 2.4)
+	# one-handed when a shield is strapped to the other arm (the two-handed cut raised the shield over the head)
+	var strike := "ss_cut_d" if hero.has_shield and SkinDriver.has_clip("ss_cut_d") else "th_cut_d"
 	if SkinDriver.has_clip(strike):
 		hero.time_scale = 0.5
 		hero.hold(strike, 0.2)
@@ -718,12 +721,14 @@ func _beat_fall(me: int) -> void:
 		return
 	# and then the few steps to the foot of the cradle, which is as far as there is
 	Story.play("gen1_seal", true)
+	# the shot is at the cradle's foot before the walk starts, so the walker comes into it and does not cross the lens
+	cam.cut(Vector3(-1.1, 1.2, 4.5), Vector3(0.3, 1.0, -2.0), 44.0)
+	cam.move(Vector3(-0.95, 1.1, 4.4), Vector3(0.35, 0.95, -2.0), 8.0)
 	await _walk(hero, Awakening.SEAT, 0.8).finished
 	if me != _token or _over:
 		return
 	hero.create_tween().tween_property(hero, "rotation:y", PI, 1.2)
 	hero.hold("wounded", 2.4)
-	cam.cut(Vector3(-1.1, 1.2, 4.5), Vector3(0.3, 1.0, -2.0), 44.0)
 	cam.move(Vector3(-0.8, 1.0, 4.3), Vector3(0.4, 0.9, -2.0), 9.0)
 	if not await _until("gen1_seal", 2, me):
 		return

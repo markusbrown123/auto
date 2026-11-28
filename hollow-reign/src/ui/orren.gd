@@ -12,7 +12,9 @@ extends Node3D
 ##   lean     both hands on the anvil, weight forward, watching the knight
 ## When he speaks (Story.speaker == "orren") he puts down what he holds, faces the knight and talks: the head and the
 ## free hand move with the loudness of his own recorded line (ENV, measured from assets/audio/vo/orren_*.ogg, 50 ms
-## steps), since the model has no jaw to open. He greets the knight when the shop opens.
+## steps), since the model has no jaw to open, and each line has its own business: on "older than my entire bloodline"
+## he points at the knight's sword, on "I just remind it" he takes up the hammer and taps the anvil with the words, and
+## the line about legendary weapons is said over a blade he is holding. He greets the knight when the shop opens.
 
 signal struck(at: Vector3)          # the hammer met the bar (world position): the workshop answers with sparks and sound
 
@@ -118,6 +120,7 @@ func _process(delta: float) -> void:
 	elif _t >= _len:
 		set_act(_next_act())
 	var want := _pose_for(act, _t)
+	_reach_for(want)
 	# eased toward the targets: an action's pose arrives over about half a second, the hammer's swing is its own
 	var k := 1.0 - exp(-delta * (14.0 if act == "hammer" and _t > 0.8 else 4.0))
 	for key: String in want:
@@ -146,7 +149,8 @@ func _local(world: Vector3) -> Vector3:
 	return body.global_transform.affine_inverse() * world
 
 func _look_basis(world: Vector3, extra_pitch: float = 0.0) -> Basis:
-	var d := _local(world) - Vector3(0, 1.75, 0)
+	# (`world` is where someone stands: he looks at their face)
+	var d := _local(world + Vector3(0, 1.65, 0)) - Vector3(0, 1.75, 0)
 	var yaw := clampf(atan2(-d.x, -d.z), -0.9, 0.9)
 	var pitch := clampf(atan2(d.y, Vector2(d.x, d.z).length()), -0.6, 0.4) + extra_pitch
 	return Basis(Vector3.UP, yaw) * Basis(Vector3.RIGHT, pitch)
@@ -203,10 +207,10 @@ func _pose_for(a: String, t: float) -> Dictionary:
 		"lean":
 			# both hands on the anvil's face, weight forward, watching the knight
 			p.yaw = to_knight
-			p.pelvis = Vector3(0, 0.98, 0.06)
-			p.chest_rot = Basis(Vector3.RIGHT, -0.3)
-			p.hand_r = anvil + Vector3(0.2, 0.05, 0.2)
-			p.hand_l = anvil + Vector3(-0.22, 0.05, 0.18)
+			p.pelvis = Vector3(0, 0.97, 0.1)
+			p.chest_rot = Basis(Vector3.RIGHT, -0.42)
+			p.hand_r = anvil + Vector3(0.18, 0.06, 0.08)
+			p.hand_l = anvil + Vector3(-0.2, 0.06, 0.06)
 			p.head_rot = _look_basis(knight_at, 0.2) * Basis(Vector3.FORWARD, 0.06 * sin(t * 0.5))
 			p.grip_l = 0.2
 			p.grip_r = 0.2
@@ -224,36 +228,77 @@ func _pose_for(a: String, t: float) -> Dictionary:
 			_beat_prev = lerpf(_beat_prev, v, 0.25)
 			p.chest_rot = Basis(Vector3.RIGHT, -0.08 - _beat_prev * 0.05)
 			p.head_rot = _look_basis(knight_at) * Basis(Vector3.RIGHT, -0.1 * _beat_prev + 0.04 * sin(_talk_t * 2.3)) * Basis(Vector3.FORWARD, 0.07 * sin(_talk_t * 0.9))
-			p.hand_r = Vector3(0.28, 1.12 + _beat_prev * 0.12, -0.32 - _beat_prev * 0.06)
+			p.hand_r = Vector3(0.3, 1.14 + _beat_prev * 0.22, -0.34 - _beat_prev * 0.12)
 			p.hand_l = anvil + Vector3(-0.22, 0.05, 0.2) if anvil.z > -0.9 else p.hand_l
 			p.grip_r = 0.1
+			# each line has its own business (TALK_HOLDS says what is in the hand for it)
+			match _line:
+				"orren_intro_02":
+					# "That sword is older than my entire bloodline": a finger toward the knight's sword hand
+					var at := _local(knight_at + Vector3(0.3, 1.0, 0.0))
+					var reach := (at - Vector3(0.2, 1.4, 0)).normalized()
+					p.hand_r = Vector3(0.2, 1.4, 0).lerp(Vector3(0.2, 1.4, 0) + reach * 0.62, smoothstep(0.4, 1.2, _talk_t) * (1.0 - smoothstep(3.6, 4.4, _talk_t)))
+					p.grip_r = 0.55
+				"orren_intro_03":
+					# "Bring me shards and coin ... I just remind it": the hammer taken up, tapped on the anvil with the words
+					p.hand_r = anvil + Vector3(0.1, 0.26 + _beat_prev * 0.2, 0.12)
+					p.grip_r = 1.0
+				"orren_idle_01":
+					# "legendary weapons": said over a blade he holds up and does not look at
+					p.hand_r = Vector3(0.16, 1.26, -0.34)
+					p.hand_l = Vector3(-0.04, 1.48, -0.5)
+					p.grip_r = 1.0
+					p.grip_l = 0.45
 	return p
 
 # ---------------------------------------------------------------- what he holds
 ## Which prop each action has in which hand.
-const HOLDS := {"hammer": {"r": "hammer", "l": "tongs"}, "inspect": {"r": "blade"}, "wipe": {"l": "rag"}}
+const HOLDS := {"hammer": {"r": "hammer", "l": "tongs"}, "inspect": {"r": "blade"}, "wipe": {"r": "rag"}}
+const TALK_HOLDS := {"orren_intro_03": {"r": "hammer"}, "orren_idle_01": {"r": "blade"}}
+
+const PUT := 0.6       # seconds to carry a piece the new action has no use for back to where it lives
+const TAKE := 0.6      # seconds to reach a piece where it lies and close the hand on it
+
+func _wanted() -> Dictionary:
+	return HOLDS.get(act, {}) if act != "talk" else TALK_HOLDS.get(_line, {})
+
+func _held_by(side: String) -> String:
+	for n: String in props:
+		if props[n].held == side:
+			return n
+	return ""
+
+## Nothing comes into his hand or leaves it by itself: at the start of an action a hand first carries back what it no
+## longer needs and lays it where it lives, then goes to where the next piece lies and takes it up.
+func _reach_for(pose: Dictionary) -> void:
+	var need := _wanted()
+	for side: String in ["r", "l"]:
+		var has := _held_by(side)
+		var pname := str(need.get(side, ""))
+		var t0 := 0.0
+		if has != "" and has != pname:
+			if _t < PUT:
+				pose["hand_" + side] = _local((props[has].rest as Transform3D).origin) + Vector3(0, 0.03, 0)
+				pose["grip_" + side] = 1.0
+				continue
+			props[has].held = ""
+			(props[has].node as Node3D).global_transform = props[has].rest
+			t0 = PUT
+		if pname != "" and props.has(pname) and props[pname].held == "":
+			if _t < t0 + TAKE:
+				pose["hand_" + side] = _local((props[pname].rest as Transform3D).origin) + Vector3(0, 0.03, 0)
+				pose["grip_" + side] = 0.2 + 0.8 * smoothstep(t0 + TAKE * 0.7, t0 + TAKE, _t)
+			else:
+				props[pname].held = side
 
 func _hold_props(hands: Dictionary) -> void:
-	var want: Dictionary = HOLDS.get(act, {})
 	for side: String in ["r", "l"]:
 		var bone := "Right" if side == "r" else "Left"
-		var pname := str(want.get(side, ""))
 		skin.curl(bone, float(_cur.get("grip_" + side, 0.25)))
-		for n: String in props:
-			var pr: Dictionary = props[n]
-			if pr.held == side and n != pname:
-				pr.held = ""
-				(pr.node as Node3D).global_transform = pr.rest
-		if pname == "" or not props.has(pname):
+		var pname := _held_by(side)
+		if pname == "":
 			continue
-		var pr2: Dictionary = props[pname]
-		var palm: Vector3 = body.global_transform * (hands[side] as Vector3)
-		var node: Node3D = pr2.node
-		# taken up once the hand has reached it (or after the first moment of the action, wherever it was)
-		if pr2.held == "" and (palm.distance_to((pr2.rest as Transform3D).origin) < 0.25 or _t > 0.7):
-			pr2.held = side
-		if pr2.held != side:
-			continue
+		var node: Node3D = props[pname].node
 		var dir := _held_dir(pname)
 		var grip_b: Vector3 = skin.grip(bone, dir)
 		var at: Vector3 = body.global_transform * grip_b
@@ -265,6 +310,8 @@ func _hold_props(hands: Dictionary) -> void:
 func _held_dir(pname: String) -> Vector3:
 	match pname:
 		"hammer":
+			if act == "talk":
+				return Vector3(-0.15, -0.5, -0.85).normalized()
 			var cyc := fmod(maxf(_t - 0.8, 0.0), 1.4) / 1.4
 			var up := smoothstep(0.0, 0.62, cyc) * (1.0 - smoothstep(0.66, 0.76, cyc))
 			return Vector3(-0.15, -0.55, -0.82).lerp(Vector3(-0.1, 0.75, 0.6), up).normalized()

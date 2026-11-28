@@ -194,6 +194,7 @@ class Kit:
 	func commit() -> void:
 		if court:
 			CourtDress.retexture(into)
+			CourtDress.merge_kit(self)
 		for nm: String in tools:
 			var mat: Material = CourtDress.kit_mat(nm, a) if court else null
 			if mat != null:

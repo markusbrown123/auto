@@ -44,3 +44,17 @@ No purchases needed. Missing pieces: climb/drop/kneel-rise clips, a portcullis t
 - Hooks: `CourtRoute.ENTRY` / `_entry_door` (Stage 1's chamber exit), `witness_hook`, `foe_spots` and `gates` (Stage 3B).
 - Not done here (3B): foe entrances, duels in place, bodies remaining, animated props with sound (the portcullises only
   slide up on a tween when the winch is turned).
+
+## Stage 3B (2026-11-28): encounters and interactions
+- Inhabitants (`src/world/route_life.gd`, data `CourtRoute.ENCOUNTERS`, one reason each): stop 1 a sentry walking the
+  line of the breach; stop 2 (the Rampart Stair) a guard in the door of the stair-foot post (new room against the east
+  curtain); stop 3 the banneret at attention by the barbican's banner, who salutes before he steps out; stop 5 the
+  Breaker behind a barricade across the gate passage (smashed through, the pieces lie where they land) or the Gate
+  Colossus sitting dormant in the passage (wakes and gets up); stop 7 the Sentinel at his post. All stand from the
+  road's opening; each is shown with its section; far ones are not processed.
+- Duels in place: the Duel takes the road's Arena and the meeting's frame (`Duel.place`), the road screen is held
+  under it (`Main.parked`); the camera director still works in the duel's own frame (it is set to the origin for its
+  update), so `cam_director.gd` and `duel_sim.gd` are untouched.
+- Bodies remain for the run (`RouteLife.bodies`); interactions are modelled and acted (`src/world/route_kit.gd`,
+  `Explore._act`); the Witness goes ahead at forks and to what is used (`Explore._witness_ahead`, `_witness_inspect`);
+  rooms have their own camera (`CourtRoute.SPOTS[..].room`, `Explore._room_cam_tick`).

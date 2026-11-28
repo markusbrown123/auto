@@ -15,7 +15,7 @@ const DOOR := Vector3(-5.6, 0, -13.6)
 var arena: Arena
 var hall: FinalHall
 var hero: CineActor
-var monarch: FighterRig
+var monarch: CineActor
 var _leaves: Array = []
 var _door_light: OmniLight3D
 
@@ -29,13 +29,25 @@ func _ready() -> void:
 	hall.set_level(2, true)
 	hero = CineActor.knight(self)
 	hero.footsteps = true
-	hero.position = Vector3(0.4, 0, 0.8)
-	monarch = FighterRig.new()
+	# (to one side of the line down the hall, so the heir and the Monarch both stand clear in the long shot)
+	hero.position = Vector3(-1.2, 0, 0.6)
+	hero.rotation.y = atan2(1.4, 5.8)
+	# the Monarch on his knees where the fight left him, bowed, the blade down on the floor beside him (a fallen
+	# figure would stand the long rigid cloak up off the floor: the model has no cloth to lay it down with)
+	monarch = CineActor.new()
 	add_child(monarch)
 	monarch.build(CineActor.foe_look("forgotten_monarch"), true)
 	monarch.position = Vector3(0.2, 0, -5.2)
-	monarch.rotation.y = PI
-	monarch.die(1.0)
+	monarch.rotation.y = PI - 0.35
+	monarch.time_scale = 0.4
+	var down := CineSeat.make(monarch)
+	down.kneel = true
+	down.slump = 1.0
+	var blade: Node3D = monarch.weapon_r.duplicate()
+	add_child(blade)
+	monarch.set_armed(false)
+	blade.visible = true
+	blade.transform = Transform3D(Basis(Vector3.UP, 0.9) * Basis(Vector3.RIGHT, -PI * 0.5) * Basis(Vector3.UP, PI * 0.5), monarch.position + Vector3(-1.2, 0.03, 0.9))
 	# the door the Witness remembers: two leaves in the wall by the dais, shut, with nothing to show they are a door
 	var metal := Look.flat(Color("#2a2c2e"), 0.5, 0.85)
 	arena.box(Vector3(3.6, 5.2, 0.5), DOOR + Vector3(0, 2.6, -0.5), Look.glow(Color("#fff4e0"), 4.5))

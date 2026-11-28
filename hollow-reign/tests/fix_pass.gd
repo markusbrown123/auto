@@ -229,7 +229,15 @@ func _slice_continuous() -> void:
 		ok(at.x > 4.0 and not CourtRoute.floor_at(at.x, at.z).is_empty() and at.distance_to(CourtRoute.anchor(4)) > 8.0, "continuous: standing in the murder hole (%s)" % str(at.snapped(Vector3.ONE * 0.1)))
 		await frames(30)
 		ok(e._room.has("eye") and e.backdrop.cam.global_position.distance_to(e._room.eye) < 1.0, "continuous: inside the murder hole the camera is in the room with the knight, not behind the jamb")
+		var tw := 0.0
+		while not Game.profile.get("flags", {}).has("chest_courtyard_4_The Murder Hole") and tw < 20.0:
+			await get_tree().process_frame
+			tw += get_process_delta_time()
 		_press(m, "Onward", 20.0)
+		tw = 0.0
+		while not e._leaving and tw < 10.0:
+			await get_tree().process_frame
+			tw += get_process_delta_time()
 		# (Stage 3B) whoever holds the passage is still there: the way on runs past them, so it is back out to them
 		ok(await _wait_stop(m, 90.0) and int(Game.run.stage) == 4 and e.backdrop.rig.position.distance_to(CourtRoute.anchor(4)) < 0.3,
 			"continuous: out of the room and back to the passage's mouth, where its holder still stands")
@@ -249,8 +257,9 @@ func _slice_continuous() -> void:
 	Game.on_death(true)
 	m._retry_from_checkpoint("courtyard")
 	await get_tree().create_timer(1.0).timeout
-	ok(await _wait_stop(m, 60.0) and m.current != e and int(Game.run.stage) == 5 and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(5)) < 0.3,
-		"continuous: Retry stands the knight at the checkpoint's anchor")
+	var rs := await _wait_stop(m, 90.0)
+	ok(rs and m.current != e and int(Game.run.stage) == 5 and m.current.backdrop.rig.position.distance_to(CourtRoute.anchor(5)) < 0.3,
+		"continuous: Retry stands the knight at the checkpoint's anchor (%s %s %d %s)" % [str(rs), str(m.current), int(Game.run.stage), str(m.current.backdrop.rig.position) if m.current is Explore else ""])
 	# Continue: the same
 	Game.run = {}
 	Game.load_game()

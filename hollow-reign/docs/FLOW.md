@@ -149,9 +149,27 @@ screen. `Explore.continuous()` decides (the Courtyard, the kit present, the film
   camera behind (`Explore._route_cam`, pulled in front of walls with `CamFollow.clear_from`). `moved_on` no longer fades:
   `Main._next_stage` calls `Explore.travel()` on the same screen. Chests, the winch and the shrine stand in the place from the
   start (`Explore._world_props`, opened/pulled already if they were); using one walks the knight to it (`CourtRoute.SPOTS`).
-- **Fights** still open a separate `Duel` (Stage 3B will fight in place), entered and left with a dissolve of the last frame
-  (`Main._cross_then`), never black. After a win the next road screen walks on from where the foe stood
-  (`Explore.arrive = {from, label, at}`). Foes of the next stop are stood out of the camera's sight (`Explore._stage_foes`).
+- **Fights are fought where they are met** (Stage 3B). Everyone the road will meet is in the place from the moment
+  the road is opened (`RouteLife`, data `CourtRoute.ENCOUNTERS`): a sentry walking the line of the breach, a guard in
+  the stair-foot post's door, the banneret at attention by his banner, the Breaker behind a barricade in the gate
+  passage (or the Gate Colossus sitting dormant there), the Sentinel at his post; each is shown with the section of
+  the place it stands in, so nothing appears in view. Choosing the fight (`Explore._meet_then`): the foe comes as
+  itself (turns off its line, steps out of its door, salutes and steps forward, smashes through the barricade, wakes
+  and gets up), the knight walks up to where it will stand, the camera watches over the knight's shoulder. Then
+  `Main._enter_duel` holds the road screen (`Main.parked`, `Explore.park`) and the `Duel` takes up the road's own
+  Arena and frame (`Duel.place`: no arena of its own; the duel's frame is the meeting place; its camera starts from
+  the road camera's pose and eases into the fight's over 1.4 s), behind a 0.45 s dissolve that covers the swap of
+  the two figures for the duel's. A won duel goes back to the same road screen (`Main._resume_road`,
+  `Explore.unpark`): the fallen foe stays where it fell (`RouteLife.lay_down`: held pose, no processing, no
+  physics), the knight walks on from where it stood and round the body. A road opened again in the same run lays
+  the fallen down again (`RouteLife.bodies`); a Retry or Continue from a checkpoint before them stands them again.
+  A cache whose way runs past a foe still standing (the murder hole, past the passage's holder) brings the knight
+  back out to them (`Explore._back_to_stop`). Story foes, dragons and hidden duels keep the separate duel.
+- **Things used on the road** are modelled (`RouteKit`: the strongbox with its hinged lid, the windlass with crank,
+  ratchet, pawl and running chain, the barricade) and used by the knight (`Explore._act`: the sword put up, the hand
+  on the lid, the crank or the stone by IK, `RouteKit.Reach`); the portcullis rises with the crank, with its jolt,
+  judder and sound; the action button is set beside the thing, never over it (`Explore._place_action`). Pouches and
+  secrets' tells of every stop lie in the place from the start and stay where they are if not taken.
 - **Retry, Continue, Turn Back** are unchanged in the save (version 5); Retry and Continue stand the knight at the anchor of
   `run.stage`. Setting out by the winch gate (the shortcut) walks in through the postern (`CourtRoute.SHORTCUT_IN`).
 - Dev: `--screen=routewalk [--from=<stop>] [--pick=1:1,4:1] [--routecost]` walks the whole road at its own pace, fights passed

@@ -611,6 +611,12 @@ func _next_stage() -> void:
 ## everything is in memory and a short fade is all there is. The loading screen is kept for when it is not
 ## (a model still being read): then the wait is real, and it reads on a thread behind a moving picture.
 func _enter_duel(o: Dictionary) -> void:
+	if Explore.continuous() and current is Explore and current.route != null and not current.meeting.is_empty():
+		# fought where it was met: the road stays, under the duel; the foe is already standing there (its model is
+		# loaded), and whatever else the duel reads is read behind the held frame of the dissolve
+		parked = current
+		_cross_then(func(): start_duel(o), 0.45)
+		return
 	var warm: Array = CineActor.foe_files(str(o.foe))
 	var ready := true
 	for p: String in warm:
@@ -619,10 +625,6 @@ func _enter_duel(o: Dictionary) -> void:
 	if ready or not Game.profile.tutorial_done:
 		# (the first duel of a journey never shows one: whatever is still unread is read behind the fade)
 		if Explore.continuous() and current is Explore:
-			if current.route != null and not current.meeting.is_empty():
-				parked = current              # fought where it was met: the road stays, under the duel
-				_cross_then(func(): start_duel(o), 0.45)
-				return
 			_cross_then(func(): start_duel(o))
 		else:
 			_fade_then(func(): start_duel(o))

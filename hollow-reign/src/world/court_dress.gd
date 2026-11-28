@@ -22,7 +22,10 @@ extends RefCounted
 ## Hook: none needed in court_route.gd: Future.Kit sees that its host is a CourtRoute section ("SectionN") or the
 ## far layer ("Far") and calls `dress` from `commit`. `build(route, i, host)` is the same thing callable by hand.
 
-const CELL := 24.0
+const CELL := 40.0
+## What the small made things are drawn as (court_prop.gdshader): the material, the vertex alpha that tells it what
+## it is (0 wood, 0.5 bone or rag, 1 iron), a tint.
+const PROPS := {"wood": 0.0, "bone": 0.5, "iron": 1.0, "dark": 0.5}
 const FIRE := Color("#ff9a48")
 
 static var _mats := {}
@@ -73,34 +76,17 @@ static func mat(nm: String) -> Material:
 		return _mats[nm]
 	var m: Material
 	match nm:
-		"stone": m = _stone("#a9a397", "#8f8f8a", 0.56, 1.15)
-		"trim": m = _stone("#7d786f", "#6e6f6d", 0.42, 0.85, {"vary": 0.12, "moss_amt": 0.8})
+		"stone": m = _stone("#99938a", "#83837f", 0.56, 1.15)
+		"trim": m = _stone("#77726a", "#686967", 0.42, 0.85, {"vary": 0.12, "moss_amt": 0.8})
 		"roof": m = _stone("#3e434a", "#363a40", 0.26, 0.42, {"vary": 0.25, "grain": 0.35, "bevel": 0.03, "mortar": 0.012, "moss_amt": 0.7})
-		"pave": m = _stone("#9a958a", "#85847e", 0.5, 1.0, {"paving": 1.0, "moss_amt": 1.0})
-		"tread": m = _stone("#928d82", "#82817b", 0.6, 1.0, {"paving": 1.0, "moss_amt": 0.5})
+		"pave": m = _stone("#7f7a71", "#6d6c67", 0.5, 1.0, {"paving": 1.0, "moss_amt": 1.0, "vary": 0.3, "grain": 0.75})
+		"tread": m = _stone("#7d786f", "#6d6c67", 0.6, 1.0, {"paving": 1.0, "moss_amt": 0.5, "vary": 0.26, "grain": 0.75})
 		"rubble": m = _stone("#9c968b", "#83837e", 0.3, 0.5, {"vary": 0.3, "bevel": 0.04, "dirt_h": 0.7})
-		"wood":
-			var w := StandardMaterial3D.new()
-			w.albedo_texture = Highland._noise_tex()
-			w.albedo_color = Color("#8a6a4c")
-			w.vertex_color_use_as_albedo = true
-			w.uv1_triplanar = true
-			w.uv1_world_triplanar = true
-			w.uv1_scale = Vector3(1.4, 0.18, 1.4)
-			w.roughness = 0.88
-			m = w
-		"iron":
-			var ir := StandardMaterial3D.new()
-			ir.albedo_texture = Highland._noise_tex()
-			ir.albedo_color = Color("#5a4a40")
-			ir.vertex_color_use_as_albedo = true
-			ir.uv1_triplanar = true
-			ir.uv1_world_triplanar = true
-			ir.uv1_scale = Vector3(2.5, 2.5, 2.5)
-			ir.metallic = 0.45
-			ir.roughness = 0.68
-			m = ir
-		"bone": m = Look.flat(Color("#b9ae98"), 0.75)
+		"props":
+			var pr := ShaderMaterial.new()
+			pr.shader = load("res://src/world/court_prop.gdshader")
+			pr.set_shader_parameter("noise_tex", Highland._noise_tex())
+			m = pr
 		"cloth", "cloth_kit":
 			var c := ShaderMaterial.new()
 			c.shader = load("res://src/world/court_cloth.gdshader")
@@ -167,6 +153,16 @@ static func retexture(host: Node3D) -> void:
 		if g != null:
 			g.set_shader_parameter("route_lut", lut())
 			g.set_shader_parameter("has_lut", 1.0)
+			# the route's crags: drawn as the land's own rock (strata, lichen, moss on their tops), not flat dark stone
+			if not _mats.has("crag"):
+				var c: ShaderMaterial = g.duplicate()
+				c.set_shader_parameter("turf_bias", 0.14)
+				c.set_shader_parameter("rock_tint", Color("#b4ada2"))
+				_mats["crag"] = c
+			var rock := route._mat("rock")
+			for mm: MultiMeshInstance3D in host.find_children("*", "MultiMeshInstance3D", false, false):
+				if mm.material_override == rock:
+					mm.material_override = _mats["crag"]
 
 # ================================================================ keeping the ways clear
 static func _clear_init() -> void:
@@ -185,6 +181,29 @@ static func _clear_init() -> void:
 		_rings.append([Vector2(float(s.stand[0]), float(s.stand[1])), 2.0])
 		for v: Array in s.via:
 			_rings.append([Vector2(float(v[0]), float(v[1])), 1.6])
+	# Stage 3B's encounters (read by name so either file can change without breaking the other): the duel's middle
+	# ("meet") and its camera, the foe's post, its patrol beat, the way it comes out, a barricade
+	var cm: Dictionary = (load("res://src/world/court_route.gd") as Script).get_script_constant_map()
+	var enc: Dictionary = cm.get("ENCOUNTERS", {})
+	for st: int in enc:
+		var e: Dictionary = enc[st]
+		var all: Array = [e]
+		for alt: Dictionary in (e.get("by_foe", {}) as Dictionary).values():
+			all.append(alt)
+		for ee: Dictionary in all:
+			if ee.has("meet"):
+				_rings.append([Vector2(float(ee.meet[0]), float(ee.meet[1])), 8.0])
+			for k2: String in ["post", "barricade"]:
+				if ee.has(k2):
+					_rings.append([Vector2(float(ee[k2][0]), float(ee[k2][1])), 2.6])
+			for k3: String in ["beat", "out"]:
+				var pts: Array = ee.get(k3, [])
+				for j in pts.size():
+					var a := Vector2(float(pts[j][0]), float(pts[j][1]))
+					var b := a if j == pts.size() - 1 else Vector2(float(pts[j + 1][0]), float(pts[j + 1][1]))
+					var steps := maxi(1, int(a.distance_to(b)))
+					for q in steps + 1:
+						_rings.append([a.lerp(b, float(q) / steps), 2.0])
 	_rings.append([Vector2(CourtRoute.ENTRY.x, CourtRoute.ENTRY.z), 3.0])
 	_rings.append([Vector2(CourtRoute.SHORTCUT_IN.x, CourtRoute.SHORTCUT_IN.z), 2.5])
 	_rings.append([Vector2(CourtRoute.MONUMENT.x, CourtRoute.MONUMENT.z), 3.2])
@@ -314,32 +333,91 @@ class Bins:
 		return sets[key][3]
 
 	func commit(parent: Node3D) -> int:
-		var tris := 0
-		var by := {}
+		# wood, iron, bone and dark pieces share one material: their batches are joined here, each vertex told what
+		# it is by its alpha; what casts a shadow is joined across cells
+		var groups := {}
 		for key: String in sets:
 			var s: Array = sets[key]
 			var bt: Batch = s[3]
 			if bt.v.is_empty():
 				continue
-			tris += bt.v.size() / 3
-			by[str(s[0])] = int(by.get(str(s[0]), 0)) + bt.v.size() / 3
+			var m := str(s[0])
+			var cell := bool(s[1])
+			if CourtDress.PROPS.has(m):
+				var kind: float = CourtDress.PROPS[m]
+				var dark := m == "dark"
+				for i in bt.c.size():
+					var col := bt.c[i]
+					if dark:
+						col = Color(0.06, 0.06, 0.065)
+					col.a = kind
+					bt.c[i] = col
+				m = "props"
+			if bool(s[2]) or m != "props":
+				cell = false
+			var gk := "%s|%s|%s" % [m, "s" if bool(s[2]) else "", key.get_slice("|", 2) if cell else "-"]
+			if not groups.has(gk):
+				groups[gk] = [m, cell, bool(s[2]), Batch.new()]
+			var g: Batch = groups[gk][3]
+			g.v.append_array(bt.v)
+			g.n.append_array(bt.n)
+			g.uv.append_array(bt.uv)
+			g.uv2.append_array(bt.uv2)
+			g.c.append_array(bt.c)
+		var tris := 0
+		var by := {}
+		for gk2: String in groups:
+			var s2: Array = groups[gk2]
+			var bt2: Batch = s2[3]
+			tris += bt2.v.size() / 3
+			by[str(s2[0])] = int(by.get(str(s2[0]), 0)) + bt2.v.size() / 3
 			var mi := MeshInstance3D.new()
-			mi.name = "Dress_" + str(s[0])
-			mi.mesh = bt.mesh()
-			mi.material_override = CourtDress.mat(str(s[0]))
-			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if bool(s[2]) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			if bool(s[1]):
-				var reach := 62.0
-				match str(s[0]):
-					"decal": reach = 46.0
-					"ivy": reach = 80.0
-					"bone": reach = 40.0
+			mi.name = "Dress_" + str(s2[0])
+			mi.mesh = bt2.mesh()
+			mi.material_override = CourtDress.mat(str(s2[0]))
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if bool(s2[2]) else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			var reach := 0.0
+			match str(s2[0]):
+				"props": reach = 58.0 if bool(s2[1]) else 0.0
+				"decal": reach = 48.0
+				"ivy": reach = 85.0
+				"rubble": reach = 75.0
+				"coal", "flame": reach = 90.0
+			if reach > 0.0:
 				mi.visibility_range_end = reach
 				mi.visibility_range_end_margin = 6.0
 			parent.add_child(mi)
 		if OS.get_cmdline_user_args().has("--routecost"):
-			print("DRESS %s: %d meshes, %d triangles %s" % [parent.get_parent().name, sets.size(), tris, str(by)])
+			print("DRESS %s: %d meshes, %d triangles %s" % [parent.get_parent().name, groups.size(), tris, str(by)])
 		return tris
+
+## A court kit's wood, iron and dark tools, joined into one mesh in the props material (fewer draws).
+static func merge_kit(k: Future.Kit) -> void:
+	var bt := Batch.new()
+	for nm: String in ["wood", "iron", "dark"]:
+		if not k.tools.has(nm):
+			continue
+		var arr: Array = (k.tools[nm] as SurfaceTool).commit_to_arrays()
+		k.tools.erase(nm)
+		var verts: PackedVector3Array = arr[Mesh.ARRAY_VERTEX]
+		var norms: PackedVector3Array = arr[Mesh.ARRAY_NORMAL]
+		var idx = arr[Mesh.ARRAY_INDEX]
+		var col := Color(0.06, 0.06, 0.065) if nm == "dark" else Color.WHITE
+		col.a = PROPS[nm]
+		var order: PackedInt32Array = idx if idx is PackedInt32Array and (idx as PackedInt32Array).size() > 0 else PackedInt32Array(range(verts.size()))
+		for i in order:
+			bt.v.append(verts[i])
+			bt.n.append(norms[i] if norms.size() > i else Vector3.UP)
+			bt.uv.append(Vector2.ZERO)
+			bt.uv2.append(Vector2.ONE)
+			bt.c.append(col)
+	if bt.v.is_empty():
+		return
+	var mi := MeshInstance3D.new()
+	mi.name = "Fu_props"
+	mi.mesh = bt.mesh()
+	mi.material_override = mat("props")
+	k.into.add_child(mi)
 
 # ================================================================ the hook
 ## Called by Future.Kit.commit when a court kit has committed its own meshes.
@@ -348,6 +426,16 @@ static func dress(k: Future.Kit) -> void:
 	var route := host.get_parent() as CourtRoute
 	if route == null:
 		return
+	if OS.get_cmdline_user_args().has("--routecost"):
+		var kt := 0
+		var parts := {}
+		for mi: MeshInstance3D in host.find_children("Fu_*", "MeshInstance3D", false, false):
+			var t := mi.mesh.get_faces().size() / 3
+			kt += t
+			parts[String(mi.name)] = t
+		print("KIT %s: %d triangles %s" % [host.name, kt, str(parts)])
+	if OS.get_cmdline_user_args().has("--dressbare"):
+		return                                      # dev: the masonry without the dressing (cost comparisons)
 	if String(host.name) == "Far":
 		_far(route, host, k.walls)
 	else:
@@ -365,6 +453,8 @@ static func build(route: CourtRoute, i: int, host: Node3D, walls: Array = []) ->
 	d.name = "Dress"
 	d.visible = route._sync
 	host.add_child(d)
+	var f0 := Engine.get_process_frames()
+	var t0 := Time.get_ticks_usec()
 	var B := Bins.new()
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7300 + i * 31
@@ -398,8 +488,44 @@ static func build(route: CourtRoute, i: int, host: Node3D, walls: Array = []) ->
 	_weeds(route, d, weeds)
 	d.set_meta("tris", tris)
 	d.visible = true
+	if OS.get_cmdline_user_args().has("--routecost"):
+		print("DRESS TIME section %d: %d ms wall clock over %d frames (sync %s)" % [i, (Time.get_ticks_usec() - t0) / 1000, Engine.get_process_frames() - f0, str(route._sync)])
 
 # ================================================================ pieces
+## Dev (`--dresscam=x,y,z,yaw,pitch` in degrees): a still camera that takes over the view a second after the place is
+## built, for before/after pictures of what the road's own camera never turns to (the hillside door, the keep).
+static func _devcam(route: CourtRoute) -> void:
+	for a: String in OS.get_cmdline_user_args():
+		if not a.begins_with("--dresscam="):
+			continue
+		var v := a.trim_prefix("--dresscam=").split(",")
+		if v.size() < 5:
+			return
+		var cam := Camera3D.new()
+		cam.name = "DressCam"
+		cam.fov = 55.0
+		cam.far = 4000.0
+		route.add_child(cam)
+		cam.position = Vector3(float(v[0]), float(v[1]), float(v[2]))
+		cam.rotation_degrees = Vector3(float(v[4]), float(v[3]), 0)
+		for t: float in [0.5, 1.0, 2.0, 4.0]:
+			route.get_tree().create_timer(t).timeout.connect(func():
+				if is_instance_valid(cam):
+					cam.make_current()
+					route.update(cam.position))
+		return
+
+## Small stones and chips scattered over a yard, off the ways.
+static func _chips(B: Bins, rng: RandomNumberGenerator, x0: float, x1: float, z0: float, z1: float, count: int) -> void:
+	for i in count:
+		var x := rng.randf_range(x0, x1)
+		var z := rng.randf_range(z0, z1)
+		if blocked(x, z, 0.1) or CourtRoute.floor_at(x, z).is_empty():
+			continue
+		var s := rng.randf_range(0.07, 0.2)
+		var q := Vector3(x, _gy(x, z) + s * 0.2, z)
+		B.at("rubble", q).box(Vector3(s * 1.4, s * 0.6, s), _xf(q, rng.randf() * TAU, rng.randf_range(-0.3, 0.3), rng.randf_range(-0.3, 0.3)), _shade(rng, 0.6, 0.95))
+
 static func _gy(x: float, z: float) -> float:
 	return CourtRoute.ground_y(x, z)
 
@@ -434,11 +560,11 @@ static func _barrel(B: Bins, rng: RandomNumberGenerator, p: Vector3, lying: bool
 		xf = Transform3D(Basis(Vector3.UP, rng.randf() * TAU) * Basis(Vector3.FORWARD, PI * 0.5), p + Vector3(0, 0.3, 0)) * Transform3D(Basis.IDENTITY, Vector3(0, -0.42, 0))
 	var wb := B.at("wood", p)
 	var ib := B.at("iron", p)
-	wb.prism(xf, 0.27, 0.32, 0.42, 10, col)
-	wb.prism(xf * Transform3D(Basis.IDENTITY, Vector3(0, 0.42, 0)), 0.32, 0.27, 0.42, 10, col)
-	for y: float in [0.1, 0.36, 0.48, 0.74]:
+	wb.prism(xf, 0.27, 0.32, 0.42, 9, col)
+	wb.prism(xf * Transform3D(Basis.IDENTITY, Vector3(0, 0.42, 0)), 0.32, 0.27, 0.42, 9, col)
+	for y: float in [0.12, 0.72]:
 		var r := lerpf(0.275, 0.32, 1.0 - absf(y - 0.42) / 0.42) + 0.012
-		ib.prism(xf * Transform3D(Basis.IDENTITY, Vector3(0, y - 0.025, 0)), r, r, 0.05, 10, Color(0.8, 0.75, 0.7), false)
+		ib.prism(xf * Transform3D(Basis.IDENTITY, Vector3(0, y - 0.03, 0)), r, r, 0.06, 9, Color(0.8, 0.75, 0.7), false)
 
 static func _crate(B: Bins, rng: RandomNumberGenerator, p: Vector3, s: float, yaw: float) -> void:
 	var col := _shade(rng, 0.8, 1.15)
@@ -508,7 +634,7 @@ static func _rack(B: Bins, rng: RandomNumberGenerator, p: Vector3, yaw: float) -
 ## "prone" face down, or "back".
 static func _corpse(B: Bins, rng: RandomNumberGenerator, p: Vector3, yaw: float, pose: String) -> void:
 	var ib := B.at("iron", p)
-	var rag := B.at("wood", p)
+	var rag := B.at("bone", p)
 	var bone := B.at("bone", p)
 	var steel := Color(0.85, 0.85, 0.88) * rng.randf_range(0.7, 1.0)
 	var cloth := [Color(0.45, 0.12, 0.08), Color(0.2, 0.22, 0.3), Color(0.3, 0.28, 0.2)][rng.randi() % 3] as Color
@@ -780,7 +906,7 @@ static func _weeds(route: CourtRoute, d: Node3D, pts: Array) -> void:
 ## The walls the route builds as plain boxes, per section: [x0, z0, x1, z1, foot height, height, open side x, z,
 ## merlons on top]. (The kit's walls are recorded as they are laid; see Future._court_wall.)
 const BOX_WALLS := {
-	1: [[15.6, -77.5, 15.6, -94.0, 3.2, 6.6, -1.0, 0.0, false], [-16.0, -95.75, -7.8, -95.75, 3.2, 4.2, 0.0, 1.0, false],
+	1: [[15.6, -77.5, 15.6, -88.5, 3.2, 6.6, -1.0, 0.0, false], [-16.0, -95.75, -7.8, -95.75, 3.2, 4.2, 0.0, 1.0, false],
 		[-7.75, -95.9, -7.75, -99.1, 3.2, 4.2, 1.0, 0.0, false], [-7.75, -102.9, -7.75, -106.0, 3.2, 4.2, 1.0, 0.0, false]],
 	2: [[-15.0, -128.3, -9.0, -128.3, 4.5, 6.0, 0.0, 1.0, true], [8.8, -128.3, 13.2, -128.3, 4.5, 6.0, 0.0, 1.0, true],
 		[-5.8, -125.95, -2.6, -125.95, 4.5, 5.6, 0.0, 1.0, false], [2.6, -125.95, 5.8, -125.95, 4.5, 5.6, 0.0, 1.0, false]],
@@ -1056,7 +1182,7 @@ static func _outer(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d: No
 		if not blocked(foot.x, foot.z, 0.3):
 			B.at("wood", foot, true, true).beam(foot, Vector3(sx * 5.4, 7.4, -77.6), 0.2, -1.0, Color(0.75, 0.7, 0.62))
 			B.at("wood", foot, true, true).beam(foot + Vector3(sx * 0.7, 0, 0.2), Vector3(sx * 5.4, 5.2, -77.6), 0.18, -1.0, Color(0.7, 0.66, 0.6))
-	_scaffold(B, rng, Vector3(15.3, 3.2, -80.0), Vector3(0, 0, -1), Vector3(-1, 0, 0), 11.0, 2)
+	_scaffold(B, rng, Vector3(15.3, 3.2, -79.6), Vector3(0, 0, -1), Vector3(-1, 0, 0), 7.6, 2)
 	# stores in the north-west corner, a cart, the rack by the guardhouse door, the dead
 	for bp: Array in [[-15.0, -80.4], [-14.3, -80.6], [-15.1, -81.2], [-14.4, -81.4]]:
 		_barrel(B, rng, _on(float(bp[0]), float(bp[1])))
@@ -1067,7 +1193,7 @@ static func _outer(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d: No
 	if not blocked(-10.0, -81.8, 1.6):
 		_cart(B, rng, _on(-10.0, -81.8), 1.9, false)
 	_rack(B, rng, _on(-7.15, -97.6), PI * 0.5)
-	for c: Array in [[-5.6, -83.0, "prone", 0.0], [14.85, -94.0, "sit", -PI * 0.5], [-16.0, -93.5, "sit", PI * 0.5], [9.5, -104.5, "back", 0.0]]:
+	for c: Array in [[-5.6, -83.0, "prone", 0.0], [14.85, -78.6, "sit", -PI * 0.5], [-16.0, -93.5, "sit", PI * 0.5], [9.5, -104.5, "back", 0.0]]:
 		if not blocked(float(c[0]), float(c[1]), 0.6):
 			_corpse(B, rng, _on(float(c[0]), float(c[1])), float(c[3]) if str(c[2]) == "sit" else rng.randf() * TAU, str(c[2]))
 	for ar: Array in [[-8.0, -86.0], [10.0, -82.5], [-11.5, -89.0]]:
@@ -1086,6 +1212,7 @@ static func _outer(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d: No
 	# soot round the braziers
 	for sx2: float in [-1.0, 1.0]:
 		_decal(B, Vector3(sx2 * 5.5, 0, -88.0 + sx2 * 2.0), 2.2, Color(0.04, 0.035, 0.03, 0.75), rng)
+	_chips(B, rng, -15.5, 15.0, -60.0, -106.0, 160)
 
 ## 2. The barbican: its gate arch, machicolations and crenels, the chains, the forecourt's barricade and stores.
 static func _barbican(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d: Node3D, weeds: Array) -> void:
@@ -1129,6 +1256,7 @@ static func _barbican(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d:
 		_decal(B, Vector3(rng.randf_range(-11.0, 11.0), 0, rng.randf_range(-113.0, -125.0)), rng.randf_range(1.0, 2.4), Color(0.09, 0.08, 0.06, 0.45), rng)
 	for sx3: float in [-1.0, 1.0]:
 		_decal(B, Vector3(sx3 * 4.6, 0, -125.4), 2.0, Color(0.04, 0.035, 0.03, 0.75), rng)
+	_chips(B, rng, -12.0, 12.0, -106.0, -127.0, 90)
 
 ## A pointed arch of voussoirs on a face at `at` (the middle of the opening's sill): opening `hw` either side,
 ## springing at `spring` above the sill, its head at `head`; the spandrels filled to the head.
@@ -1189,6 +1317,7 @@ static func _winch(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, d: No
 		if not blocked(x, z, 0.9):
 			_slab(B, rng, Vector3(x, 0, z))
 		_decal(B, Vector3(rng.randf_range(-15.0, 11.5), 0, rng.randf_range(-138.0, -156.0)), rng.randf_range(1.0, 2.4), Color(0.08, 0.08, 0.06, 0.5), rng)
+	_chips(B, rng, -15.5, 12.0, -137.0, -157.0, 90)
 	# the passage: transverse arches on pilasters between the roof's slabs, chains, bones in the corners, one dead
 	for zp: float in [-162.4, -170.4, -174.4]:
 		for sx: float in [-1.0, 1.0]:
@@ -1276,6 +1405,8 @@ static func _ward(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, host: 
 			_slab(B, rng, Vector3(x, 0, z))
 		_decal(B, Vector3(rng.randf_range(-20.0, 20.0), 0, rng.randf_range(-200.0, -239.0)), rng.randf_range(1.2, 3.0), [Color(0.16, 0.06, 0.05, 0.45), Color(0.08, 0.08, 0.06, 0.5)][i2 % 2], rng)
 	_scaffold(B, rng, Vector3(-18.9, 8.0, -200.2), Vector3(0, 0, -1), Vector3(1, 0, 0), 6.5, 3)
+	_chips(B, rng, -12.0, 12.0, -176.0, -192.0, 60)
+	_chips(B, rng, -21.0, 21.0, -198.0, -240.0, 200)
 	for sx2: float in [-1.0, 1.0]:
 		_decal(B, Vector3(sx2 * 4.2, 0, -216.0), 2.2, Color(0.04, 0.035, 0.03, 0.75), rng)
 	# the keep's gate: its statues, two braziers lit, banners from the wall-walks of the ward
@@ -1298,6 +1429,7 @@ static func _ward(B: Bins, rng: RandomNumberGenerator, route: CourtRoute, host: 
 static func _far(route: CourtRoute, host: Node3D, walls: Array) -> void:
 	if host.has_node("Dress"):
 		return
+	_devcam(route)
 	var d := Node3D.new()
 	d.name = "Dress"
 	host.add_child(d)

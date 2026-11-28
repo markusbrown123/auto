@@ -145,10 +145,12 @@ func _seat(st: int, f: FighterRig, at: Vector3) -> void:
 
 ## Called every frame with where the knight is.
 func tick(dt: float, knight: Vector3) -> void:
-	for st: int in foes:
-		var f: CineActor = foes[st]
-		if not is_instance_valid(f):
+	for st: int in foes.keys():
+		var fv = foes[st]
+		if not is_instance_valid(fv):
+			foes.erase(st)
 			continue
+		var f: CineActor = fv
 		var built := _built(f.global_position)
 		if not f.visible and built and (state.get(st, "") != "post" or not ex._seen(f.global_position)):
 			f.visible = true
@@ -320,7 +322,7 @@ func meet(st: int, at: Vector3, knight: Node3D) -> void:
 ## The foe stood at a stop, if it is standing.
 func foe_at(st: int) -> CineActor:
 	var f = foes.get(st)
-	return f if f != null and is_instance_valid(f) else null
+	return f if is_instance_valid(f) else null
 
 ## The rig that fought at stop `st` lies where it fell: it is moved into the place as it is, held after it has
 ## settled, and recorded for this run. The one that stood there before the duel is let go.

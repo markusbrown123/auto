@@ -11,6 +11,8 @@ var seat := 0.56                  # how high the seat is above the rig's feet, m
 var back := 0.12                  # how far the hips go back into the chair, metres
 var spread := 0.16                # how far the knees fall apart (0: thighs straight ahead)
 var recline := 0.1                # radians the back leans into the chair
+var kneel := false                # on the knees instead of on a seat: thighs down, shins laid back along the floor
+var slump := 0.0                  # 0..1: spent, the head down and the arms let fall to the thighs (a beaten figure)
 
 static func make(who: FighterRig, seat_height: float = 0.56) -> CineSeat:
 	var s := CineSeat.new()
@@ -38,18 +40,40 @@ func _process(_delta: float) -> void:
 	var to_feet: float = skel.global_position.y - rig.global_position.y
 	var hip_rest: Transform3D = sk.rest["Hips"]
 	var leg_rest: Transform3D = sk.rest["LeftUpLeg"]
-	var want_y: float = (seat - to_feet) / unit + (hip_rest.origin.y - leg_rest.origin.y)
-	hp.origin = hp.origin.lerp(Vector3(hp.origin.x, want_y, hp.origin.z) - fwd * (back / unit), k)
-	hp.basis = Basis(right, -recline * k) * hp.basis
+	var at := seat
+	if kneel:
+		# the top of the thigh stands a thigh's length (and the knee's thickness) above the floor
+		at = ((sk.rest["LeftUpLeg"] as Transform3D).origin - (sk.rest["LeftLeg"] as Transform3D).origin).length() * unit + 0.05 * rig.scale.y
+	var want_y: float = (at - to_feet) / unit + (hip_rest.origin.y - leg_rest.origin.y)
+	hp.origin = hp.origin.lerp(Vector3(hp.origin.x, want_y, hp.origin.z) - fwd * ((0.0 if kneel else back) / unit), k)
+	hp.basis = Basis(right, (0.0 if kneel else -recline) * k) * hp.basis
 	skel.set_bone_global_pose(hips, hp)
 	for side: Array in [["Left", -1.0], ["Right", 1.0]]:
 		var out := right * float(side[1])
-		_aim(skel, sk.bone[side[0] + "UpLeg"], sk.bone[side[0] + "Leg"], (fwd + out * spread + Vector3(0, -0.06, 0)).normalized(), k)
-		_aim(skel, sk.bone[side[0] + "Leg"], sk.bone[side[0] + "Foot"], (Vector3.DOWN + fwd * 0.1 + out * spread * 0.4).normalized(), k)
+		if kneel:
+			_aim(skel, sk.bone[side[0] + "UpLeg"], sk.bone[side[0] + "Leg"], (Vector3.DOWN + fwd * 0.18 + out * 0.08).normalized(), k)
+			_aim(skel, sk.bone[side[0] + "Leg"], sk.bone[side[0] + "Foot"], (-fwd + Vector3.DOWN * 0.08 + out * 0.05).normalized(), k)
+		else:
+			_aim(skel, sk.bone[side[0] + "UpLeg"], sk.bone[side[0] + "Leg"], (fwd + out * spread + Vector3(0, -0.06, 0)).normalized(), k)
+			_aim(skel, sk.bone[side[0] + "Leg"], sk.bone[side[0] + "Foot"], (Vector3.DOWN + fwd * 0.1 + out * spread * 0.4).normalized(), k)
 		var foot: int = sk.bone[side[0] + "Foot"]
 		var fp := skel.get_bone_global_pose(foot)
 		fp.basis = fp.basis.slerp((sk.rest[side[0] + "Foot"] as Transform3D).basis, k)
 		skel.set_bone_global_pose(foot, fp)
+		if kneel and sk.bone.has(side[0] + "ToeBase"):
+			_aim(skel, foot, sk.bone[side[0] + "ToeBase"], (-fwd * 0.4 + Vector3.DOWN).normalized(), k)
+	if slump > 0.0:
+		# the trunk folded forward over the knees, the head hung, the arms dropped onto the thighs
+		var sk2 := slump * k
+		for b: Array in [["Spine1", 0.18], ["Spine2", 0.22], ["Neck", 0.25], ["Head", 0.4]]:
+			if sk.bone.has(b[0]):
+				var gp := skel.get_bone_global_pose(sk.bone[b[0]])
+				gp.basis = Basis(right, -float(b[1]) * sk2) * gp.basis
+				skel.set_bone_global_pose(sk.bone[b[0]], gp)
+		for side: Array in [["Left", -1.0], ["Right", 1.0]]:
+			var out2 := right * float(side[1])
+			_aim(skel, sk.bone[side[0] + "Arm"], sk.bone[side[0] + "ForeArm"], (Vector3.DOWN * 0.8 + fwd * 0.45 + out2 * 0.25).normalized(), sk2)
+			_aim(skel, sk.bone[side[0] + "ForeArm"], sk.bone[side[0] + "Hand"], (fwd * 0.75 + Vector3.DOWN * 0.55 - out2 * 0.1).normalized(), sk2)
 	# the weapons ride the hands the pose has just moved (as CineActor does for its clips)
 	var into: Transform3D = sk.root.transform * (sk.root.global_transform.affine_inverse() * skel.global_transform)
 	rig.weapon_r.position = into * sk._palm("Right", skel.get_bone_global_pose(sk.bone["RightHand"]).origin)

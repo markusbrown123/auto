@@ -12,7 +12,7 @@ Rule: one agent per file group at a time; each stage ends with check + all suite
 | 1 | **Opening sequence**: awakening chamber rebuilt (detailed ancient facility, restrained light, entrance/exit), waking machine, waking and getting-up animation (packs, both bodies), sword on its holder with cinematic pickup and correct grip, Witness discovery and awakening, leaving the room into the world | awakening/opening cine, chamber build (future.gd section), skin_driver clips, witness_drone.gd | 0c | done 250e262 |
 | 2 | **Locomotion and idle**: breathing reduced (visual and audio), calm idle, weighted walk without sliding, turns, stairs, slopes, surface changes, stable camera with obstruction avoidance | fighter_rig.gd, skin_driver.gd, camera | 0a | done d840bee + follow-up |
 | 3 | **Continuous Courtyard** (TRAVERSAL_PLAN steps 1-7): connected route from chamber exit and hillside to the inner ward, branches, optional rooms, stairs, bridge, elevations, hidden areas, backtracking, world-placed props/chests/levers/gates with animation and sound, enemies as inhabitants with entrances, duels in place, bodies remain, Witness companion behaviour, no pop-in (streaming, LOD, occlusion) | court_route.gd, future.gd, explore.gd, main.gd, duel.gd entry, gen_regions.py, foe_entrance.gd | 1, 2 | 3A route done 5c3e708; 3B encounters/interactions running; 3C environment detail running |
-| 4 | **Cinematics and characters**: every slice cutscene directed (cameras, light, acting, equipped gear, entrances/exits), merchant workshop and animations, Monarch/merchant models (3D only with approved spend) | src/cine/*, sanctuary workshop | 1, 3, 0e choice | running (Monarch and merchant models built, owner-approved) |
+| 4 | **Cinematics and characters**: every slice cutscene directed (cameras, light, acting, equipped gear, entrances/exits), merchant workshop and animations, Monarch/merchant models (3D only with approved spend) | src/cine/*, sanctuary workshop | 1, 3, 0e choice | done in code (see Stage 4 notes); recordings in marketing/stage4 |
 | 5 | **Audio integration**: approved recorded sounds in place with distance falloff, ambience zones along the route, machinery, combat set synced to contact, full soundtrack on the approved theme (credits asked first), mix for speaker/headphones | sfx.gd, music cues, assets/audio | 0b approval, 3 | |
 | 6 | **Branding, menus, loading**: chosen logo/icon in game and export, title reveal with the theme, main menu, startup, loading screens only where needed, UI consistency at iPhone sizes | launch.gd, title_screen.gd, loading_screen.gd, ui.gd, icons | 0e choice | logo A on title + icon A done 12aecdc; rest pending |
 | 7 | **QA and build**: full normal-speed recordings from launch to the sanctuary after the Sentinel, both bodies, death/retry; fix list; clean clone; build document | all | 1-6 | |
@@ -20,3 +20,16 @@ Rule: one agent per file group at a time; each stage ends with check + all suite
 Cannot be verified here: anything on the phone (performance, heat, touch feel), how audio sounds (nobody listens here), Theora on iOS.
 
 Stage 3 is split: 3A (route, streaming, continuous explore; running), 3B (foe entrances, duels in place, interactive props, bodies remain, Witness companion on the route).
+
+## Stage 4 notes (2026-11-28)
+- **Monarch**: `assets/models/forgotten_monarch.glb` is now the approved new model, written by `tools/fix_rigged_glb.py monarch`
+  from `art/models/monarch_v2.glb` (the old model stays in `art/models/forgotten_monarch.glb`): the concept's sword, a
+  separate piece of the mesh skinned to the hands, is removed (the game's `w_monarch` is his only blade), and the cloak
+  is bound to the trunk (collar to the clavicles, spine to hips by height, the hem to both thighs) instead of the upper
+  arms. The long rigid cloak cannot lie flat: a fallen Monarch stands it up off the floor, so the Aftermath kneels him
+  (`CineSeat.kneel`, `slump`). Bench: `tools/dev/foe_bench.tscn`.
+- **Orren's workshop**: the shop is held in it (`src/ui/workshop.gd`, built by `KnightStage` "forge"; `--noworkshop`
+  gives the plain cove back); Orren is `src/ui/orren.gd` (procedural work over the `idle` clip, voice-driven head and
+  hand, per-line business). Bench: `tools/dev/workshop_bench.tscn`.
+- **Asked of other owners**: the Monarch's death in `duel.gd` (kneel instead of `die()`); the Witness's halo size in close
+  shots (`witness_drone.gd`; the Awakening halves it locally); the Forge tab still shows the hall, not the workshop.

@@ -65,6 +65,12 @@ func _ready() -> void:
 		_build_plan()
 		follow.measure = true
 		follow.avoid = FighterRig.loco
+		if _args.has("side"):
+			# --side: a still camera beside the stairs, at knee height, to see each foot on the treads
+			follow.enabled = false
+			cam.fov = 40.0
+			cam.global_position = Vector3(5.0, 1.7, -29.8)
+			cam.look_at(Vector3(0, 0.75, -29.8))
 	else:
 		# standing: a still three-quarter view from in front, chest to boots, to judge breathing and weight
 		follow.enabled = false
@@ -429,7 +435,7 @@ func _walk_block() -> void:
 						print("    sink %s ankle %s g %.2f toe %s g %.2f rest %.3f" % [side, str(a), _gy(a.x, a.z), str(toe), _gy(toe.x, toe.z), float(rest_h[side])])
 		print("  most a foot goes under the course (ankle or toe): %.1f cm @ %.1f s" % [sink * 100.0, sink_t])
 	if follow:
-		print("  camera: %d obstruction frames, %d pull-ins" % [follow.blocked_frames, follow.pull_ins])
+		print("  camera: %d frames in which something stood between the wanted camera place and the head or chest (%d times); %d frames in which the head was hidden from where the camera actually was" % [follow.blocked_frames, follow.pull_ins, follow.seen_blocked])
 
 # ---------------------------------------------------------------- the room
 func _room() -> void:
@@ -494,3 +500,24 @@ func _room() -> void:
 			b.position = Vector3(xp, _gy(0, zp) + 1.6, zp)
 			add_child(b)
 			_walls.append(b)
+	if _args.has("pillars"):
+		# --pillars: a colonnade close on the camera's side of the walk probe's lanes, every 2.5 m (the camera test)
+		var zq := 3.0
+		while zq > -30.0:
+			for xq: float in [-5.15, 0.85]:
+				var b2 := MeshInstance3D.new()
+				var bm2 := BoxMesh.new()
+				bm2.size = Vector3(0.5, 3.0, 0.5)
+				b2.mesh = bm2
+				b2.material_override = pm
+				b2.position = Vector3(xq, 1.5, zq)
+				add_child(b2)
+			zq -= 2.5
+		for xq2 in range(-12, -6):
+			var b3 := MeshInstance3D.new()
+			var bm3 := BoxMesh.new()
+			bm3.size = Vector3(0.5, 3.0, 0.5)
+			b3.mesh = bm3
+			b3.material_override = pm
+			b3.position = Vector3(float(xq2) * 1.0 - 0.3, 1.5, 0.9 - 6.0 + 4.0)
+			add_child(b3)

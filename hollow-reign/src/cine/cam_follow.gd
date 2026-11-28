@@ -32,6 +32,8 @@ var _yaw := 0.0
 var _y := 0.0
 var _pull := 1.0               # 1: at the wanted distance; less: pulled in toward the head
 var _was_blocked := false
+var _swing := 0.0              # radians the camera has swung round the figure to see past something close to it
+var _swing_to := 0.0
 var _ok := false
 
 func snap() -> void:
@@ -54,20 +56,33 @@ func _process(delta: float) -> void:
 	_p += _v * delta
 	_y = lerpf(_y, gp.y, 1.0 - exp(-delta * 3.0 / maxf(height_time, 0.05)))
 	_yaw = lerp_angle(_yaw, target.global_rotation.y, 1.0 - exp(-delta * 3.0 / maxf(turn_time, 0.05)))
-	var b := Basis(Vector3.UP, _yaw)
 	var base := Vector3(_p.x, _y, _p.z)
 	var head := base + Vector3(0, 1.6 * target.scale.y, 0)
-	var eye := base + b * offset
-	var look := base + b * look_ahead
+	var chest := base + Vector3(0, 1.15 * target.scale.y, 0)
+	# (the shoulders as well as the middle: a post that covers half the body is in the way before it reaches the head)
+	var side := Basis(Vector3.UP, _yaw) * Vector3(0.28 * target.scale.y, 0, 0)
+	var look := base + Basis(Vector3.UP, _yaw) * look_ahead
 	var want_pull := 1.0
 	if avoid or measure:
-		var clear := clear_from(target, [head, base + Vector3(0, 1.15 * target.scale.y, 0)], eye, min_dist)
-		want_pull = clear if avoid else 1.0
-		if clear < 0.999:
+		var clear0 := clear_from(target, [head, chest, chest + side, chest - side], base + Basis(Vector3.UP, _yaw) * offset, min_dist)
+		if clear0 < 0.999:
 			blocked_frames += 1
 			if not _was_blocked:
 				pull_ins += 1
-		_was_blocked = clear < 0.999
+		_was_blocked = clear0 < 0.999
+		if avoid:
+			# something too near the figure to be stepped in front of: the camera swings round it instead (the nearest
+			# side first, at most 50 degrees), and back behind once the way is clear
+			if clear0 >= 0.999:
+				_swing_to = 0.0
+			elif not _clear_at(head, chest, base, _swing_to):
+				for cand: float in [_swing_to, 0.45, -0.45, 0.9, -0.9]:
+					if _clear_at(head, chest, base, cand):
+						_swing_to = cand
+						break
+			_swing = lerpf(_swing, _swing_to, 1.0 - exp(-delta * 3.0))
+			want_pull = clear_from(target, [head, chest, chest + side, chest - side], base + Basis(Vector3.UP, _yaw + _swing) * offset, min_dist)
+	var eye := base + Basis(Vector3.UP, _yaw + _swing) * offset
 	# in quickly (a frame or two), out again slowly so that a pillar going by does not pump the lens
 	_pull = lerpf(_pull, want_pull, 1.0 - exp(-delta * (18.0 if want_pull < _pull else 1.6)))
 	var at := head.lerp(eye, _pull)
@@ -76,6 +91,12 @@ func _process(delta: float) -> void:
 		cam.look_at(look)
 	if (avoid or measure) and not sight_clear(target, [head], at):
 		seen_blocked += 1
+
+## Whether, swung `swing` radians round the figure, the camera (pulled in as far as it may be) sees head and chest.
+func _clear_at(head: Vector3, chest: Vector3, base: Vector3, swing: float) -> bool:
+	var e := base + Basis(Vector3.UP, _yaw + swing) * offset
+	var c := clear_from(target, [head, chest], e, min_dist)
+	return sight_clear(target, [head, chest], head.lerp(e, c))
 
 # ---------------------------------------------------------------- the test, for any camera
 static var _tri := {}          # mesh RID -> TriangleMesh (null: not tested, too big)

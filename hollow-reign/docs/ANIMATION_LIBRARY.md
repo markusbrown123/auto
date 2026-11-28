@@ -397,6 +397,9 @@ Recordings and contact sheets: `marketing/locomotion_pass/` (`before_*` = `--old
 | Course: worst hips jump in one frame | m 16.9, f 15.8 cm | m 4.8, f 5.3 cm |
 | Course: deepest a foot goes into the ground | m 18.8, f 22.3 cm | m 3.6, f 6.9 cm |
 | Walk: step, cadence, clip rate against ground | 0.79 m, 93/min, 1.01 (f 0.85 m, 89/min) | unchanged |
+| Camera, walk past a colonnade 0.85 m off the lane (`--pillars`): frames the head was hidden | 436 | 63 (pull-in plus a swing round of up to 50°) |
+| Camera, test course / female walk: frames the head was hidden | 225 / 56 (wanted place blocked) | 0 / 0 |
+| Camera, prologue road (`--screen=prologue --auto --camlog`, 90 s): ridden frames blocked | 21 of 902 | 21 wanted, 0 where the camera was put |
 
 Not done: the packs' `Walk_Fw_Start/End` are still not baked (the damped start and stop and the picked-up first step stand
 in); no turn-in-place clips (the Explosive `UnarmedTurn*` exist in `art/anim_src` but are unarmed); stairs and slopes are
